@@ -6,14 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core;
+namespace Spiral\Core\Container;
 
-abstract class Component
+use Spiral\Core\Container;
+
+class Component
 {
-    /**
-     * Declares to IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = '';
+    //this creates THE FUCKING CHAIN!
+    protected static function getContainer()
+    {
+        return Container::getInstance();
+    }
 
     /**
      * Create or retrieve component instance using IoC container. This method can return already
@@ -31,9 +34,14 @@ abstract class Component
     {
         if (empty($container))
         {
-            $container = Container::getInstance();
+            $container = static::getContainer();
         }
 
         return $container->get(get_called_class(), $parameters);
     }
+}
+
+class BenchmarkerInterface
+{
+    //!!!!
 }

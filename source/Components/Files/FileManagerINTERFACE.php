@@ -10,7 +10,7 @@ namespace Spiral\Components\Files;
 
 use Spiral\Core\Traits;
 
-class FileManager extends Component
+class FileManagerINTERFACE
 {
     /**
      * Will provide us helper method getInstance().

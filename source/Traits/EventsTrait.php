@@ -67,4 +67,7 @@ trait EventsTrait
     {
         self::dispatcher()->addListener($event, $listener);
     }
+
+    //how to make you static??? static variable? nope
+    abstract static protected function getContainer();
 }

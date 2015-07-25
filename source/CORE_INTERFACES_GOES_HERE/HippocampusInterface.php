@@ -6,19 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Tests;
+namespace Spiral\Core;
 
-use Spiral\Core\HippocampusInterface;
-
-class Hippocampus implements HippocampusInterface
+interface HippocampusInterface
 {
-    /**
-     * Data to be stored or loaded.s
-     *
-     * @var array
-     */
-    protected $data = [];
-
     /**
      * Load data previously saved to application cache, if file is not exists null will be returned.
      * This method can be replaced by Core Traits to use different ways to store data like APC.
@@ -27,15 +18,7 @@ class Hippocampus implements HippocampusInterface
      * @param string $directory Application cache directory will be used by default.
      * @return mixed|array
      */
-    public function loadData($name, $directory = null)
-    {
-        if (!isset($this->data[$directory . $name]))
-        {
-            return null;
-        }
-
-        return $this->data[$directory . $name];
-    }
+    public function loadData($name, $directory = null);
 
     /**
      * Save runtime data to application cache, previously saved file can be removed or rewritten at
@@ -52,8 +35,5 @@ class Hippocampus implements HippocampusInterface
      * @param mixed  $data      Data to be stored, any format supported by var_export().
      * @param string $directory Application cache directory will be used by default.
      */
-    public function saveData($name, $data, $directory = null)
-    {
-        $this->data[$directory . $name] = $data;
-    }
+    public function saveData($name, $data, $directory = null);
 }

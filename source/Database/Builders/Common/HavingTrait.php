@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL\Builders\Common;
 
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\Parameter;
 use Spiral\Components\DBAL\ParameterInterface;
 use Spiral\Components\DBAL\QueryBuilder;
@@ -45,7 +45,7 @@ trait HavingTrait
      *                                        parameters, by default $this->addParameter will be used.
      *
      * @return array
-     * @throws DBALException
+     * @throws DatabaseException
      */
     abstract protected function whereToken(
         $joiner,
@@ -121,7 +121,7 @@ trait HavingTrait
      * @param mixed        $variousB   Value is operator specified.
      * @param mixed        $variousC   Specified only in between statements.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function having($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
@@ -196,7 +196,7 @@ trait HavingTrait
      * @param mixed        $variousB   Value is operator specified.
      * @param mixed        $variousC   Specified only in between statements.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function andHaving($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
@@ -270,7 +270,7 @@ trait HavingTrait
      * @param mixed        $variousB   Value is operator specified.
      * @param mixed        $variousC   Specified only in between statements.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function orHaving($identifier, $variousA = [], $variousB = null, $variousC = null)
     {

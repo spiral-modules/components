@@ -22,17 +22,6 @@ class Translator extends Component
     const DEFAULT_BUNDLE = 'default';
 
     /**
-     * Models and other classes which inherits I18nIndexable interface allowed to be automatically
-     * parsed and analyzed for messages stored in default property values (static and non static),
-     * such values can be prepended and appended with i18n prefixes ([[ and ]] by default) and will
-     * be localized on output.
-     *
-     * Class should implement i18nNamespace method (static) which will define required i18n namespace.
-     */
-    const I18N_PREFIX  = '[[';
-    const I18N_POSTFIX = ']]';
-
-    /**
      * Constructed language pluralizers.
      *
      * @var PluralizerInterface[]

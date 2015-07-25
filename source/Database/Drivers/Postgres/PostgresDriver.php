@@ -9,7 +9,7 @@
 namespace Spiral\Components\DBAL\Drivers\Postgres;
 
 use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\Driver;
 use PDO;
 use Spiral\Components\DBAL\Drivers\Postgres\Builders\InsertQuery;
@@ -143,7 +143,7 @@ class PostgresDriver extends Driver
      *
      * @param string $table Fully specified table name, including postfix.
      * @return string
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function getPrimary($table)
     {
@@ -159,7 +159,7 @@ class PostgresDriver extends Driver
 
         if (!$this->hasTable($table))
         {
-            throw new DBALException(
+            throw new DatabaseException(
                 "Unable to fetch table primary key, no such table '{$table}' exists."
             );
         }

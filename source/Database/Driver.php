@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\DBAL;
 
 use Spiral\Component;
 use Spiral\Components\DBAL\Builders\DeleteQuery;

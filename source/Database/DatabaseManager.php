@@ -89,7 +89,7 @@ class DatabaseManager extends Component implements Container\InjectionManagerInt
      * @param array  $config   Forced database configuration.
      * @param Driver $driver   Forced driver instance.
      * @return Database
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function db($database = 'default', array $config = [], Driver $driver = null)
     {
@@ -107,7 +107,7 @@ class DatabaseManager extends Component implements Container\InjectionManagerInt
         {
             if (!isset($this->config['databases'][$database]))
             {
-                throw new DBALException(
+                throw new DatabaseException(
                     "Unable to create database, no presets for '{$database}' found."
                 );
             }

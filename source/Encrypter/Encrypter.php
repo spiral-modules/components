@@ -6,18 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Encrypter;
+namespace Spiral\Encrypter;
 
-use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 
-class Encrypter extends Component
+class Encrypter
 {
-    /**
-     * Will provide us helper method getInstance().
-     */
-    use Traits\SingletonTrait, Traits\ConfigurableTrait;
-
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
@@ -49,7 +43,6 @@ class Encrypter extends Component
      * New encrypter component.
      *
      * @param ConfiguratorInterface $configurator
-     * @throws EncrypterException
      */
     public function __construct(ConfiguratorInterface $configurator)
     {
@@ -100,11 +93,20 @@ class Encrypter extends Component
     }
 
     /**
+     * Get current encrypter method.
+     *
+     * @return string
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
      * Restore encryption values specified in configuration,
      * key, mode and cipher will be altered.
      *
      * @return $this
-     * @throws EncrypterException
      */
     public function restoreDefaults()
     {
@@ -127,7 +129,9 @@ class Encrypter extends Component
     {
         if ($length < 1)
         {
-            throw new EncrypterException("Random string length should be at least 1 byte long.");
+            throw new EncrypterException(
+                "Random string length should be at least 1 byte long."
+            );
         }
 
         if (!$result = openssl_random_pseudo_bytes($length, $cryptoStrong))

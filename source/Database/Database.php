@@ -19,7 +19,7 @@ use Spiral\Core\Traits;
 use Spiral\Core\Container;
 use Spiral\Core\Container\InjectableInterface;
 
-class Database extends Component implements InjectableInterface
+class Database extends Component
 {
     /**
      * Query and statement events.

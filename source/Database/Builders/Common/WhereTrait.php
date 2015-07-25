@@ -9,7 +9,7 @@
 namespace Spiral\Components\DBAL\Builders\Common;
 
 use Spiral\Components\DBAL\DatabaseManager;
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\Parameter;
 use Spiral\Components\DBAL\ParameterInterface;
 use Spiral\Components\DBAL\QueryBuilder;
@@ -100,7 +100,7 @@ trait WhereTrait
      * @param mixed        $variousB   Value is operator specified.
      * @param mixed        $variousC   Specified only in between statements.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function where($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
@@ -173,7 +173,7 @@ trait WhereTrait
      * @param mixed        $variousB   Value is operator specified.
      * @param mixed        $variousC   Specified only in between statements.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function andWhere($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
@@ -246,7 +246,7 @@ trait WhereTrait
      * @param mixed        $variousB   Value is operator specified.
      * @param mixed        $variousC   Specified only in between statements.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function orWhere($identifier, $variousA = [], $variousB = null, $variousC = null)
     {
@@ -267,7 +267,7 @@ trait WhereTrait
      *                                        parameters, by default $this->addParameter will be used.
      *
      * @return array
-     * @throws DBALException
+     * @throws DatabaseException
      */
     protected function whereToken(
         $joiner,
@@ -348,7 +348,7 @@ trait WhereTrait
                 $valueA = strtoupper($valueA);
                 if (!in_array($valueA, ['BETWEEN', 'NOT BETWEEN']))
                 {
-                    throw new DBALException(
+                    throw new DatabaseException(
                         'Only "BETWEEN" or "NOT BETWEEN" can define second comparasions value.'
                     );
                 }
@@ -437,7 +437,7 @@ trait WhereTrait
      * @param \Closure $parameterWrapper Callback or closure used to handle all catched parameters,
      *                                   by default $this->addParameter will be used.
      * @return array
-     * @throws DBALException
+     * @throws DatabaseException
      */
     protected function parseWhere(array $where, $grouping, &$tokens, callable $parameterWrapper)
     {
@@ -480,14 +480,14 @@ trait WhereTrait
             {
                 if (is_numeric($key))
                 {
-                    throw new DBALException("Nested conditions should have defined operator.");
+                    throw new DatabaseException("Nested conditions should have defined operator.");
                 }
                 $key = strtoupper($key);
                 if (in_array($key, ['BETWEEN', 'NOT BETWEEN']))
                 {
                     if (!is_array($subValue) || count($subValue) != 2)
                     {
-                        throw new DBALException(
+                        throw new DatabaseException(
                             "Exactly 2 array values required for between statement."
                         );
                     }

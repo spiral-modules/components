@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL\Drivers\SqlServer;
 
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
 use Spiral\Components\DBAL\SqlFragment;
 use Spiral\Core\Traits\LoggerTrait;
@@ -52,7 +52,7 @@ class QueryCompiler extends BaseQueryCompiler
      * @param int     $offset
      * @param array   $unions
      * @return string
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function select(
         array $from,

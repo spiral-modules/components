@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Encrypter;
+namespace Spiral\Encrypter;
 
-use Spiral\Core\SpiralException;
+use Spiral\Core\ExceptionInterface;
 
-class DecryptionException extends SpiralException
+class DecryptionException extends \RuntimeException implements ExceptionInterface
 {
 
 }

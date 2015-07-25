@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Core\Traits;
+use Spiral\DBAL\Driver;
 
-class QueryCompiler extends Component
+class QueryCompiler
 {
     /**
      * Query types for parameter ordering.
@@ -193,18 +193,18 @@ class QueryCompiler extends Component
      * @param array  $rowsets List of rowsets, usually presented by Parameter instances as every
      *                        rowset is array of values.
      * @return string
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function insert($table, array $columns, array $rowsets)
     {
         if (!$columns)
         {
-            throw new DBALException("Unable to build insert statement, columns must be set.");
+            throw new DatabaseException("Unable to build insert statement, columns must be set.");
         }
 
         if (!$rowsets)
         {
-            throw new DBALException(
+            throw new DatabaseException(
                 "Unable to build insert statement, at least one value set must be provided."
             );
         }
@@ -231,7 +231,6 @@ class QueryCompiler extends Component
      * @param int     $offset
      * @param array   $unions
      * @return string
-     * @throws DBALException
      */
     public function select(
         array $from,
@@ -414,7 +413,6 @@ class QueryCompiler extends Component
      *
      * @param array $joins
      * @return string
-     * @throws DBALException
      */
     public function joins(array $joins)
     {
@@ -437,7 +435,7 @@ class QueryCompiler extends Component
      *
      * @param array $tokens
      * @return string
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function where(array $tokens)
     {
@@ -549,7 +547,7 @@ class QueryCompiler extends Component
 
         if ($activeGroup)
         {
-            throw new DBALException("Unable to build where statement, unclosed where group.");
+            throw new DatabaseException("Unable to build where statement, unclosed where group.");
         }
 
         return trim($statement);

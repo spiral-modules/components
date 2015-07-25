@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Encrypter;
+namespace Spiral\Database;
 
 use Spiral\Core\ExceptionInterface;
 
-class EncrypterException extends \RuntimeException implements ExceptionInterface
+class DatabaseException extends \RuntimeException implements ExceptionInterface
 {
 
 }

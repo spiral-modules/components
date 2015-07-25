@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL\Drivers\Sqlite;
 
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
 use Spiral\Core\Traits\LoggerTrait;
 
@@ -84,7 +84,7 @@ class QueryCompiler extends BaseQueryCompiler
      * @param array  $rowsets List of rowsets, usually presented by Parameter instances as every rowset
      *                        is array of values.
      * @return string
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function insert($table, array $columns, array $rowsets)
     {

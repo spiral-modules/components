@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL\Drivers\Postgres;
 
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
 
 class QueryCompiler extends BaseQueryCompiler
@@ -111,7 +111,7 @@ class QueryCompiler extends BaseQueryCompiler
      *                           rowset is array of values.
      * @param string $primaryKey Primary key name to return.
      * @return string
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function insert($table, array $columns, array $rowsets, $primaryKey = '')
     {

@@ -126,13 +126,13 @@ class CachedResult extends QueryResult
      * @link http://php.net/manual/en/pdostatement.setfetchmode.php
      * @param int $mode The fetch mode must be one of the PDO::FETCH_* constants.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function fetchMode($mode)
     {
         if ($mode != PDO::FETCH_ASSOC && $mode != PDO::FETCH_NUM)
         {
-            throw new DBALException(
+            throw new DatabaseException(
                 'Cached query supports only FETCH_ASSOC and FETCH_NUM fetching modes.'
             );
         }
@@ -190,7 +190,7 @@ class CachedResult extends QueryResult
      * @param integer|string $columnID Column number (1 - first column) or name to bind data to.
      * @param mixed          $variable Variable to bind column value to.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function bind($columnID, &$variable)
     {
@@ -212,7 +212,7 @@ class CachedResult extends QueryResult
                 }
             }
 
-            throw new DBALException(
+            throw new DatabaseException(
                 "Did not find index '{$columnID}' in the defined columns, it will not be bound."
             );
         }
@@ -220,7 +220,7 @@ class CachedResult extends QueryResult
         {
             if (!isset($this->data[0][$columnID]))
             {
-                throw new DBALException(
+                throw new DatabaseException(
                     "Did not find column name '{$columnID}' in the defined columns, it will not be bound."
                 );
             }

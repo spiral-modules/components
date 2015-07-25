@@ -9,7 +9,7 @@
 namespace Spiral\Components\DBAL\Builders\Common;
 
 use Spiral\Components\Cache\StoreInterface;
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\QueryBuilder;
 use Spiral\Components\DBAL\QueryCompiler;
 use Spiral\Components\DBAL\QueryResult;
@@ -220,7 +220,7 @@ abstract class AbstractSelectQuery extends QueryBuilder implements
      * @param string $method
      * @param array  $arguments
      * @return int
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function __call($method, $arguments)
     {
@@ -228,12 +228,12 @@ abstract class AbstractSelectQuery extends QueryBuilder implements
 
         if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM']))
         {
-            throw new DBALException("Unknown aggregation method '{$method}'.");
+            throw new DatabaseException("Unknown aggregation method '{$method}'.");
         }
 
         if (!isset($arguments[0]) || count($arguments) > 1)
         {
-            throw new DBALException("Aggregation methods can support exactly one column.");
+            throw new DatabaseException("Aggregation methods can support exactly one column.");
         }
 
         $this->columns = ["{$method}({$arguments[0]})"];

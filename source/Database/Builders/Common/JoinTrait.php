@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL\Builders\Common;
 
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\Parameter;
 use Spiral\Components\DBAL\ParameterInterface;
 use Spiral\Components\DBAL\QueryBuilder;
@@ -270,7 +270,7 @@ trait JoinTrait
      * @param mixed $operator   Foreign column is operator specified.
      * @param mixed $identifier Foreign column.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function on($on = null, $operator = null, $identifier = null)
     {
@@ -314,7 +314,7 @@ trait JoinTrait
      * @param mixed $operator   Foreign column is operator specified.
      * @param mixed $identifier Foreign column.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function andOn($on = null, $operator = null, $identifier = null)
     {
@@ -379,7 +379,7 @@ trait JoinTrait
      * @param mixed $operator   Foreign column is operator specified.
      * @param mixed $identifier Foreign column.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function orOn($on = null, $operator = null, $identifier = null)
     {
@@ -424,7 +424,7 @@ trait JoinTrait
      * @param mixed $operator Foreign column is operator specified.
      * @param mixed $value    Value.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function onWhere($on = null, $operator = null, $value = null)
     {
@@ -469,7 +469,7 @@ trait JoinTrait
      * @param mixed $operator Foreign column is operator specified.
      * @param mixed $value    Value.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function andOnWhere($on = null, $operator = null, $value = null)
     {
@@ -514,7 +514,7 @@ trait JoinTrait
      * @param mixed $operator Foreign column is operator specified.
      * @param mixed $value    Value.
      * @return $this
-     * @throws DBALException
+     * @throws DatabaseException
      */
     public function orOnWhere($on = null, $operator = null, $value = null)
     {
@@ -540,7 +540,7 @@ trait JoinTrait
      *                                        parameters, by default $this->addParameter will be used.
      *
      * @return array
-     * @throws DBALException
+     * @throws DatabaseException
      */
     abstract protected function whereToken(
         $joiner,

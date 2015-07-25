@@ -10,7 +10,7 @@ namespace Spiral\Components\DBAL\Builders;
 
 use Spiral\Components\DBAL\Builders\Common\AffectQuery;
 use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\DBALException;
+use Spiral\Components\DBAL\DatabaseException;
 use Spiral\Components\DBAL\ParameterInterface;
 use Spiral\Components\DBAL\QueryBuilder;
 use Spiral\Components\DBAL\QueryCompiler;
@@ -141,7 +141,7 @@ class UpdateQuery extends AffectQuery
 
         if (empty($this->columns))
         {
-            throw new DBALException("Update values should be specified.");
+            throw new DatabaseException("Update values should be specified.");
         }
 
         return $compiler->update($this->table, $this->columns, $this->joins, $this->whereTokens);

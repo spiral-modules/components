@@ -13,7 +13,7 @@ use Psr\Http\Message\UploadedFileInterface;
 use Spiral\Components\Files\FileManager;
 use Spiral\Components\Files\StreamContainerInterface;
 use Spiral\Components\Http\Stream;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\Container\InjectableInterface;
 
 class StorageContainer extends Component implements InjectableInterface

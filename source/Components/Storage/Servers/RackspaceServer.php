@@ -21,7 +21,7 @@ use Spiral\Components\Http\Uri;
 use Spiral\Components\Storage\StorageContainer;
 use Spiral\Components\Storage\StorageException;
 use Spiral\Components\Storage\StorageServer;
-use Spiral\Core\Component\LoggerTrait;
+use Spiral\Core\Traits\LoggerTrait;
 
 class RackspaceServer extends StorageServer
 {

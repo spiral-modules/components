@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use PDOStatement;
 
 class QueryResult extends Component implements \Countable, \Iterator, \JsonSerializable

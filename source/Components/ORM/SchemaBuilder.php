@@ -12,7 +12,7 @@ use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
 use Spiral\Components\ORM\Schemas\ModelSchema;
 use Spiral\Components\ORM\Schemas\RelationSchemaInterface;
 use Spiral\Components\Tokenizer\Tokenizer;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\Container;
 use Spiral\Support\Models\DataEntity;
 

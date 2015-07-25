@@ -10,7 +10,7 @@ namespace Spiral\Components\Storage;
 
 use Psr\Http\Message\StreamInterface;
 use Spiral\Components\Files\StreamContainerInterface;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class StorageObject extends Component implements StreamContainerInterface
 {

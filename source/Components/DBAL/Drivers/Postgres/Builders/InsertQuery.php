@@ -12,7 +12,7 @@ use Spiral\Components\DBAL\Builders\InsertQuery as BaseInsertQuery;
 use Spiral\Components\DBAL\DBALException;
 use Spiral\Components\DBAL\Drivers\Postgres\PostgresDriver;
 use Spiral\Components\DBAL\QueryCompiler;
-use Spiral\Core\Component\LoggerTrait;
+use Spiral\Core\Traits\LoggerTrait;
 
 class InsertQuery extends BaseInsertQuery
 {

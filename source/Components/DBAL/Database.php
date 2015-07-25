@@ -15,7 +15,7 @@ use Spiral\Components\DBAL\Builders\DeleteQuery;
 use Spiral\Components\DBAL\Builders\InsertQuery;
 use Spiral\Components\DBAL\Builders\SelectQuery;
 use Spiral\Components\DBAL\Builders\UpdateQuery;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\Container;
 use Spiral\Core\Container\InjectableInterface;
 
@@ -24,7 +24,7 @@ class Database extends Component implements InjectableInterface
     /**
      * Query and statement events.
      */
-    use Component\EventsTrait;
+    use Traits\EventsTrait;
 
     /**
      * InjectableInterface declares to spiral Container that requested interface or class should

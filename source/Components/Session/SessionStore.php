@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\Session;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 
@@ -17,7 +17,7 @@ class SessionStore extends Component implements \ArrayAccess, \IteratorAggregate
     /**
      * Required traits.
      */
-    use Component\SingletonTrait, Component\ConfigurableTrait, Component\LoggerTrait;
+    use Traits\SingletonTrait, Traits\ConfigurableTrait, Traits\LoggerTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

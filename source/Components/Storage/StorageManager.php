@@ -10,7 +10,7 @@ namespace Spiral\Components\Storage;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 
@@ -19,9 +19,9 @@ class StorageManager extends Component implements Container\InjectionManagerInte
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait,
-        Component\ConfigurableTrait,
-        Component\LoggerTrait;
+    use Traits\SingletonTrait,
+        Traits\ConfigurableTrait,
+        Traits\LoggerTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

@@ -8,14 +8,14 @@
  */
 namespace Spiral\Components\Files;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class FileManager extends Component
 {
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait;
+    use Traits\SingletonTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

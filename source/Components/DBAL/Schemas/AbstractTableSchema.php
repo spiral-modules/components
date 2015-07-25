@@ -9,8 +9,8 @@
 namespace Spiral\Components\DBAL\Schemas;
 
 use Spiral\Components\DBAL\Driver;
-use Spiral\Core\Component;
-use Spiral\Core\Component\LoggerTrait;
+use Spiral\Core\Traits;
+use Spiral\Core\Traits\LoggerTrait;
 
 /**
  * @method AbstractColumnSchema primary($column)

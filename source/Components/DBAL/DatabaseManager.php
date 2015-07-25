@@ -10,7 +10,7 @@ namespace Spiral\Components\DBAL;
 
 use Spiral\Components\DBAL\Migrations\Repository;
 use Spiral\Components\DBAL\Migrations\Migrator;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 use Spiral\Core\SpiralException;
@@ -20,7 +20,7 @@ class DatabaseManager extends Component implements Container\InjectionManagerInt
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait, Component\ConfigurableTrait;
+    use Traits\SingletonTrait, Traits\ConfigurableTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -155,37 +155,6 @@ class DatabaseManager extends Component implements Container\InjectionManagerInt
     )
     {
         return $this->db($parameter->getName());
-    }
-
-    /**
-     * MigrationRepository instance. Repository responsible for registering and retrieving existed
-     * migrations.
-     *
-     * @param string $directory Directory where migrations should be stored in.
-     * @return Repository
-     */
-    public function migrationRepository($directory = null)
-    {
-        return Repository::make([
-            'directory' => $directory ?: $this->config['migrations']['directory']
-        ], $this->container);
-    }
-
-    /**
-     * Get database specific migrator.
-     *
-     * @param string $database  Associated database.
-     * @param string $directory Directory where migrations should be stored in.
-     * @return Migrator
-     * @throws SpiralException
-     */
-    public function getMigrator($database = 'default', $directory = null)
-    {
-        return $this->container->get($this->config['migrations']['migrator'], [
-            'database'   => $this->db($database),
-            'repository' => $this->migrationRepository($directory),
-            'config'     => $this->config['migrations']
-        ]);
     }
 
     /**

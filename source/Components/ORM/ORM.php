@@ -14,7 +14,7 @@ use Spiral\Components\ORM\Exporters\DocumentationExporter;
 use Spiral\Components\ORM\Schemas\ModelSchema;
 use Spiral\Components\ORM\Schemas\RelationSchemaInterface;
 use Spiral\Components\ORM\Selector\LoaderInterface;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 use Spiral\Core\CoreInterface;
@@ -25,7 +25,7 @@ class ORM extends Component
     /**
      * Required traits.
      */
-    use Component\SingletonTrait, Component\ConfigurableTrait, Component\EventsTrait;
+    use Traits\SingletonTrait, Traits\ConfigurableTrait, Traits\EventsTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

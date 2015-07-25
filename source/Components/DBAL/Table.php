@@ -13,7 +13,7 @@ use Spiral\Components\DBAL\Builders\SelectQuery;
 use Spiral\Components\DBAL\Builders\UpdateQuery;
 use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
 use Spiral\Components\Http\Request;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 /**
  * @method SelectQuery distinct(bool $distinct = true)

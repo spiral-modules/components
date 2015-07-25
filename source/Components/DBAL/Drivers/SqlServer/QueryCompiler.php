@@ -11,7 +11,7 @@ namespace Spiral\Components\DBAL\Drivers\SqlServer;
 use Spiral\Components\DBAL\DBALException;
 use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
 use Spiral\Components\DBAL\SqlFragment;
-use Spiral\Core\Component\LoggerTrait;
+use Spiral\Core\Traits\LoggerTrait;
 
 class QueryCompiler extends BaseQueryCompiler
 {

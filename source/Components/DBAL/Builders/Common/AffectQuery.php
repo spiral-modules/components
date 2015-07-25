@@ -11,7 +11,7 @@ namespace Spiral\Components\DBAL\Builders\Common;
 use Spiral\Components\DBAL\Database;
 use Spiral\Components\DBAL\QueryBuilder;
 use Spiral\Components\DBAL\QueryCompiler;
-use Spiral\Core\Component\LoggerTrait;
+use Spiral\Core\Traits\LoggerTrait;
 
 abstract class AffectQuery extends QueryBuilder
 {

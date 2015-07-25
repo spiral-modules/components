@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\Cache;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 
@@ -29,7 +29,7 @@ class CacheManager extends Component implements Container\InjectionManagerInterf
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait, Component\ConfigurableTrait;
+    use Traits\SingletonTrait, Traits\ConfigurableTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

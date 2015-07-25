@@ -16,7 +16,7 @@ use Spiral\Components\ORM\ActiveRecord;
 use Spiral\Components\ORM\ORMAccessor;
 use Spiral\Components\ORM\ORMException;
 use Spiral\Components\ORM\SchemaBuilder;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Support\Models\DataEntity;
 use Spiral\Support\Models\Schemas\DataEntitySchema;
 
@@ -25,7 +25,7 @@ class ModelSchema extends DataEntitySchema
     /**
      * Logging.
      */
-    use Component\LoggerTrait;
+    use Traits\LoggerTrait;
 
     /**
      * Base model class.

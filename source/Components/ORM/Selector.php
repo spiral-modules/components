@@ -18,14 +18,14 @@ use Spiral\Components\DBAL\QueryResult;
 use Spiral\Components\DBAL\SqlFragmentInterface;
 use Spiral\Components\ORM\Selector\Loader;
 use Spiral\Components\ORM\Selector\Loaders\RootLoader;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class Selector extends AbstractSelectQuery
 {
     /**
      * To warn user about non optimal queries.
      */
-    use Component\LoggerTrait;
+    use Traits\LoggerTrait;
 
     /**
      * Loading methods. See load() and with() methods.

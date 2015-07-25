@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class SqlFragment implements SqlFragmentInterface
 {

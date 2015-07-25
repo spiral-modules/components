@@ -16,7 +16,7 @@ use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
 use Spiral\Components\DBAL\Schemas\AbstractIndexSchema;
 use Spiral\Components\DBAL\Schemas\AbstractReferenceSchema;
 use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use PDO;
 use PDOStatement;
 use Spiral\Core\Container;
@@ -26,7 +26,7 @@ abstract class Driver extends Component
     /**
      * Profiling and logging.
      */
-    use Component\LoggerTrait, Component\EventsTrait;
+    use Traits\LoggerTrait, Traits\EventsTrait;
 
     /**
      * Get short name to use for driver query profiling.

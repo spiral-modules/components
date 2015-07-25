@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\ODM;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 use Spiral\Core\SpiralException;
@@ -19,7 +19,7 @@ class ODM extends Component implements Container\InjectionManagerInterface
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait, Component\ConfigurableTrait, Component\EventsTrait;
+    use Traits\SingletonTrait, Traits\ConfigurableTrait, Traits\EventsTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

@@ -11,7 +11,7 @@ namespace Spiral\Components\ODM;
 use Spiral\Components\ODM\Schemas\CollectionSchema;
 use Spiral\Components\ODM\Schemas\DocumentSchema;
 use Spiral\Components\Tokenizer\Tokenizer;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class SchemaBuilder extends Component
 {

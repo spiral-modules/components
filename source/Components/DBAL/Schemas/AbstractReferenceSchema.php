@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\DBAL\Schemas;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 abstract class AbstractReferenceSchema extends Component
 {

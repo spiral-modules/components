@@ -12,7 +12,7 @@ use Spiral\Components\ORM\ActiveRecord;
 use Spiral\Components\ORM\ORMException;
 use Spiral\Components\ORM\Relation;
 use Spiral\Components\ORM\Selector;
-use Spiral\Core\Component\LoggerTrait;
+use Spiral\Core\Traits\LoggerTrait;
 
 class ManyToMany extends Relation implements \Countable
 {

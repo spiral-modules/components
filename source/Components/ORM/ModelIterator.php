@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\ORM;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class ModelIterator extends Component implements \Iterator, \Countable, \JsonSerializable
 {

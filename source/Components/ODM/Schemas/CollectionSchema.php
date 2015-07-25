@@ -9,7 +9,7 @@
 namespace Spiral\Components\ODM\Schemas;
 
 use Spiral\Components\ODM\SchemaBuilder;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 class CollectionSchema extends Component
 {

@@ -9,7 +9,7 @@
 namespace Spiral\Components\View;
 
 use Spiral\Components\Files\FileManager;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container;
 
@@ -18,10 +18,10 @@ class ViewManager extends Component
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait,
-        Component\ConfigurableTrait,
-        Component\LoggerTrait,
-        Component\EventsTrait;
+    use Traits\SingletonTrait,
+        Traits\ConfigurableTrait,
+        Traits\LoggerTrait,
+        Traits\EventsTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

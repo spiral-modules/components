@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\I18n;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\RuntimeCacheInterface;
 use Spiral\Helpers\StringHelper;
@@ -18,7 +18,7 @@ class Translator extends Component
     /**
      * Will provide us helper method getInstance().
      */
-    use Component\SingletonTrait, Component\ConfigurableTrait;
+    use Traits\SingletonTrait, Traits\ConfigurableTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

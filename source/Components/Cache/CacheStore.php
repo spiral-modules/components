@@ -8,7 +8,7 @@
  */
 namespace Spiral\Components\Cache;
 
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Core\Container\InjectableInterface;
 
 abstract class CacheStore extends Component implements StoreInterface, InjectableInterface

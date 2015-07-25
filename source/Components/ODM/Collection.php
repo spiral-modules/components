@@ -9,7 +9,7 @@
 namespace Spiral\Components\ODM;
 
 use Spiral\Components\ODM\Collection\CursorReader;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 use Spiral\Support\Pagination\PaginableInterface;
 use Spiral\Support\Pagination\PaginatorTrait;
 
@@ -40,7 +40,7 @@ class Collection extends Component implements \IteratorAggregate, PaginableInter
     /**
      * Pagination and logging traits.
      */
-    use PaginatorTrait, Component\LoggerTrait;
+    use PaginatorTrait, Traits\LoggerTrait;
 
     /**
      * Sort order.

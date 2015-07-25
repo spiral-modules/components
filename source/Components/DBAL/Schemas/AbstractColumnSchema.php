@@ -11,7 +11,7 @@ namespace Spiral\Components\DBAL\Schemas;
 use Spiral\Components\DBAL\Database;
 use Spiral\Components\DBAL\SqlFragment;
 use Spiral\Components\DBAL\SqlFragmentInterface;
-use Spiral\Core\Component;
+use Spiral\Core\Traits;
 
 /**
  * @method static AbstractColumnSchema make(array $parameters = []);
@@ -43,7 +43,7 @@ abstract class AbstractColumnSchema extends Component
     /**
      * Logging.
      */
-    use Component\LoggerTrait;
+    use Traits\LoggerTrait;
 
     /**
      * Direct mapping from base abstract type to database internal type with specified data options,

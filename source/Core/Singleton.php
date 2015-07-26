@@ -8,7 +8,7 @@
  */
 namespace Spiral\Core;
 
-class Singleton extends Component
+abstract class Singleton extends Component
 {
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.

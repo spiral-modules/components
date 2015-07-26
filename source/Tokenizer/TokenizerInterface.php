@@ -11,6 +11,22 @@ namespace Spiral\Tokenizer;
 interface TokenizerInterface
 {
     /**
+     * Token array constants.
+     */
+    const TYPE = 0;
+    const CODE = 1;
+    const LINE = 2;
+
+    /**
+     * Fetch PHP tokens for specified filename. String tokens should be automatically extended with their
+     * type and line.
+     *
+     * @param string $filename
+     * @return array
+     */
+    public function fetchTokens($filename);
+
+    /**
      * Index all available files excluding and generate list of found classes with their names and
      * filenames. Unreachable classes or files with conflicts be skipped.
      *

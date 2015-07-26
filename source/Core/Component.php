@@ -8,7 +8,7 @@
  */
 namespace Spiral\Core;
 
-class Component
+abstract class Component
 {
     /**
      * Global container instance using not very often by some component traits like Loggers, Events

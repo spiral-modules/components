@@ -6,7 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Http\Router;
+namespace Spiral\Http\Router\Traits;
+
+use Spiral\Http\Router\Route;
+use Spiral\Core\ContainerInterface;
+use Spiral\Http\Router\RouteInterface;
+use Spiral\Http\Router\Router;
+use Spiral\Http\Router\RouterException;
 
 trait RouterTrait
 {
@@ -21,9 +27,16 @@ trait RouterTrait
      * Router middleware used by HttpDispatcher and modules to perform URI based routing with defined
      * endpoint such as controller action, closure or middleware.
      *
-     * @var Router
+     * @var Router|null
      */
     protected $router = null;
+
+    /**
+     * Global container access is required in some cases.
+     *
+     * @return ContainerInterface
+     */
+    abstract public function getContainer();
 
     /**
      * Get Router instance.
@@ -47,7 +60,12 @@ trait RouterTrait
      */
     protected function createRouter()
     {
-        return Router::make(['routes' => $this->routes]);
+        if (empty(self::getContainer()))
+        {
+            throw new RouterException("Unable to create default router, default container not set.");
+        }
+
+        return new Router(self::getContainer(), $this->routes);
     }
 
     /**

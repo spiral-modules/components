@@ -11,7 +11,6 @@ namespace Spiral\Core;
 use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\BadArgumentException;
 use Spiral\Core\Container\NonInstantiableException;
-use Symfony\Component\Process\Exception\ExceptionInterface;
 
 interface ContainerInterface
 {

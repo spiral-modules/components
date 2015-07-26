@@ -22,7 +22,7 @@ use Spiral\Http\Responses\EmptyResponse;
 use Spiral\Http\Responses\HtmlResponse;
 use Spiral\Http\Responses\JsonResponse;
 use Spiral\Http\Router\Router;
-use Spiral\Http\Router\RouterTrait;
+use Spiral\Http\Router\Traits\RouterTrait;
 use Spiral\Views\ViewManager;
 use Spiral\Views\ViewManagerInterface;
 use Zend\Diactoros\Response\EmitterInterface;

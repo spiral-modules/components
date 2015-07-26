@@ -76,13 +76,13 @@ abstract class Controller extends Component implements ControllerInterface
      * any other type supported by specified dispatcher. This method can be overwritten in child
      * controller to force some specific Response or modify output from every controller action.
      *
+     * @param ContainerInterface $container
      * @param string             $action     Method name.
      * @param array              $parameters Set of parameters to populate controller method.
-     * @param ContainerInterface $container
      * @return mixed
      * @throws ClientException
      */
-    public function callAction($action = '', array $parameters = [], ContainerInterface $container)
+    public function callAction(ContainerInterface $container, $action = '', array $parameters = [])
     {
         //Action should include prefix and be always specified
         $action = static::ACTION_PREFIX . (!empty($action) ? $action : $this->defaultAction);

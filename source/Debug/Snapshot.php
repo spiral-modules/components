@@ -9,7 +9,6 @@
 namespace Spiral\Debug;
 
 use Exception;
-use Spiral\Core\Container\ContainerException;
 use Spiral\Core\ContainerInterface;
 use Spiral\Views\ViewManager;
 use Spiral\Views\ViewManagerInterface;
@@ -124,12 +123,6 @@ class Snapshot
      */
     public function getTrace()
     {
-        if ($this->exception instanceof ContainerException)
-        {
-            //Corrected injection trace
-            return $this->exception->injectionTrace();
-        }
-
         return $this->exception->getTrace();
     }
 
@@ -140,12 +133,6 @@ class Snapshot
      */
     public function getClass()
     {
-        if ($this->exception instanceof ContainerException)
-        {
-            //Corrected injection trace
-            return get_class($this->exception->getPrevious());
-        }
-
         return get_class($this->exception);
     }
 

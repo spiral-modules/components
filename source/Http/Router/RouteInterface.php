@@ -15,6 +15,16 @@ use Spiral\Core\ContainerInterface;
 interface RouteInterface
 {
     /**
+     * Default segment pattern, this patter can be applied to controller names, actions and etc.
+     */
+    const DEFAULT_SEGMENT = '[^\/]+';
+
+    /**
+     * Default separator to split controller and action name in route target.
+     */
+    const CONTROLLER_SEPARATOR = '::';
+
+    /**
      * Get route name. Name is requires to correctly identify route inside router stack (to generate
      * url for example).
      *

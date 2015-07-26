@@ -224,9 +224,9 @@ abstract class Driver extends Component
             return $this->pdo;
         }
 
-        $this->benchmark($this->databaseName . "::connect", $this->config['connection']);
+        $this->benchmark('connect', $this->config['connection']);
         $this->pdo = $this->fire('connect', $this->createPDO());
-        $this->benchmark($this->databaseName . "::connect", $this->config['connection']);
+        $this->benchmark('connect', $this->config['connection']);
 
         return $this->pdo;
     }

@@ -55,4 +55,11 @@ interface ContainerInterface
      * @return bool
      */
     public function hasBinding($alias);
+
+    /**
+     * Remove existed binding.
+     *
+     * @param string $alias
+     */
+    public function removeBinding($alias);
 }

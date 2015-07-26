@@ -13,13 +13,15 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Events\Traits\EventsTrait;
+use Spiral\Files\FilesInterface;
 
 class Debugger extends Singleton
 {
     /**
      * Few traits.
      */
-    use ConfigurableTrait, LoggerTrait;
+    use ConfigurableTrait, LoggerTrait, EventsTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -34,134 +36,140 @@ class Debugger extends Singleton
     protected $container = null;
 
     /**
+     * File component.
+     *
+     * @var FilesInterface
+     */
+    protected $files = null;
+
+    /**
+     * List of recorded benchmarks.
+     *
+     * @var array
+     */
+    protected $benchmarks = [];
+
+    /**
      * Constructing debug component. Debug is one of primary spiral component and will be available
      * for use in any environment and any application point. This is first initiated component in
      * application.
      *
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
+     * @param FilesInterface        $files
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    public function __construct(
+        ConfiguratorInterface $configurator,
+        ContainerInterface $container,
+        FilesInterface $files
+    )
     {
         $this->config = $configurator->getConfig($this);
+        $this->container = $container;
+        $this->files = $files;
     }
 
     /**
      * Create logger associated with specified container.
      *
-     * @param $name
+     * @param string $name
      * @return Logger
      */
     public function createLogger($name)
     {
         $logger = new Logger($name);
 
+        if (isset($this->config['loggers'][$name]))
+        {
+            //TODO: Configuring logger
+        }
+
         return $logger;
     }
 
-//    /**
-//     * Benchmark method used to determinate how long time and how much memory was used to perform
-//     * some specified piece of code. Method should be used twice, before and after code needs to be
-//     * profile, first call will return true, second one will return time in seconds took to perform
-//     * code between benchmark method calls. If Debugger::$benchmarking enabled - result will be
-//     * additionally logged in Debugger::$benchmarks array and can be retrieved using
-//     * Debugger::getBenchmarks() for future analysis.
-//     *
-//     * Example:
-//     * Debugger::benchmark('parseURL', 'google.com');
-//     * ...
-//     * echo Debugger::benchmark('parseURL', 'google.com');
-//     *
-//     * @param string $record Record name.
-//     * @return bool|float
-//     */
-//    public static function benchmark($record)
-//    {
-//        if (func_num_args() > 1)
-//        {
-//            $record = join('|', func_get_args());
-//        }
-//
-//        if (!isset(self::$benchmarks[$record]))
-//        {
-//            self::$benchmarks[$record] = [
-//                microtime(true),
-//                memory_get_usage()
-//            ];
-//
-//            return true;
-//        }
-//
-//        self::$benchmarks[$record][] = microtime(true);
-//        self::$benchmarks[$record][] = memory_get_usage();
-//
-//        return self::$benchmarks[$record][2] - self::$benchmarks[$record][0];
-//    }
-//
-//    /**
-//     * Retrieve all active and finished benchmark records, this method will return finished records
-//     * only if Debugger::$benchmarking is true, in opposite case all finished records will be erased
-//     * right after completion.
-//     *
-//     * @return array|null
-//     */
-//    public static function getBenchmarks()
-//    {
-//        return self::$benchmarks;
-//    }
+    /**
+     * Handle exception and convert it to user friendly snapshot instance.
+     *
+     * @param \Exception $exception
+     * @param bool       $logError If true (default), message to error log will be added.
+     * @return Snapshot
+     */
+    public function createSnapshot(\Exception $exception, $logError = true)
+    {
+        /**
+         * @var Snapshot $snapshot
+         */
+        $snapshot = $this->container->get(Snapshot::class, [
+            'exception' => $exception,
+            'view'      => $this->config['snapshots']['view']
+        ]);
 
+        //Error message should be added to log only for non http exceptions
+        if ($logError)
+        {
+            $this->logger()->error($snapshot->getMessage());
+        }
 
-    //    /**
-    //     * Will convert Exception to ExceptionResponse object which can be passed further to dispatcher
-    //     * and handled by environment logic. Additionally error message will be recorded in "error" debug
-    //     * container.
-    //     *
-    //     * ExceptionResponse will contain full exception explanation and rendered snapshot which can be
-    //     * recorded as html file for future usage.
-    //     *
-    //     * @param Exception $exception
-    //     * @param bool      $logException If true (default), message to error container will be added.
-    //     * @return Snapshot
-    //     */
-    //    public function handleException(Exception $exception, $logException = true)
-    //    {
-    //        //We are requesting viewManager using container here to performance reasons
-    //        $snapshot = new Snapshot(
-    //            $exception,
-    //            ViewManager::getInstance($this->container),
-    //            $this->config['backtrace']['view']
-    //        );
-    //
-    //        if ($exception instanceof ClientException)
-    //        {
-    //            //No logging for ClientExceptions
-    //            return $snapshot;
-    //        }
-    //
-    //        //Error message should be added to log only for non http exceptions
-    //        if ($logException)
-    //        {
-    //            self::logger()->error($snapshot->getMessage());
-    //        }
-    //
-    //        $filename = null;
-    //        if ($this->config['backtrace']['snapshots']['enabled'])
-    //        {
-    //            $filename = interpolate($this->config['backtrace']['snapshots']['filename'], [
-    //                'timestamp' => date($this->config['backtrace']['snapshots']['timeFormat'], time()),
-    //                'exception' => $snapshot->getName()
-    //            ]);
-    //
-    //            //We can save it now
-    //            FileManager::getInstance($this->container)->write(
-    //                $filename,
-    //                $snapshot->renderSnapshot()
-    //            );
-    //        }
-    //
-    //        //Letting subscribers know...
-    //        $this->event('snapshot', compact('snapshot', 'filename'));
-    //
-    //        return $snapshot;
-    //    }
+        $filename = null;
+        if ($this->config['snapshots']['enabled'])
+        {
+            //We can additionally save exception on hard drive
+            $filename = \Spiral\interpolate($this->config['snapshots']['filename'], [
+                'timestamp' => date($this->config['snapshots']['timeFormat'], time()),
+                'exception' => $snapshot->shortName()
+            ]);
+
+            $this->files->write($filename, $snapshot->render());
+        }
+
+        $this->fire('snapshot', compact('snapshot', 'filename'));
+
+        return $snapshot;
+    }
+
+    /**
+     * Benchmarks used to record duration of long or memory inefficient operations in spiral, you
+     * can use profiler panel to view benchmarks later.
+     *
+     * Every additional record name will be joined with caller name.
+     *
+     * @param string       $caller Caller name
+     * @param string|array $record Record name(s).
+     * @return bool|float
+     */
+    public function benchmark($caller, $record)
+    {
+
+        if (is_array($record))
+        {
+            //Formatting in form caller|record|recordB
+            $name = $caller . '|' . join('|', $record);
+        }
+        else
+        {
+            $name = join('|', func_get_args());
+        }
+
+        if (!isset($this->benchmarks[$name]))
+        {
+            $this->benchmarks[$name] = [microtime(true), memory_get_usage()];
+
+            return true;
+        }
+
+        $this->benchmarks[$name][] = microtime(true);
+        $this->benchmarks[$name][] = memory_get_usage();
+
+        return $this->benchmarks[$name][2] - $this->benchmarks[$name][0];
+    }
+
+    /**
+     * Retrieve all active and finished benchmark records.
+     *
+     * @return array|null
+     */
+    public function getBenchmarks()
+    {
+        return $this->benchmarks;
+    }
 }

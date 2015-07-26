@@ -8,9 +8,7 @@
  */
 namespace Spiral\Components\Tokenizer\Reflection\FunctionUsage;
 
-use Spiral\Core\Component;
-
-class Argument extends Component
+class Argument
 {
     /**
      * Argument types.  All parsed functions will have arguments marked with these constants.

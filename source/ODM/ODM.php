@@ -124,6 +124,23 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
+     * Injector will receive requested class or interface reflection and reflection linked
+     * to parameter in constructor or method.
+     *
+     * This method can return pre-defined instance or create new one based on requested class. Parameter
+     * reflection can be used for dynamic class constructing, for example it can define database name
+     * or config section to be used to construct requested instance.
+     *
+     * @param \ReflectionClass     $class
+     * @param \ReflectionParameter $parameter
+     * @return mixed
+     */
+    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    {
+        return $this->db($parameter->getName());
+    }
+
+    /**
      * Get schema for specified document class or collection.
      *
      * @param string $item Document class or collection name (including database).

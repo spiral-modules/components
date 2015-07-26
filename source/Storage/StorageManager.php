@@ -139,6 +139,23 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     }
 
     /**
+     * Injector will receive requested class or interface reflection and reflection linked
+     * to parameter in constructor or method.
+     *
+     * This method can return pre-defined instance or create new one based on requested class. Parameter
+     * reflection can be used for dynamic class constructing, for example it can define database name
+     * or config section to be used to construct requested instance.
+     *
+     * @param \ReflectionClass     $class
+     * @param \ReflectionParameter $parameter
+     * @return mixed
+     */
+    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    {
+        return $this->bucket($parameter->getName());
+    }
+
+    /**
      * Resolve bucket instance using object address, bucket will be detected by reading it's
      * own prefix from object address. Bucket with longest detected prefix will be used to represent
      * such object. Make sure you don't have prefix collisions.

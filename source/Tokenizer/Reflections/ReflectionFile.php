@@ -121,20 +121,22 @@ class ReflectionFile
      *
      * @param string    $filename     Filename to be parsed.
      * @param Tokenizer $tokenizer    TokenManager instance.
-     * @param array     $cachedSchema Cached list of found classes, interfaces and etc, will be
+     * @param array     $cache        Cached list of found classes, interfaces and etc, will be
      *                                pre-loaded to memory to speed up processing.
      */
-    public function __construct($filename, Tokenizer $tokenizer = null, array $cachedSchema = [])
+    public function __construct($filename, Tokenizer $tokenizer = null, array $cache = [])
     {
         $this->filename = $filename;
         $this->tokenizer = $tokenizer;
 
-        if (!empty($cachedSchema))
+        if (!empty($cache))
         {
-            $this->importSchema($cachedSchema);
+            $this->importSchema($cache);
 
             return;
         }
+
+        //TODO: REFACTOR!
 
         $tokens = $this->tokens = $tokenizer->fetchTokens($filename);
 
@@ -163,6 +165,11 @@ class ReflectionFile
 
         //Restoring original value
         $this->tokens = $tokens;
+    }
+
+    public function getFilename()
+    {
+        return $this->filename;
     }
 
     /**

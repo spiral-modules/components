@@ -9,9 +9,8 @@
 namespace Spiral\Components\Tokenizer\Reflection;
 
 use Spiral\Components\Tokenizer\Reflection\FunctionUsage\Argument;
-use Spiral\Core\Component;
 
-class FunctionUsage extends Component
+class FunctionUsage
 {
     /**
      * Function name, can include :: as a parent class.

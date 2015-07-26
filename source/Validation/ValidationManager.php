@@ -8,17 +8,17 @@
  */
 namespace Spiral\Validation;
 
-use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
+use Spiral\Core\Traits\ConfigurableTrait;
 
 class ValidationManager extends Singleton
 {
     /**
      * Required traits.
      */
-    use Component\ConfigurableTrait;
+    use ConfigurableTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

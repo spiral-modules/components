@@ -8,7 +8,9 @@
  */
 namespace Spiral\Database;
 
-class QueryCompiler
+use Spiral\Core\Component;
+
+class QueryCompiler extends Component
 {
     /**
      * Query types for parameter ordering.

@@ -10,6 +10,7 @@ namespace Spiral\Database\Schemas;
 
 use Spiral\Core\Component;
 use Spiral\Database\Driver;
+use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * @method AbstractColumnSchema primary($column)
@@ -39,7 +40,7 @@ abstract class AbstractTableSchema extends Component
     /**
      * Logging.
      */
-    use Component\LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Rename SQL statement is usually the same... we all know who has different syntax. :)

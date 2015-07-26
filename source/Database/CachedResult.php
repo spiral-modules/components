@@ -150,7 +150,7 @@ class CachedResult extends QueryResult
      *
      * @param bool $mode The fetch mode must be one of the PDO::FETCH_* constants, PDO::FETCH_ASSOC
      *                   by default.
-     * @return array
+     * @return array|bool
      */
     public function fetch($mode = null)
     {
@@ -159,7 +159,12 @@ class CachedResult extends QueryResult
             $this->fetchMode($mode);
         }
 
-        if ($data = isset($this->data[$this->cursor]) ? $this->data[$this->cursor++] : false)
+        if (!isset($this->data[$this->cursor]))
+        {
+            return false;
+        }
+
+        if ($data = $this->data[$this->cursor++])
         {
             foreach ($this->bindings as $columnID => &$variable)
             {

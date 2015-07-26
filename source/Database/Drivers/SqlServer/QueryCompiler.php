@@ -8,17 +8,17 @@
  */
 namespace Spiral\Database\Drivers\SqlServer;
 
-use Spiral\Core\Component;
 use Spiral\Database\DatabaseException;
 use Spiral\Database\QueryCompiler as BaseQueryCompiler;
 use Spiral\Database\SqlFragment;
+use Spiral\Debug\Traits\LoggerTrait;
 
 class QueryCompiler extends BaseQueryCompiler
 {
     /**
      * Logging.
      */
-    use Component\LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Parent driver instance, driver used only for identifier() methods but can be required in other

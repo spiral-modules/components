@@ -8,6 +8,7 @@
  */
 namespace Spiral\Files;
 
+use Psr\Http\Message\UploadedFileInterface;
 use Spiral\Core\Traits;
 
 interface FilesInterface

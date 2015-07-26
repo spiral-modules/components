@@ -8,16 +8,16 @@
  */
 namespace Spiral\Database\Drivers\Sqlite;
 
-use Spiral\Core\Component;
 use Spiral\Database\DatabaseException;
 use Spiral\Database\QueryCompiler as BaseQueryCompiler;
+use Spiral\Debug\Traits\LoggerTrait;
 
 class QueryCompiler extends BaseQueryCompiler
 {
     /**
      * For warnings.
      */
-    use Component\LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Compile delete query statement. Table name, joins and where tokens are required.

@@ -8,8 +8,6 @@
  */
 namespace Spiral\Database;
 
-use Spiral\Database\SqlFragmentInterface;
-
 class SqlFragment implements SqlFragmentInterface
 {
     /**

@@ -8,10 +8,10 @@
  */
 namespace Spiral\Validation\Traits;
 
-use Spiral\Component\EventsTrait;
+use Spiral\Events\Traits\EventsTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
-use Spiral\Validation\DumpValidator;
+use Spiral\Validation\ValidationException;
 use Spiral\Validation\ValidationManager;
 use Spiral\Validation\ValidatorInterface;
 
@@ -123,7 +123,7 @@ trait ValidatorTrait
             )->createValidator($this->fields, !empty($validates) ? $validates : $this->validates);
         }
 
-        return new DumpValidator();
+        throw new ValidationException("Unable to create class Validator, no global container set.");
     }
 
     /**

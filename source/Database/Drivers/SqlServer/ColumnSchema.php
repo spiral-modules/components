@@ -455,7 +455,7 @@ class ColumnSchema extends AbstractColumnSchema
                     . $this->getName() . '_default_' . uniqid();
             }
 
-            $operations[] = interpolate(
+            $operations[] = \Spiral\interpolate(
                 "ADD CONSTRAINT {constraint} DEFAULT {default} FOR {column}",
                 [
                     'constraint' => $this->table->getDriver()->identifier($this->defaultConstraint),

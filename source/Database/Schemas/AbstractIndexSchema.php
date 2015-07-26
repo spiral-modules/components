@@ -8,8 +8,6 @@
  */
 namespace Spiral\Database\Schemas;
 
-use Spiral\Core\Component;
-
 abstract class AbstractIndexSchema
 {
     /**

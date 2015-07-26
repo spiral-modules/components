@@ -30,14 +30,6 @@ class SchemaBuilder
     protected $orm = null;
 
     /**
-     * Container.
-     *
-     * @invisible
-     * @var Container
-     */
-    protected $container = null;
-
-    /**
      * Found ActiveRecord schemas.
      *
      * @var ModelSchema[]
@@ -62,7 +54,6 @@ class SchemaBuilder
     {
         $this->config = $config;
         $this->orm = $orm;
-        $this->container = $orm->getContainer();
 
         foreach ($tokenizer->getClasses(ActiveRecord::class) as $class => $definition)
         {

@@ -85,7 +85,7 @@ class NamespaceElement extends Element
      * @param ArrayExporter $exporter    Custom array exporter for properties.
      * @return string
      */
-    public function createDeclaration($indentLevel = 0, ArrayExporter $exporter = null)
+    public function render($indentLevel = 0, ArrayExporter $exporter = null)
     {
         $result = [$this->renderComment($indentLevel)];
 

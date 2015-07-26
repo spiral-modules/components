@@ -8,18 +8,18 @@
  */
 namespace Spiral\Database\Drivers\Postgres\Builders;
 
-use Spiral\Core\Component;
 use Spiral\Database\Builders\InsertQuery as BaseInsertQuery;
 use Spiral\Database\DatabaseException;
 use Spiral\Database\Drivers\Postgres\PostgresDriver;
 use Spiral\Database\QueryCompiler;
+use Spiral\Debug\Traits\LoggerTrait;
 
 class InsertQuery extends BaseInsertQuery
 {
     /**
      * Logging.
      */
-    use Component\LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Get or render SQL statement.

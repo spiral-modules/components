@@ -11,6 +11,7 @@ namespace Spiral\Database;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Database\Schemas\AbstractTableSchema;
 
 /**
  * @method SelectQuery distinct(bool $distinct = true)

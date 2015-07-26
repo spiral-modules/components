@@ -8,7 +8,6 @@
  */
 namespace Spiral\Debug;
 
-use Spiral\Debug\Debugger;
 use Spiral\Core\Singleton;
 
 class Dumper extends Singleton

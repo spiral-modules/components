@@ -12,6 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Database\Database;
 use Spiral\Database\SqlFragment;
 use Spiral\Database\SqlFragmentInterface;
+use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * @method static AbstractColumnSchema make(array $parameters = []);
@@ -43,7 +44,7 @@ abstract class AbstractColumnSchema extends Component
     /**
      * Logging.
      */
-    use Component\LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Direct mapping from base abstract type to database internal type with specified data options,

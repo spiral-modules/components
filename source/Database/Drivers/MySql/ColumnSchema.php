@@ -231,7 +231,12 @@ class ColumnSchema extends AbstractColumnSchema
                 return (int)$this->defaultValue;
             }
 
-            return (new self($this->defaultValue, null, DatabaseManager::DEFAULT_TIMEZONE))->getTimestamp();
+            $datetime = new \DateTime(
+                $this->defaultValue,
+                new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
+            );
+
+            return $datetime->getTimestamp();
         }
 
         return parent::prepareDefault();

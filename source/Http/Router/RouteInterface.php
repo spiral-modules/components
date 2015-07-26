@@ -10,6 +10,7 @@ namespace Spiral\Http\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\Container;
+use Spiral\Core\ContainerInterface;
 
 interface RouteInterface
 {
@@ -34,15 +35,11 @@ interface RouteInterface
      * Perform route on given Request and return response.
      *
      * @param ServerRequestInterface $request
-     * @param Container              $container Container is required to get valid middleware instance.
-     * @param array                  $filters   Name of filters to be applied.
+     * @param ContainerInterface     $container Container is required to get valid middleware instance
+     *                                          and execute controllers in some cases.
      * @return mixed
      */
-    public function perform(
-        ServerRequestInterface $request,
-        Container $container,
-        array $filters = [] //TODO: I DON'T LIKE THIS NAME
-    );
+    public function perform(ServerRequestInterface $request, ContainerInterface $container);
 
     /**
      * Create URL using route parameters (will be merged with default values), route pattern and base

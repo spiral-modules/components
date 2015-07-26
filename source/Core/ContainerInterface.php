@@ -57,6 +57,26 @@ interface ContainerInterface
     public function bind($alias, $resolver);
 
     /**
+     * Replace existed binding with new value. Existed binding value will be returned from this method
+     * and can be used again to restore original state using restore() method.
+     *
+     * Attention, due internal format you can restore original value only using restore method!
+     *
+     * @see restore()
+     * @param string                 $alias  Alias where singleton will be attached to.
+     * @param string|object|callable Closure to resolve class instance, class instance or class name.
+     * @return object|string|array|null
+     */
+    public function replace($alias, $resolver);
+
+    /**
+     * Restore previously pulled binding value. Method will accept only result of replace() method.
+     *
+     * @param mixed $binding
+     */
+    public function restore($binding);
+
+    /**
      * Bind closure or class name which will be performed only once, after first call class instance
      * will be attached to specified alias and will be returned directly without future invoking.
      *
@@ -73,6 +93,14 @@ interface ContainerInterface
      * @return bool
      */
     public function hasBinding($alias);
+
+    /**
+     * Check if alias points to constructed instance or singleton instance.
+     *
+     * @param string $alias
+     * @return bool
+     */
+    public function isInstance($alias);
 
     /**
      * Remove existed binding.

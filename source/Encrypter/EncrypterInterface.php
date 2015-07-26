@@ -11,6 +11,14 @@ namespace Spiral\Encrypter;
 interface EncrypterInterface
 {
     /**
+     * Get current encrypter key. Key can be used in various application parts for hashing and etc.
+     * Be careful, DO NOT share this key with client or raw data.
+     *
+     * @return string
+     */
+    public function getKey();
+
+    /**
      * Generate a pseudo-random string of bytes.
      *
      * @link http://php.net/manual/en/function.openssl-random-pseudo-bytes.php

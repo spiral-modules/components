@@ -16,7 +16,8 @@
     "psr/log": "*",
     "psr/http-message": "^1.0",
     "doctrine/inflector": "1.0.1",
-    "guzzlehttp/guzzle": "~6.0"
+    "guzzlehttp/guzzle": "~6.0",
+    "zendframework/zend-diactoros": "^1.1"
   },
   "autoload": {
     "files": [

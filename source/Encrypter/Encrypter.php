@@ -78,7 +78,8 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Get current encrypter key.
+     * Get current encrypter key. Key can be used in various application parts for hashing and etc.
+     * Be careful, DO NOT share this key with client or raw data.
      *
      * @return string
      */

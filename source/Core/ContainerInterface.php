@@ -8,6 +8,11 @@
  */
 namespace Spiral\Core;
 
+use ReflectionFunctionAbstract as ContextFunction;
+use Spiral\Core\Container\BadArgumentException;
+use Spiral\Core\Container\NonInstantiableException;
+use Symfony\Component\Process\Exception\ExceptionInterface;
+
 interface ContainerInterface
 {
     /**
@@ -23,9 +28,22 @@ interface ContainerInterface
      * @param array  $parameters                    Parameters to be mapped to class constructor or
      *                                              forwarded to closure.
      * @return mixed|null|object
-     * @throws ExceptionInterface
+     * @throws NonInstantiableException
+     * @throws BadArgumentException
      */
     public function get($alias, $parameters = []);
+
+    /**
+     * Helper method to resolve constructor or function arguments, build required DI using IoC
+     * container and mix with pre-defined set of named parameters.
+     *
+     * @param ContextFunction $reflection Method or constructor should be filled with DI.
+     * @param array           $parameters Outside parameters used in priority to DI.
+     *                                    Named list.
+     * @return array
+     * @throws BadArgumentException
+     */
+    public function resolveArguments(ContextFunction $reflection, array $parameters = []);
 
     /**
      * IoC binding can create a link between specified alias and method to resolve that alias, resolver

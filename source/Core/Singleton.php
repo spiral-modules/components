@@ -24,13 +24,14 @@ abstract class Singleton extends Component
      */
     public static function getInstance(ContainerInterface $container = null)
     {
-        $container = !empty($container) ? $container : self::getContainer();
-
         if (empty($container))
         {
-            throw new \RuntimeException(
-                "Singleton instance can be constructed only via valid Container."
-            );
+            if (empty($container = self::getContainer()))
+            {
+                throw new \RuntimeException(
+                    "Singleton instance can be constructed only via valid Container."
+                );
+            }
         }
 
         return $container->get(static::SINGLETON);

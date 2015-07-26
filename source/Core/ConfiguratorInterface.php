@@ -13,8 +13,8 @@ interface ConfiguratorInterface
     /**
      * Get configuration for specific requester.
      *
-     * @param object $requester
+     * @param object|string $source
      * @return array
      */
-    public function getConfig($requester = null);
+    public function getConfig($source = null);
 }

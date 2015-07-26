@@ -10,16 +10,16 @@ namespace Spiral\Components\Tokenizer;
 
 use Spiral\Components\Tokenizer\Reflection\FunctionUsage;
 use Spiral\Components\Tokenizer\Reflection\FunctionUsage\Argument;
-use Spiral\Tokenizer\Tokenizer;
+use Spiral\Tokenizer\TokenizerInterface;
 
 class ReflectionFile
 {
     /**
      * Token array constants.
      */
-    const TOKEN_TYPE = Tokenizer::TYPE;
-    const TOKEN_CODE = Tokenizer::CODE;
-    const TOKEN_LINE = Tokenizer::LINE;
+    const TOKEN_TYPE = TokenizerInterface::TYPE;
+    const TOKEN_CODE = TokenizerInterface::CODE;
+    const TOKEN_LINE = TokenizerInterface::LINE;
     const TOKEN_ID   = 3;
 
     /**
@@ -51,9 +51,9 @@ class ReflectionFile
     /**
      * Reflection filename.
      *
-     * @var null
+     * @var ''
      */
-    protected $filename = null;
+    protected $filename = '';
 
     /**
      * Parsed tokens array.
@@ -97,13 +97,13 @@ class ReflectionFile
      *
      * @var bool
      */
-    protected $includes = false;
+    protected $hasIncludes = false;
 
     /**
      * Tokenizer component.
      *
      * @invisible
-     * @var Tokenizer
+     * @var TokenizerInterface
      */
     protected $tokenizer = null;
 
@@ -119,12 +119,12 @@ class ReflectionFile
      * declared in given file, used functions and other low level information. Reflector is very slow,
      * so it's recommended to use only with cache.
      *
-     * @param string    $filename     Filename to be parsed.
-     * @param Tokenizer $tokenizer    TokenManager instance.
-     * @param array     $cache        Cached list of found classes, interfaces and etc, will be
-     *                                pre-loaded to memory to speed up processing.
+     * @param string             $filename  Filename to be parsed.
+     * @param TokenizerInterface $tokenizer TokenManager instance.
+     * @param array              $cache     Cached list of found classes, interfaces and etc, will be
+     *                                      pre-loaded to memory to speed up processing.
      */
-    public function __construct($filename, Tokenizer $tokenizer = null, array $cache = [])
+    public function __construct($filename, TokenizerInterface $tokenizer = null, array $cache = [])
     {
         $this->filename = $filename;
         $this->tokenizer = $tokenizer;
@@ -136,24 +136,17 @@ class ReflectionFile
             return;
         }
 
-        //TODO: REFACTOR!
+        //File tokens
+        $tokens = $tokenizer->fetchTokens($filename);
 
-        $tokens = $this->tokens = $tokenizer->fetchTokens($filename);
+        //Let's erase not useful tokens
+        $this->tokens = $this->cleanTokens($tokens);
 
-        //We only need few tokens to detect what we need
-        foreach ($this->tokens as $TID => $token)
-        {
-            if (!in_array($token[self::TOKEN_TYPE], self::$useTokens))
-            {
-                unset($this->tokens[$TID]);
-                continue;
-            }
-
-            $this->tokens[$TID][self::TOKEN_ID] = $TID;
-        }
-
-        $this->tokens = array_values($this->tokens);
+        //Restoring original tokens (this one is required for function usages)
+        $this->tokens = $tokens;
         $this->countTokens = count($this->tokens);
+
+        //Looking for declarations
         $this->locateDeclarations();
 
         //No need to record empty namespace
@@ -167,6 +160,11 @@ class ReflectionFile
         $this->tokens = $tokens;
     }
 
+    /**
+     * Reflection filename.
+     *
+     * @return string
+     */
     public function getFilename()
     {
         return $this->filename;
@@ -179,28 +177,42 @@ class ReflectionFile
      */
     public function exportSchema()
     {
-        return [
-            'plainIncludes' => $this->includes,
-            'declarations'  => $this->declarations,
-            'functions'     => $this->functions,
-            'namespaces'    => $this->namespaces
-        ];
+        return [$this->hasIncludes, $this->declarations, $this->functions, $this->namespaces];
     }
 
     /**
      * Import cached schema of found declarations.
      *
-     * @param array $schema
+     * @param array $cache
      * @return $this
      */
-    public function importSchema(array $schema)
+    public function importSchema(array $cache)
     {
-        $this->includes = $schema['plainIncludes'];
-        $this->declarations = $schema['declarations'];
-        $this->functions = $schema['functions'];
-        $this->namespaces = $schema['namespaces'];
+        list($this->includes, $this->declarations, $this->functions, $this->namespaces) = $cache;
 
         return $this;
+    }
+
+    /**
+     * Remove unnecessary tokens.
+     *
+     * @param array $tokens
+     * @return array
+     */
+    protected function cleanTokens(array $tokens)
+    {
+        $result = [];
+        foreach ($tokens as $TID => $token)
+        {
+            if (!in_array($token[self::TOKEN_TYPE], self::$useTokens))
+            {
+                continue;
+            }
+
+            $result[][self::TOKEN_ID] = $TID;
+        }
+
+        return $result;
     }
 
     /**
@@ -210,33 +222,43 @@ class ReflectionFile
      */
     protected function locateDeclarations()
     {
-        $includeTokens = [T_INCLUDE, T_INCLUDE_ONCE, T_REQUIRE, T_REQUIRE_ONCE];
-
         foreach ($this->tokens as $TID => $token)
         {
-            $token[self::TOKEN_TYPE] == T_FUNCTION && $this->handleFunction($TID);
-            $token[self::TOKEN_TYPE] == T_NAMESPACE && $this->handleNamespace($TID);
-            $token[self::TOKEN_TYPE] == T_USE && $this->handleUse($TID);
-
-            if (in_array($token[self::TOKEN_TYPE], [T_CLASS, T_TRAIT, T_INTERFACE]))
+            switch ($token[self::TOKEN_TYPE])
             {
-                if (
-                    $this->tokens[$TID][self::TOKEN_TYPE] == T_CLASS
-                    && isset($this->tokens[$TID - 1])
-                    && $this->tokens[$TID - 1][self::TOKEN_TYPE] == T_PAAMAYIM_NEKUDOTAYIM
-                )
-                {
-                    //PHP5.5 ClassName::class constant
-                    continue;
-                }
+                case T_NAMESPACE:
+                    $this->registerNamespace($TID);
+                    break;
 
-                $this->handleDeclaration($TID, $token[self::TOKEN_TYPE]);
-            }
+                case T_USE:
+                    $this->registerImport($TID);
+                    break;
 
-            if (!$this->includes && in_array($token[self::TOKEN_TYPE], $includeTokens))
-            {
-                //File has includes, this is not good.
-                $this->handleInclude($TID);
+                case T_FUNCTION:
+                    $this->registerFunction($TID);
+                    break;
+
+                case T_CLASS:
+                case T_TRAIT;
+                case T_INTERFACE:
+                    if (
+                        $this->tokens[$TID][self::TOKEN_TYPE] == T_CLASS
+                        && isset($this->tokens[$TID - 1])
+                        && $this->tokens[$TID - 1][self::TOKEN_TYPE] == T_PAAMAYIM_NEKUDOTAYIM
+                    )
+                    {
+                        //PHP5.5 ClassName::class constant
+                        continue;
+                    }
+
+                    $this->registerDeclaration($TID, $token[self::TOKEN_TYPE]);
+                    break;
+
+                case T_INCLUDE:
+                case T_INCLUDE_ONCE:
+                case T_REQUIRE:
+                case T_REQUIRE_ONCE:
+                    $this->hasIncludes = true;
             }
         }
     }
@@ -247,7 +269,7 @@ class ReflectionFile
      * @param int $firstTID Namespace token position.
      * @return array
      */
-    protected function handleNamespace($firstTID)
+    protected function registerNamespace($firstTID)
     {
         $namespace = '';
         $TID = $firstTID + 1;
@@ -291,33 +313,38 @@ class ReflectionFile
         ];
     }
 
+
     /**
-     * Helper methods to get namespace active at specified token position. Will return empty string
-     * (global namespace) if no namespace were found.
+     * Handle function declaration (function creation), function name will be added to function array
+     * under it's global name including parent namespace. Class methods will not be treated as functions.
      *
-     * @param int $TID Token id to check for any active namespaces.
-     * @return string
+     * @param int $firstTID
      */
-    protected function activeNamespace($TID)
+    protected function registerFunction($firstTID)
     {
-        $TID = isset($this->tokens[$TID][self::TOKEN_ID]) ? $this->tokens[$TID][self::TOKEN_ID] : $TID;
-        foreach ($this->namespaces as $namespace => $position)
+        //Checking if we are in class
+        foreach ($this->declarations as $declarations)
         {
-            if ($TID >= $position['firstTID'] && $TID <= $position['lastTID'])
+            foreach ($declarations as $location)
             {
-                return $namespace ? $namespace . '\\' : '';
+                if (
+                    $this->tokens[$firstTID][self::TOKEN_ID] >= $location['firstTID']
+                    && $this->tokens[$firstTID][self::TOKEN_ID] <= $location['lastTID']
+                )
+                {
+                    return;
+                }
             }
         }
 
-        //Seems like no namespace declaration
-        $this->namespaces[''] = [
-            'firstTID' => 0,
-            'lastTID'  => count($this->tokens),
-            'uses'     => []
-        ];
+        $name = $this->tokens[$firstTID + 1][self::TOKEN_CODE];
 
-        return '';
+        $this->functions[$this->getNamespace($firstTID) . $name] = [
+            'firstTID' => $this->tokens[$firstTID][self::TOKEN_ID],
+            'lastTID'  => $this->findLastTID($firstTID)
+        ];
     }
+
 
     /**
      * Handle declaration of class, trait of interface. Declaration will be stored under it's token
@@ -326,10 +353,10 @@ class ReflectionFile
      * @param int $firstTID  Declaration start token.
      * @param int $tokenType Declaring token type (T_CLASS, T_TRAIT, T_INTERFACE).
      */
-    protected function handleDeclaration($firstTID, $tokenType)
+    protected function registerDeclaration($firstTID, $tokenType)
     {
         $name = $this->tokens[$firstTID + 1][self::TOKEN_CODE];
-        $this->declarations[token_name($tokenType)][$this->activeNamespace($firstTID) . $name] = [
+        $this->declarations[token_name($tokenType)][$this->getNamespace($firstTID) . $name] = [
             'firstTID' => $this->tokens[$firstTID][self::TOKEN_ID],
             'lastTID'  => $this->findLastTID($firstTID)
         ];
@@ -340,9 +367,9 @@ class ReflectionFile
      *
      * @param int $firstTID Declaration start token.
      */
-    protected function handleUse($firstTID)
+    protected function registerImport($firstTID)
     {
-        $namespace = rtrim($this->activeNamespace($firstTID), '\\');
+        $namespace = rtrim($this->getNamespace($firstTID), '\\');
 
         $class = '';
         $localAlias = null;
@@ -374,43 +401,63 @@ class ReflectionFile
     }
 
     /**
-     * Handle function declaration (function creation), function name will be added to function array
-     * under it's global name including parent namespace. Class methods will not be treated as functions.
+     * Helper methods to get namespace active at specified token position. Will return empty string
+     * (global namespace) if no namespace were found.
      *
-     * @param int $firstTID
+     * @param int $TID Token id to check for any active namespaces.
+     * @return string
      */
-    protected function handleFunction($firstTID)
+    protected function getNamespace($TID)
     {
-        //Checking if we are in class
-        foreach ($this->declarations as $declarations)
+        $TID = isset($this->tokens[$TID][self::TOKEN_ID]) ? $this->tokens[$TID][self::TOKEN_ID] : $TID;
+        foreach ($this->namespaces as $namespace => $position)
         {
-            foreach ($declarations as $location)
+            if ($TID >= $position['firstTID'] && $TID <= $position['lastTID'])
             {
-                if (
-                    $this->tokens[$firstTID][self::TOKEN_ID] >= $location['firstTID']
-                    && $this->tokens[$firstTID][self::TOKEN_ID] <= $location['lastTID']
-                )
-                {
-                    return;
-                }
+                return $namespace ? $namespace . '\\' : '';
             }
         }
 
-        $name = $this->tokens[$firstTID + 1][self::TOKEN_CODE];
-        $this->functions[$this->activeNamespace($firstTID) . $name] = [
-            'firstTID' => $this->tokens[$firstTID][self::TOKEN_ID],
-            'lastTID'  => $this->findLastTID($firstTID)
+        //Seems like no namespace declaration
+        $this->namespaces[''] = [
+            'firstTID' => 0,
+            'lastTID'  => count($this->tokens),
+            'uses'     => []
         ];
+
+        return '';
     }
 
     /**
-     * Handle include token.
+     * Helper method to locate last brace token and return it's ID(last TID).
      *
-     * @param $TID
+     * @param int $firstTID Token ID to start lookup from.
+     * @return mixed
      */
-    public function handleInclude($TID)
+    protected function findLastTID($firstTID)
     {
-        $this->includes = true;
+        $level = null;
+        for ($TID = $firstTID; $TID < $this->countTokens; $TID++)
+        {
+            $token = $this->tokens[$TID];
+            if ($token[self::TOKEN_CODE] == '{')
+            {
+                $level++;
+                continue;
+            }
+
+            if ($token[self::TOKEN_CODE] == '}')
+            {
+                $level--;
+            }
+
+            if ($level !== null && !$level)
+            {
+                break;
+            }
+        }
+
+        return isset($this->tokens[$TID][self::TOKEN_ID]) ? $this->tokens[$TID][self::TOKEN_ID] : $TID;
     }
 
     /**
@@ -476,40 +523,9 @@ class ReflectionFile
      */
     public function hasIncludes()
     {
-        return $this->includes;
+        return $this->hasIncludes;
     }
 
-    /**
-     * Helper method to locate last brace token and return it's ID(last TID).
-     *
-     * @param int $firstTID Token ID to start lookup from.
-     * @return mixed
-     */
-    protected function findLastTID($firstTID)
-    {
-        $level = null;
-        for ($TID = $firstTID; $TID < $this->countTokens; $TID++)
-        {
-            $token = $this->tokens[$TID];
-            if ($token[self::TOKEN_CODE] == '{')
-            {
-                $level++;
-                continue;
-            }
-
-            if ($token[self::TOKEN_CODE] == '}')
-            {
-                $level--;
-            }
-
-            if ($level !== null && !$level)
-            {
-                break;
-            }
-        }
-
-        return isset($this->tokens[$TID][self::TOKEN_ID]) ? $this->tokens[$TID][self::TOKEN_ID] : $TID;
-    }
 
     /**
      * Will located and return all functions usages found in source. Function name, location and
@@ -523,7 +539,7 @@ class ReflectionFile
      *
      * @return FunctionUsage[]|array
      */
-    public function functionUsages()
+    public function getFunctionUsages()
     {
         if (!$this->functionUsages)
         {
@@ -534,7 +550,7 @@ class ReflectionFile
     }
 
     /**
-     * Searching for function usages.
+     * Searching for function usages. Pretty old code.
      *
      * @param array $tokens        List of parsed tokens from token_get_all() function.
      * @param int   $functionLevel If function were used inside another function this variable will
@@ -623,19 +639,19 @@ class ReflectionFile
                     }
 
                     //Will be fixed in future
-                    $class = $this->resolveClass($tokens, $functionTID, $argumentsTID);
+                    $class = $this->fetchParent($tokens, $functionTID, $argumentsTID);
 
                     $functionUsage = null;
                     if ($class != 'self' && $class != 'static')
                     {
-                        $functionUsage = FunctionUsage::make([
-                            'function' => $this->resolveName($tokens, $functionTID, $argumentsTID),
-                            'class'    => $class,
-                            'source'   => $source
-                        ]);
+                        $functionUsage = new FunctionUsage(
+                            $this->fetchName($tokens, $functionTID, $argumentsTID),
+                            $class,
+                            $source
+                        );
 
                         $functionUsage->setPosition($functionLine, $functionTID, $TID, $functionLevel);
-                        $functionUsage->setArguments($this->processArguments($arguments));
+                        $functionUsage->setArguments($this->fetchArguments($arguments));
                     }
 
                     //Nested functions can be function in usage arguments.
@@ -693,7 +709,7 @@ class ReflectionFile
      * @param int   $argumentsTID Function first argument token ID.
      * @return string
      */
-    protected function resolveName(array $tokens, $openTID, $argumentsTID)
+    protected function fetchName(array $tokens, $openTID, $argumentsTID)
     {
         $function = [];
         for (; $openTID < $argumentsTID; $openTID++)
@@ -721,7 +737,7 @@ class ReflectionFile
      * @param int   $argumentsTID Function first argument token ID.
      * @return string
      */
-    protected function resolveClass(array $tokens, $openTID, $argumentsTID)
+    protected function fetchParent(array $tokens, $openTID, $argumentsTID)
     {
         $function = [];
         for (; $openTID < $argumentsTID; $openTID++)
@@ -758,7 +774,7 @@ class ReflectionFile
         }
         else
         {
-            $namespace = rtrim($this->activeNamespace($openTID), '\\');
+            $namespace = rtrim($this->getNamespace($openTID), '\\');
 
             if (isset($this->namespaces[$namespace ?: '\\']['uses'][$class]))
             {
@@ -775,7 +791,7 @@ class ReflectionFile
      * @param array $tokens
      * @return Argument[]
      */
-    protected function processArguments(array $tokens)
+    protected function fetchArguments(array $tokens)
     {
         $argument = $parenthesis = 0;
 
@@ -865,6 +881,6 @@ class ReflectionFile
             }
         }
 
-        return Argument::make($argument);
+        return new Argument($argument['type'], $argument['value']);
     }
 }

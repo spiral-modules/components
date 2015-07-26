@@ -8,9 +8,10 @@
  */
 namespace Spiral\Debug\Traits;
 
+use Spiral\Core\ContainerInterface;
+
 trait BenchmarkTrait
 {
-
     /**
      * Global container access is required in some cases.
      *
@@ -18,14 +19,12 @@ trait BenchmarkTrait
      */
     abstract public function getContainer();
 
-
     protected function benchmark()
     {
         if (empty(self::getContainer()))
         {
+            //Nothing to do
             return null;
         }
-
-        echo "BENCHMARK";
     }
 }

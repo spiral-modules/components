@@ -19,6 +19,9 @@
     "guzzlehttp/guzzle": "~6.0"
   },
   "autoload": {
+    "files": [
+      "source/functions.php"
+    ],
     "psr-4": {
       "Spiral\\": "source/",
       "Spiral\\Tests\\": "tests/"

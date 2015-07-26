@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM;
+namespace Spiral\ODM;
 
-use Spiral\Support\Models\AccessorInterface;
+use Spiral\Models\AccessorInterface;
 
 interface CompositableInterface extends AccessorInterface
 {

@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Selector;
+namespace Spiral\ORM\Selector;
 
-use Spiral\Components\ORM\ORM;
-use Spiral\Components\ORM\Selector;
+use Spiral\ORM\ORM;
+use Spiral\ORM\Selector;
 
 interface LoaderInterface
 {

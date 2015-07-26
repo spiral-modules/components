@@ -8,8 +8,6 @@
  */
 namespace Spiral\Database;
 
-use Spiral\DBAL\Driver;
-
 class QueryCompiler
 {
     /**
@@ -647,5 +645,58 @@ class QueryCompiler
         }
 
         return trim($statement);
+    }
+
+    /**
+     * Helper method used to fill query with binded parameters. This method should NEVER be used to
+     * generate database queries and only for debugging.
+     *
+     * @param string $query      SQL statement with parameter placeholders.
+     * @param array  $parameters Parameters to be binded into query.
+     * @return mixed
+     */
+    public static function interpolate($query, array $parameters = [])
+    {
+        if (empty($parameters))
+        {
+            return $query;
+        }
+
+        array_walk($parameters, function (&$parameter)
+        {
+            switch (gettype($parameter))
+            {
+                case "boolean":
+                    return $parameter = $parameter ? 'true' : 'false';
+                case "integer":
+                    return $parameter = $parameter + 0;
+                case "NULL":
+                    return $parameter = 'NULL';
+                case "double":
+                    return $parameter = sprintf('%F', $parameter);
+                case "string":
+                    return $parameter = "'" . addcslashes($parameter, "'") . "'";
+                case 'object':
+                    if (method_exists($parameter, '__toString'))
+                    {
+                        return $parameter = "'" . addcslashes((string)$parameter, "'") . "'";
+                    }
+            }
+
+            return $parameter = "[UNRESOLVED]";
+        });
+
+        reset($parameters);
+        if (!is_int(key($parameters)))
+        {
+            return \Spiral\interpolate($query, $parameters, '', '');
+        }
+
+        foreach ($parameters as $parameter)
+        {
+            $query = preg_replace('/\?/', $parameter, $query, 1);
+        }
+
+        return $query;
     }
 }

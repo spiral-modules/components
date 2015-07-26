@@ -6,16 +6,16 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Selector;
+namespace Spiral\ORM\Selector;
 
-use Spiral\Components\DBAL\Builders\Common\AbstractSelectQuery;
+use Spiral\Database\Builders\BaseSelectQuery;
 
 class WhereDecorator
 {
     /**
      * Query instance to accept all where/onWhere/having requests.
      *
-     * @var AbstractSelectQuery
+     * @var BaseSelectQuery
      */
     protected $query = null;
 
@@ -37,11 +37,11 @@ class WhereDecorator
     /**
      * WhereDecorator used to trick user functions and route where() calls to specified destination.
      *
-     * @param AbstractSelectQuery $query
-     * @param string              $target
-     * @param string              $alias
+     * @param BaseSelectQuery $query
+     * @param string          $target
+     * @param string          $alias
      */
-    public function __construct(AbstractSelectQuery $query, $target = 'where', $alias = '')
+    public function __construct(BaseSelectQuery $query, $target = 'where', $alias = '')
     {
         $this->query = $query;
         $this->target = $target;

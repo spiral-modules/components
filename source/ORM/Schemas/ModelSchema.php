@@ -6,31 +6,30 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas;
+namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Components\DBAL\SqlFragmentInterface;
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORMAccessor;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\SchemaBuilder;
-use Spiral\Core\Traits;
-use Spiral\Support\Models\DataEntity;
-use Spiral\Support\Models\Schemas\DataEntitySchema;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\SqlFragmentInterface;
+use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Models\Schemas\EntitySchema;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORMAccessor;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\SchemaBuilder;
 
-class ModelSchema extends DataEntitySchema
+class ModelSchema extends EntitySchema
 {
     /**
      * Logging.
      */
-    use Traits\LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Base model class.
      */
-    const BASE_CLASS = SchemaBuilder::ACTIVE_RECORD;
+    const BASE_CLASS = ActiveRecord::class;
 
     /**
      * ActiveRecord model class name.
@@ -180,7 +179,7 @@ class ModelSchema extends DataEntitySchema
             return null;
         }
 
-        if ($merge && ($this->reflection->getParentClass()->getName() != SchemaBuilder::ACTIVE_RECORD))
+        if ($merge && ($this->reflection->getParentClass()->getName() != ActiveRecord::class))
         {
             $parentClass = $this->reflection->getParentClass()->getName();
             if (is_array($value))
@@ -299,7 +298,7 @@ class ModelSchema extends DataEntitySchema
             {
                 if (!array_key_exists($field, $mutators[$mutator]))
                 {
-                    $mutators[$mutator][$field] = $filter;
+                    $mutators[$mutator][$field] = $this->builder->processAlias($filter);
                 }
             }
         }
@@ -500,11 +499,6 @@ class ModelSchema extends DataEntitySchema
         {
             $setter = $this->getSetters()[$name];
 
-            if (is_string($setter) && isset(ActiveRecord::$mutatorAliases[$setter]))
-            {
-                $setter = DataEntity::$mutatorAliases[$setter];
-            }
-
             //We have to pass default value thought accessor
             return call_user_func($setter, $defaultValue);
         }
@@ -594,7 +588,7 @@ class ModelSchema extends DataEntitySchema
     {
         if (isset($this->relations[$name]))
         {
-            self::logger()->warning(
+            $this->logger()->warning(
                 "Unable to create relation '{class}'.'{name}', connection already exists.",
                 [
                     'name'  => $name,

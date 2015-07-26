@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas\Relations;
+namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\Schemas\RelationSchema;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\Schemas\RelationSchema;
 
 class HasOneSchema extends RelationSchema
 {

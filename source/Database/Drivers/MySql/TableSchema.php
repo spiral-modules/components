@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\Schemas\AbstractIndexSchema;
-use Spiral\Components\DBAL\Schemas\AbstractReferenceSchema;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractIndexSchema;
+use Spiral\Database\Schemas\AbstractReferenceSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
 
 class TableSchema extends AbstractTableSchema
 {
@@ -49,7 +49,9 @@ class TableSchema extends AbstractTableSchema
      **/
     protected function loadColumns()
     {
-        $query = interpolate("SHOW FULL COLUMNS FROM {table}", ['table' => $this->getName(true)]);
+        $query = \Spiral\interpolate(
+            "SHOW FULL COLUMNS FROM {table}", ['table' => $this->getName(true)]
+        );
 
         foreach ($this->driver->query($query)->bind(1, $columnName) as $column)
         {
@@ -64,7 +66,7 @@ class TableSchema extends AbstractTableSchema
     protected function loadIndexes()
     {
         $indexes = [];
-        $query = interpolate("SHOW INDEXES FROM {table}", ['table' => $this->getName(true)]);
+        $query = \Spiral\interpolate("SHOW INDEXES FROM {table}", ['table' => $this->getName(true)]);
         foreach ($this->driver->query($query) as $index)
         {
             if ($index['Key_name'] == 'PRIMARY')
@@ -122,7 +124,7 @@ class TableSchema extends AbstractTableSchema
 
         //Additional table options
         $options = "ENGINE = {engine}";
-        $statement = $statement . ' ' . interpolate($options, ['engine' => $this->engine]);
+        $statement = $statement . ' ' . \Spiral\interpolate($options, ['engine' => $this->engine]);
 
         //Executing
         $execute && $this->driver->statement($statement);
@@ -147,7 +149,7 @@ class TableSchema extends AbstractTableSchema
      */
     protected function doColumnChange(AbstractColumnSchema $column, AbstractColumnSchema $dbColumn)
     {
-        $query = interpolate("ALTER TABLE {table} CHANGE {column} {statement}", [
+        $query = \Spiral\interpolate("ALTER TABLE {table} CHANGE {column} {statement}", [
             'table'     => $this->getName(true),
             'column'    => $dbColumn->getName(true),
             'statement' => $column->sqlStatement()
@@ -174,7 +176,7 @@ class TableSchema extends AbstractTableSchema
      */
     protected function doIndexChange(AbstractIndexSchema $index, AbstractIndexSchema $dbIndex)
     {
-        $query = interpolate("ALTER TABLE {table} DROP INDEX {original}, ADD {statement}", [
+        $query = \Spiral\interpolate("ALTER TABLE {table} DROP INDEX {original}, ADD {statement}", [
             'table'     => $this->getName(true),
             'original'  => $dbIndex->getName(true),
             'statement' => $index->sqlStatement(false)

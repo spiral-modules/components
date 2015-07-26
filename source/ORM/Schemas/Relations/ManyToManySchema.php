@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas\Relations;
+namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\Schemas\RelationSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\Schemas\RelationSchema;
 
 class ManyToManySchema extends RelationSchema
 {
@@ -38,10 +38,10 @@ class ManyToManySchema extends RelationSchema
         ActiveRecord::THOUGHT_OUTER_KEY => '{outer:roleName}_{definition:OUTER_KEY}',
         ActiveRecord::CONSTRAINT        => true,
         ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
-        ActiveRecord::CREATE_PIVOT  => true,
-        ActiveRecord::PIVOT_COLUMNS => [],
-        ActiveRecord::WHERE_PIVOT   => [],
-        ActiveRecord::WHERE         => []
+        ActiveRecord::CREATE_PIVOT      => true,
+        ActiveRecord::PIVOT_COLUMNS     => [],
+        ActiveRecord::WHERE_PIVOT       => [],
+        ActiveRecord::WHERE             => []
     ];
 
     /**

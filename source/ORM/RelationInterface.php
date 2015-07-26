@@ -6,9 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
-
-use Spiral\Support\Models\DataEntity;
+namespace Spiral\ORM;
 
 interface RelationInterface
 {
@@ -50,7 +48,7 @@ interface RelationInterface
      * Get relation data (data should be automatically loaded if not pre-loaded already). Result
      * can vary based on relation type and usually represent one model or array of models.
      *
-     * @return array|null|DataEntity|DataEntity[]
+     * @return mixed
      */
     public function getInstance();
 

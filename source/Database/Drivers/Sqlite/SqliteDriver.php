@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Sqlite;
+namespace Spiral\Database\Drivers\Sqlite;
 
-use Spiral\Components\DBAL\Driver;
-use Spiral\Core\Container;
+use Spiral\Core\ContainerInterface;
+use Spiral\Database\Driver;
 
 class SqliteDriver extends Driver
 {
@@ -56,15 +56,15 @@ class SqliteDriver extends Driver
     const TABLE_EXISTS_QUERY = "SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?";
 
     /**
-     * Driver instances responsible for all database low level operations which can be DBMS
-     * specific - such as connection preparation, custom table/column/index/reference schemas and etc.
+     * Driver instances responsible for all database low level operations which can be DBMS specific
+     * - such as connection preparation, custom table/column/index/reference schemas and etc.
      *
-     * @param array     $config
-     * @param Container $container
+     * @param ContainerInterface $container
+     * @param array              $config
      */
-    public function __construct(array $config = [], Container $container)
+    public function __construct(ContainerInterface $container, array $config)
     {
-        parent::__construct($config, $container);
+        parent::__construct($container, $config);
 
         //Removing "sqlite:"
         $this->databaseName = substr($this->config['connection'], 7);
@@ -117,7 +117,7 @@ class SqliteDriver extends Driver
      */
     public function isolationLevel($level)
     {
-        self::logger()->error(
+        $this->logger()->error(
             "Transaction isolation level is not fully supported by SQLite ({level}).",
             compact('level')
         );

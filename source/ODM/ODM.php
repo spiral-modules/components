@@ -6,25 +6,28 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM;
+namespace Spiral\ODM;
 
-use Spiral\Core\Traits;
+use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\ContainerInterface;
 use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\Container;
-use Spiral\Core\SpiralException;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Debug\Traits\BenchmarkTrait;
+use Spiral\Events\Traits\EventsTrait;
+use Spiral\Core\Singleton;
 
-class ODM extends Component implements Container\InjectionManagerInterface
+class ODM extends Singleton implements InjectorInterface
 {
     /**
      * Will provide us helper method getInstance().
      */
-    use Traits\SingletonTrait, Traits\ConfigurableTrait, Traits\EventsTrait;
+    use ConfigurableTrait, EventsTrait, BenchmarkTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
-    const SINGLETON = __CLASS__;
+    const SINGLETON = self::class;
 
     /**
      * Core component.
@@ -37,7 +40,7 @@ class ODM extends Component implements Container\InjectionManagerInterface
      * Container instance.
      *
      * @invisible
-     * @var Container
+     * @var ContainerInterface
      */
     protected $container = null;
 
@@ -60,17 +63,16 @@ class ODM extends Component implements Container\InjectionManagerInterface
      * ODM component instance.
      *
      * @param ConfiguratorInterface $configurator
-     * @param HippocampusInterface $runtime
-     * @param Container             $container
-     * @throws SpiralException
+     * @param HippocampusInterface  $runtime
+     * @param ContainerInterface    $container
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         HippocampusInterface $runtime,
-        Container $container
+        ContainerInterface $container
     )
     {
-        $this->config = $configurator->getConfig('odm');
+        $this->config = $configurator->getConfig($this);
 
         $this->runtime = $runtime;
         $this->container = $container;
@@ -110,39 +112,15 @@ class ODM extends Component implements Container\InjectionManagerInterface
             $config = $this->config['databases'][$database];
         }
 
-        benchmark('odm::database', $database);
-
+        $this->benchmark('database', $database);
         $this->databases[$database] = $this->container->get(MongoDatabase::class, [
             'name'   => $database,
             'config' => $config,
             'odm'    => $this
-        ], null, true);
-
-        benchmark('odm::database', $database);
+        ]);
+        $this->benchmark('database', $database);
 
         return $this->databases[$database];
-    }
-
-    /**
-     * InjectionManager will receive requested class or interface reflection and reflection linked
-     * to parameter in constructor or method used to declare dependency.
-     *
-     * This method can return pre-defined instance or create new one based on requested class, parameter
-     * reflection can be used to dynamic class constructing, for example it can define database name
-     * or config section should be used to construct requested instance.
-     *
-     * @param \ReflectionClass     $class
-     * @param \ReflectionParameter $parameter
-     * @param Container            $container
-     * @return mixed
-     */
-    public function resolveInjection(
-        \ReflectionClass $class,
-        \ReflectionParameter $parameter,
-        Container $container
-    )
-    {
-        return $this->db($parameter->getName());
     }
 
     /**
@@ -174,9 +152,7 @@ class ODM extends Component implements Container\InjectionManagerInterface
      */
     public function schemaBuilder()
     {
-        return SchemaBuilder::make([
-            'config' => $this->config
-        ], $this->container);
+        return $this->container->get(SchemaBuilder::class, ['config' => $this->config]);
     }
 
     /**
@@ -192,9 +168,9 @@ class ODM extends Component implements Container\InjectionManagerInterface
         //Create all required indexes
         $builder->createIndexes($this);
 
-        $this->schema = $this->event('schema', $builder->normalizeSchema());
+        $this->schema = $this->fire('schema', $builder->normalizeSchema());
 
-        //We have to flush schema cache after schema udpate, just in case
+        //We have to flush schema cache after schema update, just in case
         Document::clearSchemaCache();
 
         //Saving

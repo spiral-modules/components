@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Builders;
+namespace Spiral\Database\Builders;
 
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\Parameter;
-use Spiral\Components\DBAL\QueryBuilder;
-use Spiral\Components\DBAL\QueryCompiler;
+use Spiral\Database\Database;
+use Spiral\Database\Parameter;
+use Spiral\Database\QueryBuilder;
+use Spiral\Database\QueryCompiler;
 
 class InsertQuery extends QueryBuilder
 {

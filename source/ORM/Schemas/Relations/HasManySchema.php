@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas\Relations;
+namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\Components\ORM\ActiveRecord;
+use Spiral\ORM\ActiveRecord;
 
 class HasManySchema extends HasOneSchema
 {
@@ -30,6 +30,6 @@ class HasManySchema extends HasOneSchema
         ActiveRecord::CONSTRAINT        => true,
         ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
         ActiveRecord::NULLABLE          => true,
-        ActiveRecord::WHERE => []
+        ActiveRecord::WHERE             => []
     ];
 }

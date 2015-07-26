@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\SqlFragment;
-use Spiral\Support\Models\Accessors\Timestamp;
+use Spiral\Database\DatabaseManager;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\SqlFragment;
 
 class ColumnSchema extends AbstractColumnSchema
 {
@@ -225,7 +225,13 @@ class ColumnSchema extends AbstractColumnSchema
     {
         if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue))
         {
-            return Timestamp::castTimestamp($this->defaultValue, 'UTC');
+            if (is_numeric($this->defaultValue))
+            {
+                //Nothing to do
+                return (int)$this->defaultValue;
+            }
+
+            return (new self($this->defaultValue, null, DatabaseManager::DEFAULT_TIMEZONE))->getTimestamp();
         }
 
         return parent::prepareDefault();
@@ -244,7 +250,7 @@ class ColumnSchema extends AbstractColumnSchema
             //Flushing default value for forbidden types
             $this->defaultValue = null;
 
-            self::logger()->warning("Default value is not allowed for MySQL type '{type}'.", [
+            $this->logger()->warning("Default value is not allowed for MySQL type '{type}'.", [
                 'type' => $this->type
             ]);
         }

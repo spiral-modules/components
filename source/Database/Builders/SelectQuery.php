@@ -6,14 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Builders;
+namespace Spiral\Database\Builders;
 
-use Spiral\Components\DBAL\Builders\Common\AbstractSelectQuery;
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\QueryBuilder;
-use Spiral\Components\DBAL\QueryCompiler;
+use Spiral\Database\Database;
+use Spiral\Database\QueryBuilder;
+use Spiral\Database\QueryCompiler;
 
-class SelectQuery extends AbstractSelectQuery
+class SelectQuery extends BaseSelectQuery
 {
     /**
      * Array of table names data should be fetched from. This list may include aliases (AS) construction,

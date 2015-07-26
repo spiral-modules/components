@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Schemas;
+namespace Spiral\Database\Schemas;
 
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\SqlFragment;
-use Spiral\Components\DBAL\SqlFragmentInterface;
-use Spiral\Core\Traits;
+use Spiral\Core\Component;
+use Spiral\Database\Database;
+use Spiral\Database\SqlFragment;
+use Spiral\Database\SqlFragmentInterface;
 
 /**
  * @method static AbstractColumnSchema make(array $parameters = []);
@@ -43,7 +43,7 @@ abstract class AbstractColumnSchema extends Component
     /**
      * Logging.
      */
-    use Traits\LoggerTrait;
+    use Component\LoggerTrait;
 
     /**
      * Direct mapping from base abstract type to database internal type with specified data options,
@@ -115,8 +115,8 @@ abstract class AbstractColumnSchema extends Component
         'bigint'         => 'bigInteger',
         'incremental'    => 'primary',
         'bigIncremental' => 'bigPrimary',
-        'bool' => 'boolean',
-        'blob' => 'binary'
+        'bool'           => 'boolean',
+        'blob'           => 'binary'
     ];
 
     /**
@@ -752,7 +752,7 @@ abstract class AbstractColumnSchema extends Component
             }
         }
 
-        self::logger()->debug("Column '{name}' has changed attributes: {difference}.", [
+        $this->logger()->debug("Column '{name}' has changed attributes: {difference}.", [
             'name'       => $this->name,
             'difference' => join(', ', $difference)
         ]);

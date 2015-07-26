@@ -11,17 +11,17 @@ namespace Spiral\Components\Storage\Servers;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Spiral\Components\Cache\CacheFacade;
-use Spiral\Components\Files\FileManager;
-use Spiral\Components\Http\Uri;
-use Spiral\Components\Storage\StorageContainer;
-use Spiral\Components\Storage\StorageException;
-use Spiral\Components\Storage\StorageServer;
-use Spiral\Core\Traits\LoggerTrait;
+use Psr\Http\Message\UriInterface;
+use Spiral\Cache\StoreInterface;
+use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Files\FilesInterface;
+use Spiral\Storage\BucketInterface;
+use Spiral\Storage\StorageException;
+use Spiral\Storage\StorageServer;
 
 class RackspaceServer extends StorageServer
 {
@@ -49,12 +49,12 @@ class RackspaceServer extends StorageServer
     ];
 
     /**
-     * Cache component to remember connection.
+     * Cache store to remember connection.
      *
      * @invisible
-     * @var CacheFacade
+     * @var StoreInterface
      */
-    protected $cache = null;
+    protected $store = null;
 
     /**
      * Guzzle client.
@@ -81,19 +81,26 @@ class RackspaceServer extends StorageServer
      * Every server represent one virtual storage which can be either local, remote or cloud based.
      * Every server should support basic set of low-level operations (create, move, copy and etc).
      *
-     * @param FileManager  $file    File component.
-     * @param array        $options Storage connection options.
-     * @param CacheFacade $cache   CacheManager to remember connection credentials across sessions.
+     * @param FilesInterface $files   File component.
+     * @param array          $options Storage connection options.
+     * @param StoreInterface $store   StoreInterface to remember connection credentials across sessions.
      */
-    public function __construct(FileManager $file, array $options, CacheFacade $cache = null)
+    public function __construct(FilesInterface $files, array $options, StoreInterface $store = null)
     {
-        parent::__construct($file, $options);
-        $this->cache = $cache;
+        parent::__construct($files, $options);
+
+        if (empty($store))
+        {
+            //This will work only with global container set
+            $store = self::getContainer()->get('Spiral\Cache\StoreInterface');
+        }
+
+        $this->store = $store;
 
         if ($this->options['cache'])
         {
-            $this->authToken = $this->cache->get($this->options['username'] . '@rackspace-token');
-            $this->regions = $this->cache->get($this->options['username'] . '@rackspace-regions');
+            $this->authToken = $this->store->get($this->options['username'] . '@rackspace-token');
+            $this->regions = $this->store->get($this->options['username'] . '@rackspace-regions');
         }
 
         //Some options can be passed directly for guzzle client
@@ -105,15 +112,15 @@ class RackspaceServer extends StorageServer
      * Check if given object (name) exists in specified container. Method should never fail if file
      * not exists and will return bool in any condition.
      *
-     * @param StorageContainer $container Container instance associated with specific server.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance associated with specific server.
+     * @param string          $name   Storage object name.
      * @return bool|ResponseInterface
      */
-    public function exists(StorageContainer $container, $name)
+    public function exists(BucketInterface $bucket, $name)
     {
         try
         {
-            $response = $this->client->send($this->buildRequest('HEAD', $container, $name));
+            $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
         }
         catch (ClientException $exception)
         {
@@ -126,7 +133,7 @@ class RackspaceServer extends StorageServer
             {
                 $this->reconnect();
 
-                return $this->exists($container, $name);
+                return $this->exists($bucket, $name);
             }
 
             //Some unexpected error
@@ -144,13 +151,13 @@ class RackspaceServer extends StorageServer
     /**
      * Retrieve object size in bytes, should return false if object does not exists.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return int|bool
      */
-    public function getSize(StorageContainer $container, $name)
+    public function size(BucketInterface $bucket, $name)
     {
-        if (empty($response = $this->exists($container, $name)))
+        if (empty($response = $this->exists($bucket, $name)))
         {
             return false;
         }
@@ -162,12 +169,12 @@ class RackspaceServer extends StorageServer
      * Upload storage object using given filename or stream. Method can return false in case of failed
      * upload or thrown custom exception if needed.
      *
-     * @param StorageContainer       $container Container instance.
-     * @param string                 $name      Given storage object name.
-     * @param string|StreamInterface $origin    Local filename or stream to use for creation.
+     * @param BucketInterface        $bucket Bucket instance.
+     * @param string                 $name   Given storage object name.
+     * @param string|StreamInterface $origin Local filename or stream to use for creation.
      * @return bool
      */
-    public function put(StorageContainer $container, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $origin)
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name)))
         {
@@ -178,7 +185,7 @@ class RackspaceServer extends StorageServer
         {
             $request = $this->buildRequest(
                 'PUT',
-                $container,
+                $bucket,
                 $name,
                 [
                     'Content-Type' => $mimetype,
@@ -194,7 +201,7 @@ class RackspaceServer extends StorageServer
             {
                 $this->reconnect();
 
-                return $this->put($container, $name, $origin);
+                return $this->put($bucket, $name, $origin);
             }
 
             //Some unexpected error
@@ -210,15 +217,15 @@ class RackspaceServer extends StorageServer
      *
      * Method should return false or thrown an exception if stream can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return StreamInterface|false
      */
-    public function getStream(StorageContainer $container, $name)
+    public function allocateStream(BucketInterface $bucket, $name)
     {
         try
         {
-            $response = $this->client->send($this->buildRequest('GET', $container, $name));
+            $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
         }
         catch (ClientException $exception)
         {
@@ -226,7 +233,7 @@ class RackspaceServer extends StorageServer
             {
                 $this->reconnect();
 
-                return $this->getStream($container, $name);
+                return $this->allocateStream($bucket, $name);
             }
 
             if ($exception->getCode() != 404)
@@ -241,67 +248,24 @@ class RackspaceServer extends StorageServer
     }
 
     /**
-     * Rename storage object without changing it's container. This operation does not require
-     * object recreation or download and can be performed on remote server.
-     *
-     * Method should return false or thrown an exception if object can not be renamed.
-     *
-     * @param StorageContainer $container Container instance.
-     * @param string           $oldname   Storage object name.
-     * @param string           $newname   New storage object name.
-     * @return bool
-     */
-    public function rename(StorageContainer $container, $oldname, $newname)
-    {
-        try
-        {
-            $this->client->send($this->buildRequest(
-                'PUT',
-                $container,
-                $newname,
-                [
-                    'X-Copy-From'    => '/' . $container->options['container'] . '/' . rawurlencode($oldname),
-                    'Content-Length' => 0
-                ]
-            ));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
-                $this->reconnect();
-
-                return $this->rename($container, $oldname, $newname);
-            }
-
-            throw $exception;
-        }
-
-        //Deleting old file
-        $this->delete($container, $oldname);
-
-        return true;
-    }
-
-    /**
      * Delete storage object from specified container. Method should not fail if object does not
      * exists.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      */
-    public function delete(StorageContainer $container, $name)
+    public function delete(BucketInterface $bucket, $name)
     {
         try
         {
-            $this->client->send($this->buildRequest('DELETE', $container, $name));
+            $this->client->send($this->buildRequest('DELETE', $bucket, $name));
         }
         catch (ClientException $exception)
         {
             if ($exception->getCode() == 401)
             {
                 $this->reconnect();
-                $this->delete($container, $name);
+                $this->delete($bucket, $name);
             }
             elseif ($exception->getCode() != 404)
             {
@@ -311,36 +275,26 @@ class RackspaceServer extends StorageServer
     }
 
     /**
-     * Copy object to another internal (under same server) container, this operation may not
-     * require file download and can be performed remotely.
+     * Rename storage object without changing it's container. This operation does not require
+     * object recreation or download and can be performed on remote server.
      *
-     * Method should return false or thrown an exception if object can not be copied.
+     * Method should return false or thrown an exception if object can not be renamed.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket  Bucket instance.
+     * @param string          $oldname Storage object name.
+     * @param string          $newname New storage object name.
      * @return bool
      */
-    public function copy(StorageContainer $container, StorageContainer $destination, $name)
+    public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        if ($container->options['region'] != $destination->options['region'])
-        {
-            self::logger()->warning(
-                "Copying between regions are not allowed by Rackspace and performed using local buffer."
-            );
-
-            //Using local memory/disk as buffer
-            return parent::copy($container, $destination, $name);
-        }
-
         try
         {
             $this->client->send($this->buildRequest(
                 'PUT',
-                $destination,
-                $name,
+                $bucket,
+                $newname,
                 [
-                    'X-Copy-From'    => '/' . $container->options['container'] . '/' . rawurlencode($name),
+                    'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldname),
                     'Content-Length' => 0
                 ]
             ));
@@ -351,7 +305,60 @@ class RackspaceServer extends StorageServer
             {
                 $this->reconnect();
 
-                return $this->connect($container, $destination, $name);
+                return $this->rename($bucket, $oldname, $newname);
+            }
+
+            throw $exception;
+        }
+
+        //Deleting old file
+        $this->delete($bucket, $oldname);
+
+        return true;
+    }
+
+    /**
+     * Copy object to another internal (under same server) container, this operation may not
+     * require file download and can be performed remotely.
+     *
+     * Method should return false or thrown an exception if object can not be copied.
+     *
+     * @param BucketInterface $bucket      Bucket instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
+     * @return bool
+     */
+    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    {
+        if ($bucket->getOption('region') != $destination->getOption('region'))
+        {
+            $this->logger()->warning(
+                "Copying between regions are not allowed by Rackspace and performed using local buffer."
+            );
+
+            //Using local memory/disk as buffer
+            return parent::copy($bucket, $destination, $name);
+        }
+
+        try
+        {
+            $this->client->send($this->buildRequest(
+                'PUT',
+                $destination,
+                $name,
+                [
+                    'X-Copy-From'    => '/' . $bucket->getOPtion('container') . '/' . rawurlencode($name),
+                    'Content-Length' => 0
+                ]
+            ));
+        }
+        catch (ClientException $exception)
+        {
+            if ($exception->getCode() == 401)
+            {
+                $this->reconnect();
+
+                return $this->copy($bucket, $destination, $name);
             }
 
             throw $exception;
@@ -393,7 +400,7 @@ class RackspaceServer extends StorageServer
         try
         {
             /**
-             * @var Response $response
+             * @var ResponseInterface $response
              */
             $response = $this->client->send($request);
         }
@@ -431,13 +438,13 @@ class RackspaceServer extends StorageServer
 
         if ($this->options['cache'])
         {
-            $this->cache->set(
+            $this->store->set(
                 $this->options['username'] . '@rackspace-token',
                 $this->authToken,
                 self::CACHE_LIFETIME
             );
 
-            $this->cache->set(
+            $this->store->set(
                 $this->options['username'] . '@rackspace-regions',
                 $this->regions,
                 self::CACHE_LIFETIME
@@ -454,45 +461,47 @@ class RackspaceServer extends StorageServer
     {
         $this->authToken = null;
         $this->connect();
+        //Check connections status
+
     }
 
     /**
      * Create instance of UriInterface based on provided container instance and storage object name.
      * Region url will be automatically resolved and included to generated instance.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     * @return Uri
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
+     * @return UriInterface
      * @throws StorageException
      */
-    protected function buildUri(StorageContainer $container, $name)
+    protected function buildUri(BucketInterface $bucket, $name)
     {
-        if (empty($container->options['region']))
+        if (empty($bucket->getOption('region')))
         {
             throw new StorageException("Every rackspace container should have specified region.");
         }
 
-        $region = $container->options['region'];
+        $region = $bucket->getOption('region');
         if (!isset($this->regions[$region]))
         {
             throw new StorageException("'{$region}' region is not supported by Rackspace.");
         }
 
         return new Uri(
-            $this->regions[$region] . '/' . $container->options['container'] . '/' . rawurlencode($name)
+            $this->regions[$region] . '/' . $bucket->getOption('container') . '/' . rawurlencode($name)
         );
     }
 
     /**
      * Helper method used to create request with forced authorization token.
      *
-     * @param string           $method    Http method.
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     * @param array            $headers   Request headers.
+     * @param string          $method  Http method.
+     * @param BucketInterface $bucket  Bucket instance.
+     * @param string          $name    Storage object name.
+     * @param array           $headers Request headers.
      * @return RequestInterface
      */
-    protected function buildRequest($method, StorageContainer $container, $name, array $headers = [])
+    protected function buildRequest($method, BucketInterface $bucket, $name, array $headers = [])
     {
         //Adding auth headers
         $headers += [
@@ -500,6 +509,6 @@ class RackspaceServer extends StorageServer
             'Date'         => gmdate('D, d M Y H:i:s T')
         ];
 
-        return new Request($method, $this->buildUri($container, $name), $headers);
+        return new Request($method, $this->buildUri($bucket, $name), $headers);
     }
 }

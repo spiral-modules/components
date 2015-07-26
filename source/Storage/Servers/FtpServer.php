@@ -9,10 +9,10 @@
 namespace Spiral\Components\Storage\Servers;
 
 use Psr\Http\Message\StreamInterface;
-use Spiral\Components\Files\FileManager;
-use Spiral\Components\Storage\StorageContainer;
-use Spiral\Components\Storage\StorageException;
-use Spiral\Components\Storage\StorageServer;
+use Spiral\Files\FilesInterface;
+use Spiral\Storage\BucketInterface;
+use Spiral\Storage\StorageException;
+use Spiral\Storage\StorageServer;
 
 class FtpServer extends StorageServer
 {
@@ -42,12 +42,13 @@ class FtpServer extends StorageServer
      * Every server represent one virtual storage which can be either local, remote or cloud based.
      * Every server should support basic set of low-level operations (create, move, copy and etc).
      *
-     * @param FileManager $file    File component.
-     * @param array       $options Storage connection options.
+     * @param FilesInterface $files   File component.
+     * @param array          $options Storage connection options.
+     * @throws StorageException
      */
-    public function __construct(FileManager $file, array $options)
+    public function __construct(FilesInterface $files, array $options)
     {
-        parent::__construct($file, $options);
+        parent::__construct($files, $options);
 
         if (!extension_loaded('ftp'))
         {
@@ -63,25 +64,25 @@ class FtpServer extends StorageServer
      * Check if given object (name) exists in specified container. Method should never fail if file
      * not exists and will return bool in any condition.
      *
-     * @param StorageContainer $container Container instance associated with specific server.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance associated with specific server.
+     * @param string          $name   Storage object name.
      * @return bool
      */
-    public function exists(StorageContainer $container, $name)
+    public function exists(BucketInterface $bucket, $name)
     {
-        return ftp_size($this->connection, $this->getPath($container, $name)) != -1;
+        return ftp_size($this->connection, $this->getPath($bucket, $name)) != -1;
     }
 
     /**
      * Retrieve object size in bytes, should return false if object does not exists.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return int|bool
      */
-    public function getSize(StorageContainer $container, $name)
+    public function size(BucketInterface $bucket, $name)
     {
-        if (($size = ftp_size($this->connection, $this->getPath($container, $name))) != -1)
+        if (($size = ftp_size($this->connection, $this->getPath($bucket, $name))) != -1)
         {
             return $size;
         }
@@ -93,20 +94,20 @@ class FtpServer extends StorageServer
      * Upload storage object using given filename or stream. Method can return false in case of failed
      * upload or thrown custom exception if needed.
      *
-     * @param StorageContainer       $container Container instance.
-     * @param string                 $name      Given storage object name.
-     * @param string|StreamInterface $origin    Local filename or stream to use for creation.
+     * @param BucketInterface        $bucket Bucket instance.
+     * @param string                 $name   Given storage object name.
+     * @param string|StreamInterface $origin Local filename or stream to use for creation.
      * @return bool
      */
-    public function put(StorageContainer $container, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $origin)
     {
-        $location = $this->ensureLocation($container, $name);
+        $location = $this->ensureLocation($bucket, $name);
         if (!ftp_put($this->connection, $location, $this->castFilename($origin), FTP_BINARY))
         {
             return false;
         }
 
-        return $this->refreshPermissions($container, $name);
+        return $this->refreshPermissions($bucket, $name);
     }
 
     /**
@@ -116,21 +117,21 @@ class FtpServer extends StorageServer
      *
      * Method should return false or thrown an exception if local filename can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return string|bool
      */
-    public function allocateFilename(StorageContainer $container, $name)
+    public function allocateFilename(BucketInterface $bucket, $name)
     {
-        if (!$this->exists($container, $name))
+        if (!$this->exists($bucket, $name))
         {
             return false;
         }
 
         //File should be removed after processing
-        $tempFilename = $this->file->tempFilename($this->file->extension($name));
+        $tempFilename = $this->files->tempFilename($this->files->extension($name));
 
-        return ftp_get($this->connection, $tempFilename, $this->getPath($container, $name), FTP_BINARY)
+        return ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY)
             ? $tempFilename
             : false;
     }
@@ -141,13 +142,13 @@ class FtpServer extends StorageServer
      *
      * Method should return false or thrown an exception if stream can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return StreamInterface|false
      */
-    public function getStream(StorageContainer $container, $name)
+    public function allocateStream(BucketInterface $bucket, $name)
     {
-        if (!$filename = $this->allocateFilename($container, $name))
+        if (!$filename = $this->allocateFilename($bucket, $name))
         {
             return false;
         }
@@ -156,45 +157,45 @@ class FtpServer extends StorageServer
     }
 
     /**
+     * Delete storage object from specified container. Method should not fail if object does not
+     * exists.
+     *
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
+     */
+    public function delete(BucketInterface $bucket, $name)
+    {
+        if ($this->exists($bucket, $name))
+        {
+            ftp_delete($this->connection, $this->getPath($bucket, $name));
+        }
+    }
+
+    /**
      * Rename storage object without changing it's container. This operation does not require
      * object recreation or download and can be performed on remote server.
      *
      * Method should return false or thrown an exception if object can not be renamed.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $oldname   Storage object name.
-     * @param string           $newname   New storage object name.
+     * @param BucketInterface $bucket  Bucket instance.
+     * @param string          $oldname Storage object name.
+     * @param string          $newname New storage object name.
      * @return bool
      */
-    public function rename(StorageContainer $container, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        if (!$this->exists($container, $oldname))
+        if (!$this->exists($bucket, $oldname))
         {
             return false;
         }
 
-        $location = $this->ensureLocation($container, $newname);
-        if (!ftp_rename($this->connection, $this->getPath($container, $oldname), $location))
+        $location = $this->ensureLocation($bucket, $newname);
+        if (!ftp_rename($this->connection, $this->getPath($bucket, $oldname), $location))
         {
             return false;
         }
 
-        return $this->refreshPermissions($container, $newname);
-    }
-
-    /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     */
-    public function delete(StorageContainer $container, $name)
-    {
-        if ($this->exists($container, $name))
-        {
-            ftp_delete($this->connection, $this->getPath($container, $name));
-        }
+        return $this->refreshPermissions($bucket, $newname);
     }
 
     /**
@@ -203,25 +204,25 @@ class FtpServer extends StorageServer
      *
      * Method should return false or thrown an exception if object can not be replaced.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket      Bucket instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
      * @return bool
      */
-    public function replace(StorageContainer $container, StorageContainer $destination, $name)
+    public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        if (!$this->exists($container, $name))
+        if (!$this->exists($bucket, $name))
         {
             return false;
         }
 
-        $location = $this->ensureLocation($container, $name);
-        if (!ftp_rename($this->connection, $this->getPath($container, $name), $location))
+        $location = $this->ensureLocation($bucket, $name);
+        if (!ftp_rename($this->connection, $this->getPath($bucket, $name), $location))
         {
             return false;
         }
 
-        return $this->refreshPermissions($destination, $name);
+        return $this->refreshPermissions($bucket, $name);
     }
 
     /**
@@ -265,14 +266,14 @@ class FtpServer extends StorageServer
     /**
      * Ensure that target object directory exists and has right permissions.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return bool|string
      */
-    protected function ensureLocation(StorageContainer $container, $name)
+    protected function ensureLocation(BucketInterface $bucket, $name)
     {
-        $directory = dirname($this->getPath($container, $name));
-        $mode = !empty($container->options['mode']) ? $container->options['mode'] : FileManager::RUNTIME;
+        $directory = dirname($this->getPath($bucket, $name));
+        $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 
         try
         {
@@ -280,7 +281,7 @@ class FtpServer extends StorageServer
             {
                 ftp_chmod($this->connection, $mode | 0111, $directory);
 
-                return $this->getPath($container, $name);
+                return $this->getPath($bucket, $name);
             }
         }
         catch (\Exception $exception)
@@ -310,37 +311,35 @@ class FtpServer extends StorageServer
             }
         }
 
-        return $this->getPath($container, $name);
+        return $this->getPath($bucket, $name);
     }
 
     /**
      * Get full file location on server including homedir.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return string
      */
-    protected function getPath(StorageContainer $container, $name)
+    protected function getPath(BucketInterface $bucket, $name)
     {
-        return $this->file->normalizePath(
-            $this->options['home'] . '/' . $container->options['folder'] . $name
+        return $this->files->normalizePath(
+            $this->options['home'] . '/' . $bucket->getOption('folder') . $name
         );
     }
 
     /**
      * Refresh file permissions accordingly to container options.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return bool
      */
-    protected function refreshPermissions(StorageContainer $container, $name)
+    protected function refreshPermissions(BucketInterface $bucket, $name)
     {
-        $mode = !empty($container->options['mode'])
-            ? $container->options['mode']
-            : FileManager::RUNTIME;
+        $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 
-        return ftp_chmod($this->connection, $mode, $this->getPath($container, $name)) !== false;
+        return ftp_chmod($this->connection, $mode, $this->getPath($bucket, $name)) !== false;
     }
 
     /**

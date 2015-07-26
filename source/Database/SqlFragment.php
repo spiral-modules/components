@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Core\Traits;
+use Spiral\Database\SqlFragmentInterface;
 
 class SqlFragment implements SqlFragmentInterface
 {

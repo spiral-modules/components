@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas\Relations;
+namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\Schemas\MorphedRelationSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\Schemas\MorphedRelationSchema;
 
 class ManyToMorphedSchema extends MorphedRelationSchema
 {
@@ -27,7 +27,7 @@ class ManyToMorphedSchema extends MorphedRelationSchema
      * @var array
      */
     protected $defaultDefinition = [
-        ActiveRecord::MORPHED_ALIASES => [],
+        ActiveRecord::MORPHED_ALIASES   => [],
         ActiveRecord::PIVOT_TABLE       => '{name:singular}_map',
         ActiveRecord::INNER_KEY         => '{record:primaryKey}',
         ActiveRecord::OUTER_KEY         => '{outer:primaryKey}',
@@ -36,10 +36,10 @@ class ManyToMorphedSchema extends MorphedRelationSchema
         ActiveRecord::MORPH_KEY         => '{name:singular}_type',
         ActiveRecord::CONSTRAINT        => true,
         ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
-        ActiveRecord::CREATE_PIVOT    => true,
-        ActiveRecord::PIVOT_COLUMNS   => [],
-        ActiveRecord::WHERE_PIVOT     => [],
-        ActiveRecord::WHERE           => []
+        ActiveRecord::CREATE_PIVOT      => true,
+        ActiveRecord::PIVOT_COLUMNS     => [],
+        ActiveRecord::WHERE_PIVOT       => [],
+        ActiveRecord::WHERE             => []
     ];
 
     /**

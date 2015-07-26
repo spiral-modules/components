@@ -9,9 +9,9 @@
 namespace Spiral\Components\Storage\Servers;
 
 use Psr\Http\Message\StreamInterface;
-use Spiral\Components\Files\FileManager;
-use Spiral\Components\Storage\StorageContainer;
-use Spiral\Components\Storage\StorageServer;
+use Spiral\Files\FilesInterface;
+use Spiral\Storage\BucketInterface;
+use Spiral\Storage\StorageServer;
 
 class LocalServer extends StorageServer
 {
@@ -19,26 +19,26 @@ class LocalServer extends StorageServer
      * Check if given object (name) exists in specified container. Method should never fail if file
      * not exists and will return bool in any condition.
      *
-     * @param StorageContainer $container Container instance associated with specific server.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance associated with specific server.
+     * @param string          $name   Storage object name.
      * @return bool
      */
-    public function exists(StorageContainer $container, $name)
+    public function exists(BucketInterface $bucket, $name)
     {
-        return $this->file->exists($container->options['folder'] . $name);
+        return $this->files->exists($this->getPath($bucket, $name));
     }
 
     /**
      * Retrieve object size in bytes, should return false if object does not exists.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return int|bool
      */
-    public function getSize(StorageContainer $container, $name)
+    public function size(BucketInterface $bucket, $name)
     {
-        return $this->file->exists($container->options['folder'] . $name)
-            ? $this->file->size($container->options['folder'] . $name)
+        return $this->files->exists($this->getPath($bucket, $name))
+            ? $this->files->size($this->getPath($bucket, $name))
             : false;
     }
 
@@ -46,17 +46,17 @@ class LocalServer extends StorageServer
      * Upload storage object using given filename or stream. Method can return false in case of failed
      * upload or thrown custom exception if needed.
      *
-     * @param StorageContainer       $container Container instance.
-     * @param string                 $name      Given storage object name.
-     * @param string|StreamInterface $origin    Local filename or stream to use for creation.
+     * @param BucketInterface        $bucket Bucket instance.
+     * @param string                 $name   Given storage object name.
+     * @param string|StreamInterface $origin Local filename or stream to use for creation.
      * @return bool
      */
-    public function put(StorageContainer $container, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $origin)
     {
         return $this->internalCopy(
-            $container,
+            $bucket,
             $this->castFilename($origin),
-            $container->options['folder'] . $name
+            $this->getPath($bucket, $name)
         );
     }
 
@@ -67,14 +67,14 @@ class LocalServer extends StorageServer
      *
      * Method should return false or thrown an exception if local filename can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return string|bool
      */
-    public function allocateFilename(StorageContainer $container, $name)
+    public function allocateFilename(BucketInterface $bucket, $name)
     {
-        return $this->file->exists($container->options['folder'] . $name)
-            ? $container->options['folder'] . $name
+        return $this->files->exists($this->getPath($bucket, $name))
+            ? $this->getPath($bucket, $name)
             : false;
     }
 
@@ -84,19 +84,31 @@ class LocalServer extends StorageServer
      *
      * Method should return false or thrown an exception if stream can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return StreamInterface|false
      */
-    public function getStream(StorageContainer $container, $name)
+    public function allocateStream(BucketInterface $bucket, $name)
     {
-        if (!$this->exists($container, $name))
+        if (!$this->exists($bucket, $name))
         {
             return false;
         }
 
         //Getting readonly stream
-        return \GuzzleHttp\Psr7\stream_for(fopen($this->allocateFilename($container, $name), 'rb'));
+        return \GuzzleHttp\Psr7\stream_for(fopen($this->allocateFilename($bucket, $name), 'rb'));
+    }
+
+    /**
+     * Delete storage object from specified container. Method should not fail if object does not
+     * exists.
+     *
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
+     */
+    public function delete(BucketInterface $bucket, $name)
+    {
+        $this->files->delete($this->getPath($bucket, $name));
     }
 
     /**
@@ -105,30 +117,18 @@ class LocalServer extends StorageServer
      *
      * Method should return false or thrown an exception if object can not be renamed.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $oldname   Storage object name.
-     * @param string           $newname   New storage object name.
+     * @param BucketInterface $bucket  Bucket instance.
+     * @param string          $oldname Storage object name.
+     * @param string          $newname New storage object name.
      * @return bool
      */
-    public function rename(StorageContainer $container, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         return $this->internalMove(
-            $container,
-            $container->options['folder'] . $oldname,
-            $container->options['folder'] . $newname
+            $bucket,
+            $this->getPath($bucket, $oldname),
+            $this->getPath($bucket, $newname)
         );
-    }
-
-    /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     */
-    public function delete(StorageContainer $container, $name)
-    {
-        $this->file->delete($container->options['folder'] . $name);
     }
 
     /**
@@ -137,17 +137,17 @@ class LocalServer extends StorageServer
      *
      * Method should return false or thrown an exception if object can not be copied.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket      Bucket instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
      * @return bool
      */
-    public function copy(StorageContainer $container, StorageContainer $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
         return $this->internalCopy(
             $destination,
-            $container->options['folder'] . $name,
-            $destination->options['folder'] . $name
+            $this->getPath($bucket, $name),
+            $this->getPath($destination, $name)
         );
     }
 
@@ -157,69 +157,83 @@ class LocalServer extends StorageServer
      *
      * Method should return false or thrown an exception if object can not be replaced.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket      Bucket instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
      * @return bool
      */
-    public function replace(StorageContainer $container, StorageContainer $destination, $name)
+    public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
         return $this->internalMove(
             $destination,
-            $container->options['folder'] . $name,
-            $destination->options['folder'] . $name
+            $this->getPath($bucket, $name),
+            $this->getPath($destination, $name)
         );
     }
 
     /**
      * Move helper, ensure target directory existence, file permissions and etc.
      *
-     * @param StorageContainer $container   Destination container.
-     * @param string           $filename    Original filename.
-     * @param string           $destination Destination filename.
+     * @param BucketInterface $bucket      Bucket container.
+     * @param string          $filename    Original filename.
+     * @param string          $destination Destination filename.
      * @return bool
      */
-    protected function internalMove(StorageContainer $container, $filename, $destination)
+    protected function internalMove(BucketInterface $bucket, $filename, $destination)
     {
-        if (!$this->file->exists($filename))
+        if (!$this->files->exists($filename))
         {
             return false;
         }
 
-        $mode = !empty($container->options['mode']) ? $container->options['mode'] : FileManager::RUNTIME;
-        $this->file->ensureDirectory(dirname($destination), $mode);
+        $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
+        $this->files->ensureDirectory(dirname($destination), $mode);
 
-        if (!$this->file->move($filename, $destination))
+        if (!$this->files->move($filename, $destination))
         {
             return false;
         }
 
-        return $this->file->setPermissions($destination, $mode);
+        return $this->files->setPermissions($destination, $mode);
     }
 
     /**
      * Copy helper, ensure target directory existence, file permissions and etc.
      *
-     * @param StorageContainer $container   Destination container.
-     * @param string           $filename    Original filename.
-     * @param string           $destination Destination filename.
+     * @param BucketInterface $bucket      Bucket container.
+     * @param string          $filename    Original filename.
+     * @param string          $destination Destination filename.
      * @return bool
      */
-    protected function internalCopy(StorageContainer $container, $filename, $destination)
+    protected function internalCopy(BucketInterface $bucket, $filename, $destination)
     {
-        if (!$this->file->exists($filename))
+        if (!$this->files->exists($filename))
         {
             return false;
         }
 
-        $mode = !empty($container->options['mode']) ? $container->options['mode'] : FileManager::RUNTIME;
-        $this->file->ensureDirectory(dirname($destination), $mode);
+        $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
+        $this->files->ensureDirectory(dirname($destination), $mode);
 
-        if (!$this->file->copy($filename, $destination))
+        if (!$this->files->copy($filename, $destination))
         {
             return false;
         }
 
-        return $this->file->setPermissions($destination, $mode);
+        return $this->files->setPermissions($destination, $mode);
+    }
+
+    /**
+     * Get full file location on server including homedir.
+     *
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
+     * @return string
+     */
+    protected function getPath(BucketInterface $bucket, $name)
+    {
+        return $this->files->normalizePath(
+            $this->options['home'] . '/' . $bucket->getOption('folder') . $name
+        );
     }
 }

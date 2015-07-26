@@ -6,18 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Components\DBAL\Driver;
 use PDO;
+use Spiral\Database\Driver;
 
 class MySqlDriver extends Driver
 {
-    /**
-     * Get short name to use for driver query profiling.
-     */
-    const DRIVER_NAME = 'MySQL';
-
     /**
      * Class names should be used to create schema instances to describe specified driver table. Schema
      * realizations are driver specific and allows both schema reading and writing (migrations).

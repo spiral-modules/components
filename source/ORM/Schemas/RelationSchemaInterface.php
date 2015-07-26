@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas;
+namespace Spiral\ORM\Schemas;
 
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\SchemaBuilder;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\SchemaBuilder;
 
 interface RelationSchemaInterface
 {

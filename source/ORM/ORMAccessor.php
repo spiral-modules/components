@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
-use Spiral\Components\DBAL\Driver;
-use Spiral\Support\Models\AccessorInterface;
+use Spiral\Database\Driver;
+use Spiral\Models\AccessorInterface;
 
 interface ORMAccessor extends AccessorInterface
 {

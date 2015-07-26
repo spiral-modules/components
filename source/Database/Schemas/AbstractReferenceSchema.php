@@ -6,11 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Schemas;
+namespace Spiral\Database\Schemas;
 
-use Spiral\Core\Traits;
-
-abstract class AbstractReferenceSchema extends Component
+abstract class AbstractReferenceSchema
 {
     /**
      * Delete and update foreign key rules.

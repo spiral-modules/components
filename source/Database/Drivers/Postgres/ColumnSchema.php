@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\SqlFragment;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\SqlFragment;
 
 class ColumnSchema extends AbstractColumnSchema
 {
@@ -183,9 +183,7 @@ class ColumnSchema extends AbstractColumnSchema
 
         //Potential enum with manually created constraint (check in)
         if (
-            (
-                $this->type == 'character' || $this->type == 'character varying'
-            )
+            ($this->type == 'character' || $this->type == 'character varying')
             && $this->size
         )
         {

@@ -6,16 +6,20 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
-use Spiral\Support\Models\DataEntity;
+use Spiral\Core\Component;
 
-abstract class Relation implements RelationInterface, \Countable, \IteratorAggregate, \JsonSerializable
+abstract class Relation extends Component implements
+    RelationInterface,
+    \Countable,
+    \IteratorAggregate,
+    \JsonSerializable
 {
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_ONE;
+    const RELATION_TYPE = null;
 
     /**
      * Indication that relation represent multiple records.
@@ -143,7 +147,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      * Get relation data (data should be automatically loaded if not pre-loaded already). Result
      * can vary based on relation type and usually represent one model or array of models.
      *
-     * @return array|null|DataEntity|DataEntity[]
+     * @return mixed
      */
     public function getInstance()
     {

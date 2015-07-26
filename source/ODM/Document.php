@@ -6,13 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM;
+namespace Spiral\ODM;
 
-use Spiral\Components\I18n\Translator;
-use Spiral\Support\Models\AccessorInterface;
-use Spiral\Support\Models\DatabaseEntityInterface;
-use Spiral\Support\Models\DataEntity;
-use Spiral\Support\Validation\Validator;
+use Spiral\Models\AccessorInterface;
+use Spiral\Models\DatabaseEntityInterface;
+use Spiral\Models\DataEntity;
+use Spiral\Validation\ValidatorInterface;
 
 abstract class Document extends DataEntity implements CompositableInterface, DatabaseEntityInterface
 {
@@ -224,7 +223,14 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     public function __construct($data = [], $parent = null, $options = null, ODM $odm = null)
     {
         $this->parent = $parent;
-        $this->odm = !empty($odm) ? $odm : ODM::getInstance();
+
+        if (empty($odm))
+        {
+            //Will work only when global container is set!
+            $odm = ODM::getInstance(self::getContainer());
+        }
+
+        $this->odm = $odm;
 
         if (!isset(self::$schemaCache[$class = get_class($this)]))
         {
@@ -239,10 +245,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         if (!empty($this->schema[ODM::D_DEFAULTS]))
         {
             $this->fields = $data
-                ? array_replace_recursive(
-                    $this->schema[ODM::D_DEFAULTS],
-                    is_array($data) ? $data : []
-                )
+                ? array_replace_recursive($this->schema[ODM::D_DEFAULTS], is_array($data) ? $data : [])
                 : $this->schema[ODM::D_DEFAULTS];
         }
 
@@ -338,14 +341,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     {
         if (isset($this->schema[ODM::D_MUTATORS][$mutator][$field]))
         {
-            $mutator = $this->schema[ODM::D_MUTATORS][$mutator][$field];
-
-            if (is_string($mutator) && isset(self::$mutatorAliases[$mutator]))
-            {
-                return self::$mutatorAliases[$mutator];
-            }
-
-            return $mutator;
+            return $this->schema[ODM::D_MUTATORS][$mutator][$field];
         }
 
         return null;
@@ -479,7 +475,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
             $result[$field] = $value;
         }
 
-        return $this->event('publicFields', $result);
+        return $this->fire('publicFields', $result);
     }
 
     /**
@@ -783,7 +779,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
      * Validator instance associated with model, will be response for validations of validation errors.
      * Model related error localization should happen in model itself.
      *
-     * @return Validator
+     * @return ValidatorInterface
      */
     public function getValidator()
     {
@@ -793,10 +789,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
             return $this->validator->setData($this->fields);
         }
 
-        return $this->validator = Validator::make([
-            'data'      => $this->fields,
-            'validates' => $this->schema[ODM::D_VALIDATES]
-        ]);
+        return parent::getValidator($this->schema[ODM::D_VALIDATES]);
     }
 
     /**
@@ -827,41 +820,8 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Get all validation errors with applied localization using i18n component (if specified), any
-     * error message can be localized by using [[ ]] around it. Data will be automatically validated
-     * while calling this method (if not validated before).
-     *
-     * @param bool $reset Remove all model messages and reset validation, false by default.
-     * @return array
-     */
-    public function getErrors($reset = false)
-    {
-        $this->validate();
-        $errors = [];
-        foreach ($this->errors as $field => $error)
-        {
-            if (
-                is_string($error)
-                && substr($error, 0, 2) == Translator::I18N_PREFIX
-                && substr($error, -2) == Translator::I18N_POSTFIX
-            )
-            {
-                $error = $this->i18nMessage($error);
-            }
-
-            $errors[$field] = $error;
-        }
-
-        if ($reset)
-        {
-            $this->errors = [];
-        }
-
-        return $errors;
-    }
-
-    /**
-     * Get ODM collection associated with specified document.
+     * Get ODM collection associated with specified document. Method will not work without specifying
+     * ODM and without global container.
      *
      * @param ODM   $odm    ODM component, will be received from Container if not specified.
      * @param array $schema Forced document schema.
@@ -869,8 +829,16 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
      */
     public static function odmCollection(ODM $odm = null, array $schema = [])
     {
-        $odm = !empty($odm) ? $odm : ODM::getInstance();
-        $schema = !empty($schema) ? $schema : $odm->getSchema(get_called_class());
+        if (empty($odm))
+        {
+            //Will work only when global container is set!
+            $odm = ODM::getInstance(self::getContainer());
+        }
+
+        if (empty($schema))
+        {
+            $schema = $odm->getSchema(get_called_class());
+        }
 
         static::initialize();
 
@@ -912,25 +880,25 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
 
         if (!$this->isLoaded())
         {
-            $this->event('saving');
+            $this->fire('saving');
             unset($this->fields['_id']);
 
             static::odmCollection($this->odm, $this->schema)->insert(
                 $this->fields = $this->serializeData()
             );
 
-            $this->event('saved');
+            $this->fire('saved');
         }
         elseif ($this->solidState || $this->hasUpdates())
         {
-            $this->event('updating');
+            $this->fire('updating');
 
             static::odmCollection($this->odm, $this->schema)->update(
                 ['_id' => $this->primaryKey()],
                 $this->buildAtomics()
             );
 
-            $this->event('updated');
+            $this->fire('updated');
         }
 
         $this->flushUpdates();
@@ -953,13 +921,13 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
             );
         }
 
-        $this->event('deleting');
+        $this->fire('deleting');
         $this->primaryKey() && static::odmCollection($this->odm, $this->schema)->remove([
             '_id' => $this->primaryKey()
         ]);
 
         $this->fields = $this->schema[ODM::D_DEFAULTS];
-        $this->event('deleted');
+        $this->fire('deleted');
     }
 
     /**
@@ -979,7 +947,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
 
         //Forcing validation (empty set of fields is not valid set of fields)
         $class->validationRequired = true;
-        $class->setFields($fields)->event('created');
+        $class->setFields($fields)->fire('created');
 
         return $class;
     }

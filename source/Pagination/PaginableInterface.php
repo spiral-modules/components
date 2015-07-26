@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Support\Pagination;
+namespace Spiral\Pagination;
 
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -36,8 +36,10 @@ interface PaginableInterface extends \Countable
      *                                              store the current page number. "page" by default.
      * @param int                    $count         Forced count value, if 0 paginator will try to fetch
      *                                              count from associated object.
-     * @param ServerRequestInterface $request       Dispatcher request.
+     * @param ServerRequestInterface $request       Dispatcher request. You can skip this argument only
+     *                                              when global container is set.
      * @return mixed
+     * @throws PaginationException
      */
     public function paginate(
         $limit = 50,

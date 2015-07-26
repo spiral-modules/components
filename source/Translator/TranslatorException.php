@@ -6,9 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Translator;
+namespace Spiral\Translator;
 
-class TranslatorException extends \RuntimeException
+use Spiral\Core\ExceptionInterface;
+
+class TranslatorException extends \RuntimeException implements ExceptionInterface
 {
 
 }

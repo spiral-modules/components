@@ -6,11 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
-use Spiral\Core\Traits;
-
-class ModelIterator extends Component implements \Iterator, \Countable, \JsonSerializable
+class ModelIterator implements \Iterator, \Countable, \JsonSerializable
 {
     /**
      * ORM component used to create model instances.

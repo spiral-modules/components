@@ -9,11 +9,11 @@
 namespace Spiral\Components\Storage\Servers;
 
 use Psr\Http\Message\StreamInterface;
-use Spiral\Components\Files\FileManager;
-use Spiral\Components\ODM\MongoDatabase;
-use Spiral\Components\ODM\ODM;
-use Spiral\Components\Storage\StorageContainer;
-use Spiral\Components\Storage\StorageServer;
+use Spiral\Files\FilesInterface;
+use Spiral\ODM\MongoDatabase;
+use Spiral\ODM\ODM;
+use Spiral\Storage\BucketInterface;
+use Spiral\Storage\StorageServer;
 
 class GridfsServer extends StorageServer
 {
@@ -37,13 +37,13 @@ class GridfsServer extends StorageServer
      * Every server represent one virtual storage which can be either local, remote or cloud based.
      * Every server should support basic set of low-level operations (create, move, copy and etc).
      *
-     * @param FileManager $file    File component.
-     * @param array       $options Storage connection options.
-     * @param ODM         $odm     ODM manager is required to resolve MongoDatabase.
+     * @param FilesInterface $files   File component.
+     * @param array          $options Storage connection options.
+     * @param ODM            $odm     ODM manager is required to resolve MongoDatabase.
      */
-    public function __construct(FileManager $file, array $options, ODM $odm = null)
+    public function __construct(FilesInterface $files, array $options, ODM $odm = null)
     {
-        parent::__construct($file, $options);
+        parent::__construct($files, $options);
         $odm = $odm ?: ODM::getInstance();
 
         $this->database = $odm->db($this->options['database']);
@@ -53,13 +53,13 @@ class GridfsServer extends StorageServer
      * Check if given object (name) exists in specified container. Method should never fail if file
      * not exists and will return bool in any condition.
      *
-     * @param StorageContainer $container Container instance associated with specific server.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance associated with specific server.
+     * @param string          $name   Storage object name.
      * @return bool|\MongoGridFSFile
      */
-    public function exists(StorageContainer $container, $name)
+    public function exists(BucketInterface $bucket, $name)
     {
-        return $this->getGridFS($container)->findOne([
+        return $this->getGridFS($bucket)->findOne([
             'filename' => $name
         ]);
     }
@@ -67,13 +67,13 @@ class GridfsServer extends StorageServer
     /**
      * Retrieve object size in bytes, should return false if object does not exists.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return int|bool
      */
-    public function getSize(StorageContainer $container, $name)
+    public function size(BucketInterface $bucket, $name)
     {
-        if (!$file = $this->exists($container, $name))
+        if (!$file = $this->exists($bucket, $name))
         {
             return false;
         }
@@ -85,24 +85,22 @@ class GridfsServer extends StorageServer
      * Upload storage object using given filename or stream. Method can return false in case of failed
      * upload or thrown custom exception if needed.
      *
-     * @link https://github.com/mongodb/mongo-php-driver/blob/master/gridfs/gridfs.c#L690
-     * @link https://github.com/mongodb/mongo-php-driver/blob/master/gridfs/gridfs.c#L241
-     * @param StorageContainer       $container Container instance.
-     * @param string                 $name      Given storage object name.
-     * @param string|StreamInterface $origin    Local filename or stream to use for creation.
+     * @param BucketInterface        $bucket Bucket instance.
+     * @param string                 $name   Given storage object name.
+     * @param string|StreamInterface $origin Local filename or stream to use for creation.
      * @return bool
      */
-    public function put(StorageContainer $container, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $origin)
     {
         //We have to remove existed file first, this might not be super optimal operation.
         //Can be re-thinked
-        $this->delete($container, $name);
+        $this->delete($bucket, $name);
 
         /**
          * For some reason mongo driver i have locally don't want to read wrapped streams,
          * it either dies with "error setting up file" or hangs.
          *
-         * I wasn't able to debug cause of this error at this moment as i don't have Visual Studio
+         * I was not able to debug cause of this error at this moment as i don't have Visual Studio
          * at this PC.
          *
          * However, error caused by some code from this file. In a meantime i will write content to
@@ -110,16 +108,15 @@ class GridfsServer extends StorageServer
          *
          * @link https://github.com/mongodb/mongo-php-driver/blob/master/gridfs/gridfs.c
          */
-
-        $tempFilename = $this->file->tempFilename();
+        $tempFilename = $this->files->tempFilename();
         copy($this->castFilename($origin), $tempFilename);
 
-        if (!$this->getGridFS($container)->storeFile($tempFilename, ['filename' => $name]))
+        if (!$this->getGridFS($bucket)->storeFile($tempFilename, ['filename' => $name]))
         {
             return false;
         }
 
-        $this->file->delete($tempFilename);
+        $this->files->delete($tempFilename);
 
         return true;
     }
@@ -130,13 +127,13 @@ class GridfsServer extends StorageServer
      *
      * Method should return false or thrown an exception if stream can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return StreamInterface|false
      */
-    public function getStream(StorageContainer $container, $name)
+    public function allocateStream(BucketInterface $bucket, $name)
     {
-        if (!$file = $this->exists($container, $name))
+        if (!$file = $this->exists($bucket, $name))
         {
             return false;
         }
@@ -145,51 +142,47 @@ class GridfsServer extends StorageServer
     }
 
     /**
+     * Delete storage object from specified container. Method should not fail if object does not
+     * exists.
+     *
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
+     */
+    public function delete(BucketInterface $bucket, $name)
+    {
+        $this->getGridFS($bucket)->remove(['filename' => $name]);
+    }
+
+    /**
      * Rename storage object without changing it's container. This operation does not require
      * object recreation or download and can be performed on remote server.
      *
      * Method should return false or thrown an exception if object can not be renamed.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $oldname   Storage object name.
-     * @param string           $newname   New storage object name.
+     * @param BucketInterface $bucket  Bucket instance.
+     * @param string          $oldname Storage object name.
+     * @param string          $newname New storage object name.
      * @return bool
      */
-    public function rename(StorageContainer $container, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        $this->delete($container, $newname);
+        $this->delete($bucket, $newname);
 
-        return $this->getGridFS($container)->update(
-            [
-                'filename' => $oldname
-            ],
-            [
-                '$set' => ['filename' => $newname]
-            ]
+        return $this->getGridFS($bucket)->update(
+            ['filename' => $oldname],
+            ['$set' => ['filename' => $newname]]
         );
-    }
-
-    /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     */
-    public function delete(StorageContainer $container, $name)
-    {
-        $this->getGridFS($container)->remove(['filename' => $name]);
     }
 
     /**
      * Get valid gridfs collection associated with container.
      *
-     * @param StorageContainer $container
+     * @param BucketInterface $bucket Bucket instance.
      * @return \MongoGridFS
      */
-    protected function getGridFS(StorageContainer $container)
+    protected function getGridFS(BucketInterface $bucket)
     {
-        $gridFs = $this->database->getGridFS($container->options['collection']);
+        $gridFs = $this->database->getGridFS($bucket->getOption('collection'));
         $gridFs->ensureIndex(['filename' => 1]);
 
         return $gridFs;

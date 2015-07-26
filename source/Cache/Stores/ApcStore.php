@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Cache\Stores;
+namespace Spiral\Cache\Stores;
 
-use Spiral\Components\Cache\CacheFacade;
-use Spiral\Components\Cache\CacheStore;
+use Spiral\Cache\CacheManager;
+use Spiral\Cache\CacheStore;
 
 class ApcStore extends CacheStore
 {
@@ -42,9 +42,11 @@ class ApcStore extends CacheStore
      * Create a new cache store instance. Every instance should represent a single cache method.
      * Multiple stores can exist at the same time and be used in different parts of the application.
      *
-     * @param CacheFacade $cache CacheManager component.
+     * Logic of receiving configuration is reverted for controllable injections in spiral application.
+     *
+     * @param CacheManager $cache CacheFacade component.
      */
-    public function __construct(CacheFacade $cache)
+    public function __construct(CacheManager $cache)
     {
         parent::__construct($cache);
 

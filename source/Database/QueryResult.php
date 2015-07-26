@@ -6,12 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Core\Traits;
 use PDOStatement;
 
-class QueryResult extends Component implements \Countable, \Iterator, \JsonSerializable
+class QueryResult implements \Countable, \Iterator, \JsonSerializable
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
@@ -79,7 +78,10 @@ class QueryResult extends Component implements \Countable, \Iterator, \JsonSeria
      */
     public function queryString()
     {
-        return DatabaseManager::interpolateQuery($this->statement->queryString, $this->parameters);
+        return QueryCompiler::interpolate(
+            $this->statement->queryString,
+            $this->parameters
+        );
     }
 
     /**

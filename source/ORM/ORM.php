@@ -6,36 +6,71 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\DatabaseManager;
-use Spiral\Components\ORM\Exporters\DocumentationExporter;
-use Spiral\Components\ORM\Schemas\ModelSchema;
-use Spiral\Components\ORM\Schemas\RelationSchemaInterface;
-use Spiral\Components\ORM\Selector\LoaderInterface;
-use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\Container;
-use Spiral\Core\CoreInterface;
+use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Database\Database;
+use Spiral\Database\DatabaseManager;
+use Spiral\Events\Traits\EventsTrait;
+use Spiral\ORM\Schemas\ModelSchema;
+use Spiral\ORM\Schemas\RelationSchemaInterface;
+use Spiral\ORM\Selector\LoaderInterface;
+use Spiral\Core\Singleton;
 
-class ORM extends Component
+class ORM extends Singleton
 {
     /**
      * Required traits.
      */
-    use Traits\SingletonTrait, Traits\ConfigurableTrait, Traits\EventsTrait;
+    use ConfigurableTrait, EventsTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
-    const SINGLETON = __CLASS__;
+    const SINGLETON = self::class;
+
+    /**
+     * Normalized entity constants.
+     */
+    const E_ROLE_NAME   = 0;
+    const E_TABLE       = 1;
+    const E_DB          = 2;
+    const E_COLUMNS     = 3;
+    const E_HIDDEN      = 4;
+    const E_SECURED     = 5;
+    const E_FILLABLE    = 6;
+    const E_MUTATORS    = 7;
+    const E_VALIDATES   = 8;
+    const E_RELATIONS   = 9;
+    const E_PRIMARY_KEY = 10;
+
+    /**
+     * Normalized relation options.
+     */
+    const R_TYPE       = 0;
+    const R_TABLE      = 1;
+    const R_DEFINITION = 2;
+
+    /**
+     * Pivot table location in ActiveRecord data.
+     */
+    const PIVOT_DATA = '@pivot';
+
+    /**
+     * Container instance.
+     *
+     * @invisible
+     * @var ContainerInterface
+     */
+    protected $container = null;
 
     /**
      * Core component.
      *
-     * @var CoreInterface
+     * @var HippocampusInterface
      */
     protected $runtime = null;
 
@@ -45,14 +80,6 @@ class ORM extends Component
      * @var DatabaseManager
      */
     protected $dbal = null;
-
-    /**
-     * Container instance.
-     *
-     * @invisible
-     * @var Container
-     */
-    protected $container = null;
 
     /**
      * Loaded entities schema. Schema contains full description about model behaviours, relations,
@@ -76,22 +103,22 @@ class ORM extends Component
      * ORM component instance.
      *
      * @param ConfiguratorInterface $configurator
-     * @param HippocampusInterface $runtime
+     * @param ContainerInterface    $container
+     * @param HippocampusInterface  $runtime
      * @param DatabaseManager       $dbal
-     * @param Container             $container
      */
     public function __construct(
         ConfiguratorInterface $configurator,
+        ContainerInterface $container,
         HippocampusInterface $runtime,
-        DatabaseManager $dbal,
-        Container $container
+        DatabaseManager $dbal
     )
     {
-        $this->runtime = $runtime;
-        $this->dbal = $dbal;
-        $this->container = $container;
+        $this->config = $configurator->getConfig($this);
 
-        $this->config = $configurator->getConfig('orm');
+        $this->runtime = $runtime;
+        $this->container = $container;
+        $this->dbal = $dbal;
     }
 
     /**
@@ -183,17 +210,6 @@ class ORM extends Component
     }
 
     /**
-     * Get associated Container, can be used inside custom relations and loaders to load additional
-     * components.
-     *
-     * @return Container
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-    /**
      * Get schema for specified document class or collection.
      *
      * @param string $item   Document class or collection name (including database).
@@ -216,17 +232,43 @@ class ORM extends Component
     }
 
     /**
-     * Get ORM schema reader. Schema will detect all declared entities, their tables, columns,
-     * relationships and etc.
+     * Construct instance of ActiveRecord or receive it from cache (if enabled).
      *
-     * @return SchemaBuilder
+     * @param string $class
+     * @param array  $data
+     * @param bool   $cache
+     * @return ActiveRecord
      */
-    public function schemaBuilder()
+    public function construct($class, array $data = [], $cache = true)
     {
-        return SchemaBuilder::make([
-            'config' => $this->config,
-            'orm' => $this
-        ], $this->container);
+        if (!$this->config['entityCache']['enabled'] || !$cache)
+        {
+            //Entity cache is disabled
+            return new $class($data, !empty($data), $this);
+        }
+
+        //We have to find object criteria (will work for objects with primary key only)
+        $criteria = null;
+        if (
+            !empty($this->schema[$class][self::E_PRIMARY_KEY])
+            && !empty($data[$this->schema[$class][self::E_PRIMARY_KEY]])
+        )
+        {
+            $criteria = $class . '.' . $data[$this->schema[$class][self::E_PRIMARY_KEY]];
+        }
+
+        if (isset($this->entityCache[$criteria]))
+        {
+            //Retrieving reconfigured model from the cache
+            return $this->entityCache[$criteria]->setContext($data);
+        }
+
+        if (count($this->entityCache) > $this->config['entityCache']['maxSize'])
+        {
+            return new $class($data, !empty($data), $this);
+        }
+
+        return $this->entityCache[$criteria] = new $class($data, !empty($data), $this);
     }
 
     /**
@@ -237,7 +279,8 @@ class ORM extends Component
      * @param array        $definition
      * @param array        $data
      * @param bool         $loaded
-     * @return mixed
+     * @return RelationInterface
+     * @throws ORMException
      */
     public function relation($type, ActiveRecord $parent, $definition, $data = null, $loaded = false)
     {
@@ -302,48 +345,22 @@ class ORM extends Component
     }
 
     /**
-     * Construct instance of ActiveRecord or receive it from cache (if enabled).
+     * Get ORM schema reader. Schema will detect all declared entities, their tables, columns,
+     * relationships and etc.
      *
-     * @param string $class
-     * @param array  $data
-     * @param bool   $cache
-     * @return ActiveRecord
+     * @return SchemaBuilder
      */
-    public function construct($class, array $data = [], $cache = true)
+    public function schemaBuilder()
     {
-        if (!$this->config['entityCache']['enabled'] || !$cache)
-        {
-            //Entity cache is disabled
-            return new $class($data, !empty($data), $this);
-        }
-
-        //We have to find object criteria (will work for objects with primary key only)
-        $criteria = null;
-        if (
-            !empty($this->schema[$class][ORM::E_PRIMARY_KEY])
-            && !empty($data[$this->schema[$class][ORM::E_PRIMARY_KEY]])
-        )
-        {
-            $criteria = $class . '.' . $data[$this->schema[$class][ORM::E_PRIMARY_KEY]];
-        }
-
-        if (isset($this->entityCache[$criteria]))
-        {
-            //Retrieving reconfigured model from the cache
-            return $this->entityCache[$criteria]->setContext($data);
-        }
-
-        if (count($this->entityCache) > $this->config['entityCache']['maxSize'])
-        {
-            return new $class($data, !empty($data), $this);
-        }
-
-        return $this->entityCache[$criteria] = new $class($data, !empty($data), $this);
+        return $this->container->get(SchemaBuilder::class, [
+            'config' => $this->config,
+            'orm'    => $this
+        ]);
     }
 
     /**
-     * Refresh ODM schema state, will reindex all found document models and render documentation for
-     * them. This is slow method using Tokenizer, refreshSchema() should not be called by user request.
+     * Refresh ORM schema state, will reindex all found active records. This is slow method using
+     * Tokenizer, refreshSchema() should not be called by user request.
      *
      * @return SchemaBuilder
      */
@@ -351,18 +368,12 @@ class ORM extends Component
     {
         $builder = $this->schemaBuilder();
 
-        if (!empty($this->config['documentation']))
-        {
-            //Virtual ORM documentation to help IDE
-            DocumentationExporter::make(compact('builder'), $this->container)->render(
-                $this->config['documentation']
-            );
-        }
-
         //Building database!
         $builder->executeSchema();
 
-        $this->schema = $this->event('schema', $builder->normalizeSchema());
+        $this->schema = $this->fire('schema', $builder->normalizeSchema());
+
+        //We have to flush schema cache after schema update, just in case
         ActiveRecord::clearSchemaCache();
 
         //Saving
@@ -378,31 +389,4 @@ class ORM extends Component
     {
         $this->entityCache = [];
     }
-
-    /**
-     * Normalized entity constants.
-     */
-    const E_ROLE_NAME   = 0;
-    const E_TABLE       = 1;
-    const E_DB          = 2;
-    const E_COLUMNS     = 3;
-    const E_HIDDEN      = 4;
-    const E_SECURED     = 5;
-    const E_FILLABLE    = 6;
-    const E_MUTATORS    = 7;
-    const E_VALIDATES   = 8;
-    const E_RELATIONS   = 9;
-    const E_PRIMARY_KEY = 10;
-
-    /**
-     * Normalized relation options.
-     */
-    const R_TYPE       = 0;
-    const R_TABLE      = 1;
-    const R_DEFINITION = 2;
-
-    /**
-     * Pivot table location in ActiveRecord data.
-     */
-    const PIVOT_DATA = '@pivot';
 }

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\SqlServer;
+namespace Spiral\Database\Drivers\SqlServer;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractColumnSchema;
 
 class ColumnSchema extends AbstractColumnSchema
 {

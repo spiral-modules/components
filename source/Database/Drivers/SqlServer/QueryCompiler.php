@@ -6,19 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\SqlServer;
+namespace Spiral\Database\Drivers\SqlServer;
 
-use Spiral\Components\DBAL\DatabaseException;
-use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
-use Spiral\Components\DBAL\SqlFragment;
-use Spiral\Core\Traits\LoggerTrait;
+use Spiral\Core\Component;
+use Spiral\Database\DatabaseException;
+use Spiral\Database\QueryCompiler as BaseQueryCompiler;
+use Spiral\Database\SqlFragment;
 
 class QueryCompiler extends BaseQueryCompiler
 {
     /**
      * Logging.
      */
-    use LoggerTrait;
+    use Component\LoggerTrait;
 
     /**
      * Parent driver instance, driver used only for identifier() methods but can be required in other
@@ -78,13 +78,13 @@ class QueryCompiler extends BaseQueryCompiler
 
         if ($this->driver->getServerVersion() >= 12)
         {
-            self::logger()->warning(
+            $this->logger()->warning(
                 "You can't use query limiting without specifying ORDER BY statement, sql fallback used."
             );
         }
         else
         {
-            self::logger()->warning(
+            $this->logger()->warning(
                 "You are using older version of SQLServer, "
                 . "it has some limitation with query limiting and unions."
             );

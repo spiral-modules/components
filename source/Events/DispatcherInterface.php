@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core\Events;
+namespace Spiral\Events;
 
 interface DispatcherInterface
 {
@@ -45,10 +45,10 @@ interface DispatcherInterface
 
     /**
      * Fire event by name. All attached event handlers will be performed in order they were registered.
-     * Method will return resulted event context which will be passed thought all event listeners.
+     * Method should return resulted event context which will be passed thought all event listeners.
      *
-     * @param string $event   Event name.
-     * @param mixed  $context Primary event content.
+     * @param string|EventInterface $event   Event name or event instance.
+     * @param mixed                 $context Primary event content.
      * @return mixed
      */
     public function fire($event, $context = null);

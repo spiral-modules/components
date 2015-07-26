@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database;
 
-use Spiral\Core\Traits;
+use Spiral\Core\Component;
 
 abstract class QueryBuilder extends Component implements SqlFragmentInterface
 {
@@ -128,7 +128,7 @@ abstract class QueryBuilder extends Component implements SqlFragmentInterface
      */
     public function queryString()
     {
-        return DatabaseManager::interpolateQuery(
+        return $this->compiler->interpolate(
             $this->sqlStatement(),
             $this->database->getDriver()->prepareParameters($this->getParameters())
         );

@@ -6,15 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\Table;
-use Spiral\Components\I18n\Translator;
-use Spiral\Support\Models\AccessorInterface;
-use Spiral\Support\Models\DatabaseEntityInterface;
-use Spiral\Support\Models\DataEntity;
-use Spiral\Support\Validation\Validator;
+use Spiral\Database\Database;
+use Spiral\Database\Table;
+use Spiral\Models\AccessorInterface;
+use Spiral\Models\DatabaseEntityInterface;
+use Spiral\Models\DataEntity;
+use Spiral\Validation\ValidatorInterface;
 
 abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterface
 {
@@ -537,9 +536,15 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      */
     public function __construct(array $data = [], $loaded = false, ORM $orm = null)
     {
-        $this->orm = !empty($orm) ? $orm : ORM::getInstance();
         $this->loaded = $loaded;
 
+        if (empty($odm))
+        {
+            //Will work only when global container is set!
+            $orm = ORM::getInstance(self::getContainer());
+        }
+
+        $this->orm = $orm;
         if (!isset(self::$schemaCache[$class = static::class]))
         {
             static::initialize();
@@ -707,14 +712,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
     {
         if (isset($this->schema[ORM::E_MUTATORS][$mutator][$field]))
         {
-            $mutator = $this->schema[ORM::E_MUTATORS][$mutator][$field];
-
-            if (is_string($mutator) && isset(self::$mutatorAliases[$mutator]))
-            {
-                return self::$mutatorAliases[$mutator];
-            }
-
-            return $mutator;
+            return $this->schema[ORM::E_MUTATORS][$mutator][$field];
         }
 
         return null;
@@ -955,14 +953,14 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
             unset($fields[$secured]);
         }
 
-        return $this->event('publicFields', $fields);
+        return $this->fire('publicFields', $fields);
     }
 
     /**
      * Validator instance associated with model, will be response for validations of validation errors.
      * Model related error localization should happen in model itself.
      *
-     * @return Validator
+     * @return ValidatorInterface
      */
     public function getValidator()
     {
@@ -972,45 +970,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
             return $this->validator->setData($this->fields);
         }
 
-        //CUT
-        return $this->validator = Validator::make([
-            'data'      => $this->fields,
-            'validates' => $this->schema[ORM::E_VALIDATES]
-        ]);
-    }
-
-    /**
-     * Get all validation errors with applied localization using i18n component (if specified), any
-     * error message can be localized by using [[ ]] around it. Data will be automatically validated
-     * while calling this method (if not validated before).
-     *
-     * @param bool $reset Remove all model messages and reset validation, false by default.
-     * @return array
-     */
-    public function getErrors($reset = false)
-    {
-        $this->validate();
-        $errors = [];
-        foreach ($this->errors as $field => $error)
-        {
-            if (
-                is_string($error)
-                && substr($error, 0, 2) == Translator::I18N_PREFIX
-                && substr($error, -2) == Translator::I18N_POSTFIX
-            )
-            {
-                $error = $this->i18nMessage($error);
-            }
-
-            $errors[$field] = $error;
-        }
-
-        if ($reset)
-        {
-            $this->errors = [];
-        }
-
-        return $errors;
+        return parent::getValidator($this->schema[ORM::E_VALIDATES]);
     }
 
     /**
@@ -1022,10 +982,12 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      */
     public static function dbalTable(ORM $orm = null, Database $database = null)
     {
-        /**
-         * We can always get instance of ORM component from global scope.
-         */
-        $orm = !empty($orm) ? $orm : ORM::getInstance();
+        if (empty($odm))
+        {
+            //Will work only when global container is set!
+            $orm = ORM::getInstance(self::getContainer());
+        }
+
         $schema = $orm->getSchema(static::class);
 
         //We can bypass dbalDatabase() method here.
@@ -1042,24 +1004,31 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      */
     public static function dbalDatabase(ORM $orm = null)
     {
-        /**
-         * We can always get instance of ORM component from global scope.
-         */
-        $orm = !empty($orm) ? $orm : ORM::getInstance();
+        if (empty($odm))
+        {
+            //Will work only when global container is set!
+            $orm = ORM::getInstance(self::getContainer());
+        }
 
         return $orm->getDatabase($orm->getSchema(static::class)[ORM::E_DB]);
     }
 
     /**
      * Get associated orm Selector. Selectors used to build complex related queries and fetch
-     * models from database.
+     * models from database. Method will not work without specifying ORM and without global container.
      *
      * @param ORM $orm ORM component, will be received from container if not provided.
      * @return Selector
      */
     public static function ormSelector(ORM $orm = null)
     {
-        return new Selector(static::class, !empty($orm) ? $orm : ORM::getInstance());
+        if (empty($odm))
+        {
+            //Will work only when global container is set!
+            $orm = ORM::getInstance(self::getContainer());
+        }
+
+        return new Selector(static::class, $orm);
     }
 
     /**
@@ -1095,7 +1064,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
         $primaryKey = $this->schema[ORM::E_PRIMARY_KEY];
         if (!$this->isLoaded())
         {
-            $this->event('saving');
+            $this->fire('saving');
 
             //We will need to support models with primary keys in future
             unset($this->fields[$primaryKey]);
@@ -1110,20 +1079,20 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
             }
 
             $this->loaded = true;
-            $this->event('saved');
+            $this->fire('saved');
 
             $this->orm->registerEntity($this);
         }
         elseif ($this->solidState || $this->hasUpdates())
         {
-            $this->event('updating');
+            $this->fire('updating');
 
             static::dbalTable($this->orm)->update(
                 $this->compileUpdates(),
                 $this->getCriteria()
             )->run();
 
-            $this->event('updated');
+            $this->fire('updated');
         }
 
         $this->flushUpdates();
@@ -1160,7 +1129,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      */
     public function delete()
     {
-        $this->event('deleting');
+        $this->fire('deleting');
 
         if ($this->isLoaded())
         {
@@ -1170,7 +1139,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
         $this->fields = $this->schema[ORM::E_COLUMNS];
         $this->loaded = self::DELETED;
 
-        $this->event('deleted');
+        $this->fire('deleted');
     }
 
     /**
@@ -1208,7 +1177,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
 
         //Forcing validation (empty set of fields is not valid set of fields)
         $class->validationRequired = true;
-        $class->setFields($fields)->event('created');
+        $class->setFields($fields)->fire('created');
 
         return $class;
     }

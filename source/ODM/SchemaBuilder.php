@@ -6,23 +6,18 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM;
+namespace Spiral\ODM;
 
-use Spiral\Components\ODM\Schemas\CollectionSchema;
-use Spiral\Components\ODM\Schemas\DocumentSchema;
-use Spiral\Components\Tokenizer\Tokenizer;
-use Spiral\Core\Traits;
+use Spiral\ODM\Schemas\CollectionSchema;
+use Spiral\ODM\Schemas\DocumentSchema;
+use Spiral\Tokenizer\TokenizerInterface;
 
-class SchemaBuilder extends Component
+class SchemaBuilder
 {
     /**
      * ODM class names.
      */
-    const COMPOSITABLE = 'Spiral\Components\ODM\CompositableInterface';
-    const COLLECTION   = 'Spiral\Components\ODM\Collection';
-    const COMPOSITOR   = 'Spiral\Components\ODM\Accessors\Compositor';
-    const DATA_ENTITY  = 'Spiral\Components\DataEntity';
-    const DOCUMENT     = 'Spiral\Components\ODM\Document';
+    const COMPOSITABLE = 'Spiral\ODM\CompositableInterface';
 
     /**
      * Schema generating configuration.
@@ -48,16 +43,16 @@ class SchemaBuilder extends Component
     /**
      * New ODM Schema reader instance.
      *
-     * @param array     $config
-     * @param Tokenizer $tokenizer
+     * @param array              $config
+     * @param TokenizerInterface $tokenizer
      */
-    public function __construct(array $config, Tokenizer $tokenizer)
+    public function __construct(array $config, TokenizerInterface $tokenizer)
     {
         $this->config = $config;
 
-        foreach ($tokenizer->getClasses(self::DOCUMENT) as $class => $definition)
+        foreach ($tokenizer->getClasses(Document::class) as $class => $definition)
         {
-            if ($class == self::DOCUMENT)
+            if ($class == Document::class)
             {
                 continue;
             }
@@ -135,9 +130,9 @@ class SchemaBuilder extends Component
      */
     public function getDocument($class)
     {
-        if ($class == self::DOCUMENT)
+        if ($class == Document::class)
         {
-            return new DocumentSchema($this, self::DOCUMENT);
+            return new DocumentSchema($this, Document::class);
         }
 
         if (!isset($this->documents[$class]))
@@ -159,6 +154,22 @@ class SchemaBuilder extends Component
         return isset($this->config['mutators'][$abstractType])
             ? $this->config['mutators'][$abstractType]
             : [];
+    }
+
+    /**
+     * Get mutator alias.
+     *
+     * @param string $alias
+     * @return string|array|null
+     */
+    public function processAlias($alias)
+    {
+        if (!is_string($alias) || !isset($this->config['aliases'][$alias]))
+        {
+            return $alias;
+        }
+
+        return $this->config['aliases'][$alias];
     }
 
     /**

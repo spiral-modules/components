@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM\Collection;
+namespace Spiral\ODM\Collection;
 
-use Spiral\Components\ODM\ODM;
-use Spiral\Components\ODM\Document;
-use Spiral\Components\ODM\ODMException;
+use Spiral\ODM\ODM;
+use Spiral\ODM\Document;
+use Spiral\ODM\ODMException;
 
 /**
  * @method array explain()

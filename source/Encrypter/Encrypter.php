@@ -9,13 +9,20 @@
 namespace Spiral\Encrypter;
 
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Core\Singleton;
 
-class Encrypter
+class Encrypter extends Singleton implements EncrypterInterface
 {
     /**
-     * Declares to IoC that component instance should be treated as singleton.
+     * To edit configuration in runtime.
      */
-    const SINGLETON = __CLASS__;
+    use ConfigurableTrait;
+
+    /**
+     * Declares to Spiral IoC that component instance should be treated as singleton.
+     */
+    const SINGLETON = self::class;
 
     /**
      * Keys to use in packed data.
@@ -25,7 +32,7 @@ class Encrypter
     const SIGNATURE = 'c';
 
     /**
-     * One of the MCRYPT_ciphername constants, or the name of the algorithm as string.
+     * One of the MCRYPT_CIPERNAME constants, or the name of the algorithm as string.
      *
      * @var string
      */
@@ -43,10 +50,11 @@ class Encrypter
      * New encrypter component.
      *
      * @param ConfiguratorInterface $configurator
+     * @throws EncrypterException
      */
     public function __construct(ConfiguratorInterface $configurator)
     {
-        $this->config = $configurator->getConfig('encrypter');
+        $this->config = $configurator->getConfig($this);
 
         $this->setKey($this->config['key']);
         if (!empty($this->config['method']))
@@ -93,7 +101,7 @@ class Encrypter
     }
 
     /**
-     * Get current encrypter method.
+     * Get current method.
      *
      * @return string
      */
@@ -107,6 +115,7 @@ class Encrypter
      * key, mode and cipher will be altered.
      *
      * @return $this
+     * @throws EncrypterException
      */
     public function restoreDefaults()
     {
@@ -129,9 +138,7 @@ class Encrypter
     {
         if ($length < 1)
         {
-            throw new EncrypterException(
-                "Random string length should be at least 1 byte long."
-            );
+            throw new EncrypterException("Random string length should be at least 1 byte long.");
         }
 
         if (!$result = openssl_random_pseudo_bytes($length, $cryptoStrong))

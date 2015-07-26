@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM;
+namespace Spiral\ODM;
 
-use Spiral\Components\ODM\Collection\CursorReader;
-use Spiral\Core\Traits;
-use Spiral\Support\Pagination\PaginableInterface;
-use Spiral\Support\Pagination\PaginatorTrait;
+use Spiral\Core\Component;
+use Spiral\ODM\Collection\CursorReader;
+use Spiral\Pagination\PaginableInterface;
+use Spiral\Pagination\Traits\PaginatorTrait;
 
 /**
  * @method bool getSlaveOkay()
@@ -35,12 +35,12 @@ use Spiral\Support\Pagination\PaginatorTrait;
  * @method bool|array distinct($key, $query)
  * @method array aggregate(array $pipeline, array $op, array $pipelineOperators)
  */
-class Collection extends Component implements \IteratorAggregate, PaginableInterface
+class Collection extends Component implements \Countable, \IteratorAggregate, PaginableInterface
 {
     /**
      * Pagination and logging traits.
      */
-    use PaginatorTrait, Traits\LoggerTrait;
+    use Component\LoggerTrait, PaginatorTrait;
 
     /**
      * Sort order.
@@ -233,7 +233,7 @@ class Collection extends Component implements \IteratorAggregate, PaginableInter
     public function createCursor($query = [], $fields = [], $plainResult = false)
     {
         $this->query($query);
-        $this->doPagination();
+        $this->runPagination();
 
         $cursorReader = new CursorReader(
             $this->mongoCollection()->find($this->query, $fields),
@@ -248,7 +248,7 @@ class Collection extends Component implements \IteratorAggregate, PaginableInter
 
         if ((!empty($this->limit) || !empty($this->offset)) && empty($this->sort))
         {
-            self::logger()->warning(
+            $this->logger()->warning(
                 "MongoDB query executed with limit/offset but without specified sorting."
             );
         }
@@ -278,7 +278,7 @@ class Collection extends Component implements \IteratorAggregate, PaginableInter
             $queryInfo['explained'] = $cursorReader->explain();
         }
 
-        self::logger()->debug(
+        $this->logger()->debug(
             "{database}/{collection}: " . json_encode($queryInfo, JSON_PRETTY_PRINT),
             [
                 'collection' => $this->name,

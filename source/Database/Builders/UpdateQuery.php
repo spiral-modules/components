@@ -6,15 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Builders;
+namespace Spiral\Database\Builders;
 
-use Spiral\Components\DBAL\Builders\Common\AffectQuery;
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\DatabaseException;
-use Spiral\Components\DBAL\ParameterInterface;
-use Spiral\Components\DBAL\QueryBuilder;
-use Spiral\Components\DBAL\QueryCompiler;
-use Spiral\Components\DBAL\SqlFragmentInterface;
+use Spiral\Database\Database;
+use Spiral\Database\DatabaseException;
+use Spiral\Database\ParameterInterface;
+use Spiral\Database\QueryBuilder;
+use Spiral\Database\QueryCompiler;
+use Spiral\Database\SqlFragmentInterface;
 
 class UpdateQuery extends AffectQuery
 {

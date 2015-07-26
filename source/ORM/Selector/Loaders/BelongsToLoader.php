@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Selector\Loaders;
+namespace Spiral\ORM\Selector\Loaders;
 
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\Selector;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Selector;
 
 class BelongsToLoader extends HasOneLoader
 {

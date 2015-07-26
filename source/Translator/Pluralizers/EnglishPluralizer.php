@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\I18n\Pluralizers;
+namespace Spiral\Translator\Pluralizers;
 
-use Spiral\Components\I18n\PluralizerInterface;
+use Spiral\Translator\PluralizerInterface;
 
 class EnglishPluralizer implements PluralizerInterface
 {

@@ -6,12 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM\Schemas;
+namespace Spiral\ODM\Schemas;
 
-use Spiral\Components\ODM\SchemaBuilder;
-use Spiral\Core\Traits;
+use Spiral\ODM\SchemaBuilder;
 
-class CollectionSchema extends Component
+class CollectionSchema
 {
     /**
      * Parent ODM schema builder holds all other documents.

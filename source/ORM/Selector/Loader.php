@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Selector;
+namespace Spiral\ORM\Selector;
 
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\QueryResult;
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORM;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\Selector;
+use Spiral\Database\Database;
+use Spiral\Database\QueryResult;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORM;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\Selector;
 
 abstract class Loader implements LoaderInterface
 {

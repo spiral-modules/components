@@ -6,24 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Components\ORM\Schemas\ModelSchema;
-use Spiral\Components\ORM\Schemas\RelationSchemaInterface;
-use Spiral\Components\Tokenizer\Tokenizer;
-use Spiral\Core\Traits;
-use Spiral\Core\Container;
-use Spiral\Support\Models\DataEntity;
+use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\ORM\Schemas\ModelSchema;
+use Spiral\ORM\Schemas\RelationSchemaInterface;
+use Spiral\Tokenizer\TokenizerInterface;
 
-class SchemaBuilder extends Component
+class SchemaBuilder
 {
-    /**
-     * ORM class names.
-     */
-    const DATA_ENTITY   = DataEntity::class;
-    const ACTIVE_RECORD = ActiveRecord::class;
-
     /**
      * Schema generating configuration.
      *
@@ -63,19 +54,19 @@ class SchemaBuilder extends Component
     /**
      * New ORM Schema reader instance.
      *
-     * @param array     $config
-     * @param ORM       $orm
-     * @param Tokenizer $tokenizer
+     * @param array              $config
+     * @param ORM                $orm
+     * @param TokenizerInterface $tokenizer
      */
-    public function __construct(ORM $orm, array $config, Tokenizer $tokenizer)
+    public function __construct(array $config, ORM $orm, TokenizerInterface $tokenizer)
     {
         $this->config = $config;
         $this->orm = $orm;
         $this->container = $orm->getContainer();
 
-        foreach ($tokenizer->getClasses(self::ACTIVE_RECORD) as $class => $definition)
+        foreach ($tokenizer->getClasses(ActiveRecord::class) as $class => $definition)
         {
-            if ($class == self::ACTIVE_RECORD)
+            if ($class == ActiveRecord::class)
             {
                 continue;
             }
@@ -128,9 +119,9 @@ class SchemaBuilder extends Component
      */
     public function modelSchema($class)
     {
-        if ($class == self::ACTIVE_RECORD)
+        if ($class == ActiveRecord::class)
         {
-            return new ModelSchema(self::ACTIVE_RECORD, $this);
+            return new ModelSchema(ActiveRecord::class, $this);
         }
 
         if (!isset($this->models[$class]))
@@ -160,6 +151,22 @@ class SchemaBuilder extends Component
     public function getMutators($type)
     {
         return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+    }
+
+    /**
+     * Get mutator alias.
+     *
+     * @param string $alias
+     * @return string|array|null
+     */
+    public function processAlias($alias)
+    {
+        if (!is_string($alias) || !isset($this->config['aliases'][$alias]))
+        {
+            return $alias;
+        }
+
+        return $this->config['aliases'][$alias];
     }
 
     /**

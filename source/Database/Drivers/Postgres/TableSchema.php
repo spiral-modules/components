@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
 
 class TableSchema extends AbstractTableSchema
 {
@@ -40,8 +40,7 @@ class TableSchema extends AbstractTableSchema
     protected function loadColumns()
     {
         //Required for constraints fetch
-        $tableOID = $this->driver
-            ->query("SELECT oid FROM pg_class WHERE relname = ?", [$this->name])
+        $tableOID = $this->driver->query("SELECT oid FROM pg_class WHERE relname = ?", [$this->name])
             ->fetchColumn();
 
         //Collecting all candidates
@@ -79,9 +78,7 @@ class TableSchema extends AbstractTableSchema
             $index = $this->registerIndex($index['indexname'], $index['indexdef']);
 
             $conType = $this->driver
-                ->query("SELECT contype FROM pg_constraint WHERE conname = ?", [
-                    $index->getName()
-                ])
+                ->query("SELECT contype FROM pg_constraint WHERE conname = ?", [$index->getName()])
                 ->fetchColumn();
 
             if ($conType == 'p')
@@ -148,15 +145,14 @@ class TableSchema extends AbstractTableSchema
         //Renaming is separate operation
         if ($column->getName() != $dbColumn->getName())
         {
-            $this->driver->statement(
-                interpolate('ALTER TABLE {table} RENAME COLUMN {original} TO {column}',
-                    [
-                        'table'    => $this->getName(true),
-                        'column'   => $column->getName(true),
-                        'original' => $dbColumn->getName(true)
-                    ]
-                )
-            );
+            $this->driver->statement(\Spiral\interpolate(
+                'ALTER TABLE {table} RENAME COLUMN {original} TO {column}',
+                [
+                    'table'    => $this->getName(true),
+                    'column'   => $column->getName(true),
+                    'original' => $dbColumn->getName(true)
+                ]
+            ));
 
             $column->setName($dbColumn->getName());
         }
@@ -168,7 +164,7 @@ class TableSchema extends AbstractTableSchema
         }
 
         //Postgres columns should be altered using set of operations
-        $query = interpolate('ALTER TABLE {table} {operations}', [
+        $query = \Spiral\interpolate('ALTER TABLE {table} {operations}', [
             'table'      => $this->getName(true),
             'operations' => trim(join(', ', $operations), ', ')
         ]);

@@ -6,18 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\SqlServer;
+namespace Spiral\Database\Drivers\SqlServer;
 
-use Spiral\Components\DBAL\Driver;
+use Spiral\Database\Driver;
 use PDO;
 
 class SqlServerDriver extends Driver
 {
-    /**
-     * Get short name to use for driver query profiling.
-     */
-    const DRIVER_NAME = 'SQLServer';
-
     /**
      * Class names should be used to create schema instances to describe specified driver table. Schema
      * realizations are driver specific and allows both schema reading and writing (migrations).

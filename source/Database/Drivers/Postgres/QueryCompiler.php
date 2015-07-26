@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Components\DBAL\DatabaseException;
-use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
+use Spiral\Database\DatabaseException;
+use Spiral\Database\QueryCompiler as BaseQueryCompiler;
 
 class QueryCompiler extends BaseQueryCompiler
 {

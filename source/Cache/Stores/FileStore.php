@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Cache\Stores;
+namespace Spiral\Cache\Stores;
 
-use Spiral\Components\Cache\CacheFacade;
-use Spiral\Components\Cache\CacheStore;
-use Spiral\Components\Files\FileManager;
+use Spiral\Cache\CacheManager;
+use Spiral\Cache\CacheStore;
+use Spiral\Files\FilesInterface;
 
 class FileStore extends CacheStore
 {
@@ -32,21 +32,23 @@ class FileStore extends CacheStore
     /**
      * File component.
      *
-     * @var FileManager
+     * @var FilesInterface
      */
-    protected $file = null;
+    protected $files = null;
 
     /**
-     * Create a new cache store instance. Every instance represents a single cache method. Multiple
-     * stores can exist at the same time and can be used in different areas of the application.
+     * Create a new cache store instance. Every instance should represent a single cache method.
+     * Multiple stores can exist at the same time and be used in different parts of the application.
      *
-     * @param CacheFacade $cache CacheManager component.
-     * @param FileManager  $file
+     * Logic of receiving configuration is reverted for controllable injections in spiral application.
+     *
+     * @param CacheManager   $cache CacheFacade component.
+     * @param FilesInterface $files
      */
-    public function __construct(CacheFacade $cache, FileManager $file = null)
+    public function __construct(CacheManager $cache, FilesInterface $files = null)
     {
         parent::__construct($cache);
-        $this->file = $file;
+        $this->files = $files;
     }
 
     /**
@@ -66,7 +68,7 @@ class FileStore extends CacheStore
      * @param string $name
      * @return string
      */
-    protected function buildFilename($name)
+    protected function makeFilename($name)
     {
         return $this->options['directory'] . '/' . md5($name) . '.' . $this->options['extension'];
     }
@@ -79,7 +81,7 @@ class FileStore extends CacheStore
      */
     public function has($name)
     {
-        return $this->file->exists($this->buildFilename($name));
+        return $this->files->exists($this->makeFilename($name));
     }
 
     /**
@@ -91,13 +93,13 @@ class FileStore extends CacheStore
      */
     public function get($name, &$expiration = null)
     {
-        $filename = $this->buildFilename($name);
-        if (!$this->file->exists($filename))
+        $filename = $this->makeFilename($name);
+        if (!$this->files->exists($filename))
         {
             return null;
         }
 
-        $cacheData = unserialize($this->file->read($filename));
+        $cacheData = unserialize($this->files->read($filename));
         if (!empty($cacheData[0]) && $cacheData[0] < time())
         {
             $this->delete($name);
@@ -119,8 +121,8 @@ class FileStore extends CacheStore
      */
     public function set($name, $data, $lifetime)
     {
-        return $this->file->write(
-            $this->buildFilename($name),
+        return $this->files->write(
+            $this->makeFilename($name),
             serialize([time() + $lifetime, $data])
         );
     }
@@ -135,8 +137,8 @@ class FileStore extends CacheStore
      */
     public function forever($name, $data)
     {
-        return $this->file->write(
-            $this->buildFilename($name),
+        return $this->files->write(
+            $this->makeFilename($name),
             serialize([0, $data])
         );
     }
@@ -148,7 +150,7 @@ class FileStore extends CacheStore
      */
     public function delete($name)
     {
-        $this->file->delete($this->buildFilename($name));
+        $this->files->delete($this->makeFilename($name));
     }
 
     /**
@@ -188,14 +190,10 @@ class FileStore extends CacheStore
      */
     public function flush()
     {
-        $files = $this->file->getFiles(
-            $this->options['directory'],
-            [$this->options['extension']]
-        );
-
+        $files = $this->files->getFiles($this->options['directory'], $this->options['extension']);
         foreach ($files as $filename)
         {
-            $this->file->delete($filename);
+            $this->files->delete($filename);
         }
 
         return count($files);

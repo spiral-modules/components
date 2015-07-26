@@ -6,20 +6,20 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Postgres\Builders;
+namespace Spiral\Database\Drivers\Postgres\Builders;
 
-use Spiral\Components\DBAL\Builders\InsertQuery as BaseInsertQuery;
-use Spiral\Components\DBAL\DatabaseException;
-use Spiral\Components\DBAL\Drivers\Postgres\PostgresDriver;
-use Spiral\Components\DBAL\QueryCompiler;
-use Spiral\Core\Traits\LoggerTrait;
+use Spiral\Core\Component;
+use Spiral\Database\Builders\InsertQuery as BaseInsertQuery;
+use Spiral\Database\DatabaseException;
+use Spiral\Database\Drivers\Postgres\PostgresDriver;
+use Spiral\Database\QueryCompiler;
 
 class InsertQuery extends BaseInsertQuery
 {
     /**
      * Logging.
      */
-    use LoggerTrait;
+    use Component\LoggerTrait;
 
     /**
      * Get or render SQL statement.
@@ -37,7 +37,7 @@ class InsertQuery extends BaseInsertQuery
 
         if ($primary = $driver->getPrimary($this->database->getPrefix() . $this->table))
         {
-            self::logger()->debug(
+            $this->logger()->debug(
                 "Primary key '{sequence}' automatically resolved for table '{table}'.", [
                 'table'    => $this->table,
                 'sequence' => $primary

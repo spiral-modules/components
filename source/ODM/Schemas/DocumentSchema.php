@@ -6,22 +6,22 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM\Schemas;
+namespace Spiral\ODM\Schemas;
 
-use Spiral\Components\ODM\Document;
-use Spiral\Components\ODM\ODM;
-use Spiral\Components\ODM\ODMAccessor;
-use Spiral\Components\ODM\ODMException;
-use Spiral\Components\ODM\SchemaBuilder;
-use Spiral\Support\Models\DataEntity;
-use Spiral\Support\Models\Schemas\DataEntitySchema;
+use Spiral\Models\Schemas\EntitySchema;
+use Spiral\ODM\Accessors\Compositor;
+use Spiral\ODM\Document;
+use Spiral\ODM\ODM;
+use Spiral\ODM\ODMAccessor;
+use Spiral\ODM\ODMException;
+use Spiral\ODM\SchemaBuilder;
 
-class DocumentSchema extends DataEntitySchema
+class DocumentSchema extends EntitySchema
 {
     /**
      * Base model class.
      */
-    const BASE_CLASS = SchemaBuilder::DOCUMENT;
+    const BASE_CLASS = Document::class;
 
     /**
      * Parent ODM schema builder holds all other documents.
@@ -76,7 +76,7 @@ class DocumentSchema extends DataEntitySchema
             return null;
         }
 
-        if ($merge && ($this->reflection->getParentClass()->getName() != SchemaBuilder::DOCUMENT))
+        if ($merge && ($this->reflection->getParentClass()->getName() != static::BASE_CLASS))
         {
             $parentClass = $this->reflection->getParentClass()->getName();
 
@@ -106,7 +106,7 @@ class DocumentSchema extends DataEntitySchema
     {
         $parentClass = $this->reflection->getParentClass()->getName();
 
-        return $parentClass != SchemaBuilder::DOCUMENT ? $parentClass : null;
+        return $parentClass != static::BASE_CLASS ? $parentClass : null;
     }
 
     /**
@@ -216,7 +216,7 @@ class DocumentSchema extends DataEntitySchema
             {
                 if (!array_key_exists($field, $mutators[$mutator]))
                 {
-                    $mutators[$mutator][$field] = $filter;
+                    $mutators[$mutator][$field] = $this->builder->processAlias($filter);
                 }
             }
         }
@@ -226,7 +226,7 @@ class DocumentSchema extends DataEntitySchema
         {
             //Composition::ONE has to be resolved little bit different way due model inheritance
             $mutators['accessor'][$field] = [
-                $composition['type'] == ODM::CMP_MANY ? SchemaBuilder::COMPOSITOR : ODM::CMP_ONE,
+                $composition['type'] == ODM::CMP_MANY ? Compositor::class : ODM::CMP_ONE,
                 $composition['classDefinition']
             ];
         }
@@ -266,10 +266,6 @@ class DocumentSchema extends DataEntitySchema
             if (isset($setters[$field]))
             {
                 $filter = $setters[$field];
-                if (is_string($filter) && isset(DataEntity::$mutatorAliases[$filter]))
-                {
-                    $filter = DataEntity::$mutatorAliases[$filter];
-                }
 
                 //Applying filter to default value
                 try
@@ -484,7 +480,7 @@ class DocumentSchema extends DataEntitySchema
     {
         $reflection = $this->reflection;
 
-        while ($reflection->getParentClass()->getName() != SchemaBuilder::DOCUMENT)
+        while ($reflection->getParentClass()->getName() != self::BASE_CLASS)
         {
             if (
                 $hasCollection

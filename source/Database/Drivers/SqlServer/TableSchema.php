@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\SqlServer;
+namespace Spiral\Database\Drivers\SqlServer;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\Schemas\AbstractIndexSchema;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractIndexSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
 
 class TableSchema extends AbstractTableSchema
 {
@@ -81,8 +81,8 @@ class TableSchema extends AbstractTableSchema
      */
     protected function loadReferences()
     {
-        foreach ($this->driver->query("sp_fkeys @fktable_name = ?", [$this->name]) as
-                 $reference)
+        $references = $this->driver->query("sp_fkeys @fktable_name = ?", [$this->name]);
+        foreach ($references as $reference)
         {
             $this->registerReference($reference['FK_NAME'], $reference);
         }
@@ -151,7 +151,7 @@ class TableSchema extends AbstractTableSchema
 
         foreach ($column->alterOperations($dbColumn) as $operation)
         {
-            $query = interpolate('ALTER TABLE {table} {operation}', [
+            $query = \Spiral\interpolate('ALTER TABLE {table} {operation}', [
                 'table'     => $this->getName(true),
                 'operation' => $operation
             ]);

@@ -6,26 +6,26 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM;
+namespace Spiral\ORM;
 
 use Psr\Log\LogLevel;
-use Spiral\Components\Cache\CacheFacade;
-use Spiral\Components\DBAL\Builders\Common\AbstractSelectQuery;
-use Spiral\Components\DBAL\ParameterInterface;
-use Spiral\Components\DBAL\QueryBuilder;
-use Spiral\Components\DBAL\QueryCompiler;
-use Spiral\Components\DBAL\QueryResult;
-use Spiral\Components\DBAL\SqlFragmentInterface;
-use Spiral\Components\ORM\Selector\Loader;
-use Spiral\Components\ORM\Selector\Loaders\RootLoader;
-use Spiral\Core\Traits;
+use Spiral\Database\Builders\BaseSelectQuery;
+use Spiral\Database\ParameterInterface;
+use Spiral\Database\QueryBuilder;
+use Spiral\Database\QueryCompiler;
+use Spiral\Database\QueryResult;
+use Spiral\Database\SqlFragmentInterface;
+use Spiral\Debug\Traits\BenchmarkTrait;
+use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\ORM\Selector\Loader;
+use Spiral\ORM\Selector\Loaders\RootLoader;
 
-class Selector extends AbstractSelectQuery
+class Selector extends BaseSelectQuery
 {
     /**
      * To warn user about non optimal queries.
      */
-    use Traits\LoggerTrait;
+    use LoggerTrait, BenchmarkTrait;
 
     /**
      * Loading methods. See load() and with() methods.
@@ -503,14 +503,13 @@ class Selector extends AbstractSelectQuery
         if (!empty($this->cacheLifetime))
         {
             $cacheKey = $this->cacheKey ?: md5(serialize([$statement, $this->getParameters()]));
-            $cacheStore = $this->cacheStore ?: CacheFacade::getInstance()->store();
 
-            if ($cacheStore->has($cacheKey))
+            if ($this->cacheStore->has($cacheKey))
             {
-                self::logger()->debug("Selector result fetched from cache.");
+                $this->logger()->debug("Selector result fetched from cache.");
 
                 //We are going to store parsed result, not queries
-                return $cacheStore->get($cacheKey);
+                return $this->cacheStore->get($cacheKey);
             }
         }
 
@@ -520,9 +519,9 @@ class Selector extends AbstractSelectQuery
 
         //In many cases (too many inloads, too complex queries) parsing may take significant amount
         //of time, so we better profile it
-        benchmark('selector::parseResult', $statement);
+        $this->benchmark('parseResult', $statement);
         $data = $this->loader->parseResult($result, $rowsCount);
-        benchmark('selector::parseResult', $statement);
+        $this->benchmark('parseResult', $statement);
 
         //To let developer know that something bad about his query
         !empty($data) && $this->checkCounts(count($data), $rowsCount);
@@ -571,7 +570,7 @@ class Selector extends AbstractSelectQuery
             }
         }
 
-        self::logger()->log(
+        $this->logger()->log(
             $logLevel,
             "Query resulted with {rowsCount} row(s) grouped into {dataCount} records.",
             compact('dataCount', 'rowsCount')

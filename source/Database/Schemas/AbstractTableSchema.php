@@ -6,11 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Schemas;
+namespace Spiral\Database\Schemas;
 
-use Spiral\Components\DBAL\Driver;
-use Spiral\Core\Traits;
-use Spiral\Core\Traits\LoggerTrait;
+use Spiral\Core\Component;
+use Spiral\Database\Driver;
 
 /**
  * @method AbstractColumnSchema primary($column)
@@ -40,7 +39,7 @@ abstract class AbstractTableSchema extends Component
     /**
      * Logging.
      */
-    use LoggerTrait;
+    use Component\LoggerTrait;
 
     /**
      * Rename SQL statement is usually the same... we all know who has different syntax. :)
@@ -839,7 +838,7 @@ abstract class AbstractTableSchema extends Component
     {
         if ($this->isExists())
         {
-            $this->driver->statement(interpolate(static::RENAME_STATEMENT, [
+            $this->driver->statement(\Spiral\interpolate(static::RENAME_STATEMENT, [
                 'table' => $this->getName(true),
                 'name'  => $this->driver->identifier($this->tablePrefix . $name)
             ]));
@@ -862,7 +861,7 @@ abstract class AbstractTableSchema extends Component
             return;
         }
 
-        $this->driver->statement(interpolate("DROP TABLE {table}", [
+        $this->driver->statement(\Spiral\interpolate("DROP TABLE {table}", [
             'table' => $this->getName(true)
         ]));
 
@@ -1013,7 +1012,7 @@ abstract class AbstractTableSchema extends Component
 
                 if (empty($schema))
                 {
-                    self::logger()->info(
+                    $this->logger->info(
                         "Dropping column [{statement}] from table {table}.",
                         [
                             'statement' => $dbColumn->sqlStatement(),
@@ -1027,7 +1026,7 @@ abstract class AbstractTableSchema extends Component
 
                 if (empty($dbColumn))
                 {
-                    self::logger()->info(
+                    $this->logger->info(
                         "Adding column [{statement}] into table {table}.",
                         [
                             'statement' => $schema->sqlStatement(),
@@ -1040,7 +1039,7 @@ abstract class AbstractTableSchema extends Component
                 }
 
                 //Altering
-                self::logger()->info(
+                $this->logger->info(
                     "Altering column [{statement}] to [{new}] in table {table}.",
                     [
                         'statement' => $dbColumn->sqlStatement(),
@@ -1058,7 +1057,7 @@ abstract class AbstractTableSchema extends Component
 
                 if (empty($schema))
                 {
-                    self::logger()->info(
+                    $this->logger->info(
                         "Dropping index [{statement}] from table {table}.",
                         [
                             'statement' => $dbIndex->sqlStatement(true),
@@ -1072,7 +1071,7 @@ abstract class AbstractTableSchema extends Component
 
                 if (empty($dbIndex))
                 {
-                    self::logger()->info(
+                    $this->logger->info(
                         "Adding index [{statement}] into table {table}.",
                         [
                             'statement' => $schema->sqlStatement(false),
@@ -1085,7 +1084,7 @@ abstract class AbstractTableSchema extends Component
                 }
 
                 //Altering
-                self::logger()->info(
+                $this->logger->info(
                     "Altering index [{statement}] to [{new}] in table {table}.",
                     [
                         'statement' => $dbIndex->sqlStatement(false),
@@ -1103,7 +1102,7 @@ abstract class AbstractTableSchema extends Component
 
                 if (empty($schema))
                 {
-                    self::logger()->info(
+                    $this->logger->info(
                         "Dropping foreign key [{statement}] in table {table}.",
                         [
                             'statement' => $dbForeign->sqlStatement(),
@@ -1117,7 +1116,7 @@ abstract class AbstractTableSchema extends Component
 
                 if (empty($dbForeign))
                 {
-                    self::logger()->info(
+                    $this->logger->info(
                         "Adding foreign key [{statement}] into table {table}.",
                         [
                             'statement' => $schema->sqlStatement(),
@@ -1130,7 +1129,7 @@ abstract class AbstractTableSchema extends Component
                 }
 
                 //Altering
-                self::logger()->info(
+                $this->logger->info(
                     "Altering foreign key [{statement}] to [{new}] in table {table}.",
                     [
                         'statement' => $dbForeign->sqlStatement(),

@@ -8,14 +8,34 @@
  */
 namespace Spiral\Translator;
 
-use Spiral\Component;
-use Spiral\Components\Translator\TranslatorException;
-use Spiral\Core\Traits;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Core\Singleton;
 
-class Translator extends Component
+class Translator extends Singleton
 {
+    /**
+     * Some operations should be recorded.
+     */
+    use ConfigurableTrait;
+
+    /**
+     * Declares to Spiral IoC that component instance should be treated as singleton.
+     */
+    const SINGLETON = self::class;
+
+    /**
+     * Models and other classes which inherits I18nIndexable interface allowed to be automatically
+     * parsed and analyzed for messages stored in default property values (static and non static),
+     * such values can be prepended and appended with i18n prefixes ([[ and ]] by default) and will
+     * be localized on output.
+     *
+     * Class should implement i18nNamespace method (static) which will define required i18n namespace.
+     */
+    const I18N_PREFIX  = '[[';
+    const I18N_POSTFIX = ']]';
+
     /**
      * Bundle to use for short localization syntax (l function).
      */
@@ -67,8 +87,8 @@ class Translator extends Component
      */
     public function __construct(ConfiguratorInterface $configurator, HippocampusInterface $runtime)
     {
-        $this->runtime = $runtime;
         $this->config = $configurator->getConfig($this);
+        $this->runtime = $runtime;
 
         $this->language = $this->config['default'];
         $this->languageOptions = $this->config['languages'][$this->language];
@@ -177,10 +197,9 @@ class Translator extends Component
      * @param string $string String to be localized.
      * @return string
      */
-    public function normalize($string)
+    protected function normalize($string)
     {
-        //interpolate => as component
-        return preg_replace('/[ \t\n]+/', ' ', trim(StringHelper::normalizeEndings(trim($string))));
+        return preg_replace('/[ \t\n\r]+/', ' ', trim($string));
     }
 
     /**
@@ -216,8 +235,7 @@ class Translator extends Component
 
         if (is_array(func_get_arg(2)))
         {
-            //interpolate => as component
-            return interpolate($this->bundles[$bundle][$string], func_get_arg(2));
+            return \Spiral\interpolate($this->bundles[$bundle][$string], func_get_arg(2));
         }
 
         $arguments = array_slice(func_get_args(), 1);

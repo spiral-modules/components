@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Support\Models\Schemas;
+namespace Spiral\Models\Schemas;
 
-use Spiral\Support\Generators\Reactor\ClassElements\MethodElement;
+use Spiral\Reactor\ClassElements\MethodElement;
 
 class MethodSchema extends MethodElement
 {

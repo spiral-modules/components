@@ -6,11 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Storage;
+namespace Spiral\Storage;
 
-use Spiral\Core\SpiralException;
+use Spiral\Core\ExceptionInterface;
 
-class StorageException extends SpiralException
+class StorageException extends \RuntimeException implements ExceptionInterface
 {
 
 }

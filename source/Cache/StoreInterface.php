@@ -6,18 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Cache;
+namespace Spiral\Cache;
 
 interface StoreInterface
 {
-    /**
-     * Create a new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and be used in different parts of the application.
-     *
-     * @param CacheFacade $cache CacheManager component.
-     */
-    public function __construct(CacheFacade $cache);
-
     /**
      * Check if store is working properly. Should check if the store drives exists, files are
      * writable, etc.

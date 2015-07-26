@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Sqlite;
+namespace Spiral\Database\Drivers\Sqlite;
 
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\Schemas\AbstractReferenceSchema;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Components\DBAL\Schemas\SchemaBuilderException;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractReferenceSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\SchemaBuilderException;
 
 class TableSchema extends AbstractTableSchema
 {
@@ -94,9 +94,6 @@ class TableSchema extends AbstractTableSchema
     {
         if ($this->primaryKeys != $this->dbPrimaryKeys)
         {
-            dumP(array_keys($this->columns), 2);
-            dump($this->primaryKeys, 2);
-            dumP($this->dbPrimaryKeys, 2);
             throw new SchemaBuilderException(
                 "Primary keys can not be changed for already exists table ({$this->getName()})."
             );
@@ -119,7 +116,7 @@ class TableSchema extends AbstractTableSchema
 
                     if (!$schema)
                     {
-                        self::logger()->info(
+                        $this->logger()->info(
                             "Dropping index [{statement}] from table {table}.", [
                             'statement' => $dbIndex->sqlStatement(true),
                             'table'     => $this->getName(true)
@@ -131,7 +128,7 @@ class TableSchema extends AbstractTableSchema
 
                     if (!$dbIndex)
                     {
-                        self::logger()->info(
+                        $this->logger()->info(
                             "Adding index [{statement}] into table {table}.", [
                             'statement' => $schema->sqlStatement(false),
                             'table'     => $this->getName(true)
@@ -142,7 +139,7 @@ class TableSchema extends AbstractTableSchema
                     }
 
                     //Altering
-                    self::logger()->info(
+                    $this->logger()->info(
                         "Altering index [{statement}] to [{new}] in table {table}.", [
                         'statement' => $dbIndex->sqlStatement(false),
                         'new'       => $schema->sqlStatement(false),
@@ -154,7 +151,7 @@ class TableSchema extends AbstractTableSchema
             }
             else
             {
-                self::logger()->info(
+                $this->logger()->info(
                     "Rebuilding table {table} to apply required modifications.", [
                     'table' => $this->getName(true)
                 ]);
@@ -181,7 +178,7 @@ class TableSchema extends AbstractTableSchema
                     }
                 }
 
-                self::logger()->info(
+                $this->logger()->info(
                     "Migrating table data from {source} to {table} "
                     . "with columns mappings ({columns}) => ({target}).",
                     [
@@ -193,7 +190,7 @@ class TableSchema extends AbstractTableSchema
                 );
 
                 //http://stackoverflow.com/questions/4007014/alter-column-in-sqlite
-                $query = interpolate(
+                $query = \Spiral\interpolate(
                     "INSERT INTO {table} ({target}) SELECT {columns} FROM {source}",
                     [
                         'source'  => $this->driver->identifier($tableName),

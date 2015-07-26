@@ -6,13 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Relations;
+namespace Spiral\ORM\Relations;
 
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\Relation;
-use Spiral\Components\ORM\Selector;
-use Spiral\Core\Traits\LoggerTrait;
+use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\Relation;
+use Spiral\ORM\Selector;
 
 class ManyToMany extends Relation implements \Countable
 {
@@ -255,7 +255,7 @@ class ManyToMany extends Relation implements \Countable
     /**
      * Instance of DBAL\Table associated with relation pivot table.
      *
-     * @return \Spiral\Components\DBAL\Table
+     * @return \Spiral\Database\Table
      */
     protected function pivotTable()
     {

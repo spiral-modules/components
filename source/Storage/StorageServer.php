@@ -7,14 +7,16 @@
  * @copyright ©2009-2011
  */
 
-namespace Spiral\Components\Storage;
+namespace Spiral\Storage;
 
 use Psr\Http\Message\StreamInterface;
-use Spiral\Components\Files\FileManager;
-use Spiral\Components\Files\StreamWrapper;
-use Spiral\Components\Http\Stream;
+use Psr\Http\Message\UploadedFileInterface;
+use Spiral\Core\Component;
+use Spiral\Files\FilesInterface;
+use Spiral\Files\Streams\StreamableInterface;
+use Spiral\Files\Streams\StreamWrapper;
 
-abstract class StorageServer implements StorageServerInterface
+abstract class StorageServer extends Component implements ServerInterface
 {
     /**
      * Default mimetype to be used when nothing else can be applied.
@@ -31,21 +33,21 @@ abstract class StorageServer implements StorageServerInterface
     /**
      * File component.
      *
-     * @var FileManager
+     * @var FilesInterface
      */
-    protected $file = null;
+    protected $files = null;
 
     /**
      * Every server represent one virtual storage which can be either local, remote or cloud based.
      * Every server should support basic set of low-level operations (create, move, copy and etc).
      *
-     * @param FileManager $file    File component.
-     * @param array       $options Storage connection options.
+     * @param FilesInterface $files   File component.
+     * @param array          $options Storage connection options.
      */
-    public function __construct(FileManager $file, array $options)
+    public function __construct(FilesInterface $files, array $options)
     {
         $this->options = $options + $this->options;
-        $this->file = $file;
+        $this->files = $files;
     }
 
     /**
@@ -55,13 +57,13 @@ abstract class StorageServer implements StorageServerInterface
      *
      * Method should return false or thrown an exception if local filename can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Container instance.
+     * @param string          $name   Storage object name.
      * @return string|bool
      */
-    public function allocateFilename(StorageContainer $container, $name)
+    public function allocateFilename(BucketInterface $bucket, $name)
     {
-        if (empty($stream = $this->getStream($container, $name)))
+        if (empty($stream = $this->allocateStream($bucket, $name)))
         {
             return false;
         }
@@ -77,14 +79,14 @@ abstract class StorageServer implements StorageServerInterface
      *
      * Method should return false or thrown an exception if object can not be copied.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket      Container instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
      * @return bool
      */
-    public function copy(StorageContainer $container, StorageContainer $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        return $this->put($destination, $name, $this->getStream($container, $name));
+        return $this->put($destination, $name, $this->allocateStream($bucket, $name));
     }
 
     /**
@@ -93,16 +95,16 @@ abstract class StorageServer implements StorageServerInterface
      *
      * Method should return false or thrown an exception if object can not be replaced.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket      Container instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
      * @return bool
      */
-    public function replace(StorageContainer $container, StorageContainer $destination, $name)
+    public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        if ($this->copy($container, $destination, $name))
+        if ($this->copy($bucket, $destination, $name))
         {
-            $this->delete($container, $name);
+            $this->delete($bucket, $name);
 
             return true;
         }
@@ -120,12 +122,17 @@ abstract class StorageServer implements StorageServerInterface
     {
         if (empty($origin) || is_string($origin))
         {
-            if (!$this->file->exists($origin))
+            if (!$this->files->exists($origin))
             {
                 return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
             }
 
             return $origin;
+        }
+
+        if ($origin instanceof UploadedFileInterface || $origin instanceof StreamableInterface)
+        {
+            $origin = $origin->getStream();
         }
 
         if ($origin instanceof StreamInterface)
@@ -144,6 +151,11 @@ abstract class StorageServer implements StorageServerInterface
      */
     protected function castStream($origin)
     {
+        if ($origin instanceof UploadedFileInterface || $origin instanceof StreamableInterface)
+        {
+            $origin = $origin->getStream();
+        }
+
         if ($origin instanceof StreamInterface)
         {
             return $origin;
@@ -154,6 +166,6 @@ abstract class StorageServer implements StorageServerInterface
             return \GuzzleHttp\Psr7\stream_for('');
         }
 
-        return new Stream($origin);
+        return \GuzzleHttp\Psr7\stream_for($origin);
     }
 } 

@@ -6,18 +6,18 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Sqlite;
+namespace Spiral\Database\Drivers\Sqlite;
 
-use Spiral\Components\DBAL\DatabaseException;
-use Spiral\Components\DBAL\QueryCompiler as BaseQueryCompiler;
-use Spiral\Core\Traits\LoggerTrait;
+use Spiral\Core\Component;
+use Spiral\Database\DatabaseException;
+use Spiral\Database\QueryCompiler as BaseQueryCompiler;
 
 class QueryCompiler extends BaseQueryCompiler
 {
     /**
      * For warnings.
      */
-    use LoggerTrait;
+    use Component\LoggerTrait;
 
     /**
      * Compile delete query statement. Table name, joins and where tokens are required.
@@ -56,7 +56,7 @@ class QueryCompiler extends BaseQueryCompiler
      */
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
-        self::logger()->warning(
+        $this->logger()->warning(
             "SQLite UPDATE statement are very limited, you can not use complex SET statements."
         );
 

@@ -6,14 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Components\DBAL\Builders\DeleteQuery;
-use Spiral\Components\DBAL\Builders\SelectQuery;
-use Spiral\Components\DBAL\Builders\UpdateQuery;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Components\Http\Request;
-use Spiral\Core\Traits;
+use Spiral\Database\Builders\DeleteQuery;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Builders\UpdateQuery;
 
 /**
  * @method SelectQuery distinct(bool $distinct = true)
@@ -37,7 +34,7 @@ use Spiral\Core\Traits;
  * @method int max($identifier) Perform aggregation based on column or expression value.
  * @method int sum($identifier) Perform aggregation based on column or expression value.
  */
-class Table extends Component implements \JsonSerializable, \IteratorAggregate, \Countable
+class Table implements \JsonSerializable, \IteratorAggregate, \Countable
 {
     /**
      * Table name, without prefix.

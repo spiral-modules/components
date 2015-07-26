@@ -6,36 +6,28 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Components\Cache\CacheException;
-use Spiral\Components\Cache\CacheFacade;
-use Spiral\Components\Cache\StoreInterface;
-use Spiral\Components\DBAL\Builders\DeleteQuery;
-use Spiral\Components\DBAL\Builders\InsertQuery;
-use Spiral\Components\DBAL\Builders\SelectQuery;
-use Spiral\Components\DBAL\Builders\UpdateQuery;
-use Spiral\Core\Traits;
-use Spiral\Core\Container;
-use Spiral\Core\Container\InjectableInterface;
+use Spiral\Cache\StoreInterface;
+use Spiral\Core\Component;
+use Spiral\Database\Builders\DeleteQuery;
+use Spiral\Database\Builders\InsertQuery;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Events\Traits\EventsTrait;
 
 class Database extends Component
 {
     /**
      * Query and statement events.
      */
-    use Traits\EventsTrait;
+    use EventsTrait;
 
     /**
-     * InjectableInterface declares to spiral Container that requested interface or class should
-     * not be resolved using default mechanism. Following interface does not require any methods,
-     * however class or other interface which inherits InjectableInterface should declare constant
-     * named "INJECTION_MANAGER" with name of class responsible for resolving that injection.
-     *
-     * InjectionFactory will receive requested class or interface reflection and reflection linked
-     * to parameter in constructor or method used to declare injection.
+     * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
+     * once set - Container will ask specific binding for injection.
      */
-    const INJECTION_MANAGER = DatabaseManager::class;
+    const INJECTABLE = DatabaseManager::class;
 
     /**
      * Transaction isolation level 'SERIALIZABLE'.
@@ -113,13 +105,6 @@ class Database extends Component
     protected $driver = null;
 
     /**
-     * Container is required to resolve CacheManager when required.
-     *
-     * @var Container
-     */
-    protected $container = null;
-
-    /**
      * Database connection name/id.
      *
      * @var string
@@ -137,13 +122,11 @@ class Database extends Component
      * New Database instance. Database class is high level abstraction at top of Driver. Multiple
      * databases can use same driver and be different by table prefix.
      *
-     * @param Driver    $driver      Driver instance responsible for database connection.
-     * @param Container $container   Container is required to resolve CacheManager component when
-     *                               required.
-     * @param string    $name        Internal database name/id.
-     * @param string    $tablePrefix Default database table prefix, will be used for all table identifiers.
+     * @param Driver $driver      Driver instance responsible for database connection.
+     * @param string $name        Internal database name/id.
+     * @param string $tablePrefix Default database table prefix, will be used for all table identifiers.
      */
-    public function __construct(Driver $driver, Container $container, $name, $tablePrefix = '')
+    public function __construct(Driver $driver, $name, $tablePrefix = '')
     {
         $this->name = $name;
         $this->driver = $driver;
@@ -204,7 +187,7 @@ class Database extends Component
      */
     public function statement($query, array $parameters = [])
     {
-        return $this->event('statement', [
+        return $this->fire('statement', [
             'statement'  => $this->driver->statement($query, $parameters),
             'query'      => $query,
             'parameters' => $parameters,
@@ -251,7 +234,7 @@ class Database extends Component
      */
     public function query($query, array $parameters = [])
     {
-        return $this->event('query', [
+        return $this->fire('query', [
             'statement'  => $this->driver->query($query, $parameters),
             'query'      => $query,
             'parameters' => $parameters,
@@ -270,7 +253,6 @@ class Database extends Component
      * @param StoreInterface $store      Cache store to store result in, if null default store will
      *                                   be used.
      * @return CachedResult
-     * @throws CacheException
      */
     public function cached(
         $lifetime,
@@ -280,19 +262,18 @@ class Database extends Component
         StoreInterface $store = null
     )
     {
-        $store = !empty($store) ? $store : CacheFacade::getInstance($this->container)->store();
+        if (empty($store))
+        {
+            //This will work only with global container set
+            $store = self::getContainer()->get('Spiral\Cache\StoreInterface');
+        }
 
         if (empty($key))
         {
             /**
              * Trying to build unique query id based on provided options and environment.
              */
-            $key = md5(serialize([
-                $query,
-                $parameters,
-                $this->name,
-                $this->tablePrefix
-            ]));
+            $key = md5(serialize([$query, $parameters, $this->name, $this->tablePrefix]));
         }
 
         $data = $store->remember($key, $lifetime, function () use ($query, $parameters)

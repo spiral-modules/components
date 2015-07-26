@@ -6,13 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Cache\Stores;
+namespace Spiral\Cache\Stores;
 
-use Spiral\Components\Cache\CacheException;
-use Spiral\Components\Cache\CacheFacade;
-use Spiral\Components\Cache\CacheStore;
-use Memcache as MemcacheDriver;
-use Memcached as MemcachedDriver;
+use Spiral\Cache\CacheStore;
+use Spiral\Cache\CacheManager;
+use Spiral\Cache\CacheException;
+use Memcache, Memcached;
 
 class MemcacheStore extends CacheStore
 {
@@ -59,7 +58,7 @@ class MemcacheStore extends CacheStore
     /**
      * Constructed driver instance.
      *
-     * @var MemcacheDriver|MemcachedDriver
+     * @var Memcache|Memcached
      */
     protected $service = null;
 
@@ -78,16 +77,17 @@ class MemcacheStore extends CacheStore
     protected $prefix = '';
 
     /**
-     * Create new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and can be used in different parts of the
-     * application.
+     * Create a new cache store instance. Every instance should represent a single cache method.
+     * Multiple stores can exist at the same time and be used in different parts of the application.
      *
-     * @param CacheFacade                  $cache   CacheManager component.
-     * @param MemcacheDriver|MemcacheDriver $driver  Pre-created driver instance.
-     * @param bool                          $connect If true, custom driver will be connected.
+     * Logic of receiving configuration is reverted for controllable injections in spiral application.
+     *
+     * @param CacheManager        $cache   CacheFacade component.
+     * @param Memcache|Memcached $driver  Pre-created driver instance.
+     * @param bool               $connect If true, custom driver will be connected.
      * @throws CacheException
      */
-    public function __construct(CacheFacade $cache, $driver = null, $connect = true)
+    public function __construct(CacheManager $cache, $driver = null, $connect = true)
     {
         parent::__construct($cache);
 
@@ -114,11 +114,11 @@ class MemcacheStore extends CacheStore
 
         if ($this->driver == self::DRIVER_MEMCACHE)
         {
-            $this->service = new MemcacheDriver();
+            $this->service = new Memcache();
         }
         else
         {
-            $this->service = new MemcacheDriver();
+            $this->service = new Memcached();
         }
 
         $this->connect();
@@ -127,8 +127,8 @@ class MemcacheStore extends CacheStore
     /**
      * Set pre-created Memcache driver.
      *
-     * @param MemcacheDriver|MemcacheDriver $driver  Pre-created driver instance.
-     * @param bool                          $connect If true, custom driver will be connected.
+     * @param Memcache|Memcached $driver  Pre-created driver instance.
+     * @param bool               $connect If true, custom driver will be connected.
      */
     protected function setDriver($driver, $connect)
     {
@@ -334,7 +334,7 @@ class MemcacheStore extends CacheStore
     /**
      * Retrieve the currently selected memcache driver instance.
      *
-     * @return MemcachedDriver|MemcacheDriver
+     * @return Memcache|Memcached
      */
     public function getService()
     {

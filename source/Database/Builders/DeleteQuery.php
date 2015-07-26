@@ -6,10 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Builders;
+namespace Spiral\Database\Builders;
 
-use Spiral\Components\DBAL\Builders\Common\AffectQuery;
-use Spiral\Components\DBAL\QueryCompiler;
+use Spiral\Database\QueryCompiler;
 
 class DeleteQuery extends AffectQuery
 {

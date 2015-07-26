@@ -6,23 +6,19 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Components\DBAL\Database;
-use Spiral\Components\DBAL\DatabaseException;
-use Spiral\Components\DBAL\Driver;
+use Spiral\Core\ContainerInterface;
+use Spiral\Database\Database;
+use Spiral\Database\DatabaseException;
+use Spiral\Database\Driver;
 use PDO;
-use Spiral\Components\DBAL\Drivers\Postgres\Builders\InsertQuery;
+use Spiral\Database\Drivers\Postgres\Builders\InsertQuery;
 use Spiral\Core\Container;
 use Spiral\Core\HippocampusInterface;
 
 class PostgresDriver extends Driver
 {
-    /**
-     * Get short name to use for driver query profiling.
-     */
-    const DRIVER_NAME = 'Postgres';
-
     /**
      * Class names should be used to create schema instances to describe specified driver table. Schema
      * realizations are driver specific and allows both schema reading and writing (migrations).
@@ -65,7 +61,7 @@ class PostgresDriver extends Driver
                                 AND table_name = ?";
 
     /**
-     * CoreInterface.
+     * HippocampusInterface.
      *
      * @var HippocampusInterface
      */
@@ -84,17 +80,17 @@ class PostgresDriver extends Driver
      * Driver instances responsible for all database low level operations which can be DBMS specific
      * - such as connection preparation, custom table/column/index/reference schemas and etc.
      *
-     * @param array                 $config
-     * @param Container             $container
+     * @param ContainerInterface   $container
+     * @param array                $config
      * @param HippocampusInterface $runtime
      */
     public function __construct(
-        array $config = [],
-        Container $container,
+        ContainerInterface $container,
+        array $config,
         HippocampusInterface $runtime
     )
     {
-        parent::__construct($config, $container);
+        parent::__construct($container, $config);
         $this->runtime = $runtime;
     }
 
@@ -221,12 +217,9 @@ class PostgresDriver extends Driver
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return InsertQuery::make(
-            [
+        return $this->container->get(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
-            ] + $parameters,
-            $this->container
-        );
+            ] + $parameters);
     }
 }

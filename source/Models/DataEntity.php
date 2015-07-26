@@ -6,41 +6,29 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Support\Models;
+namespace Spiral\Models;
 
-use Spiral\Components\I18n\Translator;
-use Spiral\Components\I18n\LocalizableTrait;
-use Spiral\Core\Traits;
-use Spiral\Support\Models\Schemas\DataEntitySchema;
-use Spiral\Support\Validation\Validator;
+use Spiral\Core\Component;
+use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Events\Traits\EventsTrait;
+use Spiral\Validation\Traits\ValidatorTrait;
+use Spiral\Models\Schemas\EntitySchema;
 
-abstract class DataEntity extends Component implements \JsonSerializable, \IteratorAggregate, \ArrayAccess
+abstract class DataEntity extends Component implements
+    \JsonSerializable,
+    \IteratorAggregate,
+    \ArrayAccess
 {
     /**
      * Model events and localization.
      */
-    use LocalizableTrait, Traits\LoggerTrait, Traits\EventsTrait;
+    use EventsTrait, LoggerTrait, ValidatorTrait;
 
     /**
      * Such option will be passed to trait initializers when some component requested model schema
      * analysis.
      */
     const SCHEMA_ANALYSIS = 788;
-
-    /**
-     * Mutator aliases. Aliases used to simplify definition of DataEntity setters and getters. New
-     * filter alias can be defined at any moment by application or module. Aliases can also be used
-     * for accessors.
-     *
-     * @var array
-     */
-    public static $mutatorAliases = [
-        'escape'      => ['Spiral\Helpers\StringHelper', 'escape'],
-        'string'      => ['Spiral\Helpers\ValueHelper', 'castString'],
-        'boolean'     => ['Spiral\Helpers\ValueHelper', 'castBoolean'],
-        'scalarArray' => ['Spiral\Helpers\ValueHelper', 'scalarArray'],
-        'timestamp'   => 'Spiral\Support\Models\Accessors\Timestamp'
-    ];
 
     /**
      * Indication that model was already initiated.
@@ -55,14 +43,6 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
      * @var array
      */
     protected static $messagesCache = [];
-
-    /**
-     * Fields to apply filters and validations, this is primary model data, which can be set using
-     * setFields() method and retrieved using getFields() or publicFields().
-     *
-     * @var array
-     */
-    protected $fields = [];
 
     /**
      * List of secured fields, such fields can not be set using setFields() method (only directly).
@@ -88,70 +68,12 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     protected $hidden = [];
 
     /**
-     * Validator instance will be used to check model fields.
-     *
-     * @var Validator
-     */
-    protected $validator = null;
-
-    /**
      * Indication that validation is required, flag can be set when some field changed or in other
      * conditions when data has to be revalidated.
      *
      * @var bool
      */
     protected $validationRequired = false;
-
-    /**
-     * Set of validation rules associated with their field. Every field can have one or multiple
-     * rules assigned, however after first fail system will stop checking that field. This used to
-     * prevent cascade validation failing. You can redefine property singleError and addMessage
-     * function to specify different behaviour.
-     *
-     * Every rule should include condition (callback, function name or checker condition).
-     * Additionally spiral validator supports custom validation messages which can be associated
-     * with one condition by defining key "message" or "error", and additional argument which will
-     * be passed to validation function AFTER field value.
-     *
-     * Default message provided by validator OR by checker (has higher priority that validation
-     * message) will be used if you did not specify any custom rule.
-     *
-     * Validator will skip all empty or not defined values, to force it's validation use specially
-     * designed rules like "notEmpty", "required", "requiredWith" and etc.
-     *
-     * Examples:
-     * "status" => [
-     *      ["notEmpty"],
-     *      ["string::shorter", 10, "error" => "Your string is too short."],
-     *      [["MyClass","myMethod"], "error" => "Custom validation failed."]
-     * [,
-     * "email" => [
-     *      ["notEmpty", "error" => "Please enter your email address."],
-     *      ["email", "error" => "Email is not valid."]
-     * [,
-     * "pin" => [
-     *      ["string::regexp", "/[0-9]{5}/", "error" => "Invalid pin format, if you don't know your
-     *                                                   pin, please skip this field."]
-     * [,
-     * "flag" => ["notEmpty", "boolean"]
-     *
-     * In cases where you don't need custom message or check parameters you can use simplified
-     * rule syntax:
-     *
-     * "flag" => ["notEmpty", "boolean"]
-     *
-     * P.S. "$validates" is common name for validation rules property in validator and modes.
-     *
-     * @var array
-     */
-    protected $validates = [];
-
-    /**
-     * Validation and model errors.
-     *
-     * @var array
-     */
-    protected $errors = [];
 
     /**
      * Field getters, will be executed when field are received.
@@ -178,17 +100,6 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     protected $accessors = [];
 
     /**
-     * Register new filter alias. Filter aliases used by getters and setters.
-     *
-     * @param string   $alias  Alias name.
-     * @param callable $filter Filter to be applied, should be valid callable.
-     */
-    public static function setMutatorAlias($alias, $filter)
-    {
-        static::$mutatorAliases[$alias] = $filter;
-    }
-
-    /**
      * Get mutator for specified field. Setters, getters and accessors can be retrieved using this
      * method.
      *
@@ -204,14 +115,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
 
         if (isset($this->{$mutator}[$field]))
         {
-            $filter = $this->{$mutator}[$field];
-
-            if (is_string($filter) && isset(self::$mutatorAliases[$filter]))
-            {
-                return self::$mutatorAliases[$filter];
-            }
-
-            return $filter;
+            return $this->{$mutator}[$field];
         }
 
         return null;
@@ -266,9 +170,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
             }
             catch (\ErrorException $exception)
             {
-                self::logger()->warning(
-                    "Failed to apply filter to '{name}' field.", compact('name')
-                );
+                $this->logger()->warning("Failed to apply filter to '{name}' field.", compact('name'));
 
                 return null;
             }
@@ -319,7 +221,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
             catch (\ErrorException $exception)
             {
                 $value = call_user_func($filter, null);
-                self::logger()->warning("Failed to apply filter to '{name}' field.", compact('name'));
+                $this->logger()->warning("Failed to apply filter to '{name}' field.", compact('name'));
             }
         }
 
@@ -486,7 +388,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
             return $this;
         }
 
-        foreach ($this->event('setFields', $fields) as $name => $field)
+        foreach ($this->fire('setFields', $fields) as $name => $field)
         {
             $this->isFillable($field) && $this->setField($name, $field, true);
         }
@@ -507,7 +409,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
             unset($fields[$secured]);
         }
 
-        return $this->event('publicFields', $fields);
+        return $this->fire('publicFields', $fields);
     }
 
     /**
@@ -519,26 +421,6 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     public function getIterator()
     {
         return new \ArrayIterator($this->getFields());
-    }
-
-    /**
-     * Validator instance associated with model, will be response for validations of validation errors.
-     * Model related error localization should happen in model itself.
-     *
-     * @return Validator
-     */
-    public function getValidator()
-    {
-        if (!empty($this->validator))
-        {
-            //Refreshing data
-            return $this->validator->setData($this->fields);
-        }
-
-        return $this->validator = Validator::make([
-            'data'      => $this->fields,
-            'validates' => $this->validates
-        ]);
     }
 
     /**
@@ -567,90 +449,17 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
         }
         elseif ($this->validationRequired)
         {
-            $this->event('validation');
+            $this->fire('validation');
 
             $this->errors = $this->getValidator()->getErrors();
             $this->validationRequired = false;
 
             //Cleaning memory
             $this->validator->setData([]);
-            $this->errors = $this->event('validated', $this->errors);
+            $this->errors = $this->fire('validated', $this->errors);
         }
 
         return empty($this->errors);
-    }
-
-    /**
-     * Validate data and return validation status, true if all fields passed validation and false is
-     * some error messages collected (error messages can be forced manually using addError() method).
-     *
-     * @return bool
-     */
-    public function isValid()
-    {
-        $this->validate();
-
-        return !((bool)$this->errors);
-    }
-
-    /**
-     * Evil tween of isValid() method: validate data (if not already validated) and return true if
-     * any validation error occurred including errors added using addError() method.
-     *
-     * @return bool
-     */
-    public function hasErrors()
-    {
-        return !$this->isValid();
-    }
-
-    /**
-     * Get all validation errors with applied localization using i18n component (if specified), any
-     * error message can be localized by using [[ ]] around it. Data will be automatically validated
-     * while calling this method (if not validated before).
-     *
-     * @param bool $reset Remove all model messages and reset validation, false by default.
-     * @return array
-     */
-    public function getErrors($reset = false)
-    {
-        $this->validate();
-        $errors = [];
-        foreach ($this->errors as $field => $error)
-        {
-            if (
-                is_string($error)
-                && substr($error, 0, 2) == Translator::I18N_PREFIX
-                && substr($error, -2) == Translator::I18N_POSTFIX
-            )
-            {
-                $error = $this->i18nMessage($error);
-            }
-
-            $errors[$field] = $error;
-        }
-
-        if ($reset)
-        {
-            $this->errors = [];
-        }
-
-        return $errors;
-    }
-
-    /**
-     * Adding error message. You can use this function to assign error manually. This message will be
-     * localized same way as other messages, however system will not be able to index them.
-     *
-     * To use custom errors combined with location use ->addError($model->getMessage()) and store your
-     * custom error messages in model::$messages array.
-     *
-     * @param string       $field   Field storing message.
-     * @param string|array $message Message to be added.
-     */
-    public function addError($field, $message)
-    {
-        $this->errors[$field] = $message;
     }
 
     /**
@@ -683,16 +492,16 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
      * sends SCHEMA_ANALYSIS option to trait initializers. Method can be used to create custom filters,
      * schema values and etc.
      *
-     * @param DataEntitySchema $schema
-     * @param string           $property Model property name.
-     * @param mixed            $value    Model property value, will be provided in an inherited form.
+     * @param EntitySchema $schema
+     * @param string       $property Model property name.
+     * @param mixed        $value    Model property value, will be provided in an inherited form.
      * @return mixed
      */
-    public static function describeProperty(DataEntitySchema $schema, $property, $value)
+    public static function describeProperty(EntitySchema $schema, $property, $value)
     {
         static::initialize(self::SCHEMA_ANALYSIS);
 
-        return static::dispatcher()->fire('describe', compact('schema', 'property', 'value'))['value'];
+        return static::events()->fire('describe', compact('schema', 'property', 'value'))['value'];
     }
 
     /**
@@ -713,6 +522,6 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
      */
     public function jsonSerialize()
     {
-        return $this->event('jsonSerialize', $this->publicFields());
+        return $this->fire('jsonSerialize', $this->publicFields());
     }
 }

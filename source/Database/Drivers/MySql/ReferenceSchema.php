@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Components\DBAL\Schemas\AbstractReferenceSchema;
+use Spiral\Database\Schemas\AbstractReferenceSchema;
 
 class ReferenceSchema extends AbstractReferenceSchema
 {

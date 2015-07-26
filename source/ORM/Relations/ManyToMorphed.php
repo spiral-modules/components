@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Relations;
+namespace Spiral\ORM\Relations;
 
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ModelIterator;
-use Spiral\Components\ORM\ORM;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\RelationInterface;
-use Spiral\Components\ORM\Selector;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ModelIterator;
+use Spiral\ORM\ORM;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\RelationInterface;
+use Spiral\ORM\Selector;
 
 class ManyToMorphed implements RelationInterface
 {
@@ -315,7 +315,7 @@ class ManyToMorphed implements RelationInterface
     /**
      * Instance of DBAL\Table associated with relation pivot table.
      *
-     * @return \Spiral\Components\DBAL\Table
+     * @return \Spiral\Database\Table
      */
     protected function pivotTable()
     {

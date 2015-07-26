@@ -6,22 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ODM;
+namespace Spiral\ODM;
 
-use Spiral\Core\Container\InjectableInterface;
-
-class MongoDatabase extends \MongoDB implements InjectableInterface
+class MongoDatabase extends \MongoDB
 {
     /**
-     * InjectableInterface declares to spiral Container that requested interface or class should
-     * not be resolved using default mechanism. Following interface does not require any methods,
-     * however class or other interface which inherits InjectableInterface should declare constant
-     * named "INJECTION_MANAGER" with name of class responsible for resolving that injection.
-     *
-     * InjectionFactory will receive requested class or interface reflection and reflection linked
-     * to parameter in constructor or method used to declare injection.
+     * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
+     * once set - Container will ask specific binding for injection.
      */
-    const INJECTION_MANAGER = ODM::class;
+    const INJECTABLE = ODM::class;
 
     /**
      * Profiling levels.
@@ -74,7 +67,6 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
         $this->config = $this->config + $config;
 
         //Selecting client
-        benchmark('mongo::connect', $this->config['database']);
         if (class_exists('MongoClient', false))
         {
             $this->connection = new \MongoClient($this->config['server'], $this->config['options']);
@@ -85,7 +77,6 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
         }
 
         parent::__construct($this->connection, $this->config['database']);
-        benchmark('mongo::connect', $this->config['database']);
     }
 
     /**

@@ -10,15 +10,15 @@ namespace Spiral\Components\Storage\Servers;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Spiral\Components\Files\FileManager;
-use Spiral\Components\Storage\StorageContainer;
-use Spiral\Components\Storage\StorageServer;
+use Psr\Http\Message\UriInterface;
+use Spiral\Files\FilesInterface;
+use Spiral\Storage\BucketInterface;
+use Spiral\Storage\StorageServer;
 
 class AmazonServer extends StorageServer
 {
@@ -45,12 +45,12 @@ class AmazonServer extends StorageServer
      * Every server represent one virtual storage which can be either local, remote or cloud based.
      * Every server should support basic set of low-level operations (create, move, copy and etc).
      *
-     * @param FileManager $file    File component.
-     * @param array       $options Storage connection options.
+     * @param FilesInterface $files   File component.
+     * @param array          $options Storage connection options.
      */
-    public function __construct(FileManager $file, array $options)
+    public function __construct(FilesInterface $files, array $options)
     {
-        parent::__construct($file, $options);
+        parent::__construct($files, $options);
 
         //Some options can be passed directly for guzzle client
         $this->client = new Client($this->options);
@@ -60,16 +60,15 @@ class AmazonServer extends StorageServer
      * Check if given object (name) exists in specified container. Method should never fail if file
      * not exists and will return bool in any condition.
      *
-     * @param StorageContainer $container Container instance associated with specific server.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance associated with specific server.
+     * @param string          $name   Storage object name.
      * @return bool|ResponseInterface
-     * @throws ClientException
      */
-    public function exists(StorageContainer $container, $name)
+    public function exists(BucketInterface $bucket, $name)
     {
         try
         {
-            $response = $this->client->send($this->buildRequest('HEAD', $container, $name));
+            $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
         }
         catch (ClientException $exception)
         {
@@ -90,16 +89,17 @@ class AmazonServer extends StorageServer
         return $response;
     }
 
+
     /**
      * Retrieve object size in bytes, should return false if object does not exists.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return int|bool
      */
-    public function getSize(StorageContainer $container, $name)
+    public function size(BucketInterface $bucket, $name)
     {
-        if (empty($response = $this->exists($container, $name)))
+        if (empty($response = $this->exists($bucket, $name)))
         {
             return false;
         }
@@ -111,14 +111,12 @@ class AmazonServer extends StorageServer
      * Upload storage object using given filename or stream. Method can return false in case of failed
      * upload or thrown custom exception if needed.
      *
-     * @param StorageContainer       $container Container instance.
-     * @param string                 $name      Given storage object name.
-     * @param string|StreamInterface $origin    Local filename or stream to use for creation.
+     * @param BucketInterface        $bucket Bucket instance.
+     * @param string                 $name   Given storage object name.
+     * @param string|StreamInterface $origin Local filename or stream to use for creation.
      * @return bool
-     * @throws ClientException
-     * @throws ServerException
      */
-    public function put(StorageContainer $container, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $origin)
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name)))
         {
@@ -127,14 +125,14 @@ class AmazonServer extends StorageServer
 
         $request = $this->buildRequest(
             'PUT',
-            $container,
+            $bucket,
             $name,
             [
                 'Content-MD5'  => base64_encode(md5_file($this->castFilename($origin), true)),
                 'Content-Type' => $mimetype
             ],
             [
-                'Acl'          => $container->options['public'] ? 'public-read' : 'private',
+                'Acl'          => $bucket->getOption('public') ? 'public-read' : 'private',
                 'Content-Type' => $mimetype
             ]
         );
@@ -150,17 +148,15 @@ class AmazonServer extends StorageServer
      *
      * Method should return false or thrown an exception if stream can not be allocated.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
      * @return StreamInterface|false
-     * @throws ClientException
-     * @throws ServerException
      */
-    public function getStream(StorageContainer $container, $name)
+    public function allocateStream(BucketInterface $bucket, $name)
     {
         try
         {
-            $response = $this->client->send($this->buildRequest('GET', $container, $name));
+            $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
         }
         catch (ClientException $exception)
         {
@@ -176,31 +172,42 @@ class AmazonServer extends StorageServer
         return $response->getBody();
     }
 
+
+    /**
+     * Delete storage object from specified container. Method should not fail if object does not
+     * exists.
+     *
+     * @param BucketInterface $bucket Bucket instance.
+     * @param string          $name   Storage object name.
+     */
+    public function delete(BucketInterface $bucket, $name)
+    {
+        $this->client->send($this->buildRequest('DELETE', $bucket, $name));
+    }
+
     /**
      * Rename storage object without changing it's container. This operation does not require
      * object recreation or download and can be performed on remote server.
      *
      * Method should return false or thrown an exception if object can not be renamed.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $oldname   Storage object name.
-     * @param string           $newname   New storage object name.
+     * @param BucketInterface $bucket  Bucket instance.
+     * @param string          $oldname Storage object name.
+     * @param string          $newname New storage object name.
      * @return bool
-     * @throws ClientException
-     * @throws ServerException
      */
-    public function rename(StorageContainer $container, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         try
         {
             $this->client->send($this->buildRequest(
                 'PUT',
-                $container,
+                $bucket,
                 $newname,
                 [],
                 [
-                    'Acl'         => $container->options['public'] ? 'public-read' : 'private',
-                    'Copy-Source' => $this->buildUri($container, $oldname)->getPath()
+                    'Acl'         => $bucket->getOption('public') ? 'public-read' : 'private',
+                    'Copy-Source' => $this->buildUri($bucket, $oldname)->getPath()
                 ]
             ));
         }
@@ -215,22 +222,11 @@ class AmazonServer extends StorageServer
             return false;
         }
 
-        $this->delete($container, $oldname);
+        $this->delete($bucket, $oldname);
 
         return true;
     }
 
-    /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     */
-    public function delete(StorageContainer $container, $name)
-    {
-        $this->client->send($this->buildRequest('DELETE', $container, $name));
-    }
 
     /**
      * Copy object to another internal (under same server) container, this operation may not
@@ -238,12 +234,12 @@ class AmazonServer extends StorageServer
      *
      * Method should return false or thrown an exception if object can not be copied.
      *
-     * @param StorageContainer $container   Container instance.
-     * @param StorageContainer $destination Destination container (under same server).
-     * @param string           $name        Storage object name.
+     * @param BucketInterface $bucket      Bucket instance.
+     * @param BucketInterface $destination Destination bucket (under same server).
+     * @param string          $name        Storage object name.
      * @return bool
      */
-    public function copy(StorageContainer $container, StorageContainer $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
         try
         {
@@ -253,8 +249,8 @@ class AmazonServer extends StorageServer
                 $name,
                 [],
                 [
-                    'Acl'         => $destination->options['public'] ? 'public-read' : 'private',
-                    'Copy-Source' => $this->buildUri($container, $name)->getPath()
+                    'Acl'         => $destination->getOption('public') ? 'public-read' : 'private',
+                    'Copy-Source' => $this->buildUri($bucket, $name)->getPath()
                 ]
             ));
         }
@@ -275,30 +271,30 @@ class AmazonServer extends StorageServer
     /**
      * Create instance of UriInterface based on provided container instance and storage object name.
      *
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     * @return Uri
+     * @param BucketInterface $container Bucket instance.
+     * @param string          $name      Storage object name.
+     * @return UriInterface
      */
-    protected function buildUri(StorageContainer $container, $name)
+    protected function buildUri(BucketInterface $container, $name)
     {
         return new Uri(
-            $this->options['server'] . '/' . $container->options['bucket'] . '/' . rawurlencode($name)
+            $this->options['server'] . '/' . $container->getOption('bucket') . '/' . rawurlencode($name)
         );
     }
 
     /**
      * Helper method used to create signed amazon request with correct set of headers.
      *
-     * @param string           $method    Http method.
-     * @param StorageContainer $container Container instance.
-     * @param string           $name      Storage object name.
-     * @param array            $headers   Request headers.
-     * @param array            $commands  Amazon commands associated with values.
+     * @param string          $method   Http method.
+     * @param BucketInterface $bucket   Bucket instance.
+     * @param string          $name     Storage object name.
+     * @param array           $headers  Request headers.
+     * @param array           $commands Amazon commands associated with values.
      * @return RequestInterface
      */
     protected function buildRequest(
         $method,
-        StorageContainer $container,
+        BucketInterface $bucket,
         $name,
         array $headers = [],
         array $commands = []
@@ -313,7 +309,7 @@ class AmazonServer extends StorageServer
         $packedCommands = $this->packCommands($commands);
 
         return $this->signRequest(
-            new Request($method, $this->buildUri($container, $name), $headers + $packedCommands),
+            new Request($method, $this->buildUri($bucket, $name), $headers + $packedCommands),
             $packedCommands
         );
     }

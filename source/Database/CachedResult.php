@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Components\Cache\StoreInterface;
+use Spiral\Cache\StoreInterface;
 use PDO;
 
 class CachedResult extends QueryResult
@@ -104,7 +104,10 @@ class CachedResult extends QueryResult
      */
     public function queryString()
     {
-        return DatabaseManager::interpolateQuery($this->query, $this->parameters);
+        return QueryCompiler::interpolate(
+            $this->query,
+            $this->parameters
+        );
     }
 
     /**

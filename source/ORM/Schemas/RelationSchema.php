@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\ORM\Schemas;
+namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\ORM\ActiveRecord;
-use Spiral\Components\ORM\ORM;
-use Spiral\Components\ORM\ORMException;
-use Spiral\Components\ORM\SchemaBuilder;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\ORM;
+use Spiral\ORM\ORMException;
+use Spiral\ORM\SchemaBuilder;
 use Spiral\Core\Container;
 
 abstract class RelationSchema implements RelationSchemaInterface
@@ -205,7 +205,7 @@ abstract class RelationSchema implements RelationSchemaInterface
                 continue;
             }
 
-            $this->definition[$property] = interpolate($pattern, $this->definitionOptions());
+            $this->definition[$property] = \Spiral\interpolate($pattern, $this->definitionOptions());
         }
     }
 

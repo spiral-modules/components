@@ -6,32 +6,30 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\DBAL;
+namespace Spiral\Database;
 
-use Spiral\Component;
-use Spiral\Components\DBAL\Builders\DeleteQuery;
-use Spiral\Components\DBAL\Builders\InsertQuery;
-use Spiral\Components\DBAL\Builders\SelectQuery;
-use Spiral\Components\DBAL\Builders\UpdateQuery;
-use Spiral\Components\DBAL\Schemas\AbstractColumnSchema;
-use Spiral\Components\DBAL\Schemas\AbstractIndexSchema;
-use Spiral\Components\DBAL\Schemas\AbstractReferenceSchema;
-use Spiral\Components\DBAL\Schemas\AbstractTableSchema;
-use Spiral\Core\Traits;
+use Spiral\Core\Component;
+use Spiral\Database\Builders\DeleteQuery;
+use Spiral\Database\Builders\InsertQuery;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractIndexSchema;
+use Spiral\Database\Schemas\AbstractReferenceSchema;
+use Spiral\Database\Schemas\AbstractTableSchema;
 use PDO;
 use PDOStatement;
+use Spiral\Core\ContainerInterface;
+use Spiral\Debug\Traits\BenchmarkTrait;
+use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Events\Traits\EventsTrait;
 
 abstract class Driver extends Component
 {
     /**
      * Profiling and logging.
      */
-    use Traits\LoggerTrait, Traits\EventsTrait;
-
-    /**
-     * Get short name to use for driver query profiling.
-     */
-    const DRIVER_NAME = 'DBALDriver';
+    use LoggerTrait, EventsTrait, BenchmarkTrait;
 
     /**
      * Class names should be used to create schema instances to describe specified driver table.
@@ -71,6 +69,13 @@ abstract class Driver extends Component
      * @var string
      */
     const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
+
+    /**
+     * Container is required to load custom builders.
+     *
+     * @var ContainerInterface
+     */
+    protected $container = null;
 
     /**
      * Connection configuration described in DBAL config file. Any driver can be used as data source
@@ -123,10 +128,13 @@ abstract class Driver extends Component
      * Driver instances responsible for all database low level operations which can be DBMS specific
      * - such as connection preparation, custom table/column/index/reference schemas and etc.
      *
-     * @param array $config
+     * @param ContainerInterface $container
+     * @param array              $config
      */
-    public function __construct(array $config)
+    public function __construct(ContainerInterface $container, array $config)
     {
+        $this->container = $container;
+
         $this->config = $config + $this->config;
         $this->options = $config['options'] + $this->options;
 
@@ -216,9 +224,9 @@ abstract class Driver extends Component
             return $this->pdo;
         }
 
-        benchmark(static::DRIVER_NAME . "::connect", $this->config['connection']);
-        $this->pdo = $this->event('connect', $this->createPDO());
-        benchmark(static::DRIVER_NAME . "::connect", $this->config['connection']);
+        $this->benchmark($this->databaseName . "::connect", $this->config['connection']);
+        $this->pdo = $this->fire('connect', $this->createPDO());
+        $this->benchmark($this->databaseName . "::connect", $this->config['connection']);
 
         return $this->pdo;
     }
@@ -259,7 +267,7 @@ abstract class Driver extends Component
      */
     public function disconnect()
     {
-        $this->event('disconnect', $this->pdo);
+        $this->fire('disconnect', $this->pdo);
         $this->pdo = null;
 
         return $this;
@@ -302,10 +310,7 @@ abstract class Driver extends Component
 
             if (is_array($parameter))
             {
-                $result = array_merge(
-                    $result,
-                    $this->prepareParameters($parameter)
-                );
+                $result = array_merge($result, $this->prepareParameters($parameter));
             }
             else
             {
@@ -332,8 +337,8 @@ abstract class Driver extends Component
         {
             if ($this->config['profiling'])
             {
-                $builtQuery = DatabaseManager::interpolateQuery($query, $parameters);
-                benchmark(static::DRIVER_NAME . "::" . $this->getDatabaseName(), $builtQuery);
+                $builtQuery = QueryCompiler::interpolate($query, $parameters);
+                $this->benchmark($this->databaseName, $builtQuery);
             }
 
             $pdoStatement = $this->getPDO()->prepare($query);
@@ -341,7 +346,7 @@ abstract class Driver extends Component
             //Configuring statement binded parameters
             $pdoStatement->execute($parameters);
 
-            $this->event('statement', [
+            $this->fire('statement', [
                 'statement'  => $pdoStatement,
                 'query'      => $query,
                 'parameters' => $parameters
@@ -349,16 +354,16 @@ abstract class Driver extends Component
 
             if ($this->config['profiling'] && isset($builtQuery))
             {
-                benchmark(static::DRIVER_NAME . "::" . $this->getDatabaseName(), $builtQuery);
-                self::logger()->debug($builtQuery, compact('query', 'parameters'));
+                $this->benchmark($this->databaseName, $builtQuery);
+                $this->logger()->debug($builtQuery, compact('query', 'parameters'));
             }
         }
         catch (\PDOException $exception)
         {
-            self::logger()->error(
+            $this->logger()->error(
                 !empty($builtQuery)
                     ? $builtQuery
-                    : DatabaseManager::interpolateQuery($query, $parameters),
+                    : QueryCompiler::interpolate($query, $parameters),
                 compact('query', 'parameters')
             );
 
@@ -380,7 +385,7 @@ abstract class Driver extends Component
      */
     public function query($query, array $parameters = [], &$preparedParameters = null)
     {
-        return self::getContainer()->get(static::QUERY_RESULT, [
+        return $this->container->get(static::QUERY_RESULT, [
             'statement'  => $this->statement($query, $parameters, $preparedParameters),
             'parameters' => $preparedParameters
         ]);
@@ -430,7 +435,7 @@ abstract class Driver extends Component
                 $this->isolationLevel($isolationLevel);
             }
 
-            self::logger()->info('Starting transaction.');
+            $this->logger()->info('Starting transaction.');
 
             return $this->getPDO()->beginTransaction();
         }
@@ -452,7 +457,7 @@ abstract class Driver extends Component
         $this->transactionLevel--;
         if ($this->transactionLevel == 0)
         {
-            self::logger()->info('Committing transaction.');
+            $this->logger()->info('Committing transaction.');
 
             return $this->getPDO()->commit();
         }
@@ -475,7 +480,7 @@ abstract class Driver extends Component
 
         if ($this->transactionLevel == 0)
         {
-            self::logger()->info('Rolling black transaction.');
+            $this->logger()->info('Rolling black transaction.');
 
             return $this->getPDO()->rollBack();
         }
@@ -494,7 +499,7 @@ abstract class Driver extends Component
      */
     protected function isolationLevel($level)
     {
-        self::logger()->info("Setting transaction isolation level to '{$level}'.");
+        $this->logger()->info("Setting transaction isolation level to '{$level}'.");
         !empty($level) && $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
     }
 
@@ -506,7 +511,7 @@ abstract class Driver extends Component
      */
     protected function savepointCreate($name)
     {
-        self::logger()->info("Creating savepoint '{$name}'.");
+        $this->logger()->info("Creating savepoint '{$name}'.");
         $this->statement("SAVEPOINT " . $this->identifier("SVP{$name}"));
     }
 
@@ -518,7 +523,7 @@ abstract class Driver extends Component
      */
     protected function savepointRelease($name)
     {
-        self::logger()->info("Releasing savepoint '{$name}'.");
+        $this->logger()->info("Releasing savepoint '{$name}'.");
         $this->statement("RELEASE SAVEPOINT " . $this->identifier("SVP{$name}"));
     }
 
@@ -530,7 +535,7 @@ abstract class Driver extends Component
      */
     protected function savepointRollback($name)
     {
-        self::logger()->info("Rolling back savepoint '{$name}'.");
+        $this->logger()->info("Rolling back savepoint '{$name}'.");
         $this->statement("ROLLBACK TO SAVEPOINT " . $this->identifier("SVP{$name}"));
     }
 
@@ -573,14 +578,11 @@ abstract class Driver extends Component
      */
     public function tableSchema($table, $tablePrefix = '')
     {
-        return self::getContainer()->get(
-            static::SCHEMA_TABLE,
-            [
-                'driver'      => $this,
-                'name'        => $table,
-                'tablePrefix' => $tablePrefix
-            ]
-        );
+        return $this->container->get(static::SCHEMA_TABLE, [
+            'driver'      => $this,
+            'name'        => $table,
+            'tablePrefix' => $tablePrefix
+        ]);
     }
 
     /**
@@ -594,7 +596,7 @@ abstract class Driver extends Component
      */
     public function columnSchema(AbstractTableSchema $table, $name, $schema = null)
     {
-        return self::getContainer()->get(static::SCHEMA_COLUMN, compact('table', 'name', 'schema'));
+        return $this->container->get(static::SCHEMA_COLUMN, compact('table', 'name', 'schema'));
     }
 
     /**
@@ -608,7 +610,7 @@ abstract class Driver extends Component
      */
     public function indexSchema(AbstractTableSchema $table, $name, $schema = null)
     {
-        return self::getContainer()->get(static::SCHEMA_INDEX, compact('table', 'name', 'schema'));
+        return $this->container->get(static::SCHEMA_INDEX, compact('table', 'name', 'schema'));
     }
 
     /**
@@ -622,7 +624,7 @@ abstract class Driver extends Component
      */
     public function referenceSchema(AbstractTableSchema $table, $name, $schema = null)
     {
-        return self::getContainer()->get(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
+        return $this->container->get(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
     }
 
     /**
@@ -646,7 +648,7 @@ abstract class Driver extends Component
      */
     public function queryCompiler($tablePrefix = '')
     {
-        return self::getContainer()->get(static::QUERY_COMPILER, [
+        return $this->container->get(static::QUERY_COMPILER, [
             'driver'      => $this,
             'tablePrefix' => $tablePrefix
         ]);
@@ -661,10 +663,10 @@ abstract class Driver extends Component
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return InsertQuery::make([
+        return $this->container->get(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
-            ] + $parameters, self::getContainer());
+            ] + $parameters);
     }
 
     /**
@@ -676,10 +678,10 @@ abstract class Driver extends Component
      */
     public function selectBuilder(Database $database, array $parameters = [])
     {
-        return SelectQuery::make([
+        return $this->container->get(SelectQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
-            ] + $parameters, self::getContainer());
+            ] + $parameters);
     }
 
     /**
@@ -691,10 +693,10 @@ abstract class Driver extends Component
      */
     public function deleteBuilder(Database $database, array $parameters = [])
     {
-        return DeleteQuery::make([
+        return $this->container->get(DeleteQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
-            ] + $parameters, self::getContainer());
+            ] + $parameters);
     }
 
     /**
@@ -706,10 +708,10 @@ abstract class Driver extends Component
      */
     public function updateBuilder(Database $database, array $parameters = [])
     {
-        return UpdateQuery::make([
+        return $this->container->get(UpdateQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
-            ] + $parameters, self::getContainer());
+            ] + $parameters);
     }
 
     /**

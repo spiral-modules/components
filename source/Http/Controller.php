@@ -37,6 +37,13 @@ abstract class Controller extends Component implements ControllerInterface
     protected $defaultAction = 'index';
 
     /**
+     * Container interface used in callAction.
+     *
+     * @var ContainerInterface
+     */
+    protected $container = null;
+
+    /**
      * Last set of parameters passed to callAction method,
      *
      * @var array
@@ -104,12 +111,13 @@ abstract class Controller extends Component implements ControllerInterface
             throw new ClientException(ClientException::NOT_FOUND, "Action is not allowed.");
         }
 
+        $this->container = $container;
         $this->parameters = $parameters;
 
         try
         {
             //Getting set of arguments should be sent to requested method
-            $arguments = $container->resolveArguments($reflection, $parameters);
+            $arguments = $this->container->resolveArguments($reflection, $parameters);
         }
         catch (BadArgumentException $exception)
         {
@@ -131,5 +139,30 @@ abstract class Controller extends Component implements ControllerInterface
         $this->benchmark($action);
 
         return $this->afterAction($reflection, $arguments, $result);
+    }
+
+    /**
+     * Call action of external controller and return it's result. Container instance has to be set.
+     *
+     * @param string $controller
+     * @param string $action
+     * @param array  $parameters
+     * @return mixed
+     */
+    protected function externalAction($controller, $action, array $parameters = [])
+    {
+        if (!class_exists($controller))
+        {
+            throw new ClientException(ClientException::NOT_FOUND);
+        }
+
+        //Initiating controller with all required dependencies
+        $controller = $this->container->get($controller);
+        if (!$controller instanceof ControllerInterface)
+        {
+            throw new ClientException(404, "Not a valid controller.");
+        }
+
+        return $controller->callAction($this->container, $action, $parameters);
     }
 }

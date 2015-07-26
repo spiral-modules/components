@@ -13,7 +13,7 @@ abstract class Singleton extends Component
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
-    const SINGLETON = self::class;
+    const SINGLETON = null;
 
     /**
      * Singletons will work as desired only under Spiral Container which can understand SINGLETON

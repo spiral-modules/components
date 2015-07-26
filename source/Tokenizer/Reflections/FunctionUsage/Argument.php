@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Tokenizer\Reflection\FunctionUsage;
+namespace Spiral\Tokenizer\Reflections\FunctionUsage;
 
 class Argument
 {

@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Tokenizer\Reflection;
+namespace Spiral\Tokenizer\Reflections;
 
-use Spiral\Components\Tokenizer\Reflection\FunctionUsage\Argument;
+use Spiral\Tokenizer\Reflections\FunctionUsage\Argument;
 
 class FunctionUsage
 {

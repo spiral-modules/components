@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Tokenizer;
+namespace Spiral\Tokenizer\Reflections;
 
-use Spiral\Components\Tokenizer\Reflection\FunctionUsage;
-use Spiral\Components\Tokenizer\Reflection\FunctionUsage\Argument;
+use Spiral\Tokenizer\Reflections\FunctionUsage;
+use Spiral\Tokenizer\Reflections\FunctionUsage\Argument;
 use Spiral\Tokenizer\TokenizerInterface;
 
 class ReflectionFile
@@ -143,7 +143,6 @@ class ReflectionFile
         $this->tokens = $this->cleanTokens($tokens);
 
         //Restoring original tokens (this one is required for function usages)
-        $this->tokens = $tokens;
         $this->countTokens = count($this->tokens);
 
         //Looking for declarations
@@ -209,7 +208,8 @@ class ReflectionFile
                 continue;
             }
 
-            $result[][self::TOKEN_ID] = $TID;
+            $token[self::TOKEN_ID] = $TID;
+            $result[] = $token;
         }
 
         return $result;

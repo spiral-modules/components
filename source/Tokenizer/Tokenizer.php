@@ -8,7 +8,7 @@
  */
 namespace Spiral\Tokenizer;
 
-use Spiral\Components\Tokenizer\ReflectionFile;
+use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Loader;
@@ -302,6 +302,8 @@ class Tokenizer extends Singleton implements TokenizerInterface
                         continue 2;
                     }
                 }
+
+                $result[] = $filename;
             }
         }
 

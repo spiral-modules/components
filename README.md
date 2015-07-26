@@ -1,1 +1,1 @@
-Spiral Framework Core
+Spiral Framework Core Components

@@ -9,11 +9,12 @@
 namespace Spiral\Validation;
 
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 
-class ValidationManager extends Singleton
+class ValidationManager extends Singleton implements InjectorInterface
 {
     /**
      * Required traits.
@@ -49,15 +50,33 @@ class ValidationManager extends Singleton
      * without using container get method.
      *
      * @param array $data
-     * @param array $rules
+     * @param array $validates
      * @param array $options Custom validation options.
      * @return ValidatorInterface
      */
-    public function createValidator(array $data, array $rules, array $options = [])
+    public function createValidator(array $data, array $validates, array $options = [])
     {
         $class = $this->config['validator'];
 
         //Pretty simple right?
-        return new $class($data, $rules, $options + $this->config, $this->container);
+        return new $class($data, $validates, $options + $this->config, $this->container);
+    }
+
+    /**
+     * Injector will receive requested class or interface reflection and reflection linked
+     * to parameter in constructor or method.
+     *
+     * This method can return pre-defined instance or create new one based on requested class. Parameter
+     * reflection can be used for dynamic class constructing, for example it can define database name
+     * or config section to be used to construct requested instance.
+     *
+     * @param \ReflectionClass     $class
+     * @param \ReflectionParameter $parameter
+     * @return mixed
+     */
+    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    {
+        //We can use default validator
+        return $this->createValidator([], []);
     }
 }

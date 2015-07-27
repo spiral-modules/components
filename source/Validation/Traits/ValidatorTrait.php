@@ -118,9 +118,10 @@ trait ValidatorTrait
 
         if (!empty(self::getContainer()))
         {
-            $this->validator = ValidationManager::getInstance(
-                self::getContainer()
-            )->createValidator($this->fields, !empty($validates) ? $validates : $this->validates);
+            $this->validator = self::getContainer()->get('Spiral\Validation\ValidatorInterface', [
+                'fields'    => $this->fields,
+                'validates' => !empty($validates) ? $validates : $this->validates
+            ]);
         }
 
         throw new ValidationException("Unable to create class Validator, no global container set.");

@@ -8,12 +8,13 @@
  */
 namespace Spiral\Validation;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class Validator extends Component
+class Validator extends Component implements LoggerAwareInterface
 {
     /**
      * Localization and indexation support.

@@ -11,9 +11,9 @@ namespace Spiral\Core;
 use ReflectionParameter;
 use Exception;
 use RuntimeException;
-use Spiral\Core\Container\BadArgumentException;
+use Spiral\Core\Container\ArgumentException;
 use ReflectionFunctionAbstract as ContextFunction;
-use Spiral\Core\Container\NonInstantiableException;
+use Spiral\Core\Container\InstanceException;
 
 class Container extends Component implements ContainerInterface
 {
@@ -67,8 +67,8 @@ class Container extends Component implements ContainerInterface
      *                                              forwarded to closure.
      * @param ReflectionParameter $context          Context parameter were used to declare DI.
      * @return mixed|null|object
-     * @throws NonInstantiableException
-     * @throws BadArgumentException
+     * @throws InstanceException
+     * @throws ArgumentException
      * @throws RuntimeException
      */
     public function get($alias, $parameters = [], ReflectionParameter $context = null)
@@ -98,7 +98,7 @@ class Container extends Component implements ContainerInterface
 
             if (!$reflector->isInstantiable())
             {
-                throw new NonInstantiableException("Class '{$alias}' can not be constructed.");
+                throw new InstanceException("Class '{$alias}' can not be constructed.");
             }
 
             if (empty($constructor = $reflector->getConstructor()))
@@ -175,7 +175,7 @@ class Container extends Component implements ContainerInterface
      * @param array           $parameters Outside parameters used in priority to DI.
      *                                    Named list.
      * @return array
-     * @throws BadArgumentException
+     * @throws ArgumentException
      * @throws Exception
      */
     public function resolveArguments(ContextFunction $reflection, array $parameters = [])
@@ -201,7 +201,7 @@ class Container extends Component implements ContainerInterface
                 }
 
                 //Unable to resolve scalar argument value
-                throw new BadArgumentException($parameter, $reflection);
+                throw new ArgumentException($parameter, $reflection);
             }
 
             if (isset($parameters[$name]) && is_object($parameters[$name]))
@@ -220,7 +220,7 @@ class Container extends Component implements ContainerInterface
             }
             catch (Exception $exception)
             {
-                if ($exception instanceof NonInstantiableException && $parameter->isDefaultValueAvailable())
+                if ($exception instanceof InstanceException && $parameter->isDefaultValueAvailable())
                 {
                     //Let's try to use default value instead (some interface requested)
                     $arguments[] = $parameter->getDefaultValue();

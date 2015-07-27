@@ -10,7 +10,7 @@ namespace Spiral\Core\Container;
 
 use Spiral\Core\ExceptionInterface;
 
-class BadArgumentException extends \RuntimeException implements ExceptionInterface
+class ArgumentException extends \RuntimeException implements ExceptionInterface
 {
     /**
      * Parameter caused error.

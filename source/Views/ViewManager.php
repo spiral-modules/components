@@ -8,6 +8,7 @@
  */
 namespace Spiral\Views;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
@@ -15,7 +16,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Core\Singleton;
 
-class ViewManager extends Singleton implements ViewsInterface
+class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterface
 {
     /**
      * Will provide us helper method getInstance().
@@ -52,7 +53,7 @@ class ViewManager extends Singleton implements ViewsInterface
      * @invisible
      * @var FilesInterface
      */
-    protected $fileFacade = null;
+    protected $files = null;
 
     /**
      * Registered view namespaces. Every namespace can include multiple search directories. Search
@@ -88,7 +89,7 @@ class ViewManager extends Singleton implements ViewsInterface
         $this->config = $configurator->getConfig($this);
 
         $this->container = $container;
-        $this->fileFacade = $files;
+        $this->files = $files;
 
         //Mounting namespaces from config and external modules
         $this->namespaces = $this->config['namespaces'];
@@ -162,13 +163,12 @@ class ViewManager extends Singleton implements ViewsInterface
     }
 
     /**
-     * Searching for view in namespaces. Namespace specifies set of view files joined by module or
-     * application folder or etc. View name is relative file name (starting with namespace folder).
+     * Get physical location of view filename (if ViewInterface allows that).
      *
      * @param string $namespace View namespace.
      * @param string $view      View filename, without .php included.
      * @param string $engine    Name of used engine.
-     * @return string
+     * @return string|null
      * @throws ViewException
      */
     public function viewFilename($namespace, $view, &$engine = null)
@@ -189,9 +189,9 @@ class ViewManager extends Singleton implements ViewsInterface
                 foreach ($options['extensions'] as $extension)
                 {
                     $candidate = $directory . '/' . $view . '.' . $extension;
-                    if ($this->fileFacade->exists($candidate))
+                    if ($this->files->exists($candidate))
                     {
-                        return $this->fileFacade->normalizePath($candidate);
+                        return $this->files->normalizePath($candidate);
                     }
                 }
             }
@@ -217,9 +217,9 @@ class ViewManager extends Singleton implements ViewsInterface
         $result = [];
         foreach ($this->namespaces[$namespace] as $directory)
         {
-            foreach ($this->fileFacade->getFiles($directory) as $filename)
+            foreach ($this->files->getFiles($directory) as $filename)
             {
-                $extension = $this->fileFacade->extension($filename);
+                $extension = $this->files->extension($filename);
 
                 //Let's check if we have any engine to handle this type of file
                 $foundEngine = false;
@@ -239,7 +239,7 @@ class ViewManager extends Singleton implements ViewsInterface
 
                 //We can fetch view name (2 will remove ./)
                 $view = substr(
-                    $this->fileFacade->relativePath($filename, $directory),
+                    $this->files->relativePath($filename, $directory),
                     2,
                     -1 * strlen($extension) - 1
                 );
@@ -295,12 +295,12 @@ class ViewManager extends Singleton implements ViewsInterface
             return true;
         }
 
-        if (!$this->fileFacade->exists($cacheFilename))
+        if (!$this->files->exists($cacheFilename))
         {
             return true;
         }
 
-        return $this->fileFacade->timeUpdated($cacheFilename) < $this->fileFacade->timeUpdated($viewFilename);
+        return $this->files->timeUpdated($cacheFilename) < $this->files->timeUpdated($viewFilename);
     }
 
     /**
@@ -334,9 +334,9 @@ class ViewManager extends Singleton implements ViewsInterface
             if ($resetCache || $this->isExpired($viewFilename, $cacheFilename))
             {
                 //Saving compilation result to filename
-                $this->fileFacade->write(
+                $this->files->write(
                     $cacheFilename,
-                    $this->compile($engine, $this->fileFacade->read($viewFilename), $namespace, $view),
+                    $this->compile($engine, $this->files->read($viewFilename), $namespace, $view),
                     FilesInterface::RUNTIME,
                     true
                 );
@@ -357,7 +357,7 @@ class ViewManager extends Singleton implements ViewsInterface
      */
     public function getSource($namespace, $view)
     {
-        return $this->fileFacade->read($this->viewFilename($namespace, $view));
+        return $this->files->read($this->viewFilename($namespace, $view));
     }
 
     /**

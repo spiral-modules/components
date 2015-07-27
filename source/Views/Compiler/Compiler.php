@@ -22,12 +22,12 @@ class Compiler extends Component implements CompilerInterface
     use BenchmarkTrait;
 
     /**
-     * ViewFacade component.
+     * ViewsInterface component.
      *
      * @invisible
      * @var ViewsInterface
      */
-    protected $viewFacade = null;
+    protected $views = null;
 
     /**
      * Container interface.
@@ -77,15 +77,15 @@ class Compiler extends Component implements CompilerInterface
      * Instance of view compiler. Compilers used to pre-process view files for faster rendering in
      * runtime environment.
      *
-     * @param ViewsInterface $viewFacade
-     * @param ContainerInterface   $container
-     * @param array                $config    Compiler configuration.
-     * @param string               $source    Non-compiled source.
-     * @param string               $namespace View namespace.
-     * @param string               $view      View name.
+     * @param ViewsInterface     $views
+     * @param ContainerInterface $container
+     * @param array              $config    Compiler configuration.
+     * @param string             $source    Non-compiled source.
+     * @param string             $namespace View namespace.
+     * @param string             $view      View name.
      */
     public function __construct(
-        ViewsInterface $viewFacade,
+        ViewsInterface $views,
         ContainerInterface $container,
         array $config,
         $source,
@@ -93,7 +93,7 @@ class Compiler extends Component implements CompilerInterface
         $view
     )
     {
-        $this->viewFacade = $viewFacade;
+        $this->views = $views;
         $this->container = $container;
 
         $this->config = $config;
@@ -108,9 +108,9 @@ class Compiler extends Component implements CompilerInterface
      *
      * @return ViewsInterface
      */
-    public function getViewFacade()
+    public function getViews()
     {
-        return $this->viewFacade;
+        return $this->views;
     }
 
     /**
@@ -150,7 +150,7 @@ class Compiler extends Component implements CompilerInterface
      */
     public function getFilename()
     {
-        return $this->viewFacade->viewFilename($this->namespace, $this->view);
+        return $this->views->viewFilename($this->namespace, $this->view);
     }
 
     /**
@@ -169,7 +169,7 @@ class Compiler extends Component implements CompilerInterface
         $compiler->view = $view;
 
         //We are getting new view source
-        $compiler->source = $this->viewFacade->getSource($namespace, $view);
+        $compiler->source = $this->views->getSource($namespace, $view);
 
         //Processors has to be regenerated to flush content
         $compiler->processors = [];
@@ -192,7 +192,7 @@ class Compiler extends Component implements CompilerInterface
         foreach ($this->config['processors'] as $processor => $options)
         {
             $this->processors[] = $this->container->get($processor, [
-                'viewManager' => $this->viewFacade,
+                'viewManager' => $this->views,
                 'compiler'    => $this,
                 'options'     => $options
             ]);

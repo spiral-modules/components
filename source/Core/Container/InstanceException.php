@@ -10,7 +10,7 @@ namespace Spiral\Core\Container;
 
 use Spiral\Core\ExceptionInterface;
 
-class NonInstantiableException extends \RuntimeException implements ExceptionInterface
+class InstanceException extends \RuntimeException implements ExceptionInterface
 {
 
 }

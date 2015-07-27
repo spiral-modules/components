@@ -29,7 +29,7 @@ abstract class Singleton extends Component
             if (empty($container = self::getContainer()))
             {
                 throw new \RuntimeException(
-                    "Singleton instance can be constructed only via valid Container."
+                    "Singleton instance can be constructed only using valid Container."
                 );
             }
         }

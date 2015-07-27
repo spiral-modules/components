@@ -29,7 +29,7 @@ use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
-class HttpDispatcher extends Singleton implements DispatcherInterface
+class HttpDispatcher extends Singleton
 {
     /**
      * Http required traits.

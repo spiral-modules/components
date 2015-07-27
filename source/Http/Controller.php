@@ -9,7 +9,7 @@
 namespace Spiral\Http;
 
 use Spiral\Core\Component;
-use Spiral\Core\Container\BadArgumentException;
+use Spiral\Core\Container\ArgumentException;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
@@ -119,7 +119,7 @@ abstract class Controller extends Component implements ControllerInterface
             //Getting set of arguments should be sent to requested method
             $arguments = $this->container->resolveArguments($reflection, $parameters);
         }
-        catch (BadArgumentException $exception)
+        catch (ArgumentException $exception)
         {
             throw new ClientException(
                 ClientException::BAD_DATA,

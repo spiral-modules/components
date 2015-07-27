@@ -9,8 +9,8 @@
 namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
-use Spiral\Core\Container\BadArgumentException;
-use Spiral\Core\Container\NonInstantiableException;
+use Spiral\Core\Container\ArgumentException;
+use Spiral\Core\Container\InstanceException;
 
 interface ContainerInterface
 {
@@ -27,8 +27,8 @@ interface ContainerInterface
      * @param array  $parameters                    Parameters to be mapped to class constructor or
      *                                              forwarded to closure.
      * @return mixed|null|object
-     * @throws NonInstantiableException
-     * @throws BadArgumentException
+     * @throws InstanceException
+     * @throws ArgumentException
      */
     public function get($alias, $parameters = []);
 
@@ -40,7 +40,7 @@ interface ContainerInterface
      * @param array           $parameters Outside parameters used in priority to DI.
      *                                    Named list.
      * @return array
-     * @throws BadArgumentException
+     * @throws ArgumentException
      */
     public function resolveArguments(ContextFunction $reflection, array $parameters = []);
 

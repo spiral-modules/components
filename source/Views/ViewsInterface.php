@@ -16,12 +16,11 @@ interface ViewsInterface
     const NS_SEPARATOR = ':';
 
     /**
-     * Searching for view in namespaces. Namespace specifies set of view files joined by module or
-     * application folder or etc. View name is relative file name (starting with namespace folder).
+     * Get physical location of view filename (if ViewInterface allows that).
      *
      * @param string $namespace View namespace.
      * @param string $view      View filename, without .php included.
-     * @return string
+     * @return string|null
      * @throws ViewException
      */
     public function viewFilename($namespace, $view);

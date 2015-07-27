@@ -29,7 +29,7 @@ class FileElement extends NamespaceElement
      *
      * @var FilesInterface
      */
-    protected $file = null;
+    protected $files = null;
 
     /**
      * New instance of RPHPFile, class used to write Reactor declarations to specified filename.
@@ -40,7 +40,7 @@ class FileElement extends NamespaceElement
     public function __construct($namespace = null, FilesInterface $files)
     {
         parent::__construct($namespace);
-        $this->file = $files;
+        $this->files = $files;
     }
 
     /**
@@ -81,7 +81,7 @@ class FileElement extends NamespaceElement
      */
     public function renderFile($filename, $mode = FilesInterface::RUNTIME, $ensureDirectory = false)
     {
-        return $this->file->write($filename, $this->render(), $mode, $ensureDirectory);
+        return $this->files->write($filename, $this->render(), $mode, $ensureDirectory);
     }
 
     /**

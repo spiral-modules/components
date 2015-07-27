@@ -8,6 +8,7 @@
  */
 namespace Spiral\Models;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Events\Traits\EventsTrait;
@@ -17,7 +18,8 @@ use Spiral\Models\Schemas\EntitySchema;
 abstract class DataEntity extends Component implements
     \JsonSerializable,
     \IteratorAggregate,
-    \ArrayAccess
+    \ArrayAccess,
+    LoggerAwareInterface
 {
     /**
      * Model events and localization.

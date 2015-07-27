@@ -69,7 +69,7 @@ class Inspector extends Component
      * @return EntityInspection
      * @throws InspectorException
      */
-    public function getInspection($class)
+    public function inspection($class)
     {
         if (!isset($this->inspections[$class]))
         {

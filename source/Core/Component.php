@@ -16,7 +16,7 @@ abstract class Component
      *
      * @var ContainerInterface
      */
-    private static $container;
+    private static $container = null;
 
     /**
      * Set instance of global container, this method used to supply container to some component traits

@@ -115,9 +115,9 @@ trait ValidatorTrait
             return $validator;
         }
 
-        if (!empty(self::getContainer()))
+        if (!empty($this->getContainer()))
         {
-            $this->validator = self::getContainer()->get(ValidatorInterface::class, [
+            $this->validator = $this->getContainer()->get(ValidatorInterface::class, [
                 'fields'    => $this->fields,
                 'validates' => !empty($validates) ? $validates : $this->validates
             ]);

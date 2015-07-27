@@ -12,6 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Pagination\PaginationException;
 use Spiral\Pagination\Paginator;
+use Spiral\Pagination\PaginatorInterface;
 
 trait PaginatorTrait
 {
@@ -119,18 +120,22 @@ trait PaginatorTrait
      * @return $this
      */
     public function paginate(
-        $limit = 25,
+        $limit = PaginatorInterface::DEFAULT_LIMIT,
         $count = null,
-        $pageParameter = 'page',
+        $pageParameter = PaginatorInterface::DEFAULT_PARAMETER,
         ServerRequestInterface $request = null
     )
     {
-        if (empty($request) && !empty(self::getContainer()))
+        if (empty($request) && !empty($this->getContainer()))
         {
-            $request = self::getContainer()->get('Psr\Http\Message\ServerRequestInterface');
+            $request = $this->getContainer()->get(ServerRequestInterface::class);
         }
 
-        $this->paginator = new Paginator($pageParameter, $request);
+        $this->paginator = $this->getContainer()->get(
+            PaginatorInterface::class,
+            compact('request', 'pageParameter')
+        );
+
         $this->paginator->setLimit($limit);
         $this->paginationCount = $count;
 

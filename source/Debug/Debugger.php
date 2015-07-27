@@ -52,6 +52,12 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
      */
     public function configureLogger(Logger $logger)
     {
+        if (!isset($this->config['loggers'][$logger->getName()]))
+        {
+            //Nothing to configure
+            return;
+        }
+
         //TODO: MUST BE IMPLEMENTED
     }
 

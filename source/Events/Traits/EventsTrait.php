@@ -24,7 +24,7 @@ trait EventsTrait
      *
      * @var DispatcherInterface[]
      */
-    private static $eventDispatchers = [];
+    private static $dispatchers = [];
 
     /**
      * Global container access is required in some cases. Method should be declared statically!
@@ -41,7 +41,7 @@ trait EventsTrait
      */
     public static function setDispatcher(DispatcherInterface $dispatcher = null)
     {
-        self::$eventDispatchers[static::class] = $dispatcher;
+        self::$dispatchers[static::class] = $dispatcher;
     }
 
     /**
@@ -57,9 +57,9 @@ trait EventsTrait
      */
     public static function events()
     {
-        if (isset(self::$eventDispatchers[static::class]))
+        if (isset(self::$dispatchers[static::class]))
         {
-            return self::$eventDispatchers[static::class];
+            return self::$dispatchers[static::class];
         }
 
         if (empty(self::getContainer()))
@@ -67,7 +67,7 @@ trait EventsTrait
             throw new EventsException("Unable to create event dispatcher, global container not set.");
         }
 
-        return self::$eventDispatchers[static::class] = self::getContainer()->get(
+        return self::$dispatchers[static::class] = self::getContainer()->get(
             DispatcherInterface::class
         );
     }
@@ -93,12 +93,12 @@ trait EventsTrait
      */
     protected function fire($event, $context = null)
     {
-        if (empty(self::$eventDispatchers[static::class]))
+        if (empty(self::$dispatchers[static::class]))
         {
             return $context;
         }
 
-        return self::$eventDispatchers[static::class]->fire(
+        return self::$dispatchers[static::class]->fire(
             new ObjectEvent($event, $this, $context)
         );
     }

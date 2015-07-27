@@ -64,7 +64,7 @@ trait EventsTrait
 
         if (empty(self::getContainer()))
         {
-            throw new EventsException("Unable to create event dispatcher, global container not set.");
+            return self::$dispatchers[static::class] = new Dispatcher();
         }
 
         return self::$dispatchers[static::class] = self::getContainer()->get(

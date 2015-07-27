@@ -17,11 +17,25 @@ interface StatusInterface
     const EXECUTED = true;
 
     /**
+     * Get migration given name.
+     *
+     * @return bool
+     */
+    public function getName();
+
+    /**
      * Get migration state (EXECUTED or PENDING).
      *
      * @return bool
      */
     public function getState();
+
+    /**
+     * Get migration creation time.
+     *
+     * @return \DateTime
+     */
+    public function getTimeCreated();
 
     /**
      * Get migration execution time (if any).

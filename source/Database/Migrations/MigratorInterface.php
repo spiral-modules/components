@@ -48,18 +48,23 @@ interface MigratorInterface
      *
      * @param string $name  Migration name.
      * @param string $class Class name to represent migration.
-     * @return string
+     * @return bool
      * @throws MigrationException
      */
     public function registerMigration($name, $class);
 
     /**
      * Run one outstanding migration, migrations will be performed in an order they were registered.
+     * Method must return executed migration.
+     *
+     * @return MigrationInterface|null
      */
     public function run();
 
     /**
-     * Rollback last executed migration.
+     * Rollback last executed migration. Method must return rolled back migration.
+     *
+     * @return MigrationInterface|null
      */
     public function rollback();
 }

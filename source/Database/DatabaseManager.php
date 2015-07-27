@@ -12,6 +12,7 @@ use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Database\Migrations\MigratorInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Core\Singleton;
 
@@ -143,8 +144,13 @@ class DatabaseManager extends Singleton implements InjectorInterface
         return $this->db($parameter->getName());
     }
 
+    /**
+     * Get selected migrator. Migrator class specified in DBAL configuration.
+     *
+     * @return MigratorInterface
+     */
     public function getMigrator()
     {
-
+        return $this->container->get($this->config['migrator']);
     }
 }

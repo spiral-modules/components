@@ -17,7 +17,7 @@ use Spiral\Translator\TranslatorInterface;
 trait TranslatorTrait
 {
     /**
-     * Global container access is required in some cases. Method should be declared statically.
+     * Global container access is required in some cases. Method should be declared statically!
      *
      * @return ContainerInterface
      */
@@ -51,6 +51,9 @@ trait TranslatorTrait
      * Perform automatic message localization. Messages with [[ ]] and without braces accepted.
      * Please use this method statically as in this case it will be correctly indexed. Method will
      * work only with global container is set.
+     *
+     * Example:
+     * User::translate("User account is invalid.");
      *
      * @param string $string
      * @return string

@@ -8,7 +8,7 @@
  */
 namespace Spiral\Core;
 
-interface CallerInterface
+interface CoreInterface
 {
     /**
      * Call controller method by fully specified or short controller name, action and addition

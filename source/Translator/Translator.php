@@ -13,7 +13,7 @@ use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
 
-class Translator extends Singleton
+class Translator extends Singleton implements TranslatorInterface
 {
     /**
      * Some operations should be recorded.
@@ -24,17 +24,6 @@ class Translator extends Singleton
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Models and other classes which inherits I18nIndexable interface allowed to be automatically
-     * parsed and analyzed for messages stored in default property values (static and non static),
-     * such values can be prepended and appended with i18n prefixes ([[ and ]] by default) and will
-     * be localized on output.
-     *
-     * Class should implement i18nNamespace method (static) which will define required i18n namespace.
-     */
-    const I18N_PREFIX  = '[[';
-    const I18N_POSTFIX = ']]';
 
     /**
      * Bundle to use for short localization syntax (l function).
@@ -98,21 +87,21 @@ class Translator extends Singleton
      * Change application language selection, all future translations or pluralization
      * phrases will be fetched using new language options and bundles.
      *
-     * @param string $language Valid language identifier (en, ru, de).
+     * @param string $languageID Valid language identifier (en, ru, de).
      * @throws TranslatorException
      */
-    public function setLanguage($language)
+    public function setLanguage($languageID)
     {
-        if (!isset($this->config['languages'][$language]))
+        if (!isset($this->config['languages'][$languageID]))
         {
-            throw new TranslatorException("Invalid language '{$language}', no presets found.");
+            throw new TranslatorException("Invalid language '{$languageID}', no presets found.");
         }
 
         //Cleaning all bundles
         $this->bundles = [];
 
-        $this->language = $language;
-        $this->languageOptions = $this->config['languages'][$language];
+        $this->language = $languageID;
+        $this->languageOptions = $this->config['languages'][$languageID];
     }
 
     /**
@@ -123,6 +112,88 @@ class Translator extends Singleton
     public function getLanguage()
     {
         return $this->language;
+    }
+
+    /**
+     * Translate and format string fetched from bundle, new strings will be automatically registered
+     * in bundle with key identical to string itself. Function support embedded formatting, to enable
+     * it provide arguments to insert after string.
+     *
+     * Examples:
+     * $translator->translate('bundle', 'Some Message');
+     * $translator->translate('bundle', 'Hello %s', $name);
+     *
+     * @param string $bundle Bundle name.
+     * @param string $string String to be localized, should be sprintf compatible if formatting
+     *                       required.
+     * @return string
+     */
+    public function translate($bundle, $string)
+    {
+        $this->loadBundle($bundle);
+
+        if (!isset($this->bundles[$bundle][$string = $this->normalize($string)]))
+        {
+            $this->bundles[$bundle][$string] = func_get_arg(1);
+            $this->saveBundle($bundle);
+        }
+
+        if (func_num_args() == 2)
+        {
+            //Just simple text line
+            return $this->bundles[$bundle][$string];
+        }
+
+        if (is_array(func_get_arg(2)))
+        {
+            return \Spiral\interpolate($this->bundles[$bundle][$string], func_get_arg(2));
+        }
+
+        $arguments = array_slice(func_get_args(), 1);
+        $arguments[0] = $this->bundles[$bundle][$string];
+
+        //Formatting
+        return call_user_func_array('sprintf', $arguments);
+    }
+
+    /**
+     * Format phase according to formula defined in selected language. Phase should include "%s" which
+     * will be replaced with number provided as second argument.
+     *
+     * Examples:
+     * $translator->pluralize("%s user", $users);
+     *
+     * All pluralization phases stored in same bundle defined in i18n config.
+     *
+     * @param string $phrase       Pluralization phase.
+     * @param int    $number       Number has to be used in pluralization phrase.
+     * @param bool   $formatNumber True to format number using number_format.
+     * @return string
+     */
+    public function pluralize($phrase, $number, $formatNumber = true)
+    {
+        $this->loadBundle($bundle = $this->config['plurals']);
+
+        if (!isset($this->bundles[$bundle][$phrase = $this->normalize($phrase)]))
+        {
+            $this->bundles[$bundle][$phrase] = array_pad(
+                [],
+                $this->getPluralizer()->countForms(),
+                func_get_arg(0)
+            );
+
+            $this->saveBundle($bundle);
+        }
+
+        if (is_null($number))
+        {
+            return $this->bundles[$bundle][$phrase];
+        }
+
+        return sprintf(
+            $this->getPluralizer()->getForm($number, $this->bundles[$bundle][$phrase]),
+            $formatNumber ? number_format($number) : $number
+        );
     }
 
     /**
@@ -203,49 +274,6 @@ class Translator extends Singleton
     }
 
     /**
-     * Translate and format string fetched from bundle, new strings will be automatically registered
-     * in bundle with key identical to string itself. Function support embedded formatting, to enable
-     * it provide arguments to insert after string. This method is indexable and will be automatically
-     * collected to bundles.
-     *
-     * Examples:
-     * I18n::get('bundle', 'Some Message');
-     * I18n::get('bundle', 'Hello %s', $name);
-     *
-     * @param string $bundle Bundle name.
-     * @param string $string String to be localized, should be sprintf compatible if formatting
-     *                       required.
-     * @return string
-     */
-    public function get($bundle, $string)
-    {
-        $this->loadBundle($bundle);
-
-        if (!isset($this->bundles[$bundle][$string = $this->normalize($string)]))
-        {
-            $this->bundles[$bundle][$string] = func_get_arg(1);
-            $this->saveBundle($bundle);
-        }
-
-        if (func_num_args() == 2)
-        {
-            //Just simple text line
-            return $this->bundles[$bundle][$string];
-        }
-
-        if (is_array(func_get_arg(2)))
-        {
-            return \Spiral\interpolate($this->bundles[$bundle][$string], func_get_arg(2));
-        }
-
-        $arguments = array_slice(func_get_args(), 1);
-        $arguments[0] = $this->bundles[$bundle][$string];
-
-        //Formatting
-        return call_user_func_array('sprintf', $arguments);
-    }
-
-    /**
      * Force translation for specified string in bundle file. Will replace existed translation or
      * create new one.
      *
@@ -260,46 +288,5 @@ class Translator extends Singleton
         $this->loadBundle($bundle);
         $this->bundles[$bundle][$string] = func_num_args() == 2 ? $translation : $string;
         $this->saveBundle($bundle);
-    }
-
-    /**
-     * Format phase according to formula defined in selected language. Phase should include "%s" which
-     * will be replaced with number provided as second argument. This method is indexable and will
-     * be automatically collected to bundles.
-     *
-     * Examples:
-     * I18n::pluralize("%s user", $users);
-     *
-     * All pluralization phases stored in same bundle defined in i18n config.
-     *
-     * @param string $phrase       Pluralization phase.
-     * @param int    $number       Number has to be used in pluralization phrase.
-     * @param bool   $numberFormat True to format number using number_format.
-     * @return string
-     */
-    public function pluralize($phrase, $number, $numberFormat = true)
-    {
-        $this->loadBundle($bundle = $this->config['plurals']);
-
-        if (!isset($this->bundles[$bundle][$phrase = $this->normalize($phrase)]))
-        {
-            $this->bundles[$bundle][$phrase] = array_pad(
-                [],
-                $this->getPluralizer()->countForms(),
-                func_get_arg(0)
-            );
-
-            $this->saveBundle($bundle);
-        }
-
-        if (is_null($number))
-        {
-            return $this->bundles[$bundle][$phrase];
-        }
-
-        return sprintf(
-            $this->getPluralizer()->getForm($number, $this->bundles[$bundle][$phrase]),
-            $numberFormat ? number_format($number) : $number
-        );
     }
 }

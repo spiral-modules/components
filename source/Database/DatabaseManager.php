@@ -142,4 +142,9 @@ class DatabaseManager extends Singleton implements InjectorInterface
     {
         return $this->db($parameter->getName());
     }
+
+    public function getMigrator()
+    {
+
+    }
 }

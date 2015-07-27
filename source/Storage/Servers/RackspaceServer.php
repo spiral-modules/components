@@ -16,6 +16,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
@@ -23,7 +24,7 @@ use Spiral\Storage\BucketInterface;
 use Spiral\Storage\StorageException;
 use Spiral\Storage\StorageServer;
 
-class RackspaceServer extends StorageServer
+class RackspaceServer extends StorageServer implements LoggerAwareInterface
 {
     /**
      * Some warnings.
@@ -92,7 +93,7 @@ class RackspaceServer extends StorageServer
         if (empty($store))
         {
             //This will work only with global container set
-            $store = self::getContainer()->get('Spiral\Cache\StoreInterface');
+            $store = self::getContainer()->get(StoreInterface::class);
         }
 
         $this->store = $store;

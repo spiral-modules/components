@@ -12,7 +12,6 @@ use Spiral\Events\Traits\EventsTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
 use Spiral\Validation\ValidationException;
-use Spiral\Validation\ValidationManager;
 use Spiral\Validation\ValidatorInterface;
 
 trait ValidatorTrait
@@ -118,7 +117,7 @@ trait ValidatorTrait
 
         if (!empty(self::getContainer()))
         {
-            $this->validator = self::getContainer()->get('Spiral\Validation\ValidatorInterface', [
+            $this->validator = self::getContainer()->get(ValidatorInterface::class, [
                 'fields'    => $this->fields,
                 'validates' => !empty($validates) ? $validates : $this->validates
             ]);

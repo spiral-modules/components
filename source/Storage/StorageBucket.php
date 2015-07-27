@@ -10,13 +10,14 @@ namespace Spiral\Storage;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 
-class StorageBucket extends Component implements BucketInterface
+class StorageBucket extends Component implements BucketInterface, LoggerAwareInterface
 {
     /**
      * Benchmarking and logging operations.

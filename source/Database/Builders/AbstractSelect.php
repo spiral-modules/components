@@ -11,7 +11,6 @@ namespace Spiral\Database\Builders;
 use Spiral\Cache\StoreInterface;
 use Spiral\Database\Builders\Traits\JoinsTrait;
 use Spiral\Database\Builders\Traits\HavingTrait;
-use Spiral\Database\Database;
 use Spiral\Database\DatabaseException;
 use Spiral\Database\QueryCompiler;
 use Spiral\Database\QueryResult;
@@ -111,7 +110,7 @@ abstract class AbstractSelect extends AbstractWhere implements
         if (empty($store))
         {
             //This will work only with global container set
-            $store = self::getContainer()->get(Database::CACHE_STORE);
+            $store = self::getContainer()->get(StoreInterface::class);
         }
 
         $this->cacheStore = $store;

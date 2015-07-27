@@ -16,10 +16,10 @@ interface ObjectInterface extends StreamableInterface
      * Storage objects used to represent one single file located at remote, local or cloud server,
      * such object provides basic set of API required to manager it location or retrieve file content.
      *
-     * @param string             $address   Full object address.
-     * @param string             $name      Relative object name.
-     * @param StorageInterface   $storage   Storage component.
-     * @param BucketInterface $bucket Associated storage object.
+     * @param string           $address Full object address.
+     * @param string           $name    Relative object name.
+     * @param StorageInterface $storage Storage component.
+     * @param BucketInterface  $bucket  Associated storage object.
      * @throws StorageException
      */
     public function __construct(

@@ -9,6 +9,7 @@
 namespace Spiral\Storage;
 
 use Psr\Http\Message\StreamInterface;
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
@@ -17,7 +18,10 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Core\Singleton;
 
-class StorageManager extends Singleton implements StorageInterface, InjectorInterface
+class StorageManager extends Singleton implements
+    StorageInterface,
+    InjectorInterface,
+    LoggerAwareInterface
 {
     /**
      * Runtime configuration editing + some logging.

@@ -8,6 +8,7 @@
  */
 namespace Spiral\Session;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
@@ -15,7 +16,7 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Core\Singleton;
 
-class SessionStore extends Singleton implements \ArrayAccess, \IteratorAggregate
+class SessionStore extends Singleton implements \ArrayAccess, \IteratorAggregate, LoggerAwareInterface
 {
     /**
      * Required traits.

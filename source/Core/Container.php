@@ -18,11 +18,6 @@ use Spiral\Core\Container\InstanceException;
 class Container extends Component implements ContainerInterface
 {
     /**
-     * Container interface for convenience.
-     */
-    const CONTAINER_INTERFACE = 'Spiral\Core\ContainerInterface';
-
-    /**
      * Exception  to throw when instance can not be constructed.
      */
     const CODE_NON_INSTANTIABLE = 777;
@@ -73,7 +68,7 @@ class Container extends Component implements ContainerInterface
      */
     public function get($alias, $parameters = [], ReflectionParameter $context = null)
     {
-        if ($alias == self::CONTAINER_INTERFACE)
+        if ($alias == ContainerInterface::class)
         {
             return $this;
         }

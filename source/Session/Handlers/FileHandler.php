@@ -24,20 +24,20 @@ class FileHandler implements \SessionHandlerInterface
      *
      * @var FilesInterface
      */
-    protected $fileFacade = null;
+    protected $files = null;
 
     /**
      * New session handler instance.
      * PHP >= 5.4.0
      *
-     * @param array               $options    Session handler options.
-     * @param int                 $lifetime   Default session lifetime.
+     * @param array          $options    Session handler options.
+     * @param int            $lifetime   Default session lifetime.
      * @param FilesInterface $fileFacade FileManager component.
      */
     public function __construct(array $options, $lifetime = 0, FilesInterface $fileFacade = null)
     {
         $this->directory = $options['directory'];
-        $this->fileFacade = $fileFacade;
+        $this->files = $fileFacade;
     }
 
     /**
@@ -62,7 +62,7 @@ class FileHandler implements \SessionHandlerInterface
      */
     public function destroy($session_id)
     {
-        return $this->fileFacade->delete($this->directory . '/' . $session_id);
+        return $this->files->delete($this->directory . '/' . $session_id);
     }
 
     /**
@@ -76,11 +76,11 @@ class FileHandler implements \SessionHandlerInterface
      */
     public function gc($maxlifetime)
     {
-        foreach ($this->fileFacade->getFiles($this->directory) as $filename)
+        foreach ($this->files->getFiles($this->directory) as $filename)
         {
-            if ($this->fileFacade->timeUpdated($filename) < time() - $maxlifetime)
+            if ($this->files->timeUpdated($filename) < time() - $maxlifetime)
             {
-                $this->fileFacade->delete($filename);
+                $this->files->delete($filename);
             }
         }
     }
@@ -109,8 +109,8 @@ class FileHandler implements \SessionHandlerInterface
      */
     public function read($session_id)
     {
-        return $this->fileFacade->exists($this->directory . '/' . $session_id)
-            ? $this->fileFacade->read($this->directory . '/' . $session_id)
+        return $this->files->exists($this->directory . '/' . $session_id)
+            ? $this->files->read($this->directory . '/' . $session_id)
             : false;
     }
 
@@ -130,13 +130,13 @@ class FileHandler implements \SessionHandlerInterface
     {
         try
         {
-            return $this->fileFacade->write($this->directory . '/' . $session_id, $session_data);
+            return $this->files->write($this->directory . '/' . $session_id, $session_data);
         }
         catch (\ErrorException $exception)
         {
             //Possibly that directory doesn't exists, we don't want to force directory by default,
             //but we can try now.
-            return $this->fileFacade->write(
+            return $this->files->write(
                 $this->directory . '/' . $session_id,
                 $session_data,
                 FilesInterface::RUNTIME,

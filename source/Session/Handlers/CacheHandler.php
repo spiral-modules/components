@@ -45,9 +45,7 @@ class CacheHandler implements \SessionHandlerInterface
     public function __construct(array $options, $lifetime = 0, CacheInterface $cache = null)
     {
         $this->lifetime = $lifetime;
-        $this->cacheStore = $cache->store(
-            $options['store'] == 'default' ? null : $options['store']
-        );
+        $this->cacheStore = $cache->store($options['store'] == 'default' ? null : $options['store']);
 
         $this->prefix = !empty($options['prefix']) ? ':' . $options['prefix'] : '';
     }

@@ -8,6 +8,8 @@
  */
 namespace Spiral\Http\Router;
 
+use Cocur\Slugify\SlugifyInterface;
+use Psr\Http\Message\UriInterface;
 use Spiral\Http\MiddlewareInterface;
 use Zend\Diactoros\Response\RedirectResponse;
 
@@ -45,7 +47,7 @@ interface RouterInterface extends MiddlewareInterface
     public function activeRoute();
 
     /**
-     * Generate url using route name and set of provided parameters. Parameters will be automatically
+     * Generate Uri using route name and set of provided parameters. Parameters will be automatically
      * injected to route pattern and prefixed with activePath value.
      *
      * You can enter controller::action type route, in this case appropriate controller and action
@@ -56,26 +58,12 @@ interface RouterInterface extends MiddlewareInterface
      * $this->router->url('post::view', ['id' => 1]);
      * $this->router->url('post/view', ['id' => 1]);
      *
-     * @param string $route      Route name.
-     * @param array  $parameters Route parameters including controller name, action and etc.
-     * @return string
+     * @param string           $route      Route name.
+     * @param array            $parameters Route parameters including controller name, action and etc.
+     * @param SlugifyInterface $slugify    Instance to create url slugs. By default Slugify will be
+     *                                     used.
+     * @return UriInterface
      * @throws RouterException
      */
-    public function url($route, array $parameters = []);
-
-    /**
-     * Generate redirect based on url rendered using specified route pattern.
-     *
-     * You can enter controller::action type route, in this case appropriate controller and action
-     * will be injected into default route as controller and action parameters accordingly. Default
-     * route should be instance of spiral DirectRoute or compatible.
-     *
-     * Example:
-     * return $this->router->redirect('post::view', ['id' => 1]);
-     *
-     * @param string $route      Route name.
-     * @param array  $parameters Route parameters including controller name, action and etc.
-     * @return RedirectResponse
-     */
-    public function redirect($route, array $parameters = []);
+    public function createUri($route, array $parameters = [], SlugifyInterface $slugify = null);
 }

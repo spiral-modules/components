@@ -72,7 +72,7 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
     protected $types = [
         'int'     => 'intval',
         'float'   => 'floatval',
-        'string'  => ['Spiral\Helpers\ValueHelper', 'castString'],
+        'string'  => ['self', 'castString'],
         'MongoId' => 'mongoID'
     ];
 
@@ -250,6 +250,33 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
         }
 
         return $value;
+    }
+
+    /**
+     * Will convert the input variable in any format into a string. This function bypasses the
+     * problem of applying strval() to arrays.
+     *
+     * @param mixed $variable Input variable. Any format is allowed.
+     * @return string
+     */
+    protected function castString($variable)
+    {
+        if (is_array($variable))
+        {
+            return '';
+        }
+
+        if (is_object($variable))
+        {
+            if (method_exists($variable, '__toString'))
+            {
+                return $variable->__toString();
+            }
+
+            return '';
+        }
+
+        return strval($variable);
     }
 
     /**

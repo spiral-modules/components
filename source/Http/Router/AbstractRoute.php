@@ -8,13 +8,16 @@
  */
 namespace Spiral\Http\Router;
 
+use Cocur\Slugify\Slugify;
+use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Spiral\Controllers\ControllerException;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\CoreInterface;
 use Spiral\Http\ClientException;
-use Spiral\Http\ControllerInterface;
 use Spiral\Http\MiddlewareInterface;
+use Spiral\Http\Uri;
 
 abstract class AbstractRoute implements RouteInterface
 {
@@ -320,43 +323,52 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Create URL using route parameters (will be merged with default values), route pattern and base
+     * Create Uri using route parameters (will be merged with default values), route pattern and base
      * path.
      *
-     * @param array  $parameters
-     * @param string $basePath
-     * @return string
+     * @param array            $parameters
+     * @param string           $basePath
+     * @param SlugifyInterface $slugify Instance to create url slugs. By default Slugify will be
+     *                                  used.
+     * @return UriInterface
      */
-    public function createURL(array $parameters = [], $basePath = '/')
+    public function createUri(array $parameters = [], $basePath = '/', SlugifyInterface $slugify = null)
     {
         if (empty($this->compiled))
         {
             $this->compile();
         }
 
-        $parameters = $parameters + $this->defaults + $this->compiled['options'];
-
-        //Rendering URL
-        $url = \Spiral\interpolate(
-            $this->compiled['template'],
-            array_map(['Spiral\Helpers\UrlHelper', 'slug'], $parameters),
-            '<',
-            '>'
+        $parameters = array_map(
+            [!empty($slugify) ? $slugify : $this->createSlugify(), 'slug'],
+            $parameters + $this->defaults + $this->compiled['options']
         );
 
-        $query = '';
+        //Uri without empty blocks
+        $uri = strtr(
+            \Spiral\interpolate($this->compiled['template'], $parameters, '<', '>'),
+            ['[]' => '', '[/]' => '', '[' => '', ']' => '', '//' => '/']
+        );
 
-        //Getting additional parameters
-        $queryParameters = array_diff_key($parameters, $this->compiled['options']);
-        if (!empty($queryParameters))
+        $uri = new Uri(($this->withHost ? '' : $basePath) . $uri);
+
+        //Getting additional query parameters
+        if (!empty($queryParameters = array_diff_key($parameters, $this->compiled['options'])))
         {
-            $query = '?' . http_build_query($queryParameters);
+            $uri->withQuery(http_build_query($queryParameters));
         }
 
-        //Kicking empty blocks
-        $url = $basePath . strtr($url, ['[]' => '', '[/]' => '', '[' => '', ']' => '', '//' => '/']);
+        return $uri;
+    }
 
-        return $url . $query;
+    /**
+     * Get instance of SlugifyInterface.
+     *
+     * @return SlugifyInterface
+     */
+    protected function createSlugify()
+    {
+        return new Slugify();
     }
 
     /**

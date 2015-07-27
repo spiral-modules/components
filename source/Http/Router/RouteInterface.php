@@ -8,7 +8,9 @@
  */
 namespace Spiral\Http\Router;
 
+use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Spiral\Core\Container;
 use Spiral\Core\ContainerInterface;
 
@@ -52,12 +54,14 @@ interface RouteInterface
     public function perform(ServerRequestInterface $request, ContainerInterface $container);
 
     /**
-     * Create URL using route parameters (will be merged with default values), route pattern and base
+     * Create Uri using route parameters (will be merged with default values), route pattern and base
      * path.
      *
-     * @param array  $parameters
-     * @param string $basePath
-     * @return string
+     * @param array            $parameters
+     * @param string           $basePath
+     * @param SlugifyInterface $slugify Instance to create url slugs. By default Slugify will be
+     *                                  used.
+     * @return UriInterface
      */
-    public function createURL(array $parameters = [], $basePath = '/');
+    public function createUri(array $parameters = [], $basePath = '/', SlugifyInterface $slugify = null);
 }

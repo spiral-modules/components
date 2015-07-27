@@ -16,7 +16,7 @@ interface CompilerInterface
      * Instance of view compiler. Compilers used to pre-process view files for faster rendering in
      * runtime environment.
      *
-     * @param ViewManagerInterface $viewFacade
+     * @param ViewsInterface $viewFacade
      * @param ContainerInterface  $container
      * @param array               $config    Compiler configuration.
      * @param string              $source    Non-compiled source.
@@ -24,7 +24,7 @@ interface CompilerInterface
      * @param string              $view      View name.
      */
     public function __construct(
-        ViewManagerInterface $viewFacade,
+        ViewsInterface $viewFacade,
         ContainerInterface $container,
         array $config,
         $source,

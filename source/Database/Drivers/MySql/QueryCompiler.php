@@ -8,9 +8,9 @@
  */
 namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Database\QueryCompiler as BaseQueryCompiler;
+use Spiral\Database\QueryCompiler as AbstractCompiler;
 
-class QueryCompiler extends BaseQueryCompiler
+class QueryCompiler extends AbstractCompiler
 {
     /**
      * Create valid list of parameters (valid order) based on query type.

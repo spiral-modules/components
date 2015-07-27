@@ -8,9 +8,9 @@
  */
 namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Database\Schemas\AbstractIndexSchema;
+use Spiral\Database\Schemas\AbstractIndex;
 
-class IndexSchema extends AbstractIndexSchema
+class IndexSchema extends AbstractIndex
 {
     /**
      * Parse index information provided by parent TableSchema and populate index values.

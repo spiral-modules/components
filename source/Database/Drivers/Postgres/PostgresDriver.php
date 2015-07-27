@@ -81,13 +81,13 @@ class PostgresDriver extends Driver
      * - such as connection preparation, custom table/column/index/reference schemas and etc.
      *
      * @param ContainerInterface   $container
-     * @param array                $config
      * @param HippocampusInterface $runtime
+     * @param array                $config
      */
     public function __construct(
         ContainerInterface $container,
-        array $config,
-        HippocampusInterface $runtime
+        HippocampusInterface $runtime,
+        array $config
     )
     {
         parent::__construct($container, $config);

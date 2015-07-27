@@ -8,10 +8,10 @@
  */
 namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Database\Schemas\AbstractColumnSchema;
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractTable;
 
-class TableSchema extends AbstractTableSchema
+class TableSchema extends AbstractTable
 {
 
     /**
@@ -133,10 +133,10 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column altering command.
      *
-     * @param AbstractColumnSchema $column
-     * @param AbstractColumnSchema $dbColumn
+     * @param AbstractColumn $column
+     * @param AbstractColumn $dbColumn
      */
-    protected function doColumnChange(AbstractColumnSchema $column, AbstractColumnSchema $dbColumn)
+    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
         /**
          * @var ColumnSchema $column

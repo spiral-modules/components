@@ -8,12 +8,13 @@
  */
 namespace Spiral\Database\Builders;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Builders\Traits\JoinsTrait;
 use Spiral\Database\Database;
 use Spiral\Database\QueryCompiler;
 use Spiral\Debug\Traits\LoggerTrait;
 
-abstract class AffectQuery extends WhereQuery
+abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterface
 {
     /**
      * A lot of traits.

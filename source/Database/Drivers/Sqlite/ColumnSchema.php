@@ -8,9 +8,9 @@
  */
 namespace Spiral\Database\Drivers\Sqlite;
 
-use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractColumn;
 
-class ColumnSchema extends AbstractColumnSchema
+class ColumnSchema extends AbstractColumn
 {
     /**
      * Direct mapping from base abstract type to database internal type with specified data options,

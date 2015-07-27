@@ -8,12 +8,12 @@
  */
 namespace Spiral\Database\Drivers\Sqlite;
 
-use Spiral\Database\Schemas\AbstractColumnSchema;
-use Spiral\Database\Schemas\AbstractReferenceSchema;
-use Spiral\Database\Schemas\AbstractTableSchema;
-use Spiral\Database\Schemas\SchemaBuilderException;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Schemas\SchemaException;
 
-class TableSchema extends AbstractTableSchema
+class TableSchema extends AbstractTable
 {
     /**
      * Driver specific method to load table columns schemas.  Method will not be called if table not
@@ -87,14 +87,14 @@ class TableSchema extends AbstractTableSchema
      *
      * We will have to rebuild and copy database in SQLite as it has some limitations.
      *
-     * @throws SchemaBuilderException
+     * @throws SchemaException
      * @throws \Exception
      */
     protected function updateSchema()
     {
         if ($this->primaryKeys != $this->dbPrimaryKeys)
         {
-            throw new SchemaBuilderException(
+            throw new SchemaException(
                 "Primary keys can not be changed for already exists table ({$this->getName()})."
             );
         }
@@ -230,9 +230,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column add command.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      */
-    protected function doColumnAdd(AbstractColumnSchema $column)
+    protected function doColumnAdd(AbstractColumn $column)
     {
         //Not supported
     }
@@ -240,9 +240,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column remove (drop) command.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      */
-    protected function doColumnDrop(AbstractColumnSchema $column)
+    protected function doColumnDrop(AbstractColumn $column)
     {
         //Not supported
     }
@@ -250,12 +250,12 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column altering command.
      *
-     * @param AbstractColumnSchema $column
-     * @param AbstractColumnSchema $dbColumn
+     * @param AbstractColumn $column
+     * @param AbstractColumn $dbColumn
      */
     protected function doColumnChange(
-        AbstractColumnSchema $column,
-        AbstractColumnSchema $dbColumn
+        AbstractColumn $column,
+        AbstractColumn $dbColumn
     )
     {
         //Not supported
@@ -264,9 +264,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific foreign key adding command.
      *
-     * @param AbstractReferenceSchema $foreign
+     * @param AbstractReference $foreign
      */
-    protected function doForeignAdd(AbstractReferenceSchema $foreign)
+    protected function doForeignAdd(AbstractReference $foreign)
     {
         //Not supported
     }
@@ -274,9 +274,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific foreign key remove (drop) command.
      *
-     * @param AbstractReferenceSchema $foreign
+     * @param AbstractReference $foreign
      */
-    protected function doForeignDrop(AbstractReferenceSchema $foreign)
+    protected function doForeignDrop(AbstractReference $foreign)
     {
         //Not supported
     }
@@ -284,12 +284,12 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific foreign key altering command, by default it will remove and add foreign key.
      *
-     * @param AbstractReferenceSchema $foreign
-     * @param AbstractReferenceSchema $dbForeign
+     * @param AbstractReference $foreign
+     * @param AbstractReference $dbForeign
      */
     protected function doForeignChange(
-        AbstractReferenceSchema $foreign,
-        AbstractReferenceSchema $dbForeign
+        AbstractReference $foreign,
+        AbstractReference $dbForeign
     )
     {
         //Not supported

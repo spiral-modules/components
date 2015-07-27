@@ -9,8 +9,8 @@
 namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
-use Spiral\Database\Schemas\AbstractColumnSchema;
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\SqlFragmentInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\Schemas\EntitySchema;
@@ -50,7 +50,7 @@ class ModelSchema extends EntitySchema
      * Table schema used to fetch information about declared or fetched columns. Empty if model is
      * abstract.
      *
-     * @var AbstractTableSchema
+     * @var AbstractTable
      */
     protected $tableSchema = null;
 
@@ -148,7 +148,7 @@ class ModelSchema extends EntitySchema
     /**
      * Get associated table schema. Result can be empty if models is abstract or schema is empty.
      *
-     * @return AbstractTableSchema|null
+     * @return AbstractTable|null
      */
     public function getTableSchema()
     {
@@ -365,13 +365,13 @@ class ModelSchema extends EntitySchema
      * message      => text, null[able]
      * time_expired => timestamp
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      * @param string               $definition
      * @param mixed                $default Declared default value or null.
      * @return mixed
      * @throws ORMException
      */
-    protected function castColumn(AbstractColumnSchema $column, $definition, $default = null)
+    protected function castColumn(AbstractColumn $column, $definition, $default = null)
     {
         if (!is_null($default))
         {
@@ -437,10 +437,10 @@ class ModelSchema extends EntitySchema
     /**
      * Cast default value based on column type.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      * @return bool|float|int|mixed|string
      */
-    protected function castDefaultValue(AbstractColumnSchema $column)
+    protected function castDefaultValue(AbstractColumn $column)
     {
         //As no default value provided and column can not be null we can cast value by ourselves
         if ($column->abstractType() == 'timestamp' || $column->abstractType() == 'datetime')

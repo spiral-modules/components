@@ -10,7 +10,7 @@ namespace Spiral\Database\Schemas;
 
 use Spiral\Core\ExceptionInterface;
 
-class SchemaBuilderException extends \RuntimeException implements ExceptionInterface
+class SchemaException extends \RuntimeException implements ExceptionInterface
 {
 
 }

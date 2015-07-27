@@ -8,11 +8,11 @@
  */
 namespace Spiral\Database\Drivers\SqlServer;
 
-use Spiral\Database\Schemas\AbstractColumnSchema;
-use Spiral\Database\Schemas\AbstractIndexSchema;
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractTable;
 
-class TableSchema extends AbstractTableSchema
+class TableSchema extends AbstractTable
 {
     /**
      * Rename SQL statement is usually the same...
@@ -91,9 +91,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column add command.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      */
-    protected function doColumnAdd(AbstractColumnSchema $column)
+    protected function doColumnAdd(AbstractColumn $column)
     {
         $this->driver->statement("ALTER TABLE {$this->getName(true)} ADD {$column->sqlStatement()}");
     }
@@ -101,10 +101,10 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column altering command.
      *
-     * @param AbstractColumnSchema $column
-     * @param AbstractColumnSchema $dbColumn
+     * @param AbstractColumn $column
+     * @param AbstractColumn $dbColumn
      */
-    protected function doColumnChange(AbstractColumnSchema $column, AbstractColumnSchema $dbColumn)
+    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
         /**
          * @var ColumnSchema $column
@@ -174,9 +174,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific index remove (drop) command.
      *
-     * @param AbstractIndexSchema $index
+     * @param AbstractIndex $index
      */
-    protected function doIndexDrop(AbstractIndexSchema $index)
+    protected function doIndexDrop(AbstractIndex $index)
     {
         $this->driver->statement("DROP INDEX {$index->getName(true)} ON {$this->getName(true)}");
     }

@@ -8,7 +8,9 @@
  */
 namespace Spiral\Cache;
 
-use Spiral\Core;
+use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\ContainerInterface;
+use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Core\Singleton;
 use Spiral\Core\Container\InjectorInterface;
@@ -18,7 +20,7 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     /**
      * Some operations should be recorded.
      */
-    use Core\Traits\ConfigurableTrait, BenchmarkTrait;
+    use ConfigurableTrait, BenchmarkTrait;
 
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
@@ -35,20 +37,17 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     /**
      * Associated container instance. Used to create cache stores.
      *
-     * @var Core\ContainerInterface
+     * @var ContainerInterface
      */
     protected $container = null;
 
     /**
      * Constructing CacheManager and selecting default adapter.
      *
-     * @param Core\ConfiguratorInterface $configurator
-     * @param Core\ContainerInterface    $container
+     * @param ConfiguratorInterface $configurator
+     * @param ContainerInterface    $container
      */
-    public function __construct(
-        Core\ConfiguratorInterface $configurator,
-        Core\ContainerInterface $container
-    )
+    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
         $this->config = $configurator->getConfig($this);
         $this->container = $container;

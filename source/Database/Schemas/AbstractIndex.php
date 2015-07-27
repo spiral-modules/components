@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Schemas;
 
-abstract class AbstractIndexSchema
+abstract class AbstractIndex
 {
     /**
      * Index types.
@@ -20,7 +20,7 @@ abstract class AbstractIndexSchema
      * Parent table schema.
      *
      * @invisible
-     * @var AbstractTableSchema
+     * @var AbstractTable
      */
     protected $table = null;
 
@@ -51,12 +51,12 @@ abstract class AbstractIndexSchema
      * based on index mapping and resolving (based on set of column name), there is no simple way to
      * create multiple indexes with same set of columns, as they will be resolved as one index.
      *
-     * @param AbstractTableSchema $table
+     * @param AbstractTable $table
      * @param  string             $name
      * @param mixed               $schema Index information fetched from database by TableSchema.
      *                                    Format depends on database type.
      */
-    public function __construct(AbstractTableSchema $table, $name, $schema = null)
+    public function __construct(AbstractTable $table, $name, $schema = null)
     {
         $this->name = $name;
         $this->table = $table;
@@ -180,10 +180,10 @@ abstract class AbstractIndexSchema
     /**
      * Compare two index schemas to check if data were altered.
      *
-     * @param AbstractIndexSchema $dbIndex
+     * @param AbstractIndex $dbIndex
      * @return bool
      */
-    public function compare(AbstractIndexSchema $dbIndex)
+    public function compare(AbstractIndex $dbIndex)
     {
         return $this == $dbIndex;
     }

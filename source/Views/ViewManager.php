@@ -15,7 +15,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Core\Singleton;
 
-class ViewManager extends Singleton implements ViewManagerInterface
+class ViewManager extends Singleton implements ViewsInterface
 {
     /**
      * Will provide us helper method getInstance().

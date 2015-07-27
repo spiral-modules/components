@@ -30,6 +30,11 @@ class Database extends Component
     const INJECTABLE = DatabaseManager::class;
 
     /**
+     * Default cache store interface.
+     */
+    const CACHE_STORE = 'Spiral\Cache\StoreInterface';
+
+    /**
      * Transaction isolation level 'SERIALIZABLE'.
      *
      * This is the highest isolation level. With a lock-based concurrency control DBMS implementation,
@@ -265,7 +270,7 @@ class Database extends Component
         if (empty($store))
         {
             //This will work only with global container set
-            $store = self::getContainer()->get('Spiral\Cache\StoreInterface');
+            $store = self::getContainer()->get(static::CACHE_STORE);
         }
 
         if (empty($key))

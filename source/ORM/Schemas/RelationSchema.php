@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
-use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractColumn;
 use Spiral\ORM\ActiveRecord;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMException;
@@ -394,10 +394,10 @@ abstract class RelationSchema implements RelationSchemaInterface
      * Resolve correct abstract type to represent inner or outer key. Primary types will be converted
      * to appropriate sized integers.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      * @return string
      */
-    protected function resolveAbstractType(AbstractColumnSchema $column)
+    protected function resolveAbstractType(AbstractColumn $column)
     {
         switch ($column->abstractType())
         {
@@ -413,10 +413,10 @@ abstract class RelationSchema implements RelationSchemaInterface
     /**
      * Simplified method to cast column type and options by provided definition.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      * @param string               $definition
      */
-    protected function castColumn(AbstractColumnSchema $column, $definition)
+    protected function castColumn(AbstractColumn $column, $definition)
     {
         $validType = preg_match(
             '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i',

@@ -12,7 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Views\CompilerInterface;
-use Spiral\Views\ViewManagerInterface;
+use Spiral\Views\ViewsInterface;
 
 class Compiler extends Component implements CompilerInterface
 {
@@ -25,7 +25,7 @@ class Compiler extends Component implements CompilerInterface
      * ViewFacade component.
      *
      * @invisible
-     * @var ViewManagerInterface
+     * @var ViewsInterface
      */
     protected $viewFacade = null;
 
@@ -77,7 +77,7 @@ class Compiler extends Component implements CompilerInterface
      * Instance of view compiler. Compilers used to pre-process view files for faster rendering in
      * runtime environment.
      *
-     * @param ViewManagerInterface $viewFacade
+     * @param ViewsInterface $viewFacade
      * @param ContainerInterface   $container
      * @param array                $config    Compiler configuration.
      * @param string               $source    Non-compiled source.
@@ -85,7 +85,7 @@ class Compiler extends Component implements CompilerInterface
      * @param string               $view      View name.
      */
     public function __construct(
-        ViewManagerInterface $viewFacade,
+        ViewsInterface $viewFacade,
         ContainerInterface $container,
         array $config,
         $source,
@@ -106,7 +106,7 @@ class Compiler extends Component implements CompilerInterface
     /**
      * Get associated view manager.
      *
-     * @return ViewManagerInterface
+     * @return ViewsInterface
      */
     public function getViewFacade()
     {

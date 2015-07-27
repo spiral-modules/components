@@ -8,11 +8,12 @@
  */
 namespace Spiral\Database\Drivers\Sqlite;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\DatabaseException;
-use Spiral\Database\QueryCompiler as BaseQueryCompiler;
+use Spiral\Database\QueryCompiler as AbstractCompiler;
 use Spiral\Debug\Traits\LoggerTrait;
 
-class QueryCompiler extends BaseQueryCompiler
+class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 {
     /**
      * For warnings.

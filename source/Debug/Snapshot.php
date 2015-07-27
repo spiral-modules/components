@@ -11,7 +11,7 @@ namespace Spiral\Debug;
 use Exception;
 use Spiral\Core\ContainerInterface;
 use Spiral\Views\ViewManager;
-use Spiral\Views\ViewManagerInterface;
+use Spiral\Views\ViewsInterface;
 
 class Snapshot
 {
@@ -35,7 +35,7 @@ class Snapshot
      * ViewManager used to render snapshots.
      *
      * @invisible
-     * @var ViewManagerInterface
+     * @var ViewsInterface
      */
     protected $viewManager = null;
 
@@ -60,17 +60,17 @@ class Snapshot
      *
      * @param Exception          $exception
      * @param ContainerInterface $container
-     * @param ViewManager        $viewManager View manager is required for rendering.
-     * @param string             $view        View should be used to render backtrace.
+     * @param ViewsInterface     $views View manager is required for rendering.
+     * @param string             $view  View should be used to render backtrace.
      */
     public function __construct(
         Exception $exception,
         ContainerInterface $container,
-        ViewManager $viewManager,
+        ViewsInterface $views,
         $view = '')
     {
         $this->exception = $exception;
-        $this->viewManager = $viewManager;
+        $this->viewManager = $views;
         $this->view = $view;
     }
 

@@ -8,12 +8,13 @@
  */
 namespace Spiral\Database\Drivers\SqlServer;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\DatabaseException;
-use Spiral\Database\QueryCompiler as BaseQueryCompiler;
+use Spiral\Database\QueryCompiler as AbstractCompiler;
 use Spiral\Database\SqlFragment;
 use Spiral\Debug\Traits\LoggerTrait;
 
-class QueryCompiler extends BaseQueryCompiler
+class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 {
     /**
      * Logging.

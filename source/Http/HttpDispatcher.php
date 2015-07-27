@@ -24,7 +24,7 @@ use Spiral\Http\Responses\JsonResponse;
 use Spiral\Http\Router\Router;
 use Spiral\Http\Router\Traits\RouterTrait;
 use Spiral\Views\ViewManager;
-use Spiral\Views\ViewManagerInterface;
+use Spiral\Views\ViewsInterface;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
@@ -56,7 +56,7 @@ class HttpDispatcher extends Singleton implements DispatcherInterface
     /**
      * ViewManager used to render error pages.
      *
-     * @var ViewManagerInterface
+     * @var ViewsInterface
      */
     protected $viewManager = null;
 
@@ -127,9 +127,9 @@ class HttpDispatcher extends Singleton implements DispatcherInterface
      * Due ViewManager will be created on demand (for performance reasons) - this method can used
      * to defined custom instance of renderer.
      *
-     * @param ViewManagerInterface $viewManager
+     * @param ViewsInterface $viewManager
      */
-    public function setViewManager(ViewManagerInterface $viewManager)
+    public function setViewManager(ViewsInterface $viewManager)
     {
         $this->viewManager = $viewManager;
     }
@@ -137,7 +137,7 @@ class HttpDispatcher extends Singleton implements DispatcherInterface
     /**
      * ViewManager instance.
      *
-     * @return ViewManagerInterface
+     * @return ViewsInterface
      */
     protected function getViewManager()
     {

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\ORM\Schemas\ModelSchema;
 use Spiral\ORM\Schemas\RelationSchemaInterface;
 use Spiral\Tokenizer\TokenizerInterface;
@@ -165,7 +165,7 @@ class SchemaBuilder
      *
      * @param string $database
      * @param string $table
-     * @return AbstractTableSchema
+     * @return AbstractTable
      */
     public function table($database, $table)
     {
@@ -184,14 +184,14 @@ class SchemaBuilder
      * dependencies.
      *
      * @param bool $cascade
-     * @return AbstractTableSchema[]
+     * @return AbstractTable[]
      */
     public function getTables($cascade = true)
     {
         if ($cascade)
         {
             $tables = $this->tables;
-            uasort($tables, function (AbstractTableSchema $tableA, AbstractTableSchema $tableB)
+            uasort($tables, function (AbstractTable $tableA, AbstractTable $tableB)
             {
                 return in_array($tableA->getName(), $tableB->getDependencies())
                 || count($tableB->getDependencies()) > count($tableA->getDependencies());

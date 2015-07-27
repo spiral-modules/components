@@ -9,9 +9,9 @@
 namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Database\DatabaseException;
-use Spiral\Database\QueryCompiler as BaseQueryCompiler;
+use Spiral\Database\QueryCompiler as AbstractCompiler;
 
-class QueryCompiler extends BaseQueryCompiler
+class QueryCompiler extends AbstractCompiler
 {
     /**
      * Compile delete query statement. Table name, joins and where tokens are required.

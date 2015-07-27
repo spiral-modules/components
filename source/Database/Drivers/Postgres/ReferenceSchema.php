@@ -8,9 +8,9 @@
  */
 namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Database\Schemas\AbstractReferenceSchema;
+use Spiral\Database\Schemas\AbstractReference;
 
-class ReferenceSchema extends AbstractReferenceSchema
+class ReferenceSchema extends AbstractReference
 {
     /**
      * Parse schema information provided by parent TableSchema and populate foreign key values.

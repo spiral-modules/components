@@ -8,7 +8,7 @@
  */
 namespace Spiral\Views;
 
-interface ViewManagerInterface
+interface ViewsInterface
 {
     /**
      * Namespace separator in views.

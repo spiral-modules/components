@@ -10,7 +10,7 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\QueryCompiler;
 
-class DeleteQuery extends AffectQuery
+class DeleteQuery extends AbstractAffect
 {
     /**
      * Change target table, table name should be provided without postfix.

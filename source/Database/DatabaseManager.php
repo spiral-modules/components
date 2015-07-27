@@ -10,6 +10,7 @@ namespace Spiral\Database;
 
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Core\Singleton;
@@ -34,6 +35,13 @@ class DatabaseManager extends Singleton implements InjectorInterface
     const DEFAULT_TIMEZONE = 'UTC';
 
     /**
+     * ContainerInterface instance.
+     *
+     * @var ContainerInterface
+     */
+    protected $container = null;
+
+    /**
      * Constructed instances of DBAL databases.
      *
      * @var Database[]
@@ -45,10 +53,12 @@ class DatabaseManager extends Singleton implements InjectorInterface
      * their schema builders/describers.
      *
      * @param ConfiguratorInterface $configurator
+     * @param ContainerInterface    $container
      */
-    public function __construct(ConfiguratorInterface $configurator)
+    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
         $this->config = $configurator->getConfig($this);
+        $this->container = $container;
     }
 
     /**
@@ -100,12 +110,12 @@ class DatabaseManager extends Singleton implements InjectorInterface
         {
             //Driver identifier can be fetched from connection string
             $driver = substr($config['connection'], 0, strpos($config['connection'], ':'));
-            $driver = $this->getContainer()->get($this->config['drivers'][$driver], compact('config'));
+            $driver = $this->container->get($this->config['drivers'][$driver], compact('config'));
         }
 
         $this->benchmark('database', $database);
 
-        $this->databases[$database] = $this->getContainer()->get(Database::class, [
+        $this->databases[$database] = $this->container->get(Database::class, [
             'name'        => $database,
             'driver'      => $driver,
             'tablePrefix' => isset($config['tablePrefix']) ? $config['tablePrefix'] : ''

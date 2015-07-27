@@ -12,7 +12,7 @@ use Spiral\Database\Database;
 use Spiral\Database\QueryBuilder;
 use Spiral\Database\QueryCompiler;
 
-class SelectQuery extends BaseSelectQuery
+class SelectQuery extends AbstractSelect
 {
     /**
      * Array of table names data should be fetched from. This list may include aliases (AS) construction,

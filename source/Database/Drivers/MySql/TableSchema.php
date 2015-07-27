@@ -8,12 +8,12 @@
  */
 namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Database\Schemas\AbstractColumnSchema;
-use Spiral\Database\Schemas\AbstractIndexSchema;
-use Spiral\Database\Schemas\AbstractReferenceSchema;
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractTable;
 
-class TableSchema extends AbstractTableSchema
+class TableSchema extends AbstractTable
 {
     /**
      * List of most common MySQL table engines.
@@ -144,10 +144,10 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific column altering command.
      *
-     * @param AbstractColumnSchema $column
-     * @param AbstractColumnSchema $dbColumn
+     * @param AbstractColumn $column
+     * @param AbstractColumn $dbColumn
      */
-    protected function doColumnChange(AbstractColumnSchema $column, AbstractColumnSchema $dbColumn)
+    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
         $query = \Spiral\interpolate("ALTER TABLE {table} CHANGE {column} {statement}", [
             'table'     => $this->getName(true),
@@ -161,9 +161,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific index remove (drop) command.
      *
-     * @param AbstractIndexSchema $index
+     * @param AbstractIndex $index
      */
-    protected function doIndexDrop(AbstractIndexSchema $index)
+    protected function doIndexDrop(AbstractIndex $index)
     {
         $this->driver->statement("DROP INDEX {$index->getName(true)} ON {$this->getName(true)}");
     }
@@ -171,10 +171,10 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific index altering command, by default it will remove and add index.
      *
-     * @param AbstractIndexSchema $index
-     * @param AbstractIndexSchema $dbIndex
+     * @param AbstractIndex $index
+     * @param AbstractIndex $dbIndex
      */
-    protected function doIndexChange(AbstractIndexSchema $index, AbstractIndexSchema $dbIndex)
+    protected function doIndexChange(AbstractIndex $index, AbstractIndex $dbIndex)
     {
         $query = \Spiral\interpolate("ALTER TABLE {table} DROP INDEX {original}, ADD {statement}", [
             'table'     => $this->getName(true),
@@ -188,9 +188,9 @@ class TableSchema extends AbstractTableSchema
     /**
      * Driver specific foreign key remove (drop) command.
      *
-     * @param AbstractReferenceSchema $foreign
+     * @param AbstractReference $foreign
      */
-    protected function doForeignDrop(AbstractReferenceSchema $foreign)
+    protected function doForeignDrop(AbstractReference $foreign)
     {
         $this->driver->statement(
             "ALTER TABLE {$this->getName(true)} DROP FOREIGN KEY {$foreign->getName(true)}"

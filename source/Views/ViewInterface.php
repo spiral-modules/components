@@ -13,7 +13,7 @@ interface ViewInterface
     /**
      * View instance binded to specified view file (file has to be already pre-processed).
      *
-     * @param ViewManagerInterface $viewFacade  ViewManager component.
+     * @param ViewsInterface $viewFacade  ViewManager component.
      * @param string              $filename    Compiled view file.
      * @param array               $data        Runtime data passed by controller or model, should be
      *                                         injected
@@ -22,7 +22,7 @@ interface ViewInterface
      * @param string              $view        View name.
      */
     public function __construct(
-        ViewManagerInterface $viewFacade,
+        ViewsInterface $viewFacade,
         $filename,
         array $data = [],
         $namespace,

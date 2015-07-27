@@ -8,15 +8,16 @@
  */
 namespace Spiral\Database;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Schemas\AbstractColumnSchema;
-use Spiral\Database\Schemas\AbstractIndexSchema;
-use Spiral\Database\Schemas\AbstractReferenceSchema;
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractTable;
 use PDO;
 use PDOStatement;
 use Spiral\Core\ContainerInterface;
@@ -24,7 +25,7 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Events\Traits\EventsTrait;
 
-abstract class Driver extends Component
+abstract class Driver extends Component implements LoggerAwareInterface
 {
     /**
      * Profiling and logging.
@@ -361,9 +362,7 @@ abstract class Driver extends Component
         catch (\PDOException $exception)
         {
             $this->logger()->error(
-                !empty($builtQuery)
-                    ? $builtQuery
-                    : QueryCompiler::interpolate($query, $parameters),
+                !empty($builtQuery) ? $builtQuery : QueryCompiler::interpolate($query, $parameters),
                 compact('query', 'parameters')
             );
 
@@ -574,7 +573,7 @@ abstract class Driver extends Component
      * @param string $tablePrefix Database specific table prefix, this parameter is not required,
      *                            but if provided all
      *                            foreign keys will be created using it.
-     * @return AbstractTableSchema
+     * @return AbstractTable
      */
     public function tableSchema($table, $tablePrefix = '')
     {
@@ -589,12 +588,12 @@ abstract class Driver extends Component
      * Get instance of driver specified ColumnSchema. Every schema object should fully represent one
      * table column, it's type and all possible options.
      *
-     * @param AbstractTableSchema $table  Parent TableSchema.
+     * @param AbstractTable $table  Parent TableSchema.
      * @param string              $name   Column name.
      * @param mixed               $schema Driver specific column schema.
-     * @return AbstractColumnSchema
+     * @return AbstractColumn
      */
-    public function columnSchema(AbstractTableSchema $table, $name, $schema = null)
+    public function columnSchema(AbstractTable $table, $name, $schema = null)
     {
         return $this->container->get(static::SCHEMA_COLUMN, compact('table', 'name', 'schema'));
     }
@@ -603,12 +602,12 @@ abstract class Driver extends Component
      * Get instance of driver specified IndexSchema. Every index schema should represent single table
      * index including name, type and columns.
      *
-     * @param AbstractTableSchema $table  Parent TableSchema.
+     * @param AbstractTable $table  Parent TableSchema.
      * @param string              $name   Index name.
      * @param mixed               $schema Driver specific index schema.
-     * @return AbstractIndexSchema
+     * @return AbstractIndex
      */
-    public function indexSchema(AbstractTableSchema $table, $name, $schema = null)
+    public function indexSchema(AbstractTable $table, $name, $schema = null)
     {
         return $this->container->get(static::SCHEMA_INDEX, compact('table', 'name', 'schema'));
     }
@@ -617,12 +616,12 @@ abstract class Driver extends Component
      * Get instance of driver specified ReferenceSchema (foreign key). Every ReferenceSchema should
      * represent one foreign key with it's referenced table, column and rules.
      *
-     * @param AbstractTableSchema $table  Parent TableSchema.
+     * @param AbstractTable $table  Parent TableSchema.
      * @param string              $name   Constraint name.
      * @param mixed               $schema Driver specific foreign key schema.
-     * @return AbstractReferenceSchema
+     * @return AbstractReference
      */
-    public function referenceSchema(AbstractTableSchema $table, $name, $schema = null)
+    public function referenceSchema(AbstractTable $table, $name, $schema = null)
     {
         return $this->container->get(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
     }

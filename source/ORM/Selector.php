@@ -9,7 +9,7 @@
 namespace Spiral\ORM;
 
 use Psr\Log\LogLevel;
-use Spiral\Database\Builders\BaseSelectQuery;
+use Spiral\Database\Builders\AbstractSelect;
 use Spiral\Database\ParameterInterface;
 use Spiral\Database\QueryBuilder;
 use Spiral\Database\QueryCompiler;
@@ -20,7 +20,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Selector\Loader;
 use Spiral\ORM\Selector\Loaders\RootLoader;
 
-class Selector extends BaseSelectQuery
+class Selector extends AbstractSelect
 {
     /**
      * To warn user about non optimal queries.

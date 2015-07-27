@@ -14,7 +14,7 @@ use Spiral\Database\ParameterInterface;
 use Spiral\Database\QueryBuilder;
 use Spiral\Database\SqlFragmentInterface;
 
-abstract class WhereQuery extends QueryBuilder
+abstract class AbstractWhere extends QueryBuilder
 {
     /**
      * QueryBuilder constants. This particular constants used in WhereTrait to convert array query

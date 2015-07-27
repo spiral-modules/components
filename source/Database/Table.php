@@ -11,7 +11,7 @@ namespace Spiral\Database;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * @method SelectQuery distinct(bool $distinct = true)
@@ -112,7 +112,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, \Countable
      * Get schema for specified table. TableSchema contains information about all table columns,
      * indexes and foreign keys. Schema can also be used to manipulate table structure.
      *
-     * @return AbstractTableSchema
+     * @return AbstractTable
      */
     public function schema()
     {

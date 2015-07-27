@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\Database\Schemas\AbstractTableSchema;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\ORM\ActiveRecord;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Schemas\MorphedRelationSchema;
@@ -94,7 +94,7 @@ class ManyToMorphedSchema extends MorphedRelationSchema
     /**
      * Pivot table schema.
      *
-     * @return AbstractTableSchema
+     * @return AbstractTable
      */
     public function getPivotSchema()
     {

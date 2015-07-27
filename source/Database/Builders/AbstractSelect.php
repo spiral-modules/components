@@ -11,6 +11,7 @@ namespace Spiral\Database\Builders;
 use Spiral\Cache\StoreInterface;
 use Spiral\Database\Builders\Traits\JoinsTrait;
 use Spiral\Database\Builders\Traits\HavingTrait;
+use Spiral\Database\Database;
 use Spiral\Database\DatabaseException;
 use Spiral\Database\QueryCompiler;
 use Spiral\Database\QueryResult;
@@ -27,7 +28,7 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method int max($identifier) Perform aggregation based on column or expression value.
  * @method int sum($identifier) Perform aggregation based on column or expression value.
  */
-abstract class BaseSelectQuery extends WhereQuery implements
+abstract class AbstractSelect extends AbstractWhere implements
     \Countable,
     \IteratorAggregate,
     PaginableInterface
@@ -110,7 +111,7 @@ abstract class BaseSelectQuery extends WhereQuery implements
         if (empty($store))
         {
             //This will work only with global container set
-            $store = self::getContainer()->get('Spiral\Cache\StoreInterface');
+            $store = self::getContainer()->get(Database::CACHE_STORE);
         }
 
         $this->cacheStore = $store;

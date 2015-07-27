@@ -8,6 +8,7 @@
  */
 namespace Spiral\Database\Schemas;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Database\Database;
 use Spiral\Database\SqlFragment;
@@ -15,31 +16,31 @@ use Spiral\Database\SqlFragmentInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
- * @method static AbstractColumnSchema make(array $parameters = []);
+ * @method static AbstractColumn make(array $parameters = []);
  *
- * @method AbstractColumnSchema|$this boolean()
+ * @method AbstractColumn|$this boolean()
  *
- * @method AbstractColumnSchema|$this integer()
- * @method AbstractColumnSchema|$this tinyInteger()
- * @method AbstractColumnSchema|$this bigInteger()
+ * @method AbstractColumn|$this integer()
+ * @method AbstractColumn|$this tinyInteger()
+ * @method AbstractColumn|$this bigInteger()
  *
- * @method AbstractColumnSchema|$this text()
- * @method AbstractColumnSchema|$this tinyText()
- * @method AbstractColumnSchema|$this longText()
+ * @method AbstractColumn|$this text()
+ * @method AbstractColumn|$this tinyText()
+ * @method AbstractColumn|$this longText()
  *
- * @method AbstractColumnSchema|$this double()
- * @method AbstractColumnSchema|$this float()
+ * @method AbstractColumn|$this double()
+ * @method AbstractColumn|$this float()
  *
- * @method AbstractColumnSchema|$this datetime()
- * @method AbstractColumnSchema|$this date()
- * @method AbstractColumnSchema|$this time()
- * @method AbstractColumnSchema|$this timestamp()
+ * @method AbstractColumn|$this datetime()
+ * @method AbstractColumn|$this date()
+ * @method AbstractColumn|$this time()
+ * @method AbstractColumn|$this timestamp()
  *
- * @method AbstractColumnSchema|$this binary()
- * @method AbstractColumnSchema|$this tinyBinary()
- * @method AbstractColumnSchema|$this longBinary()
+ * @method AbstractColumn|$this binary()
+ * @method AbstractColumn|$this tinyBinary()
+ * @method AbstractColumn|$this longBinary()
  */
-abstract class AbstractColumnSchema extends Component
+abstract class AbstractColumn extends Component implements LoggerAwareInterface
 {
     /**
      * Logging.
@@ -179,7 +180,7 @@ abstract class AbstractColumnSchema extends Component
      * Parent table schema.
      *
      * @invisible
-     * @var AbstractTableSchema
+     * @var AbstractTable
      */
     protected $table = null;
 
@@ -240,12 +241,12 @@ abstract class AbstractColumnSchema extends Component
     /**
      * ColumnSchema
      *
-     * @param AbstractTableSchema $table  Parent TableSchema.
+     * @param AbstractTable $table  Parent TableSchema.
      * @param string              $name   Column name.
      * @param mixed               $schema Column information fetched from database by TableSchema.
      *                                    Format depends on database type.
      */
-    public function __construct(AbstractTableSchema $table, $name, $schema = null)
+    public function __construct(AbstractTable $table, $name, $schema = null)
     {
         $this->name = $name;
         $this->table = $table;
@@ -339,7 +340,7 @@ abstract class AbstractColumnSchema extends Component
      *
      * @param string $type Abstract or virtual type declared in mapping.
      * @return $this
-     * @throws SchemaBuilderException
+     * @throws SchemaException
      */
     public function type($type)
     {
@@ -350,7 +351,7 @@ abstract class AbstractColumnSchema extends Component
 
         if (!isset($this->mapping[$type]))
         {
-            throw new SchemaBuilderException("Undefined abstract/virtual type '{$type}'.");
+            throw new SchemaException("Undefined abstract/virtual type '{$type}'.");
         }
 
         /**
@@ -666,7 +667,7 @@ abstract class AbstractColumnSchema extends Component
     /**
      * Associate table index with current column.
      *
-     * @return AbstractIndexSchema
+     * @return AbstractIndex
      */
     public function index()
     {
@@ -676,7 +677,7 @@ abstract class AbstractColumnSchema extends Component
     /**
      * Associate unique table index with current column.
      *
-     * @return AbstractIndexSchema
+     * @return AbstractIndex
      */
     public function unique()
     {
@@ -690,14 +691,14 @@ abstract class AbstractColumnSchema extends Component
      *
      * @param string $table  Foreign table name.
      * @param string $column Foreign column name (id by default).
-     * @return AbstractReferenceSchema
-     * @throws SchemaBuilderException
+     * @return AbstractReference
+     * @throws SchemaException
      */
     public function foreign($table, $column = 'id')
     {
         if ($this->phpType() != 'int')
         {
-            throw new SchemaBuilderException(
+            throw new SchemaException(
                 "Only numeric types can be defined with foreign key constraint."
             );
         }
@@ -717,10 +718,10 @@ abstract class AbstractColumnSchema extends Component
     /**
      * Compare two column schemas to check if data were altered.
      *
-     * @param AbstractColumnSchema $dbColumn
+     * @param AbstractColumn $dbColumn
      * @return bool
      */
-    public function compare(AbstractColumnSchema $dbColumn)
+    public function compare(AbstractColumn $dbColumn)
     {
         if ($this == $dbColumn)
         {

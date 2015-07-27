@@ -9,9 +9,9 @@
 namespace Spiral\Database\Drivers\SqlServer;
 
 use PDOStatement;
-use Spiral\Database\QueryResult as BaseQueryResult;
+use Spiral\Database\QueryResult as AbstractResult;
 
-class QueryResult extends BaseQueryResult
+class QueryResult extends AbstractResult
 {
     /**
      * Helper column used to create limit, offset statements in older versions.

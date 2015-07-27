@@ -9,10 +9,10 @@
 namespace Spiral\Database\Drivers\MySql;
 
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Schemas\AbstractColumnSchema;
+use Spiral\Database\Schemas\AbstractColumn;
 use Spiral\Database\SqlFragment;
 
-class ColumnSchema extends AbstractColumnSchema
+class ColumnSchema extends AbstractColumn
 {
     /**
      * Direct mapping from base abstract type to database internal type with specified data options,

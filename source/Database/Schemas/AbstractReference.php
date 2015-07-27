@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Schemas;
 
-abstract class AbstractReferenceSchema
+abstract class AbstractReference
 {
     /**
      * Delete and update foreign key rules.
@@ -20,7 +20,7 @@ abstract class AbstractReferenceSchema
      * Parent table schema.
      *
      * @invisible
-     * @var AbstractTableSchema
+     * @var AbstractTable
      */
     protected $table = null;
 
@@ -70,12 +70,12 @@ abstract class AbstractReferenceSchema
      * Instance on ConstraintSchema represent table foreign key, it should contain information about
      * referenced table, column name and delete/update rules.
      *
-     * @param AbstractTableSchema $table
+     * @param AbstractTable $table
      * @param  string             $name
      * @param mixed               $schema Constraint information fetched from database by TableSchema.
      *                                    Format depends on driver type.
      */
-    public function __construct(AbstractTableSchema $table, $name, $schema = null)
+    public function __construct(AbstractTable $table, $name, $schema = null)
     {
         $this->name = $name;
         $this->table = $table;
@@ -234,10 +234,10 @@ abstract class AbstractReferenceSchema
     /**
      * Compare two foreign key schemas to check if data were altered.
      *
-     * @param AbstractReferenceSchema $original
+     * @param AbstractReference $original
      * @return bool
      */
-    public function compare(AbstractReferenceSchema $original)
+    public function compare(AbstractReference $original)
     {
         return $this == $original;
     }

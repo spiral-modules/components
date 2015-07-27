@@ -15,7 +15,7 @@ use Spiral\Database\QueryBuilder;
 use Spiral\Database\QueryCompiler;
 use Spiral\Database\SqlFragmentInterface;
 
-class UpdateQuery extends AffectQuery
+class UpdateQuery extends AbstractAffect
 {
     /**
      * Array of column names associated with values to be updated. Values can include scalar, Parameter

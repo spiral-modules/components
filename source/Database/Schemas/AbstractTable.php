@@ -8,34 +8,35 @@
  */
 namespace Spiral\Database\Schemas;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Database\Driver;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
- * @method AbstractColumnSchema primary($column)
- * @method AbstractColumnSchema bigPrimary($column)
- * @method AbstractColumnSchema enum($column, array $values)
- * @method AbstractColumnSchema string($column, $length = 255)
- * @method AbstractColumnSchema decimal($column, $precision, $scale)
- * @method AbstractColumnSchema boolean($column)
- * @method AbstractColumnSchema integer($column)
- * @method AbstractColumnSchema tinyInteger($column)
- * @method AbstractColumnSchema bigInteger($column)
- * @method AbstractColumnSchema text($column)
- * @method AbstractColumnSchema tinyText($column)
- * @method AbstractColumnSchema longText($column)
- * @method AbstractColumnSchema double($column)
- * @method AbstractColumnSchema float($column)
- * @method AbstractColumnSchema datetime($column)
- * @method AbstractColumnSchema date($column)
- * @method AbstractColumnSchema time($column)
- * @method AbstractColumnSchema timestamp($column)
- * @method AbstractColumnSchema binary($column)
- * @method AbstractColumnSchema tinyBinary($column)
- * @method AbstractColumnSchema longBinary($column)
+ * @method AbstractColumn primary($column)
+ * @method AbstractColumn bigPrimary($column)
+ * @method AbstractColumn enum($column, array $values)
+ * @method AbstractColumn string($column, $length = 255)
+ * @method AbstractColumn decimal($column, $precision, $scale)
+ * @method AbstractColumn boolean($column)
+ * @method AbstractColumn integer($column)
+ * @method AbstractColumn tinyInteger($column)
+ * @method AbstractColumn bigInteger($column)
+ * @method AbstractColumn text($column)
+ * @method AbstractColumn tinyText($column)
+ * @method AbstractColumn longText($column)
+ * @method AbstractColumn double($column)
+ * @method AbstractColumn float($column)
+ * @method AbstractColumn datetime($column)
+ * @method AbstractColumn date($column)
+ * @method AbstractColumn time($column)
+ * @method AbstractColumn timestamp($column)
+ * @method AbstractColumn binary($column)
+ * @method AbstractColumn tinyBinary($column)
+ * @method AbstractColumn longBinary($column)
  */
-abstract class AbstractTableSchema extends Component
+abstract class AbstractTable extends Component implements LoggerAwareInterface
 {
     /**
      * Logging.
@@ -53,7 +54,7 @@ abstract class AbstractTableSchema extends Component
      * Attention! BaseColumnSchema type added to make IDE work properly as "name" is really common
      * column name. However you better use longer syntax $table->column('name');
      *
-     * @var string|AbstractColumnSchema
+     * @var string|AbstractColumn
      */
     protected $name = '';
 
@@ -103,7 +104,7 @@ abstract class AbstractTableSchema extends Component
      * ColumnSchema(s) describing table columns, represents desired table structure to be applied
      * on save() method.
      *
-     * @var AbstractColumnSchema[]
+     * @var AbstractColumn[]
      */
     protected $columns = [];
 
@@ -112,7 +113,7 @@ abstract class AbstractTableSchema extends Component
      * to build table diff.
      *
      * @invisible
-     * @var AbstractColumnSchema[]
+     * @var AbstractColumn[]
      */
     protected $dbColumns = [];
 
@@ -120,7 +121,7 @@ abstract class AbstractTableSchema extends Component
      * IndexSchema(s) used to described desired table indexes, this schemas will be synced with
      * database on save() method call. IndexSchemas should not include primary keys.
      *
-     * @var AbstractIndexSchema[]
+     * @var AbstractIndex[]
      */
     protected $indexes = [];
 
@@ -128,7 +129,7 @@ abstract class AbstractTableSchema extends Component
      * IndexSchema(s) fetched from database, this indexes used as references to build table diff.
      *
      * @invisible
-     * @var AbstractIndexSchema[]
+     * @var AbstractIndex[]
      */
     protected $dbIndexes = [];
 
@@ -137,7 +138,7 @@ abstract class AbstractTableSchema extends Component
      * to database on save() method call. ReferenceSchemas table name depends on tablePrefix, make
      * sure correct value were specified.
      *
-     * @var AbstractReferenceSchema[]
+     * @var AbstractReference[]
      */
     protected $references = [];
 
@@ -145,7 +146,7 @@ abstract class AbstractTableSchema extends Component
      * ReferenceSchema(s) fetched from database and used to build table diff.
      *
      * @invisible
-     * @var AbstractReferenceSchema[]
+     * @var AbstractReference[]
      */
     protected $dbReferences = [];
 
@@ -188,7 +189,7 @@ abstract class AbstractTableSchema extends Component
      *
      * @param string $name   Column name.
      * @param mixed  $schema Driver specific column information schema.
-     * @return AbstractColumnSchema
+     * @return AbstractColumn
      */
     protected function registerColumn($name, $schema)
     {
@@ -210,7 +211,7 @@ abstract class AbstractTableSchema extends Component
      *
      * @param string $name   Index name.
      * @param mixed  $schema Driver specific index information schema.
-     * @return AbstractIndexSchema
+     * @return AbstractIndex
      */
     protected function registerIndex($name, $schema)
     {
@@ -234,7 +235,7 @@ abstract class AbstractTableSchema extends Component
      *
      * @param string $name   Foreign key name.
      * @param mixed  $schema Driver specific foreign key information schema.
-     * @return AbstractReferenceSchema
+     * @return AbstractReference
      */
     protected function registerReference($name, $schema)
     {
@@ -331,7 +332,7 @@ abstract class AbstractTableSchema extends Component
      * Get all declared columns. This list may be not identical to dbColumns property as it will
      * represent desired table state.
      *
-     * @return AbstractColumnSchema[]
+     * @return AbstractColumn[]
      */
     public function getColumns()
     {
@@ -343,7 +344,7 @@ abstract class AbstractTableSchema extends Component
      * table structure on save() method call.
      *
      * @param string $column Column name.
-     * @return AbstractColumnSchema
+     * @return AbstractColumn
      */
     public function column($column)
     {
@@ -360,7 +361,7 @@ abstract class AbstractTableSchema extends Component
      * declared columns will be applied to table structure on save() method call.
      *
      * @param string $column
-     * @return AbstractColumnSchema
+     * @return AbstractColumn
      */
     public function __get($column)
     {
@@ -374,7 +375,7 @@ abstract class AbstractTableSchema extends Component
      *
      * @param string $type      Desired column type.
      * @param array  $arguments Type specific parameters.
-     * @return AbstractColumnSchema
+     * @return AbstractColumn
      */
     public function __call($type, array $arguments)
     {
@@ -385,7 +386,7 @@ abstract class AbstractTableSchema extends Component
      * Internal helper method used to find index by column names. Attention, column order does matter!
      *
      * @param array $columns
-     * @return AbstractIndexSchema|null
+     * @return AbstractIndex|null
      */
     protected function findIndex(array $columns)
     {
@@ -447,7 +448,7 @@ abstract class AbstractTableSchema extends Component
      * Get all declared indexes. This list may be not identical to dbIndexes property as it will
      * represent desired table state.
      *
-     * @return AbstractIndexSchema[]
+     * @return AbstractIndex[]
      */
     public function getIndexes()
     {
@@ -468,7 +469,7 @@ abstract class AbstractTableSchema extends Component
      * $table->index(array('key', 'key2'));
      *
      * @param mixed $columns Column name, or array of columns.
-     * @return AbstractIndexSchema|null
+     * @return AbstractIndex|null
      */
     public function index($columns)
     {
@@ -501,7 +502,7 @@ abstract class AbstractTableSchema extends Component
      * $table->unique(array('key', 'key2'));
      *
      * @param mixed $columns Column name, or array of columns.
-     * @return AbstractColumnSchema|null
+     * @return AbstractColumn|null
      */
     public function unique($columns)
     {
@@ -514,7 +515,7 @@ abstract class AbstractTableSchema extends Component
      * Internal helper method used to find foreign key constrain by column name.
      *
      * @param string $column
-     * @return AbstractReferenceSchema|null
+     * @return AbstractReference|null
      */
     protected function findForeign($column)
     {
@@ -544,7 +545,7 @@ abstract class AbstractTableSchema extends Component
      * Get all declared foreign keys. This list may be not identical to dbReferences property as it
      * will represent desired table state.
      *
-     * @return AbstractReferenceSchema[]
+     * @return AbstractReference[]
      */
     public function getForeigns()
     {
@@ -557,7 +558,7 @@ abstract class AbstractTableSchema extends Component
      * referenced columns has same type.
      *
      * @param string $column Column name.
-     * @return AbstractReferenceSchema|null
+     * @return AbstractReference|null
      */
     public function foreign($column)
     {
@@ -708,7 +709,7 @@ abstract class AbstractTableSchema extends Component
      * List of column were altered by table schema manipulations, will include renamed, removed and
      * created columns.
      *
-     * @return array|AbstractColumnSchema[]
+     * @return array|AbstractColumn[]
      */
     public function alteredColumns()
     {
@@ -743,7 +744,7 @@ abstract class AbstractTableSchema extends Component
      * List of indexes were altered by table schema manipulations, will include renamed, removed and
      * newly created indexes.
      *
-     * @return array|AbstractIndexSchema[]
+     * @return array|AbstractIndex[]
      */
     public function alteredIndexes()
     {
@@ -778,7 +779,7 @@ abstract class AbstractTableSchema extends Component
      * List of foreign keys constraints were altered by table schema manipulations, will include
      * renamed, removed and newly added constraints.
      *
-     * @return array|AbstractReferenceSchema[]
+     * @return array|AbstractReference[]
      */
     public function alteredReferences()
     {
@@ -992,14 +993,14 @@ abstract class AbstractTableSchema extends Component
      * failing one - will rollback others. Attention, rolling back transaction with schema modifications
      * can be not implemented in some databases.
      *
-     * @throws SchemaBuilderException
+     * @throws SchemaException
      * @throws \Exception
      */
     protected function updateSchema()
     {
         if ($this->primaryKeys != $this->dbPrimaryKeys)
         {
-            throw new SchemaBuilderException(
+            throw new SchemaException(
                 "Primary keys can not be changed for already exists table."
             );
         }
@@ -1154,9 +1155,9 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific column add command.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      */
-    protected function doColumnAdd(AbstractColumnSchema $column)
+    protected function doColumnAdd(AbstractColumn $column)
     {
         $this->driver->statement("ALTER TABLE {$this->getName(true)} "
             . "ADD COLUMN {$column->sqlStatement()}");
@@ -1165,9 +1166,9 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific column remove (drop) command.
      *
-     * @param AbstractColumnSchema $column
+     * @param AbstractColumn $column
      */
-    protected function doColumnDrop(AbstractColumnSchema $column)
+    protected function doColumnDrop(AbstractColumn $column)
     {
         //We have to erase all associated constraints
         foreach ($column->getConstraints() as $constraint)
@@ -1187,20 +1188,20 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific column altering command.
      *
-     * @param AbstractColumnSchema $column
-     * @param AbstractColumnSchema $dbColumn
+     * @param AbstractColumn $column
+     * @param AbstractColumn $dbColumn
      */
     abstract protected function doColumnChange(
-        AbstractColumnSchema $column,
-        AbstractColumnSchema $dbColumn
+        AbstractColumn $column,
+        AbstractColumn $dbColumn
     );
 
     /**
      * Driver specific index adding command.
      *
-     * @param AbstractIndexSchema $index
+     * @param AbstractIndex $index
      */
-    protected function doIndexAdd(AbstractIndexSchema $index)
+    protected function doIndexAdd(AbstractIndex $index)
     {
         $this->driver->statement("CREATE {$index->sqlStatement()}");
     }
@@ -1208,9 +1209,9 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific index remove (drop) command.
      *
-     * @param AbstractIndexSchema $index
+     * @param AbstractIndex $index
      */
-    protected function doIndexDrop(AbstractIndexSchema $index)
+    protected function doIndexDrop(AbstractIndex $index)
     {
         $this->driver->statement("DROP INDEX {$index->getName(true)}");
     }
@@ -1218,10 +1219,10 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific index altering command, by default it will remove and add index.
      *
-     * @param AbstractIndexSchema $index
-     * @param AbstractIndexSchema $dbIndex
+     * @param AbstractIndex $index
+     * @param AbstractIndex $dbIndex
      */
-    protected function doIndexChange(AbstractIndexSchema $index, AbstractIndexSchema $dbIndex)
+    protected function doIndexChange(AbstractIndex $index, AbstractIndex $dbIndex)
     {
         $this->doIndexDrop($dbIndex);
         $this->doIndexAdd($index);
@@ -1230,9 +1231,9 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific foreign key adding command.
      *
-     * @param AbstractReferenceSchema $foreign
+     * @param AbstractReference $foreign
      */
-    protected function doForeignAdd(AbstractReferenceSchema $foreign)
+    protected function doForeignAdd(AbstractReference $foreign)
     {
         $this->driver->statement("ALTER TABLE {$this->getName(true)} ADD {$foreign->sqlStatement()}");
     }
@@ -1240,9 +1241,9 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific foreign key remove (drop) command.
      *
-     * @param AbstractReferenceSchema $foreign
+     * @param AbstractReference $foreign
      */
-    protected function doForeignDrop(AbstractReferenceSchema $foreign)
+    protected function doForeignDrop(AbstractReference $foreign)
     {
         $this->driver->statement("ALTER TABLE {$this->getName(true)} "
             . "DROP CONSTRAINT {$foreign->getName(true)}");
@@ -1262,12 +1263,12 @@ abstract class AbstractTableSchema extends Component
     /**
      * Driver specific foreign key altering command, by default it will remove and add foreign key.
      *
-     * @param AbstractReferenceSchema $foreign
-     * @param AbstractReferenceSchema $dbForeign
+     * @param AbstractReference $foreign
+     * @param AbstractReference $dbForeign
      */
     protected function doForeignChange(
-        AbstractReferenceSchema $foreign,
-        AbstractReferenceSchema $dbForeign
+        AbstractReference $foreign,
+        AbstractReference $dbForeign
     )
     {
         $this->doForeignDrop($dbForeign);

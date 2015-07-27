@@ -25,7 +25,7 @@ class Logger extends AbstractLogger
     /**
      * Message parts (stored in static log container).
      */
-    const MESSAGE_CONTAINER = 0;
+    const MESSAGE_CHANNEL   = 0;
     const MESSAGE_TIMESTAMP = 1;
     const MESSAGE_LEVEL     = 2;
     const MESSAGE_BODY      = 3;
@@ -116,7 +116,7 @@ class Logger extends AbstractLogger
     public function log($level, $message, array $context = [])
     {
         $payload = [
-            self::MESSAGE_CONTAINER => $this->name,
+            self::MESSAGE_CHANNEL   => $this->name,
             self::MESSAGE_TIMESTAMP => microtime(true),
             self::MESSAGE_LEVEL     => $level,
             self::MESSAGE_BODY      => \Spiral\interpolate($message, $context),
@@ -127,6 +127,9 @@ class Logger extends AbstractLogger
         {
             self::$logMessages[] = $payload;
         }
+
+        //We don't need this information for log handlers
+        unset($payload[self::MESSAGE_CHANNEL], $payload[self::MESSAGE_TIMESTAMP]);
 
         if (isset($this->handlers[$level]))
         {

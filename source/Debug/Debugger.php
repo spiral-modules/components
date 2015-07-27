@@ -10,10 +10,10 @@ namespace Spiral\Debug;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Files\FilesInterface;
 
 class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInterface
 {
@@ -28,11 +28,11 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     const SINGLETON = self::class;
 
     /**
-     * File component is required for logging.
+     * ContainerInterface used to create log handlers.
      *
-     * @var FilesInterface
+     * @var ContainerInterface
      */
-    protected $files = null;
+    protected $container = null;
 
     /**
      * List of recorded benchmarks.
@@ -47,16 +47,16 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
      * application.
      *
      * @param ConfiguratorInterface $configurator
-     * @param FilesInterface        $files
+     * @param ContainerInterface    $container
      */
-    public function __construct(ConfiguratorInterface $configurator, FilesInterface $files)
+    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
         $this->config = $configurator->getConfig($this);
-        $this->files = $files;
+        $this->container = $container;
     }
 
     /**
-     * Configure logger handlers.
+     * Configure logger handlers. I don't really want to connect Monolog - you can do it by youself.
      *
      * @param Logger $logger
      */
@@ -68,8 +68,12 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
             return;
         }
 
-        //WHAT TO DO WITH YOU?
-        //TODO: MUST BE IMPLEMENTED
+        foreach ($this->config['loggers'][$logger->getName()] as $logLevel => $handler)
+        {
+            $logger->setHandler($logLevel, $this->container->get($handler['class'], [
+                'options' => $handler
+            ]));
+        }
     }
 
     /**

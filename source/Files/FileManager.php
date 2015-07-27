@@ -57,7 +57,7 @@ class FileManager extends Singleton implements FilesInterface
      *
      * @param string $filename
      * @param string $data            String data to write, can contain binary data.
-     * @param int    $mode            Use File::RUNTIME for 777
+     * @param int    $mode            Use FilesInterface::RUNTIME for 777
      * @param bool   $ensureDirectory If true, helper will ensure that destination directory exists
      *                                and have right permissions.
      * @param bool   $append          Will append file content.
@@ -92,7 +92,7 @@ class FileManager extends Singleton implements FilesInterface
      *
      * @param string $filename
      * @param string $data            String data to write, can contain binary data.
-     * @param int    $mode            Use File::RUNTIME for 666
+     * @param int    $mode            Use FilesInterface::RUNTIME for 666
      * @param bool   $ensureDirectory If true, helper will ensure that destination directory exists
      *                                and have right
      *                                permissions.
@@ -430,7 +430,7 @@ class FileManager extends Singleton implements FilesInterface
      * Make sure directory exists and has right permissions, works recursively.
      *
      * @param string $directory            Target directory.
-     * @param mixed  $mode                 Use File::RUNTIME for 777
+     * @param mixed  $mode                 Use FilesInterface::RUNTIME for 777
      * @param bool   $recursivePermissions Use this flag to apply permissions to all *created*
      *                                     directories. This flag used by system to ensure that all
      *                                     files and folders in runtime directory has right permissions,

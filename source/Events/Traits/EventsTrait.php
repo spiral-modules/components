@@ -11,8 +11,12 @@ namespace Spiral\Events\Traits;
 use Spiral\Core\ContainerInterface;
 use Spiral\Events\Dispatcher;
 use Spiral\Events\DispatcherInterface;
+use Spiral\Events\EventsException;
 use Spiral\Events\ObjectEvent;
 
+/**
+ * Class should be instance of Component or declare STATIC getContainer() method.
+ */
 trait EventsTrait
 {
     /**
@@ -23,7 +27,7 @@ trait EventsTrait
     private static $eventDispatchers = [];
 
     /**
-     * Global container access is required in some cases.
+     * Global container access is required in some cases. Method should be declared statically!
      *
      * @return ContainerInterface
      */
@@ -49,6 +53,7 @@ trait EventsTrait
      * If no "events" binding presented, default dispatcher will be used (performance reasons).
      *
      * @return DispatcherInterface
+     * @throws EventsException
      */
     public static function events()
     {
@@ -57,18 +62,14 @@ trait EventsTrait
             return self::$eventDispatchers[static::class];
         }
 
-        if (
-            !empty(self::getContainer())
-            && self::getContainer()->hasBinding('Spiral\Events\DispatcherInterface')
-        )
+        if (empty(self::getContainer()))
         {
-            //Let's receive event dispatcher thought global container
-            return self::$eventDispatchers[static::class] = self::getContainer()->get(
-                'Spiral\Events\DispatcherInterface'
-            );
+            throw new EventsException("Unable to create event dispatcher, global container not set.");
         }
 
-        return self::$eventDispatchers[static::class] = new Dispatcher();
+        return self::$eventDispatchers[static::class] = self::getContainer()->get(
+            DispatcherInterface::class
+        );
     }
 
     /**

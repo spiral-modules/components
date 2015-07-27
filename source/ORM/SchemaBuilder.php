@@ -8,12 +8,13 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Component;
 use Spiral\Database\Schemas\AbstractTable;
 use Spiral\ORM\Schemas\ModelSchema;
 use Spiral\ORM\Schemas\RelationSchemaInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
-class SchemaBuilder
+class SchemaBuilder extends Component
 {
     /**
      * Schema generating configuration.

@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Schemas\AbstractColumn;
 use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\SqlFragmentInterface;
@@ -19,7 +20,7 @@ use Spiral\ORM\ORMAccessor;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\SchemaBuilder;
 
-class ModelSchema extends EntitySchema
+class ModelSchema extends EntitySchema implements LoggerAwareInterface
 {
     /**
      * Logging.
@@ -366,8 +367,8 @@ class ModelSchema extends EntitySchema
      * time_expired => timestamp
      *
      * @param AbstractColumn $column
-     * @param string               $definition
-     * @param mixed                $default Declared default value or null.
+     * @param string         $definition
+     * @param mixed          $default Declared default value or null.
      * @return mixed
      * @throws ORMException
      */

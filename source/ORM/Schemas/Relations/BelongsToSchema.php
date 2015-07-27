@@ -19,7 +19,6 @@ class BelongsToSchema extends RelationSchema
      */
     const RELATION_TYPE = ActiveRecord::BELONGS_TO;
 
-
     /**
      * Equivalent relationship resolved based on definition and not schema, usually polymorphic.
      */

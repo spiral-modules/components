@@ -56,7 +56,6 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     protected $name = '';
 
-
     /**
      * Default definition parameters, will be filled if parameter skipped from definition by user.
      * Every parameter described by it's key and pattern.

@@ -6,9 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core;
+namespace Spiral\Controllers;
 
+use Spiral\Core\Component;
 use Spiral\Core\Container\ArgumentException;
+use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
 abstract class Controller extends Component implements ControllerInterface

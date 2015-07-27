@@ -128,7 +128,7 @@ class Container extends Component implements ContainerInterface
             //Binding is pointing to something else
             $instance = $this->get($binding, $parameters, $context);
 
-            if ($instance instanceof Singleton)
+            if ($instance instanceof SingletonInterface)
             {
                 //To prevent double binding
                 $this->bindings[$binding] = $this->bindings[get_class($instance)] = $instance;

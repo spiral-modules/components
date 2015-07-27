@@ -789,7 +789,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
             return $this->validator->setData($this->fields);
         }
 
-        return parent::getValidator($this->schema[ODM::D_VALIDATES]);
+        return parent::validator($this->schema[ODM::D_VALIDATES]);
     }
 
     /**

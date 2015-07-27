@@ -194,7 +194,7 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
         if (empty($this->endpoints[$this->getBasePath()]))
         {
             //Base path wasn't handled, let's attach our router
-            $this->endpoints[$this->getBasePath()] = $this->createRouter();
+            $this->endpoints[$this->getBasePath()] = $this->router();
         }
 
         //Become alive and die right after that

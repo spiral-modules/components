@@ -12,10 +12,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Http\ClientException;
-use Spiral\Http\MiddlewareInterface;
 use Spiral\Http\Responses\RedirectResponse;
 
-class Router implements MiddlewareInterface
+class Router implements RouterInterface
 {
     /**
      * Internal name for primary (default) route. Primary route used to resolve url and perform controller
@@ -175,7 +174,7 @@ class Router implements MiddlewareInterface
     }
 
     /**
-     * Get route by name. Use Router::PRIMARY_ROUTE to get default route.
+     * Get route by name. Use Router::DEFAULT to get default route.
      *
      * @param string $route
      * @return RouteInterface

@@ -9,7 +9,9 @@
 namespace Spiral\Http\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Controllers\ControllerException;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\CoreInterface;
 use Spiral\Http\ClientException;
 use Spiral\Http\ControllerInterface;
 use Spiral\Http\MiddlewareInterface;
@@ -25,6 +27,13 @@ abstract class AbstractRoute implements RouteInterface
      * Default separator to split controller and action name in route target.
      */
     const CONTROLLER_SEPARATOR = '::';
+
+    /**
+     * CoreInterface used to execute actions handled by route.
+     *
+     * @var CoreInterface
+     */
+    protected $core = null;
 
     /**
      * Declared route name.
@@ -88,19 +97,41 @@ abstract class AbstractRoute implements RouteInterface
     protected $matches = [];
 
     /**
+     * Set custom instance of CoreInterface to handle route controller and action.
+     *
+     * @param CoreInterface $core
+     * @return $this
+     */
+    public function setCore(CoreInterface $core)
+    {
+        $this->core = $core;
+
+        return $this;
+    }
+
+    /**
      * Set route name. This action should be performed BEFORE parent router will be created, in other
      * scenario route will be available under old name.
      *
-     * Yes, there is not setName method (this is short alias).
+     * @param string $name
+     * @return $this
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Alias for setName.
      *
      * @param string $name
      * @return $this
      */
     public function name($name)
     {
-        $this->name = $name;
-
-        return $this;
+        return $this->setName($name);
     }
 
     /**
@@ -157,14 +188,25 @@ abstract class AbstractRoute implements RouteInterface
     /**
      * Set default values (will be merged with current default) to be used in generated target.
      *
-     * @param array $default
+     * @param array $defaults
      * @return $this
      */
-    public function defaults(array $default)
+    public function setDefaults(array $defaults)
     {
-        $this->defaults = $default + $this->defaults;
+        $this->defaults = $defaults + $this->defaults;
 
         return $this;
+    }
+
+    /**
+     * Alias for setDefaults.
+     *
+     * @param array $defaults
+     * @return $this
+     */
+    public function defaults(array $defaults)
+    {
+        return $this->setDefaults($defaults);
     }
 
     /**
@@ -318,7 +360,7 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Resolve controller using Controller and call it's method with specified parameters.
+     * Call controller action using CoreInteface.
      *
      * @param ContainerInterface $container
      * @param string             $controller
@@ -329,18 +371,24 @@ abstract class AbstractRoute implements RouteInterface
      */
     protected function callAction(ContainerInterface $container, $controller, $action, array $parameters = [])
     {
-        if (!class_exists($controller))
+        if (empty($this->core))
         {
-            throw new ClientException(ClientException::NOT_FOUND);
+            $this->core = $container->get(CoreInterface::class);
         }
 
-        //Initiating controller with all required dependencies
-        $controller = $container->get($controller);
-        if (!$controller instanceof ControllerInterface)
+        try
         {
-            throw new ClientException(404, "Not a valid controller.");
+            return $this->core->callAction($controller, $action, $parameters);
         }
+        catch (ControllerException $exception)
+        {
+            if ($exception->getCode() == ControllerException::BAD_ACTION)
+            {
+                throw new ClientException(ClientException::NOT_FOUND, $exception->getMessage());
+            }
 
-        return $controller->callAction($container, $action, $parameters);
+            //Something is wrong
+            throw new ClientException(ClientException::BAD_DATA, $exception->getMessage());
+        }
     }
 }

@@ -13,6 +13,7 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Http\Router\RouteInterface;
 use Spiral\Http\Router\Router;
 use Spiral\Http\Router\RouterException;
+use Spiral\Http\Router\RouterInterface;
 
 trait RouterTrait
 {
@@ -39,11 +40,21 @@ trait RouterTrait
     abstract public function getContainer();
 
     /**
-     * Get Router instance.
+     * Set custom router implementation.
      *
-     * @return Router
+     * @param RouterInterface $router
      */
-    public function getRouter()
+    public function setRouter(RouterInterface $router)
+    {
+        $this->router = $router;
+    }
+
+    /**
+     * Get or create associated router.
+     *
+     * @return RouterInterface
+     */
+    public function router()
     {
         if (!empty($this->router))
         {
@@ -56,16 +67,16 @@ trait RouterTrait
     /**
      * Create router instance with aggregated routes.
      *
-     * @return Router
+     * @return RouterInterface
      */
     protected function createRouter()
     {
-        if (empty(self::getContainer()))
+        if (empty($this->getContainer()))
         {
             throw new RouterException("Unable to create default router, default container not set.");
         }
 
-        return new Router(self::getContainer(), $this->routes);
+        return new Router($this->getContainer(), $this->routes);
     }
 
     /**
@@ -76,10 +87,7 @@ trait RouterTrait
     public function addRoute(RouteInterface $route)
     {
         $this->routes[] = $route;
-        if (!empty($this->router))
-        {
-            $this->router->addRoute($route);
-        }
+        !empty($this->router) && $this->router->addRoute($route);
     }
 
     /**
@@ -130,14 +138,7 @@ trait RouterTrait
      */
     public function route($pattern, $target = null, array $defaults = [])
     {
-        if (is_string($target))
-        {
-            $name = $target;
-        }
-        else
-        {
-            $name = uniqid();
-        }
+        $name = is_string($target) ? $target : uniqid('route', true);
 
         $this->addRoute($route = new Route($name, $pattern, $target, $defaults));
 

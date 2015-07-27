@@ -104,7 +104,7 @@ trait ValidatorTrait
      * @param array $validates Custom validation rules.
      * @return ValidatorInterface
      */
-    public function getValidator(array $validates = [])
+    public function validator(array $validates = [])
     {
         if (!empty($this->validator))
         {
@@ -136,7 +136,7 @@ trait ValidatorTrait
     {
         $this->fire('validation');
 
-        $this->errors = $this->getValidator()->getErrors();
+        $this->errors = $this->validator()->getErrors();
 
         //Cleaning memory
         $this->validator->setData([]);

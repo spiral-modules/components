@@ -967,7 +967,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
             return $this->validator->setData($this->fields);
         }
 
-        return parent::getValidator($this->schema[ORM::E_VALIDATES]);
+        return parent::validator($this->schema[ORM::E_VALIDATES]);
     }
 
     /**

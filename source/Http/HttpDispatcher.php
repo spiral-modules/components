@@ -187,7 +187,7 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
     }
 
     /**
-     * Starting dispatcher.
+     * Start dispatcher.
      */
     public function start()
     {
@@ -347,24 +347,7 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
             return;
         }
 
-        if (!$this->describeException($exception))
-        {
-            $this->dispatch($this->errorResponse(Response::SERVER_ERROR));
-        }
-    }
-
-    /**
-     * Internal dispatcher method used to describe exception to client, method should return true
-     * if exception was successfully described.
-     *
-     * Can be redefined in child dispatchers to include custom logic.
-     *
-     * @param \Exception $exception
-     * @return bool
-     */
-    protected function describeException(\Exception $exception)
-    {
-        return false;
+        $this->dispatch($this->errorResponse(Response::SERVER_ERROR));
     }
 
     /**

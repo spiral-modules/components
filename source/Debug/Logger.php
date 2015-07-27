@@ -74,11 +74,8 @@ class Logger extends AbstractLogger
     {
         $this->name = $name;
 
-        if (!empty($debugger))
-        {
-            //Configuring handlers
-            $debugger->configureLogger($this);
-        }
+        //Configuring handlers
+        !empty($debugger) && $debugger->configureLogger($this);
     }
 
     /**

@@ -8,39 +8,23 @@
  */
 namespace Spiral\Debug;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Events\Traits\EventsTrait;
-use Spiral\Files\FilesInterface;
 
-class Debugger extends Singleton
+class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInterface
 {
     /**
      * Few traits.
      */
-    use ConfigurableTrait, LoggerTrait, EventsTrait;
+    use ConfigurableTrait, LoggerTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Container instance is required to resolve dependencies.
-     *
-     * @var ContainerInterface
-     */
-    protected $container = null;
-
-    /**
-     * File component.
-     *
-     * @var FilesInterface
-     */
-    protected $files = null;
 
     /**
      * List of recorded benchmarks.
@@ -55,18 +39,10 @@ class Debugger extends Singleton
      * application.
      *
      * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
-     * @param FilesInterface        $files
      */
-    public function __construct(
-        ConfiguratorInterface $configurator,
-        ContainerInterface $container,
-        FilesInterface $files
-    )
+    public function __construct(ConfiguratorInterface $configurator)
     {
         $this->config = $configurator->getConfig($this);
-        $this->container = $container;
-        $this->files = $files;
     }
 
     /**
@@ -76,82 +52,35 @@ class Debugger extends Singleton
      */
     public function configureLogger(Logger $logger)
     {
+        //TODO: MUST BE IMPLEMENTED
     }
 
     /**
-     * Handle exception and convert it to user friendly snapshot instance.
+     * Benchmarks used to record long or important operations inside spiral components. Only time
+     * will be recorded. Method should return elapsed time when record will be closed (same set of
+     * arguments has to be provided).
      *
-     * @param \Exception $exception
-     * @param bool       $logError If true (default), message to error log will be added.
-     * @return Snapshot
-     */
-    public function createSnapshot(\Exception $exception, $logError = true)
-    {
-        /**
-         * @var Snapshot $snapshot
-         */
-        $snapshot = $this->container->get(Snapshot::class, [
-            'exception' => $exception,
-            'view'      => $this->config['snapshots']['view']
-        ]);
-
-        //Error message should be added to log only for non http exceptions
-        if ($logError)
-        {
-            $this->logger()->error($snapshot->getMessage());
-        }
-
-        $filename = null;
-        if ($this->config['snapshots']['enabled'])
-        {
-            //We can additionally save exception on hard drive
-            $filename = \Spiral\interpolate($this->config['snapshots']['filename'], [
-                'timestamp' => date($this->config['snapshots']['timeFormat'], time()),
-                'exception' => $snapshot->shortName()
-            ]);
-
-            $this->files->write($filename, $snapshot->render());
-        }
-
-        $this->fire('snapshot', compact('snapshot', 'filename'));
-
-        return $snapshot;
-    }
-
-    /**
-     * Benchmarks used to record duration of long or memory inefficient operations in spiral, you
-     * can use profiler panel to view benchmarks later.
-     *
-     * Every additional record name will be joined with caller name.
-     *
-     * @param string       $caller Caller name
-     * @param string|array $record Record name(s).
+     * @param object $caller  Call initiator (used to de-group events).
+     * @param string $record  Benchmark record name.
+     * @param string $context Record context (if any).
      * @return bool|float
      */
-    public function benchmark($caller, $record)
+    public function benchmark($caller, $record, $context = '')
     {
+        //Unique called ID
+        $callerID = is_object($caller) ? spl_object_hash($caller) : $caller;
 
-        if (is_array($record))
-        {
-            //Formatting in form caller|record|recordB
-            $name = $caller . '|' . join('|', $record);
-        }
-        else
-        {
-            $name = join('|', func_get_args());
-        }
-
+        $name = $callerID . '|' . $record . '|' . $context;
         if (!isset($this->benchmarks[$name]))
         {
-            $this->benchmarks[$name] = [microtime(true), memory_get_usage()];
+            $this->benchmarks[$name] = [$caller, $context, microtime(true)];
 
             return true;
         }
 
-        $this->benchmarks[$name][] = microtime(true);
-        $this->benchmarks[$name][] = memory_get_usage();
+        $this->benchmarks[$name][3] = microtime(true);
 
-        return $this->benchmarks[$name][2] - $this->benchmarks[$name][0];
+        return $this->benchmarks[$name][3] - $this->benchmarks[$name][2];
     }
 
     /**

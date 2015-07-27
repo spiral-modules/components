@@ -213,9 +213,11 @@ class Compiler extends Component implements CompilerInterface
         {
             $reflection = new \ReflectionClass($processor);
 
-            $this->benchmark($reflection->getShortName(), $this->namespace . ':' . $this->view);
+            $context = $this->namespace . ViewsInterface::NS_SEPARATOR . $this->view;
+
+            $this->benchmark($reflection->getShortName(), $context);
             $source = $processor->process($source);
-            $this->benchmark($reflection->getShortName(), $this->namespace . ':' . $this->view);
+            $this->benchmark($reflection->getShortName(), $context);
         }
 
         return $source;

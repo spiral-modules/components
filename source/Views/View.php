@@ -89,7 +89,9 @@ class View extends Component implements ViewInterface
      */
     public function render()
     {
-        !empty($this->view) && $this->benchmark('render', $this->namespace . ':' . $this->view);
+        //Benchmarking context
+        $context = $this->namespace . ViewsInterface::NS_SEPARATOR . $this->view;
+        !empty($this->view) && $this->benchmark('render', $context);
 
         //RENDERING PROCESS
         ob_start();
@@ -98,7 +100,7 @@ class View extends Component implements ViewInterface
         $result = ob_get_clean();
         //END RENDERING PROCESS
 
-        !empty($this->view) && $this->benchmark('render', $this->namespace . ':' . $this->view);
+        !empty($this->view) && $this->benchmark('render', $context);
 
         return $result;
     }

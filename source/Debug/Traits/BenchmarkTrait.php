@@ -9,7 +9,7 @@
 namespace Spiral\Debug\Traits;
 
 use Spiral\Core\ContainerInterface;
-use Spiral\Debug\Debugger;
+use Spiral\Debug\BenchmarkerInterface;
 
 trait BenchmarkTrait
 {
@@ -24,21 +24,22 @@ trait BenchmarkTrait
      * Benchmarks used to record duration of long or memory inefficient operations in spiral, you
      * can use profiler panel to view benchmarks later.
      *
-     * Every additional record name will be joined with caller name.
-     *
-     * @param string|array $record Record name(s).
+     * @param string $record  Benchmark record name.
+     * @param string $context Record context (if any).
      * @return bool|float
      */
-    protected function benchmark($record = '')
+    protected function benchmark($record = '', $context = '')
     {
-        if (empty(self::getContainer()))
+        if (empty($this->getContainer()))
         {
             //Nothing to do
-            return null;
+            return false;
         }
 
-        return Debugger::getInstance(
-            self::getContainer()
-        )->benchmark(static::class, func_get_args());
+        return $this->getContainer()->get(BenchmarkerInterface::class)->benchmark(
+            $this,
+            $record,
+            $context
+        );
     }
 }

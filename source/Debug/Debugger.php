@@ -67,6 +67,8 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
             //Nothing to configure
             return;
         }
+
+        //WHAT TO DO WITH YOU?
         //TODO: MUST BE IMPLEMENTED
     }
 

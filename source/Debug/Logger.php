@@ -38,7 +38,7 @@ class Logger extends AbstractLogger
      *
      * @var bool
      */
-    protected static $memoryLogging = true;
+    private static $memoryLogging = true;
 
     /**
      * Log messages collected during application runtime. Messages will be displayed in exception

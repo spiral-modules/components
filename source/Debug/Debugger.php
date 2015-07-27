@@ -13,6 +13,7 @@ use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Files\FilesInterface;
 
 class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInterface
 {
@@ -27,6 +28,13 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     const SINGLETON = self::class;
 
     /**
+     * File component is required for logging.
+     *
+     * @var FilesInterface
+     */
+    protected $files = null;
+
+    /**
      * List of recorded benchmarks.
      *
      * @var array
@@ -39,10 +47,12 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
      * application.
      *
      * @param ConfiguratorInterface $configurator
+     * @param FilesInterface        $files
      */
-    public function __construct(ConfiguratorInterface $configurator)
+    public function __construct(ConfiguratorInterface $configurator, FilesInterface $files)
     {
         $this->config = $configurator->getConfig($this);
+        $this->files = $files;
     }
 
     /**
@@ -57,7 +67,6 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
             //Nothing to configure
             return;
         }
-
         //TODO: MUST BE IMPLEMENTED
     }
 

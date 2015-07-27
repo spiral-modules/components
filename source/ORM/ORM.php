@@ -179,26 +179,6 @@ class ORM extends Singleton
     }
 
     /**
-     * Change associated DatabaseManager.
-     *
-     * @param DatabaseManager $dbal
-     */
-    public function setDBAL(DatabaseManager $dbal)
-    {
-        $this->dbal = $dbal;
-    }
-
-    /**
-     * Most of classes with ORM access will need DatabaseManager as well.
-     *
-     * @return DatabaseManager
-     */
-    public function getDBAL()
-    {
-        return $this->dbal;
-    }
-
-    /**
      * Get database by it's name from DBAL associated with ORM component.
      *
      * @param string $database

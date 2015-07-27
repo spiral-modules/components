@@ -6,11 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Http;
+namespace Spiral\Core;
 
-use Spiral\Core\Component;
 use Spiral\Core\Container\ArgumentException;
-use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
 abstract class Controller extends Component implements ControllerInterface
@@ -87,7 +85,7 @@ abstract class Controller extends Component implements ControllerInterface
      * @param string             $action     Method name.
      * @param array              $parameters Set of parameters to populate controller method.
      * @return mixed
-     * @throws ClientException
+     * @throws ControllerException
      */
     public function callAction(ContainerInterface $container, $action = '', array $parameters = [])
     {
@@ -96,7 +94,10 @@ abstract class Controller extends Component implements ControllerInterface
 
         if (!method_exists($this, $action))
         {
-            throw new ClientException(ClientException::NOT_FOUND);
+            throw new ControllerException(
+                "No such controller action {$action}.",
+                ControllerException::BAD_ACTION
+            );
         }
 
         $reflection = new \ReflectionMethod($this, $action);
@@ -108,7 +109,10 @@ abstract class Controller extends Component implements ControllerInterface
             || $reflection->getDeclaringClass()->getName() == __CLASS__
         )
         {
-            throw new ClientException(ClientException::NOT_FOUND, "Action is not allowed.");
+            throw new ControllerException(
+                "Action {$action} can not be executed.",
+                ControllerException::BAD_ACTION
+            );
         }
 
         $this->container = $container;
@@ -121,9 +125,9 @@ abstract class Controller extends Component implements ControllerInterface
         }
         catch (ArgumentException $exception)
         {
-            throw new ClientException(
-                ClientException::BAD_DATA,
-                "Missing/invalid parameter '{$exception->getParameter()->name}'."
+            throw new ControllerException(
+                "Missing/invalid parameter '{$exception->getParameter()->name}'.",
+                ControllerException::BAD_ARGUMENT
             );
         }
 
@@ -139,30 +143,5 @@ abstract class Controller extends Component implements ControllerInterface
         $this->benchmark($action);
 
         return $this->afterAction($reflection, $arguments, $result);
-    }
-
-    /**
-     * Call action of external controller and return it's result. Container instance has to be set.
-     *
-     * @param string $controller
-     * @param string $action
-     * @param array  $parameters
-     * @return mixed
-     */
-    protected function externalAction($controller, $action, array $parameters = [])
-    {
-        if (!class_exists($controller))
-        {
-            throw new ClientException(ClientException::NOT_FOUND);
-        }
-
-        //Initiating controller with all required dependencies
-        $controller = $this->container->get($controller);
-        if (!$controller instanceof ControllerInterface)
-        {
-            throw new ClientException(404, "Not a valid controller.");
-        }
-
-        return $controller->callAction($this->container, $action, $parameters);
     }
 }

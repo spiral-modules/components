@@ -538,11 +538,8 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
     {
         $this->loaded = $loaded;
 
-        if (empty($odm))
-        {
-            //Will work only when global container is set!
-            $orm = ORM::getInstance(self::getContainer());
-        }
+        //Will work only when global container is set!
+        $orm = !empty($orm) ? $orm : self::getContainer()->get(ORM::class);
 
         $this->orm = $orm;
         if (!isset(self::$schemaCache[$class = static::class]))
@@ -982,11 +979,8 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      */
     public static function dbalTable(ORM $orm = null, Database $database = null)
     {
-        if (empty($odm))
-        {
-            //Will work only when global container is set!
-            $orm = ORM::getInstance(self::getContainer());
-        }
+        //Will work only when global container is set!
+        $orm = !empty($orm) ? $orm : self::getContainer()->get(ORM::class);
 
         $schema = $orm->getSchema(static::class);
 
@@ -1004,11 +998,8 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      */
     public static function dbalDatabase(ORM $orm = null)
     {
-        if (empty($odm))
-        {
-            //Will work only when global container is set!
-            $orm = ORM::getInstance(self::getContainer());
-        }
+        //Will work only when global container is set!
+        $orm = !empty($orm) ? $orm : self::getContainer()->get(ORM::class);
 
         return $orm->getDatabase($orm->getSchema(static::class)[ORM::E_DB]);
     }

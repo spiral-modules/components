@@ -95,6 +95,7 @@ trait EventsTrait
     {
         if (empty(self::$dispatchers[static::class]))
         {
+            //We can bypass dispatcher creation
             return $context;
         }
 

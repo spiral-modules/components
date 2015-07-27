@@ -6,9 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Http;
-
-use Spiral\Core\ContainerInterface;
+namespace Spiral\Core;
 
 interface ControllerInterface
 {
@@ -21,7 +19,7 @@ interface ControllerInterface
      * @param string             $action     Method name.
      * @param array              $parameters Set of parameters to populate controller method.
      * @return mixed
-     * @throws ClientException
+     * @throws ControllerException
      */
     public function callAction(ContainerInterface $container, $action = '', array $parameters = []);
 }

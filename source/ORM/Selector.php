@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM;
 
+use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LogLevel;
 use Spiral\Database\Builders\AbstractSelect;
 use Spiral\Database\ParameterInterface;
@@ -20,7 +21,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Selector\Loader;
 use Spiral\ORM\Selector\Loaders\RootLoader;
 
-class Selector extends AbstractSelect
+class Selector extends AbstractSelect implements LoggerAwareInterface
 {
     /**
      * To warn user about non optimal queries.

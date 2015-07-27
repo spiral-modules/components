@@ -54,8 +54,7 @@ trait LoggerTrait
     }
 
     /**
-     * Getting logger instance. If no logger associated system will try to fetch it using Debugger
-     * component, but only in case if global container is mounted.
+     * Getting logger instance. By default logger will receive variable with class name.
      *
      * @return LoggerInterface
      */
@@ -72,11 +71,11 @@ trait LoggerTrait
             return self::$loggers[static::class];
         }
 
-        if (!empty(self::getContainer()))
+        if (!empty($this->getContainer()))
         {
-            return self::$loggers[static::class] = Debugger::getInstance(
-                self::getContainer()
-            )->createLogger(static::class);
+            return self::$loggers[static::class] = $this->getContainer()->get(LoggerInterface::class, [
+                'name' => static::class
+            ]);
         }
 
         return new NullLogger();

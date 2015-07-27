@@ -131,10 +131,9 @@ trait PaginatorTrait
             $request = $this->getContainer()->get(ServerRequestInterface::class);
         }
 
-        $this->paginator = $this->getContainer()->get(
-            PaginatorInterface::class,
-            compact('request', 'pageParameter')
-        );
+        $this->paginator = $this->getContainer()->get(PaginatorInterface::class, compact(
+            'request', 'pageParameter'
+        ));
 
         $this->paginator->setLimit($limit);
         $this->paginationCount = $count;

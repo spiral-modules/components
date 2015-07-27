@@ -67,11 +67,18 @@ class Logger extends AbstractLogger
      * New logger instance, usually attached to component or set of models, by model class name or
      * alias. PSR-3 compatible and can be replaced with foreign implementation.
      *
-     * @param string $name
+     * @param string   $name
+     * @param Debugger $debugger Debugger is required to supply config.
      */
-    public function __construct($name = self::DEFAULT_NAME)
+    public function __construct($name = self::DEFAULT_NAME, Debugger $debugger = null)
     {
         $this->name = $name;
+
+        if (!empty($debugger))
+        {
+            //Configuring handlers
+            $debugger->configureLogger($this);
+        }
     }
 
     /**

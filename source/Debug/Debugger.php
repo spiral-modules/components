@@ -70,21 +70,12 @@ class Debugger extends Singleton
     }
 
     /**
-     * Create logger associated with specified container.
+     * Configure logger handlers.
      *
-     * @param string $name
-     * @return Logger
+     * @param Logger $logger
      */
-    public function createLogger($name)
+    public function configureLogger(Logger $logger)
     {
-        $logger = new Logger($name);
-
-        if (isset($this->config['loggers'][$name]))
-        {
-            //TODO: Configuring logger
-        }
-
-        return $logger;
     }
 
     /**

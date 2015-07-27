@@ -374,7 +374,7 @@ class ORM extends Singleton
         $this->schema = $this->fire('schema', $builder->normalizeSchema());
 
         //We have to flush schema cache after schema update, just in case
-        ActiveRecord::clearSchemaCache();
+        ActiveRecord::resetInitiated();
 
         //Saving
         $this->runtime->saveData('ormSchema', $this->schema);

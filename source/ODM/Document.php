@@ -92,7 +92,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
      *
      * @var array
      */
-    protected static $schemaCache = [];
+    private static $schemaCache = [];
 
     /**
      * ODM component.
@@ -227,7 +227,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         if (empty($odm))
         {
             //Will work only when global container is set!
-            $odm = ODM::getInstance(self::getContainer());
+            $odm = self::getContainer()->get(ODM::class);
         }
 
         $this->odm = $odm;
@@ -832,7 +832,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         if (empty($odm))
         {
             //Will work only when global container is set!
-            $odm = ODM::getInstance(self::getContainer());
+            $odm = self::getContainer()->get(ODM::class);
         }
 
         if (empty($schema))
@@ -883,7 +883,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
             $this->fire('saving');
             unset($this->fields['_id']);
 
-            static::odmCollection($this->odm, $this->schema)->insert(
+            $this->odmCollection($this->odm, $this->schema)->insert(
                 $this->fields = $this->serializeData()
             );
 
@@ -893,7 +893,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         {
             $this->fire('updating');
 
-            static::odmCollection($this->odm, $this->schema)->update(
+            $this->odmCollection($this->odm, $this->schema)->update(
                 ['_id' => $this->primaryKey()],
                 $this->buildAtomics()
             );
@@ -922,7 +922,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         }
 
         $this->fire('deleting');
-        $this->primaryKey() && static::odmCollection($this->odm, $this->schema)->remove([
+        $this->primaryKey() && $this->odmCollection($this->odm, $this->schema)->remove([
             '_id' => $this->primaryKey()
         ]);
 
@@ -1035,9 +1035,9 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Clear existed schema cache.
+     * Clear existed schema cache (will re-initiate models).
      */
-    public static function clearSchemaCache()
+    public static function resetInitiated()
     {
         self::$schemaCache = [];
     }

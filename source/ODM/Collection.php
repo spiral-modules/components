@@ -8,6 +8,7 @@
  */
 namespace Spiral\ODM;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ODM\Collection\CursorReader;
@@ -36,7 +37,11 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method bool|array distinct($key, $query)
  * @method array aggregate(array $pipeline, array $op, array $pipelineOperators)
  */
-class Collection extends Component implements \Countable, \IteratorAggregate, PaginableInterface
+class Collection extends Component implements
+    \Countable,
+    \IteratorAggregate,
+    PaginableInterface,
+    LoggerAwareInterface
 {
     /**
      * Pagination and logging traits.

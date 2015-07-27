@@ -13,7 +13,7 @@ use Spiral\Models\AccessorInterface;
 interface CompositableInterface extends AccessorInterface
 {
     /**
-     * New Compositable instance. No type specified to keep it compatible with AccessorInterface.
+     * New CompositableInterface instance. Used by Documents and ODM accessors.
      *
      * @param array|mixed           $data
      * @param CompositableInterface $parent

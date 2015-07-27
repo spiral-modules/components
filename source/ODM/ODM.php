@@ -188,7 +188,7 @@ class ODM extends Singleton implements InjectorInterface
         $this->schema = $this->fire('schema', $builder->normalizeSchema());
 
         //We have to flush schema cache after schema update, just in case
-        Document::clearSchemaCache();
+        Document::resetInitiated();
 
         //Saving
         $this->runtime->saveData('odmSchema', $this->schema);

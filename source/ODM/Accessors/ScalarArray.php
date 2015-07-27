@@ -77,7 +77,7 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
     ];
 
     /**
-     * New Compositable instance. No type specified to keep it compatible with AccessorInterface.
+     * New instance ScalarArray. Controls data and atomic operations for scalar array (yep).
      *
      * @param array|mixed           $data
      * @param CompositableInterface $parent

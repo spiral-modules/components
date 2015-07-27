@@ -102,7 +102,12 @@ class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayA
     public function __construct($data = null, $parent = null, $classDefinition = null, ODM $odm = null)
     {
         $this->parent = $parent;
-        $this->odm = $odm;
+
+        if (empty($this->odm = $odm))
+        {
+            throw new ODMException("ODM instance should be always set.");
+        }
+
         $this->documents = is_array($data) ? $data : [];
         if (!$this->classDefinition = $classDefinition)
         {

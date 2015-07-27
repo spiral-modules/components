@@ -37,14 +37,7 @@ abstract class DataEntity extends Component implements
      *
      * @var array
      */
-    protected static $initiatedModels = [];
-
-    /**
-     * Cache of error messages ordered by their definition parent.
-     *
-     * @var array
-     */
-    protected static $messagesCache = [];
+    private static $initiated = [];
 
     /**
      * List of secured fields, such fields can not be set using setFields() method (only directly).
@@ -473,7 +466,7 @@ abstract class DataEntity extends Component implements
      */
     protected static function initialize($options = null)
     {
-        if (isset(self::$initiatedModels[$class = get_called_class()]) && empty($options))
+        if (isset(self::$initiated[$class = get_called_class()]) && empty($options))
         {
             return;
         }
@@ -486,7 +479,7 @@ abstract class DataEntity extends Component implements
             }
         }
 
-        self::$initiatedModels[$class] = true;
+        self::$initiated[$class] = true;
     }
 
     /**

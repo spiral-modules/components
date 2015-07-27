@@ -391,7 +391,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      *
      * @var array
      */
-    protected static $schemaCache = [];
+    private static $schemaCache = [];
 
     /**
      * ORM component.
@@ -1277,9 +1277,9 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
     }
 
     /**
-     * Clear existed schema cache.
+     * Clear existed schema cache (will re-initiate models).
      */
-    public static function clearSchemaCache()
+    public static function resetInitiated()
     {
         self::$schemaCache = [];
     }

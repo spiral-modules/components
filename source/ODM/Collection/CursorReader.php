@@ -62,11 +62,7 @@ class CursorReader implements \Iterator
         $this->odm = $odm;
         $this->schema = $schema;
 
-        if (!empty($sort))
-        {
-            $this->cursor->sort($sort);
-        }
-
+        !empty($sort) && $this->cursor->sort($sort);
         !empty($limit) && $this->cursor->limit($limit);
         !empty($offset) && $this->cursor->skip($offset);
     }

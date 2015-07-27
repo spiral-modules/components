@@ -11,11 +11,7 @@ namespace Spiral\Http;
 class ClientException extends \RuntimeException
 {
     /**
-     * ClientException exceptions are not handled by Debugger and not logged into error log, this
-     * exception classes used to define exceptions has to be handled by dispatcher itself.
-     *
-     * ClientException can be raised outside Dispatchers by Controllers and Core when method or
-     * requested controller not found.
+     * Client exception are treated as "soft error", HttpDispatcher will handle them separate way.
      */
     const BAD_DATA  = 400;
     const NOT_FOUND = 404;

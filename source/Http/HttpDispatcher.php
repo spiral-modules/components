@@ -17,6 +17,9 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Http\Responses\EmptyResponse;
+use Spiral\Http\Responses\HtmlResponse;
+use Spiral\Http\Responses\JsonResponse;
 use Spiral\Http\Router\Router;
 use Spiral\Http\Router\Traits\RouterTrait;
 use Spiral\Views\ViewsInterface;
@@ -123,11 +126,11 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
     }
 
     /**
-     * ViewManager instance.
+     * Get or created associated view renderer.
      *
      * @return ViewsInterface
      */
-    protected function getViews()
+    protected function views()
     {
         if (!empty($this->views))
         {
@@ -326,95 +329,94 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
         $this->emitter->emit($response, ob_get_level());
     }
 
-    //    /**
-    //     * Every application dispatcher should know how to handle exception.
-    //     *
-    //     * @param \Exception $exception
-    //     * @return mixed
-    //     */
-    //    public function handleException(\Exception $exception)
-    //    {
-    //        if ($exception instanceof ClientException)
-    //        {
-    //            $this->logClientError($exception);
-    //            $this->dispatch($this->errorResponse($exception->getCode()));
-    //
-    //            return;
-    //        }
-    //
-    //        //We need snapshot
-    //        $snapshot = $this->getDebugger()->createSnapshot($exception, true);
-    //
-    //        if (!$this->config['exposeErrors'])
-    //        {
-    //            $this->dispatch($this->errorResponse(Response::SERVER_ERROR));
-    //
-    //            return;
-    //        }
-    //
-    //        if ($this->request->getHeaderLine('Accept') == 'application/json')
-    //        {
-    //            $this->dispatch(new JsonResponse(
-    //                ['status' => Response::SERVER_ERROR] + $snapshot->packException(),
-    //                Response::SERVER_ERROR
-    //            ));
-    //
-    //            return;
-    //        }
-    //
-    //        $this->dispatch(new HtmlResponse($snapshot->render(), Response::SERVER_ERROR));
-    //    }
+    /**
+     * Every application dispatcher should know how to handle exception.
+     *
+     * @param \Exception $exception
+     * @return mixed
+     */
+    public function handleException(\Exception $exception)
+    {
+        if ($exception instanceof ClientException)
+        {
+            //Client errors log
+            $this->logError($exception);
 
-    //    /**
-    //     * Log client error.
-    //     *
-    //     * @param ClientException $exception
-    //     */
-    //    protected function logClientError(ClientException $exception)
-    //    {
-    //        $uri = $this->request->getUri();
-    //
-    //        $remoteAddr = '-undefined-';
-    //        if (!empty($this->request->getServerParams()['REMOTE_ADDR']))
-    //        {
-    //            $remoteAddr = $this->request->getServerParams()['REMOTE_ADDR'];
-    //        }
-    //
-    //        $this->logger()->warning(
-    //            "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.",
-    //            [
-    //                'scheme'  => $uri->getScheme(),
-    //                'host'    => $uri->getHost(),
-    //                'path'    => $uri->getPath(),
-    //                'code'    => $exception->getCode(),
-    //                'message' => $exception->getMessage() ?: '-not specified-',
-    //                'remote'  => $remoteAddr
-    //            ]
-    //        );
-    //    }
+            $this->dispatch($this->errorResponse($exception->getCode()));
 
-    //    /**
-    //     * Get response dedicated to represent server or client error.
-    //     *
-    //     * @param int $code
-    //     * @return ResponseInterface
-    //     */
-    //    protected function errorResponse($code)
-    //    {
-    //        if ($this->request->getHeaderLine('Accept') == 'application/json')
-    //        {
-    //            return new JsonResponse(['status' => $code], $code);
-    //        }
-    //
-    //        if (isset($this->config['httpErrors'][$code]))
-    //        {
-    //            //We can show custom error page
-    //            return new HtmlResponse(
-    //                $this->getViewManager()->render($this->config['httpErrors'][$code]),
-    //                $code
-    //            );
-    //        }
-    //
-    //        return new EmptyResponse($code);
-    //    }
+            return;
+        }
+
+        if (!$this->describeException($exception))
+        {
+            $this->dispatch($this->errorResponse(Response::SERVER_ERROR));
+        }
+    }
+
+    /**
+     * Internal dispatcher method used to describe exception to client, method should return true
+     * if exception was successfully described.
+     *
+     * Can be redefined in child dispatchers to include custom logic.
+     *
+     * @param \Exception $exception
+     * @return bool
+     */
+    protected function describeException(\Exception $exception)
+    {
+        return false;
+    }
+
+    /**
+     * Log client error.
+     *
+     * @param ClientException $exception
+     */
+    protected function logError(ClientException $exception)
+    {
+        $uri = $this->request->getUri();
+
+        $remoteAddr = '-undefined-';
+        if (!empty($this->request->getServerParams()['REMOTE_ADDR']))
+        {
+            $remoteAddr = $this->request->getServerParams()['REMOTE_ADDR'];
+        }
+
+        $this->logger()->warning(
+            "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.",
+            [
+                'scheme'  => $uri->getScheme(),
+                'host'    => $uri->getHost(),
+                'path'    => $uri->getPath(),
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage() ?: '-not specified-',
+                'remote'  => $remoteAddr
+            ]
+        );
+    }
+
+    /**
+     * Get response dedicated to represent server or client error.
+     *
+     * @param int $code
+     * @return ResponseInterface
+     */
+    protected function errorResponse($code)
+    {
+        if ($this->request->getHeaderLine('Accept') == 'application/json')
+        {
+            return new JsonResponse(['status' => $code], $code);
+        }
+
+        if (isset($this->config['httpErrors'][$code]))
+        {
+            //We can show custom error page
+            return new HtmlResponse(
+                $this->views()->render($this->config['httpErrors'][$code]),
+                $code
+            );
+        }
+
+        return new EmptyResponse($code);
+    }
 }

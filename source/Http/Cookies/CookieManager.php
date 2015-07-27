@@ -15,7 +15,6 @@ use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Encrypter\DecryptionException;
-use Spiral\Encrypter\Encrypter;
 use Spiral\Encrypter\EncrypterException;
 use Spiral\Encrypter\EncrypterInterface;
 use Spiral\Http\HttpDispatcher;
@@ -106,7 +105,7 @@ class CookieManager extends Component implements MiddlewareInterface
     }
 
     /**
-     * Set custom encrypter.
+     * Set custom instance encrypter.
      *
      * @param EncrypterInterface $encrypter
      */
@@ -116,19 +115,18 @@ class CookieManager extends Component implements MiddlewareInterface
     }
 
     /**
-     * Get encrypter instance. Lazy loading method.
+     * Get associated encrypter instance.
      *
      * @return EncrypterInterface
      */
-    protected function getEncrypter()
+    protected function encrypter()
     {
         if (!empty($this->encrypter))
         {
             return $this->encrypter;
         }
 
-        //We can use default encrypter
-        return $this->encrypter = Encrypter::getInstance($this->container);
+        return $this->encrypter = $this->container->get(EncrypterInterface::class);
     }
 
     /**
@@ -225,7 +223,7 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     protected function decodeCookie($cookie)
     {
-        if ($this->config['method'] == 'encrypt')
+        if ($this->config['method'] == self::ENCRYPT)
         {
             try
             {
@@ -234,7 +232,7 @@ class CookieManager extends Component implements MiddlewareInterface
                     return array_map([$this, 'decodeCookie'], $cookie);
                 }
 
-                return $this->getEncrypter()->decrypt($cookie);
+                return $this->encrypter()->decrypt($cookie);
             }
             catch (DecryptionException $exception)
             {
@@ -262,10 +260,10 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     protected function encodeCookie(Cookie $cookie)
     {
-        if ($this->config['method'] == 'encrypt')
+        if ($this->config['method'] == self::ENCRYPT)
         {
             return $cookie->withValue(
-                $this->getEncrypter()->encrypt($cookie->getValue())
+                $this->encrypter()->encrypt($cookie->getValue())
             );
         }
 
@@ -283,7 +281,7 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     protected function getSignature($value)
     {
-        return hash_hmac(self::HMAC_ALGORITHM, $value, $this->getEncrypter()->getKey());
+        return hash_hmac(self::HMAC_ALGORITHM, $value, $this->encrypter()->getKey());
     }
 
     /**

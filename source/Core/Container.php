@@ -321,7 +321,7 @@ class Container extends Component implements ContainerInterface
      * @param string $alias
      * @return bool
      */
-    public function isInstance($alias)
+    public function hasInstance($alias)
     {
         if (!$this->hasBinding($alias))
         {

@@ -47,18 +47,28 @@ class SessionStarter implements MiddlewareInterface
     }
 
     /**
-     * Get session store instance.
+     * Set custom session store.
+     *
+     * @param SessionStore $store
+     */
+    public function setStore(SessionStore $store)
+    {
+        $this->store = $store;
+    }
+
+    /**
+     * Get or create associated session store.
      *
      * @return SessionStore
      */
-    public function getStore()
+    protected function store()
     {
-        if (!empty($this->store))
+        if (!empty($this->encrypter))
         {
             return $this->store;
         }
 
-        return $this->store = SessionStore::getInstance($this->container);
+        return $this->store = $this->container->get(SessionStore::class);
     }
 
     /**
@@ -76,13 +86,13 @@ class SessionStarter implements MiddlewareInterface
         $outerID = null;
         if (isset($cookies[self::COOKIE]))
         {
-            if ($this->getStore()->isStarted())
+            if ($this->store()->isStarted())
             {
-                $outerID = $this->getStore()->getID();
+                $outerID = $this->store()->getID();
             }
 
             //Mounting ID retrieved from cookies
-            $this->store->setID($cookies[self::COOKIE]);
+            $this->store()->setID($cookies[self::COOKIE]);
         }
 
         /**
@@ -90,7 +100,7 @@ class SessionStarter implements MiddlewareInterface
          */
         $response = $next($request);
 
-        if (empty($this->store) && $this->container->isInstance(SessionStore::class))
+        if (empty($this->store) && $this->container->hasInstance(SessionStore::class))
         {
             //Store were started by itself
             $this->store = $this->container->get(SessionStore::class);

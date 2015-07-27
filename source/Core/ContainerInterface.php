@@ -99,7 +99,7 @@ interface ContainerInterface
      * @param string $alias
      * @return bool
      */
-    public function isInstance($alias);
+    public function hasInstance($alias);
 
     /**
      * Remove existed binding.

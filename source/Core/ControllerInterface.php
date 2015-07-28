@@ -6,9 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Controllers;
-
-use Spiral\Core\ContainerInterface;
+namespace Spiral\Core;
 
 interface ControllerInterface
 {

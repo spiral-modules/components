@@ -11,6 +11,11 @@ namespace Spiral\Translator;
 interface TranslatorInterface
 {
     /**
+     * Bundle to use for short localization syntax (l function).
+     */
+    const DEFAULT_BUNDLE = 'default';
+
+    /**
      * Models and other classes which inherits I18nIndexable interface allowed to be automatically
      * parsed and analyzed for messages stored in default property values (static and non static),
      * such values can be prepended and appended with i18n prefixes ([[ and ]] by default) and will

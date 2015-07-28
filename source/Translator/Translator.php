@@ -31,11 +31,6 @@ class Translator extends Singleton implements TranslatorInterface
     const CONFIG = 'translator';
 
     /**
-     * Bundle to use for short localization syntax (l function).
-     */
-    const DEFAULT_BUNDLE = 'default';
-
-    /**
      * Constructed language pluralizers.
      *
      * @var PluralizerInterface[]

@@ -13,6 +13,20 @@ use Spiral\Tokenizer\Reflections\FunctionUsage\Argument;
 class FunctionUsage
 {
     /**
+     * Function location.
+     *
+     * @var string
+     */
+    protected $filename = '';
+
+    /**
+     * Line where function was used.
+     *
+     * @var int
+     */
+    protected $line = 0;
+
+    /**
      * Function name, can include :: as a parent class.
      * Function name.
      *
@@ -33,13 +47,6 @@ class FunctionUsage
      * @var string
      */
     protected $source = '';
-
-    /**
-     * Line where function was used.
-     *
-     * @var int
-     */
-    protected $line = 0;
 
     /**
      * Function arguments with their types and values.
@@ -85,6 +92,26 @@ class FunctionUsage
     }
 
     /**
+     * Function usage filename.
+     *
+     * @return string
+     */
+    public function getFilename()
+    {
+        return $this->filename;
+    }
+
+    /**
+     * Function usage line.
+     *
+     * @return int
+     */
+    public function getLine()
+    {
+        return $this->line;
+    }
+
+    /**
      * Function usage name, may include :: with a parent static class.
      *
      * @return string
@@ -112,16 +139,6 @@ class FunctionUsage
     public function getSource()
     {
         return $this->source;
-    }
-
-    /**
-     * Function usage line.
-     *
-     * @return int
-     */
-    public function getLine()
-    {
-        return $this->line;
     }
 
     /**
@@ -190,13 +207,15 @@ class FunctionUsage
     /**
      * Function usage position.
      *
-     * @param int $line     Usage line number.
-     * @param int $openTID  Where function usage starts.
-     * @param int $closeTID Where function usage ends.
-     * @param int $level    Function used inside another function.
+     * @param string $filename Function usage filename.
+     * @param int    $line     Usage line number.
+     * @param int    $openTID  Where function usage starts.
+     * @param int    $closeTID Where function usage ends.
+     * @param int    $level    Function used inside another function.
      */
-    public function setPosition($line, $openTID, $closeTID, $level = 0)
+    public function setLocation($filename, $line, $openTID, $closeTID, $level = 0)
     {
+        $this->filename = $filename;
         $this->line = $line;
         $this->openTID = $openTID;
         $this->closeTID = $closeTID;

@@ -565,7 +565,7 @@ class ReflectionFile
         $skipTokens = false;
 
         //Were function was found
-        $functionTID = $functionLine = 0;
+        $functionTID = $line = 0;
 
         //Parsed arguments and their first token id
         $arguments = [];
@@ -650,7 +650,10 @@ class ReflectionFile
                             $source
                         );
 
-                        $functionUsage->setPosition($functionLine, $functionTID, $TID, $functionLevel);
+                        $functionUsage->setLocation(
+                            $this->filename, $line, $functionTID, $TID, $functionLevel
+                        );
+
                         $functionUsage->setArguments($this->fetchArguments($arguments));
                     }
 
@@ -688,7 +691,7 @@ class ReflectionFile
             if ($tokenType == T_STRING || $tokenType == T_STATIC || $tokenType == T_NS_SEPARATOR)
             {
                 $functionTID = $TID;
-                $functionLine = $token[self::TOKEN_LINE];
+                $line = $token[self::TOKEN_LINE];
 
                 $parenthesisLevel = 0;
                 $argumentsTID = false;

@@ -96,7 +96,7 @@ class Container extends Component implements ContainerInterface
                 throw new InstanceException("Class '{$alias}' can not be constructed.");
             }
 
-            if (empty($constructor = $reflector->getConstructor()))
+            if (!empty($constructor = $reflector->getConstructor()))
             {
                 $instance = $reflector->newInstanceArgs($this->resolveArguments(
                     $constructor,

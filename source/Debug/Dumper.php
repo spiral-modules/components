@@ -41,8 +41,8 @@ class Dumper extends Singleton
      */
     private $options = [
         'maxLevel'  => 12,
-        'container' => 'background-color: white; font-family: monospace;',
-        'element'   => "<span style='color: {style};'>{value}</span>",
+        'container' => '<pre style="background-color: white; font-family: monospace;">{dump}</pre>',
+        'element'   => "<span style='color: {style};'>{element}</span>",
         'indent'    => '&middot;    ',
         'styles'    => [
             'common'           => 'black',
@@ -112,9 +112,9 @@ class Dumper extends Singleton
             return null;
         }
 
-        $result = "<pre style='" . $this->options['container'] . "'>"
-            . $this->dumpVariable($value, '', 0)
-            . "</pre>";
+        $result = \Spiral\interpolate($this->options['container'], [
+            'dump' => $this->dumpVariable($value, '', 0)
+        ]);
 
         switch ($output)
         {

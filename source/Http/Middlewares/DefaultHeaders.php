@@ -13,7 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Http\HttpCore;
 use Spiral\Http\MiddlewareInterface;
 
-class HttpHeaders implements MiddlewareInterface
+class DefaultHeaders implements MiddlewareInterface
 {
     /**
      * Global headers list.

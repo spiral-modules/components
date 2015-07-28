@@ -14,6 +14,11 @@ use PDO;
 class SqlServerDriver extends Driver
 {
     /**
+     * Driver name, for convenience.
+     */
+    const NAME = 'SQLServer';
+
+    /**
      * Class names should be used to create schema instances to describe specified driver table. Schema
      * realizations are driver specific and allows both schema reading and writing (migrations).
      */
@@ -21,7 +26,6 @@ class SqlServerDriver extends Driver
     const SCHEMA_COLUMN    = ColumnSchema::class;
     const SCHEMA_INDEX     = IndexSchema::class;
     const SCHEMA_REFERENCE = ReferenceSchema::class;
-
 
     /**
      * Class name should be used to represent single query rowset.

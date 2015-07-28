@@ -15,11 +15,11 @@ interface ProcessorInterface
     /**
      * New processors instance with options specified in view config.
      *
-     * @param ViewsInterface $viewFacade
-     * @param Compiler            $compiler SpiralCompiler instance.
-     * @param array               $options
+     * @param ViewsInterface $views
+     * @param Compiler       $compiler Compiler instance.
+     * @param array          $options
      */
-    public function __construct(ViewsInterface $viewFacade, Compiler $compiler, array $options);
+    public function __construct(ViewsInterface $views, Compiler $compiler, array $options);
 
     /**
      * Performs view code pre-processing. LayeredCompiler will provide view source into processors,

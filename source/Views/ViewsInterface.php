@@ -11,6 +11,12 @@ namespace Spiral\Views;
 interface ViewsInterface
 {
     /**
+     * Default view namespace. View component can support as many namespaces and user want, to
+     * specify names use render(namespace:view) syntax.
+     */
+    const DEFAULT_NAMESPACE = 'default';
+
+    /**
      * Namespace separator in views.
      */
     const NS_SEPARATOR = ':';

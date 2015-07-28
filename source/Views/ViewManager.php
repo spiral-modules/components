@@ -34,12 +34,6 @@ class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterf
     const CONFIG = 'views';
 
     /**
-     * Default view namespace. View component can support as many namespaces and user want, to
-     * specify names use render(namespace:view) syntax.
-     */
-    const DEFAULT_NAMESPACE = 'default';
-
-    /**
      * Extension used to represent cached view files.
      */
     const CACHE_EXTENSION = 'php';

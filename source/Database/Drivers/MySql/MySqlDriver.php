@@ -14,6 +14,11 @@ use Spiral\Database\Driver;
 class MySqlDriver extends Driver
 {
     /**
+     * Driver name, for convenience.
+     */
+    const NAME = 'MySQL';
+
+    /**
      * Class names should be used to create schema instances to describe specified driver table. Schema
      * realizations are driver specific and allows both schema reading and writing (migrations).
      */

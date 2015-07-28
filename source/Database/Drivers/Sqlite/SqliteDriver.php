@@ -14,6 +14,11 @@ use Spiral\Database\Driver;
 class SqliteDriver extends Driver
 {
     /**
+     * Driver name, for convenience.
+     */
+    const NAME = 'SQLite';
+
+    /**
      * Get short name to use for driver query profiling.
      */
     const DRIVER_NAME = 'SQLite';

@@ -30,6 +30,11 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     use ConfigurableTrait, LoggerTrait;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'migrations';
+
+    /**
      * Migrations file name format. This format will be used when requesting new migration filename.
      */
     const FILENAME_FORMAT = '{timestamp}_{chunk}_{name}.php';
@@ -89,7 +94,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         FilesInterface $files
     )
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->container = $container;
         $this->tokenizer = $tokenizer;

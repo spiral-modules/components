@@ -43,6 +43,7 @@ class DatabaseManager extends Singleton implements InjectorInterface
     /**
      * ContainerInterface instance.
      *
+     * @invisible
      * @var ContainerInterface
      */
     protected $container = null;

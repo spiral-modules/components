@@ -14,7 +14,7 @@ abstract class CacheStore implements StoreInterface
      * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
      * once set - Container will ask specific binding for injection.
      */
-    const INJECTABLE = CacheManager::class;
+    const INJECTOR = CacheManager::class;
 
     /**
      * Internal store name.

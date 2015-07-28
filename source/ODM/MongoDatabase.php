@@ -14,7 +14,7 @@ class MongoDatabase extends \MongoDB
      * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
      * once set - Container will ask specific binding for injection.
      */
-    const INJECTABLE = ODM::class;
+    const INJECTOR = ODM::class;
 
     /**
      * Profiling levels.

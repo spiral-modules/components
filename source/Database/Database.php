@@ -27,7 +27,7 @@ class Database extends Component
      * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
      * once set - Container will ask specific binding for injection.
      */
-    const INJECTABLE = DatabaseManager::class;
+    const INJECTOR = DatabaseManager::class;
 
     /**
      * Transaction isolation level 'SERIALIZABLE'.

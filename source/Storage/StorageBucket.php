@@ -28,7 +28,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
      * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
      * once set - Container will ask specific binding for injection.
      */
-    const INJECTABLE = StorageManager::class;
+    const INJECTOR = StorageManager::class;
 
     /**
      * Address prefix will be attached to all bucket objects to generate unique object address.

@@ -12,8 +12,8 @@ use Cocur\Slugify\Slugify;
 use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Spiral\Controllers\ControllerException;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\ControllerException;
 use Spiral\Core\CoreInterface;
 use Spiral\Http\ClientException;
 use Spiral\Http\MiddlewareInterface;
@@ -394,7 +394,10 @@ abstract class AbstractRoute implements RouteInterface
         }
         catch (ControllerException $exception)
         {
-            if ($exception->getCode() == ControllerException::BAD_ACTION)
+            if (
+                $exception->getCode() == ControllerException::BAD_ACTION
+                || $exception->getCode() == ControllerException::NOT_FOUND
+            )
             {
                 throw new ClientException(ClientException::NOT_FOUND, $exception->getMessage());
             }

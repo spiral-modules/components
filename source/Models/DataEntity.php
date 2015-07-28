@@ -11,7 +11,6 @@ namespace Spiral\Models;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Events\Traits\EventsTrait;
 use Spiral\Validation\Traits\ValidatorTrait;
 use Spiral\Models\Schemas\EntitySchema;
 
@@ -24,7 +23,7 @@ abstract class DataEntity extends Component implements
     /**
      * Model events and localization.
      */
-    use EventsTrait, LoggerTrait, ValidatorTrait;
+    use LoggerTrait, ValidatorTrait;
 
     /**
      * Such option will be passed to trait initializers when some component requested model schema

@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Http\Router\Traits;
+namespace Spiral\Http\Routing\Traits;
 
-use Spiral\Http\Router\Route;
+use Spiral\Http\Routing\Route;
 use Spiral\Core\ContainerInterface;
-use Spiral\Http\Router\RouteInterface;
-use Spiral\Http\Router\Router;
-use Spiral\Http\Router\RouterException;
-use Spiral\Http\Router\RouterInterface;
+use Spiral\Http\Routing\RouteInterface;
+use Spiral\Http\Routing\Router;
+use Spiral\Http\Routing\RouterException;
+use Spiral\Http\Routing\RouterInterface;
 
 trait RouterTrait
 {

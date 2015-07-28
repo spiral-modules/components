@@ -101,7 +101,7 @@ class Dumper extends Singleton
      */
     public function dump($value, $output = self::DUMP_ECHO)
     {
-        if (PHP_SAPI === 'cli' && $output != self::DUMP_LOG)
+        if (php_sapi_name() === 'cli' && $output != self::DUMP_LOG)
         {
             print_r($value);
             if (is_string($value))

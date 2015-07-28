@@ -10,7 +10,7 @@ namespace Spiral\Http\Middlewares;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Http\HttpDispatcher;
+use Spiral\Http\HttpCore;
 use Spiral\Http\MiddlewareInterface;
 
 class HttpHeaders implements MiddlewareInterface
@@ -25,9 +25,9 @@ class HttpHeaders implements MiddlewareInterface
     /**
      * ApplicationHeaders middleware will make sure that all requested global headers sent.
      *
-     * @param HttpDispatcher $http
+     * @param HttpCore $http
      */
-    public function __construct(HttpDispatcher $http)
+    public function __construct(HttpCore $http)
     {
         $this->headers = $http->getConfig()['headers'];
     }

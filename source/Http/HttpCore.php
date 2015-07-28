@@ -20,14 +20,14 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Http\Responses\EmptyResponse;
 use Spiral\Http\Responses\HtmlResponse;
 use Spiral\Http\Responses\JsonResponse;
-use Spiral\Http\Router\Router;
-use Spiral\Http\Router\Traits\RouterTrait;
+use Spiral\Http\Routing\Router;
+use Spiral\Http\Routing\Traits\RouterTrait;
 use Spiral\Views\ViewsInterface;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
-class HttpDispatcher extends Singleton implements LoggerAwareInterface
+class HttpCore extends Singleton implements LoggerAwareInterface
 {
     /**
      * Http required traits.

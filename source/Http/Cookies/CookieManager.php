@@ -17,7 +17,7 @@ use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Encrypter\DecryptionException;
 use Spiral\Encrypter\EncrypterException;
 use Spiral\Encrypter\EncrypterInterface;
-use Spiral\Http\HttpDispatcher;
+use Spiral\Http\HttpCore;
 use Spiral\Http\MiddlewareInterface;
 use Spiral\Session\Http\SessionStarter;
 
@@ -86,9 +86,9 @@ class CookieManager extends Component implements MiddlewareInterface
      * CookieMiddleware response for packing and upacking cookie values and their protection.
      *
      * @param ContainerInterface $container
-     * @param HttpDispatcher     $dispatcher
+     * @param HttpCore     $dispatcher
      */
-    public function __construct(ContainerInterface $container, HttpDispatcher $dispatcher)
+    public function __construct(ContainerInterface $container, HttpCore $dispatcher)
     {
         $this->container = $container;
         $this->config = $dispatcher->getConfig()['cookies'];

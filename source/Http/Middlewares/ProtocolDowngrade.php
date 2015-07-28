@@ -12,7 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Http\MiddlewareInterface;
 
-class ProtocolNegotiator implements MiddlewareInterface
+class ProtocolDowngrade implements MiddlewareInterface
 {
     /**
      * Handle request generate response. Middleware used to alter incoming Request and/or Response
@@ -25,6 +25,6 @@ class ProtocolNegotiator implements MiddlewareInterface
     public function __invoke(ServerRequestInterface $request, \Closure $next = null)
     {
         //Simple middleware used to set response protocol using request instance
-        return $next($request)->withProtocolVersion($request->getProtocolVersion());
+        return $next($request)->withProtocolVersion('1.0');
     }
 }

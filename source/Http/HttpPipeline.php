@@ -116,7 +116,7 @@ class HttpPipeline extends Component
 
         if (!isset($this->middlewares[$position]))
         {
-            return $this->getResponse($outerRequest);
+            return $this->createResponse($outerRequest);
         }
 
         /**
@@ -136,7 +136,7 @@ class HttpPipeline extends Component
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    protected function getResponse(ServerRequestInterface $request)
+    protected function createResponse(ServerRequestInterface $request)
     {
         //Let's create request scope
         $outerRequest = $this->container->replace(self::REQUEST_INTERFACE, $request);
@@ -201,6 +201,9 @@ class HttpPipeline extends Component
             return new JsonResponse($response, $code);
         }
 
-        return (new Response())->getBody()->write($response . $plainOutput);
+        $psrResponse = new Response();
+        $psrResponse->getBody()->write($response . $plainOutput);
+
+        return $psrResponse;
     }
 }

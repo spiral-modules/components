@@ -129,21 +129,23 @@ class DirectRoute extends AbstractRoute
      */
     protected function createEndpoint(ContainerInterface $container)
     {
-        return function (ServerRequestInterface $request) use ($container)
-        {
-            $controller = $this->matches['controller'];
+        $route = $this;
 
-            if (isset($this->controllers[$controller]))
+        return function (ServerRequestInterface $request) use ($container, $route)
+        {
+            $controller = $route->matches['controller'];
+
+            if (isset($route->controllers[$controller]))
             {
-                $controller = $this->controllers[$controller];
+                $controller = $route->controllers[$controller];
             }
             else
             {
-                $controller = $this->namespace . '\\' . ucfirst($controller) . $this->postfix;
+                $controller = $route->namespace . '\\' . ucfirst($controller) . $route->postfix;
             }
 
             //Calling controller (using core resolved via container)
-            return $this->callAction($container, $controller, $this->matches['action'], $this->matches);
+            return $route->callAction($container, $controller, $route->matches['action'], $route->matches);
         };
     }
 }

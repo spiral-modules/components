@@ -10,7 +10,7 @@ namespace Spiral\Http\Cookies;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Components\Http\Middlewares\CsrfFilter;
+use Spiral\Http\Middlewares\CsrfFilter;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;

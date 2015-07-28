@@ -10,7 +10,4 @@ namespace Spiral\Http;
 
 class Uri extends \Zend\Diactoros\Uri
 {
-    /**
-     * Simple alias.
-     */
 }

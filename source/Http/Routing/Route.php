@@ -120,17 +120,19 @@ class Route extends AbstractRoute
             return $container->get($this->target);
         }
 
-        return function (ServerRequestInterface $request) use ($container)
+        $route = $this;
+
+        return function (ServerRequestInterface $request) use ($container, $route)
         {
-            list($controller, $action) = explode(self::CONTROLLER_SEPARATOR, $this->target);
+            list($controller, $action) = explode(self::CONTROLLER_SEPARATOR, $route->target);
 
             if ($action == self::DYNAMIC_ACTION)
             {
-                $action = $this->matches['action'];
+                $action = $route->matches['action'];
             }
 
             //Calling controller (using core resolved via container)
-            return $this->callAction($container, $controller, $action, $this->matches);
+            return $route->callAction($container, $controller, $action, $route->matches);
         };
     }
 }

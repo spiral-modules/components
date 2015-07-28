@@ -22,7 +22,7 @@ abstract class Checker extends Component
      * We are going to inherit parent validation, we have to let i18n indexer know to collect both
      * local and parent messages under one bundle.
      */
-    const I18N_INHERIT_MESSAGES = true;
+    const INHERIT_TRANSLATIONS = true;
 
     /**
      * Set of default error messages associated with their check methods organized by method name.

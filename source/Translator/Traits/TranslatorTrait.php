@@ -11,9 +11,6 @@ namespace Spiral\Translator\Traits;
 use Spiral\Core\ContainerInterface;
 use Spiral\Translator\TranslatorInterface;
 
-/**
- * Class should be instance of Component or declare STATIC getContainer() method.
- */
 trait TranslatorTrait
 {
     /**

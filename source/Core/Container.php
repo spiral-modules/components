@@ -180,7 +180,7 @@ class Container extends Component implements ContainerInterface
         {
             $name = $parameter->getName();
 
-            if (!$parameter->getClass())
+            if (empty($parameter->getClass()))
             {
                 if (array_key_exists($name, $parameters))
                 {

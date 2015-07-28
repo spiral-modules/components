@@ -160,7 +160,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             {
                 $this->logger()->warning(
                     "File '{filename}' has includes and will be excluded from analysis.",
-                    ['filename' => $this->file->relativePath($filename)]
+                    ['filename' => $filename]
                 );
 
                 continue;

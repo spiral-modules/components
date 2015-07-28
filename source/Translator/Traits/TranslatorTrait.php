@@ -17,7 +17,7 @@ use Spiral\Translator\TranslatorInterface;
 trait TranslatorTrait
 {
     /**
-     * Global container access is required in some cases. Method should be declared statically!
+     * Global container access is required in some cases. Method should be declared statically.
      *
      * @return ContainerInterface
      */
@@ -60,7 +60,8 @@ trait TranslatorTrait
      */
     public static function translate($string)
     {
-        if (empty(self::getContainer()))
+        $container = self::getContainer();
+        if (empty($container) || !$container->hasBinding(TranslatorInterface::class))
         {
             //Unable to localize
             return $string;
@@ -75,8 +76,6 @@ trait TranslatorTrait
             $string = substr($string, 2, -2);
         }
 
-        return self::getContainer()->get(TranslatorInterface::class)->translate(
-            static::i18nBundle(), $string
-        );
+        return $container->get(TranslatorInterface::class)->translate(static::i18nBundle(), $string);
     }
 }

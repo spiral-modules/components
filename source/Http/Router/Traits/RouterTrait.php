@@ -33,7 +33,7 @@ trait RouterTrait
     protected $router = null;
 
     /**
-     * Global container access is required in some cases.
+     * Global container access is required in some cases. Method should be declared statically.
      *
      * @return ContainerInterface
      */
@@ -71,12 +71,12 @@ trait RouterTrait
      */
     protected function createRouter()
     {
-        if (empty($this->getContainer()))
+        if (empty($container = self::getContainer()))
         {
             throw new RouterException("Unable to create default router, default container not set.");
         }
 
-        return new Router($this->getContainer(), $this->routes);
+        return $container->get(RouterInterface::class, ['routes' => $this->routes]);
     }
 
     /**

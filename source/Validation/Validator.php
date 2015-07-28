@@ -182,18 +182,30 @@ class Validator extends Component implements LoggerAwareInterface
      *
      * "flag" => ["notEmpty", "boolean"]
      *
-     * @param array|\ArrayAccess $data             Data to be validated.
-     * @param array              $validates        Validation rules.
-     * @param array              $options          Validation specific options.
-     * @param ContainerInterface $container        Container instance used to resolve checkers, global
+     * @param array|\ArrayAccess     $data         Data to be validated.
+     * @param array                  $validates    Validation rules.
+     * @param array                  $options      Validation specific options.
+     * @param ContainerInterface     $container    Container instance used to resolve checkers, global
      *                                             container will be used if nothing else provided.
+     * @param ValidationConfigurator $configurator Used to supply global options.
      */
-    public function __construct($data, array $validates, array $options, ContainerInterface $container)
+    public function __construct(
+        $data,
+        array $validates,
+        array $options,
+        ContainerInterface $container,
+        ValidationConfigurator $configurator = null
+    )
     {
         $this->data = $data;
         $this->validates = $validates;
         $this->options = $options + $this->options;
         $this->container = $container;
+
+        if (!empty($configurator))
+        {
+            $this->options = $configurator->getConfig() + $this->options;
+        }
     }
 
     /**

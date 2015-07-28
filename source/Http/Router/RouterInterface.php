@@ -10,11 +10,21 @@ namespace Spiral\Http\Router;
 
 use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\UriInterface;
+use Spiral\Core\ContainerInterface;
 use Spiral\Http\MiddlewareInterface;
 use Zend\Diactoros\Response\RedirectResponse;
 
 interface RouterInterface extends MiddlewareInterface
 {
+    /**
+     * Router middleware used by HttpDispatcher and modules to perform URI based routing with defined
+     * endpoint such as controller action, closure or middleware.
+     *
+     * @param ContainerInterface $container
+     * @param RouteInterface[]   $routes Pre-defined array of routes (if were collected externally).
+     */
+    public function __construct(ContainerInterface $container, array $routes = []);
+
     /**
      * Add new Route instance to router stack, route has to be added before router handled request.
      *

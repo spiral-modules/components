@@ -14,7 +14,7 @@ use Spiral\Debug\BenchmarkerInterface;
 trait BenchmarkTrait
 {
     /**
-     * Global container access is required in some cases.
+     * Global container access is required in some cases. Method should be declared statically.
      *
      * @return ContainerInterface
      */
@@ -30,16 +30,13 @@ trait BenchmarkTrait
      */
     protected function benchmark($record = '', $context = '')
     {
-        if (empty($this->getContainer()))
+        $container = self::getContainer();
+        if (empty($container) || !$container->hasBinding(BenchmarkerInterface::class))
         {
             //Nothing to do
             return false;
         }
 
-        return $this->getContainer()->get(BenchmarkerInterface::class)->benchmark(
-            $this,
-            $record,
-            $context
-        );
+        return $container->get(BenchmarkerInterface::class)->benchmark($this, $record, $context);
     }
 }

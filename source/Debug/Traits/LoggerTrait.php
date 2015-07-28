@@ -12,7 +12,6 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Spiral\Core\ContainerInterface;
-use Spiral\Debug\Debugger;
 
 trait LoggerTrait
 {
@@ -29,7 +28,7 @@ trait LoggerTrait
     private static $loggers = [];
 
     /**
-     * Global container access is required in some cases.
+     * Global container access is required in some cases. Method should be declared statically.
      *
      * @return ContainerInterface
      */
@@ -43,14 +42,14 @@ trait LoggerTrait
      */
     public function setLogger(LoggerInterface $logger, $static = false)
     {
-        if ($static)
-        {
-            self::$loggers[static::class] = $logger;
-        }
-        else
+        if (!$static)
         {
             $this->logger = $logger;
+
+            return;
         }
+
+        self::$loggers[static::class] = $logger;
     }
 
     /**
@@ -71,13 +70,15 @@ trait LoggerTrait
             return self::$loggers[static::class];
         }
 
-        if (!empty($this->getContainer()))
+        $container = self::getContainer();
+        if (empty($container) || !$container->hasBinding(LoggerInterface::class))
         {
-            return self::$loggers[static::class] = $this->getContainer()->get(LoggerInterface::class, [
-                'name' => static::class
-            ]);
+            //That's easy
+            return new NullLogger();
         }
 
-        return new NullLogger();
+        return self::$loggers[static::class] = $container->get(LoggerInterface::class, [
+            'name' => static::class
+        ]);
     }
 }

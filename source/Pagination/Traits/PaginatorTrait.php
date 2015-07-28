@@ -126,14 +126,25 @@ trait PaginatorTrait
         ServerRequestInterface $request = null
     )
     {
-        if (empty($request) && !empty($this->getContainer()))
+        if (empty($container = $this->getContainer()) && empty($request))
         {
-            $request = $this->getContainer()->get(ServerRequestInterface::class);
+            throw new PaginationException("Unable to create pagination without specified request.");
         }
 
-        $this->paginator = $this->getContainer()->get(PaginatorInterface::class, compact(
-            'request', 'pageParameter'
-        ));
+        //If no request provided we can try to fetch it from container
+        $request = !empty($request) ? $request : $container->get(ServerRequestInterface::class);
+
+        if (empty($container) || !$container->hasBinding(PaginatorInterface::class))
+        {
+            //Let's use default paginator
+            $this->paginator = new Paginator($request, $pageParameter);
+        }
+        else
+        {
+            $this->paginator = $container->get(PaginatorInterface::class, compact(
+                'request', 'pageParameter'
+            ));
+        }
 
         $this->paginator->setLimit($limit);
         $this->paginationCount = $count;

@@ -8,7 +8,7 @@
  */
 namespace Spiral\Http\Router;
 
-use Symfony\Component\Process\Exception\ExceptionInterface;
+use Spiral\Core\ExceptionInterface;
 
 class RouterException extends \RuntimeException implements ExceptionInterface
 {

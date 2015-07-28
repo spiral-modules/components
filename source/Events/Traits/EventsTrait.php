@@ -27,7 +27,7 @@ trait EventsTrait
     private static $dispatchers = [];
 
     /**
-     * Global container access is required in some cases. Method should be declared statically!
+     * Global container access is required in some cases. Method should be declared statically.
      *
      * @return ContainerInterface
      */
@@ -62,14 +62,14 @@ trait EventsTrait
             return self::$dispatchers[static::class];
         }
 
-        if (empty(self::getContainer()))
+        $container = self::getContainer();
+        if (empty($container) || !$container->hasBinding(DispatcherInterface::class))
         {
+            //Let's use default Dispatcher, no one will be harmed
             return self::$dispatchers[static::class] = new Dispatcher();
         }
 
-        return self::$dispatchers[static::class] = self::getContainer()->get(
-            DispatcherInterface::class
-        );
+        return self::$dispatchers[static::class] = $container->get(DispatcherInterface::class);
     }
 
     /**
@@ -99,8 +99,6 @@ trait EventsTrait
             return $context;
         }
 
-        return self::$dispatchers[static::class]->fire(
-            new ObjectEvent($event, $this, $context)
-        );
+        return self::$dispatchers[static::class]->fire(new ObjectEvent($event, $this, $context));
     }
 }

@@ -115,15 +115,19 @@ trait ValidatorTrait
             return $validator;
         }
 
-        if (!empty($this->getContainer()))
+        $container = self::getContainer();
+        if (empty($container) || !$container->hasBinding(ValidatorInterface::class))
         {
-            $this->validator = $this->getContainer()->get(ValidatorInterface::class, [
-                'fields'    => $this->fields,
-                'validates' => !empty($validates) ? $validates : $this->validates
-            ]);
+            //We can't create default validation without any rule, this is not secure
+            throw new ValidationException(
+                "Unable to create class Validator, no global container set or binding is missing."
+            );
         }
 
-        throw new ValidationException("Unable to create class Validator, no global container set.");
+        return $this->validator = $container->get(ValidatorInterface::class, [
+            'fields'    => $this->fields,
+            'validates' => !empty($validates) ? $validates : $this->validates
+        ]);
     }
 
     /**

@@ -34,6 +34,11 @@ class StorageManager extends Singleton implements
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'storage';
+
+    /**
      * Container instance.
      *
      * @invisible
@@ -76,7 +81,7 @@ class StorageManager extends Singleton implements
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $bucket)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $bucket;
 
         //Loading buckets

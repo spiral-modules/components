@@ -30,6 +30,11 @@ class ODM extends Singleton implements InjectorInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'odm';
+
+    /**
      * Core component.
      *
      * @var HippocampusInterface
@@ -72,7 +77,7 @@ class ODM extends Singleton implements InjectorInterface
         ContainerInterface $container
     )
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->runtime = $runtime;
         $this->container = $container;

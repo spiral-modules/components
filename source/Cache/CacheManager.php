@@ -28,6 +28,11 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'cache';
+
+    /**
      * Already constructed cache adapters.
      *
      * @var CacheStore[]
@@ -49,7 +54,7 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
     }
 

@@ -33,6 +33,11 @@ class ORM extends Singleton
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'orm';
+
+    /**
      * Normalized entity constants.
      */
     const E_ROLE_NAME   = 0;
@@ -114,7 +119,7 @@ class ORM extends Singleton
         DatabaseManager $dbal
     )
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->runtime = $runtime;
         $this->container = $container;

@@ -28,6 +28,11 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'debug';
+
+    /**
      * ContainerInterface used to create log handlers.
      *
      * @var ContainerInterface
@@ -51,7 +56,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
     }
 

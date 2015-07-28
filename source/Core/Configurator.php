@@ -28,12 +28,12 @@ class Configurator implements ConfiguratorInterface
     }
 
     /**
-     * Get configuration for specific requester.
+     * Configuration section to be loaded. Configurator will return same config for every section.
      *
-     * @param object|string $source
+     * @param string $section
      * @return array
      */
-    public function getConfig($source = null)
+    public function getConfig($section = null)
     {
         return $this->config;
     }

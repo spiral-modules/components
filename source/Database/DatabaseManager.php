@@ -29,6 +29,11 @@ class DatabaseManager extends Singleton implements InjectorInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'database';
+
+    /**
      * By default spiral will force all time conversion into single timezone before storing in
      * database, it will help us to ensure that we have to problems with switching timezones and
      * save a lot of time while development. :)
@@ -58,7 +63,7 @@ class DatabaseManager extends Singleton implements InjectorInterface
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
     }
 

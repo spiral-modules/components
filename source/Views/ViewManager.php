@@ -29,6 +29,11 @@ class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterf
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'views';
+
+    /**
      * Default view namespace. View component can support as many namespaces and user want, to
      * specify names use render(namespace:view) syntax.
      */
@@ -86,7 +91,7 @@ class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterf
         FilesInterface $files
     )
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->container = $container;
         $this->files = $files;

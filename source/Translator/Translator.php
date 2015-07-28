@@ -26,6 +26,11 @@ class Translator extends Singleton implements TranslatorInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'translator';
+
+    /**
      * Bundle to use for short localization syntax (l function).
      */
     const DEFAULT_BUNDLE = 'default';
@@ -76,7 +81,7 @@ class Translator extends Singleton implements TranslatorInterface
      */
     public function __construct(ConfiguratorInterface $configurator, HippocampusInterface $runtime)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->runtime = $runtime;
 
         $this->language = $this->config['default'];

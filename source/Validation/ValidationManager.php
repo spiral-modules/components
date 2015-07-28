@@ -27,6 +27,11 @@ class ValidationManager extends Singleton implements InjectorInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'validation';
+
+    /**
      * ContainerInterface.
      *
      * @var ContainerInterface
@@ -41,7 +46,7 @@ class ValidationManager extends Singleton implements InjectorInterface
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
     }
 

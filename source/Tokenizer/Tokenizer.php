@@ -31,6 +31,11 @@ class Tokenizer extends Singleton implements TokenizerInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'tokenizer';
+
+    /**
      * To cache tokenizer class map.
      *
      * @invisible
@@ -79,7 +84,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
         Loader $loader
     )
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->runtime = $runtime;
         $this->file = $file;

@@ -25,6 +25,11 @@ class Encrypter extends Singleton implements EncrypterInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'encrypter';
+
+    /**
      * Keys to use in packed data.
      */
     const IV        = 'a';
@@ -54,7 +59,7 @@ class Encrypter extends Singleton implements EncrypterInterface
      */
     public function __construct(ConfiguratorInterface $configurator)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->setKey($this->config['key']);
         if (!empty($this->config['method']))

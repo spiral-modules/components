@@ -11,10 +11,10 @@ namespace Spiral\Core;
 interface ConfiguratorInterface
 {
     /**
-     * Get configuration for specific requester.
+     * Configuration section to be loaded.
      *
-     * @param object|string $source
+     * @param string $section
      * @return array
      */
-    public function getConfig($source = null);
+    public function getConfig($section = null);
 }

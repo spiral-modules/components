@@ -29,6 +29,11 @@ class SessionStore extends Singleton implements \ArrayAccess, \IteratorAggregate
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'session';
+
+    /**
      * Do not use any custom handlers.
      */
     const NATIVE_HANDLER = 'native';
@@ -80,7 +85,7 @@ class SessionStore extends Singleton implements \ArrayAccess, \IteratorAggregate
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
     }
 

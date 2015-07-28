@@ -40,6 +40,11 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
     const SINGLETON = self::class;
 
     /**
+     * Configuration section.
+     */
+    const CONFIG = 'http';
+
+    /**
      * Bigger streams will be send using chunks (if possible). Default 2Mb.
      */
     const STREAM_SIZE_THRESHOLD = 2097152;
@@ -107,7 +112,7 @@ class HttpDispatcher extends Singleton implements LoggerAwareInterface
      */
     public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig($this);
+        $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
 
         $this->middlewares = $this->config['middlewares'];

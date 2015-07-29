@@ -111,7 +111,7 @@ class Dispatcher implements DispatcherInterface
 
         if (empty($this->listeners[$event->getName()]))
         {
-            return $context;
+            return $event->context();
         }
 
         foreach ($this->listeners[$event->getName()] as $listener)

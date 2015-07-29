@@ -187,15 +187,18 @@ class HttpPipeline extends Component
 
         if (is_array($response) || $response instanceof \JsonSerializable)
         {
-            if (is_array($response) && !empty($plainOutput))
-            {
-                $response['plainOutput'] = $plainOutput;
-            }
-
             $code = 200;
-            if (is_array($response) && isset($response['status']))
+            if (is_array($response))
             {
-                $code = $response['status'];
+                if (!empty($plainOutput))
+                {
+                    $response['plainOutput'] = $plainOutput;
+                }
+
+                if (isset($response['status']))
+                {
+                    $code = $response['status'];
+                }
             }
 
             return new JsonResponse($response, $code);

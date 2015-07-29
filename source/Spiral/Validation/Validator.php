@@ -192,7 +192,7 @@ class Validator extends Component implements LoggerAwareInterface
     public function __construct(
         $data,
         array $validates,
-        array $options,
+        array $options = [],
         ContainerInterface $container,
         ValidationConfigurator $configurator = null
     )

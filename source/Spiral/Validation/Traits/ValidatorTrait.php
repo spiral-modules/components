@@ -120,12 +120,12 @@ trait ValidatorTrait
         {
             //We can't create default validation without any rule, this is not secure
             throw new ValidationException(
-                "Unable to create class Validator, no global container set or binding is missing."
+                "Unable to create Validator, no global container set or binding is missing."
             );
         }
 
         return $this->validator = $container->get(ValidatorInterface::class, [
-            'fields'    => $this->fields,
+            'data'      => $this->fields,
             'validates' => !empty($validates) ? $validates : $this->validates
         ]);
     }

@@ -21,7 +21,7 @@ interface ValidatorInterface
      * @param ContainerInterface $container        Container instance used to resolve checkers, global
      *                                             container will be used if nothing else provided.
      */
-    public function __construct($data, array $validates, array $options, ContainerInterface $container);
+    public function __construct($data, array $validates, array $options = [], ContainerInterface $container);
 
     /**
      * Update validation data (context), this method will automatically clean all existed error

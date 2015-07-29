@@ -1014,7 +1014,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
 
                 if (empty($schema))
                 {
-                    $this->logger->info(
+                    $this->logger()->info(
                         "Dropping column [{statement}] from table {table}.",
                         [
                             'statement' => $dbColumn->sqlStatement(),
@@ -1028,7 +1028,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
 
                 if (empty($dbColumn))
                 {
-                    $this->logger->info(
+                    $this->logger()->info(
                         "Adding column [{statement}] into table {table}.",
                         [
                             'statement' => $schema->sqlStatement(),
@@ -1041,7 +1041,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
                 }
 
                 //Altering
-                $this->logger->info(
+                $this->logger()->info(
                     "Altering column [{statement}] to [{new}] in table {table}.",
                     [
                         'statement' => $dbColumn->sqlStatement(),
@@ -1059,7 +1059,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
 
                 if (empty($schema))
                 {
-                    $this->logger->info(
+                    $this->logger()->info(
                         "Dropping index [{statement}] from table {table}.",
                         [
                             'statement' => $dbIndex->sqlStatement(true),
@@ -1073,7 +1073,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
 
                 if (empty($dbIndex))
                 {
-                    $this->logger->info(
+                    $this->logger()->info(
                         "Adding index [{statement}] into table {table}.",
                         [
                             'statement' => $schema->sqlStatement(false),
@@ -1086,7 +1086,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
                 }
 
                 //Altering
-                $this->logger->info(
+                $this->logger()->info(
                     "Altering index [{statement}] to [{new}] in table {table}.",
                     [
                         'statement' => $dbIndex->sqlStatement(false),
@@ -1104,7 +1104,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
 
                 if (empty($schema))
                 {
-                    $this->logger->info(
+                    $this->logger()->info(
                         "Dropping foreign key [{statement}] in table {table}.",
                         [
                             'statement' => $dbForeign->sqlStatement(),
@@ -1118,7 +1118,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
 
                 if (empty($dbForeign))
                 {
-                    $this->logger->info(
+                    $this->logger()->info(
                         "Adding foreign key [{statement}] into table {table}.",
                         [
                             'statement' => $schema->sqlStatement(),
@@ -1131,7 +1131,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
                 }
 
                 //Altering
-                $this->logger->info(
+                $this->logger()->info(
                     "Altering foreign key [{statement}] to [{new}] in table {table}.",
                     [
                         'statement' => $dbForeign->sqlStatement(),

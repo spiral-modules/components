@@ -400,7 +400,7 @@ class HttpCore extends Singleton implements LoggerAwareInterface
         {
             //We can show custom error page
             return new HtmlResponse(
-                $this->views()->render($this->config['httpErrors'][$code]),
+                $this->views()->render($this->config['httpErrors'][$code], ['http' => $this]),
                 $code
             );
         }

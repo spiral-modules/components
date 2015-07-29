@@ -73,7 +73,7 @@ class SchemaBuilder
 
             if (!isset($this->collections[$collection]))
             {
-                $primaryDocument = $this->getDocument($documentSchema->primaryClass());
+                $primaryDocument = $this->documentSchema($documentSchema->primaryClass());
 
                 if ($documentSchema->getCollection() == $primaryDocument->getCollection())
                 {
@@ -103,6 +103,27 @@ class SchemaBuilder
     }
 
     /**
+     * Get DocumentSchema by class name.
+     *
+     * @param string $class Class name.
+     * @return null|DocumentSchema
+     */
+    public function documentSchema($class)
+    {
+        if ($class == Document::class)
+        {
+            return new DocumentSchema($this, Document::class);
+        }
+
+        if (!isset($this->documents[$class]))
+        {
+            return null;
+        }
+
+        return $this->documents[$class];
+    }
+
+    /**
      * All fetched document schemas.
      *
      * @return DocumentSchema[]
@@ -122,26 +143,6 @@ class SchemaBuilder
         return $this->collections;
     }
 
-    /**
-     * Get DocumentSchema by class name.
-     *
-     * @param string $class Class name.
-     * @return null|DocumentSchema
-     */
-    public function getDocument($class)
-    {
-        if ($class == Document::class)
-        {
-            return new DocumentSchema($this, Document::class);
-        }
-
-        if (!isset($this->documents[$class]))
-        {
-            return null;
-        }
-
-        return $this->documents[$class];
-    }
 
     /**
      * Get mutators for field with specified abstractType.

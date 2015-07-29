@@ -83,7 +83,7 @@ class DocumentSchema extends EntitySchema
             if (is_array($value))
             {
                 $value = array_merge(
-                    $this->builder->getDocument($parentClass)->property($property, true),
+                    $this->builder->documentSchema($parentClass)->property($property, true),
                     $value
                 );
             }
@@ -248,7 +248,7 @@ class DocumentSchema extends EntitySchema
         {
             if ($composition['type'] == ODM::CMP_ONE)
             {
-                $defaults[$field] = $this->builder->getDocument($composition['class'])->getDefaults();
+                $defaults[$field] = $this->builder->documentSchema($composition['class'])->getDefaults();
             }
         }
 
@@ -318,7 +318,7 @@ class DocumentSchema extends EntitySchema
         $compositions = [];
         foreach ($fields as $field => $type)
         {
-            if (is_string($type) && $foreignDocument = $this->builder->getDocument($type))
+            if (is_string($type) && $foreignDocument = $this->builder->documentSchema($type))
             {
                 $compositions[$field] = [
                     'type'            => ODM::CMP_ONE,
@@ -355,7 +355,7 @@ class DocumentSchema extends EntitySchema
             }
 
             $class = $type[0];
-            if (is_string($class) && $foreignDocument = $this->builder->getDocument($class))
+            if (is_string($class) && $foreignDocument = $this->builder->documentSchema($class))
             {
                 //Rename type to represent real model name
                 $compositions[$field] = [
@@ -399,7 +399,7 @@ class DocumentSchema extends EntitySchema
                 ? $options[Document::MANY]
                 : $options[Document::ONE];
 
-            if (!$externalDocument = $this->builder->getDocument($class))
+            if (!$externalDocument = $this->builder->documentSchema($class))
             {
                 throw new ODMException(
                     "Unable to build aggregation {$this->class}.{$field}, "
@@ -484,7 +484,7 @@ class DocumentSchema extends EntitySchema
         {
             if (
                 $hasCollection
-                && !$this->builder->getDocument(
+                && !$this->builder->documentSchema(
                     $reflection->getParentClass()->getName()
                 )->getCollection()
             )
@@ -507,7 +507,7 @@ class DocumentSchema extends EntitySchema
      */
     public function primaryDocument($hasCollection = false)
     {
-        return $this->builder->getDocument($this->primaryClass($hasCollection));
+        return $this->builder->documentSchema($this->primaryClass($hasCollection));
     }
 
     /**
@@ -572,7 +572,7 @@ class DocumentSchema extends EntitySchema
 
             foreach ($classes as $class => &$fields)
             {
-                $fields = $this->builder->getDocument($class)->getFields();
+                $fields = $this->builder->documentSchema($class)->getFields();
 
                 if (empty($fields))
                 {

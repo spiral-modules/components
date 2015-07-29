@@ -124,6 +124,6 @@ class CollectionSchema
      */
     public function primaryDocument()
     {
-        return $this->builder->getDocument($this->primaryClass);
+        return $this->builder->documentSchema($this->primaryClass);
     }
 }

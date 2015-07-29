@@ -46,11 +46,7 @@ trait EventsTrait
 
     /**
      * EventDispatcher instance which is currently attached to component implementation, can be redefined
-     * using setDispatcher() method. EventDispatcher instance will be created on demand and depends on
-     * "events" binding in spiral core. Every new EventDispatcher will receive "name" argument which
-     * is equal to getAlias() method result and declares events namespace.
-     *
-     * If no "events" binding presented, default dispatcher will be used (performance reasons).
+     * using setDispatcher() method.
      *
      * @return DispatcherInterface
      * @throws EventsException

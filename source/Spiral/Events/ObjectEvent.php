@@ -38,7 +38,7 @@ class ObjectEvent extends Event
      *
      * @return object
      */
-    public function getObject()
+    public function object()
     {
         return $this->object;
     }

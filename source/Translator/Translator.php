@@ -233,7 +233,7 @@ class Translator extends Singleton implements TranslatorInterface
 
         $this->bundles[$bundle] = $this->runtime->loadData(
             $bundle,
-            $this->languageOptions['dataFolder']
+            $this->languageOptions['directory']
         );
 
         if (empty($this->bundles[$bundle]))
@@ -257,7 +257,7 @@ class Translator extends Singleton implements TranslatorInterface
         $this->runtime->saveData(
             $bundle,
             $this->bundles[$bundle],
-            $this->languageOptions['dataFolder']
+            $this->languageOptions['directory']
         );
     }
 

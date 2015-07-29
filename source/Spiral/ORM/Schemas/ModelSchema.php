@@ -123,7 +123,6 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
         return $this->property('database');
     }
 
-
     /**
      * Get table name associated with model.
      *
@@ -299,9 +298,26 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
             {
                 if (!array_key_exists($field, $mutators[$mutator]))
                 {
-                    $mutators[$mutator][$field] = $this->builder->processAlias($filter);
+                    $mutators[$mutator][$field] = $filter;
                 }
             }
+        }
+
+        foreach ($mutators as $mutator => &$filters)
+        {
+            foreach ($filters as $field => $filter)
+            {
+                $filters[$field] = $this->builder->processAlias($filter);
+
+                if ($mutator == 'accessor' && is_string($filters[$field]))
+                {
+                    $filters[$field] = [
+                        $filters[$field],
+                        $this->tableSchema->getColumns()[$field]->abstractType()
+                    ];
+                }
+            }
+            unset($filters);
         }
 
         return $mutators;

@@ -206,19 +206,31 @@ class DocumentSchema extends EntitySchema
             if (isset($resolved['accessor']))
             {
                 //Ensuring type for accessor
-                $resolved['accessor'] = [
-                    $resolved['accessor'],
-                    is_array($type) ? $type[0] : $type
-                ];
+                $resolved['accessor'] = [$resolved['accessor'], is_array($type) ? $type[0] : $type];
             }
 
             foreach ($resolved as $mutator => $filter)
             {
                 if (!array_key_exists($field, $mutators[$mutator]))
                 {
-                    $mutators[$mutator][$field] = $this->builder->processAlias($filter);
+                    $mutators[$mutator][$field] = $filter;
                 }
             }
+        }
+
+        foreach ($mutators as $mutator => &$filters)
+        {
+            foreach ($filters as $field => $filter)
+            {
+                $filters[$field] = $this->builder->processAlias($filter);
+
+                if ($mutator == 'accessor' && is_string($filters[$field]))
+                {
+                    $type = $this->getFields()[$field];
+                    $filters[$field] = [$filters[$field], is_array($type) ? $type[0] : $type];
+                }
+            }
+            unset($filters);
         }
 
         //Mounting composition accessors

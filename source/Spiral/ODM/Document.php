@@ -779,17 +779,20 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
      * Validator instance associated with model, will be response for validations of validation errors.
      * Model related error localization should happen in model itself.
      *
+     * @param array $validates Custom validation rules.
      * @return ValidatorInterface
      */
-    public function validator()
+    public function validator(array $validates = [])
     {
         if (!empty($this->validator))
         {
+            !empty($validates) && $this->validator->setRules($validates);
+
             //Refreshing data
             return $this->validator->setData($this->fields);
         }
 
-        return parent::validator($this->schema[ODM::D_VALIDATES]);
+        return parent::validator(!empty($validates) ? $validates : $this->schema[ODM::D_VALIDATES]);
     }
 
     /**

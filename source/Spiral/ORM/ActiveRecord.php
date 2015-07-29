@@ -957,17 +957,20 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      * Validator instance associated with model, will be response for validations of validation errors.
      * Model related error localization should happen in model itself.
      *
+     * @param array $validates Custom validation rules.
      * @return ValidatorInterface
      */
-    public function validator()
+    public function validator(array $validates = [])
     {
         if (!empty($this->validator))
         {
+            !empty($validates) && $this->validator->setRules($validates);
+
             //Refreshing data
             return $this->validator->setData($this->fields);
         }
 
-        return parent::validator($this->schema[ORM::E_VALIDATES]);
+        return parent::validator(!empty($validates) ? $validates : $this->schema[ORM::E_VALIDATES]);
     }
 
     /**

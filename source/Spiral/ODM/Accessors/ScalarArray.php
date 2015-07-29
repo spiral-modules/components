@@ -167,6 +167,31 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
     }
 
     /**
+     * Update accessor mocked data.
+     *
+     * @param mixed $data
+     */
+    public function setData($data)
+    {
+        $this->updated = $this->solidState = true;
+
+        if (!is_array($data))
+        {
+            //Ignoring
+            return;
+        }
+
+        $this->data = [];
+        foreach ($data as $value)
+        {
+            if (($value = $this->filterValue($value)) !== null)
+            {
+                $this->data[] = $value;
+            }
+        }
+    }
+
+    /**
      * Serialize object data for saving into database. This is common method for documents and compositors.
      *
      * @return mixed
@@ -174,6 +199,25 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
     public function serializeData()
     {
         return $this->data;
+    }
+
+    /**
+     * Check if object has any update.
+     *
+     * @return bool
+     */
+    public function hasUpdates()
+    {
+        return $this->updated || $this->operations;
+    }
+
+    /**
+     * Mark object as successfully updated and flush all existed atomic operations and updates.
+     */
+    public function flushUpdates()
+    {
+        $this->updated = false;
+        $this->operations = [];
     }
 
     /**
@@ -206,25 +250,6 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
         }
 
         return $atomics;
-    }
-
-    /**
-     * Check if object has any update.
-     *
-     * @return bool
-     */
-    public function hasUpdates()
-    {
-        return $this->updated || $this->operations;
-    }
-
-    /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
-     */
-    public function flushUpdates()
-    {
-        $this->updated = false;
-        $this->operations = [];
     }
 
     /**
@@ -277,31 +302,6 @@ class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \Array
         }
 
         return strval($variable);
-    }
-
-    /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
-     */
-    public function setData($data)
-    {
-        $this->updated = $this->solidState = true;
-
-        if (!is_array($data))
-        {
-            //Ignoring
-            return;
-        }
-
-        $this->data = [];
-        foreach ($data as $value)
-        {
-            if (($value = $this->filterValue($value)) !== null)
-            {
-                $this->data[] = $value;
-            }
-        }
     }
 
     /**

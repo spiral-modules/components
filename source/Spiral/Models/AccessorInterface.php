@@ -31,17 +31,17 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
     public function embed($parent);
 
     /**
+     * Update accessor mocked data.
+     *
+     * @param mixed $data
+     */
+    public function setData($data);
+
+    /**
      * Serialize accessor mocked value. This is legacy name and used like that to be compatible with
      * ORM and ODM engines.
      *
      * @return mixed
      */
     public function serializeData();
-
-    /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
-     */
-    public function setData($data);
 }

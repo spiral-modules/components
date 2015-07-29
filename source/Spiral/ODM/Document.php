@@ -373,6 +373,17 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
+     * Update accessor mocked data.
+     *
+     * @param mixed $data
+     * @return $this
+     */
+    public function setData($data)
+    {
+        return $this->setFields($data);
+    }
+
+    /**
      * Get accessor instance.
      *
      * @param mixed  $value    Value to mock up.
@@ -394,17 +405,6 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         }
 
         return new $accessor($value, $this, $options, $this->odm);
-    }
-
-    /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
-     * @return $this
-     */
-    public function setData($data)
-    {
-        return $this->setFields($data);
     }
 
     /**
@@ -630,6 +630,71 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
+     * Check if document or specific field is updated.
+     *
+     * @param string $field
+     * @param bool   $atomicsOnly Only atomic updates will be checked.
+     * @return bool
+     */
+    public function hasUpdates($field = null, $atomicsOnly = false)
+    {
+        if (empty($field))
+        {
+            if (!empty($this->updates) || !empty($this->atomics))
+            {
+                return true;
+            }
+
+            foreach ($this->fields as $field => $value)
+            {
+                if ($value instanceof CompositableInterface && $value->hasUpdates())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        foreach ($this->atomics as $operations)
+        {
+            if (array_key_exists($field, $operations))
+            {
+                //Property already changed by atomic operation
+                return true;
+            }
+        }
+
+        if ($atomicsOnly)
+        {
+            return false;
+        }
+
+        if (array_key_exists($field, $this->updates))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Mark object as successfully updated and flush all existed atomic operations and updates.
+     */
+    public function flushUpdates()
+    {
+        $this->updates = $this->atomics = [];
+
+        foreach ($this->fields as $value)
+        {
+            if ($value instanceof CompositableInterface)
+            {
+                $value->flushUpdates();
+            }
+        }
+    }
+
+    /**
      * Get generated and manually set document/object atomic updates.
      *
      * @param string $container Name of field or index where document stored into.
@@ -711,77 +776,12 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Check if document or specific field is updated.
-     *
-     * @param string $field
-     * @param bool   $atomicsOnly Only atomic updates will be checked.
-     * @return bool
-     */
-    public function hasUpdates($field = null, $atomicsOnly = false)
-    {
-        if (empty($field))
-        {
-            if (!empty($this->updates) || !empty($this->atomics))
-            {
-                return true;
-            }
-
-            foreach ($this->fields as $field => $value)
-            {
-                if ($value instanceof CompositableInterface && $value->hasUpdates())
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        foreach ($this->atomics as $operations)
-        {
-            if (array_key_exists($field, $operations))
-            {
-                //Property already changed by atomic operation
-                return true;
-            }
-        }
-
-        if ($atomicsOnly)
-        {
-            return false;
-        }
-
-        if (array_key_exists($field, $this->updates))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
-     */
-    public function flushUpdates()
-    {
-        $this->updates = $this->atomics = [];
-
-        foreach ($this->fields as $value)
-        {
-            if ($value instanceof CompositableInterface)
-            {
-                $value->flushUpdates();
-            }
-        }
-    }
-
-    /**
      * Validator instance associated with model, will be response for validations of validation errors.
      * Model related error localization should happen in model itself.
      *
      * @return ValidatorInterface
      */
-    public function getValidator()
+    public function validator()
     {
         if (!empty($this->validator))
         {

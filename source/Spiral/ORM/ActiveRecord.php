@@ -848,46 +848,6 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
     }
 
     /**
-     * Get array of changed or created fields for specified ActiveRecord or accessor.
-     *
-     * @return array
-     */
-    protected function compileUpdates()
-    {
-        if (!$this->hasUpdates() && !$this->solidState)
-        {
-            return [];
-        }
-
-        $updates = [];
-        foreach ($this->fields as $name => $field)
-        {
-            if ($field instanceof ORMAccessor && ($this->solidState || $field->hasUpdates()))
-            {
-                $updates[$name] = $field->compileUpdates($name);
-                continue;
-            }
-
-            if (!$this->solidState && !array_key_exists($name, $this->updates))
-            {
-                continue;
-            }
-
-            if ($field instanceof ORMAccessor)
-            {
-                $field = $field->serializeData();
-            }
-
-            $updates[$name] = $field;
-        }
-
-        //Primary key should present in update set
-        unset($updates[$this->schema[ORM::E_PRIMARY_KEY]]);
-
-        return $updates;
-    }
-
-    /**
      * Check if entity or specific field is updated.
      *
      * @param string $field
@@ -938,6 +898,46 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
     }
 
     /**
+     * Get array of changed or created fields for specified ActiveRecord or accessor.
+     *
+     * @return array
+     */
+    protected function compileUpdates()
+    {
+        if (!$this->hasUpdates() && !$this->solidState)
+        {
+            return [];
+        }
+
+        $updates = [];
+        foreach ($this->fields as $name => $field)
+        {
+            if ($field instanceof ORMAccessor && ($this->solidState || $field->hasUpdates()))
+            {
+                $updates[$name] = $field->compileUpdates($name);
+                continue;
+            }
+
+            if (!$this->solidState && !array_key_exists($name, $this->updates))
+            {
+                continue;
+            }
+
+            if ($field instanceof ORMAccessor)
+            {
+                $field = $field->serializeData();
+            }
+
+            $updates[$name] = $field;
+        }
+
+        //Primary key should present in update set
+        unset($updates[$this->schema[ORM::E_PRIMARY_KEY]]);
+
+        return $updates;
+    }
+
+    /**
      * Get all non secured model fields. Additional processing can be applied to fields here.
      *
      * @return array
@@ -959,7 +959,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
      *
      * @return ValidatorInterface
      */
-    public function getValidator()
+    public function validator()
     {
         if (!empty($this->validator))
         {

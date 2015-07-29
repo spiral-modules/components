@@ -34,14 +34,6 @@ interface CompositableInterface extends AccessorInterface
     public function embed($parent);
 
     /**
-     * Get generated and manually set document/object atomic updates.
-     *
-     * @param string $container Name of field or index where document stored into.
-     * @return array
-     */
-    public function buildAtomics($container = '');
-
-    /**
      * Check if object has any update.
      *
      * @return bool
@@ -52,4 +44,12 @@ interface CompositableInterface extends AccessorInterface
      * Mark object as successfully updated and flush all existed atomic operations and updates.
      */
     public function flushUpdates();
+
+    /**
+     * Get generated and manually set document/object atomic updates.
+     *
+     * @param string $container Name of field or index where document stored into.
+     * @return array
+     */
+    public function buildAtomics($container = '');
 }

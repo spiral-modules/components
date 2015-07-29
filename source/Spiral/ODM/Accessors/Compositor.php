@@ -176,6 +176,30 @@ class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayA
     }
 
     /**
+     * Update accessor mocked data.
+     *
+     * @param mixed $data
+     */
+    public function setData($data)
+    {
+        $this->changedDirectly = $this->solidState = true;
+
+        if (!is_array($data))
+        {
+            //Ignoring
+            return;
+        }
+
+        $this->documents = [];
+
+        //Filling documents
+        foreach ($data as $item)
+        {
+            is_array($item) && $this->create($item);
+        }
+    }
+
+    /**
      * Serialize object data for saving into database. This is common method for documents and
      * compositors.
      *
@@ -208,6 +232,46 @@ class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayA
         }
 
         return $result;
+    }
+
+    /**
+     * Check if any nested object has any update.
+     *
+     * @return bool
+     */
+    public function hasUpdates()
+    {
+        if ($this->changedDirectly || !empty($this->operations))
+        {
+            return true;
+        }
+
+        foreach ($this->documents as $document)
+        {
+            if ($document instanceof CompositableInterface && $document->hasUpdates())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Mark object as successfully updated and flush all existed atomic operations and updates.
+     */
+    public function flushUpdates()
+    {
+        $this->operations = [];
+        $this->changedDirectly = false;
+
+        foreach ($this->documents as $document)
+        {
+            if ($document instanceof CompositableInterface)
+            {
+                $document->flushUpdates();
+            }
+        }
     }
 
     /**
@@ -284,46 +348,6 @@ class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayA
     }
 
     /**
-     * Check if any nested object has any update.
-     *
-     * @return bool
-     */
-    public function hasUpdates()
-    {
-        if ($this->changedDirectly || !empty($this->operations))
-        {
-            return true;
-        }
-
-        foreach ($this->documents as $document)
-        {
-            if ($document instanceof CompositableInterface && $document->hasUpdates())
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
-     */
-    public function flushUpdates()
-    {
-        $this->operations = [];
-        $this->changedDirectly = false;
-
-        foreach ($this->documents as $document)
-        {
-            if ($document instanceof CompositableInterface)
-            {
-                $document->flushUpdates();
-            }
-        }
-    }
-
-    /**
      * Accessor default value.
      *
      * @return mixed
@@ -331,30 +355,6 @@ class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayA
     public function defaultValue()
     {
         return [];
-    }
-
-    /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
-     */
-    public function setData($data)
-    {
-        $this->changedDirectly = $this->solidState = true;
-
-        if (!is_array($data))
-        {
-            //Ignoring
-            return;
-        }
-
-        $this->documents = [];
-
-        //Filling documents
-        foreach ($data as $item)
-        {
-            is_array($item) && $this->create($item);
-        }
     }
 
     /**

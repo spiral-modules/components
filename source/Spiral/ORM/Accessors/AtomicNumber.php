@@ -72,17 +72,6 @@ class AtomicNumber implements ORMAccessor
     }
 
     /**
-     * Serialize accessor mocked value. This is legacy name and used like that to be compatible with
-     * ORM and ODM engines.
-     *
-     * @return mixed
-     */
-    public function serializeData()
-    {
-        return $this->value;
-    }
-
-    /**
      * Update accessor mocked data.
      *
      * @param mixed $data
@@ -91,6 +80,17 @@ class AtomicNumber implements ORMAccessor
     {
         $this->original = $this->value = $data;
         $this->delta = 0;
+    }
+
+    /**
+     * Serialize accessor mocked value. This is legacy name and used like that to be compatible with
+     * ORM and ODM engines.
+     *
+     * @return mixed
+     */
+    public function serializeData()
+    {
+        return $this->value;
     }
 
     /**

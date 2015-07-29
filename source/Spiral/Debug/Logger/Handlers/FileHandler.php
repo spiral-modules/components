@@ -67,7 +67,7 @@ class FileHandler implements HandlerInterface
             'message' => $message
         ]);
 
-        if ($this->files->append($this->options['filename'], $message, $this->options['mode'], true))
+        if ($this->files->append($this->options['filename'], "{$message}\n", $this->options['mode'], true))
         {
             if ($this->files->size($this->options['filename']) > $this->options['filesize'])
             {

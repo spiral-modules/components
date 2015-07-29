@@ -25,5 +25,5 @@ interface HandlerInterface
      * @param string $message Message.
      * @param array  $context Context data.
      */
-    public function __invoke($level, $message, array $context);
+    public function __invoke($level, $message, array $context = []);
 }

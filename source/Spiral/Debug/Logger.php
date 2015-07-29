@@ -15,7 +15,7 @@ class Logger extends AbstractLogger
     /**
      * Helper constant to associate all log levels with one filename.
      */
-    const ALL_MESSAGES = 'all';
+    const ALL = 'all';
 
     /**
      * Default logging name (channel).
@@ -133,11 +133,11 @@ class Logger extends AbstractLogger
 
         if (isset($this->handlers[$level]))
         {
-            call_user_func($this->handlers[$level], $payload);
+            call_user_func_array($this->handlers[$level], $payload);
         }
-        elseif (isset($this->handlers[self::ALL_MESSAGES]))
+        elseif (isset($this->handlers[self::ALL]))
         {
-            call_user_func($this->handlers[self::ALL_MESSAGES], $payload);
+            call_user_func_array($this->handlers[self::ALL], $payload);
         }
 
         return $this;

@@ -25,7 +25,7 @@
       "source/functions.php"
     ],
     "psr-4": {
-      "Spiral\\": "source/",
+      "Spiral\\": "source/Spiral/",
       "Spiral\\Tests\\": "tests/"
     }
   }

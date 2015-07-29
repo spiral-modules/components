@@ -15,7 +15,7 @@ class ObjectEvent extends Event
      *
      * @var object
      */
-    protected $object = null;
+    protected $parent = null;
 
     /**
      * Event object created automatically via raise() method of EventDispatcher and passed to all
@@ -23,13 +23,13 @@ class ObjectEvent extends Event
      * parent in "object" property.
      *
      * @param string $name
-     * @param object $object
+     * @param object $parent
      * @param mixed  $context
      */
-    public function __construct($name, $object, $context = null)
+    public function __construct($name, $parent, $context = null)
     {
         $this->name = $name;
-        $this->object = $object;
+        $this->parent = $parent;
         $this->context = $context;
     }
 
@@ -38,8 +38,8 @@ class ObjectEvent extends Event
      *
      * @return object
      */
-    public function object()
+    public function parent()
     {
-        return $this->object;
+        return $this->parent;
     }
 }

@@ -8,7 +8,9 @@
  */
 namespace Spiral\Http;
 
-class ClientException extends \RuntimeException
+use Spiral\Core\ClientExceptionInterface;
+
+class ClientException extends \RuntimeException implements ClientExceptionInterface
 {
     /**
      * Client exception are treated as "soft error", HttpDispatcher will handle them separate way.

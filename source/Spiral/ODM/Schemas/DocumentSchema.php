@@ -226,7 +226,12 @@ class DocumentSchema extends EntitySchema
 
                 if ($mutator == 'accessor' && is_string($filters[$field]))
                 {
-                    $type = $this->getFields()[$field];
+                    $type = null;
+                    if (!empty($this->getFields()[$field]))
+                    {
+                        $type = $this->getFields()[$field];
+                    }
+
                     $filters[$field] = [$filters[$field], is_array($type) ? $type[0] : $type];
                 }
             }

@@ -311,10 +311,13 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
 
                 if ($mutator == 'accessor' && is_string($filters[$field]))
                 {
-                    $filters[$field] = [
-                        $filters[$field],
-                        $this->tableSchema->getColumns()[$field]->abstractType()
-                    ];
+                    $type = null;
+                    if (!empty($this->tableSchema->getColumns()[$field]))
+                    {
+                        $type = $this->tableSchema->getColumns()[$field]->abstractType();
+                    }
+
+                    $filters[$field] = [$filters[$field], $type];
                 }
             }
             unset($filters);

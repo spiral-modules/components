@@ -238,13 +238,20 @@ abstract class RelationSchema implements RelationSchemaInterface
             }
         }
 
-        if ($this->outerModel())
+        try
         {
-            $options = $options + [
-                    'outer:roleName'   => $this->outerModel()->getRoleName(),
-                    'outer:table'      => $this->outerModel()->getTable(),
-                    'outer:primaryKey' => $this->outerModel()->getPrimaryKey()
-                ];
+            if ($this->outerModel())
+            {
+                $options = $options + [
+                        'outer:roleName'   => $this->outerModel()->getRoleName(),
+                        'outer:table'      => $this->outerModel()->getTable(),
+                        'outer:primaryKey' => $this->outerModel()->getPrimaryKey()
+                    ];
+            }
+        }
+        catch (ORMException $exception)
+        {
+            //Suppressed
         }
 
         return $options;

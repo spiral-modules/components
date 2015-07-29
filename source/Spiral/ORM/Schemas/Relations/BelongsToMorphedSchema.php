@@ -79,7 +79,7 @@ class BelongsToMorphedSchema extends MorphedRelationSchema
             return;
         }
 
-        $innerSchema = $this->model->getTableSchema();
+        $innerSchema = $this->model->tableSchema();
 
         /**
          * Morph key contains parent type, nullable by default.
@@ -92,7 +92,7 @@ class BelongsToMorphedSchema extends MorphedRelationSchema
          * Inner key contains link to parent outer key (usually id), nullable by default.
          */
         $innerKey = $innerSchema->column($this->getInnerKey());
-        $innerKey->type($this->getOuterKeyType());
+        $innerKey->type($this->outerKeyType());
         $innerKey->nullable($this->isNullable());
 
         //Required index

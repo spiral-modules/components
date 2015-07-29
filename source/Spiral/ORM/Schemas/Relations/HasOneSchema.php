@@ -40,7 +40,7 @@ class HasOneSchema extends RelationSchema
      */
     public function inverseRelation()
     {
-        $this->getOuterModel()->addRelation(
+        $this->outerModel()->addRelation(
             $this->definition[ActiveRecord::INVERSE],
             [
                 ActiveRecord::BELONGS_TO        => $this->model->getClass(),
@@ -58,11 +58,11 @@ class HasOneSchema extends RelationSchema
      */
     public function buildSchema()
     {
-        $outerTable = $this->getOuterModel()->getTableSchema();
+        $outerTable = $this->outerModel()->tableSchema();
 
         //Outer key type should be matched with inner key type
         $outerKey = $outerTable->column($this->getOuterKey());
-        $outerKey->type($this->getInnerKeyType());
+        $outerKey->type($this->innerKeyType());
         $outerKey->nullable($this->isNullable());
 
         if (!empty($this->definition[ActiveRecord::MORPH_KEY]))

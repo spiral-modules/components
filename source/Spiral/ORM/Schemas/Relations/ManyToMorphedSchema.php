@@ -115,14 +115,14 @@ class ManyToMorphedSchema extends MorphedRelationSchema
         $pivotTable = $this->getPivotSchema();
 
         $localKey = $pivotTable->column($this->definition[ActiveRecord::THOUGHT_INNER_KEY]);
-        $localKey->type($this->getInnerKeyType());
+        $localKey->type($this->innerKeyType());
         $localKey->index();
 
         $morphKey = $pivotTable->column($this->getMorphKey());
         $morphKey->string(static::MORPH_COLUMN_SIZE);
 
         $outerKey = $pivotTable->column($this->definition[ActiveRecord::THOUGHT_OUTER_KEY]);
-        $outerKey->type($this->getOuterKeyType());
+        $outerKey->type($this->outerKeyType());
 
         //Additional pivot columns
         foreach ($this->definition[ActiveRecord::PIVOT_COLUMNS] as $column => $definition)

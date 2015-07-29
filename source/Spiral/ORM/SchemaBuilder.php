@@ -153,12 +153,12 @@ class SchemaBuilder extends Component
      */
     public function processAlias($alias)
     {
-        if (!is_string($alias) || !isset($this->config['aliases'][$alias]))
+        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias]))
         {
             return $alias;
         }
 
-        return $this->config['aliases'][$alias];
+        return $this->config['mutatorAliases'][$alias];
     }
 
     /**
@@ -246,7 +246,7 @@ class SchemaBuilder extends Component
         {
             foreach ($this->models as $model)
             {
-                if ($model->getTableSchema() != $table)
+                if ($model->tableSchema() != $table)
                 {
                     continue;
                 }

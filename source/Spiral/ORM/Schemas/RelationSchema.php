@@ -238,12 +238,12 @@ abstract class RelationSchema implements RelationSchemaInterface
             }
         }
 
-        if ($this->getOuterModel())
+        if ($this->outerModel())
         {
             $options = $options + [
-                    'outer:roleName'   => $this->getOuterModel()->getRoleName(),
-                    'outer:table'      => $this->getOuterModel()->getTable(),
-                    'outer:primaryKey' => $this->getOuterModel()->getPrimaryKey()
+                    'outer:roleName'   => $this->outerModel()->getRoleName(),
+                    'outer:table'      => $this->outerModel()->getTable(),
+                    'outer:primaryKey' => $this->outerModel()->getPrimaryKey()
                 ];
         }
 
@@ -258,7 +258,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isOuterDatabase()
     {
-        $outerDatabase = $this->getOuterModel()->getDatabase();
+        $outerDatabase = $this->outerModel()->getDatabase();
 
         return $this->model->getDatabase() != $outerDatabase;
     }
@@ -268,10 +268,16 @@ abstract class RelationSchema implements RelationSchemaInterface
      * polymorphic relations).
      *
      * @return null|ModelSchema
+     * @throws ORMException
      */
-    protected function getOuterModel()
+    protected function outerModel()
     {
-        return $this->builder->modelSchema($this->target);
+        if (empty($outerModel = $this->builder->modelSchema($this->target)))
+        {
+            throw new ORMException("Undefined outer model '{$this->target}'.");
+        }
+
+        return $outerModel;
     }
 
     /**
@@ -345,16 +351,14 @@ abstract class RelationSchema implements RelationSchemaInterface
      *
      * @return null|string
      */
-    public function getInnerKeyType()
+    public function innerKeyType()
     {
         if (!$innerKey = $this->getInnerKey())
         {
             return null;
         }
 
-        return $this->resolveAbstractType(
-            $this->model->getTableSchema()->column($innerKey)
-        );
+        return $this->resolveAbstractType($this->model->tableSchema()->column($innerKey));
     }
 
     /**
@@ -377,16 +381,14 @@ abstract class RelationSchema implements RelationSchemaInterface
      *
      * @return null|string
      */
-    public function getOuterKeyType()
+    public function outerKeyType()
     {
         if (!$outerKey = $this->getOuterKey())
         {
             return null;
         }
 
-        return $this->resolveAbstractType(
-            $this->getOuterModel()->getTableSchema()->column($outerKey)
-        );
+        return $this->resolveAbstractType($this->outerModel()->tableSchema()->column($outerKey));
     }
 
     /**
@@ -413,7 +415,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      * Simplified method to cast column type and options by provided definition.
      *
      * @param AbstractColumn $column
-     * @param string               $definition
+     * @param string         $definition
      */
     protected function castColumn(AbstractColumn $column, $definition)
     {

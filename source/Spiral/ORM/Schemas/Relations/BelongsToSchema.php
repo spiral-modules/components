@@ -58,7 +58,7 @@ class BelongsToSchema extends RelationSchema
 
         $inversed = $this->definition[ActiveRecord::INVERSE];
 
-        $this->getOuterModel()->addRelation(
+        $this->outerModel()->addRelation(
             $inversed[1],
             [
                 $inversed[0]                    => $this->model->getClass(),
@@ -76,11 +76,11 @@ class BelongsToSchema extends RelationSchema
      */
     public function buildSchema()
     {
-        $innerTable = $this->model->getTableSchema();
+        $innerTable = $this->model->tableSchema();
 
         //Inner key type should match outer key type
         $innerKey = $innerTable->column($this->getInnerKey());
-        $innerKey->type($this->getOuterKeyType());
+        $innerKey->type($this->outerKeyType());
         $innerKey->nullable($this->isNullable());
 
         //We can safely add index, it will not be created if outer model has passive schema
@@ -93,7 +93,7 @@ class BelongsToSchema extends RelationSchema
 
         //We are allowed to add foreign key, it will not be created if outer table has passive schema
         $foreignKey = $innerKey->foreign(
-            $this->getOuterModel()->getTable(),
+            $this->outerModel()->getTable(),
             $this->getOuterKey()
         );
 

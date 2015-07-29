@@ -151,7 +151,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
      *
      * @return AbstractTable|null
      */
-    public function getTableSchema()
+    public function tableSchema()
     {
         return $this->tableSchema;
     }
@@ -214,7 +214,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
      * Get declared indexes. This is not the same set of indexes which can be presented in table
      * schema, use RecordSchema->getTableSchema()->getIndexes() method for it.
      *
-     * @see getTableSchema()
+     * @see tableSchema()
      * @return array
      */
     public function getIndexes()

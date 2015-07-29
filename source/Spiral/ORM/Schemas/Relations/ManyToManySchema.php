@@ -51,7 +51,7 @@ class ManyToManySchema extends RelationSchema
      */
     public function inverseRelation()
     {
-        $this->getOuterModel()->addRelation(
+        $this->outerModel()->addRelation(
             $this->definition[ActiveRecord::INVERSE],
             [
                 ActiveRecord::MANY_TO_MANY      => $this->model->getClass(),
@@ -98,7 +98,7 @@ class ManyToManySchema extends RelationSchema
         }
 
         //Generating pivot table name
-        $names = [$this->model->getRoleName(), $this->getOuterModel()->getRoleName()];
+        $names = [$this->model->getRoleName(), $this->outerModel()->getRoleName()];
         asort($names);
 
         return join('_', $names) . '_map';
@@ -128,7 +128,7 @@ class ManyToManySchema extends RelationSchema
         $pivotTable = $this->getPivotSchema();
 
         $outerKey = $pivotTable->column($this->definition[ActiveRecord::THOUGHT_OUTER_KEY]);
-        $outerKey->type($this->getOuterKeyType());
+        $outerKey->type($this->outerKeyType());
 
         if (!empty($this->definition[ActiveRecord::MORPH_KEY]))
         {
@@ -137,7 +137,7 @@ class ManyToManySchema extends RelationSchema
         }
 
         $innerKey = $pivotTable->column($this->definition[ActiveRecord::THOUGHT_INNER_KEY]);
-        $innerKey->type($this->getInnerKeyType());
+        $innerKey->type($this->innerKeyType());
 
         //Additional pivot columns
         foreach ($this->definition[ActiveRecord::PIVOT_COLUMNS] as $column => $definition)
@@ -166,8 +166,8 @@ class ManyToManySchema extends RelationSchema
         $foreignKey->onUpdate($this->getConstraintAction());
 
         $foreignKey = $outerKey->foreign(
-            $this->getOuterModel()->getTable(),
-            $this->getOuterModel()->getPrimaryKey()
+            $this->outerModel()->getTable(),
+            $this->outerModel()->getPrimaryKey()
         );
 
         $foreignKey->onDelete($this->getConstraintAction());

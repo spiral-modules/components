@@ -59,12 +59,12 @@ abstract class MorphedRelationSchema extends RelationSchema
      *
      * @return null|string
      */
-    public function getOuterKeyType()
+    public function outerKeyType()
     {
         $outerKeyType = null;
         foreach ($this->getOuterModels() as $record)
         {
-            if (!$record->getTableSchema()->hasColumn($this->getOuterKey()))
+            if (!$record->tableSchema()->hasColumn($this->getOuterKey()))
             {
                 throw new ORMException(
                     "Morphed relation requires outer key exists in every record ({$record})."
@@ -72,7 +72,7 @@ abstract class MorphedRelationSchema extends RelationSchema
             }
 
             $recordKeyType = $this->resolveAbstractType(
-                $record->getTableSchema()->column($this->getOuterKey())
+                $record->tableSchema()->column($this->getOuterKey())
             );
 
             if (is_null($outerKeyType))

@@ -9,6 +9,7 @@
 namespace Spiral\Debug;
 
 use Psr\Log\AbstractLogger;
+use Psr\Log\LogLevel;
 
 class Logger extends AbstractLogger
 {
@@ -30,6 +31,18 @@ class Logger extends AbstractLogger
     const MESSAGE_LEVEL     = 2;
     const MESSAGE_BODY      = 3;
     const MESSAGE_CONTEXT   = 4;
+
+    /**
+     * Copy of LogLevels.
+     */
+    const EMERGENCY = LogLevel::EMERGENCY;
+    const ALERT     = LogLevel::ALERT;
+    const CRITICAL  = LogLevel::CRITICAL;
+    const ERROR     = LogLevel::ERROR;
+    const WARNING   = LogLevel::WARNING;
+    const NOTICE    = LogLevel::NOTICE;
+    const INFO      = LogLevel::INFO;
+    const DEBUG     = LogLevel::DEBUG;
 
     /**
      * If enabled all debug messages will be additionally collected in Logger::$logMessages array for

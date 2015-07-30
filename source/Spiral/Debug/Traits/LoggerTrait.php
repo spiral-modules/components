@@ -6,6 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
+
 namespace Spiral\Debug\Traits;
 
 use Psr\Log\LoggerAwareTrait;
@@ -13,43 +14,41 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Spiral\Core\ContainerInterface;
 
+/**
+ * On demand logger creation. Allows class to share same logger between instances.
+ */
 trait LoggerTrait
 {
+    /**
+     * To incorporate parent functionality.
+     */
+    use LoggerAwareTrait;
 
     /**
-     * Static logger associated to every class instance by it's class name.
+     * Loggers associated to classes not instances.
      *
      * @var LoggerInterface[]
      */
     private static $loggers = [];
 
     /**
-     * Global container access is required in some cases. Method should be declared statically.
-     *
      * @return ContainerInterface
      */
-    abstract public function getContainer();
+    abstract public function container();
 
     /**
-     * Sets a logger.
+     * Sets logger for every class instance, instance based loggers will be in priority compared to
+     * global logger.
      *
      * @param LoggerInterface $logger
-     * @param bool            $static If true logger will applied to every class instance.
      */
-    public function setLogger(LoggerInterface $logger, $static = false)
+    public function setGlobalLogger(LoggerInterface $logger)
     {
-        if (!$static)
-        {
-            $this->logger = $logger;
-
-            return;
-        }
-
         self::$loggers[static::class] = $logger;
     }
 
     /**
-     * Getting logger instance. By default logger will receive variable with class name.
+     * Get associated or create new instance of LoggerInterface.
      *
      * @return LoggerInterface
      */
@@ -62,12 +61,10 @@ trait LoggerTrait
 
         if (!empty(self::$loggers[static::class]))
         {
-            //Static logger is mounted
             return self::$loggers[static::class];
         }
 
-        $container = self::getContainer();
-        if (empty($container) || !$container->hasBinding(LoggerInterface::class))
+        if (empty($container = $this->container()) || !$container->hasBinding(LoggerInterface::class))
         {
             //That's easy
             return new NullLogger();

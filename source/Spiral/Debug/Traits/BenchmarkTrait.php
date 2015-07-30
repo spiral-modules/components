@@ -48,7 +48,7 @@ trait BenchmarkTrait
     {
         if (empty($this->benchmarker))
         {
-            if (empty($container = self::container()) || !$container->hasBinding(BenchmarkerInterface::class))
+            if (empty($container = $this->container()) || !$container->hasBinding(BenchmarkerInterface::class))
             {
                 //Nothing to do
                 return false;

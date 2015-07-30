@@ -14,7 +14,8 @@ use Spiral\Core\Exceptions\Container\InstanceException;
 use ReflectionFunctionAbstract as ContextFunction;
 
 /**
- * {@inheritdoc}
+ * Default implementation of IoC container, support controllable injections and post controller
+ * dependencies.
  */
 class Container extends Component implements ContainerInterface
 {

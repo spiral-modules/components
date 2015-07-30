@@ -33,14 +33,14 @@ class GridfsServer extends StorageServer
     protected $database = null;
 
     /**
-     * @param ODM            $odm
      * @param FilesInterface $files
+     * @param ODM            $odm
      * @param array          $options
      */
-    public function __construct(ODM $odm, FilesInterface $files, array $options)
+    public function __construct(FilesInterface $files, ODM $odm, array $options)
     {
-        $this->database = $odm->db($this->options['database']);
         parent::__construct($files, $options);
+        $this->database = $odm->db($this->options['database']);
     }
 
     /**

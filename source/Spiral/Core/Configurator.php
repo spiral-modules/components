@@ -9,7 +9,7 @@
 namespace Spiral\Core;
 
 /**
- * One simple configuration for different uses.
+ * One simple configurator for different uses.
  */
 class Configurator implements ConfiguratorInterface
 {

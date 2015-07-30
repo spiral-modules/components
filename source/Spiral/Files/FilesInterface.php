@@ -36,7 +36,7 @@ interface FilesInterface
     const SEPARATOR = '/';
 
     /**
-     * Ensure location existence with specified mode.
+     * Ensure location (directory) existence with specified mode.
      *
      * @param string $location
      * @param int    $mode

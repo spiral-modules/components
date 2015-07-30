@@ -9,41 +9,45 @@
 namespace Spiral\Reactor\ClassElements;
 
 use Spiral\Reactor\AbstractElement;
-use Spiral\Reactor\ArrayExporter;
+use Spiral\Reactor\ArraySerializer;
 
+/**
+ * Class property element.
+ */
 class PropertyElement extends AbstractElement
 {
     /**
-     * Property access level (private, protected and public).
-     *
      * @var string
      */
     protected $access = self::ACCESS_PUBLIC;
 
     /**
-     * Indicates that property can be accessed statistically.
-     *
      * @var bool
      */
     protected $static = false;
 
     /**
-     * Default value is presented.
-     *
      * @var bool
      */
     protected $default = false;
 
     /**
-     * Default value.
-     *
      * @var mixed
      */
     protected $defaultValue = null;
 
     /**
-     * Property access level (private, protected and public).
-     *
+     * @param string $access
+     * @return $this
+     */
+    public function setAccess($access)
+    {
+        $this->access = $access;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getAccess()
@@ -52,32 +56,7 @@ class PropertyElement extends AbstractElement
     }
 
     /**
-     * Set access level.
-     *
-     * @param string $access Public by default.
-     * @return $this
-     */
-    public function setAccess($access = self::ACCESS_PUBLIC)
-    {
-        $this->access = $access;
-
-        return $this;
-    }
-
-    /**
-     * Indicates that property can be accessed statically.
-     *
-     * @return bool
-     */
-    public function isStatic()
-    {
-        return $this->static;
-    }
-
-    /**
-     * Mark property as static/non static.
-     *
-     * @param bool $static True if property is static.
+     * @param bool $static
      * @return $this
      */
     public function setStatic($static)
@@ -88,34 +67,21 @@ class PropertyElement extends AbstractElement
     }
 
     /**
-     * True if default value is present.
-     *
      * @return bool
      */
-    public function isDefault()
+    public function isStatic()
     {
-        return $this->default;
+        return $this->static;
     }
 
     /**
-     * Get default property value.
+     * Mark property as default and specify default value.
      *
-     * @return bool
-     */
-    public function getDefaultValue()
-    {
-        return $this->defaultValue;
-    }
-
-    /**
-     * Set default value to property.
-     *
-     * @param bool  $default      Default value flag (if false, property will be designated as non
-     *                            default).
-     * @param mixed $defaultValue Property default value (string, array, etc).
+     * @param bool  $default
+     * @param mixed $defaultValue
      * @return $this
      */
-    public function setDefault($default, $defaultValue = false)
+    public function setDefault($default, $defaultValue = null)
     {
         $this->defaultValue = null;
         if ($this->default = (bool)$default)
@@ -127,12 +93,74 @@ class PropertyElement extends AbstractElement
     }
 
     /**
-     * Copy property declaration using ReflectionProperty.
+     * @return bool
+     */
+    public function isDefault()
+    {
+        return $this->default;
+    }
+
+    /**
+     * @return bool
+     */
+    public function defaultValue()
+    {
+        return $this->defaultValue;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param ArraySerializer $serializer Class used to render array values for default properties and etc.
+     * @param int             $position   Internal value.
+     */
+    public function render($indentLevel = 0, ArraySerializer $serializer = null, $position = 0)
+    {
+        $result = [
+            !$position ? ltrim($this->renderComment($indentLevel)) : $this->renderComment($indentLevel)
+        ];
+
+        $property = $this->access . ' ' . ($this->static ? 'static ' : '') . '$' . $this->name;
+
+        if (!$this->isDefault())
+        {
+            $result[] = $property . ';';
+
+            return $this->join($result, $indentLevel);
+        }
+
+        if (is_array($this->defaultValue))
+        {
+            $serializer = !empty($serializer) ? $serializer : new ArraySerializer();
+            $value = explode("\n", $serializer->serialize($this->defaultValue, self::INDENT));
+
+            foreach ($value as &$line)
+            {
+                $line = $this->indent($line, $indentLevel);
+                unset($line);
+            }
+
+            $value[0] = ltrim($value[0]);
+            $property .= ' = ' . join("\n", $value);
+        }
+        else
+        {
+            $property .= ' = ' . var_export($this->defaultValue, true);
+        }
+
+        $result[] = $property . ';';
+
+        return $this->join($result, $indentLevel);
+    }
+
+    /**
+     * Clone parameter options using ReflectionProperty.
      *
      * @param \ReflectionProperty $property
      */
     public function cloneSchema(\ReflectionProperty $property)
     {
+        $this->setDefault(false);
         $this->setComment($property->getDocComment());
         $this->static = $property->isStatic();
 
@@ -145,61 +173,19 @@ class PropertyElement extends AbstractElement
             $this->setAccess(self::ACCESS_PROTECTED);
         }
 
-        if ($property->isDefault())
+        if (!$property->isDefault())
         {
-            foreach ($property->getDeclaringClass()->getDefaultProperties() as $propertyName =>
-                     $propertyValue)
-            {
-                if ($propertyName == $property->getName())
-                {
-                    $this->setDefault(true, $propertyValue);
-                }
-            }
-        }
-    }
-
-    /**
-     * Render element declaration. That method must be declared in RElement childs classes and then
-     * perform the operation for rendering a specific type of content. Property will be rendered with
-     * it's own access level, static flag and default value (if shown).
-     *
-     * @param int           $indentLevel Tabulation level.
-     * @param int           $position    Element position.
-     * @param ArrayExporter $exporter    Array data renderer.
-     * @return string
-     */
-    public function render($indentLevel = 0, $position = 0, ArrayExporter $exporter = null)
-    {
-        $result = [
-            !$position ? ltrim($this->renderComment($indentLevel)) : $this->renderComment($indentLevel)
-        ];
-
-        $property = $this->access . ' ' . ($this->static ? 'static ' : '') . '$' . $this->name;
-
-        if ($this->isDefault())
-        {
-            if (is_array($this->defaultValue))
-            {
-                $exporter = !empty($exporter) ? $exporter : new ArrayExporter();
-                $value = explode("\n", $exporter->export($this->defaultValue, self::INDENT));
-
-                foreach ($value as &$line)
-                {
-                    $line = $this->indent($line, $indentLevel);
-                    unset($line);
-                }
-
-                $value[0] = ltrim($value[0]);
-                $property .= ' = ' . join("\n", $value);
-            }
-            else
-            {
-                $property .= ' = ' . var_export($this->defaultValue, true);
-            }
+            return;
         }
 
-        $result[] = $property . ';';
-
-        return $this->join($result, $indentLevel);
+        $parentDefaults = $property->getDeclaringClass()->getDefaultProperties();
+        foreach ($parentDefaults as $name => $defaultValue)
+        {
+            if ($name == $property->getName())
+            {
+                $this->setDefault(true, $defaultValue);
+                break;
+            }
+        }
     }
 }

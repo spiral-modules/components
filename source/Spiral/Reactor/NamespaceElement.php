@@ -8,25 +8,22 @@
  */
 namespace Spiral\Reactor;
 
+/**
+ * Represent namespace declaration.
+ */
 class NamespaceElement extends AbstractElement
 {
     /**
-     * List of classes which are declared in this namespace.
-     *
-     * @var ClassElement[]
-     */
-    protected $classes = [];
-
-    /**
-     * Namespace uses.
-     *
      * @var array
      */
     protected $uses = [];
 
     /**
-     * Add a new class declaration to namespace.
-     *
+     * @var ClassElement[]
+     */
+    protected $classes = [];
+
+    /**
      * @param ClassElement $class
      * @return $this
      */
@@ -38,19 +35,26 @@ class NamespaceElement extends AbstractElement
     }
 
     /**
-     * Get all classes being used.
-     *
-     * @return array
+     * @return ClassElement[]
      */
-    public function getUses()
+    public function getClasses()
     {
-        return $this->uses;
+        return $this->classes;
     }
 
     /**
-     * Add a new class usage to namespace.
-     *
-     * @param string $class Class name.
+     * @param array $uses
+     * @return $this
+     */
+    public function setUses(array $uses)
+    {
+        $this->uses = $uses;
+
+        return $this;
+    }
+
+    /**
+     * @param string $class
      * @return $this
      */
     public function addUse($class)
@@ -64,47 +68,42 @@ class NamespaceElement extends AbstractElement
     }
 
     /**
-     * Replace all used classes with a new given list.
-     *
-     * @param array $uses
-     * @return $this
+     * @return array
      */
-    public function setUses(array $uses)
+    public function getUses()
     {
-        $this->uses = $uses;
-
-        return $this;
+        return $this->uses;
     }
 
     /**
-     * Render element declaration. This method should be declared in RElement child classes and perform
-     * an operation for rendering a specific type of content. Renders namespace section with it's
-     * classes, uses and comments.
+     * {@inheritdoc}
      *
-     * @param int           $indentLevel Tabulation level.
-     * @param ArrayExporter $exporter    Custom array exporter for properties.
-     * @return string
+     * @param ArraySerializer $serializer Class used to render array values for default properties and etc.
      */
-    public function render($indentLevel = 0, ArrayExporter $exporter = null)
+    public function render($indentLevel = 0, ArraySerializer $serializer = null)
     {
         $result = [$this->renderComment($indentLevel)];
 
-        $result[] = 'namespace ' . trim($this->name, '\\');
-        $result[] = "{";
+        if (!empty($this->name))
+        {
+            $result[] = 'namespace ' . trim($this->name, '\\');
+            $result[] = "{";
+        }
 
-        //Uses
         foreach ($this->uses as $class)
         {
-            $result[] = $this->indent('use ' . $class . ';', $indentLevel + 1);
+            $result[] = $this->indent('use ' . $class . ';', $indentLevel + !empty($this->name) ? 1 : 0);
         }
 
-        //Classes
         foreach ($this->classes as $class)
         {
-            $result[] = $class->render($indentLevel + 1, $exporter);
+            $result[] = $class->render($indentLevel + !empty($this->name) ? 1 : 0, $serializer);
         }
 
-        $result[] = '}';
+        if (!empty($this->name))
+        {
+            $result[] = '}';
+        }
 
         return $this->join($result, $indentLevel);
     }

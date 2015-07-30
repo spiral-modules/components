@@ -8,35 +8,30 @@
  */
 namespace Spiral\Reactor\ClassElements\MethodElements;
 
+/**
+ * Single method parameter.
+ */
 class ParameterElement
 {
     /**
-     * Parameter name. This is not inherited from element.
-     *
      * @var string
      */
     protected $name = '';
 
     /**
-     * Parameter is optional.
-     *
-     * @var bool
-     */
-    protected $options = false;
-
-    /**
-     * Default value for a parameter (only if this is optional).
-     *
-     * @var mixed
-     */
-    protected $defaultValue = null;
-
-    /**
-     * Parameter type (only use class names or arrays).
-     *
      * @var string
      */
     protected $type = '';
+
+    /**
+     * @var bool
+     */
+    protected $optional = false;
+
+    /**
+     * @var mixed
+     */
+    protected $defaultValue = null;
 
     /**
      * Passed by reference flag.
@@ -46,9 +41,9 @@ class ParameterElement
     protected $pdb = false;
 
     /**
-     * New parameter object.
+     * New Method Parameter.
      *
-     * @param string $name Parameter name.
+     * @param string $name
      */
     public function __construct($name)
     {
@@ -56,19 +51,7 @@ class ParameterElement
     }
 
     /**
-     * Parameter name.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Overwrite the parameter's name.
-     *
-     * @param string $name New parameter name.
+     * @param string $name
      * @return $this
      */
     public function setName($name)
@@ -79,19 +62,15 @@ class ParameterElement
     }
 
     /**
-     * Parameter type.
-     *
      * @return string
      */
-    public function getType()
+    public function getName()
     {
-        return $this->type;
+        return $this->name;
     }
 
     /**
-     * Change parameter type.
-     *
-     * @param string $type Class name or "array".
+     * @param string $type
      * @return $this
      */
     public function setType($type)
@@ -102,13 +81,11 @@ class ParameterElement
     }
 
     /**
-     * Is the parameter passed by reference.
-     *
-     * @return bool
+     * @return string
      */
-    public function isPBR()
+    public function getType()
     {
-        return $this->pdb;
+        return $this->type;
     }
 
     /**
@@ -125,36 +102,24 @@ class ParameterElement
     }
 
     /**
-     * Is parameter optional.
-     *
      * @return bool
      */
-    public function isOptional()
+    public function isPBR()
     {
-        return $this->options;
+        return $this->pdb;
     }
 
     /**
-     * Default value (only if this is optional).
+     * Mark as optional/required and set default value.
      *
-     * @return mixed
-     */
-    public function getDefaultValue()
-    {
-        return $this->defaultValue;
-    }
-
-    /**
-     * Mark as optional/required and set up default value.
-     *
-     * @param bool  $optional     True if parameter option.
-     * @param mixed $defaultValue Parameter default value.
+     * @param bool  $optional
+     * @param mixed $defaultValue
      * @return $this
      */
     public function setOptional($optional, $defaultValue = null)
     {
         $this->defaultValue = null;
-        if ($this->options = (bool)$optional)
+        if ($this->optional = $optional)
         {
             $this->defaultValue = $defaultValue;
         }
@@ -163,9 +128,23 @@ class ParameterElement
     }
 
     /**
-     * Render element declaration. This method must be declared in RElement child classes and then
-     * perform operation for rendering specific type of content. Method parameter is embedded to
-     * method declaration.
+     * @return bool
+     */
+    public function isOptional()
+    {
+        return $this->optional;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function defaultValue()
+    {
+        return $this->defaultValue;
+    }
+
+    /**
+     * Render property declaration.
      *
      * @return string
      */
@@ -179,16 +158,18 @@ class ParameterElement
 
         $result = $type . ($this->pdb ? '&' : '') . "$" . $this->name;
 
-        if ($this->options)
+        if (!$this->optional)
         {
-            if ($this->defaultValue === [])
-            {
-                $result .= ' = array()';
-            }
-            else
-            {
-                $result .= ' = ' . var_export($this->defaultValue, true);
-            }
+            return $result;
+        }
+
+        if ($this->defaultValue === [])
+        {
+            $result .= ' = []';
+        }
+        else
+        {
+            $result .= ' = ' . var_export($this->defaultValue, true);
         }
 
         return $result;

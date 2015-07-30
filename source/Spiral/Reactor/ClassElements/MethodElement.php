@@ -11,39 +11,45 @@ namespace Spiral\Reactor\ClassElements;
 use Spiral\Reactor\ClassElements\MethodElements\ParameterElement;
 use Spiral\Reactor\AbstractElement;
 
+/**
+ * Represent class method.
+ */
 class MethodElement extends AbstractElement
 {
     /**
-     * Method access level (private, protected and public).
-     *
      * @var string
      */
     protected $access = self::ACCESS_PUBLIC;
 
     /**
-     * Indicates the method which can be accessed statically.
-     *
      * @var bool
      */
     protected $static = false;
 
     /**
-     * List of required and optional method parameters.
-     *
      * @var ParameterElement[]
      */
     protected $parameters = [];
 
     /**
-     * Source code lines (optional).
+     * Method source in form of code lines.
      *
      * @var array
      */
     protected $source = [];
 
     /**
-     * Method access level (private, protected and public).
-     *
+     * @param string $access
+     * @return $this
+     */
+    public function setAccess($access)
+    {
+        $this->access = $access;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getAccess()
@@ -52,32 +58,7 @@ class MethodElement extends AbstractElement
     }
 
     /**
-     * Set access level.
-     *
-     * @param string $access Public by default.
-     * @return $this
-     */
-    public function setAccess($access = self::ACCESS_PUBLIC)
-    {
-        $this->access = $access;
-
-        return $this;
-    }
-
-    /**
-     * Indicates that method can be accessed statically.
-     *
-     * @return bool
-     */
-    public function isStatic()
-    {
-        return $this->static;
-    }
-
-    /**
-     * Mark method as static/non static.
-     *
-     * @param bool $static True if property is static.
+     * @param bool $static
      * @return $this
      */
     public function setStatic($static)
@@ -88,41 +69,19 @@ class MethodElement extends AbstractElement
     }
 
     /**
-     * Get all the methods parameters declarations.
-     *
-     * @return ParameterElement[]
-     */
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
-    /**
-     * Check if method has parameter by it's name.
-     *
-     * @param string $name Parameter name.
      * @return bool
      */
-    public function hasParameter($name)
+    public function isStatic()
     {
-        return array_key_exists($name, $this->parameters);
+        return $this->static;
     }
 
     /**
-     * Remove parameter from methods declaration by it's name.
+     * Get existed method parameter by it's name or create new one. Parameter type will be used to
+     * generate method DocComment.
      *
      * @param string $name
-     */
-    public function removeParameter($name)
-    {
-        unset($this->parameters[$name]);
-    }
-
-    /**
-     * Get/create parameter. Parameter will automatically be created during the methods first call.
-     *
-     * @param string $name Parameter name.
-     * @param string $type DocComment to set or replace.
+     * @param string $type
      * @return ParameterElement
      */
     public function parameter($name, $type = '')
@@ -132,17 +91,78 @@ class MethodElement extends AbstractElement
             $this->parameters[$name] = new ParameterElement($name);
         }
 
-        if ($type && !in_array($type, $this->docComment))
+        if (!empty($type) && !in_array($docComment = "@param {type} \${$name}", $this->docComment))
         {
-            $this->docComment[] = '@param ' . $type . ' $' . $name;
+            $this->docComment[] = $docComment;
         }
 
         return $this->parameters[$name];
     }
 
     /**
-     * Get method source code lines.
+     * @param string $name
+     * @return bool
+     */
+    public function hasParameter($name)
+    {
+        return array_key_exists($name, $this->parameters);
+    }
+
+    /**
+     * @param string $name
+     */
+    public function removeParameter($name)
+    {
+        unset($this->parameters[$name]);
+    }
+
+    /**
+     * @return ParameterElement[]
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * Replace method source with new value.
      *
+     * @param string|array $source
+     * @return $this
+     */
+    public function setSource($source)
+    {
+        if (is_array($source))
+        {
+            $this->source = $source;
+
+            return $this;
+        }
+
+        $lines = explode("\n", preg_replace('/[\n\r]+/', "\n", $source));
+        $indentLevel = 0;
+
+        foreach ($lines as $line)
+        {
+            //Cutting start spaces
+            $line = trim($line);
+
+            if (strpos($line, '}') !== false)
+            {
+                $indentLevel--;
+            }
+
+            $this->source[] = $this->indent($line, $indentLevel);
+            if (strpos($line, '{') !== false)
+            {
+                $indentLevel++;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getSource()
@@ -151,64 +171,11 @@ class MethodElement extends AbstractElement
     }
 
     /**
-     * Mount source code into method. Indents will be modified to follow method and class tabulation.
-     * If the source is provided as array of lines - no indents will be modified.
-     *
-     * @param string|array $source
-     * @param bool         $append
-     * @return $this
-     */
-    public function setSource($source, $append = false)
-    {
-        if (!$append)
-        {
-            $this->source = [];
-        }
-
-        if (is_array($source))
-        {
-            $this->source = array_merge($this->source, $source);
-        }
-        else
-        {
-            $source = preg_replace('/[\n\r]+/', "\n", $source);
-            $sourceLines = explode("\n", $source);
-            $indentLevel = 0;
-
-            foreach ($sourceLines as $line)
-            {
-                //Cutting start spaces
-                $line = trim($line);
-
-                if (strpos($line, '}') !== false)
-                {
-                    $indentLevel--;
-                }
-
-                $this->source[] = $this->indent($line, $indentLevel);
-                if (strpos($line, '{') !== false)
-                {
-                    $indentLevel++;
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Replace strings in all doc comment lines or other names. This is particularly useful when you
-     * want to build a virtual documentation class based on another declaration. Parameter types
-     * will be replaced as well.
-     *
-     * @param string|array $search  String to find.
-     * @param string|array $replace String to replace for.
-     * @return $this
+     * {@inheritdoc}
      */
     public function replaceComments($search, $replace)
     {
         parent::replaceComments($search, $replace);
-
         foreach ($this->parameters as $parameter)
         {
             $parameter->setType(str_replace($search, $replace, $parameter->getType()));
@@ -218,13 +185,9 @@ class MethodElement extends AbstractElement
     }
 
     /**
-     * Render element declaration. The method should be declared in RElement childs classes and then
-     * perform the operation for rendering a specific type of content. Method will be rendered with
-     * it's code (optional), static keyword, access level and it's parameters.
+     * {@inheritdoc}
      *
-     * @param int $indentLevel Tabulation level.
-     * @param int $position    Element position.
-     * @return string
+     * @param int $position Internal value.
      */
     public function render($indentLevel = 0, $position = 0)
     {
@@ -268,16 +231,15 @@ class MethodElement extends AbstractElement
     }
 
     /**
-     * Clone schema from existing method. The method code will not be copied and has to be mounted
-     * manually.
+     * Clone method parameters and comments using ReflectionMethod.
      *
      * @param \ReflectionMethod $method
      */
     public function cloneSchema(\ReflectionMethod $method)
     {
         $this->setComment($method->getDocComment());
-        $this->static = $method->isStatic();
 
+        $this->static = $method->isStatic();
         if ($method->isPrivate())
         {
             $this->setAccess(self::ACCESS_PRIVATE);
@@ -287,25 +249,18 @@ class MethodElement extends AbstractElement
             $this->setAccess(self::ACCESS_PROTECTED);
         }
 
-        foreach ($method->getParameters() as $parameterReflection)
+        foreach ($method->getParameters() as $reflection)
         {
-            $parameter = $this->parameter($parameterReflection->getName());
-            if ($parameterReflection->isOptional())
+            $parameter = $this->parameter($reflection->getName());
+            if ($reflection->isOptional())
             {
-                $parameter->setOptional(true, $parameterReflection->getDefaultValue());
+                $parameter->setOptional(true, $reflection->getDefaultValue());
             }
 
-            if ($parameterReflection->isArray())
-            {
-                $parameter->setType('array');
-            }
+            $reflection->isArray() && $parameter->setType('array');
+            !empty($reflection->getClass()) && $parameter->setType($reflection->getClass()->getName());
 
-            if ($parameterReflection->getClass())
-            {
-                $parameter->setType($parameterReflection->getClass()->getName());
-            }
-
-            $parameter->setPBR($parameterReflection->isPassedByReference());
+            $parameter->setPBR($reflection->isPassedByReference());
         }
     }
 }

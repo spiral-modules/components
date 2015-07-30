@@ -7,21 +7,24 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Reactor;
+use Spiral\Reactor\Exceptions\SerializeException;
 
-class ArrayExporter
+/**
+ * Serializes simple array into pretty form.
+ */
+class ArraySerializer
 {
     /**
-     * Serialize config data with valid formatting (4 spaces for indent) and mounted path constants.
+     * Serialize array data into pretty but valid PHP code.
      *
-     * @param array  $array  Merged config data.
-     * @param string $indent Indent value (4 spaces by default).
-     * @param int    $level  Array level.
+     * @param array  $array
+     * @param string $indent
+     * @param int    $level Internal value.
      * @return string
      */
-    public function export(array $array, $indent = AbstractElement::INDENT, $level = 0)
+    public function serialize(array $array, $indent = AbstractElement::INDENT, $level = 0)
     {
         //Delimiters between rows and sub-arrays.
-        $assign = " => ";
         $subIndent = "\n" . str_repeat($indent, $level + 2);
         $keyIndent = "\n" . str_repeat($indent, $level + 1);
 
@@ -39,7 +42,7 @@ class ArrayExporter
         {
             if ($associated)
             {
-                $name = str_pad(var_export($name, true), $keyLength, ' ', STR_PAD_RIGHT) . $assign;
+                $name = str_pad(var_export($name, true), $keyLength, ' ', STR_PAD_RIGHT) . " => ";
             }
             else
             {
@@ -59,11 +62,8 @@ class ArrayExporter
             }
 
             //Sub-array
-            $result[] = $name . "[{$subIndent}" . $this->export(
-                    $value,
-                    $indent,
-                    $level + 1
-                ) . "{$keyIndent}]";
+            $result[] = $name
+                . "[{$subIndent}" . $this->serialize($value, $indent, $level + 1) . "{$keyIndent}]";
         }
 
         if ($level !== 0)
@@ -77,11 +77,12 @@ class ArrayExporter
     }
 
     /**
-     * Pack scalar value to config.
+     * Pack array key value into string.
      *
      * @param string $name
      * @param mixed  $value
      * @return string
+     * @throws SerializeException
      */
     protected function packValue($name, $value)
     {
@@ -97,7 +98,7 @@ class ArrayExporter
         {
             if (!is_string($value))
             {
-                throw new \RuntimeException("Unable to pack non scalar value.");
+                throw new SerializeException("Unable to pack non scalar value.");
             }
 
             $value = var_export($value, true);

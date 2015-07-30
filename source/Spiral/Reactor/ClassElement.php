@@ -11,6 +11,9 @@ namespace Spiral\Reactor;
 use Spiral\Reactor\ClassElements\MethodElement;
 use Spiral\Reactor\ClassElements\PropertyElement;
 
+/**
+ * Represent class declaration.
+ */
 class ClassElement extends AbstractElement
 {
     /**
@@ -279,9 +282,9 @@ class ClassElement extends AbstractElement
     /**
      * {@inheritdoc}
      *
-     * @param ArrayExporter $exporter Class used to render array values for default properties and etc.
+     * @param ArraySerializer $serializer Class used to render array values for default properties and etc.
      */
-    public function render($indentLevel = 0, ArrayExporter $exporter = null)
+    public function render($indentLevel = 0, ArraySerializer $serializer = null)
     {
         $result = [$this->renderComment($indentLevel)];
         $header = 'class ' . $this->name . ($this->parent ? ' extends ' . $this->parent : '');
@@ -305,7 +308,7 @@ class ClassElement extends AbstractElement
         $position = 0;
         foreach ($this->properties as $property)
         {
-            $result[] = $property->render($indentLevel + 1, $position++, $exporter);
+            $result[] = $property->render($indentLevel + 1, $serializer, $position++);
         }
 
         foreach ($this->methods as $method)

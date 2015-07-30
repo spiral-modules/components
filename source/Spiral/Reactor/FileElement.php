@@ -10,6 +10,9 @@ namespace Spiral\Reactor;
 
 use Spiral\Files\FilesInterface;
 
+/**
+ * Represent one PHP file and can be written directly to harddrive.
+ */
 class FileElement extends NamespaceElement
 {
     /**
@@ -18,47 +21,26 @@ class FileElement extends NamespaceElement
     const PHP_OPEN = '<?php';
 
     /**
-     * All elements nested to the PHP file, that can include classes and namespaces.
-     *
-     * @var AbstractElement[]
+     * @var ClassElement[]|NamespaceElement[]
      */
     protected $elements = [];
 
     /**
-     * FileManager component.
-     *
      * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * New instance of RPHPFile, class used to write Reactor declarations to specified filename.
-     *
-     * @param mixed          $namespace
      * @param FilesInterface $files
+     * @param mixed          $namespace
      */
-    public function __construct($namespace = null, FilesInterface $files)
+    public function __construct(FilesInterface $files, $namespace = '')
     {
         parent::__construct($namespace);
         $this->files = $files;
     }
 
     /**
-     * Adding a new reactor element to a file.
-     *
-     * @param AbstractElement $element
-     * @return $this
-     */
-    public function addElement(AbstractElement $element)
-    {
-        $this->elements[] = $element;
-
-        return $this;
-    }
-
-    /**
-     * Add a new class declaration to a file.
-     *
      * @param ClassElement $class
      * @return $this
      */
@@ -70,29 +52,22 @@ class FileElement extends NamespaceElement
     }
 
     /**
-     * Render the PHP file's code and deliver it to a given filename.
-     *
-     * @param string $filename        Filename to render code into.
-     * @param int    $mode            Use File::RUNTIME for 777 and File::READONLY for application
-     *                                files.
-     * @param bool   $ensureDirectory If true, helper will ensure that the destination directory exists
-     *                                and has the correct permissions.
-     * @return bool
+     * @param NamespaceElement $namespace
+     * @return $this
      */
-    public function renderFile($filename, $mode = FilesInterface::RUNTIME, $ensureDirectory = false)
+    public function addNamespace(NamespaceElement $namespace)
     {
-        return $this->files->write($filename, $this->render(), $mode, $ensureDirectory);
+        $this->elements[] = $namespace;
+
+        return $this;
     }
 
     /**
-     * Render element declaration. This method should be declared in RElement child classes and perform
-     * an operation for rendering the specific type of content. RPHPFile will render all nested classes
-     * and namespaces into valid (in terms of syntax) php code.
+     * {@inheritdoc}
      *
-     * @param int $indentLevel Tabulation level.
-     * @return string
+     * @param ArraySerializer $serializer Class used to render array values for default properties and etc.
      */
-    public function render($indentLevel = 0)
+    public function render($indentLevel = 0, ArraySerializer $serializer = null)
     {
         $result = [self::PHP_OPEN, trim($this->renderComment($indentLevel))];
 
@@ -110,9 +85,28 @@ class FileElement extends NamespaceElement
         //Classes
         foreach ($this->elements as $element)
         {
-            $result[] = $element->render($indentLevel);
+            $result[] = $element->render($indentLevel, $serializer);
         }
 
         return $this->join($result, $indentLevel);
+    }
+
+    /**
+     * Render file declaration into file.
+     *
+     * @param string          $filename
+     * @param int             $mode
+     * @param bool            $ensureLocation
+     * @param ArraySerializer $exporter Class used to render array values for default properties and etc.
+     * @return bool
+     */
+    public function renderTo(
+        $filename,
+        $mode = FilesInterface::RUNTIME,
+        $ensureLocation = false,
+        ArraySerializer $exporter = null
+    )
+    {
+        return $this->files->write($filename, $this->render(0, $exporter), $mode, $ensureLocation);
     }
 }

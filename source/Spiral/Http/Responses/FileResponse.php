@@ -10,16 +10,15 @@ namespace Spiral\Http\Responses;
 
 use Spiral\Http\Response;
 
-
+/**
+ * FileResponse used to create responses associated with local file or stream. Response will set
+ * create Content-Type (application/octet-stream) and Content-Length headers.
+ */
 class FileResponse extends Response
 {
     /**
-     * FileResponse used to create responses associated with local file stream. Response will automatically
-     * create Content-Type (application/octet-stream) and Content-Length headers. Headers can be
-     * rewritten manually.
-     *
      * @param string $filename Local filename to be send.
-     * @param string $name     Name show to client.
+     * @param string $name     Filename to be shown to client.
      * @param int    $status
      * @param array  $headers
      */

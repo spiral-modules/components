@@ -272,16 +272,6 @@ class Cookie
     }
 
     /**
-     * Get string representation of header.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->packHeader();
-    }
-
-    /**
      * New Cookie instance, cookies used to schedule cookie set while dispatching Response.
      * Static constructor.
      *
@@ -324,5 +314,13 @@ class Cookie
     )
     {
         return new self($name, $value, $lifetime, $path, $domain, $secure, $httpOnly);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->packHeader();
     }
 }

@@ -22,6 +22,11 @@ use Spiral\Http\Uri;
 abstract class AbstractRoute implements RouteInterface
 {
     /**
+     * Default segment pattern, this patter can be applied to controller names, actions and etc.
+     */
+    const DEFAULT_SEGMENT = '[^\/]+';
+
+    /**
      * CoreInterface used to execute actions handled by route.
      *
      * @var CoreInterface

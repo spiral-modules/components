@@ -15,6 +15,7 @@ use Spiral\Http\Routing\Router;
 use Spiral\Http\Routing\RouterException;
 use Spiral\Http\Routing\RouterInterface;
 
+
 trait RouterTrait
 {
     /**

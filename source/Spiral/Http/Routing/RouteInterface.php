@@ -9,59 +9,52 @@
 namespace Spiral\Http\Routing;
 
 use Cocur\Slugify\SlugifyInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Spiral\Core\Container;
 use Spiral\Core\ContainerInterface;
+use Spiral\Http\Exceptions\RouteException;
 
 interface RouteInterface
 {
     /**
-     * Default segment pattern, this patter can be applied to controller names, actions and etc.
-     */
-    const DEFAULT_SEGMENT = '[^\/]+';
-
-    /**
-     * Default separator to split controller and action name in route target.
+     * Controller and action in route targets and createURL route name has to be separated like that.
      */
     const CONTROLLER_SEPARATOR = '::';
 
     /**
-     * Get route name. Name is requires to correctly identify route inside router stack (to generate
-     * url for example).
-     *
      * @return string
      */
     public function getName();
 
     /**
-     * Check if route matched with provided request. Will check url pattern and pre-conditions.
+     * Check if route matched with provided request.
      *
      * @param ServerRequestInterface $request
      * @param string                 $basePath
      * @return bool
+     * @throws RouteException
      */
     public function match(ServerRequestInterface $request, $basePath = '/');
 
     /**
-     * Perform route on given Request and return response.
+     * Execute route on given request. Has to be called after match method.
      *
      * @param ServerRequestInterface $request
-     * @param ContainerInterface     $container Container is required to get valid middleware instance
-     *                                          and execute controllers in some cases.
-     * @return mixed
+     * @param ContainerInterface     $container
+     * @return ResponseInterface
      */
     public function perform(ServerRequestInterface $request, ContainerInterface $container);
 
     /**
-     * Create Uri using route parameters (will be merged with default values), route pattern and base
-     * path.
+     * Generate valid route URL using route name and set of parameters.
      *
      * @param array            $parameters
      * @param string           $basePath
-     * @param SlugifyInterface $slugify Instance to create url slugs. By default Slugify will be
-     *                                  used.
+     * @param SlugifyInterface $slugify
      * @return UriInterface
+     * @throws RouteException
      */
     public function createUri(array $parameters = [], $basePath = '/', SlugifyInterface $slugify = null);
 }

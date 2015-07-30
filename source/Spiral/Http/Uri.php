@@ -8,6 +8,9 @@
  */
 namespace Spiral\Http;
 
+/**
+ * {@inheritdoc}
+ */
 class Uri extends \Zend\Diactoros\Uri
 {
 }

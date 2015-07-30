@@ -8,7 +8,10 @@
  */
 namespace Spiral\Http\Responses;
 
-class JsonResponse extends \Zend\Diactoros\Response\JsonResponse
+/**
+ * {@inheritdoc}
+ */
+class HtmlResponse extends \Zend\Diactoros\Response\HtmlResponse
 {
     /**
      * Simple alias.

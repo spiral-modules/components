@@ -7,10 +7,10 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Http\Responses;
-
-class HtmlResponse extends \Zend\Diactoros\Response\HtmlResponse
+/**
+ * {@inheritdoc}
+ */
+class EmptyResponse extends \Zend\Diactoros\Response\EmptyResponse
 {
-    /**
-     * Simple alias.
-     */
+
 }

@@ -8,9 +8,10 @@
  */
 namespace Spiral\Http\Responses;
 
+/**
+ * {@inheritdoc}
+ */
 class RedirectResponse extends \Zend\Diactoros\Response\RedirectResponse
 {
-    /**
-     * Simple alias.
-     */
+
 }

@@ -8,12 +8,13 @@
  */
 namespace Spiral\Http;
 
-use Zend\Diactoros\Response as ZendResponse;
-
-class Response extends ZendResponse
+/**
+ * {@inheritdoc}
+ */
+class Response extends \Zend\Diactoros\Response
 {
     /**
-     * Default set of http codes.
+     * Common set of http codes.
      */
     const SUCCESS           = 200;
     const CREATED           = 201;

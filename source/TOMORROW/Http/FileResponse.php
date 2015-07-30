@@ -10,6 +10,7 @@ namespace Spiral\Http\Responses;
 
 use Spiral\Http\Response;
 
+
 class FileResponse extends Response
 {
     /**

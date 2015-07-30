@@ -44,8 +44,8 @@ interface StoreInterface
     /**
      * Save data in cache. Method will replace values created before.
      *
-     * @param string $name     Stored value name.
-     * @param mixed  $data     Data in string or binary format.
+     * @param string $name
+     * @param mixed  $data
      * @param int    $lifetime Duration in seconds until the value will expire.
      * @return mixed
      * @throws StoreException
@@ -56,8 +56,8 @@ interface StoreInterface
      * Store value in cache with infinite lifetime. Value will only expire when the cache is
      * flushed.
      *
-     * @param string $name Stored value name.
-     * @param mixed  $data Data in string or binary format.
+     * @param string $name
+     * @param mixed  $data
      * @return mixed
      * @throws StoreException
      */
@@ -74,7 +74,7 @@ interface StoreInterface
     /**
      * Increment numeric value stored in cache.
      *
-     * @param string $name  Stored value name.
+     * @param string $name
      * @param int    $delta How much to increment by. Set to 1 by default.
      * @throws StoreException
      */
@@ -83,7 +83,7 @@ interface StoreInterface
     /**
      * Decrement numeric value stored in cache.
      *
-     * @param string $name  Stored value name.
+     * @param string $name
      * @param int    $delta How much to decrement by. Set to 1 by default.
      * @throws StoreException
      */
@@ -101,8 +101,8 @@ interface StoreInterface
     /**
      * Get the item from cache and if the item is missing, set a default value using Closure.
      *
-     * @param string   $name     Stored value name.
-     * @param int      $lifetime Duration in seconds until the value will expire.
+     * @param string   $name
+     * @param int      $lifetime
      * @param callback $callback Callback should be called if a value doesn't exist in cache.
      * @return mixed
      * @throws StoreException

@@ -56,7 +56,7 @@ class View extends Component implements ViewInterface, DependedInterface
     /**
      * @param string $compiledFilename
      */
-    public function inject($compiledFilename)
+    public function depends($compiledFilename)
     {
         $this->compiledFilename = $compiledFilename;
     }

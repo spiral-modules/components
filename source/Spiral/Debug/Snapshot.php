@@ -74,7 +74,7 @@ class Snapshot extends Component implements SnapshotInterface, DependedInterface
      * @param FilesInterface $files
      * @param ViewsInterface $views
      */
-    public function inject(Debugger $debugger, FilesInterface $files, ViewsInterface $views)
+    public function depends(Debugger $debugger, FilesInterface $files, ViewsInterface $views)
     {
         $this->config = $debugger->config()[static::CONFIG];
 

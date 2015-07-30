@@ -42,7 +42,7 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Encrypter\DecryptionException
+     * @expectedException \Spiral\Encrypter\DecryptException
      * @expectedExceptionMessage Invalid dataset.
      */
     public function testBadData()
@@ -56,7 +56,7 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Encrypter\DecryptionException
+     * @expectedException \Spiral\Encrypter\DecryptException
      * @expectedExceptionMessage Encrypted data does not have valid signature.
      */
     public function testBadSignature()

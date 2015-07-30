@@ -11,7 +11,12 @@ namespace Spiral\Encrypter;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
+use Spiral\Encrypter\Exceptions\DecryptException;
+use Spiral\Encrypter\Exceptions\EncrypterException;
 
+/**
+ * Default implementation of spiral encrypter.
+ */
 class Encrypter extends Singleton implements EncrypterInterface
 {
     /**
@@ -37,6 +42,11 @@ class Encrypter extends Singleton implements EncrypterInterface
     const SIGNATURE = 'c';
 
     /**
+     * @var string
+     */
+    protected $key = '';
+
+    /**
      * One of the MCRYPT_CIPERNAME constants, or the name of the algorithm as string.
      *
      * @var string
@@ -44,18 +54,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     protected $method = 'aes-256-cbc';
 
     /**
-     * The key with which the data will be encrypted. Default application key should be defined in
-     * encrypter configuration and can not be empty.
-     *
-     * @var string
-     */
-    protected $key = '';
-
-    /**
-     * New encrypter component.
-     *
      * @param ConfiguratorInterface $configurator
-     * @throws EncrypterException
      */
     public function __construct(ConfiguratorInterface $configurator)
     {
@@ -69,11 +68,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Set the encryption key.
-     *
-     * @param  string $key
-     * @return $this
-     * @throws EncrypterException
+     * {@inheritdoc}
      */
     public function setKey($key)
     {
@@ -83,10 +78,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Get current encrypter key. Key can be used in various application parts for hashing and etc.
-     * Be careful, DO NOT share this key with client or raw data.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getKey()
     {
@@ -94,7 +86,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Set the encryption cipher.
+     * Change encryption method. One of MCRYPT_CIPERNAME constants.
      *
      * @param  string $method
      * @return $this
@@ -107,8 +99,6 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Get current method.
-     *
      * @return string
      */
     public function getMethod()
@@ -117,8 +107,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Restore encryption values specified in configuration,
-     * key, mode and cipher will be altered.
+     * Restore default encrypter key and method.
      *
      * @return $this
      * @throws EncrypterException
@@ -132,13 +121,9 @@ class Encrypter extends Singleton implements EncrypterInterface
     }
 
     /**
-     * Generate a pseudo-random string of bytes.
+     * {@inheritdoc}
      *
-     * @link http://php.net/manual/en/function.openssl-random-pseudo-bytes.php
-     * @param int  $length   Required string length (count bytes).
      * @param bool $passWeak Do not throw an exception if result is "weak". Not recommended.
-     * @return string
-     * @throws EncrypterException
      */
     public function random($length, $passWeak = false)
     {
@@ -162,40 +147,9 @@ class Encrypter extends Singleton implements EncrypterInterface
         return $result;
     }
 
-    /**
-     * Get string signature for current application key, signature can be used to verify that string
-     * is valid without encrypting/decrypting it.
-     *
-     * @param string $string Encrypted string.
-     * @param string $salt   String salt.
-     * @return string
-     */
-    public function makeSignature($string, $salt = null)
-    {
-        return hash_hmac('sha256', $string . ($salt ? ':' . $salt : ''), $this->key);
-    }
 
     /**
-     * Creates an initialization vector (IV) from a random source with specified size.
-     *
-     * @link http://php.net/manual/en/function.mcrypt-create-iv.php
-     * @param int $length
-     * @return string
-     */
-    protected function createIV($length = 16)
-    {
-        return $length ? $this->random($length, true, false) : '';
-    }
-
-    /**
-     * Encrypt given data (any serializable) using current encryption cipher, mode and key. Data will
-     * be base64 encoded and signed. Use additional parameter to make output URL friendly. Result will
-     * be encrypted string packed with signature and vector.
-     *
-     * @link http://stackoverflow.com/questions/1374753/passing-base64-encoded-strings-in-url
-     * @param mixed $data Data to be encrypted.
-     * @return string
-     * @throws EncrypterException
+     * {@inheritdoc}
      */
     public function encrypt($data)
     {
@@ -217,62 +171,80 @@ class Encrypter extends Singleton implements EncrypterInterface
         $result = json_encode([
             self::IV        => ($vector = bin2hex($vector)),
             self::DATA      => $encrypted,
-            self::SIGNATURE => $this->makeSignature($encrypted, $vector)
+            self::SIGNATURE => $this->sign($encrypted, $vector)
         ]);
 
         return base64_encode($result);
     }
 
     /**
-     * Decrypt previously data, verify signature and return it. All Encryption options should be
-     * identical to values used during encryption.
-     *
-     * @link http://php.net/manual/en/function.mcrypt-decrypt.php
-     * @param string $packed Packed string generated by Encrypter->encrypt().
-     * @return mixed
-     * @throws DecryptionException
+     * {@inheritdoc}
      */
-    public function decrypt($packed)
+    public function decrypt($payload)
     {
         try
         {
-            $packed = json_decode(base64_decode($packed), true);
+            $payload = json_decode(base64_decode($payload), true);
 
-            if (empty($packed) || !is_array($packed))
+            if (empty($payload) || !is_array($payload))
             {
-                throw new DecryptionException("Invalid dataset.");
+                throw new DecryptException("Invalid dataset.");
             }
 
-            assert(!empty($packed[self::IV]));
-            assert(!empty($packed[self::DATA]));
-            assert(!empty($packed[self::SIGNATURE]));
+            assert(!empty($payload[self::IV]));
+            assert(!empty($payload[self::DATA]));
+            assert(!empty($payload[self::SIGNATURE]));
         }
         catch (\ErrorException $exception)
         {
-            throw new DecryptionException("Unable to unpack provided data.");
+            throw new DecryptException("Unable to unpack provided data.");
         }
 
         //Verifying signature
-        if ($packed[self::SIGNATURE] !== $this->makeSignature($packed[self::DATA], $packed[self::IV]))
+        if ($payload[self::SIGNATURE] !== $this->sign($payload[self::DATA], $payload[self::IV]))
         {
-            throw new DecryptionException("Encrypted data does not have valid signature.");
+            throw new DecryptException("Encrypted data does not have valid signature.");
         }
 
         try
         {
             $decrypted = openssl_decrypt(
-                base64_decode($packed[self::DATA]),
+                base64_decode($payload[self::DATA]),
                 $this->method,
                 $this->key,
                 true,
-                hex2bin($packed[self::IV])
+                hex2bin($payload[self::IV])
             );
 
             return unserialize($decrypted);
         }
         catch (\ErrorException $exception)
         {
-            throw new DecryptionException($exception->getMessage());
+            throw new DecryptException($exception->getMessage(), $exception->getCode());
         }
+    }
+
+    /**
+     * Sign string using private key.
+     *
+     * @param string $string
+     * @param string $salt
+     * @return string
+     */
+    public function sign($string, $salt = null)
+    {
+        return hash_hmac('sha256', $string . ($salt ? ':' . $salt : ''), $this->key);
+    }
+
+    /**
+     * Create an initialization vector (IV) from a random source with specified size.
+     *
+     * @link http://php.net/manual/en/function.mcrypt-create-iv.php
+     * @param int $length
+     * @return string
+     */
+    protected function createIV($length = 16)
+    {
+        return $length ? $this->random($length, true, false) : '';
     }
 }

@@ -14,7 +14,7 @@ use Spiral\Http\Middlewares\CsrfFilter;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\Encrypter\DecryptionException;
+use Spiral\Encrypter\DecryptException;
 use Spiral\Encrypter\EncrypterException;
 use Spiral\Encrypter\EncrypterInterface;
 use Spiral\Http\HttpCore;
@@ -234,7 +234,7 @@ class CookieManager extends Component implements MiddlewareInterface
 
                 return $this->encrypter()->decrypt($cookie);
             }
-            catch (DecryptionException $exception)
+            catch (DecryptException $exception)
             {
                 return null;
             }

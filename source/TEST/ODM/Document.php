@@ -330,12 +330,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Get mutator for specified field. Setters, getters and accessors can be retrieved using this
-     * method.
-     *
-     * @param string $field   Field name.
-     * @param string $mutator Mutator type (setters, getters, accessors).
-     * @return mixed|null
+     * {@inheritdoc}
      */
     protected function getMutator($field, $mutator)
     {
@@ -348,12 +343,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Copy Compositable to embed into specified parent. Documents with already set parent will return
-     * copy of themselves, in other scenario document will return itself.
-     *
-     * @param CompositableInterface $parent Parent ODMCompositable object should be copied or prepared
-     *                                      for.
-     * @return $this|self
+     * {@inheritdoc}
      */
     public function embed($parent)
     {
@@ -373,10 +363,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
-     * @return $this
+     * {@inheritdoc}
      */
     public function setData($data)
     {
@@ -384,11 +371,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Get accessor instance.
-     *
-     * @param mixed  $value    Value to mock up.
-     * @param string $accessor Accessor definition (can be array).
-     * @return AccessorInterface
+     * {@inheritdoc}
      */
     protected function defineAccessor($value, $accessor)
     {
@@ -408,10 +391,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Check if field assignable.
-     *
-     * @param string $field
-     * @return bool
+     * {@inheritdoc}
      */
     protected function isFillable($field)
     {
@@ -424,10 +404,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Get all non secured model fields. ODM will automatically convert "_id" to "id" and convert all
-     * MongoId and MongoDates to scalar representations.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function publicFields()
     {
@@ -479,12 +456,10 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Get related document/documents.
-     *
      * @param string $offset
-     * @param array  $arguments Additional query can be provided as first argument.
+     * @param array  $arguments
      * @return Collection|Document|Document[]
-     * @throws ODMException
+     * @throws DocumentException
      */
     public function __call($offset, array $arguments)
     {
@@ -539,11 +514,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Set value to one of field. Setter filter can be disabled by providing last argument.
-     *
-     * @param string $name   Field name.
-     * @param mixed  $value  Value to set.
-     * @param bool   $filter If false no filter will be applied.
+     * {@inheritdoc}
      */
     public function setField($name, $value, $filter = true)
     {
@@ -559,10 +530,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Offset to unset.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
-     * @param mixed $offset The offset to unset.
+     * {@inheritdoc}
      */
     public function __unset($offset)
     {
@@ -630,11 +598,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Check if document or specific field is updated.
-     *
-     * @param string $field
-     * @param bool   $atomicsOnly Only atomic updates will be checked.
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasUpdates($field = null, $atomicsOnly = false)
     {
@@ -679,7 +643,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
+     * {@inheritdoc}
      */
     public function flushUpdates()
     {
@@ -695,10 +659,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Get generated and manually set document/object atomic updates.
-     *
-     * @param string $container Name of field or index where document stored into.
-     * @return array
+     * {@inheritdoc}
      */
     public function buildAtomics($container = '')
     {
@@ -776,11 +737,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Validator instance associated with model, will be response for validations of validation errors.
-     * Model related error localization should happen in model itself.
-     *
-     * @param array $validates Custom validation rules.
-     * @return ValidatorInterface
+     * {@inheritdoc}
      */
     public function validator(array $validates = [])
     {
@@ -796,10 +753,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Validating model data using validation rules, all errors will be stored in model errors array.
-     * Errors will not be erased between function calls.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     protected function validate()
     {
@@ -1014,8 +968,6 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return Object
      */
     public function __debugInfo()

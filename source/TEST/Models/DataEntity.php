@@ -224,10 +224,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Whether a offset exists.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
-     * @param mixed $offset An offset to check for.
+     * @param mixed $offset
      * @return bool
      */
     public function __isset($offset)
@@ -236,10 +233,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Offset to retrieve.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param mixed $offset The offset to retrieve.
+     * @param mixed $offset
      * @return mixed
      */
     public function __get($offset)
@@ -248,11 +242,8 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Offset to set.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param mixed $offset The offset to assign the value to.
-     * @param mixed $value  The value to set.
+     * @param mixed $offset
+     * @param mixed $value
      */
     public function __set($offset, $value)
     {
@@ -260,10 +251,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Offset to unset.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
-     * @param mixed $offset The offset to unset.
+     * @param mixed $offset
      */
     public function __unset($offset)
     {
@@ -272,11 +260,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Whether a offset exists.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
-     * @param mixed $offset An offset to check for.
-     * @return boolean
+     * {@inheritdoc}
      */
     public function offsetExists($offset)
     {
@@ -284,11 +268,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Offset to retrieve.
-     *
-     * @link   http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param mixed $offset The offset to retrieve.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function offsetGet($offset)
     {
@@ -296,12 +276,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Offset to set.
-     *
-     * @link   http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param mixed $offset The offset to assign the value to.
-     * @param mixed $value  The value to set.
-     * @return void
+     * {@inheritdoc}
      */
     public function offsetSet($offset, $value)
     {
@@ -309,11 +284,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Offset to unset.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
-     * @param mixed $offset The offset to unset.
-     * @return void
+     * {@inheritdoc}
      */
     public function offsetUnset($offset)
     {
@@ -407,10 +378,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Retrieve an external iterator. An instance of an object implementing Iterator or Traversable.
-     *
-     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return \Traversable
+     * {@inheritdoc}
      */
     public function getIterator()
     {
@@ -509,11 +477,7 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * (PHP 5 > 5.4.0)
-     * Specify data which should be serialized to JSON.
-     *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {

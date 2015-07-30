@@ -134,16 +134,7 @@ class DatabaseManager extends Singleton implements InjectorInterface
     }
 
     /**
-     * Injector will receive requested class or interface reflection and reflection linked
-     * to parameter in constructor or method.
-     *
-     * This method can return pre-defined instance or create new one based on requested class. Parameter
-     * reflection can be used for dynamic class constructing, for example it can define database name
-     * or config section to be used to construct requested instance.
-     *
-     * @param \ReflectionClass     $class
-     * @param \ReflectionParameter $parameter
-     * @return mixed
+     * {@inheritdoc}
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
     {
@@ -155,7 +146,7 @@ class DatabaseManager extends Singleton implements InjectorInterface
      *
      * @return MigratorInterface
      */
-    public function getMigrator()
+    public function createMigrator()
     {
         return $this->container->get($this->config['migrator']);
     }

@@ -1103,7 +1103,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
                     if ($relation instanceof RelationInterface && !$relation->saveInstance($validate))
                     {
                         //Let's record error
-                        $this->addError($name, $relation->getErrors());
+                        $this->setError($name, $relation->getErrors());
 
                         throw new ORMException("Unable to save relation.");
                     }

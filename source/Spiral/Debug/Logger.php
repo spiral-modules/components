@@ -11,26 +11,20 @@ namespace Spiral\Debug;
 use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
 
+/**
+ * Basic spiral implementation of PSR logger, allows custom handlers for every log level.
+ */
 class Logger extends AbstractLogger
 {
-    /**
-     * Helper constant to associate all log levels with one filename.
-     */
-    const ALL = 'all';
-
     /**
      * Default logging name (channel).
      */
     const DEFAULT_NAME = 'debug';
 
     /**
-     * Message parts (stored in static log container).
+     * Helper constant to associate all log levels with one filename.
      */
-    const MESSAGE_CHANNEL   = 0;
-    const MESSAGE_TIMESTAMP = 1;
-    const MESSAGE_LEVEL     = 2;
-    const MESSAGE_BODY      = 3;
-    const MESSAGE_CONTEXT   = 4;
+    const ALL = 'all';
 
     /**
      * Copy of LogLevels.
@@ -45,18 +39,23 @@ class Logger extends AbstractLogger
     const DEBUG     = LogLevel::DEBUG;
 
     /**
-     * If enabled all debug messages will be additionally collected in Logger::$logMessages array for
-     * future analysis. Only messages from current script session and recorded after option got
-     * enabled will be collected.
+     * Message parts (stored in static log container).
+     */
+    const MESSAGE_CHANNEL   = 0;
+    const MESSAGE_TIMESTAMP = 1;
+    const MESSAGE_LEVEL     = 2;
+    const MESSAGE_BODY      = 3;
+    const MESSAGE_CONTEXT   = 4;
+
+    /**
+     * When memory logging is enabled every log raised by logger will be stored in global array.
      *
      * @var bool
      */
-    private static $memoryLogging = true;
+    private static $memoryLogging = false;
 
     /**
-     * Log messages collected during application runtime. Messages will be displayed in exception
-     * snapshot or can be retrieved by profiler module, memory logging disabled by CLI dispatched in
-     * console environment.
+     * Globally recorded messages.
      *
      * @var array
      */
@@ -77,11 +76,8 @@ class Logger extends AbstractLogger
     protected $handlers = [];
 
     /**
-     * New logger instance, usually attached to component or set of models, by model class name or
-     * alias. PSR-3 compatible and can be replaced with foreign implementation.
-     *
      * @param string   $name
-     * @param Debugger $debugger Debugger is required to supply config.
+     * @param Debugger $debugger Used to automatically configure handlers.
      */
     public function __construct($name = self::DEFAULT_NAME, Debugger $debugger = null)
     {
@@ -92,8 +88,6 @@ class Logger extends AbstractLogger
     }
 
     /**
-     * Get logger name (channel).
-     *
      * @return string
      */
     public function getName()
@@ -102,12 +96,10 @@ class Logger extends AbstractLogger
     }
 
     /**
-     * Add log handler to output all log messages with specified log level, if log level specified
-     * as Logger::ALL_MESSAGES every message will processed thought this handler, however if there
-     * is more specific log level handler - it will be used instead of "all" handler.
+     * Associated log handlers with specific log level or all levels (ALL constant).
      *
-     * @param string   $level   Log level, use Logger::allMessages to log all messages.
-     * @param callable $handler Handler.
+     * @param string   $level
+     * @param callable $handler
      * @return $this
      */
     public function setHandler($level, callable $handler)
@@ -118,13 +110,7 @@ class Logger extends AbstractLogger
     }
 
     /**
-     * Logs with specified level. If logger has defined file handlers message will be automatically
-     * written to file.
-     *
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
-     * @return $this
+     * {@inheritdoc}
      */
     public function log($level, $message, array $context = [])
     {
@@ -157,23 +143,17 @@ class Logger extends AbstractLogger
     }
 
     /**
-     * If enabled all debug messages will be additionally collected in $logMessages array for future
-     * analysis. Only messages from current script session and recorded after option got enabled will
-     * be collection in logMessages array.
+     * When memory logging is enabled every log raised by logger will be stored in global array.
      *
      * @param bool $enabled
-     * @return bool
      */
     public static function memoryLogging($enabled = true)
     {
-        $currentValue = self::$memoryLogging;
         self::$memoryLogging = $enabled;
-
-        return $currentValue;
     }
 
     /**
-     * Get all recorded log messages.
+     * Get all recorded log messages. MemoryLogging has to be enabled.
      *
      * @return array
      */

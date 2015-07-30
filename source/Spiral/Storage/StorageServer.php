@@ -15,7 +15,11 @@ use Spiral\Core\Component;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Files\Streams\StreamWrapper;
+use Spiral\Storage\Exceptions\ServerException;
 
+/**
+ * AbstractServer implementation with different naming.
+ */
 abstract class StorageServer extends Component implements ServerInterface
 {
     /**
@@ -24,25 +28,18 @@ abstract class StorageServer extends Component implements ServerInterface
     const DEFAULT_MIMETYPE = 'application/octet-stream';
 
     /**
-     * Server configuration, connection options, auth keys and certificates.
-     *
      * @var array
      */
     protected $options = [];
 
     /**
-     * File component.
-     *
      * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * Every server represent one virtual storage which can be either local, remote or cloud based.
-     * Every server should support basic set of low-level operations (create, move, copy and etc).
-     *
-     * @param FilesInterface $files   File component.
-     * @param array          $options Storage connection options.
+     * @param FilesInterface $files
+     * @param array          $options
      */
     public function __construct(FilesInterface $files, array $options)
     {
@@ -57,7 +54,7 @@ abstract class StorageServer extends Component implements ServerInterface
     {
         if (empty($stream = $this->allocateStream($bucket, $name)))
         {
-            return false;
+            throw new ServerException("Unable to allocate local filename for '{$name}'.");
         }
 
         //Default implementation will use stream to create temporary filename, such filename
@@ -85,63 +82,63 @@ abstract class StorageServer extends Component implements ServerInterface
             return true;
         }
 
-        return false;
+        throw new ServerException("Unable to copy '{$name}' to new bucket.");
     }
 
     /**
-     * Get filename to be used in file based methods and etc. Will create virtual Uri for streams.
+     * Cast local filename to be used in file based methods and etc.
      *
-     * @param string|StreamInterface $origin
+     * @param string|StreamInterface $source
      * @return string
      */
-    protected function castFilename($origin)
+    protected function castFilename($source)
     {
-        if (empty($origin) || is_string($origin))
+        if (empty($source) || is_string($source))
         {
-            if (!$this->files->exists($origin))
+            if (!$this->files->exists($source))
             {
                 return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
             }
 
-            return $origin;
+            return $source;
         }
 
-        if ($origin instanceof UploadedFileInterface || $origin instanceof StreamableInterface)
+        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface)
         {
-            $origin = $origin->getStream();
+            $source = $source->getStream();
         }
 
-        if ($origin instanceof StreamInterface)
+        if ($source instanceof StreamInterface)
         {
-            return StreamWrapper::getUri($origin);
+            return StreamWrapper::getUri($source);
         }
 
-        throw new StorageException("Unable to get filename for non Stream instance.");
+        throw new ServerException("Unable to get filename for non Stream instance.");
     }
 
     /**
-     * Get stream associated with origin data.
+     * Cast stream associated with origin data.
      *
-     * @param string|StreamInterface $origin
+     * @param string|StreamInterface $source
      * @return StreamInterface
      */
-    protected function castStream($origin)
+    protected function castStream($source)
     {
-        if ($origin instanceof UploadedFileInterface || $origin instanceof StreamableInterface)
+        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface)
         {
-            $origin = $origin->getStream();
+            $source = $source->getStream();
         }
 
-        if ($origin instanceof StreamInterface)
+        if ($source instanceof StreamInterface)
         {
-            return $origin;
+            return $source;
         }
 
-        if (empty($origin))
+        if (empty($source))
         {
             return \GuzzleHttp\Psr7\stream_for('');
         }
 
-        return \GuzzleHttp\Psr7\stream_for($origin);
+        return \GuzzleHttp\Psr7\stream_for($source);
     }
 } 

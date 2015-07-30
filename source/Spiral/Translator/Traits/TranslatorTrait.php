@@ -19,7 +19,9 @@ use Spiral\Translator\TranslatorInterface;
 trait TranslatorTrait
 {
     /**
-     * @return ContainerInterface
+     * Has to be declared statically!
+     *
+     * @return ContainerInterface|null
      */
     abstract public function container();
 

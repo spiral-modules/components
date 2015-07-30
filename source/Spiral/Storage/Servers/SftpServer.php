@@ -12,9 +12,12 @@ use Psr\Http\Message\StreamInterface;
 use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Storage\BucketInterface;
 use Spiral\Files\FilesInterface;
-use Spiral\Storage\StorageException;
+use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\StorageServer;
 
+/**
+ * Provides abstraction level to work with data located at remove SFTP server.
+ */
 class SftpServer extends StorageServer
 {
     /**
@@ -25,8 +28,6 @@ class SftpServer extends StorageServer
     const PUB_KEY  = 'pubkey';
 
     /**
-     * Server configuration, connection options, auth keys and certificates.
-     *
      * @var array
      */
     protected $options = [
@@ -56,11 +57,7 @@ class SftpServer extends StorageServer
     protected $sftp = null;
 
     /**
-     * Every server represent one virtual storage which can be either local, remote or cloud based.
-     * Every server should support basic set of low-level operations (create, move, copy and etc).
-     *
-     * @param FilesInterface $files   File component.
-     * @param array          $options Storage connection options.
+     * {@inheritdoc}
      */
     public function __construct(FilesInterface $files, array $options)
     {
@@ -68,7 +65,7 @@ class SftpServer extends StorageServer
 
         if (!extension_loaded('ssh2'))
         {
-            throw new StorageException(
+            throw new ServerException(
                 "Unable to initialize sftp storage server, extension 'ssh2' not found."
             );
         }
@@ -77,12 +74,7 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Check if given object (name) exists in specified container. Method should never fail if file
-     * not exists and will return bool in any condition.
-     *
-     * @param BucketInterface $bucket Bucket instance associated with specific server.
-     * @param string          $name   Storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function exists(BucketInterface $bucket, $name)
     {
@@ -90,11 +82,7 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Retrieve object size in bytes, should return false if object does not exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return int|bool
+     * {@inheritdoc}
      */
     public function size(BucketInterface $bucket, $name)
     {
@@ -107,25 +95,19 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Upload storage object using given filename or stream. Method can return false in case of failed
-     * upload or thrown custom exception if needed.
-     *
-     * @param BucketInterface        $bucket Bucket instance.
-     * @param string                 $name   Given storage object name.
-     * @param string|StreamInterface $origin Local filename or stream to use for creation.
-     * @return bool
+     * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $source)
     {
-        if ($origin instanceof StreamInterface)
+        if ($source instanceof StreamInterface)
         {
-            $expectedSize = $origin->getSize();
-            $source = StreamWrapper::getResource($origin);
+            $expectedSize = $source->getSize();
+            $source = StreamWrapper::getResource($source);
         }
         else
         {
-            $expectedSize = filesize($origin);
-            $source = fopen($origin, 'r');
+            $expectedSize = filesize($source);
+            $source = fopen($source, 'r');
         }
 
         //Make sure target directory exists
@@ -144,14 +126,7 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Get temporary read-only stream used to represent remote content. This method is very similar
-     * to localFilename, however in some cases it may store data content in memory.
-     *
-     * Method should return false or thrown an exception if stream can not be allocated.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return StreamInterface|false
+     * {@inheritdoc}
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
@@ -159,11 +134,7 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * {@inheritdoc}
      */
     public function delete(BucketInterface $bucket, $name)
     {
@@ -174,21 +145,15 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Rename storage object without changing it's container. This operation does not require
-     * object recreation or download and can be performed on remote server.
-     *
-     * Method should return false or thrown an exception if object can not be renamed.
-     *
-     * @param BucketInterface $bucket  Bucket instance.
-     * @param string          $oldname Storage object name.
-     * @param string          $newname New storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         if (!$this->exists($bucket, $oldname))
         {
-            return false;
+            throw new ServerException(
+                "Unable to rename storage object '{$oldname}', object does not exists at SFTP server."
+            );
         }
 
         $location = $this->ensureLocation($bucket, $newname);
@@ -200,18 +165,18 @@ class SftpServer extends StorageServer
 
         if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldname), $location))
         {
-            return false;
+            throw new ServerException(
+                "Unable to rename storage object '{$oldname}' to '{$newname}'."
+            );
         }
 
         return $this->refreshPermissions($bucket, $newname);
     }
 
-
     /**
      * Ensure that SSH connection is up and can be used for file operations.
      *
-     * @return bool
-     * @throws StorageException
+     * @throws ServerException
      */
     protected function connect()
     {
@@ -223,7 +188,7 @@ class SftpServer extends StorageServer
 
         if (empty($session))
         {
-            throw new StorageException(
+            throw new ServerException(
                 "Unable to connect to remote SSH server '{$this->options['host']}'."
             );
         }
@@ -251,15 +216,13 @@ class SftpServer extends StorageServer
         }
 
         $this->sftp = ssh2_sftp($session);
-
-        return true;
     }
 
     /**
      * Get full file location on server including homedir.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return string
      */
     protected function getPath(BucketInterface $bucket, $name)
@@ -273,8 +236,8 @@ class SftpServer extends StorageServer
      * Get ssh2 specific uri which can be used in default php functions. Assigned to ssh2.sftp
      * stream wrapper.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return string
      */
     protected function getUri(BucketInterface $bucket, $name)
@@ -283,12 +246,12 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Ensure that target object directory exists and has right permissions.
+     * Ensure that target directory exists and has right permissions.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Relative object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return string
-     * @throws StorageException
+     * @throws ServerException
      */
     protected function ensureLocation(BucketInterface $bucket, $name)
     {
@@ -321,7 +284,7 @@ class SftpServer extends StorageServer
             {
                 if (!ssh2_sftp_mkdir($this->sftp, $location))
                 {
-                    throw new StorageException(
+                    throw new ServerException(
                         "Unable to create directory {$location} using sftp connection."
                     );
                 }
@@ -339,8 +302,8 @@ class SftpServer extends StorageServer
     /**
      * Refresh file permissions accordingly to container options.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return bool
      */
     protected function refreshPermissions(BucketInterface $bucket, $name)

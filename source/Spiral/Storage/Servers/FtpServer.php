@@ -11,14 +11,16 @@ namespace Spiral\Components\Storage\Servers;
 use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
+use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\StorageException;
 use Spiral\Storage\StorageServer;
 
+/**
+ * Provides abstraction level to work with data located at remove FTP server.
+ */
 class FtpServer extends StorageServer
 {
     /**
-     * Server configuration, connection options, auth keys and certificates.
-     *
      * @var array
      */
     protected $options = [
@@ -32,19 +34,14 @@ class FtpServer extends StorageServer
     ];
 
     /**
-     * FTP connection resource.
+     * FTP Connection.
      *
      * @var resource
      */
     protected $connection = null;
 
     /**
-     * Every server represent one virtual storage which can be either local, remote or cloud based.
-     * Every server should support basic set of low-level operations (create, move, copy and etc).
-     *
-     * @param FilesInterface $files   File component.
-     * @param array          $options Storage connection options.
-     * @throws StorageException
+     * {@inheritdoc}
      */
     public function __construct(FilesInterface $files, array $options)
     {
@@ -52,7 +49,7 @@ class FtpServer extends StorageServer
 
         if (!extension_loaded('ftp'))
         {
-            throw new StorageException(
+            throw new ServerException(
                 "Unable to initialize ftp storage server, extension 'ftp' not found."
             );
         }
@@ -61,12 +58,7 @@ class FtpServer extends StorageServer
     }
 
     /**
-     * Check if given object (name) exists in specified container. Method should never fail if file
-     * not exists and will return bool in any condition.
-     *
-     * @param BucketInterface $bucket Bucket instance associated with specific server.
-     * @param string          $name   Storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function exists(BucketInterface $bucket, $name)
     {
@@ -74,11 +66,7 @@ class FtpServer extends StorageServer
     }
 
     /**
-     * Retrieve object size in bytes, should return false if object does not exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return int|bool
+     * {@inheritdoc}
      */
     public function size(BucketInterface $bucket, $name)
     {
@@ -91,77 +79,57 @@ class FtpServer extends StorageServer
     }
 
     /**
-     * Upload storage object using given filename or stream. Method can return false in case of failed
-     * upload or thrown custom exception if needed.
-     *
-     * @param BucketInterface        $bucket Bucket instance.
-     * @param string                 $name   Given storage object name.
-     * @param string|StreamInterface $origin Local filename or stream to use for creation.
-     * @return bool
+     * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $source)
     {
         $location = $this->ensureLocation($bucket, $name);
-        if (!ftp_put($this->connection, $location, $this->castFilename($origin), FTP_BINARY))
+        if (!ftp_put($this->connection, $location, $this->castFilename($source), FTP_BINARY))
         {
-            return false;
+            throw new ServerException("Unable to put '{$name}' to FTP server.");
         }
 
         return $this->refreshPermissions($bucket, $name);
     }
 
     /**
-     * Allocate local filename for remote storage object, if container represent remote location,
-     * adapter should download file to temporary file and return it's filename. File is in readonly
-     * mode, and in some cases will be erased on shutdown.
-     *
-     * Method should return false or thrown an exception if local filename can not be allocated.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return string|bool
+     * {@inheritdoc}
      */
     public function allocateFilename(BucketInterface $bucket, $name)
     {
         if (!$this->exists($bucket, $name))
         {
-            return false;
+            throw new ServerException(
+                "Unable to create local filename for '{$name}', object does not exists."
+            );
         }
 
         //File should be removed after processing
         $tempFilename = $this->files->tempFilename($this->files->extension($name));
 
-        return ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY)
-            ? $tempFilename
-            : false;
+        if (!ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY))
+        {
+            throw new ServerException("Unable to create local filename for '{$name}'.");
+        }
+
+        return $tempFilename;
     }
 
     /**
-     * Get temporary read-only stream used to represent remote content. This method is very similar
-     * to localFilename, however in some cases it may store data content in memory.
-     *
-     * Method should return false or thrown an exception if stream can not be allocated.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return StreamInterface|false
+     * {@inheritdoc}
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
         if (!$filename = $this->allocateFilename($bucket, $name))
         {
-            return false;
+            throw new ServerException("Unable to create stream for '{$name}', object does not exists.");
         }
 
         return \GuzzleHttp\Psr7\stream_for(fopen($filename, 'rb'));
     }
 
     /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * {@inheritdoc}
      */
     public function delete(BucketInterface $bucket, $name)
     {
@@ -172,64 +140,47 @@ class FtpServer extends StorageServer
     }
 
     /**
-     * Rename storage object without changing it's container. This operation does not require
-     * object recreation or download and can be performed on remote server.
-     *
-     * Method should return false or thrown an exception if object can not be renamed.
-     *
-     * @param BucketInterface $bucket  Bucket instance.
-     * @param string          $oldname Storage object name.
-     * @param string          $newname New storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         if (!$this->exists($bucket, $oldname))
         {
-            return false;
+            throw new ServerException("Unable to rename '{$oldname}', object does not exists.");
         }
 
         $location = $this->ensureLocation($bucket, $newname);
         if (!ftp_rename($this->connection, $this->getPath($bucket, $oldname), $location))
         {
-            return false;
+            throw new ServerException("Unable to rename '{$oldname}' to '{$newname}'.");
         }
 
         return $this->refreshPermissions($bucket, $newname);
     }
 
     /**
-     * Replace object to another internal (under same server) container, this operation may not
-     * require file download and can be performed remotely.
-     *
-     * Method should return false or thrown an exception if object can not be replaced.
-     *
-     * @param BucketInterface $bucket      Bucket instance.
-     * @param BucketInterface $destination Destination bucket (under same server).
-     * @param string          $name        Storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
         if (!$this->exists($bucket, $name))
         {
-            return false;
+            throw new ServerException("Unable to replace '{$name}', object does not exists.");
         }
 
         $location = $this->ensureLocation($bucket, $name);
         if (!ftp_rename($this->connection, $this->getPath($bucket, $name), $location))
         {
-            return false;
+            throw new ServerException("Unable to replace '{$name}'.");
         }
 
         return $this->refreshPermissions($bucket, $name);
     }
 
     /**
-     * Open FTP connection.
+     * Ensure FTP connection.
      *
-     * @return bool
-     * @throws StorageException
+     * @throws ServerException
      */
     protected function connect()
     {
@@ -241,21 +192,21 @@ class FtpServer extends StorageServer
 
         if (empty($this->connection))
         {
-            throw new StorageException(
+            throw new ServerException(
                 "Unable to connect to remote FTP server '{$this->options['host']}'."
             );
         }
 
         if (!ftp_login($this->connection, $this->options['login'], $this->options['password']))
         {
-            throw new StorageException(
+            throw new ServerException(
                 "Unable to connect to remote FTP server '{$this->options['host']}'."
             );
         }
 
         if (!ftp_pasv($this->connection, $this->options['passive']))
         {
-            throw new StorageException(
+            throw new ServerException(
                 "Unable to set passive mode at remote FTP server '{$this->options['host']}'."
             );
         }
@@ -264,11 +215,12 @@ class FtpServer extends StorageServer
     }
 
     /**
-     * Ensure that target object directory exists and has right permissions.
+     * Ensure that target directory exists and has right permissions.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return bool|string
+     * @param BucketInterface $bucket
+     * @param string          $name
+     * @return string
+     * @throws ServerException
      */
     protected function ensureLocation(BucketInterface $bucket, $name)
     {
@@ -317,8 +269,8 @@ class FtpServer extends StorageServer
     /**
      * Get full file location on server including homedir.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return string
      */
     protected function getPath(BucketInterface $bucket, $name)
@@ -331,8 +283,8 @@ class FtpServer extends StorageServer
     /**
      * Refresh file permissions accordingly to container options.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return bool
      */
     protected function refreshPermissions(BucketInterface $bucket, $name)
@@ -343,7 +295,7 @@ class FtpServer extends StorageServer
     }
 
     /**
-     * Destructing. FTP connection will be closed.
+     * Drop FTP connection.
      */
     public function __destruct()
     {

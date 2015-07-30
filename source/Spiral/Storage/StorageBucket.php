@@ -8,7 +8,6 @@
  */
 namespace Spiral\Storage;
 
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
@@ -16,11 +15,15 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
+use Spiral\Storage\Exceptions\BucketException;
 
+/**
+ * Default implementation of storage bucket.
+ */
 class StorageBucket extends Component implements BucketInterface, LoggerAwareInterface
 {
     /**
-     * Benchmarking and logging operations.
+     * Most of storage operations are pretty slow, we might record and explain all of them.
      */
     use BenchmarkTrait, LoggerTrait;
 
@@ -31,44 +34,27 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
     const INJECTOR = StorageManager::class;
 
     /**
-     * Address prefix will be attached to all bucket objects to generate unique object address.
-     * You can use domain name, or folder for prefixed which should represent public buckets, in
-     * this case object address will be valid URL.
-     *
      * @var string
      */
     public $prefix = '';
 
     /**
-     * Associated server name or id. Every server represent one virtual storage which can be either
-     * local, remove or cloud based. Every adapter should support basic set of low-level operations
-     * (create, move, copy and etc). Adapter instance called server, one adapter can be used for
-     * multiple servers.
-     *
      * @var string
      */
     protected $server = '';
 
     /**
-     * Bucket options vary based on server (adapter) type associated, for local and ftp it usually
-     * folder name and file permissions, for cloud or remove storages - remote bucket name and access
-     * mode.
-     *
      * @var array
      */
     protected $options = [];
 
     /**
-     * Storage component.
-     *
      * @invisible
      * @var StorageInterface
      */
     protected $storage = null;
 
     /**
-     * FileManager component.
-     *
      * @invisible
      * @var FilesInterface
      */
@@ -180,33 +166,28 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
     /**
      * {@inheritdoc}
      */
-    public function put($name, $origin)
+    public function put($name, $source)
     {
         $this->logger()->info(
-            "Update to '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
+            "Put '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
         );
 
-        if ($origin instanceof UploadedFileInterface || $origin instanceof StreamableInterface)
+        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface)
         {
             //Known simplification for UploadedFile
-            $origin = $origin->getStream();
+            $source = $source->getStream();
         }
 
-        if (is_resource($origin))
+        if (is_resource($source))
         {
-            $origin = \GuzzleHttp\Psr7\stream_for($origin);
+            $source = \GuzzleHttp\Psr7\stream_for($source);
         }
 
-        $this->benchmark($this->getServerID(), "upload::{$this->buildAddress($name)}");
-        if (!$this->server()->put($this, $name, $origin))
-        {
-            throw new StorageException(
-                "Unable to upload content into '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
-            );
-        }
-        $this->benchmark($this->getServerID(), "upload::{$this->buildAddress($name)}");
+        $this->benchmark($this->getServerID(), "put::{$this->buildAddress($name)}");
+        $this->server()->put($this, $name, $source);
+        $this->benchmark($this->getServerID(), "put::{$this->buildAddress($name)}");
 
-        return new StorageObject($this->buildAddress($name), $name, $this->storage, $this);
+        return $this->storage->open($this->buildAddress($name));
     }
 
     /**
@@ -215,17 +196,11 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
     public function allocateFilename($name)
     {
         $this->logger()->info(
-            "Get local filename of '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
+            "Allocate filename of '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
         );
 
         $this->benchmark($this->getServerID(), "filename::{$this->buildAddress($name)}");
-        if (!$filename = $this->server()->allocateFilename($this, $name))
-        {
-            throw new StorageException(
-                "Unable to allocate local filename for '{$this->buildAddress($name)}' "
-                . "at '{$this->getServerID()}' server."
-            );
-        }
+        $filename = $this->server()->allocateFilename($this, $name);
         $this->benchmark($this->getServerID(), "filename::{$this->buildAddress($name)}");
 
         return $filename;
@@ -241,12 +216,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
         );
 
         $this->benchmark($this->getServerID(), "stream::{$this->buildAddress($name)}");
-        if (!$stream = $this->server()->allocateStream($this, $name))
-        {
-            throw new StorageException(
-                "Unable to allocate stream for '{$this->buildAddress($name)}' at '{$this->server}' server."
-            );
-        }
+        $stream = $this->server()->allocateStream($this, $name);
         $this->benchmark($this->getServerID(), "stream::{$this->buildAddress($name)}");
 
         return $stream;
@@ -282,13 +252,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
         );
 
         $this->benchmark($this->getServerID(), "rename::{$this->buildAddress($oldname)}");
-        if (!$this->server()->rename($this, $oldname, $newname))
-        {
-            throw new StorageException(
-                "Unable to rename '{$this->buildAddress($oldname)}' "
-                . "to '{$this->buildAddress($newname)}' at '{$this->getServerID()}' server."
-            );
-        }
+        $this->server()->rename($this, $oldname, $newname);
         $this->benchmark($this->getServerID(), "rename::{$this->buildAddress($oldname)}");
 
         return $this->buildAddress($newname);
@@ -313,13 +277,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             );
 
             $this->benchmark($this->getServerID(), "copy::{$this->buildAddress($name)}");
-            if (!$this->server()->copy($this, $destination, $name))
-            {
-                throw new StorageException(
-                    "Unable to copy '{$this->buildAddress($name)}' "
-                    . "to '{$destination->buildAddress($name)}' at '{$this->getServerID()}' server."
-                );
-            }
+            $this->server()->copy($this, $destination, $name);
             $this->benchmark($this->getServerID(), "copy::{$this->buildAddress($name)}");
         }
         else
@@ -329,19 +287,10 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
                 . "to '{$destination->getServerID()}'.'{$destination->buildAddress($name)}'."
             );
 
-            $stream = $this->allocateStream($name);
-
-            //Now we will try to copy object using current server/memory as a buffer.
-            if (empty($stream) || !$destination->put($name, $stream))
-            {
-                throw new StorageException(
-                    "Unable to copy '{$this->getServerID()}'.'{$this->buildAddress($name)}' "
-                    . "to '{$destination->buildAddress($name)}' at '{$this->getServerID()}' server."
-                );
-            }
+            $destination->put($name, $this->allocateStream($name));
         }
 
-        return new StorageObject($destination->buildAddress($name), $name, $this->storage, $destination);
+        return $this->storage->open($destination->buildAddress($name));
     }
 
     /**
@@ -363,13 +312,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             );
 
             $this->benchmark($this->getServerID(), "replace::{$this->buildAddress($name)}");
-            if (!$this->server()->replace($this, $destination, $name))
-            {
-                throw new StorageException(
-                    "Unable to move '{$this->buildAddress($name)}' "
-                    . "to '{$destination->buildAddress($name)}' at '{$this->getServerID()}' server."
-                );
-            }
+            $this->server()->replace($this, $destination, $name);
             $this->benchmark($this->getServerID(), "replace::{$this->buildAddress($name)}");
         }
         else
@@ -380,16 +323,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             );
 
             $stream = $this->allocateStream($name);
-
-            //Now we will try to replace object using current server/memory as a buffer.
-            if (empty($stream) || !$destination->put($name, $stream))
-            {
-                throw new StorageException(
-                    "Unable to replace '{$this->getServerID()}'.'{$this->buildAddress($name)}' "
-                    . "to '{$destination->buildAddress($name)}' at '{$this->getServerID()}' server."
-                );
-            }
-
+            $destination->put($name, $stream);
             $stream->detach() && $this->delete($name);
         }
 

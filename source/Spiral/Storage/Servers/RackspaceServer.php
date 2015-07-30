@@ -21,24 +21,20 @@ use Spiral\Cache\StoreInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
-use Spiral\Storage\StorageException;
+use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\StorageServer;
 
+/**
+ * Provides abstraction level to work with data located in Rackspace cloud.
+ */
 class RackspaceServer extends StorageServer implements LoggerAwareInterface
 {
     /**
-     * Some warnings.
+     * There is few warning messages.
      */
     use LoggerTrait;
 
     /**
-     * Default cache lifetime is 24 hours.
-     */
-    const CACHE_LIFETIME = 86400;
-
-    /**
-     * Server configuration, connection options, auth keys and certificates.
-     *
      * @var array
      */
     protected $options = [
@@ -46,7 +42,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         'authServer' => 'https://identity.api.rackspacecloud.com/v2.0/tokens',
         'username'   => '',
         'apiKey'     => '',
-        'cache'      => true
+        'cache'      => true,
+        'lifetime'   => 86400
     ];
 
     /**
@@ -58,44 +55,30 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     protected $store = null;
 
     /**
-     * Guzzle client.
-     *
      * @var Client
      */
     protected $client = null;
 
     /**
-     * Rackspace authentication token.
-     *
      * @var string
      */
     protected $authToken = [];
 
     /**
-     * All fetched rackspace regions, some operations can be performed only inside one region.
+     * Some operations can be performed only inside one region.
      *
      * @var array
      */
     protected $regions = [];
 
     /**
-     * Every server represent one virtual storage which can be either local, remote or cloud based.
-     * Every server should support basic set of low-level operations (create, move, copy and etc).
-     *
-     * @param FilesInterface $files   File component.
-     * @param array          $options Storage connection options.
-     * @param StoreInterface $store   StoreInterface to remember connection credentials across sessions.
+     * @param FilesInterface $files
+     * @param StoreInterface $store
+     * @param array          $options
      */
-    public function __construct(FilesInterface $files, array $options, StoreInterface $store = null)
+    public function __construct(FilesInterface $files, StoreInterface $store, array $options)
     {
         parent::__construct($files, $options);
-
-        if (empty($store))
-        {
-            //This will work only with global container set
-            $store = self::getContainer()->get(StoreInterface::class);
-        }
-
         $this->store = $store;
 
         if ($this->options['cache'])
@@ -110,11 +93,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     }
 
     /**
-     * Check if given object (name) exists in specified container. Method should never fail if file
-     * not exists and will return bool in any condition.
+     * {@inheritdoc}
      *
-     * @param BucketInterface $bucket Bucket instance associated with specific server.
-     * @param string          $name   Storage object name.
      * @return bool|ResponseInterface
      */
     public function exists(BucketInterface $bucket, $name)
@@ -138,7 +118,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             }
 
             //Some unexpected error
-            throw $exception;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         if ($response->getStatusCode() !== 200)
@@ -150,11 +130,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     }
 
     /**
-     * Retrieve object size in bytes, should return false if object does not exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return int|bool
+     * {@inheritdoc}
      */
     public function size(BucketInterface $bucket, $name)
     {
@@ -167,15 +143,9 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     }
 
     /**
-     * Upload storage object using given filename or stream. Method can return false in case of failed
-     * upload or thrown custom exception if needed.
-     *
-     * @param BucketInterface        $bucket Bucket instance.
-     * @param string                 $name   Given storage object name.
-     * @param string|StreamInterface $origin Local filename or stream to use for creation.
-     * @return bool
+     * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $source)
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name)))
         {
@@ -190,11 +160,11 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                 $name,
                 [
                     'Content-Type' => $mimetype,
-                    'Etag'         => md5_file($this->castFilename($origin))
+                    'Etag'         => md5_file($this->castFilename($source))
                 ]
             );
 
-            $this->client->send($request->withBody($this->castStream($origin)));
+            $this->client->send($request->withBody($this->castStream($source)));
         }
         catch (ClientException $exception)
         {
@@ -202,25 +172,18 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             {
                 $this->reconnect();
 
-                return $this->put($bucket, $name, $origin);
+                return $this->put($bucket, $name, $source);
             }
 
             //Some unexpected error
-            throw $exception;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return true;
     }
 
     /**
-     * Get temporary read-only stream used to represent remote content. This method is very similar
-     * to localFilename, however in some cases it may store data content in memory.
-     *
-     * Method should return false or thrown an exception if stream can not be allocated.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return StreamInterface|false
+     * {@inheritdoc}
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
@@ -237,23 +200,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                 return $this->allocateStream($bucket, $name);
             }
 
-            if ($exception->getCode() != 404)
-            {
-                throw $exception;
-            }
-
-            return false;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $response->getBody();
     }
 
     /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * {@inheritdoc}
      */
     public function delete(BucketInterface $bucket, $name)
     {
@@ -270,21 +224,13 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             }
             elseif ($exception->getCode() != 404)
             {
-                throw $exception;
+                throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
             }
         }
     }
 
     /**
-     * Rename storage object without changing it's container. This operation does not require
-     * object recreation or download and can be performed on remote server.
-     *
-     * Method should return false or thrown an exception if object can not be renamed.
-     *
-     * @param BucketInterface $bucket  Bucket instance.
-     * @param string          $oldname Storage object name.
-     * @param string          $newname New storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
@@ -309,7 +255,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                 return $this->rename($bucket, $oldname, $newname);
             }
 
-            throw $exception;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         //Deleting old file
@@ -319,15 +265,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     }
 
     /**
-     * Copy object to another internal (under same server) container, this operation may not
-     * require file download and can be performed remotely.
-     *
-     * Method should return false or thrown an exception if object can not be copied.
-     *
-     * @param BucketInterface $bucket      Bucket instance.
-     * @param BucketInterface $destination Destination bucket (under same server).
-     * @param string          $name        Storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
@@ -362,40 +300,38 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                 return $this->copy($bucket, $destination, $name);
             }
 
-            throw $exception;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return true;
     }
 
     /**
-     * Fetch RackSpace authentication token and build list of region urls.
+     * Connect to rackspace servers using new or cached token.
+     *
+     * @throws ServerException
      */
     protected function connect()
     {
         if (!empty($this->authToken))
         {
             //Already got credentials from cache
-            return true;
+            return;
         }
 
         //Credentials request
         $request = new Request(
             'POST',
             $this->options['authServer'],
-            [
-                'Content-Type' => 'application/json'
-            ],
-            json_encode(
-                [
-                    'auth' => [
-                        'RAX-KSKEY:apiKeyCredentials' => [
-                            'username' => $this->options['username'],
-                            'apiKey'   => $this->options['apiKey']
-                        ]
+            ['Content-Type' => 'application/json'],
+            json_encode([
+                'auth' => [
+                    'RAX-KSKEY:apiKeyCredentials' => [
+                        'username' => $this->options['username'],
+                        'apiKey'   => $this->options['apiKey']
                     ]
                 ]
-            )
+            ])
         );
 
         try
@@ -409,16 +345,15 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         {
             if ($exception->getCode() == 401)
             {
-                throw new StorageException(
+                throw new ServerException(
                     "Unable to perform Rackspace authorization using given credentials."
                 );
             }
 
-            throw $exception;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $response = json_decode((string)$response->getBody(), 1);
-
         foreach ($response['access']['serviceCatalog'] as $location)
         {
             if ($location['name'] == 'cloudFiles')
@@ -432,7 +367,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
 
         if (!isset($response['access']['token']['id']))
         {
-            throw new StorageException("Unable to fetch rackspace auth token.");
+            throw new ServerException("Unable to fetch rackspace auth token.");
         }
 
         $this->authToken = $response['access']['token']['id'];
@@ -442,50 +377,47 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             $this->store->set(
                 $this->options['username'] . '@rackspace-token',
                 $this->authToken,
-                self::CACHE_LIFETIME
+                $this->options['lifetime']
             );
 
             $this->store->set(
                 $this->options['username'] . '@rackspace-regions',
                 $this->regions,
-                self::CACHE_LIFETIME
+                $this->options['lifetime']
             );
         }
-
-        return true;
     }
 
     /**
-     * Flush existed token and reconnect, can be required if token has expired.
+     * Reconnect.
+     *
+     * @throws ServerException
      */
     protected function reconnect()
     {
         $this->authToken = null;
         $this->connect();
-        //Check connections status
-
     }
 
     /**
-     * Create instance of UriInterface based on provided container instance and storage object name.
-     * Region url will be automatically resolved and included to generated instance.
+     * Create instance of UriInterface based on provided bucket options and storage object name.
      *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return UriInterface
-     * @throws StorageException
+     * @throws ServerException
      */
     protected function buildUri(BucketInterface $bucket, $name)
     {
         if (empty($bucket->getOption('region')))
         {
-            throw new StorageException("Every rackspace container should have specified region.");
+            throw new ServerException("Every rackspace container should have specified region.");
         }
 
         $region = $bucket->getOption('region');
         if (!isset($this->regions[$region]))
         {
-            throw new StorageException("'{$region}' region is not supported by Rackspace.");
+            throw new ServerException("'{$region}' region is not supported by Rackspace.");
         }
 
         return new Uri(
@@ -494,12 +426,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     }
 
     /**
-     * Helper method used to create request with forced authorization token.
+     * Create pre-configured object request.
      *
-     * @param string          $method  Http method.
-     * @param BucketInterface $bucket  Bucket instance.
-     * @param string          $name    Storage object name.
-     * @param array           $headers Request headers.
+     * @param string          $method
+     * @param BucketInterface $bucket
+     * @param string          $name
+     * @param array           $headers
      * @return RequestInterface
      */
     protected function buildRequest($method, BucketInterface $bucket, $name, array $headers = [])

@@ -7,41 +7,30 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Storage;
+use Spiral\Storage\Exceptions\ObjectException;
 
+/**
+ * Default implementation of storage object.
+ */
 class StorageObject implements ObjectInterface
 {
     /**
-     * Full object address. Address used to identify associated bucket using bucket prefix,
-     * address can be either meaningless string or be valid URL, in this case object address can be
-     * used as to detect bucket, as to show on web page.
-     *
-     * @var string
-     */
-    protected $address = false;
-
-    /**
-     * Storage component.
-     *
      * @invisible
      * @var StorageInterface
      */
     protected $storage = null;
 
     /**
-     * Associated storage bucket. Every bucket represent one "virtual" folder which can be
-     * located on local machine, another server (ftp) or in cloud (amazon, rackspace). bucket
-     * provides basic unified functionality to manage files inside, all low level operations perform
-     * by servers (adapters), this technique allows you to create application and code which does not
-     * require to specify storage requirements at time of development.
-     *
      * @var BucketInterface
      */
     protected $bucket = null;
 
     /**
-     * Object name is relative name inside one specific bucket, can include filename and directory
-     * name.
-     *
+     * @var string
+     */
+    protected $address = false;
+
+    /**
      * @var string
      */
     protected $name = false;
@@ -49,29 +38,14 @@ class StorageObject implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(
-        $address,
-        $name = '',
-        StorageInterface $storage,
-        BucketInterface $bucket = null
-    )
+    public function __construct($address, StorageInterface $storage)
     {
         $this->storage = $storage;
-
-        if (!empty($bucket))
-        {
-            //We already know address and name
-            $this->address = $address;
-            $this->bucket = $bucket;
-            $this->name = $name;
-
-            return;
-        }
 
         //Trying to find bucket using address
         if (empty($address))
         {
-            throw new StorageException("Unable to create StorageObject with empty address.");
+            throw new ObjectException("Unable to create StorageObject with empty address.");
         }
 
         $this->address = $address;
@@ -135,7 +109,7 @@ class StorageObject implements ObjectInterface
     {
         if (empty($this->name))
         {
-            throw new StorageException("Unable to allocate filename for unassigned storage object.");
+            throw new ObjectException("Unable to allocate filename for unassigned storage object.");
         }
 
         return $this->bucket->allocateFilename($this->name);
@@ -148,7 +122,7 @@ class StorageObject implements ObjectInterface
     {
         if (empty($this->name))
         {
-            throw new StorageException("Unable to get stream for unassigned storage object.");
+            throw new ObjectException("Unable to get stream for unassigned storage object.");
         }
 
         return $this->bucket->allocateStream($this->name);
@@ -177,7 +151,7 @@ class StorageObject implements ObjectInterface
     {
         if (empty($this->name))
         {
-            throw new StorageException("Unable to rename unassigned storage object.");
+            throw new ObjectException("Unable to rename unassigned storage object.");
         }
 
         $this->address = $this->bucket->rename($this->name, $newname);
@@ -193,7 +167,7 @@ class StorageObject implements ObjectInterface
     {
         if (empty($this->name))
         {
-            throw new StorageException("Unable to copy unassigned storage object.");
+            throw new ObjectException("Unable to copy unassigned storage object.");
         }
 
         if (is_string($destination))
@@ -211,7 +185,7 @@ class StorageObject implements ObjectInterface
     {
         if (empty($this->name))
         {
-            throw new StorageException("Unable to replace unassigned storage object.");
+            throw new ObjectException("Unable to replace unassigned storage object.");
         }
 
         if (is_string($destination))

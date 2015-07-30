@@ -18,13 +18,15 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
+use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\StorageServer;
 
+/**
+ * Provides abstraction level to work with data located in Amazon S3 cloud.
+ */
 class AmazonServer extends StorageServer
 {
     /**
-     * Server configuration, connection options, auth keys and certificates.
-     *
      * @var array
      */
     protected $options = [
@@ -35,18 +37,12 @@ class AmazonServer extends StorageServer
     ];
 
     /**
-     * Guzzle client.
-     *
      * @var Client
      */
     protected $client = null;
 
     /**
-     * Every server represent one virtual storage which can be either local, remote or cloud based.
-     * Every server should support basic set of low-level operations (create, move, copy and etc).
-     *
-     * @param FilesInterface $files   File component.
-     * @param array          $options Storage connection options.
+     * {@inheritdoc}
      */
     public function __construct(FilesInterface $files, array $options)
     {
@@ -57,11 +53,8 @@ class AmazonServer extends StorageServer
     }
 
     /**
-     * Check if given object (name) exists in specified container. Method should never fail if file
-     * not exists and will return bool in any condition.
+     * {@inheritdoc}
      *
-     * @param BucketInterface $bucket Bucket instance associated with specific server.
-     * @param string          $name   Storage object name.
      * @return bool|ResponseInterface
      */
     public function exists(BucketInterface $bucket, $name)
@@ -89,13 +82,8 @@ class AmazonServer extends StorageServer
         return $response;
     }
 
-
     /**
-     * Retrieve object size in bytes, should return false if object does not exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return int|bool
+     * {@inheritdoc}
      */
     public function size(BucketInterface $bucket, $name)
     {
@@ -108,15 +96,9 @@ class AmazonServer extends StorageServer
     }
 
     /**
-     * Upload storage object using given filename or stream. Method can return false in case of failed
-     * upload or thrown custom exception if needed.
-     *
-     * @param BucketInterface        $bucket Bucket instance.
-     * @param string                 $name   Given storage object name.
-     * @param string|StreamInterface $origin Local filename or stream to use for creation.
-     * @return bool
+     * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $origin)
+    public function put(BucketInterface $bucket, $name, $source)
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name)))
         {
@@ -128,7 +110,7 @@ class AmazonServer extends StorageServer
             $bucket,
             $name,
             [
-                'Content-MD5'  => base64_encode(md5_file($this->castFilename($origin), true)),
+                'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
                 'Content-Type' => $mimetype
             ],
             [
@@ -137,20 +119,15 @@ class AmazonServer extends StorageServer
             ]
         );
 
-        return $this->client->send(
-            $request->withBody($this->castStream($origin))
-        )->getStatusCode() == 200;
+        $response = $this->client->send($request->withBody($this->castStream($source)));
+        if ($response->getStatusCode() != 200)
+        {
+            throw new ServerException("Unable to put '{$name}' to Amazon server.");
+        }
     }
 
     /**
-     * Get temporary read-only stream used to represent remote content. This method is very similar
-     * to localFilename, however in some cases it may store data content in memory.
-     *
-     * Method should return false or thrown an exception if stream can not be allocated.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
-     * @return StreamInterface|false
+     * {@inheritdoc}
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
@@ -166,19 +143,14 @@ class AmazonServer extends StorageServer
                 throw $exception;
             }
 
-            return false;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return $response->getBody();
     }
 
-
     /**
-     * Delete storage object from specified container. Method should not fail if object does not
-     * exists.
-     *
-     * @param BucketInterface $bucket Bucket instance.
-     * @param string          $name   Storage object name.
+     * {@inheritdoc}
      */
     public function delete(BucketInterface $bucket, $name)
     {
@@ -186,15 +158,7 @@ class AmazonServer extends StorageServer
     }
 
     /**
-     * Rename storage object without changing it's container. This operation does not require
-     * object recreation or download and can be performed on remote server.
-     *
-     * Method should return false or thrown an exception if object can not be renamed.
-     *
-     * @param BucketInterface $bucket  Bucket instance.
-     * @param string          $oldname Storage object name.
-     * @param string          $newname New storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
@@ -219,7 +183,7 @@ class AmazonServer extends StorageServer
                 throw $exception;
             }
 
-            return false;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $this->delete($bucket, $oldname);
@@ -227,17 +191,8 @@ class AmazonServer extends StorageServer
         return true;
     }
 
-
     /**
-     * Copy object to another internal (under same server) container, this operation may not
-     * require file download and can be performed remotely.
-     *
-     * Method should return false or thrown an exception if object can not be copied.
-     *
-     * @param BucketInterface $bucket      Bucket instance.
-     * @param BucketInterface $destination Destination bucket (under same server).
-     * @param string          $name        Storage object name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
@@ -262,33 +217,33 @@ class AmazonServer extends StorageServer
                 throw $exception;
             }
 
-            return false;
+            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         return true;
     }
 
     /**
-     * Create instance of UriInterface based on provided container instance and storage object name.
+     * Create instance of UriInterface based on provided bucket options and storage object name.
      *
-     * @param BucketInterface $container Bucket instance.
-     * @param string          $name      Storage object name.
+     * @param BucketInterface $bucket
+     * @param string          $name
      * @return UriInterface
      */
-    protected function buildUri(BucketInterface $container, $name)
+    protected function buildUri(BucketInterface $bucket, $name)
     {
         return new Uri(
-            $this->options['server'] . '/' . $container->getOption('bucket') . '/' . rawurlencode($name)
+            $this->options['server'] . '/' . $bucket->getOption('bucket') . '/' . rawurlencode($name)
         );
     }
 
     /**
-     * Helper method used to create signed amazon request with correct set of headers.
+     * Helper to create configured PSR7 request with set of amazon commands.
      *
-     * @param string          $method   Http method.
-     * @param BucketInterface $bucket   Bucket instance.
-     * @param string          $name     Storage object name.
-     * @param array           $headers  Request headers.
+     * @param string          $method
+     * @param BucketInterface $bucket
+     * @param string          $name
+     * @param array           $headers
      * @param array           $commands Amazon commands associated with values.
      * @return RequestInterface
      */

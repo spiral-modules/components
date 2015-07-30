@@ -17,7 +17,7 @@ use Spiral\Cache\CacheStore;
 class ApcStore extends CacheStore
 {
     /**
-     * Internal store name. Used to read configs in reverse way.
+     * {@inheritdoc}
      */
     const STORE = 'apc';
 

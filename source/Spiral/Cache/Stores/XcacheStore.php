@@ -14,33 +14,19 @@ use Spiral\Cache\CacheStore;
 class XcacheStore extends CacheStore
 {
     /**
-     * Internal store name. Used to read configs in reverse way.
+     * {@inheritdoc}
      */
     const STORE = 'xcache';
 
     /**
-     * Default store options.
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $options = [
         'prefix' => 'spiral'
     ];
 
     /**
-     * Cache prefix.
-     *
-     * @var string
-     */
-    protected $prefix = '';
-
-    /**
-     * Create a new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and be used in different parts of the application.
-     *
-     * Logic of receiving configuration is reverted for controllable injections in spiral application.
-     *
-     * @param CacheManager $cache CacheFacade component.
+     * {@inheritdoc}
      */
     public function __construct(CacheManager $cache)
     {
@@ -49,10 +35,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Check if store is working properly. Should check if the store drives does exist, files are
-     * writable, etc.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAvailable()
     {
@@ -60,10 +43,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Check if a value is present in cache.
-     *
-     * @param string $name Stored value name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function has($name)
     {
@@ -71,10 +51,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Get value stored in cache.
-     *
-     * @param string $name Stored value name.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function get($name)
     {
@@ -82,13 +59,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Set data in cache, should automatically create record if it wasn't created before or replace
-     * already existed record.
-     *
-     * @param string $name     Stored value name.
-     * @param mixed  $data     Data in string or binary format.
-     * @param int    $lifetime Duration in seconds till value will expire.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function set($name, $data, $lifetime)
     {
@@ -96,11 +67,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Store value in cache with infinite lifetime. Value will expire only when cache is flushed.
-     *
-     * @param string $name Stored value name.
-     * @param mixed  $data Data in string or binary format.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function forever($name, $data)
     {
@@ -108,9 +75,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Delete data from cache.
-     *
-     * @param string $name Stored value name.
+     * {@inheritdoc}
      */
     public function delete($name)
     {
@@ -118,11 +83,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Increment numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to increment by. 1 by default.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function increment($name, $delta = 1)
     {
@@ -130,11 +91,7 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Decrement numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to decrement by. 1 by default.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function decrement($name, $delta = 1)
     {
@@ -142,9 +99,9 @@ class XcacheStore extends CacheStore
     }
 
     /**
-     * Flush all values stored in cache.
+     * {@inheritdoc}
      *
-     * @return mixed
+     * @throws \ErrorException
      */
     public function flush()
     {

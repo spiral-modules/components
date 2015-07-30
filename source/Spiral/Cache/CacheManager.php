@@ -49,6 +49,13 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     protected $container = null;
 
     /**
+     * Due configuration is reverted we have to some weird things.
+     *
+     * @var array
+     */
+    protected $optionPull = [];
+
+    /**
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
      */
@@ -67,7 +74,12 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
      */
     public function storeOptions($adapter)
     {
-        return $this->config['stores'][$adapter];
+        if (empty($this->optionPull[$adapter]))
+        {
+            return $this->config['stores'][$adapter];
+        }
+
+        return array_shift($this->optionPull);
     }
 
     /**
@@ -76,16 +88,13 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     public function store($store = null, array $options = [])
     {
         $store = $store ?: $this->config['store'];
-
         if (isset($this->stores[$store]))
         {
             return $this->stores[$store];
         }
 
-        if (!empty($options))
-        {
-            $this->config['stores'][$store] = $options;
-        }
+        //To be requested by storeOptions()
+        $this->optionPull[] = $options + $this->config['stores'][$store];
 
         $this->benchmark('store', $store);
         $this->stores[$store] = $this->container->get($this->config['stores'][$store]['class'], [

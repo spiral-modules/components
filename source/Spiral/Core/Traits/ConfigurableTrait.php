@@ -18,16 +18,6 @@ trait ConfigurableTrait
     protected $config = [];
 
     /**
-     * Current component configuration.
-     *
-     * @return array
-     */
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
-    /**
      * Update config with new values, new configuration will be merged with old one.
      *
      * @param array $config
@@ -36,5 +26,15 @@ trait ConfigurableTrait
     public function setConfig(array $config)
     {
         return $this->config = $config + $this->config;
+    }
+
+    /**
+     * Current component configuration. Short naming.
+     *
+     * @return array
+     */
+    public function config()
+    {
+        return $this->config;
     }
 }

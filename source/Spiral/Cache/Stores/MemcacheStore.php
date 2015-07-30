@@ -10,20 +10,23 @@ namespace Spiral\Cache\Stores;
 
 use Spiral\Cache\CacheStore;
 use Spiral\Cache\CacheManager;
-use Spiral\Cache\CacheException;
-use Memcache, Memcached;
+use Spiral\Cache\Exceptions\StoreException;
+use Spiral\Cache\Stores\DriverInterface\DriverInterface;
+use Spiral\Cache\Stores\DriverInterface\MemcachedDriver;
+use Spiral\Cache\Stores\DriverInterface\MemcacheDriver;
 
+/**
+ * Talks to Memcache and Memcached drivers using interface.
+ */
 class MemcacheStore extends CacheStore
 {
     /**
-     * Internal store name. Used to read configs in reverse way.
+     * {@inheritdoc}
      */
     const STORE = 'memcache';
 
     /**
-     * Default store options.
-     *
-     * @var array
+     * {@inheritdoc}
      */
     protected $options = [
         'prefix'        => 'spiral',
@@ -37,30 +40,18 @@ class MemcacheStore extends CacheStore
     ];
 
     /**
-     * Maximum expiration time you can set. http://www.php.net/manual/ru/memcache.set.php
+     * Maximum expiration time you can set.
+     *
+     * @link http://www.php.net/manual/ru/memcache.set.php
      */
     const MAX_EXPIRATION = 2592000;
 
     /**
-     * Driver type. Adapter will automatically select what driver should be used. However, Memcache
-     * is preferred.
-     */
-    const DRIVER_MEMCACHE  = 1;
-    const DRIVER_MEMCACHED = 2;
-
-    /**
-     * Current active driver.
+     * Currently active driver.
      *
-     * @var int
+     * @var DriverInterface
      */
     protected $driver = null;
-
-    /**
-     * Constructed driver instance.
-     *
-     * @var Memcache|Memcached
-     */
-    protected $service = null;
 
     /**
      * List of registered memcache servers.
@@ -70,24 +61,13 @@ class MemcacheStore extends CacheStore
     protected $servers = [];
 
     /**
-     * Cache prefix.
+     * {@inheritdoc}
      *
-     * @var string
+     * @param bool            $connect If true, custom driver will be connected.
+     * @param DriverInterface $driver  Pre-created driver instance.
+     * @throws StoreException
      */
-    protected $prefix = '';
-
-    /**
-     * Create a new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and be used in different parts of the application.
-     *
-     * Logic of receiving configuration is reverted for controllable injections in spiral application.
-     *
-     * @param CacheManager        $cache   CacheFacade component.
-     * @param Memcache|Memcached $driver  Pre-created driver instance.
-     * @param bool               $connect If true, custom driver will be connected.
-     * @throws CacheException
-     */
-    public function __construct(CacheManager $cache, $driver = null, $connect = true)
+    public function __construct(CacheManager $cache, $connect, DriverInterface $driver = null)
     {
         parent::__construct($cache);
 
@@ -104,150 +84,70 @@ class MemcacheStore extends CacheStore
         }
 
         $this->prefix = !empty($this->options['prefix']) ? $this->options['prefix'] . ':' : '';
-
         if (empty($this->options['servers']))
         {
-            throw new CacheException(
-                'Unable to create Memcache cache store. A server must be specified.'
+            throw new StoreException(
+                'Unable to create Memcache[d] cache store. A lest one server must be specified.'
             );
         }
 
-        if ($this->driver == self::DRIVER_MEMCACHE)
+        //New Driver creation
+        if (class_exists('Memcache'))
         {
-            $this->service = new Memcache();
-        }
-        else
-        {
-            $this->service = new Memcached();
+            $this->setDriver(new MemcacheDriver($this->options), true);
         }
 
-        $this->connect();
+        if (class_exists('Memcached'))
+        {
+            $this->setDriver(new MemcachedDriver($this->options), true);
+        }
+
+        if (empty($this->driver))
+        {
+            throw new StoreException('No available Memcache drivers found.');
+        }
     }
 
     /**
      * Set pre-created Memcache driver.
      *
-     * @param Memcache|Memcached $driver  Pre-created driver instance.
-     * @param bool               $connect If true, custom driver will be connected.
+     * @param DriverInterface $driver  Pre-created driver instance.
+     * @param bool            $connect Force connection.
      */
-    protected function setDriver($driver, $connect)
+    protected function setDriver(DriverInterface $driver, $connect = false)
     {
-        $this->service = $driver;
-
-        $this->driver = $driver instanceof \Memcache
-            ? self::DRIVER_MEMCACHE
-            : self::DRIVER_MEMCACHED;
-
-        if ($connect)
-        {
-            $this->connect();
-        }
+        $this->driver = $driver;
+        $connect && $this->driver->connect();
     }
 
     /**
-     * Configure Memcache or Memcached instance with server details.
-     */
-    protected function connect()
-    {
-        if ($this->driver == self::DRIVER_MEMCACHE)
-        {
-            foreach ($this->options['servers'] as $server)
-            {
-                //Fill some parameters with default values
-                $server = array_merge($this->options['defaultServer'], $server);
-                $this->service->addServer(
-                    $server['host'],
-                    $server['port'],
-                    $server['persistent'],
-                    $server['weight']
-                );
-            }
-        }
-        else
-        {
-            foreach ($this->options['options'] as $option => $value)
-            {
-                $this->service->setOption($option, $value);
-            }
-
-            foreach ($this->options['servers'] as $server)
-            {
-                //Fill some parameters with default values
-                $server = array_merge($this->options['defaultServer'], $server);
-                $this->service->addServer(
-                    $server['host'],
-                    $server['port'],
-                    $server['weight']
-                );
-            }
-        }
-    }
-
-    /**
-     * Check if store is working properly. Should check to see if the store drives does exists,
-     * the files are writable, etc.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAvailable()
     {
-        if (class_exists('Memcache', false))
-        {
-            $this->driver = self::DRIVER_MEMCACHE;
-
-            return true;
-        }
-
-        if (class_exists('Memcached', false))
-        {
-            $this->driver = self::DRIVER_MEMCACHED;
-
-            return true;
-        }
-
-        return (bool)$this->driver;
+        return $this->driver->isAvailable();
     }
 
     /**
-     * Check if value is presented in cache.
-     *
-     * @param string $name Stored value name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function has($name)
     {
-        if ($this->service->get($this->prefix . $name) === false)
-        {
-            if ($this->driver == self::DRIVER_MEMCACHED)
-            {
-                return $this->service->getResultCode() != \Memcached::RES_NOTFOUND;
-            }
-
-            return false;
-        }
-
-        return true;
+        return $this->driver->get($this->prefix . $name);
     }
 
     /**
-     * Get value stored in cache or false.
-     *
-     * @param string $name Stored value name.
-     * @return mixed | bool false
+     * {@inheritdoc}
      */
     public function get($name)
     {
-        return $this->service->get($this->prefix . $name);
+        return $this->driver->get($this->prefix . $name);
     }
 
     /**
-     * Set data in cache. Should automatically create a record if it wasn't created previously or
-     * replace an existing record.
+     * {@inheritdoc}
      *
-     * @param string $name     Stored value name.
-     * @param mixed  $data     Data in string or binary format.
-     * @param int    $lifetime Duration in seconds until the value expires.
-     * @return mixed
+     * Will apply MAX_EXPIRATION.
      */
     public function set($name, $data, $lifetime)
     {
@@ -257,106 +157,46 @@ class MemcacheStore extends CacheStore
             $lifetime = 0;
         }
 
-        try
-        {
-            if ($this->driver == self::DRIVER_MEMCACHE)
-            {
-                return $this->service->set($this->prefix . $name, $data, 0, $lifetime);
-            }
-            else
-            {
-                return $this->service->set($this->prefix . $name, $data, $lifetime);
-            }
-        }
-        catch (\ErrorException $e)
-        {
-            return false;
-        }
+        return $this->driver->set($this->prefix . $name, $data, $lifetime);
     }
 
     /**
-     * Store value in cache with an infinite lifetime. Value should expire only after cache is
-     * flushed.
-     *
-     * @param string $name Stored value name.
-     * @param mixed  $data Data in string or binary format.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function forever($name, $data)
     {
-        return $this->service->set($this->prefix . $name, $data);
+        return $this->driver->forever($this->prefix . $name, $data);
     }
 
     /**
-     * Delete data from cache.
-     *
-     * @param string $name Stored value name.
+     * {@inheritdoc}
      */
     public function delete($name)
     {
-        $this->service->delete($this->prefix . $name);
+        return $this->driver->delete($this->prefix . $name);
     }
 
     /**
-     * Increment numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to increment by. 1 by default.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function increment($name, $delta = 1)
     {
-        return $this->service->increment($this->prefix . $name, $delta);
+        return $this->driver->increment($this->prefix . $name);
     }
 
     /**
-     * Decrement numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to decrement by. 1 by default.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function decrement($name, $delta = 1)
     {
-        return $this->service->decrement($this->prefix . $name, $delta);
+        return $this->driver->decrement($this->prefix . $name, $delta);
     }
 
     /**
-     * Flush all values stored in cache.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function flush()
     {
-        $this->service->flush();
-    }
-
-    /**
-     * Retrieve the currently selected memcache driver instance.
-     *
-     * @return Memcache|Memcached
-     */
-    public function getService()
-    {
-        return $this->service;
-    }
-
-    /**
-     * The connection to the memcache server will be closed, if the connection wasn't specified as
-     * persistent.
-     */
-    public function __destruct()
-    {
-        if (!$this->service)
-        {
-            return;
-        }
-
-        if ($this->options['defaultServer']['persistent'] && $this->driver == self::DRIVER_MEMCACHE)
-        {
-            $this->service->close();
-        }
-
-        $this->service = null;
+        $this->driver->flush();
     }
 }

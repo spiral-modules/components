@@ -91,7 +91,7 @@ class CookieManager extends Component implements MiddlewareInterface
     public function __construct(ContainerInterface $container, HttpCore $dispatcher)
     {
         $this->container = $container;
-        $this->config = $dispatcher->getConfig()['cookies'];
+        $this->config = $dispatcher->config()['cookies'];
     }
 
     /**

@@ -18,12 +18,12 @@ use Spiral\Files\FilesInterface;
 class FileStore extends CacheStore
 {
     /**
-     * Internal store name. Used to read configs in reverse way.
+     * {@inheritdoc}
      */
     const STORE = 'file';
 
     /**
-     * @var array
+     * {@inheritdoc}
      */
     protected $options = [
         'directory' => null,
@@ -80,8 +80,7 @@ class FileStore extends CacheStore
      */
     public function get($name, &$expiration = null)
     {
-        $filename = $this->makeFilename($name);
-        if (!$this->files->exists($filename))
+        if (!$this->files->exists($filename = $this->makeFilename($name)))
         {
             return null;
         }
@@ -98,7 +97,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function set($name, $data, $lifetime)
     {
@@ -109,7 +108,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function forever($name, $data)
     {
@@ -120,7 +119,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function delete($name)
     {
@@ -128,7 +127,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function increment($name, $delta = 1)
     {
@@ -139,7 +138,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function decrement($name, $delta = 1)
     {
@@ -150,7 +149,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * @{inheritdoc}
+     * {@inheritdoc}
      */
     public function flush()
     {

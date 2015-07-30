@@ -29,7 +29,7 @@ class DefaultHeaders implements MiddlewareInterface
      */
     public function __construct(HttpCore $http)
     {
-        $this->headers = $http->getConfig()['headers'];
+        $this->headers = $http->config()['headers'];
     }
 
     /**

@@ -14,8 +14,6 @@ use Spiral\Debug\BenchmarkerInterface;
 trait BenchmarkTrait
 {
     /**
-     * Global container access is required in some cases. Method should be declared statically.
-     *
      * @return ContainerInterface
      */
     abstract public function getContainer();

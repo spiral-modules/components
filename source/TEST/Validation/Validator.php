@@ -204,7 +204,7 @@ class Validator extends Component implements LoggerAwareInterface
 
         if (!empty($configurator))
         {
-            $this->options = $configurator->getConfig() + $this->options;
+            $this->options = $configurator->config() + $this->options;
         }
     }
 

@@ -8,6 +8,7 @@
  */
 namespace Spiral\Cache;
 
+use Spiral\Cache\Exceptions\CacheException;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
@@ -15,10 +16,13 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Core\Singleton;
 use Spiral\Core\Container\InjectorInterface;
 
+/**
+ * Default implementation of CacheInterface. Better fit for spiral.
+ */
 class CacheManager extends Singleton implements CacheInterface, InjectorInterface
 {
     /**
-     * Some operations should be recorded.
+     * Some operations can be slow.
      */
     use ConfigurableTrait, BenchmarkTrait;
 
@@ -40,15 +44,11 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     protected $stores = false;
 
     /**
-     * Associated container instance. Used to create cache stores.
-     *
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * Constructing CacheManager and selecting default adapter.
-     *
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
      */
@@ -59,10 +59,11 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     }
 
     /**
-     * Adapter specified options.
+     * Cache adapters support controllable injections, so we are giving them options from different
+     * angle.
      *
      * @param string $adapter
-     * @return mixed
+     * @return array
      */
     public function storeOptions($adapter)
     {
@@ -70,13 +71,7 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     }
 
     /**
-     * Will return specified or default cache adapter. This function will load cache adapter if it
-     * was not initiated, or fetch it from memory.
-     *
-     * @param string $store   Keep null, empty or not specified to get default cache adapter.
-     * @param array  $options Custom store options to set or replace.
-     * @return StoreInterface
-     * @throws CacheException
+     * {@inheritdoc}
      */
     public function store($store = null, array $options = [])
     {
@@ -109,16 +104,7 @@ class CacheManager extends Singleton implements CacheInterface, InjectorInterfac
     }
 
     /**
-     * Injector will receive requested class or interface reflection and reflection linked
-     * to parameter in constructor or method.
-     *
-     * This method can return pre-defined instance or create new one based on requested class. Parameter
-     * reflection can be used for dynamic class constructing, for example it can define database name
-     * or config section to be used to construct requested instance.
-     *
-     * @param \ReflectionClass     $class
-     * @param \ReflectionParameter $parameter
-     * @return mixed
+     * {@inheritdoc}
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
     {

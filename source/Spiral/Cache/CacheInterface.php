@@ -8,10 +8,12 @@
  */
 namespace Spiral\Cache;
 
+use Spiral\Cache\Exceptions\CacheException;
+
 interface CacheInterface
 {
     /**
-     * Will return specified or default cache adapter. This function will load cache adapter if it
+     * Create specified or default cache adapter. This function will load cache adapter if it
      * was not initiated, or fetch it from memory.
      *
      * @param string $store   Keep null, empty or not specified to get default cache adapter.

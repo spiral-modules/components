@@ -6,11 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Cache;
+namespace Spiral\Core\Container;
 
+use Spiral\Core\CoreException;
 use Spiral\Core\ExceptionInterface;
 
-class CacheException extends \RuntimeException implements ExceptionInterface
+class InstanceException extends CoreException implements ExceptionInterface
 {
 
 }

@@ -11,10 +11,13 @@ namespace Spiral\Cache\Stores;
 use Spiral\Cache\CacheManager;
 use Spiral\Cache\CacheStore;
 
+/**
+ * Talks to apc and apcu driver.
+ */
 class ApcStore extends CacheStore
 {
     /**
-     * Internal store name.
+     * Internal store name. Used to read configs in reverse way.
      */
     const STORE = 'apc';
 
@@ -32,19 +35,7 @@ class ApcStore extends CacheStore
     protected $driver = self::APC_DRIVER;
 
     /**
-     * Cache prefix.
-     *
-     * @var string
-     */
-    protected $prefix = '';
-
-    /**
-     * Create a new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and be used in different parts of the application.
-     *
-     * Logic of receiving configuration is reverted for controllable injections in spiral application.
-     *
-     * @param CacheManager $cache CacheFacade component.
+     * {@inheritdoc}
      */
     public function __construct(CacheManager $cache)
     {
@@ -65,10 +56,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Check if store is working properly. Should check if the store drives does exist, files are
-     * writable, etc.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAvailable()
     {
@@ -76,10 +64,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Check if a value is present in cache.
-     *
-     * @param string $name Stored value name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function has($name)
     {
@@ -92,10 +77,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Get value stored in cache.
-     *
-     * @param string $name Stored value name.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function get($name)
     {
@@ -108,14 +90,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Set data in cache, should automatically create record if it wasn't created before or replace
-     * already existed record.
-     *
-     *
-     * @param string $name     Stored value name.
-     * @param mixed  $data     Data in string or binary format.
-     * @param int    $lifetime Duration in seconds till value will expire.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function set($name, $data, $lifetime)
     {
@@ -128,11 +103,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Store value in cache with infinite lifetime. Value will expire only when cache is flushed.
-     *
-     * @param string $name Stored value name.
-     * @param mixed  $data Data in string or binary format.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function forever($name, $data)
     {
@@ -140,9 +111,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Delete data from cache. Name will be attached to applicationID to prevent run ins.
-     *
-     * @param string $name Stored value name.
+     * {@inheritdoc}
      */
     public function delete($name)
     {
@@ -157,11 +126,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Increment numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to increment by. 1 by default.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function increment($name, $delta = 1)
     {
@@ -174,11 +139,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Decrement numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to decrement by. 1 by default.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function decrement($name, $delta = 1)
     {
@@ -191,9 +152,7 @@ class ApcStore extends CacheStore
     }
 
     /**
-     * Flush all values stored in cache.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function flush()
     {

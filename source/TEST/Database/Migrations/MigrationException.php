@@ -6,11 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Schemas;
+namespace Spiral\Database\Migrations;
 
 use Spiral\Core\ExceptionInterface;
+use Spiral\Database\DatabaseException;
 
-class SchemaException extends \RuntimeException implements ExceptionInterface
+class MigrationException extends DatabaseException implements ExceptionInterface
 {
 
 }

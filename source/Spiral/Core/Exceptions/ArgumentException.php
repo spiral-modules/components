@@ -8,9 +8,10 @@
  */
 namespace Spiral\Core\Container;
 
+use Spiral\Core\CoreException;
 use Spiral\Core\ExceptionInterface;
 
-class ArgumentException extends \LogicException implements ExceptionInterface
+class ArgumentException extends CoreException implements ExceptionInterface
 {
     /**
      * Parameter caused error.

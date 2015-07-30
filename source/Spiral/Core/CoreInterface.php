@@ -8,7 +8,7 @@
  */
 namespace Spiral\Core;
 
-interface CoreInterface
+interface CoreInterface extends ContainerInterface, ConfiguratorInterface, HippocampusInterface
 {
     /**
      * Call controller method by fully specified or short controller name, action and addition

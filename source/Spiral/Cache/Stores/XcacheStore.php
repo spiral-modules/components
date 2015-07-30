@@ -14,7 +14,7 @@ use Spiral\Cache\CacheStore;
 class XcacheStore extends CacheStore
 {
     /**
-     * Internal store name.
+     * Internal store name. Used to read configs in reverse way.
      */
     const STORE = 'xcache';
 

@@ -12,16 +12,17 @@ use Spiral\Cache\CacheManager;
 use Spiral\Cache\CacheStore;
 use Spiral\Files\FilesInterface;
 
+/**
+ * Serializes data to file. Usually points to runtime directory.
+ */
 class FileStore extends CacheStore
 {
     /**
-     * Internal store name.
+     * Internal store name. Used to read configs in reverse way.
      */
     const STORE = 'file';
 
     /**
-     * Default store options.
-     *
      * @var array
      */
     protected $options = [
@@ -30,32 +31,23 @@ class FileStore extends CacheStore
     ];
 
     /**
-     * File component.
-     *
      * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * Create a new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and be used in different parts of the application.
+     * {@inheritdoc}
      *
-     * Logic of receiving configuration is reverted for controllable injections in spiral application.
-     *
-     * @param CacheManager   $cache CacheFacade component.
      * @param FilesInterface $files
      */
-    public function __construct(CacheManager $cache, FilesInterface $files = null)
+    public function __construct(CacheManager $cache, FilesInterface $files)
     {
         parent::__construct($cache);
         $this->files = $files;
     }
 
     /**
-     * Check if store works properly. Should make sure the store drives are there, the files are
-     * writable and etc.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isAvailable()
     {
@@ -63,10 +55,10 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Get cache filename by the provided value name.
+     * Create filename using cache name.
      *
      * @param string $name
-     * @return string
+     * @return string Filename.
      */
     protected function makeFilename($name)
     {
@@ -74,10 +66,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Check if value is presented in cache.
-     *
-     * @param string $name Stored value name.
-     * @return bool
+     * {@inheritdoc}
      */
     public function has($name)
     {
@@ -85,11 +74,9 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Get value stored in cache.
+     * {@inheritdoc}
      *
-     * @param string $name       Stored value name.
-     * @param int    $expiration Current expiration time.
-     * @return mixed
+     * @param int $expiration Current expiration time value in seconds (reference).
      */
     public function get($name, &$expiration = null)
     {
@@ -111,13 +98,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Set data in cache. Should automatically create a record if one wasn't created before or
-     * replace an existing record.
-     *
-     * @param string $name     Stored value name.
-     * @param mixed  $data     Data in string or binary format.
-     * @param int    $lifetime Duration in seconds until the value expires.
-     * @return mixed
+     * @{inheritdoc}
      */
     public function set($name, $data, $lifetime)
     {
@@ -128,12 +109,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Store value in cache with infinite lifetime. Value should expire only when the cache is
-     * flushed.
-     *
-     * @param string $name Stored value name.
-     * @param mixed  $data Data in string or binary format.
-     * @return mixed
+     * @{inheritdoc}
      */
     public function forever($name, $data)
     {
@@ -144,9 +120,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Delete data from cache.
-     *
-     * @param string $name Stored value name.
+     * @{inheritdoc}
      */
     public function delete($name)
     {
@@ -154,11 +128,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Increment numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to increment by. 1 by default.
-     * @return mixed
+     * @{inheritdoc}
      */
     public function increment($name, $delta = 1)
     {
@@ -169,11 +139,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Decrement numeric value stored in cache.
-     *
-     * @param string $name  Stored value name.
-     * @param int    $delta How much to decrement by. 1 by default.
-     * @return mixed
+     * @{inheritdoc}
      */
     public function decrement($name, $delta = 1)
     {
@@ -184,9 +150,7 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Flush all values stored in cache.
-     *
-     * @return mixed
+     * @{inheritdoc}
      */
     public function flush()
     {

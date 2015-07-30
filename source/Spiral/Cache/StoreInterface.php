@@ -8,10 +8,12 @@
  */
 namespace Spiral\Cache;
 
+use Spiral\Cache\Exceptions\StoreException;
+
 interface StoreInterface
 {
     /**
-     * Check if store is working properly. Should check if the store drives exists, files are
+     * Check if store is working properly. Please check if the store drives exists, files are
      * writable, etc.
      *
      * @return bool
@@ -23,6 +25,7 @@ interface StoreInterface
      *
      * @param string $name Stored value name.
      * @return bool
+     * @throws StoreException
      */
     public function has($name);
 
@@ -31,17 +34,18 @@ interface StoreInterface
      *
      * @param string $name Stored value name.
      * @return mixed
+     * @throws StoreException
      */
     public function get($name);
 
     /**
-     * Set data in cache. This should automatically create a record if it wasn't created before or
-     * replace an existing record.
+     * Save data in cache. Method will replace values created before.
      *
      * @param string $name     Stored value name.
      * @param mixed  $data     Data in string or binary format.
      * @param int    $lifetime Duration in seconds until the value will expire.
      * @return mixed
+     * @throws StoreException
      */
     public function set($name, $data, $lifetime);
 
@@ -52,6 +56,7 @@ interface StoreInterface
      * @param string $name Stored value name.
      * @param mixed  $data Data in string or binary format.
      * @return mixed
+     * @throws StoreException
      */
     public function forever($name, $data);
 
@@ -59,6 +64,7 @@ interface StoreInterface
      * Delete data from cache.
      *
      * @param string $name Stored value name.
+     * @throws StoreException
      */
     public function delete($name);
 
@@ -67,7 +73,7 @@ interface StoreInterface
      *
      * @param string $name  Stored value name.
      * @param int    $delta How much to increment by. Set to 1 by default.
-     * @return mixed
+     * @throws StoreException
      */
     public function increment($name, $delta = 1);
 
@@ -76,7 +82,7 @@ interface StoreInterface
      *
      * @param string $name  Stored value name.
      * @param int    $delta How much to decrement by. Set to 1 by default.
-     * @return mixed
+     * @throws StoreException
      */
     public function decrement($name, $delta = 1);
 
@@ -85,6 +91,7 @@ interface StoreInterface
      *
      * @param string $name Stored value name.
      * @return mixed
+     * @throws StoreException
      */
     public function pull($name);
 
@@ -95,13 +102,14 @@ interface StoreInterface
      * @param int      $lifetime Duration in seconds until the value will expire.
      * @param callback $callback Callback should be called if a value doesn't exist in cache.
      * @return mixed
+     * @throws StoreException
      */
     public function remember($name, $lifetime, $callback);
 
     /**
      * Flush all values stored in cache.
      *
-     * @return mixed
+     * @throws StoreException
      */
     public function flush();
 }

@@ -8,31 +8,35 @@
  */
 namespace Spiral\Cache;
 
+/**
+ * AbstractStore named like that for convenience and mapping.
+ */
 abstract class CacheStore implements StoreInterface
 {
     /**
-     * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
-     * once set - Container will ask specific binding for injection.
+     * This is magick constant used by Spiral Container, it helps system to resolve controllable
+     * injections.
      */
     const INJECTOR = CacheManager::class;
 
     /**
-     * Internal store name.
+     * Internal store name. Used to read configs in reverse way.
      */
     const STORE = '';
 
     /**
-     * Default store options.
-     *
      * @var array
      */
     protected $options = [];
 
     /**
-     * Create a new cache store instance. Every instance should represent a single cache method.
-     * Multiple stores can exist at the same time and be used in different parts of the application.
-     *
-     * Logic of receiving configuration is reverted for controllable injections in spiral application.
+     * @var string
+     */
+    protected $prefix = '';
+
+    /**
+     * New CacheStore. Logic of receiving configuration is reverted for controllable injections in
+     * spiral application.
      *
      * @param CacheManager $cache CacheFacade component.
      */
@@ -42,10 +46,7 @@ abstract class CacheStore implements StoreInterface
     }
 
     /**
-     * Read item from cache and delete it afterwards.
-     *
-     * @param string $name Stored value name.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function pull($name)
     {
@@ -56,12 +57,7 @@ abstract class CacheStore implements StoreInterface
     }
 
     /**
-     * Get the item from cache and if the item is missing, set a default value using Closure.
-     *
-     * @param string   $name     Stored value name.
-     * @param int      $lifetime Duration in seconds until the value will expire.
-     * @param callback $callback Callback should be called if a value doesn't exist in cache.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function remember($name, $lifetime, $callback)
     {

@@ -16,7 +16,7 @@ use Memcache, Memcached;
 class MemcacheStore extends CacheStore
 {
     /**
-     * Internal store name.
+     * Internal store name. Used to read configs in reverse way.
      */
     const STORE = 'memcache';
 

@@ -10,6 +10,9 @@ namespace Spiral\Debug;
 
 use Spiral\Core\Singleton;
 
+/**
+ * One of the oldest spiral parts, used to dump variables content in user friendly way.
+ */
 class Dumper extends Singleton
 {
     /**
@@ -18,24 +21,20 @@ class Dumper extends Singleton
     const SINGLETON = self::class;
 
     /**
-     * Options for Debugger::dump() function to specify dump destination, default options are: return,
-     * echo dump into log container "dumps".
+     * Options for dump() function to specify output.
      */
-    const DUMP_ECHO     = 0;
-    const DUMP_RETURN   = 1;
-    const DUMP_LOG      = 2;
-    const DUMP_LOG_NICE = 3;
+    const OUTPUT_ECHO     = 0;
+    const OUTPUT_RETURN   = 1;
+    const OUTPUT_LOG      = 2;
+    const OUTPUT_LOG_NICE = 3;
 
     /**
-     * Debugger instance
-     *
      * @var Debugger
      */
     protected $debugger = null;
 
     /**
-     * Dump styles used to colorize and format variable dump performed using Debugger::dump or dump()
-     * functions.
+     * Dumping styles and options.
      *
      * @var array
      */
@@ -68,8 +67,6 @@ class Dumper extends Singleton
     ];
 
     /**
-     * Dumper instance.
-     *
      * @param Debugger $debugger
      */
     public function __construct(Debugger $debugger)
@@ -78,7 +75,7 @@ class Dumper extends Singleton
     }
 
     /**
-     * Update dumping styles.
+     * Update dumping styles with new values.
      *
      * @param array $options
      */
@@ -88,20 +85,16 @@ class Dumper extends Singleton
     }
 
     /**
-     * Helper function to dump variable into specified destination (output, log or return) using
-     * pre-defined dumping styles. This method is fairly slow and should not be used in productions
-     * environment. Only use it during development, error handling and other not high loaded
-     * application parts.
+     * Dump value content into specified output.
+     **
      *
-     * Method has alias with short function dump() which is always defined.
-     *
-     * @param mixed $value  Value to be dumped.
-     * @param int   $output Output method, can print, return or log value dump.
+     * @param mixed $value
+     * @param int   $output
      * @return null|string
      */
-    public function dump($value, $output = self::DUMP_ECHO)
+    public function dump($value, $output = self::OUTPUT_ECHO)
     {
-        if (php_sapi_name() === 'cli' && $output != self::DUMP_LOG)
+        if (php_sapi_name() === 'cli' && $output != self::OUTPUT_LOG)
         {
             print_r($value);
             if (is_string($value))
@@ -118,19 +111,23 @@ class Dumper extends Singleton
 
         switch ($output)
         {
-            case self::DUMP_ECHO:
+            case self::OUTPUT_ECHO:
                 echo $result;
                 break;
 
-            case self::DUMP_RETURN:
+            case self::OUTPUT_RETURN:
                 return $result;
 
-            case self::DUMP_LOG:
-                $this->debugger->logger()->debug(print_r($value, true));
+            case self::OUTPUT_LOG:
+                $this->debugger->logger()->debug(
+                    print_r($value, true)
+                );
                 break;
 
-            case self::DUMP_LOG_NICE:
-                $this->debugger->logger()->debug($this->dump($value, self::DUMP_RETURN));
+            case self::OUTPUT_LOG_NICE:
+                $this->debugger->logger()->debug(
+                    $this->dump($value, self::OUTPUT_RETURN)
+                );
                 break;
         }
 
@@ -138,20 +135,15 @@ class Dumper extends Singleton
     }
 
     /**
-     * Variable dumping method, can be called recursively, maximum nested level specified in
-     * Debugger::$dumping['maxLevel']. Dumper values, braces and other parts will be styled using
-     * rules defined in Debugger::$dumping. Styles can be redefined any moment. You can hide class
-     * fields from dumping by using @invisible doc comment option.
+     * Variable dumper. This is the oldest spiral function, it was originally written in 2007. :)
      *
-     * This is the oldest spiral function, it was originally written in 2007. :)
-     *
-     * @param mixed  $variable Value to be dumped.
-     * @param string $name     Current variable name (empty if no name).
-     * @param int    $level
-     * @param bool   $hideType True to hide object/array type declaration, used by __debugInfo.
+     * @param mixed  $value
+     * @param string $name     Variable name, internal.
+     * @param int    $level    Dumping level, internal.
+     * @param bool   $hideType Hide array/object header, internal.
      * @return string
      */
-    private function dumpVariable($variable, $name = '', $level = 0, $hideType = false)
+    private function dumpVariable($value, $name = '', $level = 0, $hideType = false)
     {
         $result = $indent = $this->indent($level);
         if (!$hideType && $name)
@@ -164,22 +156,22 @@ class Dumper extends Singleton
             return $indent . $this->style('-possible recursion-', 'recursion') . "\n";
         }
 
-        $type = strtolower(gettype($variable));
+        $type = strtolower(gettype($value));
 
         if ($type == 'array')
         {
-            return $result . $this->dumpArray($variable, $level, $hideType);
+            return $result . $this->dumpArray($value, $level, $hideType);
         }
 
         if ($type == 'object')
         {
-            return $result . $this->dumpObject($variable, $level, $hideType);
+            return $result . $this->dumpObject($value, $level, $hideType);
         }
 
         if ($type == 'resource')
         {
             $result .= $this->style(
-                    get_resource_type($variable) . " resource ",
+                    get_resource_type($value) . " resource ",
                     "type",
                     "resource"
                 ) . "\n";
@@ -187,24 +179,24 @@ class Dumper extends Singleton
             return $result;
         }
 
-        $result .= $this->style($type . "(" . strlen($variable) . ")", "type", $type);
+        $result .= $this->style($type . "(" . strlen($value) . ")", "type", $type);
 
         $value = null;
         switch ($type)
         {
             case "string":
-                $value = htmlspecialchars($variable);
+                $value = htmlspecialchars($value);
                 break;
 
             case "boolean":
-                $value = ($variable ? "true" : "false");
+                $value = ($value ? "true" : "false");
                 break;
 
             default:
-                if ($variable !== null)
+                if ($value !== null)
                 {
                     //Not showing null value, type is enough
-                    $value = var_export($variable, true);
+                    $value = var_export($value, true);
                 }
         }
 
@@ -212,25 +204,23 @@ class Dumper extends Singleton
     }
 
     /**
-     * Helper method used to arrays.
-     *
-     * @param mixed $variable Value to be dumped.
+     * @param array $array
      * @param int   $level
-     * @param bool  $hideType True to hide object/array type declaration, used by __debugInfo.
+     * @param bool  $hideType
      * @return string
      */
-    private function dumpArray($variable, $level, $hideType)
+    private function dumpArray($array, $level, $hideType)
     {
         $result = '';
         $indent = $this->indent($level);
         if (!$hideType)
         {
-            $count = count($variable);
+            $count = count($array);
             $result .= $this->style("array({$count})", "type", "array")
                 . "\n" . $indent . $this->style("(", "indent", "(") . "\n";
         }
 
-        foreach ($variable as $name => $value)
+        foreach ($array as $name => $value)
         {
             if (!is_numeric($name))
             {
@@ -241,11 +231,7 @@ class Dumper extends Singleton
                 $name = "'" . $name . "'";
             }
 
-            $result .= $this->dumpVariable(
-                $value,
-                "[{$name}]",
-                $level + 1
-            );
+            $result .= $this->dumpVariable($value, "[{$name}]", $level + 1);
         }
 
         if (!$hideType)
@@ -257,46 +243,44 @@ class Dumper extends Singleton
     }
 
     /**
-     * Helper method used to dump objects.
-     *
-     * @param mixed  $variable Value to be dumped.
+     * @param object $value
      * @param int    $level
-     * @param bool   $hideType True to hide object/array type declaration, used by __debugInfo.
-     * @param string $class    Class name to be used.
+     * @param bool   $hideType
+     * @param string $class
      * @return string
      */
-    private function dumpObject($variable, $level, $hideType, $class = '')
+    private function dumpObject($value, $level, $hideType, $class = '')
     {
         $result = '';
         $indent = $this->indent($level);
         if (!$hideType)
         {
-            $type = ($class ?: get_class($variable)) . " object ";
+            $type = ($class ?: get_class($value)) . " object ";
 
             $result .= $this->style($type, "type", "object") .
                 "\n" . $indent . $this->style("(", "indent", "(") . "\n";
         }
 
-        if (method_exists($variable, '__debugInfo'))
+        if (method_exists($value, '__debugInfo'))
         {
-            $debugInfo = $variable->__debugInfo();
+            $debugInfo = $value->__debugInfo();
 
             if (is_object($debugInfo))
             {
-                return $this->dumpObject($debugInfo, $level, false, get_class($variable));
+                return $this->dumpObject($debugInfo, $level, false, get_class($value));
             }
 
             $result .= $this->dumpVariable(
                 $debugInfo,
                 '',
-                $level + (is_scalar($variable)),
+                $level + (is_scalar($value)),
                 true
             );
 
             return $result . $indent . $this->style(")", "parentheses") . "\n";
         }
 
-        $refection = new \ReflectionObject($variable);
+        $refection = new \ReflectionObject($value);
         foreach ($refection->getProperties() as $property)
         {
             if ($property->isStatic())
@@ -305,7 +289,7 @@ class Dumper extends Singleton
             }
 
             //Memory loop while reading doc comment for stdClass variables?
-            if (!($variable instanceof \stdClass) && strpos($property->getDocComment(), '@invisible'))
+            if (!($value instanceof \stdClass) && strpos($property->getDocComment(), '@invisible'))
             {
                 continue;
             }
@@ -321,12 +305,12 @@ class Dumper extends Singleton
             }
             $property->setAccessible(true);
 
-            if ($variable instanceof \stdClass)
+            if ($value instanceof \stdClass)
             {
                 $access = 'dynamic';
             }
 
-            $value = $property->getValue($variable);
+            $value = $property->getValue($value);
             $result .= $this->dumpVariable(
                 $value,
                 $property->getName() . $this->style(":" . $access, "access", $access),
@@ -338,7 +322,7 @@ class Dumper extends Singleton
     }
 
     /**
-     * Indent based on variable level.
+     * Set indent to line based on it's level, internal.
      *
      * @param int $level
      * @return string
@@ -354,12 +338,11 @@ class Dumper extends Singleton
     }
 
     /**
-     * Stylize content using pre-defined style. Dump styles defined in Debugger::$dumping and can be
-     * redefined at any moment.
+     * Stylize content using pre-defined style.
      *
-     * @param string $element Content to apply style to.
-     * @param string $type    Content type (value, indent, name and etc)
-     * @param string $subType Content sub type (int, string and etc...)
+     * @param string $element
+     * @param string $type
+     * @param string $subType
      * @return string
      */
     public function style($element, $type, $subType = '')

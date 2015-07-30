@@ -9,9 +9,9 @@
 namespace Spiral\Reactor\ClassElements;
 
 use Spiral\Reactor\ClassElements\MethodElements\ParameterElement;
-use Spiral\Reactor\Element;
+use Spiral\Reactor\AbstractElement;
 
-class MethodElement extends Element
+class MethodElement extends AbstractElement
 {
     /**
      * Method access level (private, protected and public).
@@ -121,20 +121,20 @@ class MethodElement extends Element
     /**
      * Get/create parameter. Parameter will automatically be created during the methods first call.
      *
-     * @param string $name       Parameter name.
-     * @param string $docComment DocComment to set or replace.
+     * @param string $name Parameter name.
+     * @param string $type DocComment to set or replace.
      * @return ParameterElement
      */
-    public function parameter($name, $docComment = '')
+    public function parameter($name, $type = '')
     {
         if (!isset($this->parameters[$name]))
         {
             $this->parameters[$name] = new ParameterElement($name);
         }
 
-        if ($docComment && !in_array($docComment, $this->docComment))
+        if ($type && !in_array($type, $this->docComment))
         {
-            $this->docComment[] = '@param ' . $docComment . ' $' . $name;
+            $this->docComment[] = '@param ' . $type . ' $' . $name;
         }
 
         return $this->parameters[$name];

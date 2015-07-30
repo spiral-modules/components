@@ -18,7 +18,7 @@ class ArrayExporter
      * @param int    $level  Array level.
      * @return string
      */
-    public function export(array $array, $indent = Element::INDENT, $level = 0)
+    public function export(array $array, $indent = AbstractElement::INDENT, $level = 0)
     {
         //Delimiters between rows and sub-arrays.
         $assign = " => ";

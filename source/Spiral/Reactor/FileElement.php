@@ -20,7 +20,7 @@ class FileElement extends NamespaceElement
     /**
      * All elements nested to the PHP file, that can include classes and namespaces.
      *
-     * @var Element[]
+     * @var AbstractElement[]
      */
     protected $elements = [];
 
@@ -46,10 +46,10 @@ class FileElement extends NamespaceElement
     /**
      * Adding a new reactor element to a file.
      *
-     * @param Element $element
+     * @param AbstractElement $element
      * @return $this
      */
-    public function addElement(Element $element)
+    public function addElement(AbstractElement $element)
     {
         $this->elements[] = $element;
 

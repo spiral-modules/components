@@ -8,7 +8,7 @@
  */
 namespace Spiral\Reactor;
 
-class NamespaceElement extends Element
+class NamespaceElement extends AbstractElement
 {
     /**
      * List of classes which are declared in this namespace.

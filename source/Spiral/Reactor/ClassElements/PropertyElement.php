@@ -8,10 +8,10 @@
  */
 namespace Spiral\Reactor\ClassElements;
 
-use Spiral\Reactor\Element;
+use Spiral\Reactor\AbstractElement;
 use Spiral\Reactor\ArrayExporter;
 
-class PropertyElement extends Element
+class PropertyElement extends AbstractElement
 {
     /**
      * Property access level (private, protected and public).

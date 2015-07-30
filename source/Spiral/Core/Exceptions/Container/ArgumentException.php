@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core\Container;
+namespace Spiral\Core\Exceptions\Container;
 
-use Spiral\Core\CoreException;
-use Spiral\Core\ExceptionInterface;
-
-class ArgumentException extends CoreException implements ExceptionInterface
+/**
+ * Unable to resolve argument value.
+ */
+class ArgumentException extends ContainerException
 {
     /**
      * Parameter caused error.
@@ -28,8 +28,6 @@ class ArgumentException extends CoreException implements ExceptionInterface
     protected $context = null;
 
     /**
-     * Unresolved argument exception.
-     *
      * @param \ReflectionParameter        $parameter
      * @param \ReflectionFunctionAbstract $context
      */
@@ -48,8 +46,6 @@ class ArgumentException extends CoreException implements ExceptionInterface
     }
 
     /**
-     * Get parameter.
-     *
      * @return \ReflectionParameter
      */
     public function getParameter()
@@ -58,8 +54,6 @@ class ArgumentException extends CoreException implements ExceptionInterface
     }
 
     /**
-     * Get context.
-     *
      * @return \ReflectionFunctionAbstract
      */
     public function getContext()

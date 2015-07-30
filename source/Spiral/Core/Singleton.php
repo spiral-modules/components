@@ -8,6 +8,11 @@
  */
 namespace Spiral\Core;
 
+use Spiral\Core\Exceptions\MissingContainerException;
+
+/**
+ * Spiral Container will treat classes like that as singletons.
+ */
 abstract class Singleton extends Component implements SingletonInterface
 {
     /**
@@ -21,17 +26,15 @@ abstract class Singleton extends Component implements SingletonInterface
      *
      * @param ContainerInterface $container
      * @return static
+     * @throws MissingContainerException
      */
     public static function getInstance(ContainerInterface $container = null)
     {
-        if (empty($container))
+        if (empty($container = self::container()) && empty($container))
         {
-            if (empty($container = self::getContainer()))
-            {
-                throw new \RuntimeException(
-                    "Singleton instance can be constructed only using valid Container."
-                );
-            }
+            throw new MissingContainerException(
+                "Singleton instance can be constructed only using valid Container."
+            );
         }
 
         return $container->get(static::SINGLETON);

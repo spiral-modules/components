@@ -9,8 +9,8 @@
 namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
-use Spiral\Core\Container\ArgumentException;
-use Spiral\Core\Container\InstanceException;
+use Spiral\Core\Exceptions\Container\ArgumentException;
+use Spiral\Core\Exceptions\Container\InstanceException;
 
 interface ContainerInterface
 {

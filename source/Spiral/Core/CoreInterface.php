@@ -7,20 +7,23 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Core;
+use Spiral\Core\Exceptions\ControllerException;
 
+/**
+ * He made 9 rings... i mean we need one general class.
+ */
 interface CoreInterface extends ContainerInterface, ConfiguratorInterface, HippocampusInterface
 {
     /**
-     * Call controller method by fully specified or short controller name, action and addition
-     * options such as default controllers namespace, default name and postfix.
+     * Request specific action result from Core. Due in 99% every action will need parent controller,
+     * we can request it too.
      *
-     * Can be used for controller-less applications.
-     *
-     * @param string $controller Controller name, or class, or name with namespace prefix.
+     * @param string $controller Controller class.
      * @param string $action     Controller action, empty by default (controller will use default action).
-     * @param array  $parameters Additional methods parameters.
+     * @param array  $parameters Action parameters (if any).
      * @return mixed
-     * @throws ExceptionInterface
+     * @throws ControllerException
+     * @throws \Exception
      */
     public function callAction($controller, $action = '', array $parameters = []);
 }

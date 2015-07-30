@@ -8,29 +8,14 @@
  */
 namespace Spiral\Core;
 
-use ReflectionParameter;
-use Exception;
-use RuntimeException;
-use Spiral\Core\Container\ArgumentException;
+use Spiral\Core\Exceptions\Container\ArgumentException;
+use Spiral\Core\Exceptions\Container\InstanceException;
 use ReflectionFunctionAbstract as ContextFunction;
-use Spiral\Core\Container\InstanceException;
 
 class Container extends Component implements ContainerInterface
 {
     /**
-     * Exception  to throw when instance can not be constructed.
-     */
-    const CODE_NON_INSTANTIABLE = 777;
-
-    /**
-     * IoC bindings. Binding can include interface - class aliases, closures, singleton closures
-     * and already constructed components stored as instances. Binding can be added using
-     * Container::bind() or Container::bindSingleton() methods, every existed binding can be defined
-     * or redefined at any moment of application flow.
-     *
-     * Instance or class name can be also binded to alias, this technique used for all spiral core
-     * components and can simplify development. Spiral additionally provides way to create DI without
-     * binding, it can be done by using real class or model name, or via ControllableInjection interface.
+     * IoC bindings. Binding one class or interface to another class and interface. :)
      *
      * @invisible
      * @var array
@@ -42,84 +27,31 @@ class Container extends Component implements ContainerInterface
      */
     public function __construct()
     {
-        if (empty(self::getContainer()))
+        if (empty(self::container()))
         {
             self::setContainer($this);
         }
     }
 
     /**
-     * Resolve class instance using IoC container. Class can be requested using it's own name, alias
-     * binding, singleton binding, closure function, closure function with singleton resolution, or
-     * via InjectableInterface interface. To add binding use Container::bind() or Container::bindSingleton()
-     * methods.
-     *
-     * This method widely used inside spiral core to resolve adapters, handlers and databases.
-     *
-     * @param string              $alias            Class/interface name or binded alias should be
-     *                                              resolved to instance.
-     * @param array               $parameters       Parameters to be mapped to class constructor or
-     *                                              forwarded to closure.
-     * @param ReflectionParameter $context          Context parameter were used to declare DI.
-     * @return mixed|null|object
-     * @throws InstanceException
-     * @throws ArgumentException
-     * @throws RuntimeException
+     * {@inheritdoc}
      */
-    public function get($alias, $parameters = [], ReflectionParameter $context = null)
+    public function get($alias, $parameters = [], \ReflectionParameter $context = null)
     {
         if ($alias == ContainerInterface::class)
         {
+            //Shortcut
             return $this;
         }
 
         if (!isset($this->bindings[$alias]))
         {
-            $reflector = new \ReflectionClass($alias);
-
-            /**
-             * We have to construct class here. Remember about this magick constant?
-             */
-            if (!empty($context) && $injector = $reflector->getConstant('INJECTOR'))
-            {
-                //We can bypass class creation to associated injector
-                return call_user_func(
-                    [$this->get($injector), 'createInjection'],
-                    $reflector,
-                    $context,
-                    $this
-                );
-            }
-
-            if (!$reflector->isInstantiable())
-            {
-                throw new InstanceException("Class '{$alias}' can not be constructed.");
-            }
-
-            if (!empty($constructor = $reflector->getConstructor()))
-            {
-                $instance = $reflector->newInstanceArgs($this->resolveArguments(
-                    $constructor,
-                    $parameters
-                ));
-            }
-            else
-            {
-                //No constructor specified
-                $instance = $reflector->newInstance();
-            }
-
-            //Component declared SINGLETON constant, binding as constant value and class name.
-            if (!empty($singleton = $reflector->getConstant('SINGLETON')))
-            {
-                $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
-            }
-
-            return $instance;
+            return $this->createInstance($alias, $parameters);
         }
 
         if (is_object($binding = $this->bindings[$alias]))
         {
+            //Singleton
             return $binding;
         }
 
@@ -141,12 +73,12 @@ class Container extends Component implements ContainerInterface
         {
             if (is_string($binding[0]))
             {
-                //Class name
+                //Class name with singleton flag
                 $instance = $this->get($binding[0], $parameters, $context);
             }
             else
             {
-                //Closure
+                //Closure with singleton flag
                 $instance = call_user_func_array($binding[0], $parameters);
             }
 
@@ -163,15 +95,56 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Helper method to resolve constructor or function arguments, build required DI using IoC
-     * container and mix with pre-defined set of named parameters.
+     * Create instance of desired class.
      *
-     * @param ContextFunction $reflection Method or constructor should be filled with DI.
-     * @param array           $parameters Outside parameters used in priority to DI.
-     *                                    Named list.
-     * @return array
-     * @throws ArgumentException
-     * @throws Exception
+     * @param string $class
+     * @param array  $parameters Constructor parameters.
+     * @return object
+     * @throws InstanceException
+     */
+    protected function createInstance($class, array $parameters)
+    {
+        $reflector = new \ReflectionClass($class);
+
+        if (!empty($context) && $injector = $reflector->getConstant('INJECTOR'))
+        {
+            /**
+             * We have to construct class here. Remember about this magick constant?
+             */
+            return call_user_func(
+                [$this->get($injector), 'createInjection'],
+                $reflector, $context, $this
+            );
+        }
+
+        if (!$reflector->isInstantiable())
+        {
+            throw new InstanceException("Class '{$class}' can not be constructed.");
+        }
+
+        if (!empty($constructor = $reflector->getConstructor()))
+        {
+            $instance = $reflector->newInstanceArgs(
+                $this->resolveArguments($constructor, $parameters)
+            );
+        }
+        else
+        {
+            //No constructor specified
+            $instance = $reflector->newInstance();
+        }
+
+        if (!empty($singleton = $reflector->getConstant('SINGLETON')))
+        {
+            //Component declared SINGLETON constant, binding as constant value and class name.
+            $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
+        }
+
+        return $instance;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function resolveArguments(ContextFunction $reflection, array $parameters = [])
     {
@@ -180,7 +153,7 @@ class Container extends Component implements ContainerInterface
         {
             $name = $parameter->getName();
 
-            if (empty($parameter->getClass()))
+            if (empty($class = $parameter->getClass()))
             {
                 if (array_key_exists($name, $parameters))
                 {
@@ -191,6 +164,7 @@ class Container extends Component implements ContainerInterface
 
                 if ($parameter->isDefaultValueAvailable())
                 {
+                    //Or default value?
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
                 }
@@ -208,16 +182,16 @@ class Container extends Component implements ContainerInterface
 
             try
             {
-                //Trying to resolve
-                $arguments[] = $this->get($parameter->getClass()->getName(), [], $parameter);
+                //Trying to resolve dependency
+                $arguments[] = $this->get($class->getName(), [], $parameter);
 
                 continue;
             }
-            catch (Exception $exception)
+            catch (InstanceException $exception)
             {
-                if ($exception instanceof InstanceException && $parameter->isDefaultValueAvailable())
+                if ($parameter->isDefaultValueAvailable())
                 {
-                    //Let's try to use default value instead (some interface requested)
+                    //Let's try to use default value instead
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
                 }
@@ -230,13 +204,7 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * IoC binding can create a link between specified alias and method to resolve that alias, resolver
-     * can be either class instance (that instance will be resolved as singleton), callback or string
-     * alias. String aliases can be used to rewrite core classes with custom realization, or specify
-     * what interface child should be used.
-     *
-     * @param string                 $alias  Alias where singleton will be attached to.
-     * @param string|object|callable Closure to resolve class instance, class instance or class name.
+     * {@inheritdoc}
      */
     public function bind($alias, $resolver)
     {
@@ -251,15 +219,15 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Replace existed binding with new value. Existed binding value will be returned from this method
-     * and can be used again to restore original state using restore() method.
-     *
-     * Attention, due internal format you can restore original value only using restore method!
-     *
-     * @see restore()
-     * @param string                 $alias  Alias where singleton will be attached to.
-     * @param string|object|callable Closure to resolve class instance, class instance or class name.
-     * @return object|string|array|null
+     * {@inheritdoc}
+     */
+    public function bindSingleton($alias, $resolver)
+    {
+        $this->bindings[$alias] = [$resolver, true];
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function replace($alias, $resolver)
     {
@@ -275,9 +243,7 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Restore previously pulled binding value. Method will accept only result of replace() method.
-     *
-     * @param mixed $binding
+     * {@inheritdoc}
      */
     public function restore($binding)
     {
@@ -292,23 +258,7 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Bind closure or class name which will be performed only once, after first call class instance
-     * will be attached to specified alias and will be returned directly without future invoking.
-     *
-     * @param string   $alias    Alias where singleton will be attached to.
-     * @param callable $resolver Closure to resolve class instance.
-     */
-    public function bindSingleton($alias, $resolver)
-    {
-        $this->bindings[$alias] = [$resolver, true];
-    }
-
-    /**
-     * Check if desired alias or class name binded in Container. You can bind new alias using
-     * Container::bind(), Container::bindSingleton().
-     *
-     * @param string $alias
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasBinding($alias)
     {
@@ -316,10 +266,7 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Check if alias points to constructed instance or singleton instance.
-     *
-     * @param string $alias
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasInstance($alias)
     {
@@ -332,9 +279,7 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Remove existed binding.
-     *
-     * @param string $alias
+     * {@inheritdoc}
      */
     public function removeBinding($alias)
     {

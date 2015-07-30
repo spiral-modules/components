@@ -8,6 +8,9 @@
  */
 namespace Spiral\Core;
 
+/**
+ * Long memory cache. Something very fast on read and slow on write!
+ */
 interface HippocampusInterface
 {
     /**
@@ -15,7 +18,7 @@ interface HippocampusInterface
      *
      * @param string $name
      * @param string $location Specific memory location.
-     * @return mixed|array
+     * @return mixed|null
      */
     public function loadData($name, $location = null);
 

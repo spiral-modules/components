@@ -8,6 +8,8 @@
  */
 namespace Spiral\Core;
 
+use Spiral\Core\Exceptions\MissingContainerException;
+
 interface SingletonInterface
 {
     /**
@@ -16,6 +18,7 @@ interface SingletonInterface
      *
      * @param ContainerInterface $container
      * @return static
+     * @throws MissingContainerException
      */
     public static function getInstance(ContainerInterface $container = null);
 }

@@ -9,9 +9,9 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * General spiral Exception.
+ * Container is missing.
  */
-interface ExceptionInterface
+class MissingContainerException extends MissingClassException
 {
 
 }

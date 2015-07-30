@@ -27,11 +27,9 @@ trait EventsTrait
     private static $dispatchers = [];
 
     /**
-     * Global container access is required in some cases. Method should be declared statically.
-     *
      * @return ContainerInterface
      */
-    abstract public function getContainer();
+    abstract public function container();
 
     /**
      * Sets event dispatcher. Event dispatcher will be associated with specific component by it's class

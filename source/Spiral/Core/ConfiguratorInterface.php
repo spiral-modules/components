@@ -11,7 +11,8 @@ namespace Spiral\Core;
 interface ConfiguratorInterface
 {
     /**
-     * Configuration section to be loaded.
+     * Return config for one specified section. Config has to be returned in component specific array
+     * form.
      *
      * @param string $section
      * @return array

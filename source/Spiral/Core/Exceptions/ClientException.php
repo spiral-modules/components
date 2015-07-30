@@ -9,9 +9,9 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * General spiral Exception.
+ * User input did something, exceptions like that should be treat differently.
  */
-interface ExceptionInterface
+class ClientException extends \RuntimeException implements ExceptionInterface
 {
 
 }

@@ -8,20 +8,21 @@
  */
 namespace Spiral\Core;
 
+/**
+ * Basic spiral cell.
+ */
 abstract class Component
 {
     /**
-     * Global container instance using not very often by some component traits like Loggers, Events
-     * and etc. Some non-core functionality may not work if such variable is not set.
+     * Global container instance used not very often by some component traits like Loggers, Events
+     * and etc.
      *
      * @var ContainerInterface
      */
     private static $container = null;
 
     /**
-     * Set instance of global container, this method used to supply container to some component traits
-     * and static functionality. It's not necessary to use it, but if used it may simplify development
-     * a lot.
+     * Set instance of global container. Required for some traits.
      *
      * @param ContainerInterface $container
      */
@@ -31,12 +32,11 @@ abstract class Component
     }
 
     /**
-     * Get instance of globally associated container. Method used by component traits and some global
-     * functionality.
+     * Short naming to get container.
      *
      * @return ContainerInterface
      */
-    final public static function getContainer()
+    final public static function container()
     {
         return self::$container;
     }

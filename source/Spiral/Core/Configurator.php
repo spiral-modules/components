@@ -8,18 +8,17 @@
  */
 namespace Spiral\Core;
 
+/**
+ * One simple configuration for different uses.
+ */
 class Configurator implements ConfiguratorInterface
 {
     /**
-     * Config dedicated for one receiver.
-     *
      * @var array
      */
     protected $config = [];
 
     /**
-     * Configurator is simple class used to create configuration source for only one receiver.
-     *
      * @param array $config
      */
     public function __construct(array $config)
@@ -28,10 +27,9 @@ class Configurator implements ConfiguratorInterface
     }
 
     /**
-     * Configuration section to be loaded. Configurator will return same config for every section.
+     *{@inheritdoc}
      *
-     * @param string $section
-     * @return array
+     * Configurator will return same config for every section.
      */
     public function getConfig($section = null)
     {

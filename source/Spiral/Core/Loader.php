@@ -10,10 +10,14 @@ namespace Spiral\Core;
 
 use Spiral\Events\Traits\EventsTrait;
 
+/**
+ * Can speed up class loading in some conditions. In addition this class is needed for tokenizer
+ * to handle not found classes.
+ */
 class Loader extends Singleton
 {
     /**
-     * Required traits.
+     * Event if class not found.
      */
     use EventsTrait;
 
@@ -23,57 +27,51 @@ class Loader extends Singleton
     const SINGLETON = self::class;
 
     /**
-     * HippocampusInterface instance.
-     *
      * @var HippocampusInterface
      */
-    protected $runtime = null;
+    protected $memory = null;
 
     /**
-     * List of classes loading during this working session.
+     * List of classes loaded while this working session.
      *
      * @var array
      */
     protected $classes = [];
 
     /**
-     * Name of loadmap file to use.
+     * Name of memory sections to use.
      *
      * @var string
      */
     protected $name = 'loadmap';
 
     /**
-     * Cached class locations, used to speed up classes loading and resolving names by namespace and
-     * postfix. In any scenario loadmap can significantly speedup application, due there is no need
-     * to ping filesystem anymore.
+     * Association between class and it's location.
      *
      * @var array
      */
     protected $loadmap = [];
 
     /**
-     * Loader state.
+     * Is SPL methods handled.
      *
      * @var bool
      */
     protected $enabled = false;
 
     /**
-     * Loader will automatically handle SPL autoload functions to start caching loadmap. In future
-     * loadmap can be used to pre-load all classes via one single file.
+     * Loader will automatically handle SPL autoload functions to start caching loadmap.
      *
      * @param HippocampusInterface $runtime
      */
     public function __construct(HippocampusInterface $runtime)
     {
-        $this->runtime = $runtime;
+        $this->memory = $runtime;
         $this->enable();
     }
 
     /**
-     * Performs auto-loading and core components initializations. All found classes will be saved
-     * into loadmap and fetched directly from it next call load request (without performing file lookup).
+     * Handle SPL auto location, will go to top of spl chain.
      *
      * @return $this
      */
@@ -81,7 +79,7 @@ class Loader extends Singleton
     {
         if (!$this->enabled)
         {
-            if ((!$this->loadmap = $this->runtime->loadData($this->name)) || !is_array($this->loadmap))
+            if ((!$this->loadmap = $this->memory->loadData($this->name)) || !is_array($this->loadmap))
             {
                 $this->loadmap = [];
             }
@@ -94,7 +92,7 @@ class Loader extends Singleton
     }
 
     /**
-     * Disable autoloading classes via \spiral\Loader.
+     * Stop handling SPL calls.
      *
      * @return $this
      */
@@ -107,10 +105,7 @@ class Loader extends Singleton
     }
 
     /**
-     * Re-enabling autoloader to push up. This operation is required if some other class loader
-     * trying to handle autoload function.
-     *
-     * For example - composer.
+     * Re-enable autoload to push it up into food chain.
      */
     public function reset()
     {
@@ -118,7 +113,7 @@ class Loader extends Singleton
     }
 
     /**
-     * Update loadmap cache name. Can be used to separate environment loadmaps.
+     * Memory section to use.
      *
      * @param string $name
      */
@@ -126,7 +121,7 @@ class Loader extends Singleton
     {
         if ($this->name != $name)
         {
-            if ((!$this->loadmap = $this->runtime->loadData($name)) || !is_array($this->loadmap))
+            if (empty($this->loadmap = $this->memory->loadData($name)) || !is_array($this->loadmap))
             {
                 $this->loadmap = [];
             }
@@ -139,7 +134,7 @@ class Loader extends Singleton
      * Find class declaration and load it.
      *
      * @param string $class Class name with namespace included.
-     * @return void
+     * @event notFound(class)
      */
     public function loadClass($class)
     {
@@ -154,46 +149,49 @@ class Loader extends Singleton
             {
                 //File was replaced or removed
                 unset($this->loadmap[$class]);
-                $this->runtime->saveData($this->name, $this->loadmap, null, true);
+                $this->memory->saveData($this->name, $this->loadmap);
 
-                //Trying to update route to class
+                //Try to update route to class
                 $this->loadClass($class);
             }
 
             return;
         }
 
+        //Composer and other loaders.
         foreach (spl_autoload_functions() as $function)
         {
             if ($function instanceof \Closure || $function[0] != $this)
             {
                 call_user_func($function, $class);
 
-                //Class was successfully found by external loader
                 if (
                     class_exists($class, false)
                     || interface_exists($class, false)
                     || trait_exists($class, false)
                 )
                 {
-                    //External loader will not provide us any information about class location, let's
-                    //get it via Reflection
+                    //Class has been successfully found by external loader
+
+                    //External loader are not going to provide us any information about class
+                    // location, let's get it via Reflection
                     $reflector = new \ReflectionClass($class);
 
                     try
                     {
                         $filename = str_replace('\\', '/', $reflector->getFileName());
                         $filename = rtrim(str_replace('//', '/', $filename), '/');
+
+                        //Direct access to filesystem, yep.
+                        if (file_exists($filename))
+                        {
+                            $this->loadmap[$class] = $this->classes[$class] = $filename;
+                            $this->memory->saveData($this->name, $this->loadmap);
+                        }
                     }
                     catch (\ErrorException $exception)
                     {
-                    }
-
-                    //This is low-level component, we can bypass FilesInterface here
-                    if (isset($filename) && file_exists($filename))
-                    {
-                        $this->loadmap[$class] = $this->classes[$class] = $filename;
-                        $this->runtime->saveData($this->name, $this->loadmap, null, true);
+                        //getFileName can throw and exception, we can ignore it
                     }
 
                     return;
@@ -215,32 +213,10 @@ class Loader extends Singleton
     }
 
     /**
-     * Current loadmap state.
-     *
-     * @return array
-     */
-    public function getLoadmap()
-    {
-        return $this->loadmap;
-    }
-
-    /**
-     * Will force loadmap content or reset it.
-     *
-     * @param array $loadmap
-     */
-    public function setLoadmap($loadmap = [])
-    {
-        $this->loadmap = $loadmap;
-
-        $this->runtime->saveData($this->name, $this->loadmap, null, true);
-    }
-
-    /**
      * Check if desired class exists in loadmap.
      *
-     * @param string $class Class name.
-     * @return array
+     * @param string $class
+     * @return bool
      */
     public function isKnown($class)
     {

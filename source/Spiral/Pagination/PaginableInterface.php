@@ -9,7 +9,11 @@
 namespace Spiral\Pagination;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Pagination\Exceptions\PaginationException;
 
+/**
+ * Only instances like can be automatically paginated.
+ */
 interface PaginableInterface extends \Countable
 {
     /**
@@ -36,14 +40,13 @@ interface PaginableInterface extends \Countable
      *                                              store the current page number. "page" by default.
      * @param int                    $count         Forced count value, if 0 paginator will try to fetch
      *                                              count from associated object.
-     * @param ServerRequestInterface $request       Dispatcher request. You can skip this argument only
-     *                                              when global container is set.
+     * @param ServerRequestInterface $request       Has to be specified if no global container set.
      * @return mixed
      * @throws PaginationException
      */
     public function paginate(
         $limit = 50,
-        $pageParameter = 'page',
+        $pageParameter = PaginatorInterface::DEFAULT_PARAMETER,
         $count = 0,
         ServerRequestInterface $request = null
     );
@@ -51,7 +54,9 @@ interface PaginableInterface extends \Countable
     /**
      * Get paginator for the current selection. Paginate method should be already called.
      *
+     * @see paginate()
      * @return Paginator
+     * @throws PaginationException
      */
     public function getPaginator();
 }

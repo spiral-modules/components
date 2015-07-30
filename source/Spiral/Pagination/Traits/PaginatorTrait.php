@@ -10,29 +10,27 @@ namespace Spiral\Pagination\Traits;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Pagination\PaginationException;
+use Spiral\Pagination\Exceptions\PaginationException;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
 
+/**
+ * Provides ability to paginate associated instance. Will work with default Paginator or fetch one
+ * from container.
+ */
 trait PaginatorTrait
 {
     /**
-     * Current limit value.
-     *
      * @var int
      */
     protected $limit = 0;
 
     /**
-     * Current offset value.
-     *
      * @var int
      */
     protected $offset = 0;
 
     /**
-     * Paginator associated with selection.
-     *
      * @var Paginator
      */
     protected $paginator = null;
@@ -46,11 +44,9 @@ trait PaginatorTrait
     protected $paginationCount = 0;
 
     /**
-     * Global container access is required in some cases.
-     *
      * @return ContainerInterface
      */
-    abstract public function getContainer();
+    abstract public function container();
 
     /**
      * Count elements of an object.
@@ -61,20 +57,10 @@ trait PaginatorTrait
     abstract public function count();
 
     /**
-     * Get current limit value.
-     *
-     * @return int
-     */
-    public function getLimit()
-    {
-        return $this->limit;
-    }
-
-    /**
      * Set selection limit.
      *
      * @param int $limit
-     * @return $this
+     * @return mixed
      */
     public function limit($limit = 0)
     {
@@ -84,20 +70,18 @@ trait PaginatorTrait
     }
 
     /**
-     * Get current offset value.
-     *
      * @return int
      */
-    public function getOffset()
+    public function getLimit()
     {
-        return $this->offset;
+        return $this->limit;
     }
 
     /**
      * Set selection offset.
      *
      * @param int $offset
-     * @return $this
+     * @return mixed
      */
     public function offset($offset = 0)
     {
@@ -107,17 +91,24 @@ trait PaginatorTrait
     }
 
     /**
-     * Paginate current selection. If count parameter provided with null value, pagination will fetch
-     * count from target object (this may cause additional query).
+     * @return int
+     */
+    public function getOffset()
+    {
+        return $this->offset;
+    }
+
+    /**
+     * Paginate current selection.
      *
      * @param int                    $limit         Pagination limit.
-     * @param int|null               $count         Forced count value, if null paginator will try to
-     *                                              fetch count from associated object.
-     * @param string                 $pageParameter Name of parameter in request query which is used
-     *                                              to store the current page number. "page" by default.
-     * @param ServerRequestInterface $request       Source of page number. Will be fetched from
-     *                                              container if nothing else if provided.
+     * @param string                 $pageParameter Name of parameter in request query which is used to
+     *                                              store the current page number. "page" by default.
+     * @param int                    $count         Forced count value, if 0 paginator will try to fetch
+     *                                              count from associated object.
+     * @param ServerRequestInterface $request       Has to be specified if no global container set.
      * @return $this
+     * @throws PaginationException
      */
     public function paginate(
         $limit = PaginatorInterface::DEFAULT_LIMIT,
@@ -126,7 +117,7 @@ trait PaginatorTrait
         ServerRequestInterface $request = null
     )
     {
-        if (empty($container = $this->getContainer()) && empty($request))
+        if (empty($container = $this->container()) && empty($request))
         {
             throw new PaginationException("Unable to create pagination without specified request.");
         }
@@ -155,6 +146,7 @@ trait PaginatorTrait
     /**
      * Get paginator for the current selection. Paginate method should be already called.
      *
+     * @see paginate()
      * @return Paginator
      * @throws PaginationException
      */

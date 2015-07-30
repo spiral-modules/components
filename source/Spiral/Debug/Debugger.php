@@ -15,10 +15,13 @@ use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
+/**
+ * Debugger is responsible for primary debug log, benchmarking and configuring spiral loggers.
+ */
 class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInterface
 {
     /**
-     * Few traits.
+     * Logger trait is required for Dumper to perform dump into debug log.
      */
     use ConfigurableTrait, LoggerTrait;
 
@@ -33,24 +36,16 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     const CONFIG = 'debug';
 
     /**
-     * ContainerInterface used to create log handlers.
-     *
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * List of recorded benchmarks.
-     *
      * @var array
      */
     protected $benchmarks = [];
 
     /**
-     * Constructing debug component. Debug is one of primary spiral component and will be available
-     * for use in any environment and any application point. This is first initiated component in
-     * application.
-     *
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
      */
@@ -61,7 +56,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     }
 
     /**
-     * Configure logger handlers. I don't really want to connect Monolog - you can do it by youself.
+     * Configure logger handlers.
      *
      * @param Logger $logger
      */
@@ -82,14 +77,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     }
 
     /**
-     * Benchmarks used to record long or important operations inside spiral components. Only time
-     * will be recorded. Method should return elapsed time when record will be closed (same set of
-     * arguments has to be provided).
-     *
-     * @param object $caller  Call initiator (used to de-group events).
-     * @param string $record  Benchmark record name.
-     * @param string $context Record context (if any).
-     * @return bool|float
+     * {@inheritdoc}
      */
     public function benchmark($caller, $record, $context = '')
     {

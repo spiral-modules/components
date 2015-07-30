@@ -33,11 +33,6 @@ interface RouterInterface extends MiddlewareInterface
     public function addRoute(RouteInterface $route);
 
     /**
-     * @return RouteInterface[]
-     */
-    public function getRoutes();
-
-    /**
      * Fetch route by it's name.
      *
      * @param string $route
@@ -45,6 +40,11 @@ interface RouterInterface extends MiddlewareInterface
      * @throws RouterException
      */
     public function getRoute($route);
+
+    /**
+     * @return RouteInterface[]
+     */
+    public function getRoutes();
 
     /**
      * Route which did match with incoming request will be marked as active and can be fetched using
@@ -55,7 +55,9 @@ interface RouterInterface extends MiddlewareInterface
     public function activeRoute();
 
     /**
-     * Generate valid route URL using route name and set of parameters.
+     * Generate valid route URL using route name and set of parameters. Should support controller
+     * and action name separated by ":" - in this case router should find appropriate route and
+     * create url using it.
      *
      * @param string           $route Route name.
      * @param array            $parameters

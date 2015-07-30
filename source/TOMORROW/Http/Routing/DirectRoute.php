@@ -76,8 +76,8 @@ class DirectRoute extends AbstractRoute
         $pattern,
         $namespace,
         $postfix,
-        array $defaults = [],
-        array $controllers = []
+        array $defaults,
+        array $controllers
     )
     {
         $this->name = $name;

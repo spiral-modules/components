@@ -21,7 +21,7 @@ interface RouteInterface
     /**
      * Controller and action in route targets and createURL route name has to be separated like that.
      */
-    const CONTROLLER_SEPARATOR = '::';
+    const SEPARATOR = '::';
 
     /**
      * @return string

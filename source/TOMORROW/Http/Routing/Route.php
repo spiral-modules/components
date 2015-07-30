@@ -114,7 +114,7 @@ class Route extends AbstractRoute
             return $this->target;
         }
 
-        if (is_string($this->target) && strpos($this->target, self::CONTROLLER_SEPARATOR) === false)
+        if (is_string($this->target) && strpos($this->target, self::SEPARATOR) === false)
         {
             //Middleware
             return $container->get($this->target);
@@ -124,7 +124,7 @@ class Route extends AbstractRoute
 
         return function (ServerRequestInterface $request) use ($container, $route)
         {
-            list($controller, $action) = explode(self::CONTROLLER_SEPARATOR, $route->target);
+            list($controller, $action) = explode(self::SEPARATOR, $route->target);
 
             if ($action == self::DYNAMIC_ACTION)
             {

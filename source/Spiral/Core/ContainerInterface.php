@@ -10,6 +10,7 @@ namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Exceptions\Container\ArgumentException;
+use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 
 interface ContainerInterface
@@ -70,6 +71,7 @@ interface ContainerInterface
      *
      * @see replace
      * @param mixed $replacePayload
+     * @throws ContainerException
      */
     public function restore($replacePayload);
 

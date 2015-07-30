@@ -10,7 +10,7 @@ namespace Spiral\Core;
 use Spiral\Core\Exceptions\ControllerException;
 
 /**
- * He made 9 rings... i mean we need one general class.
+ * He made 9 rings... i mean, we need one general class.
  */
 interface CoreInterface extends ContainerInterface, ConfiguratorInterface, HippocampusInterface
 {

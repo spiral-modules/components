@@ -237,6 +237,8 @@ class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterf
                 }
 
                 //We can fetch view name (2 will remove ./)
+
+                //TODO: CHAGE
                 $view = substr(
                     $this->files->relativePath($filename, $directory),
                     2,
@@ -249,6 +251,67 @@ class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterf
 
         return $result;
     }
+
+    //TODO: FIND BETTER LOCATION
+
+    /**
+     * Getting relative location based on absolute path.
+     *
+     * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
+     * @param string $location   Original file or directory location.
+     * @param string $relativeTo Path will be converted to be relative to this directory. By default
+     *                           application root directory will be used.
+     * @return string
+     */
+    public function relativePath($location, $relativeTo = null)
+    {
+        if (empty($relativeTo))
+        {
+            throw new \InvalidArgumentException("RelativeTo argument has to be specified.");
+        }
+
+        //Always directory
+        $relativeTo = $this->normalizePath($relativeTo) . '/';
+        $location = $this->normalizePath($location);
+
+        if (is_dir($location))
+        {
+            $location = rtrim($location, '/') . '/';
+        }
+
+        $relativeTo = explode('/', $relativeTo);
+        $location = explode('/', $location);
+
+        $relPath = $location;
+        foreach ($relativeTo as $depth => $directory)
+        {
+            //Find first non-matching directory
+            if ($directory === $location[$depth])
+            {
+                //Ignore this directory
+                array_shift($relPath);
+            }
+            else
+            {
+                //Get number of remaining dirs to $from
+                $remaining = count($relativeTo) - $depth;
+                if ($remaining > 1)
+                {
+                    // add traversals up to first matching dir
+                    $padLength = (count($relPath) + $remaining - 1) * -1;
+                    $relPath = array_pad($relPath, $padLength, '..');
+                    break;
+                }
+                else
+                {
+                    $relPath[0] = './' . $relPath[0];
+                }
+            }
+        }
+
+        return implode('/', $relPath);
+    }
+
 
     /**
      * Cached filename depends only on view name and provided set of "staticVariables", changing this
@@ -299,7 +362,7 @@ class ViewManager extends Singleton implements ViewsInterface, LoggerAwareInterf
             return true;
         }
 
-        return $this->files->timeUpdated($cacheFilename) < $this->files->timeUpdated($viewFilename);
+        return $this->files->time($cacheFilename) < $this->files->time($viewFilename);
     }
 
     /**

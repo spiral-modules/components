@@ -187,7 +187,7 @@ class LocalServer extends StorageServer
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
-        $this->files->ensureDirectory(dirname($destination), $mode);
+        $this->files->ensureLocation(dirname($destination), $mode);
 
         if (!$this->files->move($filename, $destination))
         {
@@ -213,7 +213,7 @@ class LocalServer extends StorageServer
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
-        $this->files->ensureDirectory(dirname($destination), $mode);
+        $this->files->ensureLocation(dirname($destination), $mode);
 
         if (!$this->files->copy($filename, $destination))
         {

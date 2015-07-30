@@ -78,7 +78,7 @@ class FileHandler implements \SessionHandlerInterface
     {
         foreach ($this->files->getFiles($this->directory) as $filename)
         {
-            if ($this->files->timeUpdated($filename) < time() - $maxlifetime)
+            if ($this->files->time($filename) < time() - $maxlifetime)
             {
                 $this->files->delete($filename);
             }

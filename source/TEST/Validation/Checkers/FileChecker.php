@@ -56,7 +56,7 @@ class FileChecker extends Checker
      */
     protected function getFilename($file, $onlyUploaded = true)
     {
-        if ($onlyUploaded && !$this->files->isUploaded($file))
+        if ($onlyUploaded && !$this->isUploaded($file))
         {
             return false;
         }
@@ -72,6 +72,32 @@ class FileChecker extends Checker
         }
 
         return $this->files->exists($file) ? $file : false;
+    }
+
+    /**
+     * Check if provided file were uploaded, is_uploaded_file() function will be used to check it.
+     *
+     * @param mixed|UploadedFileInterface $file Filename or file array.
+     * @return bool
+     */
+    public function isUploaded($file)
+    {
+        if (is_string($file))
+        {
+            return is_uploaded_file($file);
+        }
+
+        if (is_array($file))
+        {
+            return isset($file['tmp_name']) && is_uploaded_file($file['tmp_name']);
+        }
+
+        if ($file instanceof UploadedFileInterface)
+        {
+            return empty($file->getError());
+        }
+
+        return false;
     }
 
     /**

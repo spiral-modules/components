@@ -8,11 +8,14 @@
  */
 namespace Spiral\Debug\Logger;
 
+/**
+ * Handlers used to listen to log messages and store them accordingly.
+ */
 interface HandlerInterface
 {
     /**
-     * HandlerInterface should only accept options from debug, due it's going to be created using
-     * container you can declare any additional dependencies you want.
+     * HandlerInterface should only accept options from debug. Use depends method for additional
+     * classes.
      *
      * @param array $options
      */
@@ -21,9 +24,9 @@ interface HandlerInterface
     /**
      * Handle log message.
      *
-     * @param int    $level   Log message level.
-     * @param string $message Message.
-     * @param array  $context Context data.
+     * @param int    $level
+     * @param string $message
+     * @param array  $context
      */
     public function __invoke($level, $message, array $context = []);
 }

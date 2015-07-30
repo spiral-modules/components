@@ -8,14 +8,16 @@
  */
 namespace Spiral\Debug\Logger\Handlers;
 
+use Spiral\Core\Container\DependedInterface;
 use Spiral\Debug\Logger\HandlerInterface;
 use Spiral\Files\FilesInterface;
 
-class FileHandler implements HandlerInterface
+/**
+ * Write log message to specified file and rotates this file with prefix when max size exceed.
+ */
+class FileHandler implements HandlerInterface, DependedInterface
 {
     /**
-     * FileHandler options.
-     *
      * @var array
      */
     protected $options = [
@@ -28,22 +30,23 @@ class FileHandler implements HandlerInterface
     ];
 
     /**
-     * Files component. Will not work if not specified.
-     *
-     * @var FilesInterface|null
+     * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * HandlerInterface should only accept options from debug, due it's going to be created using
-     * container you can declare any additional dependencies you want.
-     *
-     * @param array          $options
-     * @param FilesInterface $files
+     * {@inheritdoc}
      */
-    public function __construct(array $options, FilesInterface $files = null)
+    public function __construct(array $options)
     {
         $this->options = $options + $this->options;
+    }
+
+    /**
+     * @param FilesInterface $files
+     */
+    public function depends(FilesInterface $files)
+    {
         $this->files = $files;
     }
 
@@ -56,11 +59,6 @@ class FileHandler implements HandlerInterface
      */
     public function __invoke($level, $message, array $context = [])
     {
-        if (empty($this->files) || empty($this->options['filename']))
-        {
-            return;
-        }
-
         $message = \Spiral\interpolate($this->options['format'], [
             'date'    => date($this->options['dateFormat'], time()),
             'level'   => $level,

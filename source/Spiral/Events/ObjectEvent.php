@@ -8,33 +8,29 @@
  */
 namespace Spiral\Events;
 
+/**
+ * Event which being called by some object. Object
+ */
 class ObjectEvent extends Event
 {
     /**
-     * Responsible object.
-     *
      * @var object
      */
     protected $parent = null;
 
     /**
-     * Event object created automatically via raise() method of EventDispatcher and passed to all
-     * handlers listening for this event name. ObjectEvent created by event trait and keeps event
-     * parent in "object" property.
-     *
-     * @param string $name
      * @param object $parent
+     * @param string $name
      * @param mixed  $context
      */
-    public function __construct($name, $parent, $context = null)
+    public function __construct($parent, $name, $context = null)
     {
-        $this->name = $name;
+        parent::__construct($name, $context);
         $this->parent = $parent;
-        $this->context = $context;
     }
 
     /**
-     * Event context object.
+     * Object which raised an event.
      *
      * @return object
      */

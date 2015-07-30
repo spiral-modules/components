@@ -32,9 +32,9 @@ abstract class Component
     }
 
     /**
-     * Short naming to get container.
+     * Get global container instance or return null.
      *
-     * @return ContainerInterface
+     * @return ContainerInterface|null
      */
     final public static function container()
     {

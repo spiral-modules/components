@@ -8,33 +8,29 @@
  */
 namespace Spiral\Events;
 
+/**
+ * {@inheritdoc}
+ */
 class Event implements EventInterface
 {
     /**
-     * Event name.
-     *
      * @var string
      */
     protected $name = '';
 
     /**
-     * Event context data or object, can be modified while performing.
-     *
-     * @var null
+     * @var mixed
      */
     protected $context = null;
 
     /**
-     * Indication that event chain were stopped by one of handlers.
+     * Event being stopped.
      *
      * @var bool
      */
     protected $stopped = false;
 
     /**
-     * Event object created automatically via raise() method of EventDispatcher and passed to all
-     * handlers listening for this event name.
-     *
      * @param string $name
      * @param mixed  $context
      */
@@ -45,19 +41,15 @@ class Event implements EventInterface
     }
 
     /**
-     * Event name.
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function getName()
+    public function name()
     {
         return $this->name;
     }
 
     /**
-     * Get event content reference. Get word is removed to notify user that this is not usual getter.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function &context()
     {
@@ -65,9 +57,7 @@ class Event implements EventInterface
     }
 
     /**
-     * Indication that event chain were stopped by one of handlers.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isStopped()
     {
@@ -75,7 +65,7 @@ class Event implements EventInterface
     }
 
     /**
-     * Stops event chain, EventDispatcher will end performing right after listener called this method.
+     * {@inheritdoc}
      */
     public function stopPropagation()
     {
@@ -83,7 +73,7 @@ class Event implements EventInterface
     }
 
     /**
-     * Destructing event to clean context and options.
+     * To clean context.
      */
     public function __destruct()
     {

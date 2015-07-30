@@ -15,39 +15,41 @@ use Spiral\Events\EventsException;
 use Spiral\Events\ObjectEvent;
 
 /**
- * Class should be instance of Component or declare STATIC getContainer() method.
+ * Allows class to have statically (class name) based event dispatcher. Will try to use container
+ * to resolve dispatcher instance or create one default.
+ *
+ * Trait requires static (!) implementation of container() method to automatically resolve dispatcher
+ * instance (allowed to return null).
  */
 trait EventsTrait
 {
     /**
-     * List of statically associated event dispatchers.
+     * List of dispatchers associated with their class name.
      *
      * @var DispatcherInterface[]
      */
     private static $dispatchers = [];
 
     /**
-     * @return ContainerInterface
+     * @return ContainerInterface|null
      */
     abstract public function container();
 
     /**
-     * Sets event dispatcher. Event dispatcher will be associated with specific component by it's class
-     * name.
+     * Set event dispatchers manually for current class. Can erase existed dispatcher by providing
+     * null as value.
      *
-     * @param DispatcherInterface $dispatcher
+     * @param DispatcherInterface|null $dispatcher
      */
-    public static function setDispatcher(DispatcherInterface $dispatcher = null)
+    public static function setEvents(DispatcherInterface $dispatcher = null)
     {
         self::$dispatchers[static::class] = $dispatcher;
     }
 
     /**
-     * EventDispatcher instance which is currently attached to component implementation, can be redefined
-     * using setDispatcher() method.
+     * Get class associated event dispatcher or create default one.
      *
      * @return DispatcherInterface
-     * @throws EventsException
      */
     public static function events()
     {
@@ -56,7 +58,7 @@ trait EventsTrait
             return self::$dispatchers[static::class];
         }
 
-        $container = self::getContainer();
+        $container = self::container();
         if (empty($container) || !$container->hasBinding(DispatcherInterface::class))
         {
             //Let's use default Dispatcher, no one will be harmed
@@ -67,23 +69,12 @@ trait EventsTrait
     }
 
     /**
-     * Add event listener to specified event.
+     * Fire object specific event (ObjectEvent will be used) with pointer to parent class (can be
+     * called only in runtime).
      *
-     * @param string   $event    Event name.
-     * @param callable $listener Callback.
-     */
-    public static function on($event, $listener)
-    {
-        self::events()->addListener($event, $listener);
-    }
-
-    /**
-     * Fire object associated event. Object instance will always be passed in context key "parent".
-     * No event dispatcher will not be created automatically on method call.
-     *
-     * @param string $event
-     * @param mixed  $context Event context.
-     * @return mixed
+     * @param string $event   Event name.
+     * @param mixed  $context Passed context.
+     * @return mixed          Processed event content.
      */
     protected function fire($event, $context = null)
     {
@@ -93,6 +84,6 @@ trait EventsTrait
             return $context;
         }
 
-        return self::$dispatchers[static::class]->fire(new ObjectEvent($event, $this, $context));
+        return self::$dispatchers[static::class]->fire(new ObjectEvent($this, $event, $context));
     }
 }

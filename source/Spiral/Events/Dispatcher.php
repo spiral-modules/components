@@ -7,25 +7,24 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Events;
+use Spiral\Events\Exceptions\InvalidArgumentException;
 
+/**
+ * Default dispatcher implementation.
+ */
 class Dispatcher implements DispatcherInterface
 {
     /**
-     * Event listeners, use addHandler, removeHandler for adding new handlers and raiseEvent to
-     * perform specific events.
+     * Events associated with their listeners.
      *
      * @var array
      */
     protected $listeners = [];
 
     /**
-     * All registered listeners will be performed in same order they were registered.
-     *
-     * @param string   $event    Event name.
-     * @param callback $listener Valid callback or closure.
-     * @return $this
+     * {@inheritdoc}
      */
-    public function addListener($event, $listener)
+    public function listen($event, $listener)
     {
         if (!isset($this->listeners[$event]))
         {
@@ -38,15 +37,11 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * Will remove known callback from specified event.
-     *
-     * @param string   $event    Event name.
-     * @param callback $listener Valid callback or closure.
-     * @return $this
+     * {@inheritdoc}
      */
-    public function removeListener($event, $listener)
+    public function remove($event, $listener)
     {
-        if ($this->hasListener($event, $listener))
+        if (isset($this->listeners[$event]))
         {
             unset($this->listeners[$event][array_search($listener, $this->listeners[$event])]);
         }
@@ -55,11 +50,7 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * Check if specified event listened by known callback.
-     *
-     * @param string   $event    Event name.
-     * @param callback $listener Valid callback or closure.
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasListener($event, $listener)
     {
@@ -72,12 +63,9 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * Retrieve all event listeners.
-     *
-     * @param string $event Event name.
-     * @return array
+     * {@inheritdoc}
      */
-    public function getListeners($event)
+    public function listeners($event)
     {
         if (array_key_exists($event, $this->listeners))
         {
@@ -88,19 +76,14 @@ class Dispatcher implements DispatcherInterface
     }
 
     /**
-     * Fire event by name. All attached event handlers will be performed in order they were registered.
-     * Method will return resulted event context which will be passed thought all event listeners.
-     *
-     * @param string $event   Event name.
-     * @param mixed  $context Primary event content.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function fire($event, $context = null)
     {
         if (is_object($event) && !($event instanceof EventInterface))
         {
-            throw new \InvalidArgumentException(
-                "Only instances of EventInterface can be used by event dispatcher."
+            throw new InvalidArgumentException(
+                "Only instances of EventInterface or event name can be fired."
             );
         }
 

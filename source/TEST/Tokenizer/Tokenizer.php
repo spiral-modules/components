@@ -202,7 +202,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             $parent = new \ReflectionClass($parent);
         }
 
-        $this->loader->enable()->events()->addListener('notFound', $listener = function (Event $event)
+        $this->loader->enable()->events()->listen('notFound', $listener = function (Event $event)
         {
             //We want exception if class can not be loaded
             throw new TokenizerException("Class {$event->context()['class']} can not be loaded.");
@@ -259,7 +259,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             }
         }
 
-        $this->loader->events()->removeListener('notFound', $listener);
+        $this->loader->events()->remove('notFound', $listener);
 
         return $result;
     }

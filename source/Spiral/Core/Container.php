@@ -102,7 +102,7 @@ class Container extends Component implements ContainerInterface
      * @return object
      * @throws InstanceException
      */
-    protected function createInstance($class, array $parameters)
+    private function createInstance($class, array $parameters)
     {
         $reflector = new \ReflectionClass($class);
 
@@ -245,15 +245,15 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function restore($binding)
+    public function restore($replacePayload)
     {
-        list($alias, $resolver) = $binding;
+        list($alias, $resolver) = $replacePayload;
 
         unset($this->bindings[$alias]);
         if (!empty($resolver))
         {
             //Restoring original value
-            $this->bindings[$alias] = $binding;
+            $this->bindings[$alias] = $replacePayload;
         }
     }
 

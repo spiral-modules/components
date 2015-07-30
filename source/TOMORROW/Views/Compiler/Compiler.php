@@ -150,7 +150,7 @@ class Compiler extends Component implements CompilerInterface
      */
     public function getFilename()
     {
-        return $this->views->viewFilename($this->namespace, $this->view);
+        return $this->views->getFilename($this->namespace, $this->view);
     }
 
     /**

@@ -16,7 +16,7 @@ trait BenchmarkTrait
     /**
      * @return ContainerInterface
      */
-    abstract public function getContainer();
+    abstract public function container();
 
     /**
      * Benchmarks used to record duration of long or memory inefficient operations in spiral, you

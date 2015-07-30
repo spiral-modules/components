@@ -31,6 +31,11 @@ interface FilesInterface
     const GB = 1073741824;
 
     /**
+     * Accepted location separator.
+     */
+    const SEPARATOR = '/';
+
+    /**
      * Ensure location existence with specified mode.
      *
      * @param string $location

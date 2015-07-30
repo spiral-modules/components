@@ -6,14 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Cache\Exceptions;
+namespace Spiral\Views\Exceptions;
 
 use Spiral\Core\Exceptions\ExceptionInterface;
 
 /**
- * Store not found or can not be constructed.
+ * General view component exception (view file not found and etc).
  */
-class CacheException extends \LogicException implements ExceptionInterface
+class ViewException extends \LogicException implements ExceptionInterface
 {
-
 }

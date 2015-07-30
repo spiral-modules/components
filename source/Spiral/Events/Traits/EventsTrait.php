@@ -58,8 +58,7 @@ trait EventsTrait
             return self::$dispatchers[static::class];
         }
 
-        $container = self::container();
-        if (empty($container) || !$container->hasBinding(DispatcherInterface::class))
+        if (empty($container = self::container()) || !$container->hasBinding(DispatcherInterface::class))
         {
             //Let's use default Dispatcher, no one will be harmed
             return self::$dispatchers[static::class] = new Dispatcher();

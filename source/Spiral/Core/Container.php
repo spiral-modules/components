@@ -8,6 +8,7 @@
  */
 namespace Spiral\Core;
 
+use Spiral\Core\Container\DependedInterface;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 use ReflectionFunctionAbstract as ContextFunction;
@@ -138,6 +139,13 @@ class Container extends Component implements ContainerInterface
         {
             //Component declared SINGLETON constant, binding as constant value and class name.
             $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
+        }
+
+        if ($instance instanceof DependedInterface)
+        {
+            //Post construction ingestion
+            $depends = $reflector->getMethod(DependedInterface::DEPENDENT_METHOD);
+            $depends->invoke($instance, $this->resolveArguments($depends, $parameters));
         }
 
         return $instance;

@@ -10,6 +10,9 @@ namespace Spiral\Cache;
 
 use Spiral\Cache\Exceptions\StoreException;
 
+/**
+ * Represents single cache store.
+ */
 interface StoreInterface
 {
     /**

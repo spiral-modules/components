@@ -6,14 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Events\Exceptions;
+namespace Spiral\Files\Exceptions;
 
 use Spiral\Core\Exceptions\ExceptionInterface;
 
 /**
- * {@inheritdoc}
+ * General files exception.
  */
-class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
+class FilesException extends \LogicException implements ExceptionInterface
 {
 
 }

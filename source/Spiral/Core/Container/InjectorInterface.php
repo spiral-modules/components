@@ -8,6 +8,11 @@
  */
 namespace Spiral\Core\Container;
 
+use Spiral\Core\Exceptions\Container\ContainerException;
+
+/**
+ * Magic spiral interface used to resolve dependencies based on their context.
+ */
 interface InjectorInterface
 {
     /**
@@ -20,7 +25,9 @@ interface InjectorInterface
      *
      * @param \ReflectionClass     $class
      * @param \ReflectionParameter $parameter
-     * @return mixed
+     * @return object
+     * @throws ContainerException
+     * @throws \ErrorException
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter);
 }

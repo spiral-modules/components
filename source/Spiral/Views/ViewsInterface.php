@@ -37,7 +37,7 @@ interface ViewsInterface
     public function getFilename($namespace, $view);
 
     /**
-     * Get string source of view by it's namespace and name.
+     * Get source of non compiled view.
      *
      * @param string $namespace
      * @param string $view

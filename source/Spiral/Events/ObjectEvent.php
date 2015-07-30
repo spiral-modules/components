@@ -23,7 +23,7 @@ class ObjectEvent extends Event
      * @param string $name
      * @param mixed  $context
      */
-    public function __construct($parent, $name, $context = null)
+    public function __construct($parent, $name, $context)
     {
         parent::__construct($name, $context);
         $this->parent = $parent;

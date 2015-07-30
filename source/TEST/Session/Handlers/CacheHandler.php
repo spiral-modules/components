@@ -8,7 +8,7 @@
  */
 namespace Spiral\Session\Handlers;
 
-use Spiral\Cache\CacheInterface;
+use Spiral\Cache\ProviderInterface;
 use Spiral\Cache\StoreInterface;
 
 class CacheHandler implements \SessionHandlerInterface
@@ -40,9 +40,9 @@ class CacheHandler implements \SessionHandlerInterface
      *
      * @param array          $options  Session handler options.
      * @param int            $lifetime Default session lifetime.
-     * @param CacheInterface $cache
+     * @param ProviderInterface $cache
      */
-    public function __construct(array $options, $lifetime = 0, CacheInterface $cache = null)
+    public function __construct(array $options, $lifetime = 0, ProviderInterface $cache = null)
     {
         $this->lifetime = $lifetime;
         $this->cacheStore = $cache->store($options['store'] == 'default' ? null : $options['store']);

@@ -9,12 +9,14 @@
 namespace Spiral\Files\Streams;
 
 use Psr\Http\Message\StreamInterface;
+use Spiral\Files\Exceptions\WrapperException;
 
+/**
+ * Spiral converter of PSR-7 streams to virtual filenames.
+ */
 class StreamWrapper
 {
     /**
-     * Indication that wrapper was already registered.
-     *
      * @var bool
      */
     private static $registered = false;
@@ -27,29 +29,6 @@ class StreamWrapper
     private static $uris = [];
 
     /**
-     * Stream context.
-     *
-     * @var resource
-     */
-    public $context = null;
-
-    /**
-     * Associated stream.
-     *
-     * @var StreamInterface
-     */
-    private $stream = null;
-
-    /**
-     * Stream mode (r, r+, w).
-     *
-     * @var int
-     */
-    private $mode = 0;
-
-    /**
-     * Association between mode and it's inode value.
-     *
      * @var array
      */
     private static $modes = [
@@ -60,6 +39,23 @@ class StreamWrapper
         'w'   => 33188,
         'wb'  => 33188
     ];
+
+    /**
+     * Stream context.
+     *
+     * @var resource
+     */
+    public $context = null;
+
+    /**
+     * @var StreamInterface
+     */
+    private $stream = null;
+
+    /**
+     * @var int
+     */
+    private $mode = 0;
 
     /**
      * Check if StreamInterface ended.
@@ -255,6 +251,7 @@ class StreamWrapper
      *
      * @param StreamInterface $stream
      * @return resource
+     * @throws WrapperException
      */
     public static function getResource(StreamInterface $stream)
     {
@@ -271,7 +268,7 @@ class StreamWrapper
 
         if (empty($mode))
         {
-            throw new \RuntimeException("Stream is not available in read or write modes.");
+            throw new WrapperException("Stream is not available in read or write modes.");
         }
 
         return fopen(self::getUri($stream), $mode);

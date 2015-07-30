@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core\Exceptions;
+namespace Spiral\Files\Exceptions;
 
 /**
- * Container is missing.
+ * StreamWrapper specific exception.
  */
-class MissingContainerException extends DependencyException
+class WrapperException extends FilesException
 {
 
 }

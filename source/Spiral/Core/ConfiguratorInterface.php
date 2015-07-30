@@ -8,6 +8,9 @@
  */
 namespace Spiral\Core;
 
+/**
+ * Provides array configuration based on provided config section.
+ */
 interface ConfiguratorInterface
 {
     /**

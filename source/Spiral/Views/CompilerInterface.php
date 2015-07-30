@@ -9,17 +9,17 @@
 namespace Spiral\Views;
 
 use Spiral\Core\ContainerInterface;
+use Spiral\Views\Exceptions\CompilerException;
 
+/**
+ * Compilers used to create view cache to speed up rendering process.
+ */
 interface CompilerInterface
 {
     /**
-     * Instance of view compiler. Compilers used to pre-process view files for faster rendering in
-     * runtime environment.
-     *
      * @param ViewsInterface     $views
      * @param ContainerInterface $container
      * @param array              $config    Compiler configuration.
-     * @param string             $source    Non-compiled source.
      * @param string             $namespace View namespace.
      * @param string             $view      View name.
      */
@@ -27,15 +27,14 @@ interface CompilerInterface
         ViewsInterface $views,
         ContainerInterface $container,
         array $config,
-        $source,
         $namespace,
         $view
     );
 
     /**
-     * Compile original view file to plain php code.
-     *
      * @return string
+     * @throws CompilerException
+     * @throws \Exception
      */
     public function compile();
 }

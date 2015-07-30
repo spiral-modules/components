@@ -10,11 +10,12 @@ namespace Spiral\Files\Streams;
 
 use Psr\Http\Message\StreamInterface;
 
+/**
+ * Class contain PSR-7 compatible body.
+ */
 interface StreamableInterface
 {
     /**
-     * Get associated stream.
-     *
      * @return StreamInterface
      */
     public function getStream();

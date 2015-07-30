@@ -10,7 +10,10 @@ namespace Spiral\Cache;
 
 use Spiral\Cache\Exceptions\CacheException;
 
-interface CacheInterface
+/**
+ * StoreInterface provider.
+ */
+interface ProviderInterface
 {
     /**
      * Create specified or default cache adapter. This function will load cache adapter if it

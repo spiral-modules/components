@@ -34,7 +34,7 @@ class Event implements EventInterface
      * @param string $name
      * @param mixed  $context
      */
-    public function __construct($name, $context = null)
+    public function __construct($name, $context )
     {
         $this->name = $name;
         $this->context = $context;

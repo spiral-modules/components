@@ -10,6 +10,7 @@ namespace Spiral\Views;
 
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Core\Singleton;
@@ -226,57 +227,18 @@ class ViewManager extends Singleton implements ViewsInterface
         return $this->files->read($this->getFilename($namespace, $view));
     }
 
-
-    public function compile($namespace, $view)
-    {
-    }
-
-    //    /**
-    //     * {@inheritdoc}
-    //     */
-    //    public function getFilename(
-    //        $namespace,
-    //        $view,
-    //        $compile = true,
-    //        $resetCache = false,
-    //        &$engine = null
-    //    )
-    //    {
-    //        $viewFilename = $this->getFilename($namespace, $view, $engine);
-    //
-    //        //Pre-compilation is possible only when engine defined compiler
-    //        if ($compile && !empty($this->config['engines'][$engine]['compiler']))
-    //        {
-    //            //Cached filename
-    //            $cacheFilename = $this->cacheFilename($namespace, $view);
-    //
-    //            if ($resetCache || $this->isExpired($viewFilename, $cacheFilename))
-    //            {
-    //                //Saving compilation result to filename
-    //                $this->files->write(
-    //                    $cacheFilename,
-    //                    $this->compile($engine, $this->files->read($viewFilename), $namespace, $view),
-    //                    FilesInterface::RUNTIME,
-    //                    true
-    //                );
-    //            }
-    //
-    //            return $cacheFilename;
-    //        }
-    //
-    //        return $viewFilename;
-    //    }
-
     /**
      * {@inheritdoc}
      */
-    protected function compile($engine, $source, $namespace, $view)
+    public function compile($namespace, $view)
     {
-        return $this->compiler($engine, $source, $namespace, $view)->compile();
+        //Via helper function
+        $this->compiledFilename($namespace, $view, true);
     }
 
     /**
      * {@inheritdoc}
+     * @throws ContainerException
      */
     public function get($path, array $data = [])
     {
@@ -286,13 +248,14 @@ class ViewManager extends Singleton implements ViewsInterface
             list($namespace, $path) = explode(self::NS_SEPARATOR, $path);
         }
 
-        //Compiled view source
-        $filename = $this->getFilename($namespace, $path, true, false, $engine);
+        $compiledFilename = $this->compiledFilename($namespace, $path, true, $engine);
 
-        //View representer
-        $renderer = $this->config['engines'][$engine]['view'];
-
-        return new $renderer($this, $namespace, $path, $data, $filename);
+        return $this->container->get($this->config['engines'][$engine]['view'], [
+            'views'            => $this,
+            'namespace'        => $namespace,
+            'view'             => $path,
+            'compiledFilename' => $compiledFilename
+        ]);
     }
 
     /**
@@ -303,38 +266,87 @@ class ViewManager extends Singleton implements ViewsInterface
         return $this->get($path, $data)->render();
     }
 
-
     /**
-     * Cached filename depends only on view name and provided set of "staticVariables", changing this
-     * set system can cache some view content on file system level. For example view component can
-     * set language variable, which will be rendering another view every time language changed and
-     * allow to cache translated texts.
+     * Create engine specific compiler instance.
      *
-     * @param string $namespace View namespace.
-     * @param string $viewName  View filename, without php included.
-     * @return string
+     * @param string $engine
+     * @param string $namespace
+     * @param string $view
+     * @return CompilerInterface
+     * @throws ViewException
+     * @throws ContainerException
      */
-    public function cacheFilename($namespace, $viewName)
+    protected function compiler($engine, $namespace, $view)
     {
-        foreach ($this->config['dependencies'] as $variable => $provider)
+        if (isset($this->config['engines'][$engine]))
         {
-            $this->dependencies[$variable] = call_user_func([
-                $this->container->get($provider[0]),
-                $provider[1]
-            ]);
+            throw new ViewException("Undefined view engine '{$engine}'.");
         }
 
-        $postfix = '-' . hash('crc32b', join(',', $this->dependencies)) . '.' . self::CACHE_EXTENSION;
-
-        return $this->config['caching']['directory'] . '/'
-        . $namespace . '-' . trim(str_replace(['\\', '/'], '-', $viewName), '-')
-        . $postfix;
+        return $this->container->get($this->config['engines'][$engine]['compiler'], [
+            'views'     => $this,
+            'config'    => $this->config['engines'][$engine],
+            'namespace' => $namespace,
+            'view'      => $view
+        ]);
     }
 
     /**
-     * Check if compiled view cache expired and has to be re-rendered. You can disable view cache
-     * by altering view config (this will slow your application dramatically but will simplyfy
-     * development).
+     * Return location of compiled view filename.
+     *
+     * @param string $namespace
+     * @param string $view
+     * @param bool   $reset
+     * @param string $engine
+     * @return string
+     */
+    protected function compiledFilename($namespace, $view, $reset = false, &$engine = null)
+    {
+        $viewFilename = $this->getFilename($namespace, $view, $engine);
+        if (empty($this->config['engines'][$engine]['compiler']))
+        {
+            //Nothing to compile
+            return $viewFilename;
+        }
+
+        $cacheFilename = $this->cacheFilename($namespace, $view);
+        if ($reset || $this->isExpired($viewFilename, $cacheFilename))
+        {
+            $this->files->write(
+                $cacheFilename,
+                $this->compiler($engine, $namespace, $view)->compile(),
+                FilesInterface::RUNTIME,
+                true
+            );
+        }
+
+        return $cacheFilename;
+    }
+
+    /**
+     * Create filename where compiled version of view will be stored. Should use view dependencies.
+     *
+     * @param string $namespace
+     * @param string $view
+     * @return string
+     */
+    public function cacheFilename($namespace, $view)
+    {
+        foreach ($this->config['dependencies'] as $variable => $provider)
+        {
+            $this->dependencies[$variable] = call_user_func(
+                [$this->container->get($provider[0]), $provider[1]]
+            );
+        }
+
+        $postfix = '-' . hash('crc32b', join(',', $this->dependencies)) . '.' . self::EXTENSION;
+
+        return $this->config['caching']['directory'] . '/' . $namespace . '-'
+        . trim(str_replace(['\\', '/'], '-', $view), '-') . $postfix;
+    }
+
+    /**
+     * Check if view cache has been expired.
      *
      * @param string $viewFilename
      * @param string $cacheFilename
@@ -344,7 +356,6 @@ class ViewManager extends Singleton implements ViewsInterface
     {
         if (!$this->config['caching']['enabled'])
         {
-            //Aways invalidate
             return true;
         }
 

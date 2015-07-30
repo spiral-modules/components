@@ -9,7 +9,7 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * Unable to perform user action.
+ * Unable to perform user action or find controller.
  */
 class ControllerException extends \RuntimeException implements ExceptionInterface
 {

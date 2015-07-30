@@ -8,6 +8,9 @@
  */
 namespace Spiral\Core\Traits;
 
+/**
+ * Provides simplified access to component specific configuration.
+ */
 trait ConfigurableTrait
 {
     /**

@@ -9,10 +9,10 @@
 namespace Spiral\Core\Container;
 
 /**
- * Every implemented class MUST declare method named "inject". Container should inject requested
+ * Every implemented class MUST declare method named "inject". Container/user should inject requested
  * dependencies into this method.
  *
- * In order to fully configure class such method MUCH be called.
+ * In order to fully configure class such method MUST be called.
  */
 interface DependedInterface
 {

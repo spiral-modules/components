@@ -9,9 +9,13 @@
 namespace Spiral\Views;
 
 use Spiral\Core\Component;
+use Spiral\Core\Container\DependedInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
-class View extends Component implements ViewInterface
+/**
+ * Default view implementation can work with
+ */
+class View extends Component implements ViewInterface, DependedInterface
 {
     /**
      * For render benchmarking.
@@ -19,11 +23,9 @@ class View extends Component implements ViewInterface
     use BenchmarkTrait;
 
     /**
-     * Compiled view in a form of PHP file.
-     *
      * @var string
      */
-    protected $filename = '';
+    protected $compiledFilename = '';
 
     /**
      * @var array
@@ -42,30 +44,21 @@ class View extends Component implements ViewInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param ViewsInterface $views
-     * @param string         $namespace
-     * @param string         $view
-     * @param array          $data
-     * @param string         $filename Pre-defined view filename.
      */
-    public function __construct(
-        ViewsInterface $views,
-        $namespace,
-        $view,
-        array $data = [],
-        $filename = ''
-    )
+    public function __construct(ViewsInterface $views, $namespace, $view, array $data = [])
     {
-        if (empty($this->filename = $filename))
-        {
-            $this->filename = $views->getFilename($namespace, $view);
-        }
-
         $this->namespace = $namespace;
         $this->view = $view;
 
         $this->data = $data;
+    }
+
+    /**
+     * @param string $compiledFilename
+     */
+    public function inject($compiledFilename)
+    {
+        $this->compiledFilename = $compiledFilename;
     }
 
     /**
@@ -88,7 +81,7 @@ class View extends Component implements ViewInterface
         ob_start();
 
         extract($this->data, EXTR_OVERWRITE);
-        include $this->filename;
+        include $this->compiledFilename;
 
         $result = ob_get_clean();
         $this->benchmark('render', $context);

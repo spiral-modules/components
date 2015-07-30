@@ -13,6 +13,9 @@ use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 use ReflectionFunctionAbstract as ContextFunction;
 
+/**
+ * {@inheritdoc}
+ */
 class Container extends Component implements ContainerInterface
 {
     /**

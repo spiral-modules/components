@@ -9,7 +9,8 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * User input did something, exceptions like that should be treat differently.
+ * User input did something wrong, exceptions like that should be treat differently without much
+ * logging.
  */
 class ClientException extends \RuntimeException implements ExceptionInterface
 {

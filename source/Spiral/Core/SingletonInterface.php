@@ -10,6 +10,10 @@ namespace Spiral\Core;
 
 use Spiral\Core\Exceptions\MissingContainerException;
 
+/**
+ * Class treated as singleton by spiral container and should be saved as reference in bindings.
+ * Must declare SINGLETON constant.
+ */
 interface SingletonInterface
 {
     /**

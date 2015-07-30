@@ -7,11 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Cache\Stores\DriverInterface;
+use Spiral\Cache\CacheStore;
 
 /**
  * Two brothers.
  */
-class MemcacheDriver implements DriverInterface
+class MemcacheDriver extends CacheStore implements DriverInterface
 {
     /**
      * @var array

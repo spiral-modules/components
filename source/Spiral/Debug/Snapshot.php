@@ -10,11 +10,14 @@ namespace Spiral\Debug;
 
 use Spiral\Core\Component;
 use Exception;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\Container\DependedInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewsInterface;
 
-class Snapshot extends Component implements SnapshotInterface
+/**
+ * Spiral implementation of SnapshotInterface with ability to render exception explanation using views.
+ */
+class Snapshot extends Component implements SnapshotInterface, DependedInterface
 {
     /**
      * Message format.
@@ -27,39 +30,29 @@ class Snapshot extends Component implements SnapshotInterface
     const CONFIG = 'snapshots';
 
     /**
-     * Associated exception.
-     *
      * @var \Exception
      */
     protected $exception = null;
 
     /**
-     * Used for logging.
-     *
+     * @var array
+     */
+    protected $config = [];
+
+    /**
      * @var Debugger
      */
     protected $debugger = null;
 
     /**
-     * To store snapshot at hard drive.
-     *
      * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * To render snapshot.
-     *
      * @var ViewsInterface
      */
     protected $views = null;
-
-    /**
-     * Snapshot specific configuration.
-     *
-     * @var array
-     */
-    protected $config = [];
 
     /**
      * Rendered backtrace view, can be used in to save into file, send by email or show to client.
@@ -69,57 +62,29 @@ class Snapshot extends Component implements SnapshotInterface
     protected $renderCache = '';
 
     /**
-     * Snapshot used to report, render and describe exception in user friendly way. Snapshot may
-     * require additional dependencies so it should always be constructed using container.
-     *
-     * @param Exception          $exception
-     * @param ContainerInterface $container
-     * @param Debugger           $debugger
-     * @param FilesInterface     $files
-     * @param ViewsInterface     $views
+     * [@inheritdoc}
      */
-    public function __construct(
-        Exception $exception,
-        ContainerInterface $container,
-        Debugger $debugger = null,
-        FilesInterface $files = null,
-        ViewsInterface $views = null
-    )
+    public function __construct(Exception $exception)
     {
         $this->exception = $exception;
-        $this->debugger = !empty($debugger) ? $debugger : $container->get(Debugger::class);
-
-        $this->files = !empty($files) ? $files : $container->get(FilesInterface::class);
-        $this->views = !empty($views) ? $views : $container->get(ViewsInterface::class);
-
-        //Snapshots configuration
-        $this->config = $debugger->getConfig()[static::CONFIG];
     }
 
     /**
-     * Handled exception object.
-     *
-     * @return Exception|null
+     * @param Debugger       $debugger
+     * @param FilesInterface $files
+     * @param ViewsInterface $views
      */
-    public function getException()
+    public function inject(Debugger $debugger, FilesInterface $files, ViewsInterface $views)
     {
-        return $this->exception;
+        $this->config = $debugger->config()[static::CONFIG];
+
+        $this->debugger = $debugger;
+        $this->files = $files;
+        $this->views = $views;
     }
 
     /**
-     * Handled exception class name.
-     *
-     * @return string
-     */
-    public function getClass()
-    {
-        return get_class($this->exception);
-    }
-
-    /**
-     * Get short exception name.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -129,9 +94,23 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Gets the file in which the exception occurred.
-     *
-     * @return string
+     * {@inheritdoc}
+     */
+    public function getException()
+    {
+        return $this->exception;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getClass()
+    {
+        return get_class($this->exception);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getFile()
     {
@@ -139,9 +118,7 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Gets the line in which the exception occurred.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function getLine()
     {
@@ -149,9 +126,7 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Exception trace as array.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function getTrace()
     {
@@ -159,14 +134,11 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Formatted exception message, will include exception class name, original error message and
-     * location with fine and line.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getMessage()
     {
-        return interpolate(static::MESSAGE, [
+        return \Spiral\interpolate(static::MESSAGE, [
             'exception' => $this->getClass(),
             'message'   => $this->exception->getMessage(),
             'file'      => $this->getFile(),
@@ -175,8 +147,7 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Report or store snapshot in known location. Used to store exception information for future
-     * analysis.
+     * {@inheritdoc}
      */
     public function report()
     {
@@ -188,7 +159,7 @@ class Snapshot extends Component implements SnapshotInterface
             return;
         }
 
-        $filename = interpolate($this->config['reporting']['filename'], [
+        $filename = \Spiral\interpolate($this->config['reporting']['filename'], [
             'date'      => date($this->config['reporting']['dateFormat'], time()),
             'exception' => $this->getName()
         ]);
@@ -203,9 +174,7 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Get shortened exception description. Usually used to send data over ajax.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function describe()
     {
@@ -220,9 +189,7 @@ class Snapshot extends Component implements SnapshotInterface
     }
 
     /**
-     * Render exception snapshot to string.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function render()
     {

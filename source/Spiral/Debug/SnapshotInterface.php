@@ -17,10 +17,9 @@ use Spiral\Core\ContainerInterface;
 interface SnapshotInterface
 {
     /**
-     * @param Exception          $exception
-     * @param ContainerInterface $container
+     * @param Exception $exception
      */
-    public function __construct(Exception $exception, ContainerInterface $container);
+    public function __construct(Exception $exception);
 
     /**
      * Short exception name.

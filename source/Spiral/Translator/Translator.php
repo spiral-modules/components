@@ -12,11 +12,16 @@ use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
+use Spiral\Translator\Exceptions\LanguageException;
+use Spiral\Translator\Exceptions\TranslatorException;
 
+/**
+ * Default spiral translator implementation.
+ */
 class Translator extends Singleton implements TranslatorInterface
 {
     /**
-     * Some operations should be recorded.
+     * Has configuration.
      */
     use ConfigurableTrait;
 
@@ -31,73 +36,60 @@ class Translator extends Singleton implements TranslatorInterface
     const CONFIG = 'translator';
 
     /**
-     * Constructed language pluralizers.
-     *
-     * @var PluralizerInterface[]
-     */
-    protected $pluralizers = [];
-
-    /**
-     * Currently selected language identifier.
-     *
      * @var string
      */
     protected $language = '';
 
     /**
-     * Options associated with currently active language, define pluralization formula, word forms
-     * count and  bundles directory.
-     *
      * @var array
      */
     protected $languageOptions = [];
 
     /**
-     * Already loaded language bundles, bundle define list of associations between primary and
-     * currently selected language. Bundles can be also used for "internal translating" (en => en).
+     * @var PluralizerInterface[]
+     */
+    protected $pluralizers = [];
+
+    /**
+     * Language bundles.
      *
      * @var array
      */
     protected $bundles = [];
 
     /**
-     * Core component.
-     *
      * @var HippocampusInterface
      */
-    protected $runtime = null;
+    protected $memory = null;
 
     /**
-     * New I18nManager component instance, while construing default language and timezone will be
-     * mounted.
-     *
      * @param ConfiguratorInterface $configurator
-     * @param HippocampusInterface  $runtime
+     * @param HippocampusInterface  $memory
+     * @throws LanguageException
      */
-    public function __construct(ConfiguratorInterface $configurator, HippocampusInterface $runtime)
+    public function __construct(ConfiguratorInterface $configurator, HippocampusInterface $memory)
     {
         $this->config = $configurator->getConfig(static::CONFIG);
-        $this->runtime = $runtime;
+        $this->memory = $memory;
 
-        $this->language = $this->config['default'];
-        $this->languageOptions = $this->config['languages'][$this->language];
+        $this->setLanguage($this->config['default']);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setLanguage($languageID)
+    public function setLanguage($language)
     {
-        if (!isset($this->config['languages'][$languageID]))
+        if (!isset($this->config['languages'][$language]))
         {
-            throw new TranslatorException("Invalid language '{$languageID}', no presets found.");
+            throw new LanguageException("Invalid language '{$language}', no presets found.");
         }
 
         //Cleaning all bundles
         $this->bundles = [];
 
-        $this->language = $languageID;
-        $this->languageOptions = $this->config['languages'][$languageID];
+        $this->language = $language;
+        $this->languageOptions = $this->config['languages'][$language];
     }
 
     /**
@@ -111,7 +103,7 @@ class Translator extends Singleton implements TranslatorInterface
     /**
      * {@inheritdoc}
      */
-    public function translate($bundle, $string)
+    public function translate($bundle, $string, $options = [])
     {
         $this->loadBundle($bundle);
 
@@ -142,7 +134,7 @@ class Translator extends Singleton implements TranslatorInterface
     /**
      * {@inheritdoc}
      */
-    public function pluralize($phrase, $number, $formatNumber = true)
+    public function pluralize($phrase, $number, $format = true)
     {
         $this->loadBundle($bundle = $this->config['plurals']);
 
@@ -162,25 +154,21 @@ class Translator extends Singleton implements TranslatorInterface
             return $this->bundles[$bundle][$phrase];
         }
 
-        return sprintf(
+        return \Spiral\interpolate(
             $this->pluralizer()->getForm($number, $this->bundles[$bundle][$phrase]),
-            $formatNumber ? number_format($number) : $number
+            ['n' => $format ? number_format($number) : $number]
         );
     }
 
     /**
-     * Get language specific pluralizer.
+     * Get or create instance of language pluralizer.
      *
-     * @param string $language If empty current language pluralizer will be returned.
+     * @param string $language Current language will be used if null specified.
      * @return PluralizerInterface
      */
-    protected function pluralizer($language = '')
+    public function pluralizer($language = null)
     {
-        if (empty($language))
-        {
-            $language = $this->language;
-        }
-
+        $language = !empty($language) ? $language : $this->language;
         if (isset($this->pluralizers[$language]))
         {
             return $this->pluralizers[$language];
@@ -192,7 +180,7 @@ class Translator extends Singleton implements TranslatorInterface
     }
 
     /**
-     * Load i18n bundle content to memory specific to currently selected language.
+     * Location language bundle from memory if not loaded already.
      *
      * @param string $bundle
      */
@@ -203,11 +191,7 @@ class Translator extends Singleton implements TranslatorInterface
             return;
         }
 
-        $this->bundles[$bundle] = $this->runtime->loadData(
-            $bundle,
-            $this->languageOptions['directory']
-        );
-
+        $this->bundles[$bundle] = $this->memory->loadData($bundle, $this->languageOptions['directory']);
         if (empty($this->bundles[$bundle]))
         {
             $this->bundles[$bundle] = [];
@@ -215,7 +199,7 @@ class Translator extends Singleton implements TranslatorInterface
     }
 
     /**
-     * Save modified i18n bundle to language specific directory.
+     * Save language bundle into memory.
      *
      * @param string $bundle
      */
@@ -226,18 +210,13 @@ class Translator extends Singleton implements TranslatorInterface
             return;
         }
 
-        $this->runtime->saveData(
-            $bundle,
-            $this->bundles[$bundle],
-            $this->languageOptions['directory']
-        );
+        $this->memory->saveData($bundle, $this->bundles[$bundle], $this->languageOptions['directory']);
     }
 
     /**
-     * Normalizes bundle key (string) to prevent data loosing while extra lines or spaces or formatting.
-     * Method will be applied only to keys, final value will be kept untouched.
+     * Normalize string to remove garbage spaces and new lines.
      *
-     * @param string $string String to be localized.
+     * @param string $string
      * @return string
      */
     protected function normalize($string)
@@ -246,14 +225,11 @@ class Translator extends Singleton implements TranslatorInterface
     }
 
     /**
-     * Force translation for specified string in bundle file. Will replace existed translation or
-     * create new one.
+     * Set string translation in specified bundle.
      *
-     * @param string $bundle      Bundle name.
-     * @param string $string      String to be localized, should be sprintf compatible if formatting
-     *                            required.
-     * @param string $translation String translation, by default equals to string itself.
-     * @return string
+     * @param string $bundle
+     * @param string $string
+     * @param string $translation
      */
     public function set($bundle, $string, $translation = '')
     {

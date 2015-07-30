@@ -10,13 +10,13 @@ namespace Spiral\Translator\Pluralizers;
 
 use Spiral\Translator\PluralizerInterface;
 
+/**
+ * English and similar languages.
+ */
 class EnglishPluralizer implements PluralizerInterface
 {
     /**
-     * Get abstract pluralization formula. Formula should be created in abstract form where
-     * number is "n" and form represented by it's index. Basically formula should be PO compatible.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getFormula()
     {
@@ -24,9 +24,7 @@ class EnglishPluralizer implements PluralizerInterface
     }
 
     /**
-     * How many forms presented.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function countForms()
     {
@@ -34,11 +32,7 @@ class EnglishPluralizer implements PluralizerInterface
     }
 
     /**
-     * Get form for specified number.
-     *
-     * @param int   $number
-     * @param array $forms Pluralization forms.
-     * @return int
+     * {@inheritdoc}
      */
     public function getForm($number, array $forms)
     {

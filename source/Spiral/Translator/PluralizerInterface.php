@@ -8,11 +8,13 @@
  */
 namespace Spiral\Translator;
 
+/**
+ * Simple interface to pluralize messages.
+ */
 interface PluralizerInterface
 {
     /**
-     * Get abstract pluralization formula. Formula should be created in abstract form where
-     * number is "n" and form represented by it's index. Basically formula should be PO compatible.
+     * Get abstract pluralization formula.
      *
      * @link http://docs.translatehouse.org/projects/localization-guide/en/latest/l10n/pluralforms.html
      * @return string
@@ -27,11 +29,11 @@ interface PluralizerInterface
     public function countForms();
 
     /**
-     * Get form for specified number.
+     * Select pluralization form from list using number value.
      *
      * @param int   $number
-     * @param array $forms Pluralization forms.
-     * @return int
+     * @param array $forms
+     * @return string
      */
     public function getForm($number, array $forms);
 }

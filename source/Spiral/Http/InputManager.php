@@ -19,6 +19,8 @@ use Spiral\Http\Input\HeadersBag;
 use Spiral\Http\Input\ServerBag;
 
 /**
+ * Simplified access to ServerRequestInterface values.
+ *
  * @property HeadersBag $headers
  * @property InputBag   $data
  * @property InputBag   $query
@@ -35,16 +37,12 @@ class InputManager extends Singleton
     const SINGLETON = self::class;
 
     /**
-     * Container is required to resolve active instance of ServerRequestInterface.
-     *
      * @invisible
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * Cached instance of ServerRequestInterface.
-     *
      * @invisible
      * @var ServerRequestInterface
      */
@@ -57,47 +55,21 @@ class InputManager extends Singleton
      * @var array
      */
     protected $bagAssociations = [
-        'headers'    => [
-            'class'  => HeadersBag::class,
-            'source' => 'getHeaders'
-        ],
-        'data'       => [
-            'class'  => InputBag::class,
-            'source' => 'getParsedBody'
-        ],
-        'query'      => [
-            'class'  => InputBag::class,
-            'source' => 'getQueryParams'
-        ],
-        'cookies'    => [
-            'class'  => InputBag::class,
-            'source' => 'getCookieParams'
-        ],
-        'files'      => [
-            'class'  => FilesBag::class,
-            'source' => 'getUploadedFiles'
-        ],
-        'server'     => [
-            'class'  => ServerBag::class,
-            'source' => 'getServerParams'
-        ],
-        'attributes' => [
-            'class'  => InputBag::class,
-            'source' => 'getAttributes'
-        ]
+        'headers'    => ['class' => HeadersBag::class, 'source' => 'getHeaders'],
+        'data'       => ['class' => InputBag::class, 'source' => 'getParsedBody'],
+        'query'      => ['class' => InputBag::class, 'source' => 'getQueryParams'],
+        'cookies'    => ['class' => InputBag::class, 'source' => 'getCookieParams'],
+        'files'      => ['class' => FilesBag::class, 'source' => 'getUploadedFiles'],
+        'server'     => ['class' => ServerBag::class, 'source' => 'getServerParams'],
+        'attributes' => ['class' => InputBag::class, 'source' => 'getAttributes']
     ];
 
     /**
-     * Already constructed input bag instances.
-     *
-     * @var array|InputBag[]
+     * @var InputBag[]
      */
     protected $bagInstances = [];
 
     /**
-     * Instance of InputManager. Input manager responsible for simplifying access to
-     * ServerRequestInterface parameters such as data (post), query, cookies and etc.
-     *
      * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
@@ -110,7 +82,7 @@ class InputManager extends Singleton
      *
      * @return ServerRequestInterface
      */
-    public function getRequest()
+    public function request()
     {
         //Check if we still pointing to right request
         if ($this->request !== $this->container->get(ServerRequestInterface::class))
@@ -128,23 +100,23 @@ class InputManager extends Singleton
     }
 
     /**
-     * Get UriInterface associated with current request.
+     * Get UriInterface associated with active request.
      *
      * @return UriInterface
      */
-    public function getUri()
+    public function uri()
     {
-        return $this->getRequest()->getUri();
+        return $this->request()->getUri();
     }
 
     /**
-     * Get page path (including leading slash).
+     * Get page path (including leading slash) associated with active request.
      *
      * @return string
      */
-    public function getPath()
+    public function path()
     {
-        $path = $this->getUri()->getPath();
+        $path = $this->uri()->getPath();
         if (empty($path))
         {
             return '/';
@@ -158,15 +130,14 @@ class InputManager extends Singleton
     }
 
     /**
-     * Get HTTP method request was made with.
+     * Get HTTP method active request was made with.
      *
      * @return string
      */
-    public function getMethod()
+    public function method()
     {
-        return $this->getRequest()->getMethod();
+        return $this->request()->getMethod();
     }
-
 
     /**
      * Check if request was made over http protocol.
@@ -175,7 +146,7 @@ class InputManager extends Singleton
      */
     public function isSecure()
     {
-        return $this->getRequest()->getUri()->getScheme() == 'https';
+        return $this->request()->getUri()->getScheme() == 'https';
     }
 
     /**
@@ -185,7 +156,7 @@ class InputManager extends Singleton
      */
     public function isAjax()
     {
-        return strtolower($this->getRequest()->getHeaderLine('X-Requested-With')) == 'xmlhttprequest';
+        return strtolower($this->request()->getHeaderLine('X-Requested-With')) == 'xmlhttprequest';
     }
 
     /**
@@ -195,7 +166,7 @@ class InputManager extends Singleton
      */
     public function isJsonExpected()
     {
-        return $this->getRequest()->getHeaderLine('Accept') == 'application/json';
+        return $this->request()->getHeaderLine('Accept') == 'application/json';
     }
 
     /**
@@ -204,20 +175,20 @@ class InputManager extends Singleton
      *
      * @return string|null
      */
-    public function getRemoteAddress()
+    public function remoteAddress()
     {
-        $serverParams = $this->getRequest()->getServerParams();
+        $serverParams = $this->request()->getServerParams();
 
         return isset($serverParams['REMOTE_ADDR']) ? $serverParams['REMOTE_ADDR'] : null;
     }
 
     /**
-     * Get bag instance by associated name.
+     * Get bag instance or create new one on demand.
      *
      * @param string $name
      * @return InputBag
      */
-    public function getBag($name)
+    public function bag($name)
     {
         if (isset($this->bagInstances[$name]))
         {
@@ -230,27 +201,23 @@ class InputManager extends Singleton
         }
 
         $class = $this->bagAssociations[$name]['class'];
-        $data = call_user_func([$this->getRequest(), $this->bagAssociations[$name]['source']]);
+        $data = call_user_func([$this->request(), $this->bagAssociations[$name]['source']]);
 
         return $this->bagInstances[$name] = new $class($data);
     }
 
     /**
-     * Get bag instance by associated name.
-     *
      * @param string $name
      * @return InputBag
      */
     public function __get($name)
     {
-        return $this->getBag($name);
+        return $this->bag($name);
     }
 
     /**
-     * Fetch value from parsed body.
-     *
-     * @param string      $name    Key name.
-     * @param mixed       $default Default value.
+     * @param string      $name
+     * @param mixed       $default
      * @param bool|string $implode Implode header lines, false to return header as array.
      * @return mixed
      */
@@ -260,10 +227,8 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from parsed body.
-     *
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return mixed
      */
     public function data($name, $default = null)
@@ -272,11 +237,9 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from parsed body (alias for data() method).
-     *
      * @see data()
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return mixed
      */
     public function post($name, $default = null)
@@ -285,10 +248,8 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from parsed body.
-     *
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return mixed
      */
     public function query($name, $default = null)
@@ -297,10 +258,8 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from parsed body.
-     *
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return mixed
      */
     public function cookie($name, $default = null)
@@ -309,10 +268,8 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from parsed body.
-     *
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return UploadedFileInterface|null
      */
     public function file($name, $default = null)
@@ -321,10 +278,8 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from parsed body.
-     *
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return mixed
      */
     public function server($name, $default = null)
@@ -333,10 +288,8 @@ class InputManager extends Singleton
     }
 
     /**
-     * Fetch value from request attributes (for example activePath or csrf token).
-     *
-     * @param string $name    Key name.
-     * @param mixed  $default Default value.
+     * @param string $name
+     * @param mixed  $default
      * @return mixed
      */
     public function attribute($name, $default = null)

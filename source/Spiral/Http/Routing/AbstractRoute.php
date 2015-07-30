@@ -11,14 +11,16 @@ namespace Spiral\Http\Routing;
 use Cocur\Slugify\Slugify;
 use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\ControllerException;
 use Spiral\Core\CoreInterface;
-use Spiral\Http\ClientException;
+use Spiral\Http\Exceptions\ClientException;
+use Spiral\Core\Exceptions\ControllerException;
 use Spiral\Http\MiddlewareInterface;
 use Spiral\Http\Uri;
 
+/**
+ * Base for all spiral routes.
+ */
 abstract class AbstractRoute implements RouteInterface
 {
     /**
@@ -27,38 +29,31 @@ abstract class AbstractRoute implements RouteInterface
     const DEFAULT_SEGMENT = '[^\/]+';
 
     /**
-     * CoreInterface used to execute actions handled by route.
+     * To execute actions.
      *
      * @var CoreInterface
      */
     protected $core = null;
 
     /**
-     * Declared route name.
-     *
      * @var string
      */
     protected $name = '';
 
     /**
-     * Middlewares associated with route. You can always get access to parent route using route attribute
-     * of server request.
-     *
      * @var array
      */
     protected $middlewares = [];
 
     /**
-     * Route pattern includes simplified regular expressing later compiled to real regexp. Pattern
-     * with be applied to URI path with excluded active path value (to make routes work when application
-     * located in folder and etc).
+     * Route pattern includes simplified regular expressing later compiled to real regexp.
      *
      * @var string
      */
     protected $pattern = '';
 
     /**
-     * List of methods route should react to, by default all methods are passed.
+     * List of methods route should react to, by default all methods are allowed.
      *
      * @var array
      */
@@ -87,16 +82,13 @@ abstract class AbstractRoute implements RouteInterface
     protected $compiled = [];
 
     /**
-     * Result of regular expression. Matched can be used to fill target controller pattern or send
-     * to controller method as arguments.
+     * Route matches, populated after match() method executed. Internal.
      *
      * @var array
      */
     protected $matches = [];
 
     /**
-     * Set custom instance of CoreInterface to handle route controller and action.
-     *
      * @param CoreInterface $core
      * @return $this
      */
@@ -108,13 +100,12 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Set route name. This action should be performed BEFORE parent router will be created, in other
-     * scenario route will be available under old name.
+     * Set route name. Method should be executed before registering route in router.
      *
      * @param string $name
      * @return $this
      */
-    public function setName($name)
+    public function name($name)
     {
         $this->name = $name;
 
@@ -122,35 +113,11 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Alias for setName.
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function name($name)
-    {
-        return $this->setName($name);
-    }
-
-    /**
-     * Get route name. Name is requires to correctly identify route inside router stack (to generate
-     * url for example).
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * Get route pattern.
-     *
-     * @return string
-     */
-    public function getPattern()
-    {
-        return $this->pattern;
     }
 
     /**
@@ -184,12 +151,12 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Set default values (will be merged with current default) to be used in generated target.
+     * Update route defaults (new values will be merged with existed data).
      *
      * @param array $defaults
      * @return $this
      */
-    public function setDefaults(array $defaults)
+    public function defaults(array $defaults)
     {
         $this->defaults = $defaults + $this->defaults;
 
@@ -197,27 +164,13 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Alias for setDefaults.
-     *
-     * @param array $defaults
-     * @return $this
-     */
-    public function defaults(array $defaults)
-    {
-        return $this->setDefaults($defaults);
-    }
-
-    /**
-     * Associated inner middleware with route. Route can use middlewares previously registered in
-     * Route by it's aliases.
+     * Associated middleware with route.
      *
      * Example:
+     * $route->with(new CacheMiddleware(100));
+     * $route->with(ProxyMiddleware::class);
      *
-     * $router->registerMiddleware('cache', new CacheMiddleware(100));
-     * $route->with('cache');
-     *
-     * @param string|MiddlewareInterface|\Closure $middleware Inner middleware alias, instance or
-     *                                                        closure.
+     * @param callable|MiddlewareInterface $middleware
      * @return $this
      */
     public function with($middleware)
@@ -227,41 +180,9 @@ abstract class AbstractRoute implements RouteInterface
         return $this;
     }
 
-    /**
-     * Helper method used to compile simplified route pattern to valid regular expression.
-     *
-     * We can cache results of this method in future.
-     */
-    protected function compile()
-    {
-        $replaces = ['/' => '\\/', '[' => '(?:', ']' => ')?', '.' => '\.'];
-
-        $options = [];
-        if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches))
-        {
-            $variables = array_combine($matches[1], $matches[2]);
-            foreach ($variables as $name => $segment)
-            {
-                $segment = $segment ?: self::DEFAULT_SEGMENT;
-                $replaces["<$name>"] = "(?P<$name>$segment)";
-                $options[] = $name;
-            }
-        }
-
-        $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
-        $this->compiled = [
-            'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
-            'template' => stripslashes(str_replace('?', '', $template)),
-            'options'  => array_fill_keys($options, null)
-        ];
-    }
 
     /**
-     * Check if route matched with provided request. Will check url pattern and pre-conditions.
-     *
-     * @param ServerRequestInterface $request
-     * @param string                 $basePath
-     * @return bool
+     * {@inheritdoc}
      */
     public function match(ServerRequestInterface $request, $basePath = '/')
     {
@@ -306,26 +227,36 @@ abstract class AbstractRoute implements RouteInterface
         return false;
     }
 
+
     /**
-     * Matches are populated after route matched request. Matched will include variable URL parts
-     * merged with default values.
-     *
-     * @return array
+     * Compile router pattern into valid regexp.
      */
-    public function getMatches()
+    protected function compile()
     {
-        return $this->matches;
+        $replaces = ['/' => '\\/', '[' => '(?:', ']' => ')?', '.' => '\.'];
+
+        $options = [];
+        if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches))
+        {
+            $variables = array_combine($matches[1], $matches[2]);
+            foreach ($variables as $name => $segment)
+            {
+                $segment = $segment ?: self::DEFAULT_SEGMENT;
+                $replaces["<$name>"] = "(?P<$name>$segment)";
+                $options[] = $name;
+            }
+        }
+
+        $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
+        $this->compiled = [
+            'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
+            'template' => stripslashes(str_replace('?', '', $template)),
+            'options'  => array_fill_keys($options, null)
+        ];
     }
 
     /**
-     * Create Uri using route parameters (will be merged with default values), route pattern and base
-     * path.
-     *
-     * @param array            $parameters
-     * @param string           $basePath
-     * @param SlugifyInterface $slugify Instance to create url slugs. By default Slugify will be
-     *                                  used.
-     * @return UriInterface
+     * {@inheritdoc}
      */
     public function createUri(array $parameters = [], $basePath = '/', SlugifyInterface $slugify = null)
     {
@@ -335,7 +266,7 @@ abstract class AbstractRoute implements RouteInterface
         }
 
         $parameters = array_map(
-            [!empty($slugify) ? $slugify : $this->createSlugify(), 'slug'],
+            [!empty($slugify) ? $slugify : new Slugify(), 'slug'],
             $parameters + $this->defaults + $this->compiled['options']
         );
 
@@ -357,17 +288,7 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Get instance of SlugifyInterface.
-     *
-     * @return SlugifyInterface
-     */
-    protected function createSlugify()
-    {
-        return new Slugify();
-    }
-
-    /**
-     * Call controller action using CoreInteface.
+     * Internal helper used to create execute controller action using associated core instance.
      *
      * @param ContainerInterface $container
      * @param string             $controller
@@ -376,7 +297,12 @@ abstract class AbstractRoute implements RouteInterface
      * @return mixed
      * @throws ClientException
      */
-    protected function callAction(ContainerInterface $container, $controller, $action, array $parameters = [])
+    protected function callAction(
+        ContainerInterface $container,
+        $controller,
+        $action,
+        array $parameters = []
+    )
     {
         if (empty($this->core))
         {
@@ -397,7 +323,6 @@ abstract class AbstractRoute implements RouteInterface
                 throw new ClientException(ClientException::NOT_FOUND, $exception->getMessage());
             }
 
-            //Something is wrong
             throw new ClientException(ClientException::BAD_DATA, $exception->getMessage());
         }
     }

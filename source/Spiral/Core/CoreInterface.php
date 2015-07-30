@@ -7,12 +7,13 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Core;
+
 use Spiral\Core\Exceptions\ControllerException;
 
 /**
- * He made 9 rings... i mean, we need one general class.
+ * General application enterpoint class.
  */
-interface CoreInterface extends ContainerInterface, ConfiguratorInterface, HippocampusInterface
+interface CoreInterface
 {
     /**
      * Request specific action result from Core. Due in 99% every action will need parent controller,

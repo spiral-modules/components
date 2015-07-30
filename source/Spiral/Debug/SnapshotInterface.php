@@ -11,61 +11,51 @@ namespace Spiral\Debug;
 use Exception;
 use Spiral\Core\ContainerInterface;
 
+/**
+ * Wrapper used to describe and show exception information in user friendly way.
+ */
 interface SnapshotInterface
 {
     /**
-     * Snapshot used to report, render and describe exception in user friendly way. Snapshot may
-     * require additional dependencies so it should always be constructed using container.
-     *
      * @param Exception          $exception
      * @param ContainerInterface $container
      */
     public function __construct(Exception $exception, ContainerInterface $container);
 
     /**
-     * Associated exception.
-     *
-     * @return Exception
-     */
-    public function getException();
-
-    /**
-     * Handled exception class name.
-     *
-     * @return string
-     */
-    public function getClass();
-
-    /**
-     * Get short exception name.
+     * Short exception name.
      *
      * @return string
      */
     public function getName();
 
     /**
-     * Gets the file in which the exception occurred.
-     *
+     * @return Exception
+     */
+    public function getException();
+
+    /**
+     * @return string
+     */
+    public function getClass();
+
+    /**
      * @return string
      */
     public function getFile();
 
     /**
-     * Gets the line in which the exception occurred.
-     *
      * @return int
      */
     public function getLine();
 
     /**
-     * Exception trace as array.
-     *
      * @return array
      */
     public function getTrace();
 
     /**
-     * Formatted exception message, will include exception class name, original error message and
+     * Formatted exception message, should include exception class name, original error message and
      * location with fine and line.
      *
      * @return string
@@ -86,7 +76,7 @@ interface SnapshotInterface
     public function describe();
 
     /**
-     * Render exception snapshot to string.
+     * Render exception snapshot into string.
      *
      * @return string
      */

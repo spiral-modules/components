@@ -10,8 +10,38 @@ namespace Spiral\Http\Routing;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Http\HttpPipeline;
+use Spiral\Http\MiddlewarePipeline;
 
+/**
+ * {@inheritdoc}
+ *
+ * Used to route to specified namespace of controllers. DirectRoute can route only to controllers,
+ * which means that pattern should always include both <controller> and <action> segments.
+ *
+ * Usually DirectRoute used to create "general" routing without definition of route for every
+ * controller action and etc. Having DirectRoute attached to Router as default route will allow
+ * user to generate urls based on controller action name ($router->createUri("controller::action") or
+ * $router->createUri("controller/action")).
+ *
+ * Examples:
+ * new DirectRoute(
+ *      "default",
+ *      "(<controller>(/<action>(/<id>)))",
+ *      "Controllers",
+ *      "Controller",
+ *      ["controller" => "home"]
+ * );
+ *
+ * You can also create host depended routes.
+ * $route = new DirectRoute(
+ *      "default",
+ *      "domain.com(/<controller>(/<action>(/<id>)))",
+ *      "Controllers",
+ *      "Controller",
+ *      ["controller" => "home"]
+ * );
+ * $route->withHost();
+ */
 class DirectRoute extends AbstractRoute
 {
     /**
@@ -36,32 +66,7 @@ class DirectRoute extends AbstractRoute
     protected $controllers = [];
 
     /**
-     * DirectRoute can route only to controllers, which means that pattern should always include
-     * both <controller> and <action> segments. Route can be host specific.
-     *
-     * Usually DirectRoute used to create "general" route path without need to define route for every
-     * controller action and etc. Having DirectRoute attached to Router as PrimaryRoute will allow
-     * user to generate urls based on controller action name ($router->url("controller::action") or
-     * $router->url("controller/action")).
-     *
-     * Examples:
-     * new DirectRoute(
-     *      "default",
-     *      "(<controller>(/<action>(/<id>)))",
-     *      "Controllers",
-     *      "Controller",
-     *      ["controller" => "home"]
-     * );
-     *
-     * You can also create host depended routes.
-     * $route = new DirectRoute(
-     *      "default",
-     *      "domain.com(/<controller>(/<action>(/<id>)))",
-     *      "Controllers",
-     *      "Controller",
-     *      ["controller" => "home"]
-     * );
-     * $route->withHost();
+     * New instance of DirectRoute.
      *
      * @param string $name
      * @param string $pattern
@@ -71,14 +76,7 @@ class DirectRoute extends AbstractRoute
      * @param array  $controllers Controllers aliased by their name, namespace and postfix will be
      *                            ignored in this case.
      */
-    public function __construct(
-        $name,
-        $pattern,
-        $namespace,
-        $postfix,
-        array $defaults,
-        array $controllers
-    )
+    public function __construct($name, $pattern, $namespace, $postfix, array $defaults, array $controllers)
     {
         $this->name = $name;
         $this->pattern = $pattern;
@@ -90,11 +88,7 @@ class DirectRoute extends AbstractRoute
 
     /**
      * Create controller aliases, namespace and postfix will be ignored in this case.
-     *
-     * Example:
-     * $route->controllers([
-     *      "auth" => "Module\Authorization\AuthController"
-     * ]);
+     * Example: $route->controllers(["auth" => "Module\Authorization\AuthController"]);
      *
      * @param array $controllers
      * @return $this
@@ -107,22 +101,17 @@ class DirectRoute extends AbstractRoute
     }
 
     /**
-     * Perform route on given Request and return response.
-     *
-     * @param ServerRequestInterface $request
-     * @param ContainerInterface     $container Container is required to get valid middleware instance
-     *                                          and execute controllers in some cases.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function perform(ServerRequestInterface $request, ContainerInterface $container)
     {
-        $pipeline = new HttpPipeline($container, $this->middlewares);
+        $pipeline = new MiddlewarePipeline($container, $this->middlewares);
 
         return $pipeline->target($this->createEndpoint($container))->run($request);
     }
 
     /**
-     * Get callable route target.
+     * Create callable route endpoint.
      *
      * @param ContainerInterface $container
      * @return callable
@@ -134,9 +123,9 @@ class DirectRoute extends AbstractRoute
         return function (ServerRequestInterface $request) use ($container, $route)
         {
             $controller = $route->matches['controller'];
-
             if (isset($route->controllers[$controller]))
             {
+                //Aliased
                 $controller = $route->controllers[$controller];
             }
             else
@@ -144,7 +133,6 @@ class DirectRoute extends AbstractRoute
                 $controller = $route->namespace . '\\' . ucfirst($controller) . $route->postfix;
             }
 
-            //Calling controller (using core resolved via container)
             return $route->callAction($container, $controller, $route->matches['action'], $route->matches);
         };
     }

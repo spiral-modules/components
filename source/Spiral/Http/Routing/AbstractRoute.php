@@ -20,6 +20,40 @@ use Spiral\Http\Uri;
 
 /**
  * Base for all spiral routes.
+ *
+ * Routing format (examples given in context of Core->bootstrap() method and Route):
+ *
+ * Static routes.
+ *      $this->http->route('profile-<id>', 'Controllers\UserController::showProfile');
+ *      $this->http->route('profile-<id>', 'Controllers\UserController::showProfile');
+ *
+ * Dynamic actions:
+ *      $this->http->route('account/<action>', 'Controllers\AccountController::<action>');
+ *
+ * Optional segments:
+ *      $this->http->route('profile[/<id>]', 'Controllers\UserController::showProfile');
+ *
+ * This route will react on URL's like /profile/ and /profile/someSegment/
+ *
+ * To determinate your own pattern for segment use construction <segmentName:pattern>
+ *      $this->http->route('profile[/<id:\d+>]', 'Controllers\UserController::showProfile');
+ *
+ * Will react only on /profile/ and /profile/1384978/
+ *
+ * You can use custom pattern for controller and action segments.
+ * $this->http->route('users[/<action:edit|save|open>]', 'Controllers\UserController::<action>');
+ *
+ * Routes can be applied to URI host.
+ * $this->http->route(
+ *      '<username>.domain.com[/<action>[/<id>]]',
+ *      'Controllers\UserController::<action>'
+ * )->useHost();
+ *
+ * Routes can be used non only with controllers (no idea why you may need it):
+ * $this->http->route('users', function ()
+ * {
+ *      return "This is users route.";
+ * });
  */
 abstract class AbstractRoute implements RouteInterface
 {

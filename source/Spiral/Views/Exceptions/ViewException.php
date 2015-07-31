@@ -8,11 +8,11 @@
  */
 namespace Spiral\Views\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * General view component exception (view file not found and etc).
  */
-class ViewException extends \LogicException implements ExceptionInterface
+class ViewException extends LogicException
 {
 }

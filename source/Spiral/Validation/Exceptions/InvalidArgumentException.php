@@ -8,12 +8,10 @@
  */
 namespace Spiral\Validation\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
-
 /**
  * Invalid argument supplied into validation rule.
  */
-class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
+class InvalidArgumentException extends \Spiral\Core\Exceptions\InvalidArgumentException
 {
 
 }

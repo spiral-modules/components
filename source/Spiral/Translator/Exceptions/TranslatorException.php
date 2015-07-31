@@ -8,12 +8,12 @@
  */
 namespace Spiral\Translator\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic translation exception.
  */
-class TranslatorException extends \LogicException implements ExceptionInterface
+class TranslatorException extends LogicException
 {
 
 }

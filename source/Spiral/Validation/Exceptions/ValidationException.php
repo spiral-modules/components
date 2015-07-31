@@ -8,12 +8,12 @@
  */
 namespace Spiral\Validation\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic validation exception.
  */
-class ValidationException extends \LogicException implements ExceptionInterface
+class ValidationException extends LogicException
 {
 
 }

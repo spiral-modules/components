@@ -42,8 +42,8 @@ interface TokenizerInterface
      *      'abstract' => 'ABSTRACT_BOOL'
      * ]
      *
-     * @param mixed  $parent    Class or interface should be extended. By default - null (all classes).
-     *                          Parent will also be included to classes list as one of results.
+     * @param mixed  $parent    Class, interface or trait parent. By default - null (all classes).
+     *                          Parent (class) will also be included to classes list as one of results.
      * @param string $namespace Only classes in this namespace will be retrieved, empty by default
      *                          (all namespaces).
      * @param string $postfix   Only classes with such postfix will be analyzed, empty by default.

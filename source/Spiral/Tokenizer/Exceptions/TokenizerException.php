@@ -7,13 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Tokenizer\Exceptions;
-
 use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic tokenizer exception.
  */
-class TokenizerException extends LogicExceptio
+class TokenizerException extends LogicException
 {
 
 }

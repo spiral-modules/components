@@ -8,6 +8,7 @@
  */
 namespace Spiral\Tokenizer;
 
+use Spiral\Tokenizer\Exceptions\TokenizerException;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
@@ -18,6 +19,9 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Events\Event;
 use Spiral\Files\FilesInterface;
 
+/**
+ * Default implementation of spiral tokenizer support while and blacklisted directories and etc.
+ */
 class Tokenizer extends Singleton implements TokenizerInterface
 {
     /**
@@ -36,12 +40,19 @@ class Tokenizer extends Singleton implements TokenizerInterface
     const CONFIG = 'tokenizer';
 
     /**
+     * Cache of already processed file reflections, used to speed up lookup.
+     *
+     * @var array
+     */
+    private $cache = [];
+
+    /**
      * To cache tokenizer class map.
      *
      * @invisible
      * @var HippocampusInterface
      */
-    protected $runtime = null;
+    protected $memory = null;
 
     /**
      * FileManager component to load files.
@@ -58,13 +69,6 @@ class Tokenizer extends Singleton implements TokenizerInterface
      * @var Loader
      */
     protected $loader = null;
-
-    /**
-     * Cache of already processed file reflections, used to speed up lookup.
-     *
-     * @var array
-     */
-    protected $cache = [];
 
     /**
      * Tokenizer used by spiral to fetch list of available classes, their declarations and locations.
@@ -86,7 +90,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     {
         $this->config = $configurator->getConfig(static::CONFIG);
 
-        $this->runtime = $runtime;
+        $this->memory = $runtime;
         $this->file = $file;
         $this->loader = $loader;
 
@@ -96,7 +100,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             unset($directory);
         }
 
-        $this->cache = $this->runtime->loadData('tokenizer-reflections');
+        $this->cache = $this->memory->loadData('tokenizer-reflections');
     }
 
     /**
@@ -190,7 +194,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     {
         if (empty($this->cache))
         {
-            $this->cache = $this->runtime->loadData('tokenizer-reflections');
+            $this->cache = $this->memory->loadData('tokenizer-reflections');
         }
 
         $fileMD5 = $this->file->md5($filename);
@@ -205,7 +209,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
 
         //Let's save to cache
         $this->cache[$filename] = ['md5' => $fileMD5] + $reflection->exportSchema();
-        $this->runtime->saveData('tokenizer-reflections', $this->cache);
+        $this->memory->saveData('tokenizer-reflections', $this->cache);
 
         return $reflection;
     }

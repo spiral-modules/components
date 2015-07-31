@@ -8,12 +8,12 @@
  */
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic ORM exception.
  */
-class ORMException extends \LogicException implements ExceptionInterface
+class ORMException extends LogicException
 {
 
 }

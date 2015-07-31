@@ -9,10 +9,9 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * User input did something wrong, exceptions like that should be treat differently without much
- * logging.
+ * Generic argument exception.
  */
-class ClientException extends RuntimeException
+class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
 {
 
 }

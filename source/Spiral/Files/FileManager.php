@@ -25,7 +25,7 @@ class FileManager extends Singleton implements FilesInterface
      *
      * @var array
      */
-    protected $destruct = [];
+    private $destruct = [];
 
     /**
      * New File Manager.

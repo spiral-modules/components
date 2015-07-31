@@ -8,12 +8,12 @@
  */
 namespace Spiral\Pagination\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * General pagination error.
  */
-class PaginationException extends \LogicException implements ExceptionInterface
+class PaginationException extends LogicException
 {
 
 }

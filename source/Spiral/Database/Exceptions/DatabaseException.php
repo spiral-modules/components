@@ -8,12 +8,12 @@
  */
 namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic database exception.
  */
-class DatabaseException extends \LogicException implements ExceptionInterface
+class DatabaseException extends LogicException
 {
 
 }

@@ -50,6 +50,20 @@ class CookieManager extends Component implements MiddlewareInterface
     const MAC_LENGTH = 64;
 
     /**
+     * Cookie names should never be encrypted or decrypted.
+     *
+     * @var array
+     */
+    private $exclude = [CsrfFilter::COOKIE, SessionStarter::COOKIE];
+
+    /**
+     * Cookies has to be send (specified via global scope).
+     *
+     * @var Cookie[]
+     */
+    private $scheduled = [];
+
+    /**
      * @invisible
      * @var ContainerInterface
      */
@@ -62,25 +76,11 @@ class CookieManager extends Component implements MiddlewareInterface
     protected $request = null;
 
     /**
-     * Cookie names should never be encrypted or decrypted.
-     *
-     * @var array
-     */
-    protected $exclude = [CsrfFilter::COOKIE, SessionStarter::COOKIE];
-
-    /**
      * Encrypter component.
      *
      * @var EncrypterInterface
      */
     protected $encrypter = null;
-
-    /**
-     * Cookies has to be send (specified via global scope).
-     *
-     * @var Cookie[]
-     */
-    protected $scheduled = [];
 
     /**
      * @param ContainerInterface $container
@@ -114,21 +114,6 @@ class CookieManager extends Component implements MiddlewareInterface
     }
 
     /**
-     * Get associated encrypter instance or fetch it from container.
-     *
-     * @return EncrypterInterface
-     */
-    protected function encrypter()
-    {
-        if (!empty($this->encrypter))
-        {
-            return $this->encrypter;
-        }
-
-        return $this->encrypter = $this->container->get(EncrypterInterface::class);
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function __invoke(ServerRequestInterface $request, \Closure $next = null)
@@ -149,161 +134,6 @@ class CookieManager extends Component implements MiddlewareInterface
         $this->container->restore($outerManager);
 
         return $response;
-    }
-
-    /**
-     * Unpack incoming cookies and decrypt their content.
-     *
-     * @param ServerRequestInterface $request
-     * @return ServerRequestInterface
-     */
-    protected function decodeCookies(ServerRequestInterface $request)
-    {
-        $altered = false;
-        $cookies = $request->getCookieParams();
-
-        foreach ($cookies as $name => $cookie)
-        {
-            if (in_array($name, $this->exclude) || $this->config['method'] == self::NONE)
-            {
-                continue;
-            }
-
-            $altered = true;
-            $cookies[$name] = $this->decodeCookie($cookie);
-        }
-
-        return $altered ? $request->withCookieParams($cookies) : $request;
-    }
-
-    /**
-     * Pack outcoming cookies with encrypted value.
-     *
-     * @param ResponseInterface $response
-     * @return ResponseInterface
-     * @throws EncrypterException
-     */
-    protected function mountCookies(ResponseInterface $response)
-    {
-        if (empty($this->scheduled))
-        {
-            return $response;
-        }
-
-        $cookies = $response->getHeader('Set-Cookie');
-
-        //Merging cookies
-        foreach ($this->scheduled as $cookie)
-        {
-            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE)
-            {
-                $cookies[] = $cookie->packHeader();
-                continue;
-            }
-
-            $cookies[] = $this->encodeCookie($cookie)->packHeader();
-        }
-
-        $this->scheduled = [];
-
-        return $response->withHeader('Set-Cookie', $cookies);
-    }
-
-    /**
-     * @param string|array $cookie
-     * @return array|mixed|null
-     */
-    protected function decodeCookie($cookie)
-    {
-        if ($this->config['method'] == self::ENCRYPT)
-        {
-            try
-            {
-                if (is_array($cookie))
-                {
-                    return array_map([$this, 'decodeCookie'], $cookie);
-                }
-
-                return $this->encrypter()->decrypt($cookie);
-            }
-            catch (DecryptException $exception)
-            {
-                return null;
-            }
-        }
-
-        //HMAC
-        $hmac = substr($cookie, -1 * self::MAC_LENGTH);
-        $value = substr($cookie, 0, strlen($cookie) - strlen($hmac));
-
-        if ($this->hmacSign($value) != $hmac)
-        {
-            return null;
-        }
-
-        return $value;
-    }
-
-    /**
-     * @param Cookie $cookie
-     * @return Cookie
-     */
-    protected function encodeCookie(Cookie $cookie)
-    {
-        if ($this->config['method'] == self::ENCRYPT)
-        {
-            return $cookie->withValue(
-                $this->encrypter()->encrypt($cookie->getValue())
-            );
-        }
-
-        //MAC
-        return $cookie->withValue($cookie->getValue() . $this->hmacSign($cookie->getValue()));
-    }
-
-    /**
-     * @param string $value
-     * @return string
-     */
-    protected function hmacSign($value)
-    {
-        return hash_hmac(self::HMAC_ALGORITHM, $value, $this->encrypter()->getKey());
-    }
-
-    /**
-     * Default domain to set cookies for. Domain pattern specified in cookie config is presented as
-     * valid sprintf expression.
-     *
-     * Example:
-     * mydomain.com //Forced domain value
-     * %s           //Cookies will be mounted on current domain
-     * .%s          //Cookies will be mounted on current domain and sub domains
-     *
-     * @return string
-     */
-    protected function cookieDomain()
-    {
-        $host = $this->request->getUri()->getHost();
-
-        $pattern = $this->config['domain'];
-        if (filter_var($host, FILTER_VALIDATE_IP))
-        {
-            //We can't use sub domains
-            $pattern = ltrim($pattern, '.');
-        }
-
-        if (!empty($port = $this->request->getUri()->getPort()))
-        {
-            $host = $host . ':' . $port;
-        }
-
-        if (strpos($pattern, '%s') === false)
-        {
-            //Forced domain
-            return $pattern;
-        }
-
-        return sprintf($pattern, $host);
     }
 
     /**
@@ -452,5 +282,176 @@ class CookieManager extends Component implements MiddlewareInterface
     public function getScheduled()
     {
         return $this->scheduled;
+    }
+
+    /**
+     * @param string|array $cookie
+     * @return array|mixed|null
+     */
+    private function decodeCookie($cookie)
+    {
+        if ($this->config['method'] == self::ENCRYPT)
+        {
+            try
+            {
+                if (is_array($cookie))
+                {
+                    return array_map([$this, 'decodeCookie'], $cookie);
+                }
+
+                return $this->encrypter()->decrypt($cookie);
+            }
+            catch (DecryptException $exception)
+            {
+                return null;
+            }
+        }
+
+        //HMAC
+        $hmac = substr($cookie, -1 * self::MAC_LENGTH);
+        $value = substr($cookie, 0, strlen($cookie) - strlen($hmac));
+
+        if ($this->hmacSign($value) != $hmac)
+        {
+            return null;
+        }
+
+        return $value;
+    }
+
+
+    /**
+     * Get associated encrypter instance or fetch it from container.
+     *
+     * @return EncrypterInterface
+     */
+    protected function encrypter()
+    {
+        if (!empty($this->encrypter))
+        {
+            return $this->encrypter;
+        }
+
+        return $this->encrypter = $this->container->get(EncrypterInterface::class);
+    }
+
+    /**
+     * Unpack incoming cookies and decrypt their content.
+     *
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     */
+    protected function decodeCookies(ServerRequestInterface $request)
+    {
+        $altered = false;
+        $cookies = $request->getCookieParams();
+
+        foreach ($cookies as $name => $cookie)
+        {
+            if (in_array($name, $this->exclude) || $this->config['method'] == self::NONE)
+            {
+                continue;
+            }
+
+            $altered = true;
+            $cookies[$name] = $this->decodeCookie($cookie);
+        }
+
+        return $altered ? $request->withCookieParams($cookies) : $request;
+    }
+
+    /**
+     * Pack outcoming cookies with encrypted value.
+     *
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws EncrypterException
+     */
+    protected function mountCookies(ResponseInterface $response)
+    {
+        if (empty($this->scheduled))
+        {
+            return $response;
+        }
+
+        $cookies = $response->getHeader('Set-Cookie');
+
+        //Merging cookies
+        foreach ($this->scheduled as $cookie)
+        {
+            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE)
+            {
+                $cookies[] = $cookie->packHeader();
+                continue;
+            }
+
+            $cookies[] = $this->encodeCookie($cookie)->packHeader();
+        }
+
+        $this->scheduled = [];
+
+        return $response->withHeader('Set-Cookie', $cookies);
+    }
+
+    /**
+     * Default domain to set cookies for. Domain pattern specified in cookie config is presented as
+     * valid sprintf expression.
+     *
+     * Example:
+     * mydomain.com //Forced domain value
+     * %s           //Cookies will be mounted on current domain
+     * .%s          //Cookies will be mounted on current domain and sub domains
+     *
+     * @return string
+     */
+    protected function cookieDomain()
+    {
+        $host = $this->request->getUri()->getHost();
+
+        $pattern = $this->config['domain'];
+        if (filter_var($host, FILTER_VALIDATE_IP))
+        {
+            //We can't use sub domains
+            $pattern = ltrim($pattern, '.');
+        }
+
+        if (!empty($port = $this->request->getUri()->getPort()))
+        {
+            $host = $host . ':' . $port;
+        }
+
+        if (strpos($pattern, '%s') === false)
+        {
+            //Forced domain
+            return $pattern;
+        }
+
+        return sprintf($pattern, $host);
+    }
+
+    /**
+     * @param Cookie $cookie
+     * @return Cookie
+     */
+    private function encodeCookie(Cookie $cookie)
+    {
+        if ($this->config['method'] == self::ENCRYPT)
+        {
+            return $cookie->withValue(
+                $this->encrypter()->encrypt($cookie->getValue())
+            );
+        }
+
+        //MAC
+        return $cookie->withValue($cookie->getValue() . $this->hmacSign($cookie->getValue()));
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    private function hmacSign($value)
+    {
+        return hash_hmac(self::HMAC_ALGORITHM, $value, $this->encrypter()->getKey());
     }
 }

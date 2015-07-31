@@ -8,12 +8,12 @@
  */
 namespace Spiral\Encrypter\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * General encrypter exception (bad key and etc).
  */
-class EncrypterException extends \LogicException implements ExceptionInterface
+class EncrypterException extends RuntimeException
 {
 
 }

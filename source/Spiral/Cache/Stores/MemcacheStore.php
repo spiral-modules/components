@@ -54,13 +54,6 @@ class MemcacheStore extends CacheStore
     protected $driver = null;
 
     /**
-     * List of registered memcache servers.
-     *
-     * @var array
-     */
-    protected $servers = [];
-
-    /**
      * {@inheritdoc}
      *
      * @param bool            $connect If true, custom driver will be connected.

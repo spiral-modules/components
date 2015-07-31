@@ -11,7 +11,7 @@ namespace Spiral\Core\Exceptions;
 /**
  * Exceptions raised by spiral Core Application.
  */
-class CoreException extends \LogicException implements ExceptionInterface
+class CoreException extends LogicException
 {
 
 }

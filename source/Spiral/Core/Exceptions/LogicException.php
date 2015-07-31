@@ -9,10 +9,9 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * User input did something wrong, exceptions like that should be treat differently without much
- * logging.
+ * Generic logic exception raised in spiral components.
  */
-class ClientException extends RuntimeException
+class LogicException extends \LogicException implements ExceptionInterface
 {
 
 }

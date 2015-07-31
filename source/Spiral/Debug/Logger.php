@@ -66,7 +66,7 @@ class Logger extends AbstractLogger
      *
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
      * List of log handlers associated with their log levels.

@@ -9,6 +9,7 @@
 namespace Spiral\Core;
 
 use Spiral\Core\Container\SaturableInterlace;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 use ReflectionFunctionAbstract as ContextFunction;

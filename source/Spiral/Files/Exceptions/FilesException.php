@@ -8,12 +8,12 @@
  */
 namespace Spiral\Files\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * General files exception.
  */
-class FilesException extends \LogicException implements ExceptionInterface
+class FilesException extends LogicException
 {
 
 }

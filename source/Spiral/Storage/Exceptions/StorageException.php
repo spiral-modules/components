@@ -8,12 +8,12 @@
  */
 namespace Spiral\Storage\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic storage exception.
  */
-class StorageException extends \LogicException implements ExceptionInterface
+class StorageException extends LogicException
 {
 
 }

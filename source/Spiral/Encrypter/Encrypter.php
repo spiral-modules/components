@@ -44,14 +44,14 @@ class Encrypter extends Singleton implements EncrypterInterface
     /**
      * @var string
      */
-    protected $key = '';
+    private $key = '';
 
     /**
      * One of the MCRYPT_CIPERNAME constants, or the name of the algorithm as string.
      *
      * @var string
      */
-    protected $method = 'aes-256-cbc';
+    private $method = 'aes-256-cbc';
 
     /**
      * @param ConfiguratorInterface $configurator
@@ -243,7 +243,7 @@ class Encrypter extends Singleton implements EncrypterInterface
      * @param int $length
      * @return string
      */
-    protected function createIV($length = 16)
+    private function createIV($length = 16)
     {
         return $length ? $this->random($length, true, false) : '';
     }

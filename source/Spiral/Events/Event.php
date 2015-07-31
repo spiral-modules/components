@@ -16,25 +16,25 @@ class Event implements EventInterface
     /**
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
      * @var mixed
      */
-    protected $context = null;
+    private $context = null;
 
     /**
      * Event being stopped.
      *
      * @var bool
      */
-    protected $stopped = false;
+    private $stopped = false;
 
     /**
      * @param string $name
      * @param mixed  $context
      */
-    public function __construct($name, $context )
+    public function __construct($name, $context)
     {
         $this->name = $name;
         $this->context = $context;

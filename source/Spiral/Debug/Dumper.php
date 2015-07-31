@@ -34,8 +34,6 @@ class Dumper extends Singleton
     protected $debugger = null;
 
     /**
-     * Dumping styles and options.
-     *
      * @var array
      */
     private $options = [
@@ -132,6 +130,37 @@ class Dumper extends Singleton
         }
 
         return null;
+    }
+
+    /**
+     * Stylize content using pre-defined style.
+     *
+     * @param string $element
+     * @param string $type
+     * @param string $subType
+     * @return string
+     */
+    public function style($element, $type, $subType = '')
+    {
+        if (isset($this->options['styles'][$type . '-' . $subType]))
+        {
+            $style = $this->options['styles'][$type . '-' . $subType];
+        }
+        elseif (isset($this->options['styles'][$type]))
+        {
+            $style = $this->options['styles'][$type];
+        }
+        else
+        {
+            $style = $this->options['styles']['common'];
+        }
+
+        if (!empty($style))
+        {
+            $element = \Spiral\interpolate($this->options['element'], compact('style', 'element'));
+        }
+
+        return $element;
     }
 
     /**
@@ -335,36 +364,5 @@ class Dumper extends Singleton
         }
 
         return $this->style(str_repeat($this->options["indent"], $level), "indent");
-    }
-
-    /**
-     * Stylize content using pre-defined style.
-     *
-     * @param string $element
-     * @param string $type
-     * @param string $subType
-     * @return string
-     */
-    public function style($element, $type, $subType = '')
-    {
-        if (isset($this->options['styles'][$type . '-' . $subType]))
-        {
-            $style = $this->options['styles'][$type . '-' . $subType];
-        }
-        elseif (isset($this->options['styles'][$type]))
-        {
-            $style = $this->options['styles'][$type];
-        }
-        else
-        {
-            $style = $this->options['styles']['common'];
-        }
-
-        if (!empty($style))
-        {
-            $element = \Spiral\interpolate($this->options['element'], compact('style', 'element'));
-        }
-
-        return $element;
     }
 }

@@ -8,12 +8,12 @@
  */
 namespace Spiral\Cache\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Store not found or can not be constructed.
  */
-class CacheException extends \LogicException implements ExceptionInterface
+class CacheException extends LogicException
 {
 
 }

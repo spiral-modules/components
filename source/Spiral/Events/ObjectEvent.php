@@ -16,7 +16,7 @@ class ObjectEvent extends Event
     /**
      * @var object
      */
-    protected $parent = null;
+    private $parent = null;
 
     /**
      * @param object $parent
@@ -25,8 +25,9 @@ class ObjectEvent extends Event
      */
     public function __construct($parent, $name, $context)
     {
-        parent::__construct($name, $context);
         $this->parent = $parent;
+
+        parent::__construct($name, $context);
     }
 
     /**

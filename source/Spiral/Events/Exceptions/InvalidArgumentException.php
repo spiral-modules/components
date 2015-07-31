@@ -8,12 +8,10 @@
  */
 namespace Spiral\Events\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
-
 /**
  * {@inheritdoc}
  */
-class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
+class InvalidArgumentException extends \Spiral\Core\Exceptions\InvalidArgumentException
 {
 
 }

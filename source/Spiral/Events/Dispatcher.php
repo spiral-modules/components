@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Events;
+
 use Spiral\Events\Exceptions\InvalidArgumentException;
 
 /**
@@ -19,7 +20,7 @@ class Dispatcher implements DispatcherInterface
      *
      * @var array
      */
-    protected $listeners = [];
+    private $listeners = [];
 
     /**
      * {@inheritdoc}
@@ -92,12 +93,15 @@ class Dispatcher implements DispatcherInterface
             $event = new Event($event, $context);
         }
 
-        if (empty($this->listeners[$event->getName()]))
+        /**
+         * @var Event $event
+         */
+        if (empty($this->listeners[$event->name()]))
         {
             return $event->context();
         }
 
-        foreach ($this->listeners[$event->getName()] as $listener)
+        foreach ($this->listeners[$event->name()] as $listener)
         {
             call_user_func($listener, $event);
             if ($event->isStopped())

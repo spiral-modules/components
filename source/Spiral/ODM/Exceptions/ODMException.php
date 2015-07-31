@@ -8,12 +8,12 @@
  */
 namespace Spiral\ODM\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * Generic ODM exception.
  */
-class ODMException extends \LogicException implements ExceptionInterface
+class ODMException extends LogicException
 {
 
 }

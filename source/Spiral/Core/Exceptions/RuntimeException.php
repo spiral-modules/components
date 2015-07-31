@@ -9,10 +9,9 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * User input did something wrong, exceptions like that should be treat differently without much
- * logging.
+ *Generic runtime exception in spiral components.
  */
-class ClientException extends RuntimeException
+class RuntimeException extends \RuntimeException implements ExceptionInterface
 {
 
 }

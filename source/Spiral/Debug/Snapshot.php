@@ -32,7 +32,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     /**
      * @var \Exception
      */
-    protected $exception = null;
+    private $exception = null;
 
     /**
      * @var array

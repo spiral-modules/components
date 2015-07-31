@@ -8,9 +8,7 @@
  */
 namespace Spiral\Http\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
-
-class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
+class InvalidArgumentException extends \Spiral\Core\Exceptions\InvalidArgumentException
 {
 
 }

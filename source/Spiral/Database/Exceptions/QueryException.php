@@ -7,11 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Database\Exceptions;
+use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * Query specific exception (bad parameters, database failure).
  */
-class QueryException extends DatabaseException
+class QueryException extends RuntimeException
 {
 
 }

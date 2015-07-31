@@ -64,22 +64,6 @@ trait RouterTrait
     }
 
     /**
-     * Create router instance using container.
-     *
-     * @return RouterInterface
-     * @throws RouterException
-     */
-    protected function createRouter()
-    {
-        if (empty($container = $this->container()))
-        {
-            throw new RouterException("Unable to create default router, default container not set.");
-        }
-
-        return new Router($container, $this->routes);
-    }
-
-    /**
      * Add new route.
      *
      * @param RouteInterface $route
@@ -106,5 +90,21 @@ trait RouterTrait
         $this->addRoute($route = new Route($name, $pattern, $target, $defaults));
 
         return $route;
+    }
+    
+    /**
+     * Create router instance using container.
+     *
+     * @return RouterInterface
+     * @throws RouterException
+     */
+    protected function createRouter()
+    {
+        if (empty($container = $this->container()))
+        {
+            throw new RouterException("Unable to create default router, default container not set.");
+        }
+
+        return new Router($container, $this->routes);
     }
 }

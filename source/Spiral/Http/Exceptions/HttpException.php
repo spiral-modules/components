@@ -8,12 +8,12 @@
  */
 namespace Spiral\Http\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * General HttpDispatcher exception.
  */
-class HttpException extends \LogicException implements ExceptionInterface
+class HttpException extends LogicException
 {
 
 }

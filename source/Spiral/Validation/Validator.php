@@ -271,78 +271,6 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     }
 
     /**
-     * Fetch validation rule arguments from rule definition.
-     *
-     * @param array $rule
-     * @return array
-     */
-    protected function fetchArguments(array $rule)
-    {
-        unset($rule[0], $rule['message'], $rule['error']);
-
-        return array_values($rule);
-    }
-
-    /**
-     * Fetch error message from rule definition or use default message. Method will check "message"
-     * and "error" properties of definition.
-     *
-     * @param array  $rule
-     * @param string $message Default message to use.
-     * @return mixed
-     */
-    protected function fetchMessage(array $rule, $message)
-    {
-        if (isset($rule['message']))
-        {
-            $message = $rule['message'];
-        }
-
-        if (isset($rule['error']))
-        {
-            $message = $rule['error'];
-        }
-
-        return $message;
-    }
-
-    /**
-     * Register error message for specified field. Rule definition will be interpolated into message.
-     *
-     * @param string $field
-     * @param string $message
-     * @param mixed  $condition
-     * @param array  $arguments
-     */
-    protected function addMessage($field, $message, $condition, array $arguments = [])
-    {
-        if (is_array($condition))
-        {
-            if (is_object($condition[0]))
-            {
-                $condition[0] = get_class($condition[0]);
-            }
-
-            $condition = join('::', $condition);
-        }
-
-        if ($this->options['names'])
-        {
-            $this->errors[$field] = \Spiral\interpolate(
-                $message,
-                compact('field', 'condition') + $arguments
-            );
-        }
-        else
-        {
-            $this->errors[$field] = \Spiral\interpolate(
-                $message,
-                compact('condition') + $arguments
-            );
-        }
-    }
-
-    /**
      * Check field with given condition. Can return instance of Checker (data is not valid) to
      * clarify error.
      *
@@ -383,6 +311,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
             if (is_string($condition) || is_array($condition))
             {
                 array_unshift($arguments, $value);
+
                 return call_user_func_array($condition, $arguments);
             }
         }
@@ -432,6 +361,78 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
         }
 
         return self::$checkers[$name] = $this->container->get($this->options['checkers'][$name]);
+    }
+
+    /**
+     * Fetch validation rule arguments from rule definition.
+     *
+     * @param array $rule
+     * @return array
+     */
+    private function fetchArguments(array $rule)
+    {
+        unset($rule[0], $rule['message'], $rule['error']);
+
+        return array_values($rule);
+    }
+
+    /**
+     * Fetch error message from rule definition or use default message. Method will check "message"
+     * and "error" properties of definition.
+     *
+     * @param array  $rule
+     * @param string $message Default message to use.
+     * @return mixed
+     */
+    private function fetchMessage(array $rule, $message)
+    {
+        if (isset($rule['message']))
+        {
+            $message = $rule['message'];
+        }
+
+        if (isset($rule['error']))
+        {
+            $message = $rule['error'];
+        }
+
+        return $message;
+    }
+
+    /**
+     * Register error message for specified field. Rule definition will be interpolated into message.
+     *
+     * @param string $field
+     * @param string $message
+     * @param mixed  $condition
+     * @param array  $arguments
+     */
+    private function addMessage($field, $message, $condition, array $arguments = [])
+    {
+        if (is_array($condition))
+        {
+            if (is_object($condition[0]))
+            {
+                $condition[0] = get_class($condition[0]);
+            }
+
+            $condition = join('::', $condition);
+        }
+
+        if ($this->options['names'])
+        {
+            $this->errors[$field] = \Spiral\interpolate(
+                $message,
+                compact('field', 'condition') + $arguments
+            );
+        }
+        else
+        {
+            $this->errors[$field] = \Spiral\interpolate(
+                $message,
+                compact('condition') + $arguments
+            );
+        }
     }
 
     /**

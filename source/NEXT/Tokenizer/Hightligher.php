@@ -8,22 +8,16 @@
  */
 namespace Spiral\Tokenizer;
 
-class Hightligher
+use Spiral\Core\Component;
+
+/**
+ * Highlighters used mainly by spiral exceptions to make it more user friendly, it can colorize
+ * php source using given styles and return only required set of lines.
+ */
+class Hightligher extends Component
 {
     /**
-     * @var TokenizerInterface
-     */
-    protected $tokenizer = null;
-
-    /**
-     * Rules and styles to highlight code using tokens. This rules used in Tokenizer->getCode()
-     * method to colorize some php parts in exceptions. Rule specified by: "style" => array(tokens),
-     * example:
-     * Tokenizer->setHighlighting(array(
-     *      'color: blue' => array(
-     *          T_DNUMBER, T_LNUMBER
-     *      )
-     * ));
+     * Set of highlighting rules in a form CSS_STYLE => [TOKENS].
      *
      * @var array
      */
@@ -34,6 +28,11 @@ class Hightligher
             'highlighted' => '<div class="highlighted"><div class="number">{number}</div><div>{content}</div></div>'
         ]
     ];
+
+    /**
+     * @var TokenizerInterface
+     */
+    protected $tokenizer = null;
 
     /**
      * New Hightligher instance.
@@ -48,28 +47,21 @@ class Hightligher
     }
 
     /**
-     * Fetch specified amount of lines from provided filename and highlight them according to specified
-     * highlighting rules (setHighlighting() method), target (middle) line number are specified in
-     * "$targetLine" argument and will be used as reference to count lines before and after.
+     * Colorize PHP source using given styles. In addition can automatically return only specified
+     * line with few lines around it.
      *
-     * Example:
-     * line = 10, countLines = 10
+     * Example: line = 10, countLines = 10
+     * Output: lines from 5 - 15 will be displayed, line 10 will be highlighted.
      *
-     * Output:
-     * lines from 5 - 15 will be displayed, line 10 will be highlighted.
-     *
-     * @param string $filename   Filename to fetch and highlight lines from.
-     * @param int    $targetLine Line number where code should be highlighted from.
-     * @param int    $countLines Lines to fetch before and after code line specified in previous
-     *                           argument.
+     * @param string $filename
+     * @param int    $line       Keep blank to return full source.
+     * @param int    $countLines Total lines to be returned.
      * @return string
      */
-    public function highlight($filename, $targetLine, $countLines = 10)
+    public function highlight($filename, $line = null, $countLines = 10)
     {
-        $tokens = $this->tokenizer->fetchTokens($filename);
-
-        $phpLines = "";
-        foreach ($tokens as $position => $token)
+        $result = "";
+        foreach ($this->tokenizer->fetchTokens($filename) as $position => $token)
         {
             $token[TokenizerInterface::CODE] = htmlentities($token[TokenizerInterface::CODE]);
 
@@ -84,8 +76,7 @@ class Hightligher
                         foreach (explode("\n", $token[TokenizerInterface::CODE]) as $number)
                         {
                             $lines[] = \Spiral\interpolate(
-                                $this->style['templates']['token'],
-                                compact('style', 'line')
+                                $this->style['templates']['token'], compact('style', 'line')
                             );
                         }
 
@@ -95,34 +86,38 @@ class Hightligher
                     {
                         $token[TokenizerInterface::CODE] = \Spiral\interpolate(
                             $this->style['templates']['token'],
-                            [
-                                'style' => $style,
-                                'line'  => $token[TokenizerInterface::CODE]
-                            ]
+                            ['style' => $style, 'line' => $token[TokenizerInterface::CODE]]
                         );
                     }
                     break;
                 }
             }
 
-            $phpLines .= $token[TokenizerInterface::CODE];
+            $result .= $token[TokenizerInterface::CODE];
         }
 
-        $phpLines = explode("\n", str_replace("\r\n", "\n", $phpLines));
+        return empty($line) ? $result : $this->fetchLines($result, $line, $countLines);
+    }
+
+    /**
+     * Fetch only specified lines from source.
+     *
+     * @param string $source
+     * @param int    $line
+     * @param int    $countLines
+     * @return string
+     */
+    private function fetchLines($source, $line, $countLines = 10)
+    {
+        $lines = explode("\n", str_replace("\r\n", "\n", $source));
 
         $result = "";
-        foreach ($phpLines as $number => $code)
+        foreach ($lines as $number => $code)
         {
             $number++;
-            if ($number >= $targetLine - $countLines && $number <= $targetLine + $countLines)
+            if ($number >= $line - $countLines && $number <= $line + $countLines)
             {
-                $template = $this->style['templates']['line'];
-
-                if ($number == $targetLine)
-                {
-                    $template = $this->style['templates']['highlighted'];
-                }
-
+                $template = $this->style['templates'][$number == $line ? 'highlighted' : 'line'];
                 $result .= \Spiral\interpolate($template, [
                     'number'  => $number,
                     'content' => mb_convert_encoding($code, 'utf-8')

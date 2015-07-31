@@ -47,34 +47,25 @@ class Tokenizer extends Singleton implements TokenizerInterface
     private $cache = [];
 
     /**
-     * To cache tokenizer class map.
-     *
      * @invisible
      * @var HippocampusInterface
      */
     protected $memory = null;
 
     /**
-     * FileManager component to load files.
-     *
      * @invisible
      * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * Loader component instance.
-     *
      * @invisible
      * @var Loader
      */
     protected $loader = null;
 
     /**
-     * Tokenizer used by spiral to fetch list of available classes, their declarations and locations.
-     * This class mostly used for indexing, orm and odm schemas and etc. Additionally this class has
-     * ability to perform simple PHP code highlighting which can be used in ExceptionResponses and
-     * snapshots.
+     * New instance of Tokenizer.
      *
      * @param ConfiguratorInterface $configurator
      * @param HippocampusInterface  $runtime
@@ -184,8 +175,8 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
-     * Get ReflectionFile for given filename, reflection can be used to retrieve list of declared
-     * classes, interfaces, traits and functions, plus it can locate function usages.
+     * Get ReflectionFile instance associated with given filename, reflection can be used to retrieve
+     * list of declared classes, interfaces, traits and functions, plus it can locate function usages.
      *
      * @param string $filename PHP filename.
      * @return ReflectionFile
@@ -217,15 +208,10 @@ class Tokenizer extends Singleton implements TokenizerInterface
     /**
      * Fetch targeted classes from file reflection.
      *
-     * @param ReflectionFile $fileReflection Source file reflection.
-     * @param mixed          $parent         Class or interface should be extended. By default - null
-     *                                       (all classes).
-     *                                       Parent will also be included to classes list as one of
-     *                                       results.
-     * @param string         $namespace      Only classes in this namespace will be retrieved, null
-     *                                       by default (all namespaces).
-     * @param string         $postfix        Only classes with such postfix will be analyzed, empty
-     *                                       by default.
+     * @param ReflectionFile $fileReflection
+     * @param mixed          $parent
+     * @param string         $namespace
+     * @param string         $postfix
      * @return array
      */
     private function fetchClasses(
@@ -304,7 +290,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
-     * Check if class targeted for analysis.
+     * Check if class targeted for analysis by comparing namespaces and postfixes.
      *
      * @param string $class
      * @param string $namespace

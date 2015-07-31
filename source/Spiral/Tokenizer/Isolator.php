@@ -8,29 +8,34 @@
  */
 namespace Spiral\Tokenizer;
 
-class Isolator
+use Spiral\Core\Component;
+
+/**
+ *
+ */
+class Isolator extends Component
 {
     /**
      * Unique block id, required to generate unique placeholders.
      *
      * @var int
      */
-    protected static $blockID = 0;
+    private static $blockID = 0;
 
     /**
      * All existing and isolated PHP blocks.
      *
      * @var array
      */
-    protected $phpBlocks = [];
+    private $phpBlocks = [];
 
     /**
      * Isolated prefix and postfix. Use any values that will not corrupt HTML or other source.
      *
      * @var string
      */
-    protected $prefix = '';
-    protected $postfix = '';
+    private $prefix = '';
+    private $postfix = '';
 
     /**
      * Replaces has to be performed before / after finding and mounting blocks. This replaces used
@@ -39,7 +44,7 @@ class Isolator
      *
      * @var array
      */
-    protected $patterns = [];
+    private $patterns = [];
 
     /**
      * Revert replaces, will contain list of existing and replaced tags (unique set), so output
@@ -48,14 +53,7 @@ class Isolator
      *
      * @var array
      */
-    protected $replaces = [];
-
-    /**
-     * Short tags will automatically be replaced to solve the issue with short_tags = off.
-     *
-     * @var bool
-     */
-    protected $shortTags = true;
+    private $replaces = [];
 
     /**
      * New php isolator.
@@ -70,25 +68,6 @@ class Isolator
         $this->postfix = $postfix;
 
         $this->shortTags($shortTags);
-    }
-
-    /**
-     * Adding a new tag replacement pattern. Should include tag name, regular expression to handle
-     * tag and replacement string. Originally was used to support asp tags, now only for short tags/
-     *
-     * @param string $tag     PHP Tag to handle, can be an open or closed PHP tag.
-     * @param string $regexp  Pattern used to catch tags, can be empty, in this case str_replace
-     *                        will be used.
-     * @param string $replace String tags has to be replaced with, has to be valid php opening or
-     *                        closed tag. Should include %s which will be used to identity how to
-     *                        revert replacements.
-     */
-    protected function addPattern($tag, $regexp = null, $replace = "<?php /*%s*/")
-    {
-        $this->patterns[$tag] = [
-            'regexp'  => $regexp,
-            'replace' => $replace
-        ];
     }
 
     /**
@@ -173,18 +152,6 @@ class Isolator
     }
 
     /**
-     * Mount all original tags searched and replaced by replaceTags() function. The result of this
-     * function converts source to it's original form.
-     *
-     * @param string $source
-     * @return string
-     */
-    protected function restoreTags($source)
-    {
-        return strtr($source, $this->replaces);
-    }
-
-    /**
      * Restore PHP blocks position in isolated source (isolatePHP() should be already called).
      *
      * @param string $source
@@ -215,6 +182,56 @@ class Isolator
     }
 
     /**
+     * List of all returned and replaced php blocks.
+     *
+     * @return array
+     */
+    public function getBlocks()
+    {
+        return $this->phpBlocks;
+    }
+
+    /**
+     * Update isolator php blocks.
+     *
+     * @param array $phpBlocks
+     * @return $this
+     */
+    public function setBlocks($phpBlocks)
+    {
+        $this->phpBlocks = $phpBlocks;
+
+        return $this;
+    }
+
+    /**
+     * Reset isolator state.
+     */
+    public function reset()
+    {
+        $this->phpBlocks = $this->replaces = [];
+    }
+
+    /**
+     * Adding a new tag replacement pattern. Should include tag name, regular expression to handle
+     * tag and replacement string. Originally was used to support asp tags, now only for short tags/
+     *
+     * @param string $tag     PHP Tag to handle, can be an open or closed PHP tag.
+     * @param string $regexp  Pattern used to catch tags, can be empty, in this case str_replace
+     *                        will be used.
+     * @param string $replace String tags has to be replaced with, has to be valid php opening or
+     *                        closed tag. Should include %s which will be used to identity how to
+     *                        revert replacements.
+     */
+    protected function addPattern($tag, $regexp = null, $replace = "<?php /*%s*/")
+    {
+        $this->patterns[$tag] = [
+            'regexp'  => $regexp,
+            'replace' => $replace
+        ];
+    }
+
+    /**
      * Get saved PHP block by ID.
      *
      * @param int $blockID
@@ -228,6 +245,18 @@ class Isolator
         }
 
         return $this->phpBlocks[$blockID['id']];
+    }
+
+    /**
+     * Mount all original tags searched and replaced by replaceTags() function. The result of this
+     * function converts source to it's original form.
+     *
+     * @param string $source
+     * @return string
+     */
+    protected function restoreTags($source)
+    {
+        return strtr($source, $this->replaces);
     }
 
     /**
@@ -282,39 +311,8 @@ class Isolator
      *
      * @return string
      */
-    protected function getPlaceholder()
+    private function getPlaceholder()
     {
         return md5(self::$blockID++ . '-' . uniqid('', true));
-    }
-
-    /**
-     * List of all returned and replaced php blocks.
-     *
-     * @return array
-     */
-    public function getBlocks()
-    {
-        return $this->phpBlocks;
-    }
-
-    /**
-     * Update isolator php blocks.
-     *
-     * @param array $phpBlocks
-     * @return $this
-     */
-    public function setBlocks($phpBlocks)
-    {
-        $this->phpBlocks = $phpBlocks;
-
-        return $this;
-    }
-
-    /**
-     * Reset isolator state.
-     */
-    public function reset()
-    {
-        $this->phpBlocks = $this->replaces = [];
     }
 }

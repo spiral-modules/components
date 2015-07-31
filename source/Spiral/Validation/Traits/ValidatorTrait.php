@@ -167,7 +167,7 @@ trait ValidatorTrait
      * @throws ValidationException
      * @throws MissingContainerException
      * @event validation()
-     * @event validated(errors)
+     * @event validated($errors)
      */
     protected function validate()
     {

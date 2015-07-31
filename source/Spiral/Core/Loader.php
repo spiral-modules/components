@@ -134,7 +134,7 @@ class Loader extends Singleton
      * Find class declaration and load it.
      *
      * @param string $class Class name with namespace included.
-     * @event notFound(class)
+     * @event notFound($class)
      */
     public function loadClass($class)
     {

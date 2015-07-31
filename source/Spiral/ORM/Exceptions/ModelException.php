@@ -7,11 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\ORM\Exceptions;
+use Spiral\Models\Exceptions\EntityException;
 
 /**
  * ActiveRecord related exception.
  */
-class ModelException extends ORMException
+class ModelException extends EntityException
 {
 
 }

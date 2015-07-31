@@ -11,11 +11,10 @@ namespace Spiral\ORM;
 use Spiral\Database\Database;
 use Spiral\Database\Table;
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\DatabaseEntityInterface;
 use Spiral\Models\DataEntity;
 use Spiral\Validation\ValidatorInterface;
 
-abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterface
+abstract class ActiveRecord extends DataEntity
 {
     /**
      * We are going to inherit parent validation, we have to let i18n indexer know to collect both
@@ -569,7 +568,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
         if (!$this->isLoaded())
         {
             //Non loaded models should be in solid state by default and require initial validation
-            $this->solidState(true)->validationRequired = true;
+            $this->solidState(true)->validated = true;
         }
     }
 
@@ -1170,7 +1169,7 @@ abstract class ActiveRecord extends DataEntity implements DatabaseEntityInterfac
         $class = new static();
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $class->validationRequired = true;
+        $class->validated = true;
         $class->setFields($fields)->fire('created');
 
         return $class;

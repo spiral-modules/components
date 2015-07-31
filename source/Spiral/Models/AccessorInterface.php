@@ -10,36 +10,36 @@ namespace Spiral\Models;
 
 use Spiral\Validation\ValueInterface;
 
+/**
+ * Accessors used to mock access to model field, control value setting, serializing and etc.
+ */
 interface AccessorInterface extends ValueInterface, \JsonSerializable
 {
     /**
-     * Accessors can be used to mock different model values using "representative" class, like
-     * DateTime for timestamps.
+     * Accessors creation flow is unified and must be performed without Container for performance
+     * reasons.
      *
-     * @param mixed  $data    Data to mock.
+     * @param mixed  $data
      * @param object $parent
-     * @param mixed  $options Implementation specific options.
      */
-    public function __construct($data = null, $parent = null, $options = null);
+    public function __construct($data, $parent);
 
     /**
-     * Embed to another parent.
+     * Must embed accessor to another parent model. Allowed to clone itself.
      *
      * @param object $parent
-     * @return $this
      */
     public function embed($parent);
 
     /**
-     * Update accessor mocked data.
+     * Change mocked data.
      *
      * @param mixed $data
      */
     public function setData($data);
 
     /**
-     * Serialize accessor mocked value. This is legacy name and used like that to be compatible with
-     * ORM and ODM engines.
+     * Serialize mocked data to be stored in database or retrieved by user.
      *
      * @return mixed
      */

@@ -7,11 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\ODM\Exceptions;
+use Spiral\Models\Exceptions\EntityException;
 
 /**
  * Exceptions raised by document.
  */
-class DocumentException extends ODMException
+class DocumentException extends EntityException
 {
 
 }

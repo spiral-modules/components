@@ -27,7 +27,7 @@ class MethodSchema extends MethodElement
     public function __construct(\ReflectionMethod $reflection)
     {
         $this->cloneSchema($reflection);
-        $this->name = $reflection->getName();
+        $this->setName($reflection->getName());
 
         //Looking for return value
         foreach ($this->docComment as $line)

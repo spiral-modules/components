@@ -9,11 +9,9 @@
 namespace Spiral\ODM;
 
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\DatabaseEntityInterface;
 use Spiral\Models\DataEntity;
-use Spiral\Validation\ValidatorInterface;
 
-abstract class Document extends DataEntity implements CompositableInterface, DatabaseEntityInterface
+abstract class Document extends DataEntity implements CompositableInterface
 {
     /**
      * We are going to inherit parent validation, we have to let i18n indexer know to collect both
@@ -251,7 +249,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
 
         if ((!$this->primaryKey() && empty($this->parent)) || !is_array($data))
         {
-            $this->solidState(true)->validationRequired = true;
+            $this->solidState(true)->validated = true;
         }
     }
 
@@ -373,7 +371,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
     /**
      * {@inheritdoc}
      */
-    protected function defineAccessor($value, $accessor)
+    protected function createAccessor($value, $accessor)
     {
         $options = null;
         if (is_array($accessor))
@@ -757,7 +755,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
      */
     protected function validate()
     {
-        $validationRequired = $this->validationRequired;
+        $validationRequired = $this->validated;
         parent::validate();
 
         //Validating all compositions
@@ -903,7 +901,7 @@ abstract class Document extends DataEntity implements CompositableInterface, Dat
         $class = new static([], null, [], $odm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $class->validationRequired = true;
+        $class->validated = true;
         $class->setFields($fields)->fire('created');
 
         return $class;

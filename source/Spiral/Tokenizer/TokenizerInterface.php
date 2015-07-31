@@ -8,6 +8,10 @@
  */
 namespace Spiral\Tokenizer;
 
+/**
+ * Tokenizers must support different classes with parsed PHP tokens (default functionality of
+ * token_get_all) and ability to find project classes with specified parent or namespace.
+ */
 interface TokenizerInterface
 {
     /**
@@ -18,8 +22,8 @@ interface TokenizerInterface
     const LINE = 2;
 
     /**
-     * Fetch PHP tokens for specified filename. String tokens should be automatically extended with their
-     * type and line.
+     * Fetch PHP tokens for specified filename. Usually links to token_get_all() function. Every token
+     * MUST be converted into array.
      *
      * @param string $filename
      * @return array
@@ -27,10 +31,9 @@ interface TokenizerInterface
     public function fetchTokens($filename);
 
     /**
-     * Index all available files excluding and generate list of found classes with their names and
-     * filenames. Unreachable classes or files with conflicts be skipped.
-     *
-     * This is SLOW method, should be used only for static analysis.
+     * Index all available files and generate list of found classes with their names and filenames.
+     * Unreachable classes or files with conflicts must be skipped. This is SLOW method, should be
+     * used only for static analysis.
      *
      * Output format:
      * $result['CLASS_NAME'] = [
@@ -41,10 +44,10 @@ interface TokenizerInterface
      *
      * @param mixed  $parent    Class or interface should be extended. By default - null (all classes).
      *                          Parent will also be included to classes list as one of results.
-     * @param string $namespace Only classes in this namespace will be retrieved, null by default
+     * @param string $namespace Only classes in this namespace will be retrieved, empty by default
      *                          (all namespaces).
      * @param string $postfix   Only classes with such postfix will be analyzed, empty by default.
      * @return array
      */
-    public function getClasses($parent = null, $namespace = null, $postfix = '');
+    public function getClasses($parent = null, $namespace = '', $postfix = '');
 }

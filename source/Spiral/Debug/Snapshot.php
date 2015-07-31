@@ -35,6 +35,13 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     private $exception = null;
 
     /**
+     * Rendered backtrace view, can be used in to save into file, send by email or show to client.
+     *
+     * @var string
+     */
+    private $renderCache = '';
+
+    /**
      * @var array
      */
     protected $config = [];
@@ -53,13 +60,6 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
      * @var ViewsInterface
      */
     protected $views = null;
-
-    /**
-     * Rendered backtrace view, can be used in to save into file, send by email or show to client.
-     *
-     * @var string
-     */
-    protected $renderCache = '';
 
     /**
      * [@inheritdoc}

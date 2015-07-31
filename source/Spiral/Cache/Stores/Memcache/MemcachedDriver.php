@@ -21,13 +21,6 @@ class MemcachedDriver extends CacheStore implements DriverInterface
     protected $options = [];
 
     /**
-     * Every driver have servers.
-     *
-     * @var array
-     */
-    protected $servers = [];
-
-    /**
      * @var \Memcached
      */
     protected $service = null;

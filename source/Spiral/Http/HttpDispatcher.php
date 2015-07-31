@@ -51,6 +51,11 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
     const CONFIG = 'http';
 
     /**
+     * @var EmitterInterface
+     */
+    private $emitter = null;
+
+    /**
      * @var ContainerInterface
      */
     protected $container = null;
@@ -84,11 +89,6 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
      * @var callable[]|MiddlewareInterface[]
      */
     protected $middlewares = [];
-
-    /**
-     * @var EmitterInterface
-     */
-    protected $emitter = null;
 
     /**
      * @param ConfiguratorInterface $configurator
@@ -346,7 +346,7 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
      *
      * @param ClientException $exception
      */
-    protected function logError(ClientException $exception)
+    private function logError(ClientException $exception)
     {
         $remoteAddr = '-undefined-';
         if (!empty($this->request->getServerParams()['REMOTE_ADDR']))
@@ -373,7 +373,7 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
      * @param int $code
      * @return ResponseInterface
      */
-    protected function errorResponse($code)
+    private function errorResponse($code)
     {
         if ($this->request->getHeaderLine('Accept') == 'application/json')
         {

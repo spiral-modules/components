@@ -27,37 +27,37 @@ class Loader extends Singleton
     const SINGLETON = self::class;
 
     /**
-     * @var HippocampusInterface
-     */
-    protected $memory = null;
-
-    /**
      * List of classes loaded while this working session.
      *
      * @var array
      */
-    protected $classes = [];
+    private $classes = [];
 
     /**
      * Name of memory sections to use.
      *
      * @var string
      */
-    protected $name = 'loadmap';
+    private $name = 'loadmap';
 
     /**
      * Association between class and it's location.
      *
      * @var array
      */
-    protected $loadmap = [];
+    private $loadmap = [];
 
     /**
      * Is SPL methods handled.
      *
      * @var bool
      */
-    protected $enabled = false;
+    private $enabled = false;
+
+    /**
+     * @var HippocampusInterface
+     */
+    protected $memory = null;
 
     /**
      * Loader will automatically handle SPL autoload functions to start caching loadmap.

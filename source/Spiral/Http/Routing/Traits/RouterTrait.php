@@ -26,12 +26,12 @@ trait RouterTrait
     /**
      * @var RouteInterface[]
      */
-    protected $routes = [];
+    private $routes = [];
 
     /**
      * @var Router|null
      */
-    protected $router = null;
+    private $router = null;
 
     /**
      * @return ContainerInterface
@@ -91,7 +91,7 @@ trait RouterTrait
 
         return $route;
     }
-    
+
     /**
      * Create router instance using container.
      *

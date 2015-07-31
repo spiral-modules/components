@@ -100,11 +100,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
-     * Fetch PHP tokens for specified filename. String tokens should be automatically extended with their
-     * type and line.
-     *
-     * @param string $filename
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchTokens($filename)
     {
@@ -130,24 +126,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
-     * Index all available files excluding and generate list of found classes with their names and
-     * filenames. Unreachable classes or files with conflicts be skipped.
-     *
-     * This is SLOW method, should be used only for static analysis.
-     *
-     * Output format:
-     * $result['CLASS_NAME'] = [
-     *      'class'    => 'CLASS_NAME',
-     *      'filename' => 'FILENAME',
-     *      'abstract' => 'ABSTRACT_BOOL'
-     * ]
-     *
-     * @param mixed  $parent    Class or interface should be extended. By default - null (all classes).
-     *                          Parent will also be included to classes list as one of results.
-     * @param string $namespace Only classes in this namespace will be retrieved, null by default
-     *                          (all namespaces).
-     * @param string $postfix   Only classes with such postfix will be analyzed, empty by default.
-     * @return array
+     * {@inheritdoc}
      */
     public function getClasses($parent = null, $namespace = null, $postfix = '')
     {
@@ -176,6 +155,62 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
+     * Get all class traits.
+     *
+     * @param string $class
+     * @return array
+     */
+    public function getTraits($class)
+    {
+        $traits = [];
+
+        while ($class)
+        {
+            $traits = array_merge(class_uses($class), $traits);
+            $class = get_parent_class($class);
+        }
+
+        //Traits from traits
+        foreach (array_flip($traits) as $trait)
+        {
+            $traits = array_merge(class_uses($trait), $traits);
+        }
+
+        return array_unique($traits);
+    }
+
+    /**
+     * Get ReflectionFile for given filename, reflection can be used to retrieve list of declared
+     * classes, interfaces, traits and functions, plus it can locate function usages.
+     *
+     * @param string $filename PHP filename.
+     * @return ReflectionFile
+     */
+    public function reflectionFile($filename)
+    {
+        if (empty($this->cache))
+        {
+            $this->cache = $this->runtime->loadData('tokenizer-reflections');
+        }
+
+        $fileMD5 = $this->file->md5($filename);
+
+        //Let's check if file already cached
+        if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5)
+        {
+            return new ReflectionFile($filename, $this, $this->cache[$filename]);
+        }
+
+        $reflection = new ReflectionFile($filename, $this);
+
+        //Let's save to cache
+        $this->cache[$filename] = ['md5' => $fileMD5] + $reflection->exportSchema();
+        $this->runtime->saveData('tokenizer-reflections', $this->cache);
+
+        return $reflection;
+    }
+
+    /**
      * Fetch targeted classes from file reflection.
      *
      * @param ReflectionFile $fileReflection Source file reflection.
@@ -189,7 +224,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
      *                                       by default.
      * @return array
      */
-    protected function fetchClasses(
+    private function fetchClasses(
         ReflectionFile $fileReflection,
         $parent = null,
         $namespace = null,
@@ -272,7 +307,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
      * @param string $postfix
      * @return bool
      */
-    protected function isTargeted($class, $namespace, $postfix)
+    private function isTargeted($class, $namespace, $postfix)
     {
         if (!empty($namespace) && strpos(ltrim($class, '\\'), $namespace) === false)
         {
@@ -292,7 +327,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
      *
      * @return array
      */
-    protected function availableFiles()
+    private function availableFiles()
     {
         $result = [];
         foreach ($this->config['directories'] as $directory)
@@ -313,61 +348,5 @@ class Tokenizer extends Singleton implements TokenizerInterface
         }
 
         return $result;
-    }
-
-    /**
-     * Get all class traits.
-     *
-     * @param string $class
-     * @return array
-     */
-    public function getTraits($class)
-    {
-        $traits = [];
-
-        while ($class)
-        {
-            $traits = array_merge(class_uses($class), $traits);
-            $class = get_parent_class($class);
-        }
-
-        //Traits from traits
-        foreach (array_flip($traits) as $trait)
-        {
-            $traits = array_merge(class_uses($trait), $traits);
-        }
-
-        return array_unique($traits);
-    }
-
-    /**
-     * Get ReflectionFile for given filename, reflection can be used to retrieve list of declared
-     * classes, interfaces, traits and functions, plus it can locate function usages.
-     *
-     * @param string $filename PHP filename.
-     * @return ReflectionFile
-     */
-    public function reflectionFile($filename)
-    {
-        if (empty($this->cache))
-        {
-            $this->cache = $this->runtime->loadData('tokenizer-reflections');
-        }
-
-        $fileMD5 = $this->file->md5($filename);
-
-        //Let's check if file already cached
-        if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5)
-        {
-            return new ReflectionFile($filename, $this, $this->cache[$filename]);
-        }
-
-        $reflection = new ReflectionFile($filename, $this);
-
-        //Let's save to cache
-        $this->cache[$filename] = ['md5' => $fileMD5] + $reflection->exportSchema();
-        $this->runtime->saveData('tokenizer-reflections', $this->cache);
-
-        return $reflection;
     }
 }

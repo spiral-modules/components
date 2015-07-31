@@ -37,16 +37,9 @@ class InputManager extends Singleton
     const SINGLETON = self::class;
 
     /**
-     * @invisible
-     * @var ContainerInterface
+     * @var InputBag[]
      */
-    protected $container = null;
-
-    /**
-     * @invisible
-     * @var ServerRequestInterface
-     */
-    protected $request = null;
+    private $bagInstances = [];
 
     /**
      * Associations between bags and representing class/request method.
@@ -65,9 +58,16 @@ class InputManager extends Singleton
     ];
 
     /**
-     * @var InputBag[]
+     * @invisible
+     * @var ContainerInterface
      */
-    protected $bagInstances = [];
+    protected $container = null;
+
+    /**
+     * @invisible
+     * @var ServerRequestInterface
+     */
+    protected $request = null;
 
     /**
      * @param ContainerInterface $container

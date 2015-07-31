@@ -18,7 +18,7 @@ class InputBag implements \Countable, \IteratorAggregate, \ArrayAccess
     /**
      * @var array
      */
-    protected $data = [];
+    private $data = [];
 
     /**
      * @param array $data

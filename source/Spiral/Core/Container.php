@@ -101,62 +101,6 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Create instance of desired class.
-     *
-     * @param string $class
-     * @param array  $parameters Constructor parameters.
-     * @return object
-     * @throws InstanceException
-     */
-    private function createInstance($class, array $parameters)
-    {
-        $reflector = new \ReflectionClass($class);
-
-        if (!empty($context) && $injector = $reflector->getConstant('INJECTOR'))
-        {
-            /**
-             * We have to construct class here. Remember about this magick constant?
-             */
-            return call_user_func(
-                [$this->get($injector), 'createInjection'],
-                $reflector, $context, $this
-            );
-        }
-
-        if (!$reflector->isInstantiable())
-        {
-            throw new InstanceException("Class '{$class}' can not be constructed.");
-        }
-
-        if (!empty($constructor = $reflector->getConstructor()))
-        {
-            $instance = $reflector->newInstanceArgs(
-                $this->resolveArguments($constructor, $parameters)
-            );
-        }
-        else
-        {
-            //No constructor specified
-            $instance = $reflector->newInstance();
-        }
-
-        if (!empty($singleton = $reflector->getConstant('SINGLETON')))
-        {
-            //Component declared SINGLETON constant, binding as constant value and class name.
-            $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
-        }
-
-        if ($instance instanceof SaturableInterlace)
-        {
-            //Saturating object with required dependencies
-            $depends = $reflector->getMethod(SaturableInterlace::DEPENDENT_METHOD);
-            $depends->invoke($instance, $this->resolveArguments($depends, $parameters));
-        }
-
-        return $instance;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function resolveArguments(ContextFunction $reflection, array $parameters = [])
@@ -297,5 +241,61 @@ class Container extends Component implements ContainerInterface
     public function removeBinding($alias)
     {
         unset($this->bindings[$alias]);
+    }
+
+    /**
+     * Create instance of desired class.
+     *
+     * @param string $class
+     * @param array  $parameters Constructor parameters.
+     * @return object
+     * @throws InstanceException
+     */
+    private function createInstance($class, array $parameters)
+    {
+        $reflector = new \ReflectionClass($class);
+
+        if (!empty($context) && $injector = $reflector->getConstant('INJECTOR'))
+        {
+            /**
+             * We have to construct class here. Remember about this magick constant?
+             */
+            return call_user_func(
+                [$this->get($injector), 'createInjection'],
+                $reflector, $context, $this
+            );
+        }
+
+        if (!$reflector->isInstantiable())
+        {
+            throw new InstanceException("Class '{$class}' can not be constructed.");
+        }
+
+        if (!empty($constructor = $reflector->getConstructor()))
+        {
+            $instance = $reflector->newInstanceArgs(
+                $this->resolveArguments($constructor, $parameters)
+            );
+        }
+        else
+        {
+            //No constructor specified
+            $instance = $reflector->newInstance();
+        }
+
+        if (!empty($singleton = $reflector->getConstant('SINGLETON')))
+        {
+            //Component declared SINGLETON constant, binding as constant value and class name.
+            $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
+        }
+
+        if ($instance instanceof SaturableInterlace)
+        {
+            //Saturating object with required dependencies
+            $depends = $reflector->getMethod(SaturableInterlace::DEPENDENT_METHOD);
+            $depends->invoke($instance, $this->resolveArguments($depends, $parameters));
+        }
+
+        return $instance;
     }
 }

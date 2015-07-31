@@ -29,11 +29,6 @@ class Dumper extends Singleton
     const OUTPUT_LOG_NICE = 3;
 
     /**
-     * @var Debugger
-     */
-    protected $debugger = null;
-
-    /**
      * @var array
      */
     private $options = [
@@ -63,6 +58,11 @@ class Dumper extends Singleton
             'access-protected' => '#7d95c1'
         ]
     ];
+
+    /**
+     * @var Debugger
+     */
+    protected $debugger = null;
 
     /**
      * @param Debugger $debugger

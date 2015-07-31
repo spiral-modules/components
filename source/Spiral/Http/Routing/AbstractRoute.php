@@ -214,7 +214,6 @@ abstract class AbstractRoute implements RouteInterface
         return $this;
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -259,34 +258,6 @@ abstract class AbstractRoute implements RouteInterface
         }
 
         return false;
-    }
-
-
-    /**
-     * Compile router pattern into valid regexp.
-     */
-    protected function compile()
-    {
-        $replaces = ['/' => '\\/', '[' => '(?:', ']' => ')?', '.' => '\.'];
-
-        $options = [];
-        if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches))
-        {
-            $variables = array_combine($matches[1], $matches[2]);
-            foreach ($variables as $name => $segment)
-            {
-                $segment = $segment ?: self::DEFAULT_SEGMENT;
-                $replaces["<$name>"] = "(?P<$name>$segment)";
-                $options[] = $name;
-            }
-        }
-
-        $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
-        $this->compiled = [
-            'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
-            'template' => stripslashes(str_replace('?', '', $template)),
-            'options'  => array_fill_keys($options, null)
-        ];
     }
 
     /**
@@ -359,5 +330,32 @@ abstract class AbstractRoute implements RouteInterface
 
             throw new ClientException(ClientException::BAD_DATA, $exception->getMessage());
         }
+    }
+
+    /**
+     * Compile router pattern into valid regexp.
+     */
+    private function compile()
+    {
+        $replaces = ['/' => '\\/', '[' => '(?:', ']' => ')?', '.' => '\.'];
+
+        $options = [];
+        if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches))
+        {
+            $variables = array_combine($matches[1], $matches[2]);
+            foreach ($variables as $name => $segment)
+            {
+                $segment = $segment ?: self::DEFAULT_SEGMENT;
+                $replaces["<$name>"] = "(?P<$name>$segment)";
+                $options[] = $name;
+            }
+        }
+
+        $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
+        $this->compiled = [
+            'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
+            'template' => stripslashes(str_replace('?', '', $template)),
+            'options'  => array_fill_keys($options, null)
+        ];
     }
 }

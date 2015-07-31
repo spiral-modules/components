@@ -30,22 +30,16 @@ class Router implements RouterInterface
     const DEFAULT_ROUTE = 'default';
 
     /**
-     * @invisible
-     * @var ContainerInterface
-     */
-    protected $container = null;
-
-    /**
      * @var RouteInterface[]
      */
-    protected $routes = [];
+    private $routes = [];
 
     /**
      * Every route should be executed in a context of active path.
      *
      * @var string
      */
-    protected $activePath = '/';
+    private $activePath = '/';
 
     /**
      * Active route instance, this value will be populated only after router successfully handled
@@ -53,14 +47,19 @@ class Router implements RouterInterface
      *
      * @var RouteInterface|null
      */
-    protected $activeRoute = null;
+    private $activeRoute = null;
+
+    /**
+     * @invisible
+     * @var ContainerInterface
+     */
+    protected $container = null;
 
     /**
      * {@inheritdoc}
      *
      * @param RouteInterface|array $default Default route or options to construct instance
      *                                      of DirectRoute.
-     *
      * @throws InvalidArgumentException
      */
     public function __construct(ContainerInterface $container, array $routes = [], array $default = [])

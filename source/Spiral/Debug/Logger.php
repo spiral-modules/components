@@ -59,7 +59,7 @@ class Logger extends AbstractLogger
      *
      * @var array
      */
-    protected static $logMessages = [];
+    private static $logMessages = [];
 
     /**
      * Logging container name, usually defined by component alias or class name.
@@ -73,7 +73,7 @@ class Logger extends AbstractLogger
      *
      * @var callable[]
      */
-    protected $handlers = [];
+    private $handlers = [];
 
     /**
      * @param string   $name

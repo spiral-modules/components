@@ -155,7 +155,7 @@ class MiddlewarePipeline
      * @param string $output Buffer output.
      * @return ResponseInterface
      */
-    protected function wrapResponse($response, $output = '')
+    private function wrapResponse($response, $output = '')
     {
         if ($response instanceof ResponseInterface)
         {

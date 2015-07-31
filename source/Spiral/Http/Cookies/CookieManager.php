@@ -76,8 +76,7 @@ class CookieManager extends Component implements MiddlewareInterface
     protected $request = null;
 
     /**
-     * Encrypter component.
-     *
+     * @invisible
      * @var EncrypterInterface
      */
     protected $encrypter = null;
@@ -285,42 +284,6 @@ class CookieManager extends Component implements MiddlewareInterface
     }
 
     /**
-     * @param string|array $cookie
-     * @return array|mixed|null
-     */
-    private function decodeCookie($cookie)
-    {
-        if ($this->config['method'] == self::ENCRYPT)
-        {
-            try
-            {
-                if (is_array($cookie))
-                {
-                    return array_map([$this, 'decodeCookie'], $cookie);
-                }
-
-                return $this->encrypter()->decrypt($cookie);
-            }
-            catch (DecryptException $exception)
-            {
-                return null;
-            }
-        }
-
-        //HMAC
-        $hmac = substr($cookie, -1 * self::MAC_LENGTH);
-        $value = substr($cookie, 0, strlen($cookie) - strlen($hmac));
-
-        if ($this->hmacSign($value) != $hmac)
-        {
-            return null;
-        }
-
-        return $value;
-    }
-
-
-    /**
      * Get associated encrypter instance or fetch it from container.
      *
      * @return EncrypterInterface
@@ -333,64 +296,6 @@ class CookieManager extends Component implements MiddlewareInterface
         }
 
         return $this->encrypter = $this->container->get(EncrypterInterface::class);
-    }
-
-    /**
-     * Unpack incoming cookies and decrypt their content.
-     *
-     * @param ServerRequestInterface $request
-     * @return ServerRequestInterface
-     */
-    protected function decodeCookies(ServerRequestInterface $request)
-    {
-        $altered = false;
-        $cookies = $request->getCookieParams();
-
-        foreach ($cookies as $name => $cookie)
-        {
-            if (in_array($name, $this->exclude) || $this->config['method'] == self::NONE)
-            {
-                continue;
-            }
-
-            $altered = true;
-            $cookies[$name] = $this->decodeCookie($cookie);
-        }
-
-        return $altered ? $request->withCookieParams($cookies) : $request;
-    }
-
-    /**
-     * Pack outcoming cookies with encrypted value.
-     *
-     * @param ResponseInterface $response
-     * @return ResponseInterface
-     * @throws EncrypterException
-     */
-    protected function mountCookies(ResponseInterface $response)
-    {
-        if (empty($this->scheduled))
-        {
-            return $response;
-        }
-
-        $cookies = $response->getHeader('Set-Cookie');
-
-        //Merging cookies
-        foreach ($this->scheduled as $cookie)
-        {
-            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE)
-            {
-                $cookies[] = $cookie->packHeader();
-                continue;
-            }
-
-            $cookies[] = $this->encodeCookie($cookie)->packHeader();
-        }
-
-        $this->scheduled = [];
-
-        return $response->withHeader('Set-Cookie', $cookies);
     }
 
     /**
@@ -430,6 +335,99 @@ class CookieManager extends Component implements MiddlewareInterface
     }
 
     /**
+     * Unpack incoming cookies and decrypt their content.
+     *
+     * @param ServerRequestInterface $request
+     * @return ServerRequestInterface
+     */
+    protected function decodeCookies(ServerRequestInterface $request)
+    {
+        $altered = false;
+        $cookies = $request->getCookieParams();
+
+        foreach ($cookies as $name => $cookie)
+        {
+            if (in_array($name, $this->exclude) || $this->config['method'] == self::NONE)
+            {
+                continue;
+            }
+
+            $altered = true;
+            $cookies[$name] = $this->decodeCookie($cookie);
+        }
+
+        return $altered ? $request->withCookieParams($cookies) : $request;
+    }
+
+    /**
+     * @param string|array $cookie
+     * @return array|mixed|null
+     */
+    private function decodeCookie($cookie)
+    {
+        if ($this->config['method'] == self::ENCRYPT)
+        {
+            try
+            {
+                if (is_array($cookie))
+                {
+                    return array_map([$this, 'decodeCookie'], $cookie);
+                }
+
+                return $this->encrypter()->decrypt($cookie);
+            }
+            catch (DecryptException $exception)
+            {
+                return null;
+            }
+        }
+
+        //HMAC
+        $hmac = substr($cookie, -1 * self::MAC_LENGTH);
+        $value = substr($cookie, 0, strlen($cookie) - strlen($hmac));
+
+        if ($this->hmacSign($value) != $hmac)
+        {
+            return null;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Pack outcoming cookies with encrypted value.
+     *
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws EncrypterException
+     */
+    protected function mountCookies(ResponseInterface $response)
+    {
+        if (empty($this->scheduled))
+        {
+            return $response;
+        }
+
+        $cookies = $response->getHeader('Set-Cookie');
+
+        //Merging cookies
+        foreach ($this->scheduled as $cookie)
+        {
+            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE)
+            {
+                $cookies[] = $cookie->packHeader();
+                continue;
+            }
+
+            $cookies[] = $this->encodeCookie($cookie)->packHeader();
+        }
+
+        $this->scheduled = [];
+
+        return $response->withHeader('Set-Cookie', $cookies);
+    }
+
+    /**
      * @param Cookie $cookie
      * @return Cookie
      */
@@ -447,6 +445,8 @@ class CookieManager extends Component implements MiddlewareInterface
     }
 
     /**
+     * Sign string.
+     *
      * @param string $value
      * @return string
      */

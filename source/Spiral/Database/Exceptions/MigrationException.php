@@ -7,11 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Database\Exceptions;
+use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * Error while performing migration.
  */
-class MigrationException extends DatabaseException
+class MigrationException extends RuntimeException
 {
 
 }

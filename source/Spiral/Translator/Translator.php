@@ -38,24 +38,24 @@ class Translator extends Singleton implements TranslatorInterface
     /**
      * @var string
      */
-    protected $language = '';
+    private $language = '';
 
     /**
      * @var array
      */
-    protected $languageOptions = [];
+    private $languageOptions = [];
 
     /**
      * @var PluralizerInterface[]
      */
-    protected $pluralizers = [];
+    private $pluralizers = [];
 
     /**
      * Language bundles.
      *
      * @var array
      */
-    protected $bundles = [];
+    private $bundles = [];
 
     /**
      * @var HippocampusInterface

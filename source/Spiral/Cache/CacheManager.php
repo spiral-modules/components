@@ -41,19 +41,19 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
      *
      * @var CacheStore[]
      */
-    protected $stores = false;
-
-    /**
-     * @var ContainerInterface
-     */
-    protected $container = null;
+    private $stores = false;
 
     /**
      * Due configuration is reverted we have to some weird things.
      *
      * @var array
      */
-    protected $optionPull = [];
+    private $optionsPull = [];
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container = null;
 
     /**
      * @param ConfiguratorInterface $configurator
@@ -63,23 +63,6 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
     {
         $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
-    }
-
-    /**
-     * Cache adapters support controllable injections, so we are giving them options from different
-     * angle.
-     *
-     * @param string $adapter
-     * @return array
-     */
-    public function storeOptions($adapter)
-    {
-        if (empty($this->optionPull[$adapter]))
-        {
-            return $this->config['stores'][$adapter];
-        }
-
-        return array_shift($this->optionPull);
     }
 
     /**
@@ -94,7 +77,7 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
         }
 
         //To be requested by storeOptions()
-        $this->optionPull[] = $options + $this->config['stores'][$store];
+        $this->optionsPull[] = $options + $this->config['stores'][$store];
 
         $this->benchmark('store', $store);
         $this->stores[$store] = $this->container->get($this->config['stores'][$store]['class'], [
@@ -110,6 +93,23 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
         }
 
         return $this->stores[$store];
+    }
+
+    /**
+     * Cache adapters support controllable injections, so we are giving them options from different
+     * angle.
+     *
+     * @param string $adapter
+     * @return array
+     */
+    public function storeOptions($adapter)
+    {
+        if (empty($this->optionsPull[$adapter]))
+        {
+            return $this->config['stores'][$adapter];
+        }
+
+        return array_shift($this->optionsPull);
     }
 
     /**

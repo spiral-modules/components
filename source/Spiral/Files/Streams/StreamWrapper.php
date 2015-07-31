@@ -41,13 +41,6 @@ class StreamWrapper
     ];
 
     /**
-     * Stream context.
-     *
-     * @var resource
-     */
-    public $context = null;
-
-    /**
      * @var StreamInterface
      */
     private $stream = null;
@@ -56,6 +49,13 @@ class StreamWrapper
      * @var int
      */
     private $mode = 0;
+
+    /**
+     * Stream context.
+     *
+     * @var resource
+     */
+    public $context = null;
 
     /**
      * Check if StreamInterface ended.

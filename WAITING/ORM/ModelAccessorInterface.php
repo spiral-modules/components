@@ -11,7 +11,7 @@ namespace Spiral\ORM;
 use Spiral\Database\Driver;
 use Spiral\Models\AccessorInterface;
 
-interface ORMAccessor extends AccessorInterface
+interface ModelAccessorInterface extends AccessorInterface
 {
     /**
      * Check if object has any update.

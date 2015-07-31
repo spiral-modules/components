@@ -14,7 +14,7 @@ use Spiral\Cache\CacheStore;
 /**
  * Talks to apc and apcu driver.
  */
-class ApcStore extends CacheStore
+class APCStore extends CacheStore
 {
     /**
      * {@inheritdoc}

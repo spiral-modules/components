@@ -8,7 +8,7 @@
  */
 namespace Spiral\ODM\Accessors;
 
-use Spiral\ODM\ODMAccessor;
+use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\ODM;
 use Spiral\ODM\Document;
@@ -17,7 +17,7 @@ use Spiral\ODM\ODMException;
 /**
  * This class can be potentially should be merged with ORM collection and Models EntityIterator.
  */
-class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayAccess
+class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Countable, \ArrayAccess
 {
     /**
      * Parent Document.
@@ -155,7 +155,7 @@ class Compositor implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayA
      */
     public function embed($parent)
     {
-        if (!$parent instanceof CompositableInterface)
+        if (!$parent instanceof Document)
         {
             throw new ODMException("Compositors can be embedded only to ODM objects.");
         }

@@ -13,6 +13,8 @@ use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
+use Spiral\Storage\Entities\StorageBucket;
+use Spiral\Storage\Entities\StorageObject;
 use Spiral\Storage\Exceptions\StorageException;
 
 /**

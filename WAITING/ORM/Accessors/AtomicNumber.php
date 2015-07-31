@@ -11,9 +11,9 @@ namespace Spiral\ORM\Accessors;
 use Spiral\Database\Driver;
 use Spiral\Database\SqlExpression;
 use Spiral\ORM\ActiveRecord;
-use Spiral\ORM\ORMAccessor;
+use Spiral\ORM\ModelAccessorInterface;
 
-class AtomicNumber implements ORMAccessor
+class AtomicNumber implements ModelAccessorInterface
 {
     /**
      * Parent active record.

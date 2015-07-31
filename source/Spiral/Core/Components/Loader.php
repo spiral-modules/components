@@ -6,8 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core;
+namespace Spiral\Core\Components;
 
+use Spiral\Core\HippocampusInterface;
+use Spiral\Core\Singleton;
 use Spiral\Events\Traits\EventsTrait;
 
 /**
@@ -62,11 +64,11 @@ class Loader extends Singleton
     /**
      * Loader will automatically handle SPL autoload functions to start caching loadmap.
      *
-     * @param HippocampusInterface $runtime
+     * @param HippocampusInterface $memory
      */
-    public function __construct(HippocampusInterface $runtime)
+    public function __construct(HippocampusInterface $memory)
     {
-        $this->memory = $runtime;
+        $this->memory = $memory;
         $this->enable();
     }
 

@@ -11,6 +11,7 @@ namespace Spiral\ORM\Selector;
 use Spiral\Database\Database;
 use Spiral\Database\QueryResult;
 use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Selector;
@@ -77,9 +78,9 @@ abstract class Loader implements LoaderInterface
      */
     protected $options = [
         'method' => null,
-        'alias' => null,
-        'using' => null,
-        'where' => null
+        'alias'  => null,
+        'using'  => null,
+        'where'  => null
     ];
 
     /**
@@ -377,13 +378,14 @@ abstract class Loader implements LoaderInterface
     {
         if (($position = strpos($relation, '.')) !== false)
         {
-            $parentRelation = substr($relation, 0, $position);
+            $parent = $this->loader(substr($relation, 0, $position), []);
+            if (empty($parent) || !$parent instanceof Loader)
+            {
+                throw new LoaderExcept
+            }
 
             //Recursively (will work only with ORM loaders).
-            return $this->loader($parentRelation, [])->loader(
-                substr($relation, $position + 1),
-                $options
-            );
+            return $parent->loader(substr($relation, $position + 1), $options);
         }
 
         if (!isset($this->schema[ORM::E_RELATIONS][$relation]))
@@ -510,8 +512,8 @@ abstract class Loader implements LoaderInterface
     /**
      * Clarify parent selection conditions.
      *
-     * @param bool $loaders Configure sub loaders.
-     * @param bool $joiners Configure joiners.
+     * @param bool     $loaders Configure sub loaders.
+     * @param bool     $joiners Configure joiners.
      * @param Selector $selector
      */
     public function configureSelector(Selector $selector, $loaders = true, $joiners = true)

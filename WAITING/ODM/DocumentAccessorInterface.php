@@ -8,7 +8,7 @@
  */
 namespace Spiral\ODM;
 
-interface ODMAccessor extends CompositableInterface
+interface DocumentAccessorInterface extends CompositableInterface
 {
     /**
      * Accessor default value.

@@ -6,9 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Storage;
+namespace Spiral\Storage\Entities;
 
+use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ObjectException;
+use Spiral\Storage\ObjectInterface;
+use Spiral\Storage\StorageInterface;
 
 /**
  * Default implementation of storage object.

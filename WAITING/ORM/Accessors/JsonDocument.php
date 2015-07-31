@@ -10,9 +10,9 @@ namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Driver;
 use Spiral\ODM\Document;
-use Spiral\ORM\ORMAccessor;
+use Spiral\ORM\ModelAccessorInterface;
 
-abstract class JsonDocument extends Document implements ORMAccessor
+abstract class JsonDocument extends Document implements ModelAccessorInterface
 {
     /**
      * Serialize object data for saving into database. No getters will be applied here.

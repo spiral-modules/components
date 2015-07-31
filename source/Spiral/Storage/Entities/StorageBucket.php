@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Storage;
+namespace Spiral\Storage\Entities;
 
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerAwareInterface;
@@ -15,7 +15,10 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
+use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\BucketException;
+use Spiral\Storage\StorageInterface;
+use Spiral\Storage\StorageManager;
 
 /**
  * Default implementation of storage bucket.

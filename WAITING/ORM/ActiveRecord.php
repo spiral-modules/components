@@ -863,7 +863,7 @@ abstract class ActiveRecord extends DataEntity
 
             foreach ($this->fields as $field => $value)
             {
-                if ($value instanceof ORMAccessor && $value->hasUpdates())
+                if ($value instanceof ModelAccessorInterface && $value->hasUpdates())
                 {
                     return true;
                 }
@@ -889,7 +889,7 @@ abstract class ActiveRecord extends DataEntity
 
         foreach ($this->fields as $value)
         {
-            if ($value instanceof ORMAccessor)
+            if ($value instanceof ModelAccessorInterface)
             {
                 $value->flushUpdates();
             }
@@ -911,7 +911,7 @@ abstract class ActiveRecord extends DataEntity
         $updates = [];
         foreach ($this->fields as $name => $field)
         {
-            if ($field instanceof ORMAccessor && ($this->solidState || $field->hasUpdates()))
+            if ($field instanceof ModelAccessorInterface && ($this->solidState || $field->hasUpdates()))
             {
                 $updates[$name] = $field->compileUpdates($name);
                 continue;
@@ -922,7 +922,7 @@ abstract class ActiveRecord extends DataEntity
                 continue;
             }
 
-            if ($field instanceof ORMAccessor)
+            if ($field instanceof ModelAccessorInterface)
             {
                 $field = $field->serializeData();
             }

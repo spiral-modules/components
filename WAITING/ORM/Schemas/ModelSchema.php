@@ -16,7 +16,7 @@ use Spiral\Database\SqlFragmentInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\Schemas\EntitySchema;
 use Spiral\ORM\ActiveRecord;
-use Spiral\ORM\ORMAccessor;
+use Spiral\ORM\ModelAccessorInterface;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\SchemaBuilder;
 
@@ -508,7 +508,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
             }
 
             /**
-             * @var ORMAccessor $accessor
+             * @var ModelAccessorInterface $accessor
              */
             $accessor = new $accessor($defaultValue, null, $option);
 

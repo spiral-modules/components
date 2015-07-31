@@ -11,7 +11,7 @@ namespace Spiral\Database\Exceptions;
 /**
  * Error while compiling query based on builder options.
  */
-class CompileException extends BuilderException
+class CompilerException extends BuilderException
 {
 
 }

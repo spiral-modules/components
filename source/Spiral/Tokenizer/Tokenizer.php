@@ -13,7 +13,7 @@ use Spiral\Tokenizer\Exceptions\TokenizerException;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Loader;
+use Spiral\Core\Components\Loader;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;

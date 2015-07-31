@@ -12,7 +12,7 @@ use Spiral\Models\Schemas\EntitySchema;
 use Spiral\ODM\Accessors\Compositor;
 use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
-use Spiral\ODM\ODMAccessor;
+use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\ODMException;
 use Spiral\ODM\SchemaBuilder;
 
@@ -309,7 +309,7 @@ class DocumentSchema extends EntitySchema
                     //Not an accessor but composited class
                     $accessor = new $accessor($default, null, $options);
 
-                    if ($accessor instanceof ODMAccessor)
+                    if ($accessor instanceof DocumentAccessorInterface)
                     {
                         $default = $accessor->defaultValue();
                     }

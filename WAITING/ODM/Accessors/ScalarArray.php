@@ -11,10 +11,10 @@ namespace Spiral\ODM\Accessors;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
-use Spiral\ODM\ODMAccessor;
+use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\ODMException;
 
-class ScalarArray implements ODMAccessor, \IteratorAggregate, \Countable, \ArrayAccess
+class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Countable, \ArrayAccess
 {
     /**
      * Automatically detect type based on first element.

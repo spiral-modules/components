@@ -165,19 +165,19 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertContains(self::class, $reflection->getClasses());
 
-        $functionUsages = $reflection->getFunctionUsages();
+        $functionUsages = $reflection->getCalls();
 
         $functionA = null;
         $functionB = null;
 
         foreach ($functionUsages as $usage)
         {
-            if ($usage->getFunction() == 'test_function_a')
+            if ($usage->getName() == 'test_function_a')
             {
                 $functionA = $usage;
             }
 
-            if ($usage->getFunction() == 'test_function_b')
+            if ($usage->getName() == 'test_function_b')
             {
                 $functionB = $usage;
             }
@@ -187,20 +187,20 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($functionB);
 
         $this->assertSame(2, count($functionA->getArguments()));
-        $this->assertSame(Argument::VARIABLE, $functionA->getArgument(0)->getType());
-        $this->assertSame('$this', $functionA->getArgument(0)->getValue());
+        $this->assertSame(Argument::VARIABLE, $functionA->argument(0)->getType());
+        $this->assertSame('$this', $functionA->argument(0)->getValue());
 
-        $this->assertSame(Argument::EXPRESSION, $functionA->getArgument(1)->getType());
-        $this->assertSame('$a+$b', $functionA->getArgument(1)->getValue());
+        $this->assertSame(Argument::EXPRESSION, $functionA->argument(1)->getType());
+        $this->assertSame('$a+$b', $functionA->argument(1)->getValue());
 
         $this->assertSame(2, count($functionB->getArguments()));
 
-        $this->assertSame(Argument::STRING, $functionB->getArgument(0)->getType());
-        $this->assertSame('"string"', $functionB->getArgument(0)->getValue());
-        $this->assertSame('string', $functionB->getArgument(0)->stringValue());
+        $this->assertSame(Argument::STRING, $functionB->argument(0)->getType());
+        $this->assertSame('"string"', $functionB->argument(0)->getValue());
+        $this->assertSame('string', $functionB->argument(0)->stringValue());
 
-        $this->assertSame(Argument::CONSTANT, $functionB->getArgument(1)->getType());
-        $this->assertSame('123', $functionB->getArgument(1)->getValue());
+        $this->assertSame(Argument::CONSTANT, $functionB->argument(1)->getType());
+        $this->assertSame('123', $functionB->argument(1)->getValue());
 
         if (false)
         {

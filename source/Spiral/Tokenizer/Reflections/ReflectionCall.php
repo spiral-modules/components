@@ -8,87 +8,94 @@
  */
 namespace Spiral\Tokenizer\Reflections;
 
-use Spiral\Tokenizer\Reflections\FunctionUsage\Argument;
-
-class FunctionUsage
+/**
+ * ReflectionCall used to represent function or static method call found by ReflectionFile. This
+ * reflection is very useful for static analysis and mainly used in Translator component to index
+ * translation function usages.
+ */
+class ReflectionCall
 {
     /**
-     * Function location.
-     *
      * @var string
      */
-    protected $filename = '';
+    private $filename = '';
 
     /**
-     * Line where function was used.
-     *
      * @var int
      */
-    protected $line = 0;
+    private $line = 0;
 
     /**
-     * Function name, can include :: as a parent class.
-     * Function name.
-     *
      * @var string
      */
-    protected $function = '';
+    private $name = '';
 
     /**
-     * Function class.
-     *
      * @var string
      */
-    protected $class = '';
+    private $class = '';
 
     /**
-     * Function usage source.
-     *
      * @var string
      */
-    protected $source = '';
+    private $source = '';
 
     /**
-     * Function arguments with their types and values.
-     *
-     * @var Argument[]
+     * @var ReflectionArgument[]
      */
-    protected $arguments = [];
+    private $arguments = [];
 
     /**
-     * Function open token ID.
-     *
      * @var int
      */
-    protected $openTID = 0;
+    private $openTID = 0;
 
     /**
-     * Function close token ID.
-     *
      * @var int
      */
-    protected $closeTID = 0;
+    private $closeTID = 0;
 
     /**
      * Was a function used inside another function call?
      *
      * @var int
      */
-    protected $level = 0;
+    private $level = 0;
 
     /**
-     * New function usage.
+     * New call reflection.
      *
-     * @param string $function
+     * @param string $filename
+     * @param int    $line
      * @param string $class
+     * @param string $name
+     * @param array  $arguments
      * @param string $source
+     * @param int    $openTID
+     * @param int    $closeTID
+     * @param int    $level
      */
-    public function __construct($function, $class, $source)
+    public function __construct(
+        $filename,
+        $line,
+        $class,
+        $name,
+        array $arguments,
+        $source,
+        $openTID,
+        $closeTID,
+        $level
+    )
     {
-        $this->function = $function;
-
+        $this->filename = $filename;
+        $this->line = $line;
         $this->class = $class;
+        $this->name = $name;
+        $this->arguments = $arguments;
         $this->source = $source;
+        $this->openTID = $openTID;
+        $this->closeTID = $closeTID;
+        $this->level = $level;
     }
 
     /**
@@ -116,9 +123,9 @@ class FunctionUsage
      *
      * @return string
      */
-    public function getFunction()
+    public function getName()
     {
-        return $this->function;
+        return $this->name;
     }
 
     /**
@@ -129,6 +136,16 @@ class FunctionUsage
     public function getClass()
     {
         return $this->class;
+    }
+
+    /**
+     * Call made by class method.
+     *
+     * @return bool
+     */
+    public function isMethod()
+    {
+        return !empty($this->class);
     }
 
     /**
@@ -144,7 +161,7 @@ class FunctionUsage
     /**
      * All parsed function arguments.
      *
-     * @return Argument[]
+     * @return ReflectionArgument[]
      */
     public function getArguments()
     {
@@ -152,13 +169,12 @@ class FunctionUsage
     }
 
     /**
-     * Get argument by it's position to function or return null
-     * if no argument is specified.
+     * Get call argument by it's position.
      *
      * @param int $index
-     * @return Argument|null
+     * @return ReflectionArgument|null
      */
-    public function getArgument($index)
+    public function argument($index)
     {
         return isset($this->arguments[$index]) ? $this->arguments[$index] : null;
     }
@@ -191,34 +207,5 @@ class FunctionUsage
     public function getLevel()
     {
         return $this->level;
-    }
-
-    /**
-     * Function usage arguments.
-     *
-     * @param array $arguments
-     * @return Argument[]
-     */
-    public function setArguments(array $arguments)
-    {
-        $this->arguments = $arguments;
-    }
-
-    /**
-     * Function usage position.
-     *
-     * @param string $filename Function usage filename.
-     * @param int    $line     Usage line number.
-     * @param int    $openTID  Where function usage starts.
-     * @param int    $closeTID Where function usage ends.
-     * @param int    $level    Function used inside another function.
-     */
-    public function setLocation($filename, $line, $openTID, $closeTID, $level = 0)
-    {
-        $this->filename = $filename;
-        $this->line = $line;
-        $this->openTID = $openTID;
-        $this->closeTID = $closeTID;
-        $this->level = $level;
     }
 }

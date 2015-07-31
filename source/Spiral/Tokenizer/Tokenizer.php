@@ -8,6 +8,7 @@
  */
 namespace Spiral\Tokenizer;
 
+use Spiral\Tokenizer\Exceptions\ReflectionException;
 use Spiral\Tokenizer\Exceptions\TokenizerException;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Spiral\Core\ConfiguratorInterface;
@@ -91,7 +92,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             unset($directory);
         }
 
-        $this->cache = $this->memory->loadData('tokenizer-reflections');
+        $this->cache = $this->memory->loadData(static::class);
     }
 
     /**
@@ -122,6 +123,8 @@ class Tokenizer extends Singleton implements TokenizerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws ReflectionException
      */
     public function getClasses($parent = null, $namespace = null, $postfix = '')
     {
@@ -150,7 +153,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
-     * Get all class traits.
+     * Get every class trait (including traits used in parents).
      *
      * @param string $class
      * @return array
@@ -185,7 +188,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     {
         if (empty($this->cache))
         {
-            $this->cache = $this->memory->loadData('tokenizer-reflections');
+            $this->cache = $this->memory->loadData(static::class);
         }
 
         $fileMD5 = $this->file->md5($filename);
@@ -193,14 +196,14 @@ class Tokenizer extends Singleton implements TokenizerInterface
         //Let's check if file already cached
         if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5)
         {
-            return new ReflectionFile($filename, $this, $this->cache[$filename]);
+            return new ReflectionFile($this, $filename, $this->cache[$filename]);
         }
 
-        $reflection = new ReflectionFile($filename, $this);
+        $reflection = new ReflectionFile($this, $filename);
 
         //Let's save to cache
         $this->cache[$filename] = ['md5' => $fileMD5] + $reflection->exportSchema();
-        $this->memory->saveData('tokenizer-reflections', $this->cache);
+        $this->memory->saveData(static::class, $this->cache);
 
         return $reflection;
     }
@@ -213,6 +216,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
      * @param string         $namespace
      * @param string         $postfix
      * @return array
+     * @throws ReflectionException
      */
     private function fetchClasses(
         ReflectionFile $fileReflection,

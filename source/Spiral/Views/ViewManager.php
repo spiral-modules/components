@@ -238,9 +238,11 @@ class ViewManager extends Singleton implements ViewsInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param string $class Custom View implementation.
      * @throws ContainerException
      */
-    public function get($path, array $data = [])
+    public function get($path, array $data = [], $class = null)
     {
         $namespace = self::DEFAULT_NAMESPACE;
         if (strpos($path, self::NS_SEPARATOR) !== false)
@@ -250,12 +252,15 @@ class ViewManager extends Singleton implements ViewsInterface
 
         $compiledFilename = $this->compiledFilename($namespace, $path, true, $engine);
 
-        return $this->container->get($this->config['engines'][$engine]['view'], [
-            'views'            => $this,
-            'namespace'        => $namespace,
-            'view'             => $path,
-            'compiledFilename' => $compiledFilename
-        ]);
+        return $this->container->get(
+            !empty($class) ? $class : $this->config['engines'][$engine]['view'],
+            [
+                'views'            => $this,
+                'namespace'        => $namespace,
+                'view'             => $path,
+                'compiledFilename' => $compiledFilename
+            ]
+        );
     }
 
     /**

@@ -16,12 +16,12 @@ class NamespaceElement extends AbstractElement
     /**
      * @var array
      */
-    protected $uses = [];
+    private $uses = [];
 
     /**
      * @var ClassElement[]
      */
-    protected $classes = [];
+    private $classes = [];
 
     /**
      * @param ClassElement $class
@@ -84,23 +84,23 @@ class NamespaceElement extends AbstractElement
     {
         $result = [$this->renderComment($indentLevel)];
 
-        if (!empty($this->name))
+        if (!empty($this->getName()))
         {
-            $result[] = 'namespace ' . trim($this->name, '\\');
+            $result[] = 'namespace ' . trim($this->getName(), '\\');
             $result[] = "{";
         }
 
         foreach ($this->uses as $class)
         {
-            $result[] = $this->indent('use ' . $class . ';', $indentLevel + !empty($this->name) ? 1 : 0);
+            $result[] = $this->indent('use ' . $class . ';', $indentLevel + !empty($this->getName()) ? 1 : 0);
         }
 
         foreach ($this->classes as $class)
         {
-            $result[] = $class->render($indentLevel + !empty($this->name) ? 1 : 0, $serializer);
+            $result[] = $class->render($indentLevel + !empty($this->getName()) ? 1 : 0, $serializer);
         }
 
-        if (!empty($this->name))
+        if (!empty($this->getName()))
         {
             $result[] = '}';
         }

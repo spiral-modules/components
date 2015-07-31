@@ -23,7 +23,7 @@ class FileElement extends NamespaceElement
     /**
      * @var ClassElement[]|NamespaceElement[]
      */
-    protected $elements = [];
+    private $elements = [];
 
     /**
      * @var FilesInterface
@@ -71,9 +71,9 @@ class FileElement extends NamespaceElement
     {
         $result = [self::PHP_OPEN, trim($this->renderComment($indentLevel))];
 
-        if ($this->name)
+        if (!empty($this->getName()))
         {
-            $result[] = 'namespace ' . $this->name . ';';
+            $result[] = 'namespace ' . $this->getName() . ';';
         }
 
         //Uses

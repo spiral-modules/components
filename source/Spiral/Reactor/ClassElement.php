@@ -21,27 +21,27 @@ class ClassElement extends AbstractElement
      *
      * @var string
      */
-    protected $parent = '';
+    private $parent = '';
 
     /**
      * @var array
      */
-    protected $interfaces = [];
+    private $interfaces = [];
 
     /**
      * @var array
      */
-    protected $constants = [];
+    private $constants = [];
 
     /**
      * @var PropertyElement[]
      */
-    protected $properties = [];
+    private $properties = [];
 
     /**
      * @var MethodElement[]
      */
-    protected $methods = [];
+    private $methods = [];
 
     /**
      * @return string
@@ -287,7 +287,7 @@ class ClassElement extends AbstractElement
     public function render($indentLevel = 0, ArraySerializer $serializer = null)
     {
         $result = [$this->renderComment($indentLevel)];
-        $header = 'class ' . $this->name . ($this->parent ? ' extends ' . $this->parent : '');
+        $header = 'class ' . $this->getName() . ($this->parent ? ' extends ' . $this->parent : '');
 
         if (!empty($this->interfaces))
         {
@@ -386,8 +386,9 @@ class ClassElement extends AbstractElement
         $this->properties = [];
         $this->constants = [];
         $this->methods = [];
-        $this->docComment = [];
         $this->parent = [];
         $this->interfaces = [];
+
+        parent::flushSchema();
     }
 }

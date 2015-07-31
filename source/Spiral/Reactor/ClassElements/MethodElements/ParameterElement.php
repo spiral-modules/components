@@ -16,29 +16,29 @@ class ParameterElement
     /**
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
      * @var string
      */
-    protected $type = '';
+    private $type = '';
 
     /**
      * @var bool
      */
-    protected $optional = false;
+    private $optional = false;
 
     /**
      * @var mixed
      */
-    protected $defaultValue = null;
+    private $defaultValue = null;
 
     /**
      * Passed by reference flag.
      *
      * @var bool
      */
-    protected $pdb = false;
+    private $pdb = false;
 
     /**
      * New Method Parameter.

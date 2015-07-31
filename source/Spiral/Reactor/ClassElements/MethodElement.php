@@ -19,24 +19,24 @@ class MethodElement extends AbstractElement
     /**
      * @var string
      */
-    protected $access = self::ACCESS_PUBLIC;
+    private $access = self::ACCESS_PUBLIC;
 
     /**
      * @var bool
      */
-    protected $static = false;
+    private $static = false;
 
     /**
      * @var ParameterElement[]
      */
-    protected $parameters = [];
+    private $parameters = [];
 
     /**
      * Method source in form of code lines.
      *
      * @var array
      */
-    protected $source = [];
+    private $source = [];
 
     /**
      * @param string $access
@@ -203,7 +203,7 @@ class MethodElement extends AbstractElement
         }
 
         $declaration = $this->access . ' ' . ($this->static ? 'static ' : '');
-        $declaration .= 'function ' . $this->name . '(' . join(', ', $parameters) . ')';
+        $declaration .= 'function ' . $this->getName() . '(' . join(', ', $parameters) . ')';
 
         $result[] = $declaration;
         $result[] = '{';

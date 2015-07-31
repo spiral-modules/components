@@ -23,17 +23,17 @@ trait PaginatorTrait
     /**
      * @var int
      */
-    protected $limit = 0;
+    private $limit = 0;
 
     /**
      * @var int
      */
-    protected $offset = 0;
+    private $offset = 0;
 
     /**
      * @var Paginator
      */
-    protected $paginator = null;
+    private $paginator = null;
 
     /**
      * Forced pagination count. If 0 PaginatorTrait will try to fetch value from associated object
@@ -41,7 +41,7 @@ trait PaginatorTrait
      *
      * @var int
      */
-    protected $paginationCount = 0;
+    private $paginationCount = 0;
 
     /**
      * @return ContainerInterface

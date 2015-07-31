@@ -26,15 +26,15 @@ class SessionStarter implements MiddlewareInterface
      */
     const COOKIE = 'session';
 
+    /***
+     * @var SessionStore
+     */
+    private $store = null;
+
     /**
      * @var ContainerInterface
      */
     protected $container = null;
-
-    /***
-     * @var SessionStore
-     */
-    protected $store = null;
 
     /**
      * @param ContainerInterface $container

@@ -65,7 +65,26 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      *
      * @var array
      */
-    protected static $checkers = [];
+    private static $checkers = [];
+
+    /**
+     * @var array|\ArrayAccess
+     */
+    private $data = [];
+
+    /**
+     * Validation rules, see class title for description.
+     *
+     * @var array
+     */
+    private $rules = [];
+
+    /**
+     * Error messages raised while validation.
+     *
+     * @var array
+     */
+    private $errors = [];
 
     /**
      * If rule has no definer error message this text will be used instead. Localizable.
@@ -96,25 +115,6 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      * @var bool
      */
     protected $validated = false;
-
-    /**
-     * @var array|\ArrayAccess
-     */
-    protected $data = [];
-
-    /**
-     * Validation rules, see class title for description.
-     *
-     * @var array
-     */
-    protected $rules = [];
-
-    /**
-     * Error messages raised while validation.
-     *
-     * @var array
-     */
-    protected $errors = [];
 
     /**
      * {@inheritdoc}
@@ -194,6 +194,20 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
         !$this->validated && $this->validate();
 
         return $this->errors;
+    }
+
+    /**
+     * Receive field from context data or return default value.
+     *
+     * @param string $field
+     * @param mixed  $default
+     * @return mixed
+     */
+    public function field($field, $default = null)
+    {
+        $value = isset($this->data[$field]) ? $this->data[$field] : $default;
+
+        return $value instanceof ValueInterface ? $value->serializeData() : $value;
     }
 
     /**
@@ -433,19 +447,5 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                 compact('condition') + $arguments
             );
         }
-    }
-
-    /**
-     * Receive field from context data or return default value.
-     *
-     * @param string $field
-     * @param mixed  $default
-     * @return mixed
-     */
-    public function field($field, $default = null)
-    {
-        $value = isset($this->data[$field]) ? $this->data[$field] : $default;
-
-        return $value instanceof ValueInterface ? $value->serializeData() : $value;
     }
 }

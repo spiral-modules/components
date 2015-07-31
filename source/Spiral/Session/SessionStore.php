@@ -41,30 +41,30 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
     const NATIVE_HANDLER = 'native';
 
     /**
-     * @invisible
-     * @var ContainerInterface
-     */
-    protected $container = null;
-
-    /**
      * @var string
      */
-    protected $id = '';
+    private $id = '';
 
     /**
      * @var \SessionHandler
      */
-    protected $handler = null;
+    private $handler = null;
 
     /**
      * @var bool
      */
-    protected $started = false;
+    private $started = false;
 
     /**
      * @var bool
      */
-    protected $destroyed = false;
+    private $destroyed = false;
+
+    /**
+     * @invisible
+     * @var ContainerInterface
+     */
+    protected $container = null;
 
     /**
      * @param ConfiguratorInterface $configurator

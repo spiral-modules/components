@@ -19,22 +19,22 @@ class PropertyElement extends AbstractElement
     /**
      * @var string
      */
-    protected $access = self::ACCESS_PUBLIC;
+    private $access = self::ACCESS_PUBLIC;
 
     /**
      * @var bool
      */
-    protected $static = false;
+    private $static = false;
 
     /**
      * @var bool
      */
-    protected $default = false;
+    private $default = false;
 
     /**
      * @var mixed
      */
-    protected $defaultValue = null;
+    private $defaultValue = null;
 
     /**
      * @param string $access
@@ -120,7 +120,7 @@ class PropertyElement extends AbstractElement
             !$position ? ltrim($this->renderComment($indentLevel)) : $this->renderComment($indentLevel)
         ];
 
-        $property = $this->access . ' ' . ($this->static ? 'static ' : '') . '$' . $this->name;
+        $property = $this->access . ' ' . ($this->static ? 'static ' : '') . '$' . $this->getName();
 
         if (!$this->isDefault())
         {

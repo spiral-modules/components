@@ -44,6 +44,20 @@ class ViewManager extends Singleton implements ViewsInterface
     const EXTENSION = 'php';
 
     /**
+     * Namespaces associated with their locations.
+     *
+     * @var array
+     */
+    private $namespaces = [];
+
+    /**
+     * View cache file will depends on this set of values.
+     *
+     * @var array
+     */
+    private $dependencies = [];
+
+    /**
      * @invisible
      * @var ContainerInterface
      */
@@ -54,20 +68,6 @@ class ViewManager extends Singleton implements ViewsInterface
      * @var FilesInterface
      */
     protected $files = null;
-
-    /**
-     * Namespaces associated with their locations.
-     *
-     * @var array
-     */
-    protected $namespaces = [];
-
-    /**
-     * View cache file will depends on this set of values.
-     *
-     * @var array
-     */
-    protected $dependencies = [];
 
     /**
      * @param ConfiguratorInterface $configurator
@@ -267,6 +267,28 @@ class ViewManager extends Singleton implements ViewsInterface
     }
 
     /**
+     * Create filename where compiled version of view will be stored. Should use view dependencies.
+     *
+     * @param string $namespace
+     * @param string $view
+     * @return string
+     */
+    public function cacheFilename($namespace, $view)
+    {
+        foreach ($this->config['dependencies'] as $variable => $provider)
+        {
+            $this->dependencies[$variable] = call_user_func(
+                [$this->container->get($provider[0]), $provider[1]]
+            );
+        }
+
+        $postfix = '-' . hash('crc32b', join(',', $this->dependencies)) . '.' . self::EXTENSION;
+
+        return $this->config['caching']['directory'] . '/' . $namespace . '-'
+        . trim(str_replace(['\\', '/'], '-', $view), '-') . $postfix;
+    }
+
+    /**
      * Create engine specific compiler instance.
      *
      * @param string $engine
@@ -321,28 +343,6 @@ class ViewManager extends Singleton implements ViewsInterface
         }
 
         return $cacheFilename;
-    }
-
-    /**
-     * Create filename where compiled version of view will be stored. Should use view dependencies.
-     *
-     * @param string $namespace
-     * @param string $view
-     * @return string
-     */
-    public function cacheFilename($namespace, $view)
-    {
-        foreach ($this->config['dependencies'] as $variable => $provider)
-        {
-            $this->dependencies[$variable] = call_user_func(
-                [$this->container->get($provider[0]), $provider[1]]
-            );
-        }
-
-        $postfix = '-' . hash('crc32b', join(',', $this->dependencies)) . '.' . self::EXTENSION;
-
-        return $this->config['caching']['directory'] . '/' . $namespace . '-'
-        . trim(str_replace(['\\', '/'], '-', $view), '-') . $postfix;
     }
 
     /**

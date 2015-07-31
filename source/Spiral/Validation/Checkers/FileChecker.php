@@ -132,7 +132,7 @@ class FileChecker extends Checker
      * @param mixed|UploadedFileInterface $filename Filename or file array.
      * @return bool
      */
-    protected function isUploaded($filename)
+    private function isUploaded($filename)
     {
         if (is_string($filename))
         {

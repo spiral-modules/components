@@ -28,7 +28,7 @@ abstract class AbstractElement
     /**
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
      * @var array
@@ -186,5 +186,13 @@ abstract class AbstractElement
         }
 
         return join("\n", $lines);
+    }
+
+    /**
+     * Remove all properties, methods and constants.
+     */
+    public function flushSchema()
+    {
+        $this->docComment = [];
     }
 }

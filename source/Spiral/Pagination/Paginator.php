@@ -21,43 +21,43 @@ class Paginator implements PaginatorInterface
      *
      * @var array
      */
-    protected $queryData = [];
+    private $queryData = [];
 
     /**
      * @var string
      */
-    protected $pageParameter = 'page';
+    private $pageParameter = 'page';
 
     /**
      * @var int
      */
-    protected $pageNumber = 1;
+    private $pageNumber = 1;
 
     /**
      * @var int
      */
-    protected $countPages = 1;
+    private $countPages = 1;
 
     /**
      * @var int
      */
-    protected $limit = self::DEFAULT_LIMIT;
+    private $limit = self::DEFAULT_LIMIT;
 
     /**
      * @var int
      */
-    protected $count = 0;
+    private $count = 0;
 
     /**
      * @invisible
      * @var ServerRequestInterface
      */
-    protected $request = null;
+    private $request = null;
 
     /**
      * @var UriInterface
      */
-    protected $uri = null;
+    private $uri = null;
 
     /**
      * {@inheritdoc}

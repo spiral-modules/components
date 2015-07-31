@@ -25,22 +25,22 @@ class View extends Component implements ViewInterface, SaturableInterlace
     /**
      * @var string
      */
-    protected $compiledFilename = '';
+    private $compiledFilename = '';
 
     /**
      * @var array
      */
-    protected $data = [];
+    private $data = [];
 
     /**
      * @var string
      */
-    protected $namespace = '';
+    private $namespace = '';
 
     /**
      * @var string
      */
-    protected $view = '';
+    private $view = '';
 
     /**
      * {@inheritdoc}
@@ -72,7 +72,7 @@ class View extends Component implements ViewInterface, SaturableInterlace
     /**
      * {@inheritdoc}
      */
-    public function render()
+    final public function render()
     {
         //Benchmarking context
         $context = $this->namespace . ViewsInterface::NS_SEPARATOR . $this->view;

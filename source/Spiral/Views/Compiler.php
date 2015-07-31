@@ -27,6 +27,28 @@ class Compiler extends Component implements CompilerInterface
     use ConfigurableTrait, BenchmarkTrait;
 
     /**
+     * @var string
+     */
+    private $namespace = '';
+
+    /**
+     * @var string
+     */
+    private $view = '';
+
+    /**
+     * @var string
+     */
+    private $source = '';
+
+    /**
+     * Chain of view processors to be applied to view source.
+     *
+     * @var array|ProcessorInterface[]
+     */
+    private $processors = [];
+
+    /**
      * @invisible
      * @var ViewManager
      */
@@ -37,28 +59,6 @@ class Compiler extends Component implements CompilerInterface
      * @var ContainerInterface
      */
     protected $container = null;
-
-    /**
-     * @var string
-     */
-    protected $namespace = '';
-
-    /**
-     * @var string
-     */
-    protected $view = '';
-
-    /**
-     * @var string
-     */
-    protected $source = '';
-
-    /**
-     * Chain of view processors to be applied to view source.
-     *
-     * @var array|ProcessorInterface[]
-     */
-    protected $processors = [];
 
     /**
      * {@inheritdoc}

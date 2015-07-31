@@ -27,6 +27,11 @@ trait ValidatorTrait
     use TranslatorTrait, EventsTrait;
 
     /**
+     * @var ValidatorInterface
+     */
+    private $validator = null;
+
+    /**
      * Fields (data) to be validated. Named like that for convenience.
      *
      * @var array
@@ -37,11 +42,6 @@ trait ValidatorTrait
      * @var array
      */
     protected $errors = [];
-
-    /**
-     * @var ValidatorInterface
-     */
-    protected $validator = null;
 
     /**
      * Validation rules defined in validator format. Named like that for convenience.
@@ -92,24 +92,6 @@ trait ValidatorTrait
             'data'  => $this->fields,
             'rules' => !empty($rules) ? $rules : $this->validates
         ]);
-    }
-
-    /**
-     * Validate data using associated validator.
-     *
-     * @return bool
-     * @throws ValidationException
-     * @throws MissingContainerException
-     * @event validation()
-     * @event validated(errors)
-     */
-    protected function validate()
-    {
-        $this->fire('validation');
-        $this->errors = $this->validator()->getErrors();
-        $this->validator->setData([]);
-
-        return empty($this->errors = $this->fire('validated', $this->errors));
     }
 
     /**
@@ -176,5 +158,23 @@ trait ValidatorTrait
         }
 
         return $errors;
+    }
+
+    /**
+     * Validate data using associated validator.
+     *
+     * @return bool
+     * @throws ValidationException
+     * @throws MissingContainerException
+     * @event validation()
+     * @event validated(errors)
+     */
+    protected function validate()
+    {
+        $this->fire('validation');
+        $this->errors = $this->validator()->getErrors();
+        $this->validator->setData([]);
+
+        return empty($this->errors = $this->fire('validated', $this->errors));
     }
 }

@@ -36,17 +36,17 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
     /**
      * @var string
      */
-    public $prefix = '';
+    private $prefix = '';
 
     /**
      * @var string
      */
-    protected $server = '';
+    private $server = '';
 
     /**
      * @var array
      */
-    protected $options = [];
+    private $options = [];
 
     /**
      * @invisible

@@ -275,7 +275,7 @@ class AmazonServer extends StorageServer
      * @param array $commands
      * @return array
      */
-    protected function packCommands(array $commands)
+    private function packCommands(array $commands)
     {
         $headers = [];
         foreach ($commands as $command => $value)
@@ -294,7 +294,7 @@ class AmazonServer extends StorageServer
      *                                         packCommands() method for more information.
      * @return RequestInterface
      */
-    protected function signRequest(RequestInterface $request, array $packedCommands = [])
+    private function signRequest(RequestInterface $request, array $packedCommands = [])
     {
         $signature = [
             $request->getMethod(),

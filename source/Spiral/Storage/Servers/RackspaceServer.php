@@ -35,6 +35,18 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     use LoggerTrait;
 
     /**
+     * @var string
+     */
+    private $authToken = [];
+
+    /**
+     * Some operations can be performed only inside one region.
+     *
+     * @var array
+     */
+    private $regions = [];
+
+    /**
      * @var array
      */
     protected $options = [
@@ -58,18 +70,6 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * @var Client
      */
     protected $client = null;
-
-    /**
-     * @var string
-     */
-    protected $authToken = [];
-
-    /**
-     * Some operations can be performed only inside one region.
-     *
-     * @var array
-     */
-    protected $regions = [];
 
     /**
      * @param FilesInterface $files

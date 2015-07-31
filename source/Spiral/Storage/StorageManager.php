@@ -36,20 +36,20 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     const CONFIG = 'storage';
 
     /**
-     * @invisible
-     * @var ContainerInterface
-     */
-    protected $container = null;
-
-    /**
      * @var BucketInterface[]
      */
-    protected $buckets = [];
+    private $buckets = [];
 
     /**
      * @var ServerInterface[]
      */
-    protected $servers = [];
+    private $servers = [];
+
+    /**
+     * @invisible
+     * @var ContainerInterface
+     */
+    protected $container = null;
 
     /**
      * @param ConfiguratorInterface $configurator

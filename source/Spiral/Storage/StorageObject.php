@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Storage;
+
 use Spiral\Storage\Exceptions\ObjectException;
 
 /**
@@ -15,25 +16,25 @@ use Spiral\Storage\Exceptions\ObjectException;
 class StorageObject implements ObjectInterface
 {
     /**
+     * @var BucketInterface
+     */
+    private $bucket = null;
+
+    /**
+     * @var string
+     */
+    private $address = false;
+
+    /**
+     * @var string
+     */
+    private $name = false;
+
+    /**
      * @invisible
      * @var StorageInterface
      */
     protected $storage = null;
-
-    /**
-     * @var BucketInterface
-     */
-    protected $bucket = null;
-
-    /**
-     * @var string
-     */
-    protected $address = false;
-
-    /**
-     * @var string
-     */
-    protected $name = false;
 
     /**
      * {@inheritdoc}

@@ -50,7 +50,7 @@ class GridfsServer extends StorageServer
      */
     public function exists(BucketInterface $bucket, $name)
     {
-        return $this->getGridFS($bucket)->findOne(['filename' => $name]);
+        return $this->gridFS($bucket)->findOne(['filename' => $name]);
     }
 
     /**
@@ -90,7 +90,7 @@ class GridfsServer extends StorageServer
         $tempFilename = $this->files->tempFilename();
         copy($this->castFilename($source), $tempFilename);
 
-        if (!$this->getGridFS($bucket)->storeFile($tempFilename, ['filename' => $name]))
+        if (!$this->gridFS($bucket)->storeFile($tempFilename, ['filename' => $name]))
         {
             throw new ServerException("Unable to store {$name} in GridFS server.");
         }
@@ -120,7 +120,7 @@ class GridfsServer extends StorageServer
      */
     public function delete(BucketInterface $bucket, $name)
     {
-        $this->getGridFS($bucket)->remove(['filename' => $name]);
+        $this->gridFS($bucket)->remove(['filename' => $name]);
     }
 
     /**
@@ -130,7 +130,7 @@ class GridfsServer extends StorageServer
     {
         $this->delete($bucket, $newname);
 
-        return $this->getGridFS($bucket)->update(
+        return $this->gridFS($bucket)->update(
             ['filename' => $oldname],
             ['$set' => ['filename' => $newname]]
         );
@@ -142,7 +142,7 @@ class GridfsServer extends StorageServer
      * @param BucketInterface $bucket Bucket instance.
      * @return \MongoGridFS
      */
-    protected function getGridFS(BucketInterface $bucket)
+    protected function gridFS(BucketInterface $bucket)
     {
         $gridFs = $this->database->getGridFS($bucket->getOption('collection'));
         $gridFs->ensureIndex(['filename' => 1]);

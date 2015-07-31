@@ -8,6 +8,7 @@
  */
 namespace Spiral\Core;
 
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\MissingContainerException;
 
 /**

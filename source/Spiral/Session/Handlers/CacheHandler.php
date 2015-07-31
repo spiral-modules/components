@@ -10,12 +10,12 @@ namespace Spiral\Session\Handlers;
 
 use Spiral\Cache\ProviderInterface;
 use Spiral\Cache\StoreInterface;
-use Spiral\Core\Container\DependedInterface;
+use Spiral\Core\Container\SaturableInterlace;
 
 /**
  * Stores session data in specified cache store.
  */
-class CacheHandler implements \SessionHandlerInterface, DependedInterface
+class CacheHandler implements \SessionHandlerInterface, SaturableInterlace
 {
     /**
      * @var array
@@ -45,7 +45,7 @@ class CacheHandler implements \SessionHandlerInterface, DependedInterface
     /**
      * @param ProviderInterface $cache
      */
-    public function depends(ProviderInterface $cache)
+    public function saturate(ProviderInterface $cache)
     {
         $this->cacheStore = $cache->store($this->options['store']);
     }

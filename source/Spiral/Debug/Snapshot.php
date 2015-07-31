@@ -10,14 +10,14 @@ namespace Spiral\Debug;
 
 use Spiral\Core\Component;
 use Exception;
-use Spiral\Core\Container\DependedInterface;
+use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewsInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using views.
  */
-class Snapshot extends Component implements SnapshotInterface, DependedInterface
+class Snapshot extends Component implements SnapshotInterface, SaturableInterlace
 {
     /**
      * Message format.
@@ -74,7 +74,7 @@ class Snapshot extends Component implements SnapshotInterface, DependedInterface
      * @param FilesInterface $files
      * @param ViewsInterface $views
      */
-    public function depends(Debugger $debugger, FilesInterface $files, ViewsInterface $views)
+    public function saturate(Debugger $debugger, FilesInterface $files, ViewsInterface $views)
     {
         $this->config = $debugger->config()[static::CONFIG];
 

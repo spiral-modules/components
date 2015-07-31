@@ -11,8 +11,6 @@ namespace Spiral\Tokenizer;
 class Hightligher
 {
     /**
-     * Tokenizer is required to fetch tokens.
-     *
      * @var TokenizerInterface
      */
     protected $tokenizer = null;
@@ -33,8 +31,8 @@ class Hightligher
         'templates' => [
             'token'       => '<span style="{style}">{line}</span>',
             'line'        => '<div><div class="number">{number}</div>{content}</div>',
-            'highlighted' => '<div class="highlighted"><div class="number">{number}</div>{content}</div>'
-        ],
+            'highlighted' => '<div class="highlighted"><div class="number">{number}</div><div>{content}</div></div>'
+        ]
     ];
 
     /**

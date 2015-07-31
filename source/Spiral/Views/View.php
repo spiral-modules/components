@@ -9,13 +9,13 @@
 namespace Spiral\Views;
 
 use Spiral\Core\Component;
-use Spiral\Core\Container\DependedInterface;
+use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
 /**
  * Default view implementation can work with
  */
-class View extends Component implements ViewInterface, DependedInterface
+class View extends Component implements ViewInterface, SaturableInterlace
 {
     /**
      * For render benchmarking.
@@ -56,7 +56,7 @@ class View extends Component implements ViewInterface, DependedInterface
     /**
      * @param string $compiledFilename
      */
-    public function depends($compiledFilename)
+    public function saturate($compiledFilename)
     {
         $this->compiledFilename = $compiledFilename;
     }

@@ -8,7 +8,7 @@
  */
 namespace Spiral\Core;
 
-use Spiral\Core\Container\DependedInterface;
+use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 use ReflectionFunctionAbstract as ContextFunction;
@@ -145,10 +145,10 @@ class Container extends Component implements ContainerInterface
             $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
         }
 
-        if ($instance instanceof DependedInterface)
+        if ($instance instanceof SaturableInterlace)
         {
-            //Post construction ingestion
-            $depends = $reflector->getMethod(DependedInterface::DEPENDENT_METHOD);
+            //Saturating object with required dependencies
+            $depends = $reflector->getMethod(SaturableInterlace::DEPENDENT_METHOD);
             $depends->invoke($instance, $this->resolveArguments($depends, $parameters));
         }
 

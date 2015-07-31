@@ -15,6 +15,10 @@ use Spiral\Core\Exceptions\Container\InstanceException;
 
 /**
  * Spiral IoC container interface. Used to resolve dependencies and etc.
+ *
+ * @see InjectorInterface
+ * @see StaurableInterface
+ * @see SingletonInterface
  */
 interface ContainerInterface
 {

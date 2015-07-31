@@ -79,7 +79,6 @@ class DocumentSchema extends EntitySchema
         if ($merge && ($this->reflection->getParentClass()->getName() != static::BASE_CLASS))
         {
             $parentClass = $this->reflection->getParentClass()->getName();
-
             if (is_array($value))
             {
                 $value = array_merge(

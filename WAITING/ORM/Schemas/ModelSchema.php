@@ -100,7 +100,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
      */
     public function getRoleName()
     {
-        return lcfirst($this->getShortName());
+        return lcfirst($this->getName());
     }
 
     /**
@@ -179,12 +179,13 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
             return null;
         }
 
-        if ($merge && ($this->reflection->getParentClass()->getName() != ActiveRecord::class))
+        if ($merge && ($this->reflection->getParentClass()->getName() != static::BASE_CLASS))
         {
             $parentClass = $this->reflection->getParentClass()->getName();
             if (is_array($value))
             {
                 $value = array_merge(
+                    //TODO: ABSTRACT!
                     $this->builder->modelSchema($parentClass)->property($property, true),
                     $value
                 );

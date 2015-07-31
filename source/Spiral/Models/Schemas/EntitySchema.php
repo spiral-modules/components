@@ -14,15 +14,13 @@ use Spiral\Models\DataEntity;
 abstract class EntitySchema extends Component
 {
     /**
-     * Base model class.
+     * TODO: |
      */
     const BASE_CLASS = DataEntity::class;
 
     /**
-     * Entity model reflection.
-     *
      * @invisible
-     * @var null|\ReflectionClass
+     * @var \ReflectionClass
      */
     protected $reflection = null;
 
@@ -32,7 +30,7 @@ abstract class EntitySchema extends Component
      * @invisible
      * @var array
      */
-    protected $propertiesCache = [];
+    private $propertiesCache = [];
 
     /**
      * Class reflection.
@@ -42,26 +40,6 @@ abstract class EntitySchema extends Component
     public function getReflection()
     {
         return $this->reflection;
-    }
-
-    /**
-     * Checks if class is abstract.
-     *
-     * @return bool
-     */
-    public function isAbstract()
-    {
-        return $this->reflection->isAbstract();
-    }
-
-    /**
-     * Document full class name.
-     *
-     * @return string
-     */
-    public function getClass()
-    {
-        return $this->reflection->getName();
     }
 
     /**
@@ -77,14 +55,35 @@ abstract class EntitySchema extends Component
     }
 
     /**
+     * Document full class name.
+     *
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->reflection->getName();
+    }
+
+    /**
      * Document class name without included namespace.
      *
      * @return string
      */
-    public function getShortName()
+    public function getName()
     {
         return $this->reflection->getShortName();
     }
+
+    /**
+     * Checks if class is abstract.
+     *
+     * @return bool
+     */
+    public function isAbstract()
+    {
+        return $this->reflection->isAbstract();
+    }
+
 
     /**
      * Read default model property value, will read "protected" and "private" properties.
@@ -94,6 +93,8 @@ abstract class EntitySchema extends Component
      * @return mixed
      */
     abstract protected function property($property, $merge = false);
+
+    abstract protected function parentSchema();
 
     /**
      * Getting all secured fields.
@@ -139,7 +140,7 @@ abstract class EntitySchema extends Component
      * All methods declared in document. Method will include information about parameters, return
      * type, static declaration and access level.
      *
-     * @return MethodSchema[]
+     * @return \ReflectionMethod[]
      */
     public function getMethods()
     {
@@ -152,7 +153,7 @@ abstract class EntitySchema extends Component
                 continue;
             }
 
-            $methods[] = new MethodSchema($method);
+            $methods[] = $method;
         }
 
         return $methods;
@@ -227,8 +228,6 @@ abstract class EntitySchema extends Component
     abstract public function getFields();
 
     /**
-     * Return entity class name.
-     *
      * @return string
      */
     public function __toString()

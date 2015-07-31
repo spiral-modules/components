@@ -187,7 +187,7 @@ class LocalServer extends StorageServer
     protected function getPath(BucketInterface $bucket, $name)
     {
         return $this->files->normalizePath(
-            $this->options['home'] . '/' . $bucket->getOption('folder') . $name
+            $this->options['home'] . '/' . $bucket->getOption('directory') . $name
         );
     }
 }

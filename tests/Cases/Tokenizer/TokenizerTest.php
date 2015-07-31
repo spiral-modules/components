@@ -161,7 +161,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
     public function testFileReflection()
     {
-        $reflection = $this->tokenizer()->reflectionFile(__FILE__);
+        $reflection = $this->tokenizer()->fileReflection(__FILE__);
 
         $this->assertContains(self::class, $reflection->getClasses());
 

@@ -128,7 +128,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
         $result = [];
         foreach ($this->availableFiles() as $filename)
         {
-            $reflection = $this->reflectionFile($filename);
+            $reflection = $this->fileReflection($filename);
 
             if ($reflection->hasIncludes())
             {
@@ -178,10 +178,10 @@ class Tokenizer extends Singleton implements TokenizerInterface
      * Get ReflectionFile instance associated with given filename, reflection can be used to retrieve
      * list of declared classes, interfaces, traits and functions, plus it can locate function usages.
      *
-     * @param string $filename PHP filename.
+     * @param string $filename
      * @return ReflectionFile
      */
-    public function reflectionFile($filename)
+    public function fileReflection($filename)
     {
         if (empty($this->cache))
         {

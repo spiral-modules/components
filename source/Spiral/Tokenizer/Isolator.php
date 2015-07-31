@@ -11,7 +11,8 @@ namespace Spiral\Tokenizer;
 use Spiral\Core\Component;
 
 /**
- *
+ * Isolators used to find and replace php blocks in given source. Can be used by view processors,
+ * or to remove php core from some string.
  */
 class Isolator extends Component
 {
@@ -23,7 +24,7 @@ class Isolator extends Component
     private static $blockID = 0;
 
     /**
-     * All existing and isolated PHP blocks.
+     * Found PHP blocks to be replaced.
      *
      * @var array
      */
@@ -38,18 +39,15 @@ class Isolator extends Component
     private $postfix = '';
 
     /**
-     * Replaces has to be performed before / after finding and mounting blocks. This replaces used
-     * to index PHP blocks which are not reachable in some conditions, such as if short_tags disabled
-     * or specified syntax required (ASP tags).
+     * Set of patterns to convert "disabled" php blocks into catchable (in terms of token_get_all)
+     * code. Will fix short tags using regular expressions.
      *
      * @var array
      */
     private $patterns = [];
 
     /**
-     * Revert replaces, will contain list of existing and replaced tags (unique set), so output
-     * source will be identical
-     * to input.
+     * Temporary block replaces. Used to "enable" php blocks.
      *
      * @var array
      */
@@ -67,36 +65,17 @@ class Isolator extends Component
         $this->prefix = $prefix;
         $this->postfix = $postfix;
 
-        $this->shortTags($shortTags);
-    }
-
-    /**
-     * Enable/disable caching blocks defined by PHP short tags. This allows the system to isolate
-     * blocks even in an environment where the short_tags option is disabled. This is enabled by
-     * default.
-     *
-     * @param bool $enable
-     * @return $this
-     */
-    public function shortTags($enable)
-    {
-        if ($enable)
+        if ($shortTags)
         {
             $this->addPattern('<?=', false, "<?php /*%s*/ echo ");
             $this->addPattern('<?', '/<\?(?!php)/is');
         }
-        else
-        {
-            unset($this->patterns['<?'], $this->patterns['<?=']);
-        }
-
-        return $this;
     }
 
     /**
-     * Isolates all returned PHP blocks with a defined pattern.
+     * Isolates all returned PHP blocks with a defined pattern. Method uses token_get_all function.
      *
-     * @param string $source Valid PHP code.
+     * @param string $source
      * @return string
      */
     public function isolatePHP($source)
@@ -152,7 +131,7 @@ class Isolator extends Component
     }
 
     /**
-     * Restore PHP blocks position in isolated source (isolatePHP() should be already called).
+     * Restore PHP blocks position in isolated source (isolatePHP() must be already called).
      *
      * @param string $source
      * @return string
@@ -167,7 +146,7 @@ class Isolator extends Component
     }
 
     /**
-     * Remove PHP blocks from isolated source (isolatePHP() should be already called).
+     * Remove PHP blocks from isolated source (isolatePHP() must be already called).
      *
      * @param string $isolatedSource
      * @return string
@@ -179,16 +158,6 @@ class Isolator extends Component
             '',
             $isolatedSource
         );
-    }
-
-    /**
-     * List of all returned and replaced php blocks.
-     *
-     * @return array
-     */
-    public function getBlocks()
-    {
-        return $this->phpBlocks;
     }
 
     /**
@@ -205,6 +174,16 @@ class Isolator extends Component
     }
 
     /**
+     * List of all found and replaced php blocks.
+     *
+     * @return array
+     */
+    public function getBlocks()
+    {
+        return $this->phpBlocks;
+    }
+
+    /**
      * Reset isolator state.
      */
     public function reset()
@@ -213,26 +192,22 @@ class Isolator extends Component
     }
 
     /**
-     * Adding a new tag replacement pattern. Should include tag name, regular expression to handle
-     * tag and replacement string. Originally was used to support asp tags, now only for short tags/
+     * New pattern to fix untrackable blocks.
      *
-     * @param string $tag     PHP Tag to handle, can be an open or closed PHP tag.
-     * @param string $regexp  Pattern used to catch tags, can be empty, in this case str_replace
-     *                        will be used.
-     * @param string $replace String tags has to be replaced with, has to be valid php opening or
-     *                        closed tag. Should include %s which will be used to identity how to
-     *                        revert replacements.
+     * @param string $name
+     * @param string $regexp
+     * @param string $replace
      */
-    protected function addPattern($tag, $regexp = null, $replace = "<?php /*%s*/")
+    protected function addPattern($name, $regexp = null, $replace = "<?php /*%s*/")
     {
-        $this->patterns[$tag] = [
+        $this->patterns[$name] = [
             'regexp'  => $regexp,
             'replace' => $replace
         ];
     }
 
     /**
-     * Get saved PHP block by ID.
+     * Get PHP block by it's ID.
      *
      * @param int $blockID
      * @return mixed
@@ -248,25 +223,13 @@ class Isolator extends Component
     }
 
     /**
-     * Mount all original tags searched and replaced by replaceTags() function. The result of this
-     * function converts source to it's original form.
+     * Replace all matched tags with their <?php equivalent. These tags will be detected and parsed
+     * by token_get_all() function even if there isn't a directive in php.ini file.
      *
      * @param string $source
      * @return string
      */
-    protected function restoreTags($source)
-    {
-        return strtr($source, $this->replaces);
-    }
-
-    /**
-     * Replace all matched tags with their <?php equivalent. These tags will be detected and parsed
-     * by token_get_all() function even if there isn't a directive in php.ini file.
-     *
-     * @param string $source Valid PHP code.
-     * @return string
-     */
-    protected function replaceTags($source)
+    private function replaceTags($source)
     {
         $replaces = &$this->replaces;
         foreach ($this->patterns as $tag => $pattern)
@@ -304,6 +267,18 @@ class Isolator extends Component
         }
 
         return $source;
+    }
+
+    /**
+     * Fix blocks altered by replaceTags() method.
+     *
+     * @see replaceTags()
+     * @param string $source
+     * @return string
+     */
+    private function restoreTags($source)
+    {
+        return strtr($source, $this->replaces);
     }
 
     /**

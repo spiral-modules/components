@@ -1018,7 +1018,7 @@ abstract class ActiveRecord extends DataEntity
         if (empty($odm))
         {
             //Will work only when global container is set!
-            $orm = ORM::getInstance(self::getContainer());
+            $orm = ORM::instance(self::getContainer());
         }
 
         return new Selector(static::class, $orm);

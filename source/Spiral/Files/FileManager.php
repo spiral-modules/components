@@ -33,7 +33,7 @@ class FileManager extends Singleton implements FilesInterface
     public function __construct()
     {
         //Safety mechanism
-        register_shutdown_function([$this, 'removeFiles']);
+        register_shutdown_function([$this, '__destruct']);
     }
 
     /**

@@ -25,5 +25,5 @@ interface SingletonInterface
      * @return static
      * @throws MissingContainerException
      */
-    public static function getInstance(ContainerInterface $container = null);
+    public static function instance(ContainerInterface $container = null);
 }

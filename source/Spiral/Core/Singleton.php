@@ -29,7 +29,7 @@ abstract class Singleton extends Component implements SingletonInterface
      * @return static
      * @throws MissingContainerException
      */
-    public static function getInstance(ContainerInterface $container = null)
+    public static function instance(ContainerInterface $container = null)
     {
         if (empty($container = self::container()) && empty($container))
         {

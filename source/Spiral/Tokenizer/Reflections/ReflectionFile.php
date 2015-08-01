@@ -111,12 +111,12 @@ class ReflectionFile extends Component
         $this->tokenizer = $tokenizer;
         $this->filename = $filename;
 
-        //        if (!empty($cache))
-        //        {
-        //            $this->importSchema($cache);
-        //
-        //            return;
-        //        }
+        if (!empty($cache))
+        {
+            $this->importSchema($cache);
+
+            return;
+        }
 
         //Getting tokens list
         $tokens = $tokenizer->fetchTokens($filename);

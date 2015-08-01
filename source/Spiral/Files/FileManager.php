@@ -248,7 +248,7 @@ class FileManager extends Singleton implements FilesInterface
             $extension = [$extension];
         }
 
-        $location = $this->normalizePath($location, true);
+        $location = $this->normalizePath($location) . static::SEPARATOR;
 
         $glob = glob($location . '*');
         foreach ($glob as $item)

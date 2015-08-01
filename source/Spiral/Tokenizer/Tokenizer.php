@@ -70,25 +70,25 @@ class Tokenizer extends Singleton implements TokenizerInterface
      *
      * @param ConfiguratorInterface $configurator
      * @param HippocampusInterface  $runtime
-     * @param FilesInterface        $file
+     * @param FilesInterface        $files
      * @param Loader                $loader
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         HippocampusInterface $runtime,
-        FilesInterface $file,
+        FilesInterface $files,
         Loader $loader
     )
     {
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->memory = $runtime;
-        $this->file = $file;
+        $this->files = $files;
         $this->loader = $loader;
 
         foreach ($this->config['directories'] as &$directory)
         {
-            $directory = $file->normalizePath($directory, true);
+            $directory = $files->normalizePath($directory, true);
             unset($directory);
         }
 
@@ -100,7 +100,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
      */
     public function fetchTokens($filename)
     {
-        $tokens = token_get_all($this->file->read($filename));
+        $tokens = token_get_all($this->files->read($filename));
 
         $line = 0;
         foreach ($tokens as &$token)
@@ -191,7 +191,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             $this->cache = $this->memory->loadData('tokenizer');
         }
 
-        $fileMD5 = $this->file->md5($filename);
+        $fileMD5 = $this->files->md5($filename);
 
         //Let's check if file already cached
         if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5)
@@ -326,9 +326,9 @@ class Tokenizer extends Singleton implements TokenizerInterface
         $result = [];
         foreach ($this->config['directories'] as $directory)
         {
-            foreach ($this->file->getFiles($directory, ['php']) as $filename)
+            foreach ($this->files->getFiles($directory, ['php']) as $filename)
             {
-                $filename = $this->file->normalizePath($filename);
+                $filename = $this->files->normalizePath($filename);
                 foreach ($this->config['exclude'] as $exclude)
                 {
                     if (strpos($filename, $exclude) !== false)

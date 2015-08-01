@@ -51,6 +51,7 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
     private $optionsPull = [];
 
     /**
+     * @invisible
      * @var ContainerInterface
      */
     protected $container = null;

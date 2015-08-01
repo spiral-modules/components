@@ -92,7 +92,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             unset($directory);
         }
 
-        $this->cache = $this->memory->loadData(static::class);
+        $this->cache = $this->memory->loadData('tokenizer');
     }
 
     /**
@@ -188,7 +188,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
     {
         if (empty($this->cache))
         {
-            $this->cache = $this->memory->loadData(static::class);
+            $this->cache = $this->memory->loadData('tokenizer');
         }
 
         $fileMD5 = $this->file->md5($filename);
@@ -203,7 +203,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
 
         //Let's save to cache
         $this->cache[$filename] = ['md5' => $fileMD5] + $reflection->exportSchema();
-        $this->memory->saveData(static::class, $this->cache);
+        $this->memory->saveData('tokenizer', $this->cache);
 
         return $reflection;
     }

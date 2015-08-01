@@ -152,26 +152,26 @@ class ReflectionArgument
      */
     private static function createArgument(array $definition)
     {
-        $argument = new static(self::EXPRESSION, $definition['value']);
+        $result = new static(self::EXPRESSION, $definition['value']);
 
         if (count($definition['tokens']) == 1)
         {
             //If argument represent by one token we can try to resolve it's type more precisely
-            switch ($argument['tokens'][0][0])
+            switch ($definition['tokens'][0][0])
             {
                 case T_VARIABLE:
-                    $argument->type = self::VARIABLE;
+                    $result->type = self::VARIABLE;
                     break;
                 case T_LNUMBER:
                 case T_DNUMBER:
-                    $argument->type = self::CONSTANT;
+                    $result->type = self::CONSTANT;
                     break;
                 case T_CONSTANT_ENCAPSED_STRING:
-                    $argument->type = self::STRING;
+                    $result->type = self::STRING;
                     break;
             }
         }
 
-        return $argument;
+        return $result;
     }
 }

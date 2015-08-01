@@ -58,9 +58,15 @@ class ReflectionFile extends Component
     private $countTokens = 0;
 
     /**
+     * Indicator that file has external includes.
+     *
+     * @var bool
+     */
+    private $hasIncludes = false;
+
+    /**
      * Namespaces used in file and their token positions.
      *
-     * @invisible
      * @var array
      */
     private $namespaces = [];
@@ -78,13 +84,6 @@ class ReflectionFile extends Component
      * @var array
      */
     private $functions = [];
-
-    /**
-     * Indicator that file has external includes.
-     *
-     * @var bool
-     */
-    private $hasIncludes = false;
 
     /**
      * Every found method/function call.
@@ -112,12 +111,12 @@ class ReflectionFile extends Component
         $this->tokenizer = $tokenizer;
         $this->filename = $filename;
 
-        if (!empty($cache))
-        {
-            $this->importSchema($cache);
-
-            return;
-        }
+        //        if (!empty($cache))
+        //        {
+        //            $this->importSchema($cache);
+        //
+        //            return;
+        //        }
 
         //Getting tokens list
         $tokens = $tokenizer->fetchTokens($filename);
@@ -272,6 +271,7 @@ class ReflectionFile extends Component
                         && $this->tokens[$TID - 1][self::TOKEN_TYPE] == T_PAAMAYIM_NEKUDOTAYIM
                     )
                     {
+                        echo 1;
                         //PHP5.5 ClassName::class constant
                         continue;
                     }

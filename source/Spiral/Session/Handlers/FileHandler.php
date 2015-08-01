@@ -8,12 +8,13 @@
  */
 namespace Spiral\Session\Handlers;
 
+use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Files\FilesInterface;
 
 /**
  * Stores session data in filename.
  */
-class FileHandler implements \SessionHandlerInterface
+class FileHandler implements \SessionHandlerInterface, SaturableInterlace
 {
     /**
      * @var string
@@ -37,7 +38,7 @@ class FileHandler implements \SessionHandlerInterface
     /**
      * @param FilesInterface $files
      */
-    public function depends(FilesInterface $files)
+    public function saturate(FilesInterface $files)
     {
         $this->files = $files;
     }

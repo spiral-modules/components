@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Session;
+
 use Spiral\Session\Exceptions\SessionException;
 
 /**
@@ -104,19 +105,21 @@ interface StoreInterface
     public function get($name, $default = null);
 
     /**
-     * Increment numeric value stored in cache.
+     * Increment numeric value stored in cache. Must return incremented value.
      *
      * @param string $name
      * @param int    $delta How much to increment by. Set to 1 by default.
+     * @return int
      * @throws SessionException
      */
     public function increment($name, $delta = 1);
 
     /**
-     * Decrement numeric value stored in cache.
+     * Decrement numeric value stored in cache. Must return decremented value.
      *
      * @param string $name
      * @param int    $delta How much to decrement by. Set to 1 by default.
+     * @return int
      * @throws SessionException
      */
     public function decrement($name, $delta = 1);

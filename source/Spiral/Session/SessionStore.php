@@ -99,6 +99,8 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
             $this->id = $id;
             $this->start();
         }
+
+        $this->id = $id;
     }
 
     /**
@@ -273,6 +275,8 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
     public function increment($name, $delta = 1)
     {
         $this->set($name, $this->get($name) + $delta);
+
+        return $this->get($name);
     }
 
     /**
@@ -281,6 +285,8 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
     public function decrement($name, $delta = 1)
     {
         $this->set($name, $this->get($name) - $delta);
+
+        return $this->get($name);
     }
 
     /**

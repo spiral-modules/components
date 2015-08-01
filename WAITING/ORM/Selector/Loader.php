@@ -10,7 +10,7 @@ namespace Spiral\ORM\Selector;
 
 use Spiral\Database\Database;
 use Spiral\Database\QueryResult;
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMException;
@@ -299,7 +299,7 @@ abstract class Loader implements LoaderInterface
      */
     protected function getParentKey()
     {
-        return $this->parent->getAlias() . '.' . $this->definition[ActiveRecord::INNER_KEY];
+        return $this->parent->getAlias() . '.' . $this->definition[Model::INNER_KEY];
     }
 
     /**
@@ -788,7 +788,7 @@ abstract class Loader implements LoaderInterface
     public function getReferenceKey()
     {
         //Fairly simple logic
-        return $this->definition[ActiveRecord::INNER_KEY];
+        return $this->definition[Model::INNER_KEY];
     }
 
     /**
@@ -801,12 +801,12 @@ abstract class Loader implements LoaderInterface
      */
     public function fetchReferenceCriteria(array $data)
     {
-        if (!isset($data[$this->definition[ActiveRecord::OUTER_KEY]]))
+        if (!isset($data[$this->definition[Model::OUTER_KEY]]))
         {
             return null;
         }
 
-        return $data[$this->definition[ActiveRecord::OUTER_KEY]];
+        return $data[$this->definition[Model::OUTER_KEY]];
     }
 
     /**

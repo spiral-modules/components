@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Selector\Loaders;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\Selector;
 
 class HasManyLoader extends HasOneLoader
@@ -16,7 +16,7 @@ class HasManyLoader extends HasOneLoader
     /**
      * Relation type is required to correctly resolve foreign model.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_MANY;
+    const RELATION_TYPE = Model::HAS_MANY;
 
     /**
      * Default load method (inload or postload).
@@ -46,10 +46,10 @@ class HasManyLoader extends HasOneLoader
             $this->getAlias()
         );
 
-        if (!empty($this->definition[ActiveRecord::WHERE]))
+        if (!empty($this->definition[Model::WHERE]))
         {
             //Relation WHERE conditions
-            $router->where($this->definition[ActiveRecord::WHERE]);
+            $router->where($this->definition[Model::WHERE]);
         }
 
         //User specified WHERE conditions

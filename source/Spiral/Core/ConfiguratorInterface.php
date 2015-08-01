@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Core;
+use Spiral\Core\Exceptions\ConfiguratorException;
 
 /**
  * Provides array based configuration for specified config section.
@@ -19,6 +20,7 @@ interface ConfiguratorInterface
      *
      * @param string $section
      * @return array
+     * @throws ConfiguratorException
      */
     public function getConfig($section = null);
 }

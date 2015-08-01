@@ -14,7 +14,7 @@ use Spiral\Models\AccessorInterface;
 use Spiral\Models\DataEntity;
 use Spiral\Validation\ValidatorInterface;
 
-abstract class ActiveRecord extends DataEntity
+abstract class Model extends DataEntity
 {
     /**
      * We are going to inherit parent validation, we have to let i18n indexer know to collect both
@@ -1159,12 +1159,12 @@ abstract class ActiveRecord extends DataEntity
      * You have to save model by yourself!
      *
      * @param array $fields Model fields to set, will be passed thought filters.
-     * @return self
+     * @return Model
      */
     public static function create($fields = [])
     {
         /**
-         * @var ActiveRecord $class
+         * @var Model $class
          */
         $class = new static();
 
@@ -1184,7 +1184,7 @@ abstract class ActiveRecord extends DataEntity
      *
      * @param array $where Selection WHERE statement.
      * @param array $load  Array or relations to be loaded.
-     * @return Selector|self[]
+     * @return Selector|Model[]
      */
     public static function find(array $where = [], array $load = [])
     {
@@ -1200,7 +1200,7 @@ abstract class ActiveRecord extends DataEntity
      *
      * @param array $where Selection WHERE statement.
      * @param array $load  Array or relations to be loaded.
-     * @return Selector|self[]
+     * @return Selector|Model[]
      */
     public static function select(array $where = [], array $load = [])
     {
@@ -1218,7 +1218,7 @@ abstract class ActiveRecord extends DataEntity
      * @param array $load    Array or relations to be loaded. You can't use INLOAD or JOIN_ONLY methods
      *                       with findOne.
      * @param array $orderBy Sort by conditions.
-     * @return self|null
+     * @return Model|null
      */
     public static function findOne(array $where = [], array $load = [], array $orderBy = [])
     {
@@ -1240,7 +1240,7 @@ abstract class ActiveRecord extends DataEntity
      * @param mixed $id      Primary key.
      * @param array $load    Array or relations to be loaded. You can't use INLOAD or JOIN_ONLY methods
      *                       with findOne.
-     * @return self|null
+     * @return Model|null
      */
     public static function findByPK($id = null, array $load = [])
     {

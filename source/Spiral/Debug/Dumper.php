@@ -104,7 +104,7 @@ class Dumper extends Singleton
         }
 
         $result = \Spiral\interpolate($this->options['container'], [
-            'dump' => $this->dumpVariable($value, '', 0)
+            'dump' => $this->dumpValue($value, '', 0)
         ]);
 
         switch ($output)
@@ -172,10 +172,10 @@ class Dumper extends Singleton
      * @param bool   $hideType Hide array/object header, internal.
      * @return string
      */
-    private function dumpVariable($value, $name = '', $level = 0, $hideType = false)
+    private function dumpValue($value, $name = '', $level = 0, $hideType = false)
     {
         $result = $indent = $this->indent($level);
-        if (!$hideType && $name)
+        if (!$hideType && !empty($name))
         {
             $result .= $this->style($name, "name") . $this->style(" = ", "indent", "equal");
         }
@@ -210,26 +210,26 @@ class Dumper extends Singleton
 
         $result .= $this->style($type . "(" . strlen($value) . ")", "type", $type);
 
-        $value = null;
+        $element = null;
         switch ($type)
         {
             case "string":
-                $value = htmlspecialchars($value);
+                $element = htmlspecialchars($value);
                 break;
 
             case "boolean":
-                $value = ($value ? "true" : "false");
+                $element = ($value ? "true" : "false");
                 break;
 
             default:
                 if ($value !== null)
                 {
                     //Not showing null value, type is enough
-                    $value = var_export($value, true);
+                    $element = var_export($value, true);
                 }
         }
 
-        return $result . " " . $this->style($value, "value", $type) . "\n";
+        return $result . " " . $this->style($element, "value", $type) . "\n";
     }
 
     /**
@@ -260,7 +260,7 @@ class Dumper extends Singleton
                 $name = "'" . $name . "'";
             }
 
-            $result .= $this->dumpVariable($value, "[{$name}]", $level + 1);
+            $result .= $this->dumpValue($value, "[{$name}]", $level + 1);
         }
 
         if (!$hideType)
@@ -272,44 +272,44 @@ class Dumper extends Singleton
     }
 
     /**
-     * @param object $value
+     * @param object $object
      * @param int    $level
      * @param bool   $hideType
      * @param string $class
      * @return string
      */
-    private function dumpObject($value, $level, $hideType, $class = '')
+    private function dumpObject($object, $level, $hideType, $class = '')
     {
         $result = '';
         $indent = $this->indent($level);
         if (!$hideType)
         {
-            $type = ($class ?: get_class($value)) . " object ";
+            $type = ($class ?: get_class($object)) . " object ";
 
             $result .= $this->style($type, "type", "object") .
                 "\n" . $indent . $this->style("(", "indent", "(") . "\n";
         }
 
-        if (method_exists($value, '__debugInfo'))
+        if (method_exists($object, '__debugInfo'))
         {
-            $debugInfo = $value->__debugInfo();
+            $debugInfo = $object->__debugInfo();
 
             if (is_object($debugInfo))
             {
-                return $this->dumpObject($debugInfo, $level, false, get_class($value));
+                return $this->dumpObject($debugInfo, $level, false, get_class($object));
             }
 
-            $result .= $this->dumpVariable(
+            $result .= $this->dumpValue(
                 $debugInfo,
                 '',
-                $level + (is_scalar($value)),
+                $level + (is_scalar($object)),
                 true
             );
 
             return $result . $indent . $this->style(")", "parentheses") . "\n";
         }
 
-        $refection = new \ReflectionObject($value);
+        $refection = new \ReflectionObject($object);
         foreach ($refection->getProperties() as $property)
         {
             if ($property->isStatic())
@@ -318,7 +318,7 @@ class Dumper extends Singleton
             }
 
             //Memory loop while reading doc comment for stdClass variables?
-            if (!($value instanceof \stdClass) && strpos($property->getDocComment(), '@invisible'))
+            if (!($object instanceof \stdClass) && strpos($property->getDocComment(), '@invisible'))
             {
                 continue;
             }
@@ -334,13 +334,13 @@ class Dumper extends Singleton
             }
             $property->setAccessible(true);
 
-            if ($value instanceof \stdClass)
+            if ($object instanceof \stdClass)
             {
                 $access = 'dynamic';
             }
 
-            $value = $property->getValue($value);
-            $result .= $this->dumpVariable(
+            $value = $property->getValue($object);
+            $result .= $this->dumpValue(
                 $value,
                 $property->getName() . $this->style(":" . $access, "access", $access),
                 $level + 1
@@ -358,7 +358,7 @@ class Dumper extends Singleton
      */
     private function indent($level)
     {
-        if (!$level)
+        if ($level == 0)
         {
             return '';
         }

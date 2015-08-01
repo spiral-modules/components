@@ -12,7 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Exceptions\MissingContainerException;
 use Spiral\Models\Exceptions\AccessorException;
 use Spiral\Models\Exceptions\TraitException;
-use Spiral\Models\Schemas\EntitySchema;
+use Spiral\Models\Schemas\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
 
@@ -454,12 +454,12 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
      *
      * @param string       $property
      * @param mixed        $value
-     * @param EntitySchema $schema
+     * @param ReflectionEntity $schema
      * @return mixed Returns filtered value.
      * @event describe($property, $value, EntitySchema $schema)
      * @throws TraitException
      */
-    public static function describeProperty($property, $value, EntitySchema $schema)
+    public static function describeProperty($property, $value, ReflectionEntity $schema)
     {
         static::initialize(true);
 

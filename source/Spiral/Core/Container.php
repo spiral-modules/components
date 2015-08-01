@@ -292,8 +292,8 @@ class Container extends Component implements ContainerInterface
         if ($instance instanceof SaturableInterlace)
         {
             //Saturating object with required dependencies
-            $depends = $reflector->getMethod(SaturableInterlace::SATURATE_METHOD);
-            $depends->invoke($instance, $this->resolveArguments($depends, $parameters));
+            $saturate = $reflector->getMethod(SaturableInterlace::SATURATE_METHOD);
+            $saturate->invokeArgs($instance, $this->resolveArguments($saturate, $parameters));
         }
 
         return $instance;

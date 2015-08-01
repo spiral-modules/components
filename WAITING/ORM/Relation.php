@@ -38,7 +38,7 @@ abstract class Relation extends Component implements
      * Parent ActiveRecord used to supply valid values for foreign keys and etc. In some cases active
      * record can be updated by relation (for example in cases of BELONG_TO assignment).
      *
-     * @var ActiveRecord
+     * @var Model
      */
     protected $parent = null;
 
@@ -62,7 +62,7 @@ abstract class Relation extends Component implements
      * Instance of constructed ActiveRecord of ModelIterator.
      *
      * @invisible
-     * @var ActiveRecord|ModelIterator
+     * @var Model|ModelIterator
      */
     protected $instance = null;
 
@@ -79,14 +79,14 @@ abstract class Relation extends Component implements
      * to create valid query selector.
      *
      * @param ORM          $orm        ORM component.
-     * @param ActiveRecord $parent     Parent ActiveRecord object.
+     * @param Model $parent     Parent ActiveRecord object.
      * @param array        $definition Relation definition.
      * @param mixed        $data       Pre-loaded relation data.
      * @param bool         $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
-        ActiveRecord $parent,
+        Model $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -123,7 +123,7 @@ abstract class Relation extends Component implements
             return;
         }
 
-        if (!$loaded || !($this->instance instanceof ActiveRecord))
+        if (!$loaded || !($this->instance instanceof Model))
         {
             //Flushing instance
             $this->instance = null;
@@ -153,7 +153,7 @@ abstract class Relation extends Component implements
     {
         if (!empty($this->instance))
         {
-            if ($this->instance instanceof ActiveRecord && !empty($this->data))
+            if ($this->instance instanceof Model && !empty($this->data))
             {
                 $this->instance->setContext($this->data);
             }
@@ -187,7 +187,7 @@ abstract class Relation extends Component implements
     /**
      * Convert pre-loaded relation data to active record model .
      *
-     * @return ActiveRecord
+     * @return Model
      */
     protected function createModel()
     {
@@ -241,7 +241,7 @@ abstract class Relation extends Component implements
     /**
      * Bypassing getIterator call, required for implementing IteratorAggregate interface.
      *
-     * @return ActiveRecord[]|ModelIterator
+     * @return Model[]|ModelIterator
      */
     public function getIterator()
     {
@@ -281,10 +281,10 @@ abstract class Relation extends Component implements
      * Example:
      * $user->profile = new Profile();
      *
-     * @param ActiveRecord $instance
+     * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(ActiveRecord $instance)
+    public function setInstance(Model $instance)
     {
         if (static::MULTIPLE)
         {
@@ -330,7 +330,7 @@ abstract class Relation extends Component implements
         if (static::MULTIPLE)
         {
             /**
-             * @var ActiveRecord[] $instance
+             * @var Model[] $instance
              */
             foreach ($instance as $model)
             {
@@ -351,7 +351,7 @@ abstract class Relation extends Component implements
         }
 
         /**
-         * @var ActiveRecord $instance
+         * @var Model $instance
          */
         if ($instance->isDeleted())
         {
@@ -379,7 +379,7 @@ abstract class Relation extends Component implements
         if (static::MULTIPLE)
         {
             /**
-             * @var ActiveRecord[] $data
+             * @var Model[] $data
              */
             $errors = [];
             foreach ($data as $position => $model)
@@ -400,10 +400,10 @@ abstract class Relation extends Component implements
      * Mount relation keys to parent or children models to ensure their connection. Method called
      * when model requests relation save.
      *
-     * @param ActiveRecord $model
-     * @return ActiveRecord
+     * @param Model $model
+     * @return Model
      */
-    abstract protected function mountRelation(ActiveRecord $model);
+    abstract protected function mountRelation(Model $model);
 
     /**
      * (PHP 5 > 5.4.0)

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Schemas\MorphedRelationSchema;
 
@@ -17,7 +17,7 @@ class BelongsToMorphedSchema extends MorphedRelationSchema
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::BELONGS_TO_MORPHED;
+    const RELATION_TYPE = Model::BELONGS_TO_MORPHED;
 
     /**
      * Default definition parameters, will be filled if parameter skipped from definition by user.
@@ -26,10 +26,10 @@ class BelongsToMorphedSchema extends MorphedRelationSchema
      * @var array
      */
     protected $defaultDefinition = [
-        ActiveRecord::OUTER_KEY => '{outer:primaryKey}',
-        ActiveRecord::INNER_KEY => '{name:singular}_{definition:OUTER_KEY}',
-        ActiveRecord::MORPH_KEY => '{name:singular}_type',
-        ActiveRecord::NULLABLE  => true
+        Model::OUTER_KEY => '{outer:primaryKey}',
+        Model::INNER_KEY => '{name:singular}_{definition:OUTER_KEY}',
+        Model::MORPH_KEY => '{name:singular}_type',
+        Model::NULLABLE  => true
     ];
 
     /**
@@ -40,8 +40,8 @@ class BelongsToMorphedSchema extends MorphedRelationSchema
     public function inverseRelation()
     {
         if (
-            !is_array($this->definition[ActiveRecord::INVERSE])
-            || !isset($this->definition[ActiveRecord::INVERSE][1])
+            !is_array($this->definition[Model::INVERSE])
+            || !isset($this->definition[Model::INVERSE][1])
         )
         {
             throw new ORMException(
@@ -50,17 +50,17 @@ class BelongsToMorphedSchema extends MorphedRelationSchema
             );
         }
 
-        $inversed = $this->definition[ActiveRecord::INVERSE];
+        $inversed = $this->definition[Model::INVERSE];
         foreach ($this->getOuterModels() as $record)
         {
             $record->addRelation(
                 $inversed[1],
                 [
                     $inversed[0]            => $this->model->getClass(),
-                    ActiveRecord::OUTER_KEY => $this->definition[ActiveRecord::INNER_KEY],
-                    ActiveRecord::INNER_KEY => $this->definition[ActiveRecord::OUTER_KEY],
-                    ActiveRecord::MORPH_KEY => $this->definition[ActiveRecord::MORPH_KEY],
-                    ActiveRecord::NULLABLE  => $this->definition[ActiveRecord::NULLABLE]
+                    Model::OUTER_KEY => $this->definition[Model::INNER_KEY],
+                    Model::INNER_KEY => $this->definition[Model::OUTER_KEY],
+                    Model::MORPH_KEY => $this->definition[Model::MORPH_KEY],
+                    Model::NULLABLE  => $this->definition[Model::NULLABLE]
                 ]
             );
         }

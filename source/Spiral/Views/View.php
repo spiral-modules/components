@@ -78,10 +78,24 @@ class View extends Component implements ViewInterface, SaturableInterlace
         $context = $this->namespace . ViewsInterface::NS_SEPARATOR . $this->view;
 
         $this->benchmark('render', $context);
-        ob_start();
 
+        $outerBuffer = ob_get_level();
+
+        ob_start();
         extract($this->data, EXTR_OVERWRITE);
-        include $this->compiledFilename;
+        try
+        {
+            include $this->compiledFilename;
+        }
+        catch (\Exception $exception)
+        {
+            while (ob_get_level() > $outerBuffer)
+            {
+                ob_end_clean();
+            }
+
+            throw $exception;
+        }
 
         $result = ob_get_clean();
         $this->benchmark('render', $context);

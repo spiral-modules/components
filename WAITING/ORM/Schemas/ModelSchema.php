@@ -14,13 +14,13 @@ use Spiral\Database\Schemas\AbstractColumn;
 use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\SqlFragmentInterface;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Models\Schemas\EntitySchema;
-use Spiral\ORM\ActiveRecord;
+use Spiral\Models\Schemas\ReflectionEntity;
+use Spiral\ORM\Model;
 use Spiral\ORM\ModelAccessorInterface;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\SchemaBuilder;
 
-class ModelSchema extends EntitySchema implements LoggerAwareInterface
+class ModelSchema extends ReflectionEntity implements LoggerAwareInterface
 {
     /**
      * Logging.
@@ -30,7 +30,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
     /**
      * Base model class.
      */
-    const BASE_CLASS = ActiveRecord::class;
+    const BASE_CLASS = Model::class;
 
     /**
      * ActiveRecord model class name.
@@ -549,7 +549,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
 
         foreach ($definition as $chunk)
         {
-            if ($chunk == ActiveRecord::INDEX || $chunk == ActiveRecord::UNIQUE)
+            if ($chunk == Model::INDEX || $chunk == Model::UNIQUE)
             {
                 $type = $chunk;
                 continue;
@@ -569,7 +569,7 @@ class ModelSchema extends EntitySchema implements LoggerAwareInterface
         }
 
         //Defining index
-        $this->tableSchema->index($columns)->unique($type == ActiveRecord::UNIQUE);
+        $this->tableSchema->index($columns)->unique($type == Model::UNIQUE);
     }
 
     /**

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Selector\Loaders;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\Selector;
 
 class BelongsToLoader extends HasOneLoader
@@ -16,7 +16,7 @@ class BelongsToLoader extends HasOneLoader
     /**
      * Relation type is required to correctly resolve foreign model.
      */
-    const RELATION_TYPE = ActiveRecord::BELONGS_TO;
+    const RELATION_TYPE = Model::BELONGS_TO;
 
     /**
      * Default load method (inload or postload).

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 
 class BelongsTo extends HasOne
@@ -16,7 +16,7 @@ class BelongsTo extends HasOne
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::BELONGS_TO;
+    const RELATION_TYPE = Model::BELONGS_TO;
 
     /**
      * Set relation data (called via __set method of parent ActiveRecord).
@@ -24,10 +24,10 @@ class BelongsTo extends HasOne
      * Example:
      * $user->profile = new Profile();
      *
-     * @param ActiveRecord $instance
+     * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(ActiveRecord $instance = null)
+    public function setInstance(Model $instance = null)
     {
         if (is_null($instance))
         {
@@ -39,7 +39,7 @@ class BelongsTo extends HasOne
         parent::setInstance($instance);
 
         /**
-         * @var ActiveRecord $instance
+         * @var Model $instance
          */
         if (!$instance->isLoaded())
         {
@@ -49,10 +49,10 @@ class BelongsTo extends HasOne
         }
 
         //Key in parent model
-        $outerKey = $this->definition[ActiveRecord::OUTER_KEY];
+        $outerKey = $this->definition[Model::OUTER_KEY];
 
         //Key in child model
-        $innerKey = $this->definition[ActiveRecord::INNER_KEY];
+        $innerKey = $this->definition[Model::INNER_KEY];
 
         if ($this->parent->getField($innerKey, false) != $instance->getField($outerKey, false))
         {
@@ -66,17 +66,17 @@ class BelongsTo extends HasOne
      */
     protected function dropRelation()
     {
-        $innerKey = $this->definition[ActiveRecord::INNER_KEY];
+        $innerKey = $this->definition[Model::INNER_KEY];
         $this->parent->setField($innerKey, null, false);
     }
 
     /**
      * Mount relation keys to parent or children models to ensure their connection.
      *
-     * @param ActiveRecord $model
-     * @return ActiveRecord
+     * @param Model $model
+     * @return Model
      */
-    protected function mountRelation(ActiveRecord $model)
+    protected function mountRelation(Model $model)
     {
         //Nothing to do, children can not update parent relation
         return $model;

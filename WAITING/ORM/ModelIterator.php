@@ -35,7 +35,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Constructed model instances.
      *
-     * @var ActiveRecord[]
+     * @var Model[]
      */
     protected $instances = [];
 
@@ -73,7 +73,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Get all active records as array.
      *
-     * @return ActiveRecord[]
+     * @return Model[]
      */
     public function all()
     {
@@ -162,7 +162,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Simplified way to dump information.
      *
-     * @return ActiveRecord[]
+     * @return Model[]
      */
     public function __debugInfo()
     {

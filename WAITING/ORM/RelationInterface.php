@@ -16,14 +16,14 @@ interface RelationInterface
      * to create valid query selector.
      *
      * @param ORM          $orm        ORM component.
-     * @param ActiveRecord $parent     Parent ActiveRecord object.
+     * @param Model $parent     Parent ActiveRecord object.
      * @param array        $definition Relation definition.
      * @param mixed        $data       Pre-loaded relation data.
      * @param bool         $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
-        ActiveRecord $parent,
+        Model $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -58,10 +58,10 @@ interface RelationInterface
      * Example:
      * $user->profile = new Profile();
      *
-     * @param ActiveRecord $instance
+     * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(ActiveRecord $instance);
+    public function setInstance(Model $instance);
 
     /**
      * ActiveRecord may ask relation data to be saved, save content will work ONLY for pre-loaded

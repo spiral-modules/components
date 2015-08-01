@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\Database\Schemas\AbstractTable;
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Schemas\RelationSchema;
 
@@ -18,12 +18,12 @@ class ManyToManySchema extends RelationSchema
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::MANY_TO_MANY;
+    const RELATION_TYPE = Model::MANY_TO_MANY;
 
     /**
      * Equivalent relationship resolved based on definition and not schema, usually polymorphic.
      */
-    const EQUIVALENT_RELATION = ActiveRecord::MANY_TO_MORPHED;
+    const EQUIVALENT_RELATION = Model::MANY_TO_MORPHED;
 
     /**
      * Default definition parameters, will be filled if parameter skipped from definition by user.
@@ -32,16 +32,16 @@ class ManyToManySchema extends RelationSchema
      * @var array
      */
     protected $defaultDefinition = [
-        ActiveRecord::INNER_KEY         => '{record:primaryKey}',
-        ActiveRecord::OUTER_KEY         => '{outer:primaryKey}',
-        ActiveRecord::THOUGHT_INNER_KEY => '{record:roleName}_{definition:INNER_KEY}',
-        ActiveRecord::THOUGHT_OUTER_KEY => '{outer:roleName}_{definition:OUTER_KEY}',
-        ActiveRecord::CONSTRAINT        => true,
-        ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
-        ActiveRecord::CREATE_PIVOT      => true,
-        ActiveRecord::PIVOT_COLUMNS     => [],
-        ActiveRecord::WHERE_PIVOT       => [],
-        ActiveRecord::WHERE             => []
+        Model::INNER_KEY         => '{record:primaryKey}',
+        Model::OUTER_KEY         => '{outer:primaryKey}',
+        Model::THOUGHT_INNER_KEY => '{record:roleName}_{definition:INNER_KEY}',
+        Model::THOUGHT_OUTER_KEY => '{outer:roleName}_{definition:OUTER_KEY}',
+        Model::CONSTRAINT        => true,
+        Model::CONSTRAINT_ACTION => 'CASCADE',
+        Model::CREATE_PIVOT      => true,
+        Model::PIVOT_COLUMNS     => [],
+        Model::WHERE_PIVOT       => [],
+        Model::WHERE             => []
     ];
 
     /**
@@ -52,18 +52,18 @@ class ManyToManySchema extends RelationSchema
     public function inverseRelation()
     {
         $this->outerModel()->addRelation(
-            $this->definition[ActiveRecord::INVERSE],
+            $this->definition[Model::INVERSE],
             [
-                ActiveRecord::MANY_TO_MANY      => $this->model->getClass(),
-                ActiveRecord::PIVOT_TABLE       => $this->definition[ActiveRecord::PIVOT_TABLE],
-                ActiveRecord::OUTER_KEY         => $this->definition[ActiveRecord::INNER_KEY],
-                ActiveRecord::INNER_KEY         => $this->definition[ActiveRecord::OUTER_KEY],
-                ActiveRecord::THOUGHT_INNER_KEY => $this->definition[ActiveRecord::THOUGHT_OUTER_KEY],
-                ActiveRecord::THOUGHT_OUTER_KEY => $this->definition[ActiveRecord::THOUGHT_INNER_KEY],
-                ActiveRecord::CONSTRAINT        => $this->definition[ActiveRecord::CONSTRAINT],
-                ActiveRecord::CONSTRAINT_ACTION => $this->definition[ActiveRecord::CONSTRAINT_ACTION],
-                ActiveRecord::CREATE_PIVOT      => $this->definition[ActiveRecord::CREATE_PIVOT],
-                ActiveRecord::PIVOT_COLUMNS     => $this->definition[ActiveRecord::PIVOT_COLUMNS]
+                Model::MANY_TO_MANY      => $this->model->getClass(),
+                Model::PIVOT_TABLE       => $this->definition[Model::PIVOT_TABLE],
+                Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
+                Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
+                Model::THOUGHT_INNER_KEY => $this->definition[Model::THOUGHT_OUTER_KEY],
+                Model::THOUGHT_OUTER_KEY => $this->definition[Model::THOUGHT_INNER_KEY],
+                Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],
+                Model::CONSTRAINT_ACTION => $this->definition[Model::CONSTRAINT_ACTION],
+                Model::CREATE_PIVOT      => $this->definition[Model::CREATE_PIVOT],
+                Model::PIVOT_COLUMNS     => $this->definition[Model::PIVOT_COLUMNS]
             ]
         );
     }
@@ -74,9 +74,9 @@ class ManyToManySchema extends RelationSchema
     protected function clarifyDefinition()
     {
         parent::clarifyDefinition();
-        if (empty($this->definition[ActiveRecord::PIVOT_TABLE]))
+        if (empty($this->definition[Model::PIVOT_TABLE]))
         {
-            $this->definition[ActiveRecord::PIVOT_TABLE] = $this->getPivotTable();
+            $this->definition[Model::PIVOT_TABLE] = $this->getPivotTable();
         }
 
         if ($this->isOuterDatabase())
@@ -92,9 +92,9 @@ class ManyToManySchema extends RelationSchema
      */
     public function getPivotTable()
     {
-        if (isset($this->definition[ActiveRecord::PIVOT_TABLE]))
+        if (isset($this->definition[Model::PIVOT_TABLE]))
         {
-            return $this->definition[ActiveRecord::PIVOT_TABLE];
+            return $this->definition[Model::PIVOT_TABLE];
         }
 
         //Generating pivot table name
@@ -119,7 +119,7 @@ class ManyToManySchema extends RelationSchema
      */
     public function buildSchema()
     {
-        if (!$this->definition[ActiveRecord::CREATE_PIVOT])
+        if (!$this->definition[Model::CREATE_PIVOT])
         {
             //We are working purely with pivot table in this relation
             return;
@@ -127,25 +127,25 @@ class ManyToManySchema extends RelationSchema
 
         $pivotTable = $this->getPivotSchema();
 
-        $outerKey = $pivotTable->column($this->definition[ActiveRecord::THOUGHT_OUTER_KEY]);
+        $outerKey = $pivotTable->column($this->definition[Model::THOUGHT_OUTER_KEY]);
         $outerKey->type($this->outerKeyType());
 
-        if (!empty($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!empty($this->definition[Model::MORPH_KEY]))
         {
-            $morphKey = $pivotTable->column($this->definition[ActiveRecord::MORPH_KEY]);
+            $morphKey = $pivotTable->column($this->definition[Model::MORPH_KEY]);
             $morphKey->string(static::MORPH_COLUMN_SIZE);
         }
 
-        $innerKey = $pivotTable->column($this->definition[ActiveRecord::THOUGHT_INNER_KEY]);
+        $innerKey = $pivotTable->column($this->definition[Model::THOUGHT_INNER_KEY]);
         $innerKey->type($this->innerKeyType());
 
         //Additional pivot columns
-        foreach ($this->definition[ActiveRecord::PIVOT_COLUMNS] as $column => $definition)
+        foreach ($this->definition[Model::PIVOT_COLUMNS] as $column => $definition)
         {
             $this->castColumn($pivotTable->column($column), $definition);
         }
 
-        if (!$this->isConstrained() || !empty($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!$this->isConstrained() || !empty($this->definition[Model::MORPH_KEY]))
         {
             //Either not need to create constraint or it was created in polymorphic relation
             return;
@@ -153,8 +153,8 @@ class ManyToManySchema extends RelationSchema
 
         //Complex index
         $pivotTable->unique(
-            $this->definition[ActiveRecord::THOUGHT_INNER_KEY],
-            $this->definition[ActiveRecord::THOUGHT_OUTER_KEY]
+            $this->definition[Model::THOUGHT_INNER_KEY],
+            $this->definition[Model::THOUGHT_OUTER_KEY]
         );
 
         $foreignKey = $innerKey->foreign(
@@ -184,10 +184,10 @@ class ManyToManySchema extends RelationSchema
         $definition = parent::normalizeDefinition();
 
         //Let's include pivot table columns
-        $definition[ActiveRecord::PIVOT_COLUMNS] = [];
+        $definition[Model::PIVOT_COLUMNS] = [];
         foreach ($this->getPivotSchema()->getColumns() as $column)
         {
-            $definition[ActiveRecord::PIVOT_COLUMNS][] = $column->getName();
+            $definition[Model::PIVOT_COLUMNS][] = $column->getName();
         }
 
         return $definition;

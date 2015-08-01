@@ -100,7 +100,7 @@ class ORM extends Singleton
      *
      * Cache will increase memory consumption.
      *
-     * @var ActiveRecord[]
+     * @var Model[]
      */
     protected $entityCache = [];
 
@@ -155,10 +155,10 @@ class ORM extends Singleton
     /**
      * Add ActiveRecord to entity cache (cache limit will be ignored).
      *
-     * @param ActiveRecord $record
-     * @return ActiveRecord
+     * @param Model $record
+     * @return Model
      */
-    public function registerEntity(ActiveRecord $record)
+    public function registerEntity(Model $record)
     {
         if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled'])
         {
@@ -171,9 +171,9 @@ class ORM extends Singleton
     /**
      * Remove ActiveRecord model from entity cache.
      *
-     * @param ActiveRecord $record
+     * @param Model $record
      */
-    public function removeEntity(ActiveRecord $record)
+    public function removeEntity(Model $record)
     {
         if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled'])
         {
@@ -222,7 +222,7 @@ class ORM extends Singleton
      * @param string $class
      * @param array  $data
      * @param bool   $cache
-     * @return ActiveRecord
+     * @return Model
      */
     public function construct($class, array $data = [], $cache = true)
     {
@@ -260,14 +260,14 @@ class ORM extends Singleton
      * Instance of ActiveRecord relation accessor.
      *
      * @param int          $type
-     * @param ActiveRecord $parent
+     * @param Model $parent
      * @param array        $definition
      * @param array        $data
      * @param bool         $loaded
      * @return RelationInterface
      * @throws ORMException
      */
-    public function relation($type, ActiveRecord $parent, $definition, $data = null, $loaded = false)
+    public function relation($type, Model $parent, $definition, $data = null, $loaded = false)
     {
         if (!isset($this->config['relations'][$type]['class']))
         {
@@ -359,7 +359,7 @@ class ORM extends Singleton
         $this->schema = $this->fire('schema', $builder->normalizeSchema());
 
         //We have to flush schema cache after schema update, just in case
-        ActiveRecord::resetInitiated();
+        Model::resetInitiated();
 
         //Saving
         $this->runtime->saveData('ormSchema', $this->schema);

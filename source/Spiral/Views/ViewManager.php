@@ -305,7 +305,7 @@ class ViewManager extends Singleton implements ViewsInterface
      */
     protected function compiler($engine, $namespace, $view)
     {
-        if (isset($this->config['engines'][$engine]))
+        if (!isset($this->config['engines'][$engine]))
         {
             throw new ViewException("Undefined view engine '{$engine}'.");
         }

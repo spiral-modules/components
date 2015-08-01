@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Schemas\RelationSchema;
 
@@ -17,12 +17,12 @@ class BelongsToSchema extends RelationSchema
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::BELONGS_TO;
+    const RELATION_TYPE = Model::BELONGS_TO;
 
     /**
      * Equivalent relationship resolved based on definition and not schema, usually polymorphic.
      */
-    const EQUIVALENT_RELATION = ActiveRecord::BELONGS_TO_MORPHED;
+    const EQUIVALENT_RELATION = Model::BELONGS_TO_MORPHED;
 
     /**
      * Default definition parameters, will be filled if parameter skipped from definition by user.
@@ -31,11 +31,11 @@ class BelongsToSchema extends RelationSchema
      * @var array
      */
     protected $defaultDefinition = [
-        ActiveRecord::OUTER_KEY         => '{outer:primaryKey}',
-        ActiveRecord::INNER_KEY         => '{name:singular}_{definition:OUTER_KEY}',
-        ActiveRecord::CONSTRAINT        => true,
-        ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
-        ActiveRecord::NULLABLE          => true
+        Model::OUTER_KEY         => '{outer:primaryKey}',
+        Model::INNER_KEY         => '{name:singular}_{definition:OUTER_KEY}',
+        Model::CONSTRAINT        => true,
+        Model::CONSTRAINT_ACTION => 'CASCADE',
+        Model::NULLABLE          => true
     ];
 
     /**
@@ -46,8 +46,8 @@ class BelongsToSchema extends RelationSchema
     public function inverseRelation()
     {
         if (
-            !is_array($this->definition[ActiveRecord::INVERSE])
-            || !isset($this->definition[ActiveRecord::INVERSE][1])
+            !is_array($this->definition[Model::INVERSE])
+            || !isset($this->definition[Model::INVERSE][1])
         )
         {
             throw new ORMException(
@@ -56,17 +56,17 @@ class BelongsToSchema extends RelationSchema
             );
         }
 
-        $inversed = $this->definition[ActiveRecord::INVERSE];
+        $inversed = $this->definition[Model::INVERSE];
 
         $this->outerModel()->addRelation(
             $inversed[1],
             [
                 $inversed[0]                    => $this->model->getClass(),
-                ActiveRecord::OUTER_KEY         => $this->definition[ActiveRecord::INNER_KEY],
-                ActiveRecord::INNER_KEY         => $this->definition[ActiveRecord::OUTER_KEY],
-                ActiveRecord::CONSTRAINT        => $this->definition[ActiveRecord::CONSTRAINT],
-                ActiveRecord::CONSTRAINT_ACTION => $this->definition[ActiveRecord::CONSTRAINT_ACTION],
-                ActiveRecord::NULLABLE          => $this->definition[ActiveRecord::NULLABLE]
+                Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
+                Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
+                Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],
+                Model::CONSTRAINT_ACTION => $this->definition[Model::CONSTRAINT_ACTION],
+                Model::NULLABLE          => $this->definition[Model::NULLABLE]
             ]
         );
     }

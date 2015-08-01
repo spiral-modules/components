@@ -357,7 +357,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     /**
      * We have to redefine selector iterator and result or selection is set of models not columns.
      *
-     * @return ModelIterator|QueryResult|ActiveRecord[]
+     * @return ModelIterator|QueryResult|Model[]
      */
     public function getIterator()
     {
@@ -448,7 +448,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * join HAS_MANY or MANY_TO_MANY relations using INLOAD (inload) or JOIN_ONLY (with) methods.
      *
      * @param array $where Selection WHERE statement.
-     * @return ActiveRecord|null
+     * @return Model|null
      */
     public function findOne(array $where = [])
     {
@@ -471,7 +471,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * with HAS_MANY or MANY_TO_MANY relations with this method as no limit used.
      *
      * @param mixed $id Primary key value.
-     * @return ActiveRecord|null
+     * @return Model|null
      * @throws ORMException
      */
     public function findByPK($id)

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ODM\Schemas;
 
-use Spiral\Models\Schemas\EntitySchema;
+use Spiral\Models\Schemas\ReflectionEntity;
 use Spiral\ODM\Accessors\Compositor;
 use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
@@ -16,7 +16,7 @@ use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\ODMException;
 use Spiral\ODM\SchemaBuilder;
 
-class DocumentSchema extends EntitySchema
+class DocumentSchema extends ReflectionEntity
 {
     /**
      * Base model class.

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\Selector;
 
 class HasMany extends HasOne
@@ -16,7 +16,7 @@ class HasMany extends HasOne
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_MANY;
+    const RELATION_TYPE = Model::HAS_MANY;
 
     /**
      * Indication that relation represent multiple records.
@@ -33,9 +33,9 @@ class HasMany extends HasOne
     {
         $selector = parent::createSelector();
 
-        if (isset($this->definition[ActiveRecord::WHERE]))
+        if (isset($this->definition[Model::WHERE]))
         {
-            $selector->where($this->definition[ActiveRecord::WHERE]);
+            $selector->where($this->definition[Model::WHERE]);
         }
 
         return $selector;

@@ -56,9 +56,9 @@ class SchemaBuilder extends Component
         $this->config = $config;
         $this->orm = $orm;
 
-        foreach ($tokenizer->getClasses(ActiveRecord::class) as $class => $definition)
+        foreach ($tokenizer->getClasses(Model::class) as $class => $definition)
         {
-            if ($class == ActiveRecord::class)
+            if ($class == Model::class)
             {
                 continue;
             }
@@ -111,9 +111,9 @@ class SchemaBuilder extends Component
      */
     public function modelSchema($class)
     {
-        if ($class == ActiveRecord::class)
+        if ($class == Model::class)
         {
-            return new ModelSchema(ActiveRecord::class, $this);
+            return new ModelSchema(Model::class, $this);
         }
 
         if (!isset($this->models[$class]))

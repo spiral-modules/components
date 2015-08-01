@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Schemas;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 
 abstract class MorphedRelationSchema extends RelationSchema
@@ -120,7 +120,7 @@ abstract class MorphedRelationSchema extends RelationSchema
      */
     public function getMorphKey()
     {
-        return $this->definition[ActiveRecord::MORPH_KEY];
+        return $this->definition[Model::MORPH_KEY];
     }
 
     /**

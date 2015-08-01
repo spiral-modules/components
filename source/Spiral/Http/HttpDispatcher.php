@@ -144,7 +144,7 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
      *
      * @return string
      */
-    public function getBasePath()
+    public function basePath()
     {
         return $this->config['basePath'];
     }
@@ -189,10 +189,10 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
      */
     public function start()
     {
-        if (empty($this->endpoints[$this->getBasePath()]))
+        if (empty($this->endpoints[$this->basePath()]))
         {
             //Base path wasn't handled, let's attach our router
-            $this->endpoints[$this->getBasePath()] = $this->router();
+            $this->endpoints[$this->basePath()] = $this->router();
         }
 
         //Become alive and die right after that
@@ -213,7 +213,7 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
 
         return $this->request = ServerRequestFactory::fromGlobals(
             $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
-        )->withAttribute('basePath', $this->getBasePath());
+        )->withAttribute('basePath', $this->basePath());
     }
 
     /**

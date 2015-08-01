@@ -10,7 +10,7 @@ namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\SchemaBuilder;
@@ -176,7 +176,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isInversable()
     {
-        return isset($this->definition[ActiveRecord::INVERSE]);
+        return isset($this->definition[Model::INVERSE]);
     }
 
     /**
@@ -225,9 +225,9 @@ abstract class RelationSchema implements RelationSchemaInterface
         ];
 
         $proposed = [
-            ActiveRecord::OUTER_KEY   => 'OUTER_KEY',
-            ActiveRecord::INNER_KEY   => 'INNER_KEY',
-            ActiveRecord::PIVOT_TABLE => 'PIVOT_TABLE'
+            Model::OUTER_KEY   => 'OUTER_KEY',
+            Model::INNER_KEY   => 'INNER_KEY',
+            Model::PIVOT_TABLE => 'PIVOT_TABLE'
         ];
 
         foreach ($proposed as $property => $alias)
@@ -294,9 +294,9 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isNullable()
     {
-        if (array_key_exists(ActiveRecord::NULLABLE, $this->definition))
+        if (array_key_exists(Model::NULLABLE, $this->definition))
         {
-            return $this->definition[ActiveRecord::NULLABLE];
+            return $this->definition[Model::NULLABLE];
         }
 
         return false;
@@ -315,9 +315,9 @@ abstract class RelationSchema implements RelationSchemaInterface
             return false;
         }
 
-        if (array_key_exists(ActiveRecord::CONSTRAINT, $this->definition))
+        if (array_key_exists(Model::CONSTRAINT, $this->definition))
         {
-            return $this->definition[ActiveRecord::CONSTRAINT];
+            return $this->definition[Model::CONSTRAINT];
         }
 
         return false;
@@ -330,9 +330,9 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getConstraintAction()
     {
-        if (array_key_exists(ActiveRecord::CONSTRAINT_ACTION, $this->definition))
+        if (array_key_exists(Model::CONSTRAINT_ACTION, $this->definition))
         {
-            return $this->definition[ActiveRecord::CONSTRAINT_ACTION];
+            return $this->definition[Model::CONSTRAINT_ACTION];
         }
 
         return null;
@@ -345,9 +345,9 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getInnerKey()
     {
-        if (isset($this->definition[ActiveRecord::INNER_KEY]))
+        if (isset($this->definition[Model::INNER_KEY]))
         {
-            return $this->definition[ActiveRecord::INNER_KEY];
+            return $this->definition[Model::INNER_KEY];
         }
 
         return null;
@@ -375,9 +375,9 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getOuterKey()
     {
-        if (isset($this->definition[ActiveRecord::OUTER_KEY]))
+        if (isset($this->definition[Model::OUTER_KEY]))
         {
-            return $this->definition[ActiveRecord::OUTER_KEY];
+            return $this->definition[Model::OUTER_KEY];
         }
 
         return null;
@@ -474,11 +474,11 @@ abstract class RelationSchema implements RelationSchemaInterface
 
         //Unnecessary fields.
         unset(
-            $definition[ActiveRecord::CONSTRAINT],
-            $definition[ActiveRecord::CONSTRAINT_ACTION],
-            $definition[ActiveRecord::CREATE_PIVOT],
-            $definition[ActiveRecord::INVERSE],
-            $definition[ActiveRecord::CONSTRAINT_ACTION]
+            $definition[Model::CONSTRAINT],
+            $definition[Model::CONSTRAINT_ACTION],
+            $definition[Model::CREATE_PIVOT],
+            $definition[Model::INVERSE],
+            $definition[Model::CONSTRAINT_ACTION]
         );
 
         return $definition;

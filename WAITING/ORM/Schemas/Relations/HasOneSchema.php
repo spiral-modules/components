@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Schemas\RelationSchema;
 
@@ -17,7 +17,7 @@ class HasOneSchema extends RelationSchema
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_ONE;
+    const RELATION_TYPE = Model::HAS_ONE;
 
     /**
      * Default definition parameters, will be filled if parameter skipped from definition by user.
@@ -26,11 +26,11 @@ class HasOneSchema extends RelationSchema
      * @var array
      */
     protected $defaultDefinition = [
-        ActiveRecord::INNER_KEY         => '{record:primaryKey}',
-        ActiveRecord::OUTER_KEY         => '{record:roleName}_{definition:INNER_KEY}',
-        ActiveRecord::CONSTRAINT        => true,
-        ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
-        ActiveRecord::NULLABLE          => true
+        Model::INNER_KEY         => '{record:primaryKey}',
+        Model::OUTER_KEY         => '{record:roleName}_{definition:INNER_KEY}',
+        Model::CONSTRAINT        => true,
+        Model::CONSTRAINT_ACTION => 'CASCADE',
+        Model::NULLABLE          => true
     ];
 
     /**
@@ -41,14 +41,14 @@ class HasOneSchema extends RelationSchema
     public function inverseRelation()
     {
         $this->outerModel()->addRelation(
-            $this->definition[ActiveRecord::INVERSE],
+            $this->definition[Model::INVERSE],
             [
-                ActiveRecord::BELONGS_TO        => $this->model->getClass(),
-                ActiveRecord::INNER_KEY         => $this->definition[ActiveRecord::OUTER_KEY],
-                ActiveRecord::OUTER_KEY         => $this->definition[ActiveRecord::INNER_KEY],
-                ActiveRecord::CONSTRAINT        => $this->definition[ActiveRecord::CONSTRAINT],
-                ActiveRecord::CONSTRAINT_ACTION => $this->definition[ActiveRecord::CONSTRAINT_ACTION],
-                ActiveRecord::NULLABLE          => $this->definition[ActiveRecord::NULLABLE]
+                Model::BELONGS_TO        => $this->model->getClass(),
+                Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
+                Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
+                Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],
+                Model::CONSTRAINT_ACTION => $this->definition[Model::CONSTRAINT_ACTION],
+                Model::NULLABLE          => $this->definition[Model::NULLABLE]
             ]
         );
     }
@@ -65,7 +65,7 @@ class HasOneSchema extends RelationSchema
         $outerKey->type($this->innerKeyType());
         $outerKey->nullable($this->isNullable());
 
-        if (!empty($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!empty($this->definition[Model::MORPH_KEY]))
         {
             //We are not going to configure polymorphic relations here
             return;

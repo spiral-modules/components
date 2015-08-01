@@ -10,7 +10,7 @@ namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Driver;
 use Spiral\Database\SqlExpression;
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ModelAccessorInterface;
 
 class AtomicNumber implements ModelAccessorInterface
@@ -18,7 +18,7 @@ class AtomicNumber implements ModelAccessorInterface
     /**
      * Parent active record.
      *
-     * @var ActiveRecord
+     * @var Model
      */
     protected $parent = null;
 
@@ -60,7 +60,7 @@ class AtomicNumber implements ModelAccessorInterface
     /**
      * Embedding to another parent.
      *
-     * @param ActiveRecord $parent
+     * @param Model $parent
      * @return mixed
      */
     public function embed($parent)

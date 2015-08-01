@@ -8,14 +8,14 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 
 class HasManySchema extends HasOneSchema
 {
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_MANY;
+    const RELATION_TYPE = Model::HAS_MANY;
 
     /**
      * Default definition parameters, will be filled if parameter skipped from definition by user.
@@ -25,11 +25,11 @@ class HasManySchema extends HasOneSchema
      * @var array
      */
     protected $defaultDefinition = [
-        ActiveRecord::INNER_KEY         => '{record:primaryKey}',
-        ActiveRecord::OUTER_KEY         => '{record:roleName}_{definition:INNER_KEY}',
-        ActiveRecord::CONSTRAINT        => true,
-        ActiveRecord::CONSTRAINT_ACTION => 'CASCADE',
-        ActiveRecord::NULLABLE          => true,
-        ActiveRecord::WHERE             => []
+        Model::INNER_KEY         => '{record:primaryKey}',
+        Model::OUTER_KEY         => '{record:roleName}_{definition:INNER_KEY}',
+        Model::CONSTRAINT        => true,
+        Model::CONSTRAINT_ACTION => 'CASCADE',
+        Model::NULLABLE          => true,
+        Model::WHERE             => []
     ];
 }

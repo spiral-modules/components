@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Relations;
 
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Selector;
@@ -24,7 +24,7 @@ class ManyToMany extends Relation implements \Countable
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::MANY_TO_MANY;
+    const RELATION_TYPE = Model::MANY_TO_MANY;
 
     /**
      * Indication that relation represent multiple records.
@@ -64,7 +64,7 @@ class ManyToMany extends Relation implements \Countable
         $roleName = !empty($this->roleName) ? $this->roleName : $this->parent->getRoleName();
 
         return $loader->createSelector($roleName)->where(
-            $loader->getPivotAlias() . '.' . $this->definition[ActiveRecord::THOUGHT_INNER_KEY],
+            $loader->getPivotAlias() . '.' . $this->definition[Model::THOUGHT_INNER_KEY],
             $this->innerKey()
         );
     }
@@ -73,10 +73,10 @@ class ManyToMany extends Relation implements \Countable
      * Mount relation keys to parent or children models to ensure their connection. Method called
      * when model requests relation save.
      *
-     * @param ActiveRecord $model
-     * @return ActiveRecord
+     * @param Model $model
+     * @return Model
      */
-    protected function mountRelation(ActiveRecord $model)
+    protected function mountRelation(Model $model)
     {
         //Nothing to do, every fetched model should be already linked
         return $model;
@@ -89,7 +89,7 @@ class ManyToMany extends Relation implements \Countable
      */
     protected function innerKey()
     {
-        return $this->parent->getField($this->definition[ActiveRecord::INNER_KEY]);
+        return $this->parent->getField($this->definition[Model::INNER_KEY]);
     }
 
     /**
@@ -150,12 +150,12 @@ class ManyToMany extends Relation implements \Countable
             $this->wherePivot($this->innerKey(), $this->prepareIDs($modelIDs), $wherePivot)
         );
 
-        $selectQuery->columns($this->definition[ActiveRecord::THOUGHT_OUTER_KEY]);
+        $selectQuery->columns($this->definition[Model::THOUGHT_OUTER_KEY]);
 
         $result = [];
         foreach ($selectQuery->run() as $row)
         {
-            $result[] = $row[$this->definition[ActiveRecord::THOUGHT_OUTER_KEY]];
+            $result[] = $row[$this->definition[Model::THOUGHT_OUTER_KEY]];
         }
 
         return $result;
@@ -260,7 +260,7 @@ class ManyToMany extends Relation implements \Countable
     protected function pivotTable()
     {
         return $this->parent->dbalDatabase($this->orm)->table(
-            $this->definition[ActiveRecord::PIVOT_TABLE]
+            $this->definition[Model::PIVOT_TABLE]
         );
     }
 
@@ -275,26 +275,26 @@ class ManyToMany extends Relation implements \Countable
     protected function wherePivot($innerKey, $outerKey, $wherePivot = false)
     {
         $query = [];
-        if (!empty($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!empty($this->definition[Model::MORPH_KEY]))
         {
-            $query[$this->definition[ActiveRecord::MORPH_KEY]] = !empty($this->roleName)
+            $query[$this->definition[Model::MORPH_KEY]] = !empty($this->roleName)
                 ? $this->roleName
                 : $this->parent->getRoleName();
         }
 
         if (!empty($innerKey))
         {
-            $query[$this->definition[ActiveRecord::THOUGHT_INNER_KEY]] = $innerKey;
+            $query[$this->definition[Model::THOUGHT_INNER_KEY]] = $innerKey;
         }
 
-        if ($wherePivot && !empty($this->definition[ActiveRecord::WHERE_PIVOT]))
+        if ($wherePivot && !empty($this->definition[Model::WHERE_PIVOT]))
         {
-            $query = $query + $this->definition[ActiveRecord::WHERE_PIVOT];
+            $query = $query + $this->definition[Model::WHERE_PIVOT];
         }
 
         if (!empty($outerKey))
         {
-            $query[$this->definition[ActiveRecord::THOUGHT_OUTER_KEY]] = is_array($outerKey)
+            $query[$this->definition[Model::THOUGHT_OUTER_KEY]] = is_array($outerKey)
                 ? ['IN' => $outerKey]
                 : $outerKey;
         }
@@ -348,7 +348,7 @@ class ManyToMany extends Relation implements \Countable
             );
         }
 
-        $modelID = $modelID->getField($this->definition[ActiveRecord::OUTER_KEY]);
+        $modelID = $modelID->getField($this->definition[Model::OUTER_KEY]);
 
         //To be inserted later
         $pivotRows = [$modelID => $this->pivotRow($modelID, $pivotData)];
@@ -366,13 +366,13 @@ class ManyToMany extends Relation implements \Countable
     protected function pivotRow($outerKey, array $pivotData = [])
     {
         $data = [
-            $this->definition[ActiveRecord::THOUGHT_INNER_KEY] => $this->innerKey(),
-            $this->definition[ActiveRecord::THOUGHT_OUTER_KEY] => $outerKey
+            $this->definition[Model::THOUGHT_INNER_KEY] => $this->innerKey(),
+            $this->definition[Model::THOUGHT_OUTER_KEY] => $outerKey
         ];
 
-        if (!empty($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!empty($this->definition[Model::MORPH_KEY]))
         {
-            $data[$this->definition[ActiveRecord::MORPH_KEY]] = !empty($this->roleName)
+            $data[$this->definition[Model::MORPH_KEY]] = !empty($this->roleName)
                 ? $this->roleName
                 : $this->parent->getRoleName();
         }

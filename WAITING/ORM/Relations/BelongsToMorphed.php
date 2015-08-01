@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ModelIterator;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Selector;
@@ -18,7 +18,7 @@ class BelongsToMorphed extends BelongsTo
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::BELONGS_TO_MORPHED;
+    const RELATION_TYPE = Model::BELONGS_TO_MORPHED;
 
     /**
      * Morphed class.
@@ -27,7 +27,7 @@ class BelongsToMorphed extends BelongsTo
      */
     protected function getMorphedClass()
     {
-        $morphKey = $this->definition[ActiveRecord::MORPH_KEY];
+        $morphKey = $this->definition[Model::MORPH_KEY];
 
         return $this->getClass()[$this->parent->getField($morphKey)];
     }
@@ -35,7 +35,7 @@ class BelongsToMorphed extends BelongsTo
     /**
      * Convert pre-loaded relation data to active record model or set of models.
      *
-     * @return ModelIterator|ActiveRecord
+     * @return ModelIterator|Model
      */
     protected function createModel()
     {
@@ -53,8 +53,8 @@ class BelongsToMorphed extends BelongsTo
         $selector = new Selector($this->getMorphedClass(), $this->orm);
 
         return $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[ActiveRecord::OUTER_KEY],
-            $this->parent->getField($this->definition[ActiveRecord::INNER_KEY], false)
+            $selector->getPrimaryAlias() . '.' . $this->definition[Model::OUTER_KEY],
+            $this->parent->getField($this->definition[Model::INNER_KEY], false)
         );
     }
 
@@ -64,10 +64,10 @@ class BelongsToMorphed extends BelongsTo
      * Example:
      * $user->profile = new Profile();
      *
-     * @param ActiveRecord $instance
+     * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(ActiveRecord $instance = null)
+    public function setInstance(Model $instance = null)
     {
         parent::setInstance($instance);
 
@@ -77,7 +77,7 @@ class BelongsToMorphed extends BelongsTo
         }
 
         //Forcing morph key
-        $morphKey = $this->definition[ActiveRecord::MORPH_KEY];
+        $morphKey = $this->definition[Model::MORPH_KEY];
         $this->parent->setField($morphKey, $instance->getRoleName(), false);
     }
 
@@ -88,7 +88,7 @@ class BelongsToMorphed extends BelongsTo
     {
         parent::dropRelation();
 
-        $morphKey = $this->definition[ActiveRecord::MORPH_KEY];
+        $morphKey = $this->definition[Model::MORPH_KEY];
         $this->parent->setField($morphKey, null);
     }
 }

@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Relations;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Relation;
 use Spiral\ORM\Selector;
@@ -18,7 +18,7 @@ class HasOne extends Relation
     /**
      * Relation type.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_ONE;
+    const RELATION_TYPE = Model::HAS_ONE;
 
     /**
      * Internal ORM relation method used to create valid selector used to pre-load relation data or
@@ -30,17 +30,17 @@ class HasOne extends Relation
     {
         $selector = parent::createSelector();
 
-        if (isset($this->definition[ActiveRecord::MORPH_KEY]))
+        if (isset($this->definition[Model::MORPH_KEY]))
         {
             $selector->where(
-                $selector->getPrimaryAlias() . '.' . $this->definition[ActiveRecord::MORPH_KEY],
+                $selector->getPrimaryAlias() . '.' . $this->definition[Model::MORPH_KEY],
                 $this->parent->getRoleName()
             );
         }
 
         $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[ActiveRecord::OUTER_KEY],
-            $this->parent->getField($this->definition[ActiveRecord::INNER_KEY], false)
+            $selector->getPrimaryAlias() . '.' . $this->definition[Model::OUTER_KEY],
+            $this->parent->getField($this->definition[Model::INNER_KEY], false)
         );
 
         return $selector;
@@ -52,10 +52,10 @@ class HasOne extends Relation
      * Example:
      * $user->profile = new Profile();
      *
-     * @param ActiveRecord $instance
+     * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(ActiveRecord $instance = null)
+    public function setInstance(Model $instance = null)
     {
         parent::setInstance($instance);
         $this->mountRelation($instance);
@@ -65,29 +65,29 @@ class HasOne extends Relation
      * Mount relation keys to parent or children models to ensure their connection. Method called
      * when model requests relation save.
      *
-     * @param ActiveRecord $model
-     * @return ActiveRecord
+     * @param Model $model
+     * @return Model
      */
-    protected function mountRelation(ActiveRecord $model)
+    protected function mountRelation(Model $model)
     {
         //Key in child model
-        $outerKey = $this->definition[ActiveRecord::OUTER_KEY];
+        $outerKey = $this->definition[Model::OUTER_KEY];
 
         //Key in parent model
-        $innerKey = $this->definition[ActiveRecord::INNER_KEY];
+        $innerKey = $this->definition[Model::INNER_KEY];
 
         if ($model->getField($outerKey, false) != $this->parent->getField($innerKey, false))
         {
             $model->setField($outerKey, $this->parent->getField($innerKey, false), false);
         }
 
-        if (!isset($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!isset($this->definition[Model::MORPH_KEY]))
         {
             //No morph key presented
             return $model;
         }
 
-        $morphKey = $this->definition[ActiveRecord::MORPH_KEY];
+        $morphKey = $this->definition[Model::MORPH_KEY];
 
         if ($model->getField($morphKey) != $this->parent->getRoleName())
         {
@@ -102,7 +102,7 @@ class HasOne extends Relation
      * save record by your own.
      *
      * @param mixed $fields
-     * @return ActiveRecord
+     * @return Model
      */
     public function create($fields = [])
     {

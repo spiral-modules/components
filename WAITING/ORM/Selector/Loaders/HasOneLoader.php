@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Selector\Loaders;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Selector\Loader;
@@ -18,7 +18,7 @@ class HasOneLoader extends Loader
     /**
      * Relation type is required to correctly resolve foreign model.
      */
-    const RELATION_TYPE = ActiveRecord::HAS_ONE;
+    const RELATION_TYPE = Model::HAS_ONE;
 
     /**
      * Default load method (inload or postload).
@@ -60,7 +60,7 @@ class HasOneLoader extends Loader
         }
 
         //Adding condition
-        $selector->where($this->getKey(ActiveRecord::OUTER_KEY), 'IN', $aggregatedKeys);
+        $selector->where($this->getKey(Model::OUTER_KEY), 'IN', $aggregatedKeys);
 
         return $selector;
     }
@@ -74,7 +74,7 @@ class HasOneLoader extends Loader
     protected function clarifySelector(Selector $selector)
     {
         $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
-            $this->getKey(ActiveRecord::OUTER_KEY) => $this->getParentKey()
+            $this->getKey(Model::OUTER_KEY) => $this->getParentKey()
         ]);
 
         $this->mountConditions($selector);
@@ -88,7 +88,7 @@ class HasOneLoader extends Loader
      */
     protected function mountConditions(Selector $selector)
     {
-        if (!empty($morphKey = $this->getKey(ActiveRecord::MORPH_KEY)))
+        if (!empty($morphKey = $this->getKey(Model::MORPH_KEY)))
         {
             if ($this->isJoined())
             {

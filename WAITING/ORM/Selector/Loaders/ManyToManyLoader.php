@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Selector\Loaders;
 
-use Spiral\ORM\ActiveRecord;
+use Spiral\ORM\Model;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Selector;
 use Spiral\ORM\Selector\Loader;
@@ -18,7 +18,7 @@ class ManyToManyLoader extends Loader
     /**
      * Relation type is required to correctly resolve foreign model.
      */
-    const RELATION_TYPE = ActiveRecord::MANY_TO_MANY;
+    const RELATION_TYPE = Model::MANY_TO_MANY;
 
     /**
      * Default load method (inload or postload).
@@ -57,7 +57,7 @@ class ManyToManyLoader extends Loader
     public function __construct(ORM $orm, $container, array $definition = [], Loader $parent = null)
     {
         parent::__construct($orm, $container, $definition, $parent);
-        $this->pivotColumns = $this->definition[ActiveRecord::PIVOT_COLUMNS];
+        $this->pivotColumns = $this->definition[Model::PIVOT_COLUMNS];
     }
 
     /**
@@ -67,7 +67,7 @@ class ManyToManyLoader extends Loader
      */
     public function getPivotTable()
     {
-        return $this->definition[ActiveRecord::PIVOT_TABLE];
+        return $this->definition[Model::PIVOT_TABLE];
     }
 
     /**
@@ -139,9 +139,9 @@ class ManyToManyLoader extends Loader
         }
 
         //Pivot table joining (INNER)
-        $pivotOuterKey = $this->getPivotKey(ActiveRecord::THOUGHT_OUTER_KEY);
+        $pivotOuterKey = $this->getPivotKey(Model::THOUGHT_OUTER_KEY);
         $selector->innerJoin($this->getPivotTable() . ' AS ' . $this->getPivotAlias(), [
-            $pivotOuterKey => $this->getKey(ActiveRecord::OUTER_KEY)
+            $pivotOuterKey => $this->getKey(Model::OUTER_KEY)
         ]);
 
         $this->mountPivotConditions($selector, $parentRole);
@@ -167,7 +167,7 @@ class ManyToManyLoader extends Loader
         }
 
         //Adding condition
-        $selector->where($this->getPivotKey(ActiveRecord::THOUGHT_INNER_KEY), 'IN', $aggregatedKeys);
+        $selector->where($this->getPivotKey(Model::THOUGHT_INNER_KEY), 'IN', $aggregatedKeys);
 
         return $selector;
     }
@@ -181,14 +181,14 @@ class ManyToManyLoader extends Loader
     protected function clarifySelector(Selector $selector)
     {
         $selector->join($this->joinType(), $this->getPivotTable() . ' AS ' . $this->getPivotAlias(), [
-            $this->getPivotKey(ActiveRecord::THOUGHT_INNER_KEY) => $this->getParentKey()
+            $this->getPivotKey(Model::THOUGHT_INNER_KEY) => $this->getParentKey()
         ]);
 
         $this->mountPivotConditions($selector);
 
-        $pivotOuterKey = $this->getPivotKey(ActiveRecord::THOUGHT_OUTER_KEY);
+        $pivotOuterKey = $this->getPivotKey(Model::THOUGHT_OUTER_KEY);
         $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
-            $pivotOuterKey => $this->getKey(ActiveRecord::OUTER_KEY)
+            $pivotOuterKey => $this->getKey(Model::OUTER_KEY)
         ]);
 
         $this->mountConditions($selector);
@@ -206,7 +206,7 @@ class ManyToManyLoader extends Loader
         //We have to route all conditions to ON statement
         $router = new Selector\WhereDecorator($selector, 'onWhere', $this->getPivotAlias());
 
-        if (!empty($morphKey = $this->getPivotKey(ActiveRecord::MORPH_KEY)))
+        if (!empty($morphKey = $this->getPivotKey(Model::MORPH_KEY)))
         {
             $router->where(
                 $morphKey,
@@ -214,10 +214,10 @@ class ManyToManyLoader extends Loader
             );
         }
 
-        if (!empty($this->definition[ActiveRecord::WHERE_PIVOT]))
+        if (!empty($this->definition[Model::WHERE_PIVOT]))
         {
             //Relation WHERE conditions
-            $router->where($this->definition[ActiveRecord::WHERE_PIVOT]);
+            $router->where($this->definition[Model::WHERE_PIVOT]);
         }
 
         //User specified WHERE conditions
@@ -240,10 +240,10 @@ class ManyToManyLoader extends Loader
             $this->getAlias()
         );
 
-        if (!empty($this->definition[ActiveRecord::WHERE]))
+        if (!empty($this->definition[Model::WHERE]))
         {
             //Relation WHERE conditions
-            $router->where($this->definition[ActiveRecord::WHERE]);
+            $router->where($this->definition[Model::WHERE]);
         }
 
         //User specified WHERE conditions
@@ -281,12 +281,12 @@ class ManyToManyLoader extends Loader
      */
     public function fetchReferenceCriteria(array $data)
     {
-        if (!isset($data[ORM::PIVOT_DATA][$this->definition[ActiveRecord::THOUGHT_INNER_KEY]]))
+        if (!isset($data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_INNER_KEY]]))
         {
             return null;
         }
 
-        return $data[ORM::PIVOT_DATA][$this->definition[ActiveRecord::THOUGHT_INNER_KEY]];
+        return $data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_INNER_KEY]];
     }
 
     /**
@@ -304,12 +304,12 @@ class ManyToManyLoader extends Loader
      */
     protected function deduplicate(array &$data)
     {
-        $criteria = $data[ORM::PIVOT_DATA][$this->definition[ActiveRecord::THOUGHT_INNER_KEY]]
-            . '.' . $data[ORM::PIVOT_DATA][$this->definition[ActiveRecord::THOUGHT_OUTER_KEY]];
+        $criteria = $data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_INNER_KEY]]
+            . '.' . $data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_OUTER_KEY]];
 
-        if (!empty($this->definition[ActiveRecord::MORPH_KEY]))
+        if (!empty($this->definition[Model::MORPH_KEY]))
         {
-            $criteria .= ':' . $data[ORM::PIVOT_DATA][$this->definition[ActiveRecord::MORPH_KEY]];
+            $criteria .= ':' . $data[ORM::PIVOT_DATA][$this->definition[Model::MORPH_KEY]];
         }
 
         if (isset($this->duplicates[$criteria]))

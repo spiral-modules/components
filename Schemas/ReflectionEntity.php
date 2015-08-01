@@ -8,21 +8,14 @@
  */
 namespace Spiral\Models\Schemas;
 
-use Spiral\Core\Component;
 use Spiral\Models\DataEntity;
 
-abstract class EntitySchema extends Component
+/**
+ *
+ */
+abstract class ReflectionEntity extends \ReflectionClass
 {
-    /**
-     * TODO: |
-     */
     const BASE_CLASS = DataEntity::class;
-
-    /**
-     * @invisible
-     * @var \ReflectionClass
-     */
-    protected $reflection = null;
 
     /**
      * Cache to speed up schema building.
@@ -33,16 +26,6 @@ abstract class EntitySchema extends Component
     private $propertiesCache = [];
 
     /**
-     * Class reflection.
-     *
-     * @return null|\ReflectionClass
-     */
-    public function getReflection()
-    {
-        return $this->reflection;
-    }
-
-    /**
      * Document namespace. Both start and end namespace separators will be removed, to add start
      * separator (absolute) namespace use method parameter "absolute".
      *
@@ -51,39 +34,8 @@ abstract class EntitySchema extends Component
      */
     public function getNamespace($absolute = false)
     {
-        return ($absolute ? '\\' : '') . trim($this->reflection->getNamespaceName(), '\\');
+        return ($absolute ? '\\' : '') . trim($this->getNamespaceName(), '\\');
     }
-
-    /**
-     * Document full class name.
-     *
-     * @return string
-     */
-    public function getClass()
-    {
-        return $this->reflection->getName();
-    }
-
-    /**
-     * Document class name without included namespace.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->reflection->getShortName();
-    }
-
-    /**
-     * Checks if class is abstract.
-     *
-     * @return bool
-     */
-    public function isAbstract()
-    {
-        return $this->reflection->isAbstract();
-    }
-
 
     /**
      * Read default model property value, will read "protected" and "private" properties.
@@ -226,12 +178,4 @@ abstract class EntitySchema extends Component
      * @return array
      */
     abstract public function getFields();
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getClass();
-    }
 }

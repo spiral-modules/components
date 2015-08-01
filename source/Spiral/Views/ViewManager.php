@@ -239,7 +239,6 @@ class ViewManager extends Singleton implements ViewsInterface
     /**
      * {@inheritdoc}
      *
-     * @param string $class Custom View implementation.
      * @throws ContainerException
      */
     public function get($path, array $data = [], $class = null)
@@ -258,6 +257,7 @@ class ViewManager extends Singleton implements ViewsInterface
                 'views'            => $this,
                 'namespace'        => $namespace,
                 'view'             => $path,
+                'data'             => $data,
                 'compiledFilename' => $compiledFilename
             ]
         );

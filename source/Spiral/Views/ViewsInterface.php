@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Views;
+
 use Spiral\Views\Exceptions\CompilerException;
 use Spiral\Views\Exceptions\ViewException;
 
@@ -60,16 +61,17 @@ interface ViewsInterface
     /**
      * Get instance of view class associated with view path (path can include namespace).
      *
-     * @param string $path View path, CAN include separated namespace and view, or only view name
-     *                     in this case default namespace should be used.
-     * @param array  $data Data to be interpolated into view, usually name associated with value
-     *                     or data source.
+     * @param string $path  View path, CAN include separated namespace and view, or only view name
+     *                      in this case default namespace should be used.
+     * @param array  $data  Data to be interpolated into view, usually name associated with value
+     *                      or data source.
+     * @param string $class Custom ViewInterface implementation class.
      * @return ViewInterface
      * @throws ViewException
      * @throws CompilerException
      * @throws \Exception
      */
-    public function get($path, array $data = []);
+    public function get($path, array $data = [], $class = null);
 
     /**
      * Compile desired view path into string. Just a shortcut.

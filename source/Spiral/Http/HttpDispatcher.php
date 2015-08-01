@@ -30,7 +30,7 @@ use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
 /**
- * Basic spiral Http core implementation. Used for web based applications and can route requests
+ * Basic spiral Http Dispatcher implementation. Used for web based applications and can route requests
  * to controllers or custom endpoints.
  */
 class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwareInterface

@@ -32,7 +32,7 @@ class Dumper extends Singleton
      * @var array
      */
     private $options = [
-        'maxLevel'  => 12,
+        'maxLevel'  => 10,
         'container' => '<pre style="background-color: white; font-family: monospace;">{dump}</pre>',
         'element'   => "<span style='color: {style};'>{element}</span>",
         'indent'    => '&middot;    ',
@@ -66,10 +66,12 @@ class Dumper extends Singleton
 
     /**
      * @param Debugger $debugger
+     * @param array    $options
      */
-    public function __construct(Debugger $debugger)
+    public function __construct(Debugger $debugger, array $options = [])
     {
         $this->debugger = $debugger;
+        $this->options = $options + $this->options;
     }
 
     /**
@@ -80,6 +82,16 @@ class Dumper extends Singleton
     public function setOptions(array $options)
     {
         $this->options = $options;
+    }
+
+    /**
+     * Dumping options.
+     *
+     * @return array
+     */
+    public function options()
+    {
+        return $this->options;
     }
 
     /**

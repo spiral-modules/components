@@ -11,7 +11,9 @@ namespace Spiral\Debug;
 use Spiral\Core\Component;
 use Exception;
 use Spiral\Core\Container\SaturableInterlace;
+use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;
+use Spiral\Tokenizer\Hightligher;
 use Spiral\Views\ViewsInterface;
 
 /**
@@ -47,6 +49,11 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     protected $config = [];
 
     /**
+     * @var ContainerInterface
+     */
+    protected $container = null;
+
+    /**
      * @var Debugger
      */
     protected $debugger = null;
@@ -70,14 +77,20 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     }
 
     /**
-     * @param Debugger       $debugger
-     * @param FilesInterface $files
-     * @param ViewsInterface $views
+     * @param ContainerInterface $container
+     * @param Debugger           $debugger
+     * @param FilesInterface     $files
+     * @param ViewsInterface     $views
      */
-    public function saturate(Debugger $debugger, FilesInterface $files, ViewsInterface $views)
+    public function saturate(
+        ContainerInterface $container,
+        Debugger $debugger,
+        FilesInterface $files,
+        ViewsInterface $views)
     {
         $this->config = $debugger->config()[static::CONFIG];
 
+        $this->container = $container;
         $this->debugger = $debugger;
         $this->files = $files;
         $this->views = $views;
@@ -199,7 +212,9 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
         }
 
         return $this->renderCache = $this->views->render($this->config['view'], [
-            'snapshot' => $this
+            'dumpArguments' => $this->config['dumps'],
+            'snapshot'      => $this,
+            'container'     => $this->container
         ]);
     }
 }

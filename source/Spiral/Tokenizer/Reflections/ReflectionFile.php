@@ -271,7 +271,6 @@ class ReflectionFile extends Component
                         && $this->tokens[$TID - 1][self::TOKEN_TYPE] == T_PAAMAYIM_NEKUDOTAYIM
                     )
                     {
-                        echo 1;
                         //PHP5.5 ClassName::class constant
                         continue;
                     }

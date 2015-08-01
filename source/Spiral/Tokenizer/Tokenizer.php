@@ -191,7 +191,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
             $this->cache = $this->memory->loadData('tokenizer');
         }
 
-        $fileMD5 = $this->files->md5($filename);
+        $fileMD5 = $this->files->md5($filename = $this->files->normalizePath($filename));
 
         //Let's check if file already cached
         if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5)
@@ -328,7 +328,6 @@ class Tokenizer extends Singleton implements TokenizerInterface
         {
             foreach ($this->files->getFiles($directory, ['php']) as $filename)
             {
-                $filename = $this->files->normalizePath($filename);
                 foreach ($this->config['exclude'] as $exclude)
                 {
                     if (strpos($filename, $exclude) !== false)

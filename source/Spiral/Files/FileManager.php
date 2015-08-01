@@ -264,7 +264,7 @@ class FileManager extends Singleton implements FilesInterface
                 continue;
             }
 
-            $result[] = $item;
+            $result[] = $this->normalizePath($item);
         }
 
         return $result;
@@ -300,6 +300,58 @@ class FileManager extends Singleton implements FilesInterface
         $path = str_replace('\\', '/', $path);
 
         return rtrim(str_replace('//', '/', $path), '/');
+    }
+
+    /**
+     * Get relative location based on absolute path.
+     *
+     * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
+     * @param string $path      Original file or directory location.
+     * @param string $directory Path will be converted to be relative to this directory.
+     * @return string
+     */
+    public function relativePath($path, $directory = null)
+    {
+        //Always directory
+        $directory = $this->normalizePath($directory) . '/';
+        $path = $this->normalizePath($path);
+
+        if (is_dir($path))
+        {
+            $path = rtrim($path, '/') . '/';
+        }
+
+        $directory = explode('/', $directory);
+        $path = explode('/', $path);
+
+        $relPath = $path;
+        foreach ($directory as $depth => $nested)
+        {
+            //Find first non-matching directory
+            if ($nested === $path[$depth])
+            {
+                //Ignore this directory
+                array_shift($relPath);
+            }
+            else
+            {
+                //Get number of remaining dirs to $from
+                $remaining = count($nested) - $depth;
+                if ($remaining > 1)
+                {
+                    // add traversals up to first matching dir
+                    $padLength = (count($relPath) + $remaining - 1) * -1;
+                    $relPath = array_pad($relPath, $padLength, '..');
+                    break;
+                }
+                else
+                {
+                    $relPath[0] = './' . $relPath[0];
+                }
+            }
+        }
+
+        return implode('/', $relPath);
     }
 
     /**

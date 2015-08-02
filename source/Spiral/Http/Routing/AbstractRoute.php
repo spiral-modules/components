@@ -65,6 +65,7 @@ abstract class AbstractRoute implements RouteInterface
     /**
      * To execute actions.
      *
+     * @invisible
      * @var CoreInterface
      */
     protected $core = null;

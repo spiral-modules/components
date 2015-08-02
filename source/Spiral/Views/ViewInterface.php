@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Views;
+
 use Spiral\Views\Exceptions\RenderException;
 
 /**
@@ -15,20 +16,11 @@ use Spiral\Views\Exceptions\RenderException;
 interface ViewInterface
 {
     /**
-     * View instance binded to specified view file (file has to be already pre-processed).
-     *
-     * @param ViewsInterface $views
-     * @param string         $namespace
-     * @param string         $view
-     * @param array          $data
-     */
-    public function __construct(ViewsInterface $views, $namespace, $view, array $data = []);
-
-    /**
      * Alter view parameters (should replace existed value).
      *
      * @param string $name
      * @param mixed  $value
+     * @return self
      */
     public function set($name, $value);
 

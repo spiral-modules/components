@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Schemas;
+namespace Spiral\Database\Entities\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;

@@ -8,11 +8,14 @@
  */
 namespace Spiral\Database\Drivers\MySql;
 
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\Schemas\AbstractIndex;
-use Spiral\Database\Schemas\AbstractReference;
-use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Entities\Schemas\AbstractTable;
 
+/**
+ * MySQL table schema.
+ */
 class TableSchema extends AbstractTable
 {
     /**
@@ -30,8 +33,7 @@ class TableSchema extends AbstractTable
     protected $engine = self::ENGINE_INNODB;
 
     /**
-     * Update table engine, due in current version we are not reading ENGINE in database and not allowing
-     * engine change there is no method to retrieve current value.
+     * Change table engine. Such operation will be applied only at moment of table creation.
      *
      * @param string $engine
      * @return $this
@@ -44,9 +46,8 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table columns schemas.  Method will not be called if table not
-     * exists. To create and register column schema use internal table method "registerColumn()".
-     **/
+     * {@inheritdoc}
+     */
     protected function loadColumns()
     {
         $query = \Spiral\interpolate(
@@ -60,8 +61,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table indexes schema(s). Method will not be called if table not
-     * exists. To create and register index schema use internal table method "registerIndex()".
+     * {@inheritdoc}
      */
     protected function loadIndexes()
     {
@@ -86,14 +86,13 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table foreign key schema(s). Method will not be called if table
-     * not exists. To create and register reference (foreign key) schema use internal table method
-     * "registerReference()".
+     * {@inheritdoc}
      */
     protected function loadReferences()
     {
         $query = "SELECT * FROM information_schema.referential_constraints "
             . "WHERE constraint_schema = ? AND table_name = ?";
+
         $references = $this->driver->query($query, [$this->driver->getDatabaseName(), $this->name]);
 
         foreach ($references as $reference)
@@ -112,11 +111,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Generate table creation statement and execute it (if required). Method should return create
-     * table sql query.
-     *
-     * @param bool $execute If true generated statement will be automatically executed.
-     * @return string
+     * {@inheritdoc}
      */
     protected function createSchema($execute = true)
     {
@@ -142,10 +137,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific column altering command.
-     *
-     * @param AbstractColumn $column
-     * @param AbstractColumn $dbColumn
+     * {@inheritdoc}
      */
     protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
@@ -159,9 +151,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific index remove (drop) command.
-     *
-     * @param AbstractIndex $index
+     * {@inheritdoc}
      */
     protected function doIndexDrop(AbstractIndex $index)
     {
@@ -169,10 +159,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific index altering command, by default it will remove and add index.
-     *
-     * @param AbstractIndex $index
-     * @param AbstractIndex $dbIndex
+     * {@inheritdoc}
      */
     protected function doIndexChange(AbstractIndex $index, AbstractIndex $dbIndex)
     {
@@ -186,9 +173,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific foreign key remove (drop) command.
-     *
-     * @param AbstractReference $foreign
+     * {@inheritdoc}
      */
     protected function doForeignDrop(AbstractReference $foreign)
     {

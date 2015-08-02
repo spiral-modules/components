@@ -6,26 +6,20 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\SqlFragment;
+use Spiral\Database\Drivers\MySQL\MySQLDriver;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Injections\SQLFragment;
 
+/**
+ * MySQL column schema.
+ */
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Direct mapping from base abstract type to database internal type with specified data options,
-     * such as size, precision scale, unsigned flag and etc. Every declared type can be assigned using
-     * ->type() method, however to pass custom type parameters, methods has to be declared in database
-     * specific ColumnSchema. Type identifier not necessary should be real type name.
-     *
-     * Example:
-     * integer => array('type' => 'int', 'size' => 1),
-     * boolean => array('type' => 'tinyint', 'size' => 1)
-     *
-     * @invisible
-     * @var array
+     * {@inheritdoc}
      */
     protected $mapping = [
         //Primary sequences
@@ -75,7 +69,7 @@ class ColumnSchema extends AbstractColumn
         'time'        => 'time',
         'timestamp'   => [
             'type'         => 'timestamp',
-            'defaultValue' => MySqlDriver::DEFAULT_DATETIME
+            'defaultValue' => MySQLDriver::DEFAULT_DATETIME
         ],
 
         //Binary types
@@ -88,12 +82,7 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Driver specific reverse mapping, this mapping should link database type to one of standard
-     * internal types. Not resolved types will be marked as "unknown" which will map them as php type
-     * string.
-     *
-     * @invisible
-     * @var array
+     * {@inheritdoc}
      */
     protected $reverseMapping = [
         'primary'     => [['type' => 'int', 'autoIncrement' => true]],
@@ -129,18 +118,56 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Field is auto incremental.
+     * Column is auto incremental.
      *
      * @var bool
      */
     protected $autoIncrement = false;
 
     /**
-     * Parse column information provided by parent TableSchema and populate column values.
-     *
-     * @param mixed $schema Column information fetched from database by TableSchema. Format depends
-     *                      on driver type.
-     * @return mixed
+     * {@inheritdoc}
+     */
+    public function getDefaultValue()
+    {
+        $defaultValue = parent::getDefaultValue();
+
+        if (in_array($this->type, $this->forbiddenDefaults))
+        {
+            return null;
+        }
+
+        return $defaultValue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function sqlStatement()
+    {
+        $defaultValue = $this->defaultValue;
+        if (in_array($this->type, $this->forbiddenDefaults))
+        {
+            //Flushing default value for forbidden types
+            $this->defaultValue = null;
+
+            $this->logger()->warning("Default value is not allowed for MySQL type '{type}'.", [
+                'type' => $this->type
+            ]);
+        }
+
+        $statement = parent::sqlStatement();
+
+        $this->defaultValue = $defaultValue;
+        if ($this->autoIncrement)
+        {
+            return "{$statement} AUTO_INCREMENT";
+        }
+
+        return $statement;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     protected function resolveSchema($schema)
     {
@@ -190,7 +217,7 @@ class ColumnSchema extends AbstractColumn
         if ($this->type == 'bit' && $this->defaultValue)
         {
             //Cutting b\ and '
-            $this->defaultValue = new SqlFragment($this->defaultValue);
+            $this->defaultValue = new SQLFragment($this->defaultValue);
         }
 
         if ($this->abstractType() == 'timestamp' && $this->defaultValue == '0000-00-00 00:00:00')
@@ -200,26 +227,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Get column default value, value will be automatically converted to appropriate internal type.
-     *
-     * @return mixed
-     */
-    public function getDefaultValue()
-    {
-        $defaultValue = parent::getDefaultValue();
-
-        if (in_array($this->type, $this->forbiddenDefaults))
-        {
-            return null;
-        }
-
-        return $defaultValue;
-    }
-
-    /**
-     * Prepare default value to be used in sql statements, string values will be quoted.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     protected function prepareDefault()
     {
@@ -240,35 +248,5 @@ class ColumnSchema extends AbstractColumn
         }
 
         return parent::prepareDefault();
-    }
-
-    /**
-     * Compile column create statement.
-     *
-     * @return string
-     */
-    public function sqlStatement()
-    {
-        $defaultValue = $this->defaultValue;
-        if (in_array($this->type, $this->forbiddenDefaults))
-        {
-            //Flushing default value for forbidden types
-            $this->defaultValue = null;
-
-            $this->logger()->warning("Default value is not allowed for MySQL type '{type}'.", [
-                'type' => $this->type
-            ]);
-        }
-
-        $statement = parent::sqlStatement();
-
-        $this->defaultValue = $defaultValue;
-
-        if ($this->autoIncrement)
-        {
-            return "{$statement} AUTO_INCREMENT";
-        }
-
-        return $statement;
     }
 }

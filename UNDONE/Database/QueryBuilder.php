@@ -9,23 +9,23 @@
 namespace Spiral\Database;
 
 use Spiral\Core\Component;
+use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\SQLFragmentInterface;
 
-abstract class QueryBuilder extends Component implements SqlFragmentInterface
+/**
+ *
+ */
+abstract class QueryBuilder extends Component implements SQLFragmentInterface
 {
     /**
-     * Database generated query has to be performed against, output result is depends on specific
-     * builder implementation.
-     *
      * @invisible
      * @var Database
      */
     protected $database = null;
 
     /**
-     * QueryCompiler is low level SQL compiler which used by different query builders to generate
-     * statement based on provided tokens. Every builder will get it's own QueryCompiler at it has
-     * some internal isolation features (such as query specific table aliases).
-     *
      * @invisible
      * @var QueryCompiler
      */
@@ -114,6 +114,7 @@ abstract class QueryBuilder extends Component implements SqlFragmentInterface
      * to return correct value.
      *
      * @return \PDOStatement
+     * @throws QueryException
      */
     public function run()
     {
@@ -135,8 +136,6 @@ abstract class QueryBuilder extends Component implements SqlFragmentInterface
     }
 
     /**
-     * __toString
-     *
      * @return string
      */
     public function __toString()
@@ -145,8 +144,6 @@ abstract class QueryBuilder extends Component implements SqlFragmentInterface
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return object
      */
     public function __debugInfo()

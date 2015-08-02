@@ -153,7 +153,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      *
      * @return string|null
      */
-    public function databaseName()
+    public function getDatabaseName()
     {
         return $this->databaseName;
     }
@@ -652,7 +652,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         return (object)[
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
-            'database'   => $this->databaseName(),
+            'database'   => $this->getDatabaseName(),
             'options'    => $this->options
         ];
     }

@@ -136,7 +136,7 @@ class PostgresDriver extends Driver
     {
         if (empty($this->primaryKeys))
         {
-            $this->primaryKeys = $this->memory->loadData($this->databaseName() . '-primary');
+            $this->primaryKeys = $this->memory->loadData($this->getDatabaseName() . '-primary');
         }
 
         if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys))
@@ -161,7 +161,7 @@ class PostgresDriver extends Driver
         }
 
         //Caching
-        $this->memory->saveData($this->databaseName() . '-primary', $this->primaryKeys);
+        $this->memory->saveData($this->getDatabaseName() . '-primary', $this->primaryKeys);
 
         return $this->primaryKeys[$table];
     }

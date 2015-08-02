@@ -51,14 +51,6 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function identifier($identifier)
-    {
-        return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function hasTable($name)
     {
         return (bool)$this->query(

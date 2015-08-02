@@ -9,6 +9,10 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
+use Spiral\Database\Exceptions\CompilerException;
+use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\ParameterInterface;
+use Spiral\Database\QueryBuilder;
 
 /**
  * Responsible for conversion set of query parameters (where tokens, table names and etc) int sql
@@ -56,26 +60,25 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Compile insert query statement. Table name (without prefix), columns and list of rowsets is
-     * required.
+     * Create insert query using table names, columns and rowsets. Must support both - single and batch
+     * inserts.
      *
-     * @param string $table   Table name without prefix.
-     * @param array  $columns Columns name.
-     * @param array  $rowsets List of rowsets, usually presented by Parameter instances as every
-     *                        rowset is array of values.
+     * @param string $table
+     * @param array  $columns
+     * @param array  $rowsets
      * @return string
-     * @throws DatabaseException
+     * @throws CompilerException
      */
     public function insert($table, array $columns, array $rowsets)
     {
-        if (!$columns)
+        if (empty($columns))
         {
-            throw new DatabaseException("Unable to build insert statement, columns must be set.");
+            throw new CompilerException("Unable to build insert statement, columns must be set.");
         }
 
-        if (!$rowsets)
+        if (empty($rowsets))
         {
-            throw new DatabaseException(
+            throw new CompilerException(
                 "Unable to build insert statement, at least one value set must be provided."
             );
         }
@@ -84,11 +87,53 @@ class QueryCompiler extends Component
         . "VALUES " . join(",\n", $rowsets);
     }
 
+
     /**
-     * Compile select query statement. Table names, distinct flag, columns, joins, where tokens,
-     * having tokens, group by tokens (yeah, it's very big list), order by tokens, limit, offset
-     * values and unions are required. While compilation table aliases will be collected from join
-     * and table parts, which will allow their usage in every condition even if tablePrefix not empty.
+     * Create update statement. Compiler must mount joins and where conditions.
+     *
+     * @param string $table
+     * @param array  $columns
+     * @param array  $joins
+     * @param array  $where
+     * @return string
+     */
+    public function update($table, array $columns, array $joins = [], array $where = [])
+    {
+        $statement = "UPDATE " . $this->quote($table, true, true)
+            . "\nSET" . $this->prepareColumns($columns);
+
+        if (!empty($where))
+        {
+            $statement .= "\nWHERE " . $this->where($where);
+        }
+
+        return rtrim($statement);
+    }
+
+    /**
+     * Create delete statement. Compiler must mount joins and where conditions.
+     *
+     * @param string $table
+     * @param array  $joins
+     * @param array  $where
+     * @return string
+     */
+    public function delete($table, array $joins = [], array $where = [])
+    {
+        $statement = 'DELETE FROM ' . $this->quote($table, true);
+        if (!empty($where))
+        {
+            $statement .= "\nWHERE " . $this->where($where);
+        }
+
+        //Joins must be rendered by database specific compiler
+
+        return rtrim($statement);
+    }
+
+    /**
+     * Create select statement. Compiler must validly resolve table and column aliases used in
+     * conditions and joins.
      *
      * @param array   $from
      * @param boolean $distinct
@@ -129,7 +174,7 @@ class QueryCompiler extends Component
         $having = $having ? "\nHAVING " . $this->where($having) . ' ' : '';
 
         //Sortings and grouping
-        $groupBy = $groupBy ? $this->groupBy($groupBy) . ' ' : '';
+        $groupBy = $groupBy ? "\nGROUP BY " . $this->groupBy($groupBy) . ' ' : '';
 
         //Initial statement have predictable order
         $statement = rtrim(
@@ -138,7 +183,7 @@ class QueryCompiler extends Component
 
         if (empty($unions) && !empty($orderBy))
         {
-            $statement .= "\n" . $this->orderBy($orderBy);
+            $statement .= "\nORDER BY " . $this->orderBy($orderBy);
         }
 
         if (!empty($unions))
@@ -148,7 +193,7 @@ class QueryCompiler extends Component
 
         if (!empty($unions) && !empty($orderBy))
         {
-            $statement .= "\n" . $this->orderBy($orderBy);
+            $statement .= "\nORDER BY " . $this->orderBy($orderBy);
         }
 
         if ($limit || $offset)
@@ -160,370 +205,7 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Compile delete query statement. Table name, joins and where tokens are required. Joins not
-     * supported by default.
-     *
-     * @param string $table
-     * @param array  $joins
-     * @param array  $where
-     * @return string
-     */
-    public function delete($table, array $joins = [], array $where = [])
-    {
-        $statement = 'DELETE FROM ' . $this->quote($table, true);
-
-        if (!empty($where))
-        {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
-
-        return rtrim($statement);
-    }
-
-    /**
-     * Compile update query statement. Table name, set of values (associated with column names), joins
-     * and where tokens are required. Joins not supported by default.
-     *
-     * @param string $table
-     * @param array  $columns
-     * @param array  $joins
-     * @param array  $where
-     * @return string
-     */
-    public function update($table, array $columns, array $joins = [], array $where = [])
-    {
-        $statement = "UPDATE " . $this->quote($table, true, true);
-        $statement .= "\nSET" . $this->prepareColumns($columns);
-
-        if (!empty($where))
-        {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
-
-        return rtrim($statement);
-    }
-
-    /**
-     * Prepare columns to be used in UPDATE statement.
-     *
-     * @param array  $columns
-     * @param string $tableAlias Forced table alias for updated columns.
-     * @return array
-     */
-    protected function prepareColumns(array $columns, $tableAlias = '')
-    {
-        foreach ($columns as $column => &$value)
-        {
-            if ($value instanceof QueryBuilder)
-            {
-                $value = '(' . $value->sqlStatement($this) . ')';
-            }
-            elseif ($value instanceof SqlFragmentInterface)
-            {
-                $value = $value->sqlStatement($this);
-            }
-            else
-            {
-                $value = '?';
-            }
-
-            if (strpos($column, '.') === false && !empty($tableAlias))
-            {
-                $column = $tableAlias . '.' . $column;
-            }
-
-            $value = ' ' . $this->quote($column) . ' = ' . $value;
-
-            unset($value);
-        }
-
-        return join(", ", $columns);
-    }
-
-    /**
-     * Compile DISTINCT query statement chunk.
-     *
-     * @param mixed $distinct
-     * @return string
-     */
-    protected function distinct($distinct)
-    {
-        return "DISTINCT";
-    }
-
-    /**
-     * Compile table names statement chunk, can work both for single table and list of names.
-     *
-     * @param array $tables
-     * @return string
-     */
-    protected function tables(array $tables)
-    {
-        foreach ($tables as &$table)
-        {
-            $table = $this->quote($table, true, true);
-            unset($table);
-        }
-
-        return join(', ', $tables);
-    }
-
-    /**
-     * Compile column names statement chunk.
-     *
-     * @param array $columns
-     * @return string
-     */
-    protected function columns(array $columns)
-    {
-        return wordwrap(join(', ', array_map([$this, 'quote'], $columns)), 180);
-    }
-
-    /**
-     * Compile joins including their type and ON conditions. Keyword "JOIN" will be included.
-     *
-     * @param array $joins
-     * @return string
-     */
-    protected function joins(array $joins)
-    {
-        $statement = '';
-        foreach ($joins as $table => $join)
-        {
-            $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
-
-            if (!empty($join['on']))
-            {
-                $statement .= "\n    ON " . $this->where($join['on']);
-            }
-        }
-
-        return $statement;
-    }
-
-    /**
-     * Compile where statement, WHERE keywords will not be included.
-     *
-     * @param array $tokens
-     * @return string
-     * @throws DatabaseException
-     */
-    protected function where(array $tokens)
-    {
-        if (!$tokens)
-        {
-            return '';
-        }
-
-        $statement = '';
-
-        $activeGroup = true;
-        foreach ($tokens as $condition)
-        {
-            $joiner = $condition[0];
-            $context = $condition[1];
-
-            //First condition in group/query, no any AND, OR required
-            if ($activeGroup)
-            {
-                //Kill AND, OR and etc.
-                $joiner = '';
-
-                //Next conditions require AND or OR
-                $activeGroup = false;
-            }
-            else
-            {
-                $joiner .= ' ';
-            }
-
-            if ($context == '(')
-            {
-                //New where group.
-                $activeGroup = true;
-            }
-
-            if (is_string($context))
-            {
-                $statement = rtrim($statement . $joiner)
-                    . ($joiner && $context == '(' ? ' ' : '')
-                    . $context
-                    . ($context == ')' ? ' ' : '');
-
-                continue;
-            }
-
-            if ($context instanceof QueryBuilder)
-            {
-                $statement .= $joiner . ' (' . $context->sqlStatement($this) . ') ';
-                continue;
-            }
-
-            if ($context instanceof SqlFragmentInterface)
-            {
-                //( ?? )
-                $statement .= $joiner . ' ' . $context->sqlStatement($this) . ' ';
-                continue;
-            }
-
-            list($identifier, $operator, $value) = $context;
-            if ($identifier instanceof QueryBuilder)
-            {
-                $identifier = '(' . $identifier->sqlStatement($this) . ')';
-            }
-            elseif ($identifier instanceof SqlFragmentInterface)
-            {
-                $identifier = $identifier->sqlStatement($this);
-            }
-            else
-            {
-                $identifier = $this->quote($identifier);
-            }
-
-            if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN')
-            {
-                $statement .= "{$joiner} {$identifier} " . "{$operator} "
-                    . "{$this->renderValue($value)} AND {$this->renderValue($context[3])} ";
-
-                continue;
-            }
-
-            if ($value === null || ($value instanceof ParameterInterface && $value->getValue() === null))
-            {
-                $operator = $operator == '=' ? 'IS' : 'IS NOT';
-            }
-
-            if (
-                $operator == '='
-                && (
-                    is_array($value)
-                    || ($value instanceof ParameterInterface && is_array($value->getValue()))
-                )
-            )
-            {
-                $operator = 'IN';
-            }
-
-            if ($value instanceof QueryBuilder)
-            {
-                $value = ' (' . $value . ') ';
-            }
-            else
-            {
-                $value = $this->renderValue($value);
-            }
-
-            $statement .= "{$joiner}{$identifier} {$operator} {$value} ";
-        }
-
-        if ($activeGroup)
-        {
-            throw new DatabaseException("Unable to build where statement, unclosed where group.");
-        }
-
-        return trim($statement);
-    }
-
-    /**
-     * Prepare value for inserting into query (replace ?).
-     *
-     * @param string $value
-     * @return string
-     */
-    protected function renderValue($value)
-    {
-        if ($value instanceof SqlFragmentInterface)
-        {
-            return $value->sqlStatement($this);
-        }
-
-        return '?';
-    }
-
-    /**
-     * Compile union statement chunk. Keywords UNION and ALL will be included, this methods will
-     * automatically move every union on new line.
-     *
-     * @param array $unions
-     * @return string
-     */
-    protected function unions(array $unions)
-    {
-        $statement = '';
-        foreach ($unions as $union)
-        {
-            $statement .= "\nUNION {$union[1]} \n({$union[0]})";
-        }
-
-        return $statement;
-    }
-
-    /**
-     * Compile ORDER BY statement chunk, keyword "ORDER BY" will be included.
-     *
-     * @param array $orderBy
-     * @return string
-     */
-    protected function orderBy(array $orderBy)
-    {
-        $statement = 'ORDER BY ';
-
-        foreach ($orderBy as $item)
-        {
-            $statement .= $this->quote($item[0]) . ' ' . strtoupper($item[1]);
-        }
-
-        return $statement;
-    }
-
-    /**
-     * Compile GROUP BY statement chunk, keyword "GROUP BY" will be included.
-     *
-     * @param array $groupBy
-     * @return string
-     */
-    protected function groupBy(array $groupBy)
-    {
-        $statement = 'GROUP BY ';
-
-        foreach ($groupBy as $identifier)
-        {
-            $statement .= $this->quote($identifier);
-        }
-
-        return $statement;
-    }
-
-    /**
-     * Render selection (affection) limit and offset. Keywords for LIMIT and OFFSET will be included,
-     * attention, this method will render limit and offset independently which may not be supported
-     * by some databases.
-     *
-     * @param int $limit
-     * @param int $offset
-     * @return string
-     */
-    protected function limit($limit, $offset)
-    {
-        $statement = '';
-
-        if (!empty($limit))
-        {
-            $statement = "LIMIT {$limit} ";
-        }
-
-        if (!empty($offset))
-        {
-            $statement .= "OFFSET {$offset}";
-        }
-
-        return trim($statement);
-    }
-
-    /**
-     * Quote database table or column keyword according to driver rules, method can automatically
-     * detect table names, SQL functions and used aliases (via keywords AS), last argument can be used
-     * to collect such aliases.
+     * Query query identifier, if identified stated as table - table prefix must be added.
      *
      * @param string $identifier  Identifier can include simple column operations and functions,
      *                            having "." in it will automatically force table prefix to first value.
@@ -534,7 +216,7 @@ class QueryCompiler extends Component
      */
     public function quote($identifier, $table = false, $forceTable = false)
     {
-        if ($identifier instanceof SqlFragmentInterface)
+        if ($identifier instanceof SQLFragmentInterface)
         {
             return $identifier->sqlStatement($this);
         }
@@ -655,6 +337,318 @@ class QueryCompiler extends Component
         $this->aliases = [];
 
         return $this;
+    }
+
+    /**
+     * Prepare columns to be used in UPDATE statement.
+     *
+     * @param array  $columns
+     * @param string $tableAlias Forced table alias for updated columns.
+     * @return array
+     */
+    protected function prepareColumns(array $columns, $tableAlias = '')
+    {
+        foreach ($columns as $column => &$value)
+        {
+            if ($value instanceof QueryBuilder)
+            {
+                $value = '(' . $value->sqlStatement($this) . ')';
+            }
+            elseif ($value instanceof SQLFragmentInterface)
+            {
+                $value = $value->sqlStatement($this);
+            }
+            else
+            {
+                $value = '?';
+            }
+
+            if (strpos($column, '.') === false && !empty($tableAlias))
+            {
+                $column = $tableAlias . '.' . $column;
+            }
+
+            $value = ' ' . $this->quote($column) . ' = ' . $value;
+
+            unset($value);
+        }
+
+        return join(", ", $columns);
+    }
+
+    /**
+     * Compile DISTINCT statement.
+     *
+     * @param mixed $distinct
+     * @return string
+     */
+    protected function distinct($distinct)
+    {
+        return "DISTINCT";
+    }
+
+    /**
+     * Compile table names statement.
+     *
+     * @param array $tables
+     * @return string
+     */
+    protected function tables(array $tables)
+    {
+        foreach ($tables as &$table)
+        {
+            $table = $this->quote($table, true, true);
+            unset($table);
+        }
+
+        return join(', ', $tables);
+    }
+
+    /**
+     * Compile columns list statement.
+     *
+     * @param array $columns
+     * @return string
+     */
+    protected function columns(array $columns)
+    {
+        return wordwrap(join(', ', array_map([$this, 'quote'], $columns)), 180);
+    }
+
+    /**
+     * Compiler joins statement.
+     *
+     * @param array $joins
+     * @return string
+     */
+    protected function joins(array $joins)
+    {
+        $statement = '';
+        foreach ($joins as $table => $join)
+        {
+            $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
+
+            if (!empty($join['on']))
+            {
+                $statement .= "\n    ON " . $this->where($join['on']);
+            }
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Compile where statement.
+     *
+     * @param array $tokens
+     * @return string
+     * @throws CompilerException
+     */
+    protected function where(array $tokens)
+    {
+        if (empty($tokens))
+        {
+            return '';
+        }
+
+        $statement = '';
+
+        $activeGroup = true;
+        foreach ($tokens as $condition)
+        {
+            $joiner = $condition[0];
+            $context = $condition[1];
+
+            //First condition in group/query, no any AND, OR required
+            if ($activeGroup)
+            {
+                //Kill AND, OR and etc.
+                $joiner = '';
+
+                //Next conditions require AND or OR
+                $activeGroup = false;
+            }
+            else
+            {
+                $joiner .= ' ';
+            }
+
+            if ($context == '(')
+            {
+                //New where group.
+                $activeGroup = true;
+            }
+
+            if (is_string($context))
+            {
+                $statement = rtrim($statement . $joiner)
+                    . ($joiner && $context == '(' ? ' ' : '')
+                    . $context
+                    . ($context == ')' ? ' ' : '');
+
+                continue;
+            }
+
+            if ($context instanceof QueryBuilder)
+            {
+                $statement .= $joiner . ' (' . $context->sqlStatement($this) . ') ';
+                continue;
+            }
+
+            if ($context instanceof SQLFragmentInterface)
+            {
+                //( ?? )
+                $statement .= $joiner . ' ' . $context->sqlStatement($this) . ' ';
+                continue;
+            }
+
+            list($identifier, $operator, $value) = $context;
+            if ($identifier instanceof QueryBuilder)
+            {
+                $identifier = '(' . $identifier->sqlStatement($this) . ')';
+            }
+            elseif ($identifier instanceof SQLFragmentInterface)
+            {
+                $identifier = $identifier->sqlStatement($this);
+            }
+            else
+            {
+                $identifier = $this->quote($identifier);
+            }
+
+            if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN')
+            {
+                $statement .= "{$joiner} {$identifier} " . "{$operator} "
+                    . "{$this->getPlaceholder($value)} AND {$this->getPlaceholder($context[3])} ";
+
+                continue;
+            }
+
+            if ($value === null || ($value instanceof ParameterInterface && $value->getValue() === null))
+            {
+                $operator = $operator == '=' ? 'IS' : 'IS NOT';
+            }
+
+            if (
+                $operator == '='
+                && (
+                    is_array($value)
+                    || ($value instanceof ParameterInterface && is_array($value->getValue()))
+                )
+            )
+            {
+                $operator = 'IN';
+            }
+
+            if ($value instanceof QueryBuilder)
+            {
+                $value = ' (' . $value . ') ';
+            }
+            else
+            {
+                $value = $this->getPlaceholder($value);
+            }
+
+            $statement .= "{$joiner}{$identifier} {$operator} {$value} ";
+        }
+
+        if ($activeGroup)
+        {
+            throw new CompilerException("Unable to build where statement, unclosed where group.");
+        }
+
+        return trim($statement);
+    }
+
+    /**
+     * Prepare value to be replaced into query (replace ?).
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function getPlaceholder($value)
+    {
+        if ($value instanceof SQLFragmentInterface)
+        {
+            return $value->sqlStatement($this);
+        }
+
+        return '?';
+    }
+
+    /**
+     * Compile union statement chunk. Keywords UNION and ALL will be included, this methods will
+     * automatically move every union on new line.
+     *
+     * @param array $unions
+     * @return string
+     */
+    protected function unions(array $unions)
+    {
+        $statement = '';
+        foreach ($unions as $union)
+        {
+            $statement .= "\nUNION {$union[1]} \n({$union[0]})";
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Compile ORDER BY statement.
+     *
+     * @param array $orderBy
+     * @return string
+     */
+    protected function orderBy(array $orderBy)
+    {
+        $statement = '';
+        foreach ($orderBy as $item)
+        {
+            $statement .= $this->quote($item[0]) . ' ' . strtoupper($item[1]);
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Compiler GROUP BY statement.
+     *
+     * @param array $groupBy
+     * @return string
+     */
+    protected function groupBy(array $groupBy)
+    {
+        $statement = '';
+        foreach ($groupBy as $identifier)
+        {
+            $statement .= $this->quote($identifier);
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Compile limit statement.
+     *
+     * @param int $limit
+     * @param int $offset
+     * @return string
+     */
+    protected function limit($limit, $offset)
+    {
+        $statement = '';
+        if (!empty($limit))
+        {
+            $statement = "LIMIT {$limit} ";
+        }
+
+        if (!empty($offset))
+        {
+            $statement .= "OFFSET {$offset}";
+        }
+
+        return trim($statement);
     }
 
     /**

@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Drivers\MySQL;
 
-use Spiral\Database\QueryCompiler as AbstractCompiler;
+use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 
 /**
  * MySQL syntax specific compiler.
@@ -18,21 +18,38 @@ class QueryCompiler extends AbstractCompiler
     /**
      * {@inheritdoc}
      */
-    public function prepareParameters(
-        $type,
-        array $where = [],
-        $joins = [],
-        array $having = [],
-        array $columns = []
-    )
+    public function update($table, array $columns, array $joins = [], array $where = [])
     {
-        if ($type == self::UPDATE_QUERY)
+        if (empty($joins))
         {
-            //Where statement has pretty specific order
-            return array_merge($joins, $columns, $where);
+            return parent::update($table, $columns, $joins, $where);
         }
 
-        return parent::prepareParameters($type, $where, $joins, $having, $columns);
+        $alias = $table;
+        if (preg_match('/ as /i', $alias, $matches))
+        {
+            list(, $alias) = explode($matches[0], $table);
+        }
+        else
+        {
+            $table = "{$table} AS {$table}";
+        }
+
+        $statement = "UPDATE " . $this->quote($table, true, true);
+
+        if (!empty($joins))
+        {
+            $statement .= $this->joins($joins);
+        }
+
+        $statement .= "\nSET" . $this->prepareColumns($columns, $alias);
+
+        if (!empty($where))
+        {
+            $statement .= "\nWHERE " . $this->where($where);
+        }
+
+        return rtrim($statement);
     }
 
     /**
@@ -69,38 +86,29 @@ class QueryCompiler extends AbstractCompiler
     /**
      * {@inheritdoc}
      */
-    public function update($table, array $columns, array $joins = [], array $where = [])
+    public function identifier($identifier)
     {
-        if (empty($joins))
+        return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function prepareParameters(
+        $type,
+        array $where = [],
+        $joins = [],
+        array $having = [],
+        array $columns = []
+    )
+    {
+        if ($type == self::UPDATE_QUERY)
         {
-            return parent::update($table, $columns, $joins, $where);
+            //Where statement has pretty specific order
+            return array_merge($joins, $columns, $where);
         }
 
-        $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
-            list(, $alias) = explode($matches[0], $table);
-        }
-        else
-        {
-            $table = "{$table} AS {$table}";
-        }
-
-        $statement = "UPDATE " . $this->quote($table, true, true);
-
-        if (!empty($joins))
-        {
-            $statement .= $this->joins($joins);
-        }
-
-        $statement .= "\nSET" . $this->prepareColumns($columns, $alias);
-
-        if (!empty($where))
-        {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
-
-        return rtrim($statement);
+        return parent::prepareParameters($type, $where, $joins, $having, $columns);
     }
 
     /**

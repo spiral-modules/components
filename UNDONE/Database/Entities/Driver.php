@@ -461,7 +461,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      *
      * @param string $table Table name without prefix included.
      */
-    public function truncateTable($table)
+    public function truncate($table)
     {
         $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
     }

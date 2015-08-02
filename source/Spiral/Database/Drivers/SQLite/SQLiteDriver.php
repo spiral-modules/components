@@ -9,7 +9,7 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Core\ContainerInterface;
-use Spiral\Database\Driver;
+use Spiral\Database\Entities\Driver;
 
 /**
  * Talks to sqlite databases.
@@ -68,7 +68,7 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function truncateTable($table)
+    public function truncate($table)
     {
         $this->statement("DELETE FROM {$this->identifier($table)}");
     }

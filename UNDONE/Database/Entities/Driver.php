@@ -319,6 +319,17 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
+     * Driver specific database/table identifier quotation.
+     *
+     * @param string $identifier
+     * @return string
+     */
+    public function identifier($identifier)
+    {
+        return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
+    }
+
+    /**
      * Driver specific PDOStatement parameters preparation.
      *
      * @param array $parameters

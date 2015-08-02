@@ -86,14 +86,6 @@ class QueryCompiler extends AbstractCompiler
     /**
      * {@inheritdoc}
      */
-    public function identifier($identifier)
-    {
-        return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function prepareParameters(
         $type,
         array $where = [],

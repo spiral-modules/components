@@ -40,21 +40,6 @@ class SQLiteDriver extends Driver
     const TIMESTAMP_NOW = 'CURRENT_TIMESTAMP';
 
     /**
-     * SQL query to fetch table names from database. Declared as constant only because i love well
-     * organized things.
-     *
-     * @var string
-     */
-    const FETCH_TABLES_QUERY = "SELECT * FROM sqlite_master WHERE type = 'table'";
-
-    /**
-     * Query to check table existence.
-     *
-     * @var string
-     */
-    const TABLE_EXISTS_QUERY = "SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?";
-
-    /**
      * {@inheritdoc}
      */
     public function __construct(ContainerInterface $container, array $config)
@@ -76,20 +61,11 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function isolationLevel($level)
-    {
-        $this->logger()->error(
-            "Transaction isolation level is not fully supported by SQLite ({level}).",
-            compact('level')
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function hasTable($name)
     {
-        return (bool)$this->query(self::TABLE_EXISTS_QUERY, [$name])->fetchColumn();
+        $query = 'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?';
+
+        return (bool)$this->query($query, [$name])->fetchColumn();
     }
 
     /**
@@ -98,7 +74,7 @@ class SQLiteDriver extends Driver
     public function tableNames()
     {
         $tables = [];
-        foreach ($this->query(static::FETCH_TABLES_QUERY) as $table)
+        foreach ($this->query("SELECT * FROM sqlite_master WHERE type = 'table'") as $table)
         {
             if ($table['name'] != 'sqlite_sequence')
             {
@@ -107,5 +83,16 @@ class SQLiteDriver extends Driver
         }
 
         return $tables;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function isolationLevel($level)
+    {
+        $this->logger()->error(
+            "Transaction isolation level is not fully supported by SQLite ({level}).",
+            compact('level')
+        );
     }
 }

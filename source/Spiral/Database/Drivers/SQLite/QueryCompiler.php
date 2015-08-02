@@ -12,6 +12,9 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 use Spiral\Debug\Traits\LoggerTrait;
 
+/**
+ * SQLite specific syntax compiler.
+ */
 class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 {
     /**

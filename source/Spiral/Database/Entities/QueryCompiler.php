@@ -29,18 +29,18 @@ class QueryCompiler extends Component
     const INSERT_QUERY = 'insert';
 
     /**
-     * Table prefix will be applied to every table name found in query.
-     *
-     * @var string
-     */
-    private $tablePrefix = '';
-
-    /**
      * Cached list of table aliases used to correctly inject prefixed tables into conditions.
      *
      * @var array
      */
     private $aliases = [];
+
+    /**
+     * Table prefix will be applied to every table name found in query.
+     *
+     * @var string
+     */
+    protected $tablePrefix = '';
 
     /**
      * Associated driver instance, may be required for some data assumptions.
@@ -234,7 +234,7 @@ class QueryCompiler extends Component
              */
             $quoted = $this->quote($identifier, $table, $table)
                 . $matches[0]
-                . $this->identifier($alias);
+                . $this->driver->identifier($alias);
 
             if ($table && strpos($identifier, '.') === false)
             {
@@ -281,7 +281,7 @@ class QueryCompiler extends Component
                 $identifier = $this->tablePrefix . $identifier;
             }
 
-            return $this->identifier($identifier);
+            return $this->driver->identifier($identifier);
         }
 
         $identifier = explode('.', $identifier);
@@ -296,17 +296,6 @@ class QueryCompiler extends Component
         $identifier = array_map([$this->driver, 'identifier'], $identifier);
 
         return join('.', $identifier);
-    }
-
-    /**
-     * Driver specific database/table identifier quotation.
-     *
-     * @param string $identifier
-     * @return string
-     */
-    public function identifier($identifier)
-    {
-        return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
     }
 
     /**

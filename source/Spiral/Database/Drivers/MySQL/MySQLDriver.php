@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Drivers\MySQL;
 
-use Spiral\Database\Driver;
+use Spiral\Database\Entities\Driver;
 use PDO;
 
 /**
@@ -51,12 +51,20 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
+    public function identifier($identifier)
+    {
+        return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasTable($name)
     {
-        return (bool)$this->query(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            [$this->databaseName, $name]
-        )->fetchColumn();
+        $query = 'SELECT COUNT(*) FROM information_schema.tables '
+            . 'WHERE table_schema = ? AND table_name = ?';
+
+        return (bool)$this->query($query, [$this->databaseName, $name])->fetchColumn();
     }
 
     /**

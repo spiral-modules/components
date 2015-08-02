@@ -96,6 +96,7 @@ class QueryCompiler extends Component
      * @param array  $joins
      * @param array  $where
      * @return string
+     * @throws CompilerException
      */
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
@@ -117,6 +118,7 @@ class QueryCompiler extends Component
      * @param array  $joins
      * @param array  $where
      * @return string
+     * @throws CompilerException
      */
     public function delete($table, array $joins = [], array $where = [])
     {
@@ -147,6 +149,7 @@ class QueryCompiler extends Component
      * @param int     $offset
      * @param array   $unions
      * @return string
+     * @throws CompilerException
      */
     public function select(
         array $from,

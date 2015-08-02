@@ -61,9 +61,9 @@ class DocumentSchema extends ReflectionEntity
      */
     protected function property($property, $merge = false)
     {
-        if (isset($this->propertiesCache[$property]))
+        if (isset($this->cache[$property]))
         {
-            return $this->propertiesCache[$property];
+            return $this->cache[$property];
         }
 
         $defaults = $this->reflection->getDefaultProperties();
@@ -88,7 +88,7 @@ class DocumentSchema extends ReflectionEntity
             }
         }
 
-        return $this->propertiesCache[$property] = call_user_func(
+        return $this->cache[$property] = call_user_func(
             [$this->getClass(), 'describeProperty'],
             $this,
             $property,

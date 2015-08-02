@@ -38,7 +38,7 @@ class TableSchema extends AbstractTable
      * @param string $engine
      * @return $this
      */
-    public function engine($engine)
+    public function setEngine($engine)
     {
         $this->engine = $engine;
 

@@ -36,18 +36,18 @@ class QueryCompiler extends Component
     private $aliases = [];
 
     /**
-     * Table prefix will be applied to every table name found in query.
-     *
-     * @var string
-     */
-    protected $tablePrefix = '';
-
-    /**
      * Associated driver instance, may be required for some data assumptions.
      *
      * @var Driver
      */
     protected $driver = null;
+
+    /**
+     * Table prefix will be applied to every table name found in query.
+     *
+     * @var string
+     */
+    protected $tablePrefix = '';
 
     /**
      * @param Driver $driver

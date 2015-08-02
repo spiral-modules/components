@@ -45,304 +45,11 @@ abstract class Model extends DataEntity
     const DELETED = 900;
 
     /**
-     * Model has one children model relation. Example: User has one profile.
-     *
-     * Example:
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [self::HAS_ONE => 'Models\Profile']
-     * ];
-     *
-     * By default relation will create foreign column, key and index. Default inner key where model
-     * is linked to - current model primary key name.
-     *
-     * Example (children model will be related to custom inner key).
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [
-     *          self::HAS_ONE   => 'Models\Profile',
-     *          self::INNER_KEY => 'internal_key'       //Column in "users" table
-     *      ]
-     * ];
-     *
-     * By default outer key will be named as parent_role_name_{inner_key} (Example: User model +
-     * id as primary key will create outer key named "user_id"), we can redefine it:
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [
-     *          self::HAS_ONE   => 'Models\Profile',
-     *          self::OUTER_KEY => 'parent_user_id'     //Column in "profiles" table
-     *      ]
-     * ];
-     *
-     * To stop schema builder from creating foreign key we can use CONSTRAINT option:
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [
-     *          self::HAS_ONE    => 'Models\Profile',
-     *          self::CONSTRAINT => false               //No foreign keys will be created
-     *      ]
-     * ];
-     *
-     * In some cases we want to force custom constraint action for DELETE and UPDATE rules:
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [
-     *          self::HAS_ONE           => 'Models\Profile',
-     *          self::CONSTRAINT_ACTION => 'NO ACTION' //We can also use different types, but make
-     *                                                 //sure they are supported by your database
-     *      ]
-     * ];
-     *
-     * To state that child model should always have defined parent let's set NULLABLE option to false.
-     * Attention, this option can be applied ONLY while child table is empty! By default NULLABLE
-     * flag states true:
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [
-     *          self::HAS_ONE  => 'Models\Profile',
-     *          self::NULLABLE => false                //Profile should always have associated user
-     *      ]
-     * ];
-     *
-     * Attention, while using NULLABLE relations you have to clearly state default value as NULL.
-     *
-     * You can always inverse this relation to create relation in child model:
-     * protected $schema = [
-     *      ...,
-     *      'profile' => [
-     *          self::HAS_ONE => 'Models\Profile',
-     *          self::INVERSE => 'parent_user'        //Will create BELONGS_TO relation in Profile
-     *                                                //model
-     *      ]
-     * ];
-     *
-     * By default this relation will be preloaded using INLOAD method (joined to query).
+     * Relation types, read documentation and examples to get more information.
      */
-    const HAS_ONE = 101;
-
-    /**
-     * Model has many models relation. Example: User has many posts.
-     *
-     * Example:
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [self::HAS_MANY => 'Models\Post']
-     * ];
-     *
-     * By default relation will create foreign column, key and index. Default inner key where model
-     * is linked to - current model primary key name.
-     *
-     * Example (children model will be related to custom inner key).
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [
-     *          self::HAS_MANY  => 'Models\Post',
-     *          self::INNER_KEY => 'internal_key'       //Column in "users" table
-     *      ]
-     * ];
-     *
-     * By default outer key will be named as parent_role_name_{inner_key} (Example: User model +
-     * id as primary key will create outer key named "user_id"), we can redefine it:
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [
-     *          self::HAS_MANY  => 'Models\Post',
-     *          self::OUTER_KEY => 'parent_user_id'     //Column in "posts" table
-     *      ]
-     * ];
-     *
-     * To stop schema builder from creating foreign key we can use CONSTRAINT option:
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [
-     *          self::HAS_MANY   => 'Models\Post',
-     *          self::CONSTRAINT => false               //No foreign keys will be created
-     *      ]
-     * ];
-     *
-     * In some cases we want to force custom constraint action for DELETE and UPDATE rules:
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [
-     *          self::HAS_MANY          => 'Models\Post',
-     *          self::CONSTRAINT_ACTION => 'NO ACTION' //We can also use different types, but make
-     *                                                 //sure they are supported by your database
-     *      ]
-     * ];
-     *
-     * To state that child model should always have defined parent let's set NULLABLE option to false.
-     * Attention, this option can be applied ONLY while child table is empty! By default NULLABLE
-     * flag states true:
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [
-     *          self::HAS_MANY  => 'Models\Post',
-     *          self::NULLABLE  => false                //Post should always have associated user
-     *      ]
-     * ];
-     *
-     * Attention, while using NULLABLE relations you have to clearly state default value as NULL.
-     *
-     * Has many relation allows you to define custom WHERE condition:
-     * protected $schema = [
-     *      ...,
-     *      'publicPosts' => [
-     *          self::HAS_MANY  => 'Models\Post',
-     *          self::WHERE     => [
-     *              '{table}.status' => 'public'      //Relates to only public posts, {table} is
-     *                                                //required to be included into where condition
-     *                                                //to build valid where or on where statement.
-     *          ]
-     *      ]
-     * ];
-     *
-     * You can always inverse this relation to create relation in child model:
-     * protected $schema = [
-     *      ...,
-     *      'posts' => [
-     *          self::HAS_MANY => 'Models\Post',
-     *          self::INVERSE => 'author'             //Will create BELONGS_TO relation in Post
-     *                                                //model
-     *      ]
-     * ];
-     *
-     * Attention, WHERE conditions will be not be inversed!
-     * You can also use MORPH_KEY option if you want to state that relation points to morphed
-     * model (see BELONGS_TO morph section documentation):
-     * protected $schema = [
-     *      ...,
-     *      'approvedComments' => [
-     *          self::HAS_MANY   => 'Models\Comment',
-     *          self::MORPH_KEY => 'target_type'
-     *          self::WHERE     => [
-     *              '{table}.status' => 'approved'    //Only approved model comments
-     *          ]
-     *      ]
-     * ];
-     *
-     * By default this relation will be preloaded using POSTLOAD method (executed as separate query).
-     */
-    const HAS_MANY = 102;
-
-    /**
-     * Model has one parent relation. Example: Post has author.
-     *
-     * Example:
-     * protected $schema = [
-     *      ...,
-     *      'author' => [self::BELONGS_TO => 'Models\User']
-     * ];
-     *
-     * By default relation will create foreign column, key and index in model associated table.
-     * Default outer key where model is linked to - parent model primary key name.
-     *
-     * Example (children model will be related to custom parent key).
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO   => 'Models\User',
-     *          self::OUTER_KEY    => 'internal_key'       //Column in "users" table
-     *      ]
-     * ];
-     *
-     * By default outer key will be named as parent_model_role_name_{inner_key} (Example: User model
-     * + id as primary key will create inner key named "user_id"), we can redefine it:
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO   => 'Models\User',
-     *          self::INNER_KEY    => 'parent_user_id'     //Column in "comments" table
-     *      ]
-     * ];
-     *
-     * To stop schema builder from creating foreign key we can use CONSTRAINT option:
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO => 'Models\User',
-     *          self::CONSTRAINT => false                  //No foreign keys will be created
-     *      ]
-     * ];
-     *
-     * In some cases we want to force custom constraint action for DELETE and UPDATE rules:
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO        => 'Models\User',
-     *          self::CONSTRAINT_ACTION => 'NO ACTION'    //We can also use different types, but make
-     *                                                    //sure they are supported by your database
-     *      ]
-     * ];
-     *
-     * To state that child model should always have defined parent let's set NULLABLE option to false.
-     * Attention, this option can be applied ONLY while child table is empty! By default NULLABLE
-     * flag states true:
-     *
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO  => 'Models\User',
-     *          self::NULLABLE    => false                //Post should always have associated user
-     *      ]
-     * ];
-     *
-     * Attention, while using NULLABLE relations you have to clearly state default value as NULL.
-     *
-     * You can always inverse this relation to create relation in child model, however you have to
-     * specify inversed relation type (HAS_ONE or HAS_MANY) in this case.
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO => 'Models\User',
-     *          self::INVERSE    => [self::HAS_MANY, 'posts'] //Will create HAS_MANY relation in User
-     *                                                        //model
-     *      ]
-     * ];
-     *
-     * Tip, to simplify schema reading use relation constant from outer class (User::HAS_MANY),
-     * example:
-     * protected $schema = [
-     *      ...,
-     *      'author' => [
-     *          self::BELONGS_TO => 'Models\User',
-     *          self::INVERSE    => [User::HAS_MANY, 'posts'] //Will create HAS_MANY relation in
-     *                                                        // User model
-     *      ]
-     * ];
-     *
-     * HAS_MANY relation can be used as polymorphic relation to multiple parents, relation definition
-     * in this case should point to interface and not real model (let's use Comment model as
-     * example):
-     * protected $schema = [
-     *      ...,
-     *      'target' => [
-     *          self::BELONGS_TO => 'Models\CommentableInterface'
-     *      ]
-     * ];
-     *
-     * By default morph key will be named as relation_name_type: "target_type".
-     *
-     * System will automatically create inner key and morph key to support such relation. You can
-     * define custom morph key via MORPH_KEY option. The most efficient way to use polymorphic
-     * relation is in combination with INVERSE option:
-     * protected $schema = [
-     *      ...,
-     *      'target' => [
-     *          self::BELONGS_TO => 'Models\CommentableInterface',
-     *          self::INVERSE    => [self::HAS_MANY, 'comments'] //Will create "comments" HAS_MANY
-     *                                                           //relation in every model which
-     *                                                           //implemented CommentableInterface
-     *      ]
-     * ];
-     *
-     * By default this relation will be preloaded using POSTLOAD method (executed as separate query).
-     */
-    const BELONGS_TO = 103;
-
-    /**
-     * TODO: WRITE COMMENT
-     */
+    const HAS_ONE      = 101;
+    const HAS_MANY     = 102;
+    const BELONGS_TO   = 103;
     const MANY_TO_MANY = 104;
 
     /**
@@ -538,7 +245,7 @@ abstract class Model extends DataEntity
         $this->loaded = $loaded;
 
         //Will work only when global container is set!
-        $orm = !empty($orm) ? $orm : self::getContainer()->get(ORM::class);
+        $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
 
         $this->orm = $orm;
         if (!isset(self::$schemaCache[$class = static::class]))
@@ -956,7 +663,7 @@ abstract class Model extends DataEntity
     public static function dbalTable(ORM $orm = null, Database $database = null)
     {
         //Will work only when global container is set!
-        $orm = !empty($orm) ? $orm : self::getContainer()->get(ORM::class);
+        $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
 
         $schema = $orm->getSchema(static::class);
 
@@ -975,7 +682,7 @@ abstract class Model extends DataEntity
     public static function dbalDatabase(ORM $orm = null)
     {
         //Will work only when global container is set!
-        $orm = !empty($orm) ? $orm : self::getContainer()->get(ORM::class);
+        $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
 
         return $orm->getDatabase($orm->getSchema(static::class)[ORM::E_DB]);
     }
@@ -992,7 +699,7 @@ abstract class Model extends DataEntity
         if (empty($odm))
         {
             //Will work only when global container is set!
-            $orm = ORM::instance(self::getContainer());
+            $orm = ORM::instance(self::container());
         }
 
         return new Selector(static::class, $orm);

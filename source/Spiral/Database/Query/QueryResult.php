@@ -9,28 +9,17 @@
 namespace Spiral\Database\Query;
 
 use PDOStatement;
+use Spiral\Database\Entities\QueryCompiler;
 
+/**
+ * Query result iteration class.
+ */
 class QueryResult implements \Countable, \Iterator, \JsonSerializable
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
      */
     const DUMP_LIMIT = 500;
-
-    /**
-     * PDOStatement generated for selection query.
-     *
-     * @invisible
-     * @var PDOStatement
-     */
-    protected $statement = null;
-
-    /**
-     * PDOStatement prepare parameters.
-     *
-     * @var array
-     */
-    protected $parameters = [];
 
     /**
      * Cursor position, used to determinate current data index.
@@ -47,15 +36,26 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     protected $count = 0;
 
     /**
-     * Last selected row array. Having this value is required to correctly emulate Iterator methods.
+     * Last selected row array. This value is required to correctly emulate Iterator methods.
      *
      * @var mixed
      */
     protected $rowData = null;
 
     /**
-     * New ResultReader instance.
+     * @invisible
+     * @var PDOStatement
+     */
+    protected $statement = null;
+
+    /**
+     * PDOStatement prepare parameters.
      *
+     * @var array
+     */
+    protected $parameters = [];
+
+    /**
      * @link http://php.net/manual/en/class.pdostatement.php
      * @param PDOStatement $statement
      * @param array        $parameters
@@ -78,15 +78,12 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
      */
     public function queryString()
     {
-        return QueryCompiler::interpolate(
-            $this->statement->queryString,
-            $this->parameters
-        );
+        return QueryCompiler::interpolate($this->statement->queryString, $this->parameters);
     }
 
     /**
-     * Returns the number of rows selected by SQL statement. Attention, this method will return 0
-     * for SQLite databases.
+     * The number of rows selected by SQL statement. Attention, this method will return 0 for SQLite
+     * databases.
      *
      * @link http://php.net/manual/en/pdostatement.rowcount.php
      * @link http://stackoverflow.com/questions/15003232/pdo-returns-wrong-rowcount-after-select-statement
@@ -98,7 +95,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Returns the number of columns in the result set.
+     * The number of columns in the result set.
      *
      * @link http://php.net/manual/en/pdostatement.columncount.php
      * @return int
@@ -109,9 +106,8 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Change PDOStatement fetch mode, use PDO::FETCH_ constants to specify required mode. If you wan
-     * t to keep compatibility with CachedQuery do not use other modes than PDO::FETCH_ASSOC and
-     * PDO::FETCH_NUM.
+     * Change fetching mode, use PDO::FETCH_ constants to specify required mode. If you want to keep
+     * compatibility with CachedQuery do not use other modes than PDO::FETCH_ASSOC and PDO::FETCH_NUM.
      *
      * @link http://php.net/manual/en/pdostatement.setfetchmode.php
      * @param int $mode The fetch mode must be one of the PDO::FETCH_* constants.
@@ -127,8 +123,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     /**
      * Fetch one result row as array.
      *
-     * @param bool $mode The fetch mode must be one of the PDO::FETCH_* constants, PDO::FETCH_ASSOC
-     *                   by default.
+     * @param bool $mode
      * @return array
      */
     public function fetch($mode = null)
@@ -142,7 +137,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Returns a single column from the next row of a result set.
+     * Returns a single column value from the next row of a result set.
      *
      * @param int $columnID Column number (0 - first column)
      * @return mixed
@@ -157,7 +152,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
      *
      * @link http://www.php.net/manual/en/function.PDOStatement-bindColumn.php
      * @param integer|string $columnID Column number (1 - first column) or name to bind data to.
-     * @param mixed          $variable Variable to bind column value to.
+     * @param mixed          $variable
      * @return $this
      */
     public function bind($columnID, &$variable)
@@ -170,8 +165,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     /**
      * Returns an array containing all of the result set rows, do not use this method on big datasets.
      *
-     * @param bool $mode The fetch mode must be one of the PDO::FETCH_* constants, PDO::FETCH_ASSOC
-     *                   by default.
+     * @param bool $mode
      * @return array
      */
     public function fetchAll($mode = null)
@@ -185,11 +179,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * (PHP 5 >= 5.0.0)
-     * Return the current element
-     *
-     * @link http://php.net/manual/en/iterator.current.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function current()
     {
@@ -197,11 +187,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * (PHP 5 >= 5.0.0)
-     * Move forward to next element, returns currently selected element.
-     *
-     * @link http://php.net/manual/en/iterator.next.php
-     * @return bool|mixed
+     * {@inheritdoc}
      */
     public function next()
     {
@@ -212,11 +198,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * (PHP 5 >= 5.0.0)
-     * Return the key of the current element.
-     *
-     * @link http://php.net/manual/en/iterator.key.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function key()
     {
@@ -224,11 +206,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * (PHP 5 >= 5.0.0)
-     * Checks if current position is valid.
-     *
-     * @link http://php.net/manual/en/iterator.valid.php
-     * @return boolean
+     * {@inheritdoc}
      */
     public function valid()
     {
@@ -237,11 +215,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)
-     * Rewind the Iterator to the first element.
-     *
-     * @link http://php.net/manual/en/iterator.rewind.php
-     * @return void
+     * {@inheritdoc}
      */
     public function rewind()
     {
@@ -261,7 +235,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Destruct ResultReader and free all used memory.
+     * Destruct associated statement to free used memory.
      */
     public function __destruct()
     {
@@ -270,8 +244,6 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return object
      */
     public function __debugInfo()
@@ -286,11 +258,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * (PHP 5 > 5.4.0)
-     * Specify data which should be serialized to JSON.
-     *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {

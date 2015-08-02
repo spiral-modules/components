@@ -15,7 +15,8 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\SQLFragmentInterface;
 
 /**
- *
+ * QueryBuilder classes generate set of control tokens for query compilers, this is query level
+ * abstraction.
  */
 abstract class QueryBuilder extends Component implements SQLFragmentInterface
 {
@@ -32,65 +33,13 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface
     protected $compiler = null;
 
     /**
-     * QueryBuilder class is parent for all existed DBAL query builders. Every QueryBuilder will have
-     * attached QueryGrammar instance provided by driver and responsible for building queries based
-     * on provided tokens. Additionally QueryBuilder have common mechanism to register query params,
-     * which will automatically convert array argument to Parameter instance.
-     *
      * @param Database      $database Parent database.
-     * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
+     * @param QueryCompiler $compiler Driver specific QueryCompiler instance (one per builder).
      */
     public function __construct(Database $database, QueryCompiler $compiler)
     {
         $this->database = $database;
         $this->compiler = $compiler;
-    }
-
-    /**
-     * Helper methods used to correctly fetch and split identifiers provided by function parameters.
-     * It support array list, string or comma separated list. Attention, this method will not work
-     * with complex parameters (such as functions) provided as one comma separated string, please use
-     * arrays in this case.
-     *
-     * @param array $identifiers
-     * @return array
-     */
-    protected function fetchIdentifiers(array $identifiers)
-    {
-        if (count($identifiers) == 1 && is_string($identifiers[0]))
-        {
-            return array_map('trim', explode(',', $identifiers[0]));
-        }
-
-        if (count($identifiers) == 1 && is_array($identifiers[0]))
-        {
-            return $identifiers[0];
-        }
-
-        return $identifiers;
-    }
-
-    /**
-     * Expand all QueryBuilder parameters to create flatten list.
-     *
-     * @param array $parameters
-     * @return array
-     */
-    protected function expandParameters(array $parameters)
-    {
-        $result = [];
-        foreach ($parameters as $parameter)
-        {
-            if ($parameter instanceof QueryBuilder)
-            {
-                $result = array_merge($result, $parameter->getParameters());
-                continue;
-            }
-
-            $result[] = $parameter;
-        }
-
-        return $result;
     }
 
     /**
@@ -164,5 +113,52 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface
         ];
 
         return (object)$debugInfo;
+    }
+
+    /**
+     * Helper methods used to correctly fetch and split identifiers provided by function parameters.
+     * It support array list, string or comma separated list. Attention, this method will not work
+     * with complex parameters (such as functions) provided as one comma separated string, please use
+     * arrays in this case.
+     *
+     * @param array $identifiers
+     * @return array
+     */
+    protected function fetchIdentifiers(array $identifiers)
+    {
+        if (count($identifiers) == 1 && is_string($identifiers[0]))
+        {
+            return array_map('trim', explode(',', $identifiers[0]));
+        }
+
+        if (count($identifiers) == 1 && is_array($identifiers[0]))
+        {
+            return $identifiers[0];
+        }
+
+        return $identifiers;
+    }
+
+    /**
+     * Expand all QueryBuilder parameters to create flatten list.
+     *
+     * @param array $parameters
+     * @return array
+     */
+    protected function expandParameters(array $parameters)
+    {
+        $result = [];
+        foreach ($parameters as $parameter)
+        {
+            if ($parameter instanceof QueryBuilder)
+            {
+                $result = array_merge($result, $parameter->getParameters());
+                continue;
+            }
+
+            $result[] = $parameter;
+        }
+
+        return $result;
     }
 }

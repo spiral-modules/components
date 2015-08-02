@@ -6,24 +6,24 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Sqlite;
+namespace Spiral\Database\Drivers\SQLite;
 
-use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
 
+/**
+ * SQLite column schema.
+ */
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Direct mapping from base abstract type to database internal type with specified data options,
-     * such as size, precision scale, unsigned flag and etc. Every declared type can be assigned using
-     * ->type() method, however to pass custom type parameters, methods has to be declared in database
-     * specific ColumnSchema. Type identifier not necessary should be real type name.
+     * Is column primary key.
      *
-     * Example:
-     * integer => array('type' => 'int', 'size' => 1),
-     * boolean => array('type' => 'tinyint', 'size' => 1)
-     *
-     * @invisible
-     * @var array
+     * @var bool
+     */
+    private $primaryKey = false;
+
+    /**
+     * {@inheritdoc}
      */
     protected $mapping = [
         //Primary sequences
@@ -81,14 +81,7 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Driver specific reverse mapping, this mapping should link database type to one of standard
-     * internal types. Not resolved types will be marked as "unknown" which will map them as php type
-     * string.
-     *
-     * Attention, this mapping is valid only for tables created by spiral.
-     *
-     * @invisible
-     * @var array
+     * {@inheritdoc}
      */
     protected $reverseMapping = [
         'primary'     => [['type' => 'integer', 'primaryKey' => true]],
@@ -109,18 +102,27 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Is column primary key.
-     *
-     * @var bool
+     * {@inheritdoc}
      */
-    protected $primaryKey = false;
+    public function sqlStatement()
+    {
+        $statement = parent::sqlStatement();
+        if ($this->abstractType() != 'enum')
+        {
+            return $statement;
+        }
+
+        $enumValues = [];
+        foreach ($this->enumValues as $value)
+        {
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+        }
+
+        return "$statement CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
+    }
 
     /**
-     * Parse schema information provided by parent TableSchema and populate column values.
-     *
-     * @param mixed $schema Column information fetched from database by TableSchema. Format depends
-     *                      on database type.
-     * @return mixed
+     * {@inheritdoc}
      */
     protected function resolveSchema($schema)
     {
@@ -193,34 +195,10 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Get database specific enum type definition. Should not include database type and column name.
-     *
-     * @return string.
+     * {@inheritdoc}
      */
     protected function enumType()
     {
         return '';
-    }
-
-    /**
-     * Compile column create statement.
-     *
-     * @return string
-     */
-    public function sqlStatement()
-    {
-        $statement = parent::sqlStatement();
-        if ($this->abstractType() != 'enum')
-        {
-            return $statement;
-        }
-
-        $enumValues = [];
-        foreach ($this->enumValues as $value)
-        {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
-        }
-
-        return "$statement CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
     }
 }

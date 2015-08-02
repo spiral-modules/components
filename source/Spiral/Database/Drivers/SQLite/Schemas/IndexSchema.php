@@ -6,18 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Sqlite;
+namespace Spiral\Database\Drivers\SQLite;
 
-use Spiral\Database\Schemas\AbstractIndex;
+use Spiral\Database\Entities\Schemas\AbstractIndex;
 
+/**
+ * SQLite index schema.
+ */
 class IndexSchema extends AbstractIndex
 {
     /**
-     * Parse index information provided by parent TableSchema and populate index values.
-     *
-     * @param mixed $schema Index information fetched from database by TableSchema. Format depends
-     *                      on driver type.
-     * @return mixed
+     * {@inheritdoc}
      */
     protected function resolveSchema($schema)
     {

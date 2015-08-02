@@ -6,19 +6,21 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Sqlite;
+namespace Spiral\Database\Drivers\SQLite;
 
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\Schemas\AbstractReference;
-use Spiral\Database\Schemas\AbstractTable;
-use Spiral\Database\Schemas\SchemaException;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Exceptions\SchemaException;
 
+/**
+ * SQLIte specific table schema, some alter operations emulated using temporary tables.
+ */
 class TableSchema extends AbstractTable
 {
     /**
-     * Driver specific method to load table columns schemas.  Method will not be called if table not
-     * exists. To create and register column schema use internal table method "registerColumn()".
-     **/
+     * {@inheritdoc}
+     */
     protected function loadColumns()
     {
         $tableSQL = $this->driver->query(
@@ -49,8 +51,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table indexes schema(s). Method will not be called if table not
-     * exists. To create and register index schema use internal table method "registerIndex()".
+     * {@inheritdoc}
      */
     protected function loadIndexes()
     {
@@ -65,9 +66,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table foreign key schema(s). Method will not be called if table
-     * not exists. To create and register reference (foreign key) schema use internal table method
-     * "registerReference()".
+     * {@inheritdoc}
      */
     protected function loadReferences()
     {
@@ -79,16 +78,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Perform set of atomic operations required to update table schema, such operations will include
-     * column adding, removal, altering; index adding, removing altering; foreign key constraints adding,
-     * removing and altering. All operations will be performed under common transaction, failing
-     * one - will rollback others. Attention, rolling back transaction with schema modifications can
-     * be not implemented in some databases.
-     *
-     * We will have to rebuild and copy database in SQLite as it has some limitations.
-     *
-     * @throws SchemaException
-     * @throws \Exception
+     * {@inheritdoc}
      */
     protected function updateSchema()
     {
@@ -227,10 +217,9 @@ class TableSchema extends AbstractTable
         $this->driver->commitTransaction();
     }
 
+
     /**
-     * Driver specific column add command.
-     *
-     * @param AbstractColumn $column
+     * {@inheritdoc}
      */
     protected function doColumnAdd(AbstractColumn $column)
     {
@@ -238,9 +227,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific column remove (drop) command.
-     *
-     * @param AbstractColumn $column
+     * {@inheritdoc}
      */
     protected function doColumnDrop(AbstractColumn $column)
     {
@@ -248,23 +235,15 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific column altering command.
-     *
-     * @param AbstractColumn $column
-     * @param AbstractColumn $dbColumn
+     * {@inheritdoc}
      */
-    protected function doColumnChange(
-        AbstractColumn $column,
-        AbstractColumn $dbColumn
-    )
+    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
         //Not supported
     }
 
     /**
-     * Driver specific foreign key adding command.
-     *
-     * @param AbstractReference $foreign
+     * {@inheritdoc}
      */
     protected function doForeignAdd(AbstractReference $foreign)
     {
@@ -272,9 +251,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific foreign key remove (drop) command.
-     *
-     * @param AbstractReference $foreign
+     * {@inheritdoc}
      */
     protected function doForeignDrop(AbstractReference $foreign)
     {
@@ -282,15 +259,9 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific foreign key altering command, by default it will remove and add foreign key.
-     *
-     * @param AbstractReference $foreign
-     * @param AbstractReference $dbForeign
+     * {@inheritdoc}
      */
-    protected function doForeignChange(
-        AbstractReference $foreign,
-        AbstractReference $dbForeign
-    )
+    protected function doForeignChange(AbstractReference $foreign, AbstractReference $dbForeign)
     {
         //Not supported
     }

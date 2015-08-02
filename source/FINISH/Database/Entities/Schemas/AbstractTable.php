@@ -10,7 +10,7 @@ namespace Spiral\Database\Entities\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Database\Driver;
+use Spiral\Database\Entities\Driver;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**

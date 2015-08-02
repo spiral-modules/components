@@ -8,7 +8,6 @@
  */
 namespace Spiral\Views;
 
-use Spiral\Views\Exceptions\CompilerException;
 use Spiral\Views\Exceptions\ViewException;
 
 /**

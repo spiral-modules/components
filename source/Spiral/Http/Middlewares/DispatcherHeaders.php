@@ -10,7 +10,6 @@ namespace Spiral\Http\Middlewares;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Http\HttpCore;
 use Spiral\Http\HttpDispatcher;
 use Spiral\Http\MiddlewareInterface;
 

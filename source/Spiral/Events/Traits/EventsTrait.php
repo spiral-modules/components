@@ -11,7 +11,6 @@ namespace Spiral\Events\Traits;
 use Spiral\Core\ContainerInterface;
 use Spiral\Events\Dispatcher;
 use Spiral\Events\DispatcherInterface;
-use Spiral\Events\EventsException;
 use Spiral\Events\ObjectEvent;
 
 /**

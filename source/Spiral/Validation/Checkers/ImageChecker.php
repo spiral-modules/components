@@ -8,8 +8,6 @@
  */
 namespace Spiral\Validation\Checkers;
 
-use Spiral\Files\FilesInterface;
-
 /**
  * Image based validations.
  */

@@ -9,7 +9,6 @@
 namespace Spiral\Debug;
 
 use Exception;
-use Spiral\Core\ContainerInterface;
 
 /**
  * Wrapper used to describe and show exception information in user friendly way.

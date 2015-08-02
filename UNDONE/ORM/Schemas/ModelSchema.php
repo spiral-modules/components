@@ -156,51 +156,6 @@ class ModelSchema extends ReflectionEntity implements LoggerAwareInterface
     }
 
     /**
-     * Reading default model property value, will read "protected" and "private" properties.
-     *
-     * @param string $property Property name.
-     * @param bool   $merge    If true value will be merged with all parent declarations.
-     * @return mixed
-     */
-    protected function property($property, $merge = false)
-    {
-        if (isset($this->cache[$property]))
-        {
-            return $this->cache[$property];
-        }
-
-        $defaults = $this->reflection->getDefaultProperties();
-        if (isset($defaults[$property]))
-        {
-            $value = $defaults[$property];
-        }
-        else
-        {
-            return null;
-        }
-
-        if ($merge && ($this->reflection->getParentClass()->getName() != static::BASE_CLASS))
-        {
-            $parentClass = $this->reflection->getParentClass()->getName();
-            if (is_array($value))
-            {
-                $value = array_merge(
-                    //TODO: ABSTRACT!
-                    $this->builder->modelSchema($parentClass)->property($property, true),
-                    $value
-                );
-            }
-        }
-
-        return $this->cache[$property] = call_user_func(
-            [$this->getClass(), 'describeProperty'],
-            $this,
-            $property,
-            $value
-        );
-    }
-
-    /**
      * Get model declared schema (merged with parent model(s) values).
      *
      * @return array
@@ -270,7 +225,7 @@ class ModelSchema extends ReflectionEntity implements LoggerAwareInterface
      *
      * @return mixed
      */
-    public function getMutators()
+    protected function getMutators()
     {
         $mutators = parent::getMutators();
 

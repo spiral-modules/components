@@ -13,7 +13,6 @@ use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
 use Spiral\Translator\Exceptions\LanguageException;
-use Spiral\Translator\Exceptions\TranslatorException;
 
 /**
  * Default spiral translator implementation.

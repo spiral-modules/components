@@ -16,7 +16,6 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\BucketInterface;
-use Spiral\Storage\Exceptions\BucketException;
 use Spiral\Storage\StorageInterface;
 use Spiral\Storage\StorageManager;
 

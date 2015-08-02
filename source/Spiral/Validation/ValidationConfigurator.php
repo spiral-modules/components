@@ -9,7 +9,6 @@
 namespace Spiral\Validation;
 
 use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 

@@ -14,7 +14,6 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\RouteException;
 use Spiral\Http\Exceptions\RouterException;
 use Spiral\Http\MiddlewareInterface;
-use Zend\Diactoros\Response\RedirectResponse;
 
 /**
  * Routers used by HttpDispatcher and endpoints for logical routing to controller actions.

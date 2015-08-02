@@ -8,11 +8,9 @@
  */
 namespace Spiral\Components\Storage\Servers;
 
-use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageException;
 use Spiral\Storage\StorageServer;
 
 /**

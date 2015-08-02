@@ -13,7 +13,6 @@ use Exception;
 use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;
-use Spiral\Tokenizer\Hightligher;
 use Spiral\Views\ViewsInterface;
 
 /**

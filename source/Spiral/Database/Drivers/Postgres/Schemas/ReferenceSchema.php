@@ -6,18 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Schemas\AbstractReference;
+use Spiral\Database\Entities\Schemas\AbstractReference;
 
+/**
+ * Postgres foreign key schema.
+ */
 class ReferenceSchema extends AbstractReference
 {
     /**
-     * Parse schema information provided by parent TableSchema and populate foreign key values.
-     *
-     * @param mixed $schema Foreign key information fetched from database by TableSchema. Format depends
-     *                      on database type.
-     * @return mixed
+     * {@inheritdoc}
      */
     protected function resolveSchema($schema)
     {

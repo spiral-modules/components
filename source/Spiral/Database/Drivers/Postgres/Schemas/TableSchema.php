@@ -6,21 +6,23 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
 
+/**
+ * Postgres table schema.
+ */
 class TableSchema extends AbstractTable
 {
-
     /**
      * Sequence object name usually defined only for primary keys and required by ORM to correctly
      * resolve inserted row id.
      *
      * @var string|null
      */
-    protected $sequenceName = null;
+    private $sequenceName = null;
 
     /**
      * Sequence object name usually defined only for primary keys and required by ORM to correctly
@@ -34,9 +36,8 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table columns schemas.  Method will not be called if table not
-     * exists. To create and register column schema use internal table method "registerColumn()".
-     **/
+     * {@inheritdoc}
+     */
     protected function loadColumns()
     {
         //Required for constraints fetch
@@ -45,9 +46,9 @@ class TableSchema extends AbstractTable
 
         //Collecting all candidates
         $this->sequenceName = [];
-        $query = "SELECT * FROM information_schema.columns
-                  JOIN pg_type ON (pg_type.typname = columns.udt_name)
-                  WHERE table_name = ?";
+        $query = "SELECT * FROM information_schema.columns "
+            . "JOIN pg_type ON (pg_type.typname = columns.udt_name) "
+            . "WHERE table_name = ?";
 
         $columns = $this->driver->query($query, [$this->name])->bind('column_name', $columnName);
 
@@ -67,8 +68,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table indexes schema(s). Method will not be called if table not
-     * exists. To create and register index schema use internal table method "registerIndex()".
+     * {@inheritdoc}
      */
     protected function loadIndexes()
     {
@@ -106,9 +106,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table foreign key schema(s). Method will not be called if table
-     * not exists. To create and register reference (foreign key) schema use internal table method
-     * "registerReference()".
+     * {@inheritdoc}
      */
     protected function loadReferences()
     {
@@ -131,10 +129,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific column altering command.
-     *
-     * @param AbstractColumn $column
-     * @param AbstractColumn $dbColumn
+     * {@inheritdoc}
      */
     protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
@@ -142,7 +137,7 @@ class TableSchema extends AbstractTable
          * @var ColumnSchema $column
          */
 
-        //Renaming is separate operation
+        //Rename is separate operation
         if ($column->getName() != $dbColumn->getName())
         {
             $this->driver->statement(\Spiral\interpolate(

@@ -40,7 +40,7 @@ class SQLFragment implements SQLFragmentInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function __toString()
     {

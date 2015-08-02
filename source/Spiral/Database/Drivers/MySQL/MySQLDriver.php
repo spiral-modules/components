@@ -51,6 +51,14 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
+    public function identifier($identifier)
+    {
+        return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasTable($name)
     {
         return (bool)$this->query(
@@ -71,13 +79,5 @@ class MySQLDriver extends Driver
         }
 
         return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function identifier($identifier)
-    {
-        return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
     }
 }

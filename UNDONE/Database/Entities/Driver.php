@@ -68,11 +68,19 @@ abstract class Driver extends Component implements LoggerAwareInterface
     const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
 
     /**
-     * Container is required to load custom builders.
+     * Current transaction level (count of nested transactions). Not all drives can support nested
+     * transactions.
      *
-     * @var ContainerInterface
+     * @var int
      */
-    protected $container = null;
+    private $transactionLevel = 0;
+
+    /**
+     * Database name (fetched from connection string). In some cases can contain empty string (SQLite).
+     *
+     * @var string
+     */
+    protected $databaseName = '';
 
     /**
      * Connection configuration described in DBAL config file. Any driver can be used as data source
@@ -89,13 +97,6 @@ abstract class Driver extends Component implements LoggerAwareInterface
     ];
 
     /**
-     * Database name (fetched from connection string). In some cases can contain empty string (SQLite).
-     *
-     * @var string
-     */
-    protected $databaseName = '';
-
-    /**
      * Default driver PDO options set, this keys will be merged with data provided by DBAL configuration.
      *
      * @var array
@@ -107,19 +108,14 @@ abstract class Driver extends Component implements LoggerAwareInterface
     ];
 
     /**
-     * PDO connection.
-     *
      * @var PDO
      */
     protected $pdo = null;
 
     /**
-     * Current transaction level (count of nested transactions). Not all drives can support nested
-     * transactions.
-     *
-     * @var int
+     * @var ContainerInterface
      */
-    protected $transactionLevel = 0;
+    protected $container = null;
 
     /**
      * Driver instances responsible for all database low level operations which can be DBMS specific
@@ -146,7 +142,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      *
      * @return array
      */
-    public function getConfig()
+    public function config()
     {
         return $this->config;
     }
@@ -157,7 +153,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      *
      * @return string|null
      */
-    public function getDatabaseName()
+    public function databaseName()
     {
         return $this->databaseName;
     }
@@ -199,6 +195,19 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
+     * Disconnect PDO.
+     *
+     * @return $this
+     */
+    public function disconnect()
+    {
+        $this->fire('disconnect', $this->pdo);
+        $this->pdo = null;
+
+        return $this;
+    }
+
+    /**
      * Check if PDO already constructed and ready for use.
      *
      * @return bool
@@ -206,6 +215,19 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function isConnected()
     {
         return (bool)$this->pdo;
+    }
+
+    /**
+     * Manually set associated PDO instance.
+     *
+     * @param PDO $pdo
+     * @return $this
+     */
+    public function setPDO(PDO $pdo)
+    {
+        $this->pdo = $pdo;
+
+        return $this;
     }
 
     /**
@@ -226,96 +248,6 @@ abstract class Driver extends Component implements LoggerAwareInterface
         $this->benchmark('connect', $this->config['connection']);
 
         return $this->pdo;
-    }
-
-    /**
-     * Manually set associated PDO instance.
-     *
-     * @param PDO $pdo
-     * @return $this
-     */
-    public function setPDO(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-
-        return $this;
-    }
-
-    /**
-     * Method used to get PDO instance for current driver, it can be overwritten by custom driver
-     * realization to perform DBMS specific operations.
-     *
-     * @return PDO
-     */
-    protected function createPDO()
-    {
-        return new PDO(
-            $this->config['connection'],
-            $this->config['username'],
-            $this->config['password'],
-            $this->options
-        );
-    }
-
-    /**
-     * Disconnect PDO.
-     *
-     * @return $this
-     */
-    public function disconnect()
-    {
-        $this->fire('disconnect', $this->pdo);
-        $this->pdo = null;
-
-        return $this;
-    }
-
-    /**
-     * Driver specific database/table identifier quotation.
-     *
-     * @param string $identifier Table or column name (no dots or other parts allowed).
-     * @return string
-     */
-    public function identifier($identifier)
-    {
-        return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
-    }
-
-    /**
-     * Driver specific PDOStatement parameters preparation.
-     *
-     * @param array $parameters
-     * @return array
-     */
-    public function prepareParameters(array $parameters)
-    {
-        $result = [];
-        foreach ($parameters as $parameter)
-        {
-            if ($parameter instanceof ParameterInterface)
-            {
-                $parameter = $parameter->getValue();
-            }
-
-            if ($parameter instanceof \DateTime)
-            {
-                //We are going to convert all timestamps to database timezone which is UTC by default
-                $parameter = $parameter->setTimezone(
-                    new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
-                )->format(static::DATETIME);
-            }
-
-            if (is_array($parameter))
-            {
-                $result = array_merge($result, $this->prepareParameters($parameter));
-            }
-            else
-            {
-                $result[] = $parameter;
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -384,6 +316,54 @@ abstract class Driver extends Component implements LoggerAwareInterface
             'statement'  => $this->statement($query, $parameters, $preparedParameters),
             'parameters' => $preparedParameters
         ]);
+    }
+
+    /**
+     * Driver specific database/table identifier quotation.
+     *
+     * @param string $identifier Table or column name (no dots or other parts allowed).
+     * @return string
+     */
+    public function identifier($identifier)
+    {
+        return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
+    }
+
+    /**
+     * Driver specific PDOStatement parameters preparation.
+     *
+     * @param array $parameters
+     * @return array
+     */
+    public function prepareParameters(array $parameters)
+    {
+        $result = [];
+        foreach ($parameters as $parameter)
+        {
+            if ($parameter instanceof ParameterInterface)
+            {
+                $parameter = $parameter->getValue();
+            }
+
+            if ($parameter instanceof \DateTime)
+            {
+                //We are going to convert all timestamps to database timezone which is UTC by default
+                $parameter = $parameter->setTimezone(
+                    new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
+                )->format(static::DATETIME);
+            }
+
+            if (is_array($parameter))
+            {
+                $result = array_merge($result, $this->prepareParameters($parameter));
+            }
+            else
+            {
+                $result[] = $parameter;
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -488,50 +468,13 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Set transaction isolation level, this feature may not be supported by specific database driver.
+     * Clean (truncate) specified database table. Table should exists at this moment.
      *
-     * @param string $level
+     * @param string $table Table name without prefix included.
      */
-    protected function isolationLevel($level)
+    public function truncateTable($table)
     {
-        $this->logger()->info("Setting transaction isolation level to '{$level}'.");
-        !empty($level) && $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
-    }
-
-    /**
-     * Create nested transaction save point.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
-     */
-    protected function savepointCreate($name)
-    {
-        $this->logger()->info("Creating savepoint '{$name}'.");
-        $this->statement("SAVEPOINT " . $this->identifier("SVP{$name}"));
-    }
-
-    /**
-     * Commit/release savepoint.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
-     */
-    protected function savepointRelease($name)
-    {
-        $this->logger()->info("Releasing savepoint '{$name}'.");
-        $this->statement("RELEASE SAVEPOINT " . $this->identifier("SVP{$name}"));
-    }
-
-    /**
-     * Rollback savepoint.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
-     */
-    protected function savepointRollback($name)
-    {
-        $this->logger()->info("Rolling back savepoint '{$name}'.");
-        $this->statement("ROLLBACK TO SAVEPOINT " . $this->identifier("SVP{$name}"));
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
     }
 
     /**
@@ -549,16 +492,6 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * @return array
      */
     abstract public function tableNames();
-
-    /**
-     * Clean (truncate) specified database table. Table should exists at this moment.
-     *
-     * @param string $table Table name without prefix included.
-     */
-    public function truncateTable($table)
-    {
-        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
-    }
 
     /**
      * Get schema for specified table name, name should be provided without database prefix.
@@ -719,8 +652,71 @@ abstract class Driver extends Component implements LoggerAwareInterface
         return (object)[
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
-            'database'   => $this->getDatabaseName(),
+            'database'   => $this->databaseName(),
             'options'    => $this->options
         ];
+    }
+
+    /**
+     * Method used to get PDO instance for current driver, it can be overwritten by custom driver
+     * realization to perform DBMS specific operations.
+     *
+     * @return PDO
+     */
+    protected function createPDO()
+    {
+        return new PDO(
+            $this->config['connection'],
+            $this->config['username'],
+            $this->config['password'],
+            $this->options
+        );
+    }
+
+    /**
+     * Set transaction isolation level, this feature may not be supported by specific database driver.
+     *
+     * @param string $level
+     */
+    protected function isolationLevel($level)
+    {
+        $this->logger()->info("Setting transaction isolation level to '{$level}'.");
+        !empty($level) && $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
+    }
+
+    /**
+     * Create nested transaction save point.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
+     */
+    protected function savepointCreate($name)
+    {
+        $this->logger()->info("Creating savepoint '{$name}'.");
+        $this->statement("SAVEPOINT " . $this->identifier("SVP{$name}"));
+    }
+
+    /**
+     * Commit/release savepoint.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
+     */
+    protected function savepointRelease($name)
+    {
+        $this->logger()->info("Releasing savepoint '{$name}'.");
+        $this->statement("RELEASE SAVEPOINT " . $this->identifier("SVP{$name}"));
+    }
+
+    /**
+     * Rollback savepoint.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
+     */
+    protected function savepointRollback($name)
+    {
+        $this->logger()->info("Rolling back savepoint '{$name}'.");
+        $this->statement("ROLLBACK TO SAVEPOINT " . $this->identifier("SVP{$name}"));
     }
 }

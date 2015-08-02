@@ -70,98 +70,6 @@ class QueryCompiler extends Component
         return $this;
     }
 
-    /**
-     * Quote database table or column keyword according to driver rules, method can automatically
-     * detect table names, SQL functions and used aliases (via keywords AS), last argument can be used
-     * to collect such aliases.
-     *
-     * @param string $identifier  Identifier can include simple column operations and functions,
-     *                            having "." in it will automatically force table prefix to first value.
-     * @param bool   $table       Set to true to let quote method know that identified is related to
-     *                            table name.
-     * @param bool   $forceTable  In some cases we have to force prefix.
-     * @return mixed|string
-     */
-    public function quote($identifier, $table = false, $forceTable = false)
-    {
-        if ($identifier instanceof SqlFragmentInterface)
-        {
-            return $identifier->sqlStatement($this);
-        }
-
-        if (preg_match('/ as /i', $identifier, $matches))
-        {
-            list($identifier, $alias) = explode($matches[0], $identifier);
-
-            /**
-             * We can't do looped aliases, so let's force table prefix for identifier if we aliasing
-             * table name at this moment.
-             */
-            $quoted = $this->quote($identifier, $table, $table)
-                . $matches[0]
-                . $this->driver->identifier($alias);
-
-            if ($table && strpos($identifier, '.') === false)
-            {
-                //We have to apply operation post factum to prevent self aliasing (name AS name
-                //when db has prefix, expected: prefix_name as name)
-                $this->aliases[$alias] = $identifier;
-            }
-
-            return $quoted;
-        }
-
-        if (strpos($identifier, '(') || strpos($identifier, ' '))
-        {
-            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i', function ($identifier) use (&$table)
-            {
-                $identifier = $identifier[1];
-                if (substr($identifier, -1) == '(')
-                {
-                    //Function name
-                    return $identifier;
-                }
-
-                if ($table)
-                {
-                    $table = false;
-
-                    //Only first table has to be escaped
-                    return $this->quote($identifier, true);
-                }
-
-                return $this->quote($identifier);
-            }, $identifier);
-        }
-
-        if (strpos($identifier, '.') === false)
-        {
-            if (($table && !isset($this->aliases[$identifier])) || $forceTable)
-            {
-                if (!isset($this->aliases[$this->tablePrefix . $identifier]))
-                {
-                    $this->aliases[$this->tablePrefix . $identifier] = $identifier;
-                }
-
-                $identifier = $this->tablePrefix . $identifier;
-            }
-
-            return $this->driver->identifier($identifier);
-        }
-
-        $identifier = explode('.', $identifier);
-
-        //Expecting first element be table name
-        if (!isset($this->aliases[$identifier[0]]))
-        {
-            $identifier[0] = $this->tablePrefix . $identifier[0];
-        }
-
-        //No aliases can be collected there
-        $identifier = array_map([$this->driver, 'identifier'], $identifier);
-
-        return join('.', $identifier);
-    }
 
     /**
      * Create valid list of parameters (valid order) based on query type.
@@ -386,7 +294,7 @@ class QueryCompiler extends Component
      * @param array $tables
      * @return string
      */
-    public function tables(array $tables)
+    protected function tables(array $tables)
     {
         foreach ($tables as &$table)
         {
@@ -403,7 +311,7 @@ class QueryCompiler extends Component
      * @param array $columns
      * @return string
      */
-    public function columns(array $columns)
+    protected function columns(array $columns)
     {
         return wordwrap(join(', ', array_map([$this, 'quote'], $columns)), 180);
     }
@@ -414,7 +322,7 @@ class QueryCompiler extends Component
      * @param array $joins
      * @return string
      */
-    public function joins(array $joins)
+    protected function joins(array $joins)
     {
         $statement = '';
         foreach ($joins as $table => $join)
@@ -437,7 +345,7 @@ class QueryCompiler extends Component
      * @return string
      * @throws DatabaseException
      */
-    public function where(array $tokens)
+    protected function where(array $tokens)
     {
         if (!$tokens)
         {
@@ -576,7 +484,7 @@ class QueryCompiler extends Component
      * @param array $unions
      * @return string
      */
-    public function unions(array $unions)
+    protected function unions(array $unions)
     {
         $statement = '';
         foreach ($unions as $union)
@@ -593,7 +501,7 @@ class QueryCompiler extends Component
      * @param array $orderBy
      * @return string
      */
-    public function orderBy(array $orderBy)
+    protected function orderBy(array $orderBy)
     {
         $statement = 'ORDER BY ';
 
@@ -611,7 +519,7 @@ class QueryCompiler extends Component
      * @param array $groupBy
      * @return string
      */
-    public function groupBy(array $groupBy)
+    protected function groupBy(array $groupBy)
     {
         $statement = 'GROUP BY ';
 
@@ -632,7 +540,7 @@ class QueryCompiler extends Component
      * @param int $offset
      * @return string
      */
-    public function limit($limit, $offset)
+    protected function limit($limit, $offset)
     {
         $statement = '';
 
@@ -647,6 +555,99 @@ class QueryCompiler extends Component
         }
 
         return trim($statement);
+    }
+
+    /**
+     * Quote database table or column keyword according to driver rules, method can automatically
+     * detect table names, SQL functions and used aliases (via keywords AS), last argument can be used
+     * to collect such aliases.
+     *
+     * @param string $identifier  Identifier can include simple column operations and functions,
+     *                            having "." in it will automatically force table prefix to first value.
+     * @param bool   $table       Set to true to let quote method know that identified is related to
+     *                            table name.
+     * @param bool   $forceTable  In some cases we have to force prefix.
+     * @return mixed|string
+     */
+    public function quote($identifier, $table = false, $forceTable = false)
+    {
+        if ($identifier instanceof SqlFragmentInterface)
+        {
+            return $identifier->sqlStatement($this);
+        }
+
+        if (preg_match('/ as /i', $identifier, $matches))
+        {
+            list($identifier, $alias) = explode($matches[0], $identifier);
+
+            /**
+             * We can't do looped aliases, so let's force table prefix for identifier if we aliasing
+             * table name at this moment.
+             */
+            $quoted = $this->quote($identifier, $table, $table)
+                . $matches[0]
+                . $this->driver->identifier($alias);
+
+            if ($table && strpos($identifier, '.') === false)
+            {
+                //We have to apply operation post factum to prevent self aliasing (name AS name
+                //when db has prefix, expected: prefix_name as name)
+                $this->aliases[$alias] = $identifier;
+            }
+
+            return $quoted;
+        }
+
+        if (strpos($identifier, '(') || strpos($identifier, ' '))
+        {
+            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i', function ($identifier) use (&$table)
+            {
+                $identifier = $identifier[1];
+                if (substr($identifier, -1) == '(')
+                {
+                    //Function name
+                    return $identifier;
+                }
+
+                if ($table)
+                {
+                    $table = false;
+
+                    //Only first table has to be escaped
+                    return $this->quote($identifier, true);
+                }
+
+                return $this->quote($identifier);
+            }, $identifier);
+        }
+
+        if (strpos($identifier, '.') === false)
+        {
+            if (($table && !isset($this->aliases[$identifier])) || $forceTable)
+            {
+                if (!isset($this->aliases[$this->tablePrefix . $identifier]))
+                {
+                    $this->aliases[$this->tablePrefix . $identifier] = $identifier;
+                }
+
+                $identifier = $this->tablePrefix . $identifier;
+            }
+
+            return $this->driver->identifier($identifier);
+        }
+
+        $identifier = explode('.', $identifier);
+
+        //Expecting first element be table name
+        if (!isset($this->aliases[$identifier[0]]))
+        {
+            $identifier[0] = $this->tablePrefix . $identifier[0];
+        }
+
+        //No aliases can be collected there
+        $identifier = array_map([$this->driver, 'identifier'], $identifier);
+
+        return join('.', $identifier);
     }
 
     /**

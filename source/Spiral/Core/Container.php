@@ -246,12 +246,13 @@ class Container extends Component implements ContainerInterface
     /**
      * Create instance of desired class.
      *
-     * @param string $class
-     * @param array  $parameters Constructor parameters.
+     * @param string               $class
+     * @param array                $parameters Constructor parameters.
+     * @param \ReflectionParameter $context
      * @return object
      * @throws InstanceException
      */
-    private function createInstance($class, array $parameters)
+    private function createInstance($class, array $parameters, \ReflectionParameter $context = null)
     {
         try
         {
@@ -264,9 +265,7 @@ class Container extends Component implements ContainerInterface
 
         if (!empty($context) && $injector = $reflector->getConstant('INJECTOR'))
         {
-            /**
-             * We have to construct class here. Remember about this magick constant?
-             */
+            //We have to construct class using external injector. Remember about this magick constant?
             return call_user_func(
                 [$this->get($injector), 'createInjection'],
                 $reflector, $context, $this

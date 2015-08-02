@@ -183,7 +183,7 @@ class ColumnSchema extends AbstractColumn
          * them, plus column drop is not possible without removing all constraints.
          */
 
-        $tableDriver = $this->table->getDriver();
+        $tableDriver = $this->table->driver();
         if (!empty($schema['default_object_id']))
         {
             $this->defaultConstraint = $tableDriver->query(
@@ -292,7 +292,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         return $quote
-            ? $this->table->getDriver()->identifier($this->enumConstraint)
+            ? $this->table->driver()->identifier($this->enumConstraint)
             : $this->enumConstraint;
     }
 
@@ -356,7 +356,7 @@ class ColumnSchema extends AbstractColumn
         $enumValues = [];
         foreach ($this->enumValues as $value)
         {
-            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
         $statement = $this->sqlStatement(true);
@@ -458,7 +458,7 @@ class ColumnSchema extends AbstractColumn
             $operations[] = \Spiral\interpolate(
                 "ADD CONSTRAINT {constraint} DEFAULT {default} FOR {column}",
                 [
-                    'constraint' => $this->table->getDriver()->identifier($this->defaultConstraint),
+                    'constraint' => $this->table->driver()->identifier($this->defaultConstraint),
                     'column'     => $this->getName(true),
                     'default'    => $this->prepareDefault()
                 ]
@@ -471,7 +471,7 @@ class ColumnSchema extends AbstractColumn
             $enumValues = [];
             foreach ($this->enumValues as $value)
             {
-                $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
+                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
             }
 
             $operations[] = "ADD CONSTRAINT {$this->getEnumConstraint(true)} "

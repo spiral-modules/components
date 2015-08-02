@@ -271,7 +271,7 @@ abstract class AbstractTable extends Component implements LoggerAwareInterface
      *
      * @return Driver
      */
-    public function getDriver()
+    public function driver()
     {
         return $this->driver;
     }

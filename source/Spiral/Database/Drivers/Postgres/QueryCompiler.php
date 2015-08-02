@@ -8,18 +8,26 @@
  */
 namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Database\DatabaseException;
 use Spiral\Database\QueryCompiler as AbstractCompiler;
 
+/**
+ * Postgres syntax specific compiler.
+ */
 class QueryCompiler extends AbstractCompiler
 {
     /**
-     * Compile delete query statement. Table name, joins and where tokens are required.
-     *
-     * @param string $table
-     * @param array  $joins
-     * @param array  $where
-     * @return string
+     * {@inheritdoc}
+     */
+    public function insert($table, array $columns, array $rowsets, $primaryKey = '')
+    {
+        return parent::insert($table, $columns, $rowsets) . (!empty($primaryKey)
+            ? ' RETURNING ' . $this->quote($primaryKey)
+            : ''
+        );
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function delete($table, array $joins = [], array $where = [])
     {
@@ -57,14 +65,7 @@ class QueryCompiler extends AbstractCompiler
     }
 
     /**
-     * Compile update query statement. Table name, set of values (associated with column names), joins
-     * and where tokens are required.
-     *
-     * @param string $table
-     * @param array  $columns
-     * @param array  $joins
-     * @param array  $where
-     * @return string
+     * {@inheritdoc}
      */
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
@@ -102,28 +103,7 @@ class QueryCompiler extends AbstractCompiler
     }
 
     /**
-     * Compile insert query statement. Table name (without prefix), columns and list of rowsets is
-     * required.
-     *
-     * @param string $table      Table name without prefix.
-     * @param array  $columns    Columns name.
-     * @param array  $rowsets    List of rowsets, usually presented by Parameter instances as every
-     *                           rowset is array of values.
-     * @param string $primaryKey Primary key name to return.
-     * @return string
-     * @throws DatabaseException
-     */
-    public function insert($table, array $columns, array $rowsets, $primaryKey = '')
-    {
-        return parent::insert($table, $columns, $rowsets)
-        . (!empty($primaryKey) ? ' RETURNING ' . $this->quote($primaryKey) : '');
-    }
-
-    /**
-     * Compile DISTINCT query statement chunk. Postgres supports distinct condition.
-     *
-     * @param mixed $distinct
-     * @return string
+     * {@inheritdoc}
      */
     protected function distinct($distinct)
     {

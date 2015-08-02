@@ -271,7 +271,7 @@ abstract class AbstractColumn extends Component implements LoggerAwareInterface
      */
     public function getName($quoted = false)
     {
-        return $quoted ? $this->table->getDriver()->identifier($this->name) : $this->name;
+        return $quoted ? $this->table->driver()->identifier($this->name) : $this->name;
     }
 
     /**
@@ -493,7 +493,7 @@ abstract class AbstractColumn extends Component implements LoggerAwareInterface
 
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp']))
         {
-            if (strtolower($this->defaultValue) == strtolower($this->table->getDriver()->timestampNow()))
+            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->timestampNow()))
             {
                 return new SqlFragment($this->defaultValue);
             }
@@ -532,7 +532,7 @@ abstract class AbstractColumn extends Component implements LoggerAwareInterface
             && strtolower($value) == strtolower(Database::TIMESTAMP_NOW)
         )
         {
-            $this->defaultValue = $this->table->getDriver()->timestampNow();
+            $this->defaultValue = $this->table->driver()->timestampNow();
         }
 
         return $this;
@@ -794,7 +794,7 @@ abstract class AbstractColumn extends Component implements LoggerAwareInterface
             return $defaultValue;
         }
 
-        return $this->table->getDriver()->getPDO()->quote($defaultValue);
+        return $this->table->driver()->getPDO()->quote($defaultValue);
     }
 
     /**
@@ -807,7 +807,7 @@ abstract class AbstractColumn extends Component implements LoggerAwareInterface
         $enumValues = [];
         foreach ($this->enumValues as $value)
         {
-            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
         if (!empty($enumValues))

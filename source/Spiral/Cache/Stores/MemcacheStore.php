@@ -11,9 +11,9 @@ namespace Spiral\Cache\Stores;
 use Spiral\Cache\CacheStore;
 use Spiral\Cache\CacheManager;
 use Spiral\Cache\Exceptions\StoreException;
-use Spiral\Cache\Stores\DriverInterface\DriverInterface;
-use Spiral\Cache\Stores\DriverInterface\MemcachedDriver;
-use Spiral\Cache\Stores\DriverInterface\MemcacheDriver;
+use Spiral\Cache\Stores\Memcache\DriverInterface;
+use Spiral\Cache\Stores\Memcache\MemcachedDriver;
+use Spiral\Cache\Stores\Memcache\MemcacheDriver;
 
 /**
  * Talks to Memcache and Memcached drivers using interface.
@@ -56,11 +56,11 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      *
-     * @param bool            $connect If true, custom driver will be connected.
      * @param DriverInterface $driver  Pre-created driver instance.
+     * @param bool            $connect If true, custom driver will be connected.
      * @throws StoreException
      */
-    public function __construct(CacheManager $cache, $connect, DriverInterface $driver = null)
+    public function __construct(CacheManager $cache, DriverInterface $driver = null, $connect = true)
     {
         parent::__construct($cache);
 
@@ -68,11 +68,6 @@ class MemcacheStore extends CacheStore
         {
             $this->setDriver($driver, $connect);
 
-            return;
-        }
-
-        if (!$this->isAvailable())
-        {
             return;
         }
 

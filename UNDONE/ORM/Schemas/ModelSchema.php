@@ -421,7 +421,7 @@ class ModelSchema extends ReflectionEntity implements LoggerAwareInterface
         //As no default value provided and column can not be null we can cast value by ourselves
         if ($column->abstractType() == 'timestamp' || $column->abstractType() == 'datetime')
         {
-            $driver = $this->tableSchema->getDriver();
+            $driver = $this->tableSchema->driver();
 
             return $driver::DEFAULT_DATETIME;
         }
@@ -468,7 +468,7 @@ class ModelSchema extends ReflectionEntity implements LoggerAwareInterface
             $accessor = new $accessor($defaultValue, null, $option);
 
             //We have to pass default value thought accessor
-            return $accessor->defaultValue($this->tableSchema->getDriver());
+            return $accessor->defaultValue($this->tableSchema->driver());
         }
 
         if (array_key_exists($name, $this->getSetters()) && $this->getSetters()[$name])

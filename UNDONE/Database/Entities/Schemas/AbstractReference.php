@@ -113,7 +113,7 @@ abstract class AbstractReference
             $name = md5($name);
         }
 
-        return $quoted ? $this->table->getDriver()->identifier($name) : $name;
+        return $quoted ? $this->table->driver()->identifier($name) : $name;
     }
 
     /**
@@ -254,10 +254,10 @@ abstract class AbstractReference
         $statement[] = 'CONSTRAINT';
         $statement[] = $this->getName(true);
         $statement[] = 'FOREIGN KEY';
-        $statement[] = '(' . $this->table->getDriver()->identifier($this->column) . ')';
+        $statement[] = '(' . $this->table->driver()->identifier($this->column) . ')';
 
-        $statement[] = 'REFERENCES ' . $this->table->getDriver()->identifier($this->foreignTable);
-        $statement[] = '(' . $this->table->getDriver()->identifier($this->foreignKey) . ')';
+        $statement[] = 'REFERENCES ' . $this->table->driver()->identifier($this->foreignTable);
+        $statement[] = '(' . $this->table->driver()->identifier($this->foreignKey) . ')';
 
         $statement[] = "ON DELETE {$this->deleteRule}";
         $statement[] = "ON UPDATE {$this->updateRule}";

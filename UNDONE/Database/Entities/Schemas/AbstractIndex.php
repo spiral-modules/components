@@ -94,7 +94,7 @@ abstract class AbstractIndex
             $name = md5($name);
         }
 
-        return $quoted ? $this->table->getDriver()->identifier($name) : $name;
+        return $quoted ? $this->table->driver()->identifier($name) : $name;
     }
 
     /**
@@ -207,7 +207,7 @@ abstract class AbstractIndex
         }
 
         $statement[] = '(' . join(', ', array_map(
-                [$this->table->getDriver(), 'identifier'],
+                [$this->table->driver(), 'identifier'],
                 $this->columns
             )) . ')';
 

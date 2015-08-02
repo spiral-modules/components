@@ -6,21 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySQL;
 
 use Spiral\Database\QueryCompiler as AbstractCompiler;
 
+/**
+ * MySQL syntax specific compiler.
+ */
 class QueryCompiler extends AbstractCompiler
 {
     /**
-     * Create valid list of parameters (valid order) based on query type.
-     *
-     * @param int   $type Query type.
-     * @param array $where
-     * @param array $joins
-     * @param array $having
-     * @param array $columns
-     * @return array
+     * {@inheritdoc}
      */
     public function prepareParameters(
         $type,
@@ -40,12 +36,7 @@ class QueryCompiler extends AbstractCompiler
     }
 
     /**
-     * Compile delete query statement. Table name, joins and where tokens are required.
-     *
-     * @param string $table
-     * @param array  $joins
-     * @param array  $where
-     * @return string
+     * {@inheritdoc}
      */
     public function delete($table, array $joins = [], array $where = [])
     {
@@ -76,14 +67,7 @@ class QueryCompiler extends AbstractCompiler
     }
 
     /**
-     * Compile update query statement. Table name, set of values (associated with column names), joins
-     * and where tokens are required.
-     *
-     * @param string $table
-     * @param array  $columns
-     * @param array  $joins
-     * @param array  $where
-     * @return string
+     * {@inheritdoc}
      */
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
@@ -120,15 +104,11 @@ class QueryCompiler extends AbstractCompiler
     }
 
     /**
-     * Render selection (affection) limit and offset. MySQL limit should be always provided (if offset
-     * not empty). See not really great bypass way from official documentation.
+     * {@inheritdoc}
      *
      * @link http://dev.mysql.com/doc/refman/5.0/en/select.html#id4651990
-     * @param int $limit
-     * @param int $offset
-     * @return string
      */
-    public function limit($limit, $offset)
+    protected function limit($limit, $offset)
     {
         $statement = '';
 

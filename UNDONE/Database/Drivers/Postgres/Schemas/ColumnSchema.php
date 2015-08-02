@@ -164,7 +164,7 @@ class ColumnSchema extends AbstractColumn
         if ($this->type == 'USER-DEFINED' && $schema['typtype'] == 'e')
         {
             $this->type = $schema['typname'];
-            $range = $this->table->getDriver()
+            $range = $this->table->driver()
                 ->query('SELECT enum_range(NULL::' . $this->type . ')')
                 ->fetchColumn(0);
 
@@ -190,7 +190,7 @@ class ColumnSchema extends AbstractColumn
             $query = "SELECT conname, consrc FROM pg_constraint
                       WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
 
-            $constraints = $this->table->getDriver()
+            $constraints = $this->table->driver()
                 ->query($query, [$schema['tableOID'], '(' . $this->name . '%']);
 
             foreach ($constraints as $constraint)
@@ -340,7 +340,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         return $quote
-            ? $this->table->getDriver()->identifier($this->enumConstraint)
+            ? $this->table->driver()->identifier($this->enumConstraint)
             : $this->enumConstraint;
     }
 
@@ -372,7 +372,7 @@ class ColumnSchema extends AbstractColumn
         $enumValues = [];
         foreach ($this->enumValues as $value)
         {
-            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
         return "$statement CONSTRAINT {$this->getEnumConstraint(true, true)} "
@@ -470,7 +470,7 @@ class ColumnSchema extends AbstractColumn
             $enumValues = [];
             foreach ($this->enumValues as $value)
             {
-                $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
+                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
             }
 
             $operations[] = "ADD CONSTRAINT {$this->getEnumConstraint(true)} "

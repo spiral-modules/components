@@ -44,12 +44,7 @@ class AtomicNumber implements ModelAccessorInterface
     protected $delta = 0;
 
     /**
-     * Accessors can be used to mock different model values using "representative" class, like
-     * DateTime for timestamps.
-     *
-     * @param mixed  $data    Data to mock.
-     * @param object $parent
-     * @param mixed  $options Implementation specific options.
+     * {@inheritdoc}
      */
     public function __construct($data = null, $parent = null, $options = null)
     {
@@ -58,10 +53,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Embedding to another parent.
-     *
-     * @param Model $parent
-     * @return mixed
+     * {@inheritdoc}
      */
     public function embed($parent)
     {
@@ -72,9 +64,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
+     * {@inheritdoc}
      */
     public function setData($data)
     {
@@ -83,10 +73,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Serialize accessor mocked value. This is legacy name and used like that to be compatible with
-     * ORM and ODM engines.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function serializeData()
     {
@@ -94,9 +81,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Check if object has any update.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasUpdates()
     {
@@ -104,7 +89,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
+     * {@inheritdoc}
      */
     public function flushUpdates()
     {
@@ -113,10 +98,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Get new field value to be send to database.
-     *
-     * @param string $field Name of field where model/accessor stored into.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function compileUpdates($field = '')
     {
@@ -131,10 +113,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Accessor default value specific to driver.
-     *
-     * @param Driver $driver
-     * @return mixed
+     * {@inheritdoc}
      */
     public function defaultValue(Driver $driver)
     {
@@ -142,11 +121,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * (PHP 5 > 5.4.0)
-     * Specify data which should be serialized to JSON.
-     *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
@@ -196,8 +171,6 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Converting to string.
-     *
      * @return string
      */
     public function __toString()
@@ -206,8 +179,6 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return object
      */
     public function __debugInfo()

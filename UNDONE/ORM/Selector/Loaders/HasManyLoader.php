@@ -29,10 +29,7 @@ class HasManyLoader extends HasOneLoader
     const MULTIPLE = true;
 
     /**
-     * Set morph key and additional where conditions to selector.
-     *
-     * @param Selector $selector
-     * @return Selector
+     * {@inheritdoc}
      */
     protected function mountConditions(Selector $selector)
     {

@@ -10,12 +10,23 @@ namespace Spiral\Database\Entities;
 
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
+use Spiral\Core\ContainerInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Database\DatabaseManager;
+use Spiral\Database\Exceptions\DriverException;
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Query\CachedResult;
+use Spiral\Database\Query\QueryResult;
 use Spiral\Events\Traits\EventsTrait;
 
+/**
+ * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
+ * and use different by table prefix. Databases usually linked to real database or logical portion
+ * of database (filtered by prefix).
+ */
 class Database extends Component
 {
     /**
@@ -24,8 +35,8 @@ class Database extends Component
     use EventsTrait;
 
     /**
-     * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
-     * once set - Container will ask specific binding for injection.
+     * This is magick constant used by Spiral Container, it helps system to resolve controllable
+     * injections.
      */
     const INJECTOR = DatabaseManager::class;
 
@@ -89,65 +100,48 @@ class Database extends Component
     const ISOLATION_READ_UNCOMMITTED = 'READ UNCOMMITTED';
 
     /**
-     * Statement should be used for ColumnSchema to indicate that default datetime value should be
-     * set to current time.
-     *
-     * @var string
+     * Default timestamp expression (must be handler by driver as native expressions).
      */
     const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
 
     /**
-     * Associated driver instance. Driver provides database specific support including correct schema
-     * builders, query builders and quote mechanisms.
-     *
      * @var Driver
      */
-    protected $driver = null;
+    private $driver = null;
 
     /**
-     * Database connection name/id.
-     *
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
-     * Database table prefix.
-     *
      * @var string
      */
-    protected $tablePrefix = '';
+    private $tablePrefix = '';
 
     /**
-     * New Database instance. Database class is high level abstraction at top of Driver. Multiple
-     * databases can use same driver and be different by table prefix.
-     *
-     * @param Driver $driver      Driver instance responsible for database connection.
-     * @param string $name        Internal database name/id.
-     * @param string $tablePrefix Default database table prefix, will be used for all table identifiers.
+     * @invisible
+     * @var ContainerInterface
      */
-    public function __construct(Driver $driver, $name, $tablePrefix = '')
+    protected $container = null;
+
+    /**
+     * @param ContainerInterface $container
+     * @param Driver             $driver      Driver instance responsible for database connection.
+     * @param string             $name        Internal database name/id.
+     * @param string             $tablePrefix Default database table prefix, will be used for all
+     *                                        table identifiers.
+     */
+    public function __construct(ContainerInterface $container, Driver $driver, $name, $tablePrefix = '')
     {
-        $this->name = $name;
         $this->driver = $driver;
+        $this->name = $name;
         $this->setPrefix($tablePrefix);
+
+        $this->container = $container;
     }
 
     /**
-     * Internal database name.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Associated Driver instance. Driver instances responsible for all database low level operations
-     * which can be DBMS specific - such as connection preparation, custom table/column/index/reference
-     * schemas and etc.
-     *
      * @return Driver
      */
     public function getDriver()
@@ -156,8 +150,14 @@ class Database extends Component
     }
 
     /**
-     * Change database table prefix.
-     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
      * @param string $tablePrefix
      * @return $this
      */
@@ -169,8 +169,6 @@ class Database extends Component
     }
 
     /**
-     * Get current table prefix.
-     *
      * @return string
      */
     public function getPrefix()
@@ -179,11 +177,14 @@ class Database extends Component
     }
 
     /**
-     * Get prepared PDOStatement instance. Query will be run against connected PDO object (inside Driver).
+     * Get instance of PDOStatement from Driver.
      *
-     * @param string $query      SQL statement with parameter placeholders.
+     * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      * @return \PDOStatement
+     * @throws DriverException
+     * @throws QueryException
+     * @event statement($statement, $query, $parameters, $database): statement
      */
     public function statement($query, array $parameters = [])
     {
@@ -196,27 +197,13 @@ class Database extends Component
     }
 
     /**
-     * Run affect (DELETE, UPDATE) type SQL statement with prepare parameters against connected PDO
-     * instance. Count of affected rows will be returned.
+     * Execute statement and return number of affected rows.
      *
-     * @param string $query      SQL statement with parameter placeholders.
+     * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      * @return int
-     * @throws \PDOException
-     */
-    public function affect($query, array $parameters = [])
-    {
-        return $this->statement($query, $parameters)->rowCount();
-    }
-
-    /**
-     * Alias for affect() method. Run affect (DELETE, UPDATE) type SQL statement with prepare parameters
-     * against connected PDO instance. Count of affected rows will be returned.
-     *
-     * @param string $query      SQL statement with parameter placeholders.
-     * @param array  $parameters Parameters to be binded into query.
-     * @return int
-     * @throws \PDOException
+     * @throws DriverException
+     * @throws QueryException
      */
     public function execute($query, array $parameters = [])
     {
@@ -224,13 +211,14 @@ class Database extends Component
     }
 
     /**
-     * Run "select" type SQL statement with prepare parameters against connected PDO instance.
-     * QueryResult will be returned and can be used to walk thought resulted dataset.
+     * Execute statement and return query iterator.
      *
-     * @param string $query      SQL statement with parameter placeholders.
+     * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      * @return QueryResult
-     * @throws \PDOException
+     * @throws DriverException
+     * @throws QueryException
+     * @event statement($statement, $query, $parameters, $database): statement
      */
     public function query($query, array $parameters = [])
     {
@@ -243,8 +231,7 @@ class Database extends Component
     }
 
     /**
-     * Run select type SQL statement with prepare parameters against connected PDO instance. Result
-     * will be cached for desired lifetime and presented by CachedResult data reader.
+     * Execute statement or fetch result from cache and return cached query iterator.
      *
      * @param int            $lifetime   Cache lifetime in seconds.
      * @param string         $query      SQL statement with parameter placeholders.
@@ -253,26 +240,16 @@ class Database extends Component
      * @param StoreInterface $store      Cache store to store result in, if null default store will
      *                                   be used.
      * @return CachedResult
+     * @throws DriverException
+     * @throws QueryException
      */
-    public function cached(
-        $lifetime,
-        $query,
-        array $parameters = [],
-        $key = '',
-        StoreInterface $store = null
-    )
+    public function cached($lifetime, $query, array $parameters = [], $key = '', StoreInterface $store = null)
     {
-        if (empty($store))
-        {
-            //This will work only with global container set
-            $store = self::getContainer()->get(StoreInterface::class);
-        }
+        $store = !empty($store) ? $store : $this->container->get(StoreInterface::class);
 
         if (empty($key))
         {
-            /**
-             * Trying to build unique query id based on provided options and environment.
-             */
+            //Trying to build unique query id based on provided options and environment.
             $key = md5(serialize([$query, $parameters, $this->name, $this->tablePrefix]));
         }
 
@@ -285,9 +262,43 @@ class Database extends Component
     }
 
     /**
-     * Get database specified select query builder, as builder called outside parent table, from()
-     * method should be called to provide tables to select data from. Columns can be provided as
-     * array, comma separated string or multiple parameters.
+     * Get instance of InsertBuilder associated with current Database.
+     *
+     * @param string $table Table where values should be inserted to.
+     * @return InsertQuery
+     */
+    public function insert($table = '')
+    {
+        return $this->driver->insertBuilder($this, compact('table'));
+    }
+
+    /**
+     * Get instance of UpdateBuilder associated with current Database.
+     *
+     * @param string $table  Table where rows should be updated in.
+     * @param array  $values Initial set of columns to update associated with their values.
+     * @param array  $where  Initial set of where rules specified as array.
+     * @return UpdateQuery
+     */
+    public function update($table = '', array $values = [], array $where = [])
+    {
+        return $this->driver->updateBuilder($this, compact('table', 'values', 'where'));
+    }
+
+    /**
+     * Get instance of DeleteBuilder associated with current Database.
+     *
+     * @param string $table Table where rows should be deleted from.
+     * @param array  $where Initial set of where rules specified as array.
+     * @return DeleteQuery
+     */
+    public function delete($table = '', array $where = [])
+    {
+        return $this->driver->deleteBuilder($this, compact('table', 'where'));
+    }
+
+    /**
+     * Get instance of SelectBuilder associated with current Database.
      *
      * @param array|string $columns Columns to select.
      * @return SelectQuery
@@ -305,51 +316,41 @@ class Database extends Component
     }
 
     /**
-     * Get InsertQuery builder with driver specific query compiler and associated with current database.
+     * Execute multiple commands defined by Closure function inside one transaction. Closure or
+     * function will receive only one argument - Database instance.
      *
-     * @param string $table Table where values should be inserted to.
-     * @return InsertQuery
+     * @param callable $callback
+     * @param string   $isolationLevel
+     * @return mixed
+     * @throws \Exception
      */
-    public function insert($table = '')
+    public function transaction(callable $callback, $isolationLevel = null)
     {
-        return $this->driver->insertBuilder($this, compact('table'));
-    }
+        $this->begin($isolationLevel);
 
-    /**
-     * Get DeleteQuery builder with driver specific query compiler and associated with current database.
-     *
-     * @param string $table Table where rows should be deleted from.
-     * @param array  $where Initial set of where rules specified as array.
-     * @return DeleteQuery
-     */
-    public function delete($table = '', array $where = [])
-    {
-        return $this->driver->deleteBuilder($this, compact('table', 'where'));
-    }
+        try
+        {
+            $result = call_user_func($callback, $this);
+            $this->commit();
 
-    /**
-     * Get UpdateQuery builder with driver specific query compiler and associated with current database.
-     *
-     * @param string $table  Table where rows should be updated in.
-     * @param array  $values Initial set of columns to update associated with their values.
-     * @param array  $where  Initial set of where rules specified as array.
-     * @return UpdateQuery
-     */
-    public function update($table = '', array $values = [], array $where = [])
-    {
-        return $this->driver->updateBuilder($this, compact('table', 'values', 'where'));
+            return $result;
+        }
+        catch (\Exception $exception)
+        {
+            $this->rollBack();
+            throw $exception;
+        }
     }
 
     /**
      * Start SQL transaction with specified isolation level, not all database types support it.
-     * Nested transactions will be processed using savepoints.
      *
      * @link http://en.wikipedia.org/wiki/Database_transaction
      * @link http://en.wikipedia.org/wiki/Isolation_(database_systems)
-     * @param string $isolationLevel No value provided by default.
+     * @param string $isolationLevel
      * @return bool
      */
-    public function beginTransaction($isolationLevel = null)
+    public function begin($isolationLevel = null)
     {
         return $this->driver->beginTransaction($isolationLevel);
     }
@@ -359,7 +360,7 @@ class Database extends Component
      *
      * @return bool
      */
-    public function commitTransaction()
+    public function commit()
     {
         return $this->driver->commitTransaction();
     }
@@ -375,35 +376,7 @@ class Database extends Component
     }
 
     /**
-     * Simplified way to perform set of SQL commands inside transaction, user callback as closure
-     * function which will receive current database instance as only one argument.
-     *
-     * @param callable $callback       Closure or callback, function will receive current database
-     *                                 instance as only one argument.
-     * @param string   $isolationLevel No value provided by default.
-     * @return mixed
-     * @throws \Exception
-     */
-    public function transaction(callable $callback, $isolationLevel = null)
-    {
-        $this->beginTransaction($isolationLevel);
-
-        try
-        {
-            $result = call_user_func($callback, $this);
-            $this->commitTransaction();
-
-            return $result;
-        }
-        catch (\Exception $exception)
-        {
-            $this->rollBack();
-            throw $exception;
-        }
-    }
-
-    /**
-     * Get all available database tables (only tables matching table prefix will be selected).
+     * Get every available database Table abstraction.
      *
      * @return Table[]
      */
@@ -414,6 +387,7 @@ class Database extends Component
         {
             if ($this->tablePrefix && strpos($table, $this->tablePrefix) !== 0)
             {
+                //Logical partitioning
                 continue;
             }
 
@@ -424,9 +398,9 @@ class Database extends Component
     }
 
     /**
-     * Check if linked database has specified table.
+     * Check if table exists.
      *
-     * @param string $name Table name without prefix.
+     * @param string $name
      * @return bool
      */
     public function hasTable($name)
@@ -435,20 +409,18 @@ class Database extends Component
     }
 
     /**
-     * Get instance of database table, table can be used as enterpoint to query builders, table
-     * schema and other operations.
+     * Get Table abstraction.
      *
      * @param string $name Table name without prefix.
      * @return Table
      */
     public function table($name)
     {
-        return new Table($name, $this);
+        return new Table($this, $name);
     }
 
     /**
-     * Get instance of database table, table can be used as enterpoint to query builders and table
-     * schema and other operations.
+     * Shortcut to get table abstraction.
      *
      * @param string $name Table name without prefix.
      * @return Table

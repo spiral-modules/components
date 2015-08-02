@@ -31,10 +31,7 @@ class HasOneLoader extends Loader
     const MULTIPLE = false;
 
     /**
-     * Create selector to be executed as post load, usually such selector use aggregated values
-     * and IN where syntax.
-     *
-     * @return Selector
+     * {@inheritdoc}
      */
     public function createSelector()
     {
@@ -66,10 +63,7 @@ class HasOneLoader extends Loader
     }
 
     /**
-     * ORM Loader specific method used to clarify selector conditions, join and columns with
-     * loader specific information.
-     *
-     * @param Selector $selector
+     * {@inheritdoc}
      */
     protected function clarifySelector(Selector $selector)
     {
@@ -81,10 +75,7 @@ class HasOneLoader extends Loader
     }
 
     /**
-     * Set morph key and additional where conditions to selector.
-     *
-     * @param Selector $selector
-     * @return Selector
+     * {@inheritdoc}
      */
     protected function mountConditions(Selector $selector)
     {

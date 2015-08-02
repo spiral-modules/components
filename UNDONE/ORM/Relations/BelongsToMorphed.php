@@ -21,9 +21,7 @@ class BelongsToMorphed extends BelongsTo
     const RELATION_TYPE = Model::BELONGS_TO_MORPHED;
 
     /**
-     * Morphed class.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     protected function getMorphedClass()
     {
@@ -33,9 +31,7 @@ class BelongsToMorphed extends BelongsTo
     }
 
     /**
-     * Convert pre-loaded relation data to active record model or set of models.
-     *
-     * @return ModelIterator|Model
+     * {@inheritdoc}
      */
     protected function createModel()
     {
@@ -43,10 +39,7 @@ class BelongsToMorphed extends BelongsTo
     }
 
     /**
-     * Internal ORM relation method used to create valid selector used to pre-load relation data or
-     * create custom query based on relation options.
-     *
-     * @return Selector
+     * {@inheritdoc}
      */
     protected function createSelector()
     {
@@ -59,13 +52,7 @@ class BelongsToMorphed extends BelongsTo
     }
 
     /**
-     * Set relation data (called via __set method of parent ActiveRecord).
-     *
-     * Example:
-     * $user->profile = new Profile();
-     *
-     * @param Model $instance
-     * @throws ORMException
+     * {@inheritdoc}
      */
     public function setInstance(Model $instance = null)
     {
@@ -82,7 +69,7 @@ class BelongsToMorphed extends BelongsTo
     }
 
     /**
-     * Drop relation keys.
+     * {@inheritdoc}
      */
     protected function dropRelation()
     {

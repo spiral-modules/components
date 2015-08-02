@@ -9,18 +9,19 @@
 namespace Spiral\Tests\Cases\Tokenizer;
 
 use Psr\Log\NullLogger;
+use Spiral\Core\Components\Loader;
 use Spiral\Core\Configurator;
-use Spiral\Core\Loader;
 use Spiral\Files\FileManager;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassA;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassB;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassC;
 use Spiral\Tests\Cases\Tokenizer\Classes\Inner\ClassD;
 use Spiral\Tests\RuntimeHippocampus;
-use Spiral\Tokenizer\Reflections\FunctionUsage\Argument;
+use Spiral\Tests\TestCase;
+use Spiral\Tokenizer\Reflections\ReflectionArgument;
 use Spiral\Tokenizer\Tokenizer;
 
-class TokenizerTest extends \PHPUnit_Framework_TestCase
+class TokenizerTest extends TestCase
 {
     /**
      * @var Loader
@@ -187,19 +188,19 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($functionB);
 
         $this->assertSame(2, count($functionA->getArguments()));
-        $this->assertSame(Argument::VARIABLE, $functionA->argument(0)->getType());
+        $this->assertSame(ReflectionArgument::VARIABLE, $functionA->argument(0)->getType());
         $this->assertSame('$this', $functionA->argument(0)->getValue());
 
-        $this->assertSame(Argument::EXPRESSION, $functionA->argument(1)->getType());
+        $this->assertSame(ReflectionArgument::EXPRESSION, $functionA->argument(1)->getType());
         $this->assertSame('$a+$b', $functionA->argument(1)->getValue());
 
         $this->assertSame(2, count($functionB->getArguments()));
 
-        $this->assertSame(Argument::STRING, $functionB->argument(0)->getType());
+        $this->assertSame(ReflectionArgument::STRING, $functionB->argument(0)->getType());
         $this->assertSame('"string"', $functionB->argument(0)->getValue());
         $this->assertSame('string', $functionB->argument(0)->stringValue());
 
-        $this->assertSame(Argument::CONSTANT, $functionB->argument(1)->getType());
+        $this->assertSame(ReflectionArgument::CONSTANT, $functionB->argument(1)->getType());
         $this->assertSame('123', $functionB->argument(1)->getValue());
 
         if (false)

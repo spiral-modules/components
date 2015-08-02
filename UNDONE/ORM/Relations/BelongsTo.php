@@ -19,13 +19,7 @@ class BelongsTo extends HasOne
     const RELATION_TYPE = Model::BELONGS_TO;
 
     /**
-     * Set relation data (called via __set method of parent ActiveRecord).
-     *
-     * Example:
-     * $user->profile = new Profile();
-     *
-     * @param Model $instance
-     * @throws ORMException
+     * {@inheritdoc}
      */
     public function setInstance(Model $instance = null)
     {
@@ -62,7 +56,7 @@ class BelongsTo extends HasOne
     }
 
     /**
-     * Drop relation keys.
+     * {@inheritdoc}
      */
     protected function dropRelation()
     {
@@ -71,10 +65,7 @@ class BelongsTo extends HasOne
     }
 
     /**
-     * Mount relation keys to parent or children models to ensure their connection.
-     *
-     * @param Model $model
-     * @return Model
+     * {@inheritdoc}
      */
     protected function mountRelation(Model $model)
     {

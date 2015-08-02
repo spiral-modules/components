@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database;
+namespace Spiral\Database\Entities;
 
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -58,7 +58,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, \Countable
      * @param string   $name     Table name without prefix.
      * @param Database $database Parent DBAL database.
      */
-    public function __construct($name, Database $database)
+    public function __construct(Database $database, $name)
     {
         $this->name = $name;
         $this->database = $database;

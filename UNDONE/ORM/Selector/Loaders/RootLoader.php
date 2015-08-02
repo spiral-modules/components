@@ -20,16 +20,7 @@ class RootLoader extends Loader
     const LOAD_METHOD = Selector::INLOAD;
 
     /**
-     * New instance of ORM Loader. Loader can always load additional components using
-     * ORM->getContainer().
-     *
-     * For root loader model schema should proved as loader definition.
-     *
-     * @param ORM    $orm
-     * @param string $container  Location in parent loaded where data should be attached.
-     * @param array  $definition Definition compiled by relation relation schema and stored in ORM
-     *                           cache.
-     * @param Loader $parent     Parent loader if presented.
+     * {@inheritdoc}
      */
     public function __construct(ORM $orm, $container, array $definition = [], Loader $parent = null)
     {
@@ -46,9 +37,7 @@ class RootLoader extends Loader
     }
 
     /**
-     * Configure selector options.
-     *
-     * @param Selector $selector
+     * {@inheritdoc}
      */
     public function configureSelector(Selector $selector)
     {
@@ -62,10 +51,7 @@ class RootLoader extends Loader
     }
 
     /**
-     * ORM Loader specific method used to clarify selector conditions, join and columns with
-     * loader specific information.
-     *
-     * @param Selector $selector
+     * {@inheritdoc}
      */
     protected function clarifySelector(Selector $selector)
     {

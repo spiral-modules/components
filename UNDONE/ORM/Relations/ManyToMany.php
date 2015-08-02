@@ -49,10 +49,7 @@ class ManyToMany extends Relation implements \Countable
     }
 
     /**
-     * Internal ORM relation method used to create valid selector used to pre-load relation data or
-     * create custom query based on relation options.
-     *
-     * @return Selector
+     * {@inheritdoc}
      */
     protected function createSelector()
     {
@@ -70,11 +67,7 @@ class ManyToMany extends Relation implements \Countable
     }
 
     /**
-     * Mount relation keys to parent or children models to ensure their connection. Method called
-     * when model requests relation save.
-     *
-     * @param Model $model
-     * @return Model
+     * {@inheritdoc}
      */
     protected function mountRelation(Model $model)
     {

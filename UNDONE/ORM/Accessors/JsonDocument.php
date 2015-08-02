@@ -15,9 +15,7 @@ use Spiral\ORM\ModelAccessorInterface;
 abstract class JsonDocument extends Document implements ModelAccessorInterface
 {
     /**
-     * Serialize object data for saving into database. No getters will be applied here.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function serializeData()
     {
@@ -25,10 +23,7 @@ abstract class JsonDocument extends Document implements ModelAccessorInterface
     }
 
     /**
-     * Get new field value to be send to database.
-     *
-     * @param string $field Name of field where model/accessor stored into.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function compileUpdates($field = '')
     {
@@ -36,10 +31,7 @@ abstract class JsonDocument extends Document implements ModelAccessorInterface
     }
 
     /**
-     * Accessor default value specific to driver.
-     *
-     * @param Driver $driver
-     * @return mixed
+     * {@inheritdoc}
      */
     public function defaultValue(Driver $driver)
     {
@@ -47,10 +39,7 @@ abstract class JsonDocument extends Document implements ModelAccessorInterface
     }
 
     /**
-     * Update accessor mocked data.
-     *
-     * @param mixed $data
-     * @return $this
+     * {@inheritdoc}
      */
     public function setData($data)
     {

@@ -45,14 +45,7 @@ class ManyToManyLoader extends Loader
     protected $pivotColumnsOffset = 0;
 
     /**
-     * New instance of ORM Loader. Loader can always load additional components using
-     * ORM->getContainer().
-     *
-     * @param ORM    $orm
-     * @param string $container  Location in parent loaded where data should be attached.
-     * @param array  $definition Definition compiled by relation relation schema and stored in ORM
-     *                           cache.
-     * @param Loader $parent     Parent loader if presented.
+     * {@inheritdoc}
      */
     public function __construct(ORM $orm, $container, array $definition = [], Loader $parent = null)
     {
@@ -102,9 +95,7 @@ class ManyToManyLoader extends Loader
     }
 
     /**
-     * Configure columns required for loader data selection.
-     *
-     * @param Selector $selector
+     * {@inheritdoc}
      */
     protected function configureColumns(Selector $selector)
     {
@@ -125,11 +116,7 @@ class ManyToManyLoader extends Loader
     }
 
     /**
-     * Create selector to be executed as post load, usually such selector use aggregated values
-     * and IN where syntax.
-     *
-     * @param string $parentRole
-     * @return Selector
+     * {@inheritdoc}
      */
     public function createSelector($parentRole = '')
     {
@@ -173,10 +160,7 @@ class ManyToManyLoader extends Loader
     }
 
     /**
-     * ORM Loader specific method used to clarify selector conditions, join and columns with
-     * loader specific information.
-     *
-     * @param Selector $selector
+     * {@inheritdoc}
      */
     protected function clarifySelector(Selector $selector)
     {
@@ -290,17 +274,7 @@ class ManyToManyLoader extends Loader
     }
 
     /**
-     * In many cases (for example if you have inload of HAS_MANY relation) model data can be spreaded
-     * by many result rows (duplicated). To prevent wrong data linking we have to deduplicate such
-     * records.
-     *
-     * Method will return true if data wasn't handled before and this is first occurence and false
-     * in opposite case.
-     *
-     * @param array $data                   Reference to parsed record, reference will be pointed to
-     *                                      valid and existed data segment if such data was already
-     *                                      parsed.
-     * @return bool
+     * {@inheritdoc}
      */
     protected function deduplicate(array &$data)
     {

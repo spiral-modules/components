@@ -10,8 +10,9 @@ namespace Spiral\Tests\Cases\Encrypter;
 
 use Spiral\Core\Configurator;
 use Spiral\Encrypter\Encrypter;
+use Spiral\Tests\TestCase;
 
-class EncryptionTest extends \PHPUnit_Framework_TestCase
+class EncryptionTest extends TestCase
 {
     /**
      * @param array $config
@@ -42,7 +43,7 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Encrypter\DecryptException
+     * @expectedException \Spiral\Encrypter\Exceptions\DecryptException
      * @expectedExceptionMessage Invalid dataset.
      */
     public function testBadData()
@@ -56,7 +57,7 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Encrypter\DecryptException
+     * @expectedException \Spiral\Encrypter\Exceptions\DecryptException
      * @expectedExceptionMessage Encrypted data does not have valid signature.
      */
     public function testBadSignature()

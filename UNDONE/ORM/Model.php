@@ -697,12 +697,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Get mutator for specified field. Setters, getters and accessors can be retrieved using this
-     * method.
-     *
-     * @param string $field   Field name.
-     * @param string $mutator Mutator type (setters, getters, accessors).
-     * @return mixed|null
+     * {@inheritdoc}
      */
     protected function getMutator($field, $mutator)
     {
@@ -715,10 +710,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Check if field assignable.
-     *
-     * @param string $field
-     * @return bool
+     * {@inheritdoc}
      */
     protected function isFillable($field)
     {
@@ -772,11 +764,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Offset to retrieve.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param mixed $offset The offset to retrieve.
-     * @return mixed
+     * {@inheritdoc}
      */
     public function __get($offset)
     {
@@ -789,11 +777,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Set value to one of field. Setter filter can be disabled by providing last argument.
-     *
-     * @param string $name   Field name.
-     * @param mixed  $value  Value to set.
-     * @param bool   $filter If false no filter will be applied (setter or accessor).
+     * {@inheritdoc}
      */
     public function setField($name, $value, $filter = true)
     {
@@ -814,11 +798,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Offset to set.
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param mixed $offset The offset to assign the value to.
-     * @param mixed $value  The value to set.
+     * {@inheritdoc}
      */
     public function __set($offset, $value)
     {
@@ -937,9 +917,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Get all non secured model fields. Additional processing can be applied to fields here.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function publicFields()
     {
@@ -953,11 +931,7 @@ abstract class Model extends DataEntity
     }
 
     /**
-     * Validator instance associated with model, will be response for validations of validation errors.
-     * Model related error localization should happen in model itself.
-     *
-     * @param array $validates Custom validation rules.
-     * @return ValidatorInterface
+     * {@inheritdoc}
      */
     public function validator(array $validates = [])
     {

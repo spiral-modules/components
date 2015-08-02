@@ -10,8 +10,9 @@ namespace Spiral\Tests\Cases\Encrypter;
 
 use Spiral\Core\Configurator;
 use Spiral\Encrypter\Encrypter;
+use Spiral\Tests\TestCase;
 
-class RandomTest extends \PHPUnit_Framework_TestCase
+class RandomTest extends TestCase
 {
     /**
      * @param array $config

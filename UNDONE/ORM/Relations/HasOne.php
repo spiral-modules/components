@@ -21,10 +21,7 @@ class HasOne extends Relation
     const RELATION_TYPE = Model::HAS_ONE;
 
     /**
-     * Internal ORM relation method used to create valid selector used to pre-load relation data or
-     * create custom query based on relation options.
-     *
-     * @return Selector
+     * {@inheritdoc}
      */
     protected function createSelector()
     {
@@ -47,13 +44,7 @@ class HasOne extends Relation
     }
 
     /**
-     * Set relation data (called via __set method of parent ActiveRecord).
-     *
-     * Example:
-     * $user->profile = new Profile();
-     *
-     * @param Model $instance
-     * @throws ORMException
+     * {@inheritdoc}
      */
     public function setInstance(Model $instance = null)
     {
@@ -62,11 +53,7 @@ class HasOne extends Relation
     }
 
     /**
-     * Mount relation keys to parent or children models to ensure their connection. Method called
-     * when model requests relation save.
-     *
-     * @param Model $model
-     * @return Model
+     * {@inheritdoc}
      */
     protected function mountRelation(Model $model)
     {

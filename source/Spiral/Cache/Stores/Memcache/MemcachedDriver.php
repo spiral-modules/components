@@ -100,7 +100,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function forever($name, $data)
     {
-        $this->service->decrement($name, $data);
+        $this->service->set($name, $data);
     }
 
     /**
@@ -116,7 +116,14 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function increment($name, $delta = 1)
     {
-        $this->service->increment($name, $delta);
+        if (!$this->has($name))
+        {
+            $this->forever($name, $delta);
+
+            return $delta;
+        }
+
+        return $this->service->increment($name, $delta);
     }
 
     /**
@@ -124,7 +131,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function decrement($name, $delta = 1)
     {
-        $this->service->decrement($name, $delta);
+        return $this->service->decrement($name, $delta);
     }
 
     /**

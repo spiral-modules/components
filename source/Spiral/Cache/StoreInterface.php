@@ -72,19 +72,21 @@ interface StoreInterface
     public function delete($name);
 
     /**
-     * Increment numeric value stored in cache.
+     * Increment numeric value stored in cache. Must return incremented value.
      *
      * @param string $name
      * @param int    $delta How much to increment by. Set to 1 by default.
+     * @return int
      * @throws StoreException
      */
     public function increment($name, $delta = 1);
 
     /**
-     * Decrement numeric value stored in cache.
+     * Decrement numeric value stored in cache. Must return decremented value.
      *
      * @param string $name
      * @param int    $delta How much to decrement by. Set to 1 by default.
+     * @return int
      * @throws StoreException
      */
     public function decrement($name, $delta = 1);

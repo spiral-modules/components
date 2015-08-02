@@ -55,17 +55,6 @@ class FileStore extends CacheStore
     }
 
     /**
-     * Create filename using cache name.
-     *
-     * @param string $name
-     * @return string Filename.
-     */
-    protected function makeFilename($name)
-    {
-        return $this->options['directory'] . '/' . md5($name) . '.' . $this->options['extension'];
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function has($name)
@@ -160,5 +149,16 @@ class FileStore extends CacheStore
         }
 
         return count($files);
+    }
+
+    /**
+     * Create filename using cache name.
+     *
+     * @param string $name
+     * @return string Filename.
+     */
+    protected function makeFilename($name)
+    {
+        return $this->options['directory'] . '/' . md5($name) . '.' . $this->options['extension'];
     }
 }

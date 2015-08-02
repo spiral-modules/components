@@ -29,7 +29,7 @@ class MemcacheStore extends CacheStore
      * {@inheritdoc}
      */
     protected $options = [
-        'prefix'        => 'spiral',
+        'prefix'        => 'spiral:',
         'options'       => [],
         'defaultServer' => [
             'host'       => 'localhost',
@@ -71,7 +71,6 @@ class MemcacheStore extends CacheStore
             return;
         }
 
-        $this->prefix = !empty($this->options['prefix']) ? $this->options['prefix'] . ':' : '';
         if (empty($this->options['servers']))
         {
             throw new StoreException(
@@ -97,18 +96,6 @@ class MemcacheStore extends CacheStore
     }
 
     /**
-     * Set pre-created Memcache driver.
-     *
-     * @param DriverInterface $driver  Pre-created driver instance.
-     * @param bool            $connect Force connection.
-     */
-    protected function setDriver(DriverInterface $driver, $connect = false)
-    {
-        $this->driver = $driver;
-        $connect && $this->driver->connect();
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function isAvailable()
@@ -121,7 +108,7 @@ class MemcacheStore extends CacheStore
      */
     public function has($name)
     {
-        return $this->driver->get($this->prefix . $name);
+        return $this->driver->get($this->options['prefix'] . $name);
     }
 
     /**
@@ -129,7 +116,7 @@ class MemcacheStore extends CacheStore
      */
     public function get($name)
     {
-        return $this->driver->get($this->prefix . $name);
+        return $this->driver->get($this->options['prefix'] . $name);
     }
 
     /**
@@ -145,7 +132,7 @@ class MemcacheStore extends CacheStore
             $lifetime = 0;
         }
 
-        return $this->driver->set($this->prefix . $name, $data, $lifetime);
+        return $this->driver->set($this->options['prefix'] . $name, $data, $lifetime);
     }
 
     /**
@@ -153,7 +140,7 @@ class MemcacheStore extends CacheStore
      */
     public function forever($name, $data)
     {
-        return $this->driver->forever($this->prefix . $name, $data);
+        return $this->driver->forever($this->options['prefix'] . $name, $data);
     }
 
     /**
@@ -161,7 +148,7 @@ class MemcacheStore extends CacheStore
      */
     public function delete($name)
     {
-        return $this->driver->delete($this->prefix . $name);
+        return $this->driver->delete($this->options['prefix'] . $name);
     }
 
     /**
@@ -169,7 +156,7 @@ class MemcacheStore extends CacheStore
      */
     public function increment($name, $delta = 1)
     {
-        return $this->driver->increment($this->prefix . $name);
+        return $this->driver->increment($this->options['prefix'] . $name);
     }
 
     /**
@@ -177,7 +164,7 @@ class MemcacheStore extends CacheStore
      */
     public function decrement($name, $delta = 1)
     {
-        return $this->driver->decrement($this->prefix . $name, $delta);
+        return $this->driver->decrement($this->options['prefix'] . $name, $delta);
     }
 
     /**
@@ -186,5 +173,17 @@ class MemcacheStore extends CacheStore
     public function flush()
     {
         $this->driver->flush();
+    }
+
+    /**
+     * Set pre-created Memcache driver.
+     *
+     * @param DriverInterface $driver  Pre-created driver instance.
+     * @param bool            $connect Force connection.
+     */
+    protected function setDriver(DriverInterface $driver, $connect = false)
+    {
+        $this->driver = $driver;
+        $connect && $this->driver->connect();
     }
 }

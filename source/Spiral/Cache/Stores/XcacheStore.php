@@ -25,17 +25,8 @@ class XcacheStore extends CacheStore
      * {@inheritdoc}
      */
     protected $options = [
-        'prefix' => 'spiral'
+        'prefix' => 'spiral:'
     ];
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct(CacheManager $cache)
-    {
-        parent::__construct($cache);
-        $this->prefix = !empty($this->options['prefix']) ? $this->options['prefix'] . ':' : '';
-    }
 
     /**
      * {@inheritdoc}
@@ -50,7 +41,7 @@ class XcacheStore extends CacheStore
      */
     public function has($name)
     {
-        return xcache_isset($this->prefix . $name);
+        return xcache_isset($this->options['prefix'] . $name);
     }
 
     /**
@@ -58,7 +49,7 @@ class XcacheStore extends CacheStore
      */
     public function get($name)
     {
-        return xcache_get($this->prefix . $name);
+        return xcache_get($this->options['prefix'] . $name);
     }
 
     /**
@@ -66,7 +57,7 @@ class XcacheStore extends CacheStore
      */
     public function set($name, $data, $lifetime)
     {
-        return xcache_set($this->prefix . $name, $data, $lifetime);
+        return xcache_set($this->options['prefix'] . $name, $data, $lifetime);
     }
 
     /**
@@ -74,7 +65,7 @@ class XcacheStore extends CacheStore
      */
     public function forever($name, $data)
     {
-        return xcache_set($this->prefix . $name, $data, 0);
+        return xcache_set($this->options['prefix'] . $name, $data, 0);
     }
 
     /**
@@ -82,7 +73,7 @@ class XcacheStore extends CacheStore
      */
     public function delete($name)
     {
-        xcache_unset($this->prefix . $name);
+        xcache_unset($this->options['prefix'] . $name);
     }
 
     /**
@@ -90,7 +81,7 @@ class XcacheStore extends CacheStore
      */
     public function increment($name, $delta = 1)
     {
-        return xcache_inc($this->prefix . $name, $delta);
+        return xcache_inc($this->options['prefix'] . $name, $delta);
     }
 
     /**
@@ -98,7 +89,7 @@ class XcacheStore extends CacheStore
      */
     public function decrement($name, $delta = 1)
     {
-        return xcache_dec($this->prefix . $name, $delta);
+        return xcache_dec($this->options['prefix'] . $name, $delta);
     }
 
     /**

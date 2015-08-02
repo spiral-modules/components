@@ -115,6 +115,8 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
 
     /**
      * {@inheritdoc}
+     *
+     * @throws CacheException
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
     {
@@ -123,6 +125,14 @@ class CacheManager extends Singleton implements ProviderInterface, InjectorInter
             return $this->store();
         }
 
-        return $this->container->get($class->getName(), ['cache' => $this]);
+        $store = $this->container->get($class->getName(), ['cache' => $this]);
+        if (!$store->isAvailable())
+        {
+            throw new CacheException(
+                "Unable to use store '" . get_class($store) . "', driver is unavailable."
+            );
+        }
+
+        return $store;
     }
 }

@@ -52,7 +52,7 @@ class Container extends Component implements ContainerInterface
 
         if (!isset($this->bindings[$alias]))
         {
-            return $this->createInstance($alias, $parameters);
+            return $this->createInstance($alias, $parameters, $context);
         }
 
         if (is_object($binding = $this->bindings[$alias]))

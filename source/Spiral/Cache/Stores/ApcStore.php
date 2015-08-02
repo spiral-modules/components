@@ -28,6 +28,13 @@ class APCStore extends CacheStore
     const APCU_DRIVER = 1;
 
     /**
+     * {@inheritdoc}
+     */
+    protected $options = [
+        'prefix' => 'spiral:'
+    ];
+
+    /**
      * Cache driver type.
      *
      * @var int
@@ -40,8 +47,6 @@ class APCStore extends CacheStore
     public function __construct(CacheManager $cache)
     {
         parent::__construct($cache);
-
-        $this->prefix = !empty($this->options['prefix']) ? $this->options['prefix'] . ':' : '';
         $this->driver = function_exists('apcu_store') ? self::APCU_DRIVER : self::APC_DRIVER;
     }
 
@@ -70,10 +75,10 @@ class APCStore extends CacheStore
     {
         if ($this->driver == self::APCU_DRIVER)
         {
-            return apcu_exists($this->prefix . $name);
+            return apcu_exists($this->options['prefix'] . $name);
         }
 
-        return apc_exists($this->prefix . $name);
+        return apc_exists($this->options['prefix'] . $name);
     }
 
     /**
@@ -83,10 +88,10 @@ class APCStore extends CacheStore
     {
         if ($this->driver == self::APCU_DRIVER)
         {
-            return apcu_fetch($this->prefix . $name);
+            return apcu_fetch($this->options['prefix'] . $name);
         }
 
-        return apc_fetch($this->prefix . $name);
+        return apc_fetch($this->options['prefix'] . $name);
     }
 
     /**
@@ -96,10 +101,10 @@ class APCStore extends CacheStore
     {
         if ($this->driver == self::APCU_DRIVER)
         {
-            return apcu_store($this->prefix . $name, $data, $lifetime);
+            return apcu_store($this->options['prefix'] . $name, $data, $lifetime);
         }
 
-        return apc_store($this->prefix . $name, $data, $lifetime);
+        return apc_store($this->options['prefix'] . $name, $data, $lifetime);
     }
 
     /**
@@ -117,12 +122,12 @@ class APCStore extends CacheStore
     {
         if ($this->driver == self::APCU_DRIVER)
         {
-            apcu_delete($this->prefix . $name);
+            apcu_delete($this->options['prefix'] . $name);
 
             return;
         }
 
-        apc_delete($this->prefix . $name);
+        apc_delete($this->options['prefix'] . $name);
     }
 
     /**
@@ -132,10 +137,10 @@ class APCStore extends CacheStore
     {
         if ($this->driver == self::APCU_DRIVER)
         {
-            return apcu_inc($this->prefix . $name, $delta);
+            return apcu_inc($this->options['prefix'] . $name, $delta);
         }
 
-        return apc_inc($this->prefix . $name, $delta);
+        return apc_inc($this->options['prefix'] . $name, $delta);
     }
 
     /**
@@ -145,10 +150,10 @@ class APCStore extends CacheStore
     {
         if ($this->driver == self::APCU_DRIVER)
         {
-            return apcu_dec($this->prefix . $name, $delta);
+            return apcu_dec($this->options['prefix'] . $name, $delta);
         }
 
-        return apc_dec($this->prefix . $name, $delta);
+        return apc_dec($this->options['prefix'] . $name, $delta);
     }
 
     /**

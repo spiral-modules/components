@@ -6,10 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database;
+namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
 
+/**
+ * Responsible for conversion set of query parameters (where tokens, table names and etc) int sql
+ * specific for associated driver.
+ */
 class QueryCompiler extends Component
 {
     /**
@@ -21,75 +25,34 @@ class QueryCompiler extends Component
     const INSERT_QUERY = 'insert';
 
     /**
-     * Parent driver instance, driver used only for identifier() methods but can be required in other
-     * cases.
+     * Table prefix will be applied to every table name found in query.
+     *
+     * @var string
+     */
+    private $tablePrefix = '';
+
+    /**
+     * Cached list of table aliases used to correctly inject prefixed tables into conditions.
+     *
+     * @var array
+     */
+    private $aliases = [];
+
+    /**
+     * Associated driver instance, may be required for some data assumptions.
      *
      * @var Driver
      */
     protected $driver = null;
 
     /**
-     * Active table prefix. Table prefix defined on database level is will change every quoted table
-     * or column name.
-     *
-     * @var string
-     */
-    protected $tablePrefix = '';
-
-    /**
-     * Set of table name aliases, such aliases will not be prefixed by driver. Method will generate
-     * set of aliases automatically every time "AS" condition will be met.
-     *
-     * @var array
-     */
-    protected $aliases = [];
-
-    /**
-     * QueryCompiler is low level SQL compiler which used by different query builders to generate
-     * statement based on provided tokens. Every builder will get it's own QueryCompiler at it has
-     * some internal isolation features (such as query specific table aliases).
-     *
-     * @param Driver $driver      Parent driver instance.
-     * @param string $tablePrefix Active table prefix (defined on database level).
+     * @param Driver $driver
+     * @param string $tablePrefix
      */
     public function __construct(Driver $driver, $tablePrefix = '')
     {
         $this->driver = $driver;
         $this->tablePrefix = $tablePrefix;
-    }
-
-    /**
-     * Reset QueryCompiler aliases cache.
-     *
-     * @return $this
-     */
-    public function resetAliases()
-    {
-        $this->aliases = [];
-
-        return $this;
-    }
-
-
-    /**
-     * Create valid list of parameters (valid order) based on query type.
-     *
-     * @param int   $type Query type.
-     * @param array $where
-     * @param array $joins
-     * @param array $having
-     * @param array $columns
-     * @return array
-     */
-    public function prepareParameters(
-        $type,
-        array $where = [],
-        $joins = [],
-        array $having = [],
-        array $columns = []
-    )
-    {
-        return array_merge($columns, $joins, $where, $having);
     }
 
     /**
@@ -586,7 +549,7 @@ class QueryCompiler extends Component
              */
             $quoted = $this->quote($identifier, $table, $table)
                 . $matches[0]
-                . $this->driver->identifier($alias);
+                . $this->identifier($alias);
 
             if ($table && strpos($identifier, '.') === false)
             {
@@ -633,7 +596,7 @@ class QueryCompiler extends Component
                 $identifier = $this->tablePrefix . $identifier;
             }
 
-            return $this->driver->identifier($identifier);
+            return $this->identifier($identifier);
         }
 
         $identifier = explode('.', $identifier);
@@ -651,10 +614,54 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Helper method used to fill query with binded parameters. This method should NEVER be used to
-     * generate database queries and only for debugging.
+     * Driver specific database/table identifier quotation.
      *
-     * @param string $query      SQL statement with parameter placeholders.
+     * @param string $identifier
+     * @return string
+     */
+    public function identifier($identifier)
+    {
+        return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
+    }
+
+    /**
+     * Sort list of parameters in sql specific order, query type must be provided.
+     *
+     * @param int   $type
+     * @param array $where
+     * @param array $joins
+     * @param array $having
+     * @param array $columns
+     * @return array
+     */
+    public function prepareParameters(
+        $type,
+        array $where = [],
+        array  $joins = [],
+        array $having = [],
+        array $columns = []
+    )
+    {
+        return array_merge($columns, $joins, $where, $having);
+    }
+
+    /**
+     * Reset compiler aliases cache.
+     *
+     * @return $this
+     */
+    public function reset()
+    {
+        $this->aliases = [];
+
+        return $this;
+    }
+
+    /**
+     * Helper method used to interpolate SQL query with set of parameters, must be used only for
+     * development purposes and never for real query.
+     *
+     * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      * @return mixed
      */

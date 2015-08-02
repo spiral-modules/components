@@ -6,21 +6,23 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database;
+namespace Spiral\Database\Injections;
 
-interface SqlFragmentInterface
+use Spiral\Database\Entities\QueryCompiler;
+
+/**
+ * Declares ability to be converted to sql statement, using (ot not using) query compiler. This
+ * interface generally implemented to represent custom piece of SQL code or nested query.
+ */
+interface SQLFragmentInterface
 {
     /**
-     * Get or render SQL statement.
-     *
      * @param QueryCompiler $compiler
      * @return string
      */
     public function sqlStatement(QueryCompiler $compiler = null);
 
     /**
-     * __toString
-     *
      * @return string
      */
     public function __toString();

@@ -6,22 +6,24 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database;
+namespace Spiral\Database\Injections;
 
-class SqlFragment implements SqlFragmentInterface
+use Spiral\Database\Entities\QueryCompiler;
+
+/**
+ * Default implementation of SQLFragmentInterface, provides ability to inject custom SQL code into
+ * query builders. Usually used to mock database specific functions.
+ *
+ * Example: ...->where('time_created', '>', new SQLFragment("NOW()"));
+ */
+class SQLFragment implements SQLFragmentInterface
 {
     /**
-     * Raw SQL statement.
-     *
      * @var string
      */
-    protected $statement = null;
+    private $statement = null;
 
     /**
-     * New SQLFragment instance. SQLFragments used to bypass Database->quote() method or in query
-     * builders to inject SQL at place of conditional, update or insert parameter (bypass PDOStatement
-     * prepare).
-     *
      * @param string $statement
      */
     public function __construct($statement)
@@ -30,10 +32,7 @@ class SqlFragment implements SqlFragmentInterface
     }
 
     /**
-     * Get or render SQL statement.
-     *
-     * @param QueryCompiler $compiler
-     * @return string
+     * {@inheritdoc}
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
@@ -41,8 +40,6 @@ class SqlFragment implements SqlFragmentInterface
     }
 
     /**
-     * __toString
-     *
      * @return string
      */
     public function __toString()
@@ -51,14 +48,10 @@ class SqlFragment implements SqlFragmentInterface
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return object
      */
     public function __debugInfo()
     {
-        return (object)[
-            'statement' => $this->sqlStatement()
-        ];
+        return (object)['statement' => $this->sqlStatement()];
     }
 }

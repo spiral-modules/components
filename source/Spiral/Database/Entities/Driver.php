@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database;
+namespace Spiral\Database\Entities;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
@@ -316,17 +316,6 @@ abstract class Driver extends Component implements LoggerAwareInterface
             'statement'  => $this->statement($query, $parameters, $preparedParameters),
             'parameters' => $preparedParameters
         ]);
-    }
-
-    /**
-     * Driver specific database/table identifier quotation.
-     *
-     * @param string $identifier Table or column name (no dots or other parts allowed).
-     * @return string
-     */
-    public function identifier($identifier)
-    {
-        return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
     }
 
     /**

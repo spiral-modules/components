@@ -10,7 +10,14 @@ namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Database\Drivers\Postgres\Builders\InsertQuery;
+use Spiral\Database\Drivers\Postgres\Schemas\ColumnSchema;
+use Spiral\Database\Drivers\Postgres\Schemas\IndexSchema;
+use Spiral\Database\Drivers\Postgres\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
+use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Exceptions\DriverException;
 
 /**
  * Talks to postgres databases.
@@ -46,7 +53,7 @@ class PostgresDriver extends Driver
      *
      * @var array
      */
-    protected $primaryKeys = [];
+    private $primaryKeys = [];
 
     /**
      * @invisible
@@ -115,6 +122,59 @@ class PostgresDriver extends Driver
         });
 
         return $result;
+    }
+
+
+    /**
+     * Get singular primary key associated with desired table. Used to emulate last insert id.
+     *
+     * @param string $table Fully specified table name, including postfix.
+     * @return string
+     * @throws DriverException
+     */
+    public function getPrimary($table)
+    {
+        if (empty($this->primaryKeys))
+        {
+            $this->primaryKeys = $this->memory->loadData($this->databaseName() . '-primary');
+        }
+
+        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys))
+        {
+            return $this->primaryKeys[$table];
+        }
+        if (!$this->hasTable($table))
+        {
+            throw new DriverException(
+                "Unable to fetch table primary key, no such table '{$table}' exists."
+            );
+        }
+        $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
+        if (count($this->primaryKeys[$table]) === 1)
+        {
+            //We do support only single primary key
+            $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
+        }
+        else
+        {
+            $this->primaryKeys[$table] = null;
+        }
+
+        //Caching
+        $this->memory->saveData($this->databaseName() . '-primary', $this->primaryKeys);
+
+        return $this->primaryKeys[$table];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function insertBuilder(Database $database, array $parameters = [])
+    {
+        return $this->container->get(InsertQuery::class, [
+                'database' => $database,
+                'compiler' => $this->queryCompiler($database->getPrefix())
+            ] + $parameters);
     }
 
     /**

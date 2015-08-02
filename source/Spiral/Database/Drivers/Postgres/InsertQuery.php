@@ -9,30 +9,30 @@
 namespace Spiral\Database\Drivers\Postgres\Builders;
 
 use Spiral\Database\Builders\InsertQuery as BaseInsertQuery;
-use Spiral\Database\DatabaseException;
 use Spiral\Database\Drivers\Postgres\PostgresDriver;
-use Spiral\Database\QueryCompiler;
+use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Debug\Traits\LoggerTrait;
 
+/**
+ * Postgres driver requires little bit different method to handle last insert id.
+ */
 class InsertQuery extends BaseInsertQuery
 {
     /**
-     * Logging.
+     * Debug messages.
      */
     use LoggerTrait;
 
     /**
-     * Get or render SQL statement.
-     *
-     * @param QueryCompiler $compiler
-     * @return string
+     * {@inheritdoc}
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
         $driver = $this->database->getDriver();
         if (!$driver instanceof PostgresDriver)
         {
-            throw new DatabaseException("Postgres InsertQuery can be used only with Postgres driver.");
+            throw new BuilderException("Postgres InsertQuery can be used only with Postgres driver.");
         }
 
         if ($primary = $driver->getPrimary($this->database->getPrefix() . $this->table))
@@ -50,9 +50,7 @@ class InsertQuery extends BaseInsertQuery
     }
 
     /**
-     * Run QueryBuilder statement against parent database. Method will return lastInsertID value.
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function run()
     {

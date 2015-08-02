@@ -6,24 +6,14 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\SqlServer;
+namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
-use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
 
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Direct mapping from base abstract type to database internal type with specified data options,
-     * such as size, precision scale, unsigned flag and etc. Every declared type can be assigned using
-     * ->type() method, however to pass custom type parameters, methods has to be declared in database
-     * specific ColumnSchema. Type identifier not necessary should be real type name.
-     *
-     * Example:
-     * integer => array('type' => 'int', 'size' => 1),
-     * boolean => array('type' => 'tinyint', 'size' => 1)
-     *
-     * @invisible
-     * @var array
+     * {@inheritdoc}
      */
     protected $mapping = [
         //Primary sequences
@@ -81,12 +71,7 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Driver specific reverse mapping, this mapping should link database type to one of standard
-     * internal types. Not resolved types will be marked as "unknown" which will map them as php type
-     * string.
-     *
-     * @invisible
-     * @var array
+     * {@inheritdoc}
      */
     protected $reverseMapping = [
         'primary'     => [['type' => 'int', 'identity' => true]],
@@ -130,11 +115,206 @@ class ColumnSchema extends AbstractColumn
     protected $enumConstraint = '';
 
     /**
-     * Parse column information provided by parent TableSchema and populate column values.
+     * {@inheritdoc}
+     */
+    public function abstractType()
+    {
+        if ($this->enumValues)
+        {
+            return 'enum';
+        }
+
+        return parent::abstractType();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function enum($values)
+    {
+        $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
+        sort($this->enumValues);
+
+        $this->type = 'varchar';
+        foreach ($this->enumValues as $value)
+        {
+            $this->size = max((int)$this->size, strlen($value));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Compile column create statement.
      *
-     * @param mixed $schema Column information fetched from database by TableSchema. Format depends
-     *                      on driver type.
-     * @return mixed
+     * @param bool $enum Bypass enum statement condition.
+     * @return string
+     */
+    public function sqlStatement($enum = false)
+    {
+        if ($enum || $this->abstractType() != 'enum')
+        {
+            $statement = [$this->getName(true), $this->type];
+
+            if ($this->precision)
+            {
+                $statement[] = "({$this->precision}, {$this->scale})";
+            }
+            elseif ($this->size)
+            {
+                $statement[] = "({$this->size})";
+            }
+            elseif ($this->type == 'varchar' || $this->type == 'varbinary')
+            {
+                $statement[] = "(max)";
+            }
+
+            if ($this->identity)
+            {
+                $statement[] = 'IDENTITY(1,1)';
+            }
+
+            $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
+
+            if ($this->defaultValue !== null)
+            {
+                $statement[] = "DEFAULT {$this->prepareDefault()}";
+            }
+
+            return join(' ', $statement);
+        }
+
+        //We have add constraint for enum type
+        $enumValues = [];
+        foreach ($this->enumValues as $value)
+        {
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+        }
+
+        $statement = $this->sqlStatement(true);
+
+        return "$statement CONSTRAINT {$this->getEnumConstraint(true, true)} "
+        . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
+    }
+
+    /**
+     * Get all column constraints.
+     *
+     * @return array
+     */
+    public function getConstraints()
+    {
+        $constraints = parent::getConstraints();
+
+        if ($this->defaultConstraint)
+        {
+            $constraints[] = $this->defaultConstraint;
+        }
+
+        if ($this->enumConstraint)
+        {
+            $constraints[] = $this->enumConstraint;
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * Generate set of altering operations should be applied to column to change it's type, size,
+     * default value or null flag.
+     *
+     * @param AbstractColumn $original
+     * @return array
+     */
+    protected function alterOperations(AbstractColumn $original)
+    {
+        $operations = [];
+
+        $typeDefinition = [
+            $this->type,
+            $this->size,
+            $this->precision,
+            $this->scale,
+            $this->nullable
+        ];
+
+        $originalType = [
+            $original->type,
+            $original->size,
+            $original->precision,
+            $original->scale,
+            $original->nullable
+        ];
+
+        if ($typeDefinition != $originalType)
+        {
+            if ($this->abstractType() == 'enum')
+            {
+                //Getting longest value
+                $enumSize = $this->size;
+                foreach ($this->enumValues as $value)
+                {
+                    $enumSize = max($enumSize, strlen($value));
+                }
+
+                $type = "ALTER COLUMN {$this->getName(true)} varchar($enumSize)";
+                $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
+            }
+            else
+            {
+                $type = "ALTER COLUMN {$this->getName(true)} {$this->type}";
+
+                if ($this->size)
+                {
+                    $type .= "($this->size)";
+                }
+                elseif ($this->precision)
+                {
+                    $type .= "($this->precision, $this->scale)";
+                }
+
+                $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
+            }
+        }
+
+        //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
+        if ($this->defaultValue !== null)
+        {
+            if (!$this->defaultConstraint)
+            {
+                //Making new name
+                $this->defaultConstraint = $this->table->getName() . '_'
+                    . $this->getName() . '_default_' . uniqid();
+            }
+
+            $operations[] = \Spiral\interpolate(
+                "ADD CONSTRAINT {constraint} DEFAULT {default} FOR {column}",
+                [
+                    'constraint' => $this->table->driver()->identifier($this->defaultConstraint),
+                    'column'     => $this->getName(true),
+                    'default'    => $this->prepareDefault()
+                ]
+            );
+        }
+
+        //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
+        if ($this->abstractType() == 'enum')
+        {
+            $enumValues = [];
+            foreach ($this->enumValues as $value)
+            {
+                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            }
+
+            $operations[] = "ADD CONSTRAINT {$this->getEnumConstraint(true)} "
+                . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
+        }
+
+        return $operations;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     protected function resolveSchema($schema)
     {
@@ -228,48 +408,21 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Get abstract type name, this method will map one of database types to limited set of ColumnSchema
-     * abstract types. Attention, this method is not used for schema comparasions (database type used),
-     * it's only for decorative purposes. If schema can't resolve type - "unknown" will be returned
-     * (by default mapped to php type string).
+     * Prepare default value to be used in sql statements, string values will be quoted.
      *
      * @return string
      */
-    public function abstractType()
+    protected function prepareDefault()
     {
-        if ($this->enumValues)
+        $defaultValue = parent::prepareDefault();
+        if ($this->abstractType() == 'boolean')
         {
-            return 'enum';
+            $defaultValue = (int)$this->defaultValue;
         }
 
-        return parent::abstractType();
+        return $defaultValue;
     }
 
-    /**
-     * Give column enum type with specified set of allowed values, values can be provided as array
-     * or as multiple comma separate parameters. Attention, not all databases support enum as type,
-     * in this cases enum will be emulated via column constrain. Enum values are always string type.
-     *
-     * Examples:
-     * $table->status->enum(array('active', 'disabled'));
-     * $table->status->enum('active', 'disabled');
-     *
-     * @param array|array $values Enum values (array or comma separated).
-     * @return $this
-     */
-    public function enum($values)
-    {
-        $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
-        sort($this->enumValues);
-
-        $this->type = 'varchar';
-        foreach ($this->enumValues as $value)
-        {
-            $this->size = max((int)$this->size, strlen($value));
-        }
-
-        return $this;
-    }
 
     /**
      * Get name of enum constraint.
@@ -294,190 +447,5 @@ class ColumnSchema extends AbstractColumn
         return $quote
             ? $this->table->driver()->identifier($this->enumConstraint)
             : $this->enumConstraint;
-    }
-
-    /**
-     * Prepare default value to be used in sql statements, string values will be quoted.
-     *
-     * @return string
-     */
-    protected function prepareDefault()
-    {
-        $defaultValue = parent::prepareDefault();
-        if ($this->abstractType() == 'boolean')
-        {
-            $defaultValue = (int)$this->defaultValue;
-        }
-
-        return $defaultValue;
-    }
-
-    /**
-     * Compile column create statement.
-     *
-     * @param bool $enum Bypass enum statement condition.
-     * @return string
-     */
-    public function sqlStatement($enum = false)
-    {
-        if ($enum || $this->abstractType() != 'enum')
-        {
-            $statement = [$this->getName(true), $this->type];
-
-            if ($this->precision)
-            {
-                $statement[] = "({$this->precision}, {$this->scale})";
-            }
-            elseif ($this->size)
-            {
-                $statement[] = "({$this->size})";
-            }
-            elseif ($this->type == 'varchar' || $this->type == 'varbinary')
-            {
-                $statement[] = "(max)";
-            }
-
-            if ($this->identity)
-            {
-                $statement[] = 'IDENTITY(1,1)';
-            }
-
-            $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
-
-            if ($this->defaultValue !== null)
-            {
-                $statement[] = "DEFAULT {$this->prepareDefault()}";
-            }
-
-            return join(' ', $statement);
-        }
-
-        //We have add constraint for enum type
-        $enumValues = [];
-        foreach ($this->enumValues as $value)
-        {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
-        }
-
-        $statement = $this->sqlStatement(true);
-
-        return "$statement CONSTRAINT {$this->getEnumConstraint(true, true)} "
-        . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
-    }
-
-    /**
-     * Get all column constraints.
-     *
-     * @return array
-     */
-    public function getConstraints()
-    {
-        $constraints = parent::getConstraints();
-
-        if ($this->defaultConstraint)
-        {
-            $constraints[] = $this->defaultConstraint;
-        }
-
-        if ($this->enumConstraint)
-        {
-            $constraints[] = $this->enumConstraint;
-        }
-
-        return $constraints;
-    }
-
-    /**
-     * Generate set of altering operations should be applied to column to change it's type, size,
-     * default value or null flag.
-     *
-     * @param AbstractColumn $original
-     * @return array
-     */
-    public function alterOperations(AbstractColumn $original)
-    {
-        $operations = [];
-
-        $typeDefinition = [
-            $this->type,
-            $this->size,
-            $this->precision,
-            $this->scale,
-            $this->nullable
-        ];
-
-        $originalType = [
-            $original->type,
-            $original->size,
-            $original->precision,
-            $original->scale,
-            $original->nullable
-        ];
-
-        if ($typeDefinition != $originalType)
-        {
-            if ($this->abstractType() == 'enum')
-            {
-                //Getting longest value
-                $enumSize = $this->size;
-                foreach ($this->enumValues as $value)
-                {
-                    $enumSize = max($enumSize, strlen($value));
-                }
-
-                $type = "ALTER COLUMN {$this->getName(true)} varchar($enumSize)";
-                $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
-            }
-            else
-            {
-                $type = "ALTER COLUMN {$this->getName(true)} {$this->type}";
-
-                if ($this->size)
-                {
-                    $type .= "($this->size)";
-                }
-                elseif ($this->precision)
-                {
-                    $type .= "($this->precision, $this->scale)";
-                }
-
-                $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
-            }
-        }
-
-        //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
-        if ($this->defaultValue !== null)
-        {
-            if (!$this->defaultConstraint)
-            {
-                //Making new name
-                $this->defaultConstraint = $this->table->getName() . '_'
-                    . $this->getName() . '_default_' . uniqid();
-            }
-
-            $operations[] = \Spiral\interpolate(
-                "ADD CONSTRAINT {constraint} DEFAULT {default} FOR {column}",
-                [
-                    'constraint' => $this->table->driver()->identifier($this->defaultConstraint),
-                    'column'     => $this->getName(true),
-                    'default'    => $this->prepareDefault()
-                ]
-            );
-        }
-
-        //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
-        if ($this->abstractType() == 'enum')
-        {
-            $enumValues = [];
-            foreach ($this->enumValues as $value)
-            {
-                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
-            }
-
-            $operations[] = "ADD CONSTRAINT {$this->getEnumConstraint(true)} "
-                . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
-        }
-
-        return $operations;
     }
 }

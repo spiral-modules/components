@@ -6,12 +6,15 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\SqlServer;
+namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\Schemas\AbstractIndex;
-use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Entities\Schemas\AbstractTable;
 
+/**
+ * SQLServer table schema.
+ */
 class TableSchema extends AbstractTable
 {
     /**
@@ -20,15 +23,14 @@ class TableSchema extends AbstractTable
     const RENAME_STATEMENT = "sp_rename @objname = '{table}', @newname = '{name}'";
 
     /**
-     * Driver specific method to load table columns schemas.  Method will not be called if table not
-     * exists. To create and register column schema use internal table method "registerColumn()".
-     **/
+     * {@inheritdoc}
+     */
     protected function loadColumns()
     {
-        $query = 'SELECT * FROM information_schema.columns INNER JOIN sys.columns AS sysColumns
-                    ON (
-                        object_name(object_id) = table_name AND sysColumns.name = COLUMN_NAME
-                  ) WHERE table_name = ?';
+        $query = 'SELECT * FROM information_schema.columns INNER JOIN sys.columns AS sysColumns '
+            . 'ON (object_name(object_id) = table_name AND sysColumns.name = COLUMN_NAME) '
+            . 'WHERE table_name = ?';
+
         foreach ($this->driver->query($query, [$this->name]) as $column)
         {
             $this->registerColumn($column['COLUMN_NAME'], $column);
@@ -36,24 +38,23 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table indexes schema(s). Method will not be called if table not
-     * exists. To create and register index schema use internal table method "registerIndex()".
+     * {@inheritdoc}
      *
      * @link http://stackoverflow.com/questions/765867/list-of-all-index-index-columns-in-sql-server-db
      */
     protected function loadIndexes()
     {
-        $query = "SELECT indexes.name AS indexName, cl.name AS columnName,
-                  is_primary_key AS isPrimary, is_unique AS isUnique
-                  FROM sys.indexes AS indexes
-                  INNER JOIN sys.index_columns as columns
-                    ON indexes.object_id = columns.object_id AND indexes.index_id = columns.index_id
-                  INNER JOIN sys.columns AS cl
-                    ON columns.object_id = cl.object_id AND columns.column_id = cl.column_id
-                  INNER JOIN sys.tables AS t
-                    ON indexes.object_id = t.object_id
-                  WHERE t.name = ?
-                  ORDER BY indexes.name, indexes.index_id, columns.index_column_id";
+        $query = 'SELECT indexes.name AS indexName, cl.name AS columnName, '
+            . 'is_primary_key AS isPrimary, is_unique AS isUnique'
+            . 'FROM sys.indexes AS indexes'
+            . 'INNER JOIN sys.index_columns as columns'
+            . '  ON indexes.object_id = columns.object_id AND indexes.index_id = columns.index_id'
+            . 'INNER JOIN sys.columns AS cl'
+            . '  ON columns.object_id = cl.object_id AND columns.column_id = cl.column_id'
+            . 'INNER JOIN sys.tables AS t'
+            . '  ON indexes.object_id = t.object_id'
+            . 'WHERE t.name = ?'
+            . 'ORDER BY indexes.name, indexes.index_id, columns.index_column_id';
 
         $indexes = [];
         foreach ($this->driver->query($query, [$this->name]) as $index)
@@ -75,9 +76,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific method to load table foreign key schema(s). Method will not be called if table
-     * not exists. To create and register reference (foreign key) schema use internal table method
-     * "registerReference()".
+     * {@inheritdoc}
      */
     protected function loadReferences()
     {
@@ -89,9 +88,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific column add command.
-     *
-     * @param AbstractColumn $column
+     * {@inheritdoc}
      */
     protected function doColumnAdd(AbstractColumn $column)
     {
@@ -99,10 +96,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific column altering command.
-     *
-     * @param AbstractColumn $column
-     * @param AbstractColumn $dbColumn
+     * {@inheritdoc}
      */
     protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
     {
@@ -172,9 +166,7 @@ class TableSchema extends AbstractTable
     }
 
     /**
-     * Driver specific index remove (drop) command.
-     *
-     * @param AbstractIndex $index
+     * {@inheritdoc}
      */
     protected function doIndexDrop(AbstractIndex $index)
     {

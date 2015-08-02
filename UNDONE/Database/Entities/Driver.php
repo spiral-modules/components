@@ -33,8 +33,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     use LoggerTrait, EventsTrait, BenchmarkTrait;
 
     /**
-     * Class names should be used to create schema instances to describe specified driver table.
-     * Schema realizations are driver specific and allows both schema reading and writing (migrations).
+     * Driver schemas.
      */
     const SCHEMA_TABLE     = '';
     const SCHEMA_COLUMN    = '';
@@ -42,17 +41,17 @@ abstract class Driver extends Component implements LoggerAwareInterface
     const SCHEMA_REFERENCE = '';
 
     /**
-     * Class name should be used to represent single query rowset.
+     * Query result class.
      */
     const QUERY_RESULT = QueryResult::class;
 
     /**
-     * Class name should be used to represent driver specific QueryCompiler.
+     * Query compiler class.
      */
     const QUERY_COMPILER = QueryCompiler::class;
 
     /**
-     * DateTime format should be used to perform automatic conversion of DateTime objects.
+     * DateTime format to be used to perform automatic conversion of DateTime objects.
      *
      * @var string
      */
@@ -64,10 +63,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     const DEFAULT_DATETIME = '1970-01-01 00:00:00';
 
     /**
-     * Statement should be used for ColumnSchema to indicate that default datetime value should be
-     * set to current time.
-     *
-     * @var string
+     * Default timestamp expression.
      */
     const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
 

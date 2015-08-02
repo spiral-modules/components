@@ -19,6 +19,13 @@ use Spiral\Database\Injections\SQLFragment;
 class ColumnSchema extends AbstractColumn
 {
     /**
+     * Column is auto incremental.
+     *
+     * @var bool
+     */
+    private $autoIncrement = false;
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -116,13 +123,6 @@ class ColumnSchema extends AbstractColumn
     protected $forbiddenDefaults = [
         'text', 'mediumtext', 'tinytext', 'longtext', 'blog', 'tinyblob', 'longblob'
     ];
-
-    /**
-     * Column is auto incremental.
-     *
-     * @var bool
-     */
-    protected $autoIncrement = false;
 
     /**
      * {@inheritdoc}

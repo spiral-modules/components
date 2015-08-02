@@ -6,25 +6,32 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Postgres;
+namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\SqlFragment;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Injections\SQLFragment;
 
+/**
+ * Postgres column schema.
+ */
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Direct mapping from base abstract type to database internal type with specified data options,
-     * such as size, precision scale, unsigned flag and etc. Every declared type can be assigned using
-     * ->type() method, however to pass custom type parameters, methods has to be declared in database
-     * specific ColumnSchema. Type identifier not necessary should be real type name.
+     * Field is auto incremental.
      *
-     * Example:
-     * integer => array('type' => 'int', 'size' => 1),
-     * boolean => array('type' => 'tinyint', 'size' => 1)
+     * @var bool
+     */
+    private $autoIncrement = false;
+
+    /**
+     * Name of enum constraint associated with field.
      *
-     * @invisible
-     * @var array
+     * @var string
+     */
+    private $enumConstraint = '';
+
+    /**
+     * {@inheritdoc}
      */
     protected $mapping = [
         //Primary sequences
@@ -74,12 +81,7 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Driver specific reverse mapping, this mapping should link database type to one of standard
-     * internal types. Not resolved types will be marked as "unknown" which will map them as php type
-     * string.
-     *
-     * @invisible
-     * @var array
+     * {@inheritdoc}
      */
     protected $reverseMapping = [
         'primary'     => ['serial'],
@@ -102,25 +104,7 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * Field is auto incremental.
-     *
-     * @var bool
-     */
-    protected $autoIncrement = false;
-
-    /**
-     * Name of enum constraint.
-     *
-     * @var string
-     */
-    protected $enumConstraint = '';
-
-    /**
-     * Parse column information provided by parent TableSchema and populate column values.
-     *
-     * @param mixed $schema Column information fetched from database by TableSchema. Format depends
-     *                      on driver type.
-     * @return mixed
+     * {@inheritdoc}
      */
     protected function resolveSchema($schema)
     {
@@ -136,7 +120,7 @@ class ColumnSchema extends AbstractColumn
             $this->type = ($this->type == 'bigint' ? 'bigserial' : 'serial');
             $this->autoIncrement = true;
 
-            $this->defaultValue = new SqlFragment($this->defaultValue);
+            $this->defaultValue = new SQLFragment($this->defaultValue);
 
             return;
         }
@@ -164,8 +148,7 @@ class ColumnSchema extends AbstractColumn
         if ($this->type == 'USER-DEFINED' && $schema['typtype'] == 'e')
         {
             $this->type = $schema['typname'];
-            $range = $this->table->driver()
-                ->query('SELECT enum_range(NULL::' . $this->type . ')')
+            $range = $this->table->driver()->query('SELECT enum_range(NULL::' . $this->type . ')')
                 ->fetchColumn(0);
 
             $this->enumValues = explode(',', substr($range, 1, -1));
@@ -187,11 +170,13 @@ class ColumnSchema extends AbstractColumn
             && $this->size
         )
         {
-            $query = "SELECT conname, consrc FROM pg_constraint
-                      WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
+            $query = "SELECT conname, consrc FROM pg_constraint "
+                . "WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
 
-            $constraints = $this->table->driver()
-                ->query($query, [$schema['tableOID'], '(' . $this->name . '%']);
+            $constraints = $this->table->driver()->query(
+                $query,
+                [$schema['tableOID'], '(' . $this->name . '%']
+            );
 
             foreach ($constraints as $constraint)
             {
@@ -236,12 +221,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Get abstract type name, this method will map one of database types to limited set of ColumnSchema
-     * abstract types. Attention, this method is not used for schema comparasions (database type used),
-     * it's only for decorative purposes. If schema can't resolve type - "unknown" will be returned
-     * (by default mapped to php type string).
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function abstractType()
     {
@@ -254,9 +234,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Set column to be primary sequence.
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function primary()
     {
@@ -274,9 +252,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Set column to be big primary sequence.
-     *
-     * @return $this
+     * {@inheritdoc}
      */
     public function bigPrimary()
     {
@@ -294,16 +270,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Give column enum type with specified set of allowed values, values can be provided as array
-     * or as multiple comma separate parameters. Attention, not all databases support enum as type,
-     * in this cases enum will be emulated via column constrain. Enum values are always string type.
-     *
-     * Examples:
-     * $table->status->enum(array('active', 'disabled'));
-     * $table->status->enum('active', 'disabled');
-     *
-     * @param array|array $values Enum values (array or comma separated).
-     * @return $this
+     * {@inheritdoc}
      */
     public function enum($values)
     {
@@ -319,45 +286,22 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Get name of enum constraint.
-     *
-     * @param bool $quote     True to quote identifier.
-     * @param bool $temporary If true enumConstraint identifier will be generated only for visual
-     *                        purposes.
-     * @return string
+     * {@inheritdoc}
      */
-    protected function getEnumConstraint($quote = false, $temporary = false)
+    public function getConstraints()
     {
-        if (!$this->enumConstraint)
-        {
-            if ($temporary)
-            {
-                return $this->table->getName() . '_' . $this->getName() . '_enum';
-            }
+        $constraints = parent::getConstraints();
 
-            $this->enumConstraint = $this->table->getName() . '_'
-                . $this->getName() . '_enum_' . uniqid();
+        if ($this->enumConstraint)
+        {
+            $constraints[] = $this->enumConstraint;
         }
 
-        return $quote
-            ? $this->table->driver()->identifier($this->enumConstraint)
-            : $this->enumConstraint;
+        return $constraints;
     }
 
     /**
-     * Get database specific enum type definition. Should not include database type and column name.
-     *
-     * @return string.
-     */
-    protected function enumType()
-    {
-        return '(' . $this->size . ')';
-    }
-
-    /**
-     * Compile column create statement.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function sqlStatement()
     {
@@ -375,25 +319,8 @@ class ColumnSchema extends AbstractColumn
             $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
-        return "$statement CONSTRAINT {$this->getEnumConstraint(true, true)} "
+        return "$statement CONSTRAINT {$this->enumConstraint(true, true)} "
         . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
-    }
-
-    /**
-     * Get all column constraints.
-     *
-     * @return array
-     */
-    public function getConstraints()
-    {
-        $constraints = parent::getConstraints();
-
-        if ($this->enumConstraint)
-        {
-            $constraints[] = $this->enumConstraint;
-        }
-
-        return $constraints;
     }
 
     /**
@@ -444,7 +371,7 @@ class ColumnSchema extends AbstractColumn
 
         if ($original->abstractType() == 'enum' && $this->enumConstraint)
         {
-            $operations[] = 'DROP CONSTRAINT ' . $this->getEnumConstraint(true);
+            $operations[] = 'DROP CONSTRAINT ' . $this->enumConstraint(true);
         }
 
         if ($original->defaultValue != $this->defaultValue)
@@ -473,10 +400,44 @@ class ColumnSchema extends AbstractColumn
                 $enumValues[] = $this->table->driver()->getPDO()->quote($value);
             }
 
-            $operations[] = "ADD CONSTRAINT {$this->getEnumConstraint(true)} "
+            $operations[] = "ADD CONSTRAINT {$this->enumConstraint(true)} "
                 . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
         }
 
         return $operations;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function enumType()
+    {
+        return '(' . $this->size . ')';
+    }
+
+    /**
+     * Get name of enum constraint.
+     *
+     * @param bool $quote
+     * @param bool $temporary If true enumConstraint identifier will be generated only for visual
+     *                        purposes only.
+     * @return string
+     */
+    private function enumConstraint($quote = false, $temporary = false)
+    {
+        if (!$this->enumConstraint)
+        {
+            if ($temporary)
+            {
+                return $this->table->getName() . '_' . $this->getName() . '_enum';
+            }
+
+            $this->enumConstraint = $this->table->getName() . '_'
+                . $this->getName() . '_enum_' . uniqid();
+        }
+
+        return $quote
+            ? $this->table->driver()->identifier($this->enumConstraint)
+            : $this->enumConstraint;
     }
 }

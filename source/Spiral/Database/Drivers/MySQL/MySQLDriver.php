@@ -8,6 +8,10 @@
  */
 namespace Spiral\Database\Drivers\MySQL;
 
+use Spiral\Database\Drivers\MySQL\Schemas\ColumnSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\IndexSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 use PDO;
 

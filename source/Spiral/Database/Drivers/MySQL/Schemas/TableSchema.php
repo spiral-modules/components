@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\MySql;
+namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
@@ -30,7 +30,7 @@ class TableSchema extends AbstractTable
      *
      * @var string
      */
-    protected $engine = self::ENGINE_INNODB;
+    private $engine = self::ENGINE_INNODB;
 
     /**
      * Change table engine. Such operation will be applied only at moment of table creation.

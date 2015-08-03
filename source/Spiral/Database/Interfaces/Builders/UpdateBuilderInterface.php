@@ -10,7 +10,7 @@ namespace Spiral\Database\Interfaces\Builders;
 
 use Spiral\Database\Interfaces\BuilderInterface;
 
-interface DeleteQueryInterface extends BuilderInterface
+interface UpdateBuilderInterface extends BuilderInterface
 {
 
 }

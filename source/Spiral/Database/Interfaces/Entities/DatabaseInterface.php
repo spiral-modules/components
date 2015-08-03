@@ -9,10 +9,10 @@
 namespace Spiral\Database\Interfaces\Entities;
 
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Interfaces\Builders\DeleteQueryInterface;
-use Spiral\Database\Interfaces\Builders\InsertQueryInterface;
-use Spiral\Database\Interfaces\Builders\SelectQueryInterface;
-use Spiral\Database\Interfaces\Builders\UpdateQueryInterface;
+use Spiral\Database\Interfaces\Builders\DeleteBuilderInterface;
+use Spiral\Database\Interfaces\Builders\InsertBuilderInterface;
+use Spiral\Database\Interfaces\Builders\SelectBuilderInterface;
+use Spiral\Database\Interfaces\Builders\UpdateBuilderInterface;
 use Spiral\Database\Interfaces\Query\ResultIteratorInterface;
 
 /**
@@ -49,7 +49,7 @@ interface DatabaseInterface
      * Get instance of InsertBuilder associated with current Database.
      *
      * @param string $table
-     * @return InsertQueryInterface
+     * @return InsertBuilderInterface
      */
     public function insert($table = '');
 
@@ -59,7 +59,7 @@ interface DatabaseInterface
      * @param string $table
      * @param array  $values Initial set of columns to update associated with their values.
      * @param array  $where  Initial set of where rules specified as array.
-     * @return UpdateQueryInterface
+     * @return UpdateBuilderInterface
      */
     public function update($table = '', array $values = [], array $where = []);
 
@@ -68,7 +68,7 @@ interface DatabaseInterface
      *
      * @param string $table
      * @param array  $where Initial set of where rules specified as array.
-     * @return DeleteQueryInterface
+     * @return DeleteBuilderInterface
      */
     public function delete($table = '', array $where = []);
 
@@ -76,7 +76,7 @@ interface DatabaseInterface
      * Get instance of SelectBuilder associated with current Database.
      *
      * @param array|string $columns Columns to select.
-     * @return SelectQueryInterface
+     * @return SelectBuilderInterface
      */
     public function select($columns = '*');
 

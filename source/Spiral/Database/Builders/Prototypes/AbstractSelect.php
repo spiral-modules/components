@@ -9,11 +9,14 @@
 namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Cache\StoreInterface;
-use Spiral\Database\Builders\Traits\HavingTrait;
 use Spiral\Database\Builders\Traits\JoinsTrait;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\Parameter;
+use Spiral\Database\Interfaces\BuilderInterface;
+use Spiral\Database\Interfaces\Injections\ParameterInterface;
+use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Pagination\PaginableInterface;
@@ -30,15 +33,12 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-abstract class AbstractSelect extends AbstractWhere implements
-    \Countable,
-    \IteratorAggregate,
-    PaginableInterface
+abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregate, PaginableInterface
 {
     /**
-     * Abstract select query must fully support joins, having and be paginable.
+     * Abstract select query must fully support joins and be paginable.
      */
-    use JoinsTrait, HavingTrait, PaginatorTrait;
+    use JoinsTrait, PaginatorTrait;
 
     /**
      * Sort directions.
@@ -59,6 +59,23 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @var array
      */
     protected $columns = ['*'];
+
+    /**
+     * Set of generated having tokens, format must be supported by QueryCompilers.
+     *
+     * @see AbstractWhere
+     * @var array
+     */
+    protected $havingTokens = [];
+
+    /**
+     * Parameters collected while generating HAVING tokens, must be in a same order as parameters
+     * in resulted query.
+     *
+     * @see AbstractWhere
+     * @var array
+     */
+    protected $havingParameters = [];
 
     /**
      * Columns/expression associated with their sort direction (ASK|DESC).
@@ -119,6 +136,60 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function distinct($distinct = true)
     {
         $this->distinct = $distinct;
+
+        return $this;
+    }
+
+    /**
+     * Simple HAVING condition with various set of arguments.
+     *
+     * @see AbstractWhere
+     * @param string|mixed $identifier Column or expression.
+     * @param mixed        $variousA   Operator or value.
+     * @param mixed        $variousB   Value, if operator specified.
+     * @param mixed        $variousC   Required only in between statements.
+     * @return $this
+     * @throws BuilderException
+     */
+    public function having($identifier, $variousA = null, $variousB = null, $variousC = null)
+    {
+        $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
+
+        return $this;
+    }
+
+    /**
+     * Simple AND HAVING condition with various set of arguments.
+     *
+     * @see AbstractWhere
+     * @param string|mixed $identifier Column or expression.
+     * @param mixed        $variousA   Operator or value.
+     * @param mixed        $variousB   Value, if operator specified.
+     * @param mixed        $variousC   Required only in between statements.
+     * @return $this
+     * @throws BuilderException
+     */
+    public function andHaving($identifier, $variousA = null, $variousB = null, $variousC = null)
+    {
+        $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
+
+        return $this;
+    }
+
+    /**
+     * Simple OR HAVING condition with various set of arguments.
+     *
+     * @see AbstractWhere
+     * @param string|mixed $identifier Column or expression.
+     * @param mixed        $variousA   Operator or value.
+     * @param mixed        $variousB   Value, if operator specified.
+     * @param mixed        $variousC   Required only in between statements.
+     * @return $this
+     * @throws BuilderException
+     */
+    public function orHaving($identifier, $variousA = [], $variousB = null, $variousC = null)
+    {
+        $this->whereToken('OR', func_get_args(), $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }
@@ -335,5 +406,35 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function jsonSerialize()
     {
         return $this->getIterator()->jsonSerialize();
+    }
+
+    /**
+     * Applied to every potential parameter while having tokens generation.
+     *
+     * @return \Closure
+     */
+    private function havingWrapper()
+    {
+        return function ($parameter)
+        {
+            if (!$parameter instanceof ParameterInterface && is_array($parameter))
+            {
+                $parameter = new Parameter($parameter);
+            }
+
+            if
+            (
+                $parameter instanceof SQLFragmentInterface
+                && !$parameter instanceof ParameterInterface
+                && !$parameter instanceof BuilderInterface
+            )
+            {
+                return $parameter;
+            }
+
+            $this->havingParameters[] = $parameter;
+
+            return $parameter;
+        };
     }
 }

@@ -71,6 +71,8 @@ class SelectQuery extends AbstractSelect
         return $this;
     }
 
+    //TODO: UNION
+
     /**
      * Alias for columns() method. Set columns should be fetched as result of SELECT query. Columns
      * can be provided with specified alias (AS construction).

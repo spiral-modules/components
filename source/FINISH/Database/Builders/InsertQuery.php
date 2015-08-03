@@ -154,7 +154,7 @@ class InsertQuery extends QueryBuilder
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
-        return $this->expandParameters($compiler->prepareParameters(
+        return $this->flattenParameters($compiler->prepareParameters(
             QueryCompiler::INSERT_QUERY,
             [],
             [],

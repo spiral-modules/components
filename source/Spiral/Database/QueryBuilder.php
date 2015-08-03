@@ -145,7 +145,7 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface
      * @param array $parameters
      * @return array
      */
-    protected function expandParameters(array $parameters)
+    protected function flattenParameters(array $parameters)
     {
         $result = [];
         foreach ($parameters as $parameter)

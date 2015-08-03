@@ -198,9 +198,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Get all column constraints.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function getConstraints()
     {

@@ -9,6 +9,10 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Core\ContainerInterface;
+use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\ColumnSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\IndexSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\ReferenceSchema;
 use Spiral\Database\Entities\Driver;
 
 /**
@@ -47,15 +51,7 @@ class SQLiteDriver extends Driver
         parent::__construct($container, $config);
 
         //Remove "sqlite:"
-        $this->databaseName = substr($this->config['connection'], 7);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function truncate($table)
-    {
-        $this->statement("DELETE FROM {$this->identifier($table)}");
+        $this->source = substr($this->config['connection'], 7);
     }
 
     /**
@@ -66,6 +62,14 @@ class SQLiteDriver extends Driver
         $query = 'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?';
 
         return (bool)$this->query($query, [$name])->fetchColumn();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function truncate($table)
+    {
+        $this->statement("DELETE FROM {$this->identifier($table)}");
     }
 
     /**
@@ -88,7 +92,7 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    protected function isolationLevel($level)
+    protected function setIsolationLevel($level)
     {
         $this->logger()->error(
             "Transaction isolation level is not fully supported by SQLite ({level}).",

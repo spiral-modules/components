@@ -116,62 +116,9 @@ abstract class AbstractWhere extends QueryBuilder
     }
 
     /**
-     * Add where condition to statement. Where condition will be specified with AND boolean joiner.
-     * Method supports nested queries and array based (mongo like) where conditions. Every provided
-     * parameter will be automatically escaped in generated query. Alias for where.
+     * And where method, see where() for syntax infomation.
      *
-     * Examples:
-     * 1) Simple token/nested query or expression
-     * $select->andWhere(new SQLFragment('(SELECT count(*) from `table`)'));
-     *
-     * 2) Simple assessment (= or IN)
-     * $select->andWhere('column', $value);
-     * $select->andWhere('column', array(1, 2, 3));
-     * $select->andWhere('column', new SQLFragment('CONCAT(columnA, columnB)'));
-     *
-     * 3) Assessment with specified operator (operator will be converted to uppercase automatically)
-     * $select->andWhere('column', '=', $value);
-     * $select->andWhere('column', 'IN', array(1, 2, 3));
-     * $select->andWhere('column', 'LIKE', $string);
-     * $select->andWhere('column', 'IN', new SQLFragment('(SELECT id from `table` limit 1)'));
-     *
-     * 4) Between and not between statements
-     * $select->andWhere('column', 'between', 1, 10);
-     * $select->andWhere('column', 'not between', 1, 10);
-     * $select->andWhere('column', 'not between', new SQLFragment('MIN(price)'), $maximum);
-     *
-     * 5) Closure with nested conditions
-     * $this->andWhere(function(WhereTrait $select){
-     *      $select->where("name", "Wolfy-J")->orWhere("balance", ">", 100)
-     * });
-     *
-     * 6) Array based condition
-     * $select->andWhere(["column" => 1]);
-     * $select->andWhere(["column" => [">" => 1, "<" => 10]]);
-     * $select->andWhere([
-     *      "id" => 1,
-     *      "column" => ["like" => "name"]
-     * ]);
-     * $select->andWhere([
-     *      '@or' => [
-     *          ["id" => 1],
-     *          ["id" => 2],
-     *          ["id" => 3],
-     *          ["id" => 4],
-     *          ["id" => 5],
-     *      ],
-     *      "column" => [
-     *          "like" => "name"
-     *      ],
-     *      'x'      => [
-     *          '>' => 1,
-     *          '<' => 10
-     *      ]
-     * ]);
-     *
-     * You can read more about complex where statements in official documentation or look mongo
-     * queries examples.
-     *
+     * @see where()
      * @see parseWhere()
      * @see whereToken()
      * @param string|mixed $identifier Column or expression.
@@ -189,61 +136,7 @@ abstract class AbstractWhere extends QueryBuilder
     }
 
     /**
-     * Add where condition to statement. Where condition will be specified with OR boolean joiner.
-     * Method supports nested queries and array based (mongo like) where conditions. Every provided
-     * parameter will be automatically escaped in generated query.
-     *
-     * Examples:
-     * 1) Simple token/nested query or expression
-     * $select->orWhere(new SQLFragment('(SELECT count(*) from `table`)'));
-     *
-     * 2) Simple assessment (= or IN)
-     * $select->orWhere('column', $value);
-     * $select->orWhere('column', array(1, 2, 3));
-     * $select->orWhere('column', new SQLFragment('CONCAT(columnA, columnB)'));
-     *
-     * 3) Assessment with specified operator (operator will be converted to uppercase automatically)
-     * $select->orWhere('column', '=', $value);
-     * $select->orWhere('column', 'IN', array(1, 2, 3));
-     * $select->orWhere('column', 'LIKE', $string);
-     * $select->orWhere('column', 'IN', new SQLFragment('(SELECT id from `table` limit 1)'));
-     *
-     * 4) Between and not between statements
-     * $select->orWhere('column', 'between', 1, 10);
-     * $select->orWhere('column', 'not between', 1, 10);
-     * $select->orWhere('column', 'not between', new SQLFragment('MIN(price)'), $maximum);
-     *
-     * 5) Closure with nested conditions
-     * $this->orWhere(function(WhereTrait $select){
-     *      $select->where("name", "Wolfy-J")->orWhere("balance", ">", 100)
-     * });
-     *
-     * 6) Array based condition
-     * $select->orWhere(["column" => 1]);
-     * $select->orWhere(["column" => [">" => 1, "<" => 10]]);
-     * $select->orWhere([
-     *      "id" => 1,
-     *      "column" => ["like" => "name"]
-     * ]);
-     * $select->orWhere([
-     *      '@or' => [
-     *          ["id" => 1],
-     *          ["id" => 2],
-     *          ["id" => 3],
-     *          ["id" => 4],
-     *          ["id" => 5],
-     *      ],
-     *      "column" => [
-     *          "like" => "name"
-     *      ],
-     *      'x'      => [
-     *          '>' => 1,
-     *          '<' => 10
-     *      ]
-     * ]);
-     *
-     * You can read more about complex where statements in official documentation or look mongo
-     * queries examples.
+     * Or where method, see where() for syntax infomation.
      *
      * @see parseWhere()
      * @see whereToken()
@@ -406,35 +299,6 @@ abstract class AbstractWhere extends QueryBuilder
     /**
      * Helper method used to convert complex where statement (specified by array, mongo like) to set
      * of where tokens. Method support simple expressions, nested, or and and groups and etc.
-     *
-     * Examples:
-     * $select->where(["column" => 1]);
-     *
-     * $select->where(["column" => [">" => 1, "<" => 10]]);
-     *
-     * $select->where([
-     *      "@or" => [
-     *          ["id" => 1],
-     *          ["column" => ["like" => "name"]]
-     *      ]
-     * ]);
-     *
-     * $select->where([
-     *      '@or' => [
-     *          ["id" => 1],
-     *          ["id" => 2],
-     *          ["id" => 3],
-     *          ["id" => 4],
-     *          ["id" => 5],
-     *      ],
-     *      "column" => [
-     *          "like" => "name"
-     *      ],
-     *      'x'      => [
-     *          '>' => 1,
-     *          '<' => 10
-     *      ]
-     * ]);
      *
      * @param array    $where    Array of where conditions.
      * @param string   $grouping Parent grouping token (OR, AND)

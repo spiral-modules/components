@@ -14,23 +14,31 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Schemas\AbstractColumn;
-use Spiral\Database\Schemas\AbstractIndex;
-use Spiral\Database\Schemas\AbstractReference;
-use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\DatabaseManager;
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\ParameterInterface;
+use Spiral\Database\Query\QueryResult;
+use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Entities\Schemas\AbstractTable;
 use PDO;
 use PDOStatement;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Events\Traits\EventsTrait;
 
+/**
+ * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to hide
+ * implementation specific functionality.
+ */
 abstract class Driver extends Component implements LoggerAwareInterface
 {
     /**
-     * Profiling and logging.
+     * There is few points can raise warning message or take long time to execute, we better profile
+     * them.
      */
-    use LoggerTrait, EventsTrait, BenchmarkTrait;
+    use LoggerTrait, BenchmarkTrait;
 
     /**
      * Driver schemas.
@@ -68,19 +76,23 @@ abstract class Driver extends Component implements LoggerAwareInterface
     const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
 
     /**
-     * Current transaction level (count of nested transactions). Not all drives can support nested
-     * transactions.
+     * @var PDO|null
+     */
+    private $pdo = null;
+
+    /**
+     * Transaction level (count of nested transactions). Not all drives can support nested transactions.
      *
      * @var int
      */
     private $transactionLevel = 0;
 
     /**
-     * Database name (fetched from connection string). In some cases can contain empty string (SQLite).
+     * Database/source name (fetched from connection string).
      *
      * @var string
      */
-    protected $databaseName = '';
+    protected $source = '';
 
     /**
      * Connection configuration described in DBAL config file. Any driver can be used as data source
@@ -89,15 +101,15 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * @var array
      */
     protected $config = [
+        'profiling'  => false,
         'connection' => '',
         'username'   => '',
         'password'   => '',
-        'profiling'  => true,
         'options'    => []
     ];
 
     /**
-     * Default driver PDO options set, this keys will be merged with data provided by DBAL configuration.
+     * PDO connection options set.
      *
      * @var array
      */
@@ -108,19 +120,11 @@ abstract class Driver extends Component implements LoggerAwareInterface
     ];
 
     /**
-     * @var PDO
-     */
-    protected $pdo = null;
-
-    /**
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * Driver instances responsible for all database low level operations which can be DBMS specific
-     * - such as connection preparation, custom table/column/index/reference schemas and etc.
-     *
      * @param ContainerInterface $container
      * @param array              $config
      */
@@ -133,12 +137,22 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
         if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches))
         {
-            $this->databaseName = $matches[1];
+            $this->source = $matches[1];
         }
     }
 
     /**
-     * Get Driver configuration data.
+     * Source name, can include database name or database file.
+     *
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
+     * Driver configuration.
      *
      * @return array
      */
@@ -148,19 +162,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Get database name (fetched from connection string). In some cases can return empty string
-     * (SQLite).
-     *
-     * @return string|null
-     */
-    public function getDatabaseName()
-    {
-        return $this->databaseName;
-    }
-
-    /**
-     * While profiling enabled driver will create query logging and benchmarking events. This is
-     * recommended option on development environment.
+     * Enabled profiling will raise set of log messages and benchmarks associated with PDO queries.
      *
      * @param bool $enabled Enable or disable driver profiling.
      * @return $this
@@ -191,24 +193,23 @@ abstract class Driver extends Component implements LoggerAwareInterface
     {
         $this->getPDO();
 
-        return $this->isConnected();
+        return !empty($this->getPDO());
     }
 
     /**
-     * Disconnect PDO.
+     * Disconnect driver.
      *
      * @return $this
      */
     public function disconnect()
     {
-        $this->fire('disconnect', $this->pdo);
         $this->pdo = null;
 
         return $this;
     }
 
     /**
-     * Check if PDO already constructed and ready for use.
+     * Check if driver already connected.
      *
      * @return bool
      */
@@ -218,7 +219,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Manually set associated PDO instance.
+     * Change PDO instance associated with driver.
      *
      * @param PDO $pdo
      * @return $this
@@ -231,8 +232,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Get associated PDO connection. Driver will automatically connect to PDO if it's not already
-     * exists.
+     * Get associated PDO connection. Will automatically connect if such connection does not exists.
      *
      * @return PDO
      */
@@ -244,78 +244,10 @@ abstract class Driver extends Component implements LoggerAwareInterface
         }
 
         $this->benchmark('connect', $this->config['connection']);
-        $this->pdo = $this->fire('connect', $this->createPDO());
+        $this->pdo = $this->createPDO();
         $this->benchmark('connect', $this->config['connection']);
 
         return $this->pdo;
-    }
-
-    /**
-     * Get prepared PDOStatement instance. Query will be run against connected PDO object.
-     *
-     * @param string $query              SQL statement with parameter placeholders.
-     * @param array  $parameters         Parameters to be binded into query.
-     * @param array  $preparedParameters Processed parameters will be saved into this array.
-     * @return PDOStatement
-     */
-    public function statement($query, array $parameters = [], &$preparedParameters = null)
-    {
-        $preparedParameters = $parameters = $this->prepareParameters($parameters);
-
-        try
-        {
-            if ($this->config['profiling'])
-            {
-                $builtQuery = QueryCompiler::interpolate($query, $parameters);
-                $this->benchmark($this->databaseName, $builtQuery);
-            }
-
-            $pdoStatement = $this->getPDO()->prepare($query);
-
-            //Configuring statement binded parameters
-            $pdoStatement->execute($parameters);
-
-            $this->fire('statement', [
-                'statement'  => $pdoStatement,
-                'query'      => $query,
-                'parameters' => $parameters
-            ]);
-
-            if ($this->config['profiling'] && isset($builtQuery))
-            {
-                $this->benchmark($this->databaseName, $builtQuery);
-                $this->logger()->debug($builtQuery, compact('query', 'parameters'));
-            }
-        }
-        catch (\PDOException $exception)
-        {
-            $this->logger()->error(
-                !empty($builtQuery) ? $builtQuery : QueryCompiler::interpolate($query, $parameters),
-                compact('query', 'parameters')
-            );
-
-            throw QueryException::createFromPDO($exception);
-        }
-
-        return $pdoStatement;
-    }
-
-    /**
-     * Run select type SQL statement with prepare parameters against connected PDO instance.
-     * QueryResult will be returned and can be used to walk thought resulted dataset.
-     *
-     * @param string $query              SQL statement with parameter placeholders.
-     * @param array  $parameters         Parameters to be binded into query.
-     * @param array  $preparedParameters Processed parameters will be saved into this array.
-     * @return QueryResult
-     * @throws \PDOException
-     */
-    public function query($query, array $parameters = [], &$preparedParameters = null)
-    {
-        return $this->container->get(static::QUERY_RESULT, [
-            'statement'  => $this->statement($query, $parameters, $preparedParameters),
-            'parameters' => $preparedParameters
-        ]);
     }
 
     /**
@@ -330,7 +262,95 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Driver specific PDOStatement parameters preparation.
+     * Current timestamp expression value.
+     *
+     * @return string
+     */
+    public function timestampNow()
+    {
+        return static::TIMESTAMP_NOW;
+    }
+
+    /**
+     * Create instance of PDOStatement using provided SQL query and set of parameters.
+     *
+     * @param string $query
+     * @param array  $parameters         Parameters to be binded into query.
+     * @param array  $preparedParameters Prepared list of parameters, reference.
+     * @return \PDOStatement
+     * @throws QueryException
+     */
+    public function statement($query, array $parameters = [], &$preparedParameters = null)
+    {
+        $preparedParameters = $parameters = $this->prepareParameters($parameters);
+
+        try
+        {
+            if ($this->isProfiling())
+            {
+                $queryString = QueryCompiler::interpolate($query, $parameters);
+                $this->benchmark($this->source, $queryString);
+            }
+
+            $pdoStatement = $this->getPDO()->prepare($query);
+
+            //Configuring statement binded parameters
+            $pdoStatement->execute($parameters);
+
+            if ($this->isProfiling() && isset($queryString))
+            {
+                $this->benchmark($this->source, $queryString);
+                $this->logger()->debug($queryString, compact('query', 'parameters'));
+            }
+        }
+        catch (\PDOException $exception)
+        {
+            $this->logger()->error(
+                !empty($queryString) ? $queryString : QueryCompiler::interpolate($query, $parameters),
+                compact('query', 'parameters')
+            );
+
+            throw new QueryException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+
+        return $pdoStatement;
+    }
+
+    /**
+     * Execute sql statement and wrap resulted rows using driver specific or default instance of
+     * QueryResult.
+     *
+     * @param string $query
+     * @param array  $parameters         Parameters to be binded into query.
+     * @param array  $preparedParameters Prepared list of parameters, reference.
+     * @return QueryResult
+     * @throws QueryException
+     */
+    public function query($query, array $parameters = [], &$preparedParameters = null)
+    {
+        return $this->container->get(static::QUERY_RESULT, [
+            'statement'  => $this->statement($query, $parameters, $preparedParameters),
+            'parameters' => $preparedParameters
+        ]);
+    }
+
+    /**
+     * Get id of last inserted row, this method must be called after insert query. Attention,
+     * such functionality may not work in some DBMS property (Postgres).
+     *
+     * @param string|null $sequence Name of the sequence object from which the ID should be returned.
+     * @return mixed
+     */
+    public function lastInsertID($sequence = null)
+    {
+        return $sequence
+            ? (int)$this->getPDO()->lastInsertId($sequence)
+            : (int)$this->getPDO()->lastInsertId();
+    }
+
+    /**
+     * Prepare set of query builder/user parameters to be send to PDO. Must convert DateTime instances
+     * into valid database timestamps and resolve values of ParameterInterface.
      *
      * @param array $parameters
      * @return array
@@ -356,48 +376,22 @@ abstract class Driver extends Component implements LoggerAwareInterface
             if (is_array($parameter))
             {
                 $result = array_merge($result, $this->prepareParameters($parameter));
+                continue;
             }
-            else
-            {
-                $result[] = $parameter;
-            }
+
+            $result[] = $parameter;
         }
 
         return $result;
     }
 
     /**
-     * Get last inserted row id.
-     *
-     * @param string|null $sequence Name of the sequence object from which the ID should be returned.
-     *                              Not required for MySQL database, but should be specified for
-     *                              Postgres (Postgres Driver will do it automatically).
-     * @return mixed
-     */
-    public function lastInsertID($sequence = null)
-    {
-        return $sequence
-            ? (int)$this->getPDO()->lastInsertId($sequence)
-            : (int)$this->getPDO()->lastInsertId();
-    }
-
-    /**
-     * Get the number of active transactions (transaction level).
-     *
-     * @return int
-     */
-    public function transactionLevel()
-    {
-        return $this->transactionLevel;
-    }
-
-    /**
-     * Start SQL transaction with specified isolation level, not all database types support it.
-     * Nested transactions will be processed using savepoints.
+     * Start SQL transaction with specified isolation level (not all DBMS support it). Nested
+     * transactions are processed using savepoints.
      *
      * @link   http://en.wikipedia.org/wiki/Database_transaction
      * @link   http://en.wikipedia.org/wiki/Isolation_(database_systems)
-     * @param string $isolationLevel No value provided by default.
+     * @param string $isolationLevel
      * @return bool
      */
     public function beginTransaction($isolationLevel = null)
@@ -407,7 +401,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         {
             if (!empty($isolationLevel))
             {
-                $this->isolationLevel($isolationLevel);
+                $this->setIsolationLevel($isolationLevel);
             }
 
             $this->logger()->info('Starting transaction.');
@@ -468,9 +462,17 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Clean (truncate) specified database table. Table should exists at this moment.
+     * Check if table exists.
      *
-     * @param string $table Table name without prefix included.
+     * @param string $name
+     * @return bool
+     */
+    abstract public function hasTable($name);
+
+    /**
+     * Clean (truncate) specified driver table.
+     *
+     * @param string $table Table name with prefix included.
      */
     public function truncate($table)
     {
@@ -478,25 +480,14 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Check if linked database has specified table.
-     *
-     * @param string $name Fully specified table name, including prefix.
-     * @return bool
-     */
-    abstract public function hasTable($name);
-
-    /**
-     * Fetch list of all available table names under linked database, this method is called by Database
-     * in getTables() method, same methods will automatically filter tables by their prefix.
+     * Get every available table name as array.
      *
      * @return array
      */
     abstract public function tableNames();
 
     /**
-     * Get schema for specified table name, name should be provided without database prefix.
-     * TableSchema contains information about all table columns, indexes and foreign keys. Schema can
-     * be used to manipulate table structure.
+     * Get Driver specific AbstractTable implementation.
      *
      * @param string $table       Table name without prefix included.
      * @param string $tablePrefix Database specific table prefix, this parameter is not required,
@@ -514,8 +505,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Get instance of driver specified ColumnSchema. Every schema object should fully represent one
-     * table column, it's type and all possible options.
+     * Get Driver specific AbstractColumn implementation.
      *
      * @param AbstractTable $table  Parent TableSchema.
      * @param string        $name   Column name.
@@ -528,8 +518,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Get instance of driver specified IndexSchema. Every index schema should represent single table
-     * index including name, type and columns.
+     * Get Driver specific AbstractIndex implementation.
      *
      * @param AbstractTable $table  Parent TableSchema.
      * @param string        $name   Index name.
@@ -542,8 +531,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Get instance of driver specified ReferenceSchema (foreign key). Every ReferenceSchema should
-     * represent one foreign key with it's referenced table, column and rules.
+     * Get Driver specific AbstractReference implementation.
      *
      * @param AbstractTable $table  Parent TableSchema.
      * @param string        $name   Constraint name.
@@ -553,33 +541,6 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function referenceSchema(AbstractTable $table, $name, $schema = null)
     {
         return $this->container->get(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
-    }
-
-    /**
-     * Current timestamp expression value.
-     *
-     * @return string
-     */
-    public function timestampNow()
-    {
-        return static::TIMESTAMP_NOW;
-    }
-
-    /**
-     * QueryCompiler is low level SQL compiler which used by different query builders to generate
-     * statement based on provided tokens. Every builder will get it's own QueryCompiler at it has
-     * some internal isolation features (such as query specific table aliases).
-     *
-     * @param string $tablePrefix Database specific table prefix, used to correctly quote table names
-     *                            and other identifiers.
-     * @return QueryCompiler
-     */
-    public function queryCompiler($tablePrefix = '')
-    {
-        return $this->container->get(static::QUERY_COMPILER, [
-            'driver'      => $this,
-            'tablePrefix' => $tablePrefix
-        ]);
     }
 
     /**
@@ -643,8 +604,21 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Simplified way to dump information.
+     * Get instance of Driver specific QueryCompiler.
      *
+     * @param string $tablePrefix Database specific table prefix, used to quote table names and build
+     *                            aliases.
+     * @return QueryCompiler
+     */
+    public function queryCompiler($tablePrefix = '')
+    {
+        return $this->container->get(static::QUERY_COMPILER, [
+            'driver'      => $this,
+            'tablePrefix' => $tablePrefix
+        ]);
+    }
+
+    /**
      * @return object
      */
     public function __debugInfo()
@@ -652,14 +626,13 @@ abstract class Driver extends Component implements LoggerAwareInterface
         return (object)[
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
-            'database'   => $this->getDatabaseName(),
+            'database'   => $this->getSource(),
             'options'    => $this->options
         ];
     }
 
     /**
-     * Method used to get PDO instance for current driver, it can be overwritten by custom driver
-     * realization to perform DBMS specific operations.
+     * Create instance of configured PDO class.
      *
      * @return PDO
      */
@@ -678,9 +651,9 @@ abstract class Driver extends Component implements LoggerAwareInterface
      *
      * @param string $level
      */
-    protected function isolationLevel($level)
+    protected function setIsolationLevel($level)
     {
-        $this->logger()->info("Setting transaction isolation level to '{$level}'.");
+        $this->logger()->info("Set transaction isolation level to '{$level}'.");
         !empty($level) && $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
     }
 

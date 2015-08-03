@@ -54,60 +54,6 @@ trait HavingTrait
     );
 
     /**
-     * Add having condition to statement. Having condition will be specified with AND boolean joiner.
-     * Method supports nested queries and array based (mongo like) conditions. Every provided parameter
-     * will be automatically escaped in generated query. Syntax is identical to where methods.
-     *
-     * Examples:
-     * 1) Simple token/nested query or expression
-     * $select->having(new SQLFragment('(SELECT count(*) from `table`)'));
-     *
-     * 2) Simple assessment (= or IN)
-     * $select->having('column', $value);
-     * $select->having('column', array(1, 2, 3));
-     * $select->having('column', new SQLFragment('CONCAT(columnA, columnB)'));
-     *
-     * 3) Assessment with specified operator (operator will be converted to uppercase automatically)
-     * $select->having('column', '=', $value);
-     * $select->having('column', 'IN', array(1, 2, 3));
-     * $select->having('column', 'LIKE', $string);
-     * $select->having('column', 'IN', new SQLFragment('(SELECT id from `table` limit 1)'));
-     *
-     * 4) Between and not between statements
-     * $select->having('column', 'between', 1, 10);
-     * $select->having('column', 'not between', 1, 10);
-     * $select->having('column', 'not between', new SQLFragment('MIN(price)'), $maximum);
-     *
-     * 5) Closure with nested conditions
-     * $this->having(function(WhereTrait $select){
-     *      $select->having("name", "Wolfy-J")->orHaving("balance", ">", 100)
-     * });
-     *
-     * 6) Array based condition
-     * $select->having(["column" => 1]);
-     * $select->having(["column" => [">" => 1, "<" => 10]]);
-     * $select->having([
-     *      "@or" => [
-     *          ["id" => 1],
-     *          ["column" => ["like" => "name"]]
-     *      ]
-     * ]);
-     * $select->having([
-     *      '@or' => [
-     *          ["id" => 1],
-     *          ["id" => 2],
-     *          ["id" => 3],
-     *          ["id" => 4],
-     *          ["id" => 5],
-     *      ],
-     *      "column" => [
-     *          "like" => "name"
-     *      ],
-     *      'x'      => [
-     *          '>' => 1,
-     *          '<' => 10
-     *      ]
-     * ]);
      *
      * You can read more about complex where statements in official documentation or look mongo
      * queries examples.
@@ -130,64 +76,6 @@ trait HavingTrait
     }
 
     /**
-     * Add having condition to statement. Having condition will be specified with AND boolean joiner.
-     * Method supports nested queries and array based (mongo like) conditions. Every provided parameter
-     * will be automatically escaped in generated query. Alias for having. Syntax is identical to where
-     * methods.
-     *
-     * Examples:
-     * 1) Simple token/nested query or expression
-     * $select->andHaving(new SQLFragment('(SELECT count(*) from `table`)'));
-     *
-     * 2) Simple assessment (= or IN)
-     * $select->andHaving('column', $value);
-     * $select->andHaving('column', array(1, 2, 3));
-     * $select->andHaving('column', new SQLFragment('CONCAT(columnA, columnB)'));
-     *
-     * 3) Assessment with specified operator (operator will be converted to uppercase automatically)
-     * $select->andHaving('column', '=', $value);
-     * $select->andHaving('column', 'IN', array(1, 2, 3));
-     * $select->andHaving('column', 'LIKE', $string);
-     * $select->andHaving('column', 'IN', new SQLFragment('(SELECT id from `table` limit 1)'));
-     *
-     * 4) Between and not between statements
-     * $select->andHaving('column', 'between', 1, 10);
-     * $select->andHaving('column', 'not between', 1, 10);
-     * $select->andHaving('column', 'not between', new SQLFragment('MIN(price)'), $maximum);
-     *
-     * 5) Closure with nested conditions
-     * $this->andHaving(function(WhereTrait $select){
-     *      $select->having("name", "Wolfy-J")->orHaving("balance", ">", 100)
-     * });
-     *
-     * 6) Array based condition
-     * $select->andHaving(["column" => 1]);
-     * $select->andHaving(["column" => [">" => 1, "<" => 10]]);
-     * $select->andHaving([
-     *      "id" => 1,
-     *      "column" => ["like" => "name"]
-     * ]);
-     * $select->andHaving([
-     *      '@or' => [
-     *          ["id" => 1],
-     *          ["id" => 2],
-     *          ["id" => 3],
-     *          ["id" => 4],
-     *          ["id" => 5],
-     *      ],
-     *      "column" => [
-     *          "like" => "name"
-     *      ],
-     *      'x'      => [
-     *          '>' => 1,
-     *          '<' => 10
-     *      ]
-     * ]);
-     *
-     * You can read more about complex where statements in official documentation or look mongo
-     * queries examples.
-     *
-     * @see WhereTrait
      * @see parseWhere()
      * @see whereToken()
      * @param string|mixed $identifier Column or expression.
@@ -205,62 +93,6 @@ trait HavingTrait
     }
 
     /**
-     * Add having condition to statement. Having condition will be specified with OR boolean joiner.
-     * Method supports nested queries and array based (mongo like) conditions. Every provided parameter
-     * will be automatically escaped in generated query. Syntax is identical to where methods.
-     *
-     * Examples:
-     * 1) Simple token/nested query or expression
-     * $select->orHaving(new SQLFragment('(SELECT count(*) from `table`)'));
-     *
-     * 2) Simple assessment (= or IN)
-     * $select->orHaving('column', $value);
-     * $select->orHaving('column', array(1, 2, 3));
-     * $select->orHaving('column', new SQLFragment('CONCAT(columnA, columnB)'));
-     *
-     * 3) Assessment with specified operator (operator will be converted to uppercase automatically)
-     * $select->orHaving('column', '=', $value);
-     * $select->orHaving('column', 'IN', array(1, 2, 3));
-     * $select->orHaving('column', 'LIKE', $string);
-     * $select->orHaving('column', 'IN', new SQLFragment('(SELECT id from `table` limit 1)'));
-     *
-     * 4) Between and not between statements
-     * $select->orHaving('column', 'between', 1, 10);
-     * $select->orHaving('column', 'not between', 1, 10);
-     * $select->orHaving('column', 'not between', new SQLFragment('MIN(price)'), $maximum);
-     *
-     * 5) Closure with nested conditions
-     * $this->orHaving(function(WhereTrait $select){
-     *      $select->having("name", "Wolfy-J")->orHaving("balance", ">", 100)
-     * });
-     *
-     * 6) Array based condition
-     * $select->orHaving(["column" => 1]);
-     * $select->orHaving(["column" => [">" => 1, "<" => 10]]);
-     * $select->orHaving([
-     *      "id" => 1,
-     *      "column" => ["like" => "name"]
-     * ]);
-     * $select->orHaving([
-     *      '@or' => [
-     *          ["id" => 1],
-     *          ["id" => 2],
-     *          ["id" => 3],
-     *          ["id" => 4],
-     *          ["id" => 5],
-     *      ],
-     *      "column" => [
-     *          "like" => "name"
-     *      ],
-     *      'x'      => [
-     *          '>' => 1,
-     *          '<' => 10
-     *      ]
-     * ]);
-     *
-     * You can read more about complex where statements in official documentation or look mongo
-     * queries examples.
-     *
      * @see WhereTrait
      * @see parseWhere()
      * @see whereToken()

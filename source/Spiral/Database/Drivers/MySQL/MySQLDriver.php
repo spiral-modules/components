@@ -8,10 +8,10 @@
  */
 namespace Spiral\Database\Drivers\MySQL;
 
+use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\IndexSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\ReferenceSchema;
-use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 use PDO;
 
@@ -68,7 +68,7 @@ class MySQLDriver extends Driver
         $query = 'SELECT COUNT(*) FROM information_schema.tables '
             . 'WHERE table_schema = ? AND table_name = ?';
 
-        return (bool)$this->query($query, [$this->databaseName, $name])->fetchColumn();
+        return (bool)$this->query($query, [$this->source, $name])->fetchColumn();
     }
 
     /**

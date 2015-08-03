@@ -234,7 +234,7 @@ class Database extends Component
      * Execute statement or fetch result from cache and return cached query iterator.
      *
      * @param int            $lifetime   Cache lifetime in seconds.
-     * @param string         $query      SQL statement with parameter placeholders.
+     * @param string         $query
      * @param array          $parameters Parameters to be binded into query.
      * @param string         $key        Cache key to be used to store query result.
      * @param StoreInterface $store      Cache store to store result in, if null default store will
@@ -376,6 +376,28 @@ class Database extends Component
     }
 
     /**
+     * Check if table exists.
+     *
+     * @param string $name Table name without prefix.
+     * @return bool
+     */
+    public function hasTable($name)
+    {
+        return $this->driver->hasTable($this->tablePrefix . $name);
+    }
+
+    /**
+     * Get Table abstraction.
+     *
+     * @param string $name Table name without prefix.
+     * @return Table
+     */
+    public function table($name)
+    {
+        return new Table($this, $name);
+    }
+
+    /**
      * Get every available database Table abstraction.
      *
      * @return Table[]
@@ -395,28 +417,6 @@ class Database extends Component
         }
 
         return $result;
-    }
-
-    /**
-     * Check if table exists.
-     *
-     * @param string $name
-     * @return bool
-     */
-    public function hasTable($name)
-    {
-        return $this->driver->hasTable($this->tablePrefix . $name);
-    }
-
-    /**
-     * Get Table abstraction.
-     *
-     * @param string $name Table name without prefix.
-     * @return Table
-     */
-    public function table($name)
-    {
-        return new Table($this, $name);
     }
 
     /**

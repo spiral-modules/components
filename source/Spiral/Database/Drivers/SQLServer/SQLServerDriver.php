@@ -8,6 +8,10 @@
  */
 namespace Spiral\Database\Drivers\SQLServer;
 
+use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
+use Spiral\Database\Drivers\SQLServer\Schemas\ColumnSchema;
+use Spiral\Database\Drivers\SQLServer\Schemas\IndexSchema;
+use Spiral\Database\Drivers\SQLServer\Schemas\ReferenceSchema;
 use Spiral\Database\Entities\Driver;
 use PDO;
 

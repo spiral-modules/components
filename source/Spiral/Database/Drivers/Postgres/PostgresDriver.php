@@ -11,10 +11,10 @@ namespace Spiral\Database\Drivers\Postgres;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\Drivers\Postgres\Builders\InsertQuery;
+use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Drivers\Postgres\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\Postgres\Schemas\IndexSchema;
 use Spiral\Database\Drivers\Postgres\Schemas\ReferenceSchema;
-use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
@@ -124,7 +124,6 @@ class PostgresDriver extends Driver
         return $result;
     }
 
-
     /**
      * Get singular primary key associated with desired table. Used to emulate last insert id.
      *
@@ -136,7 +135,7 @@ class PostgresDriver extends Driver
     {
         if (empty($this->primaryKeys))
         {
-            $this->primaryKeys = $this->memory->loadData($this->getDatabaseName() . '-primary');
+            $this->primaryKeys = $this->memory->loadData($this->getSource() . '-primary');
         }
 
         if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys))
@@ -161,7 +160,7 @@ class PostgresDriver extends Driver
         }
 
         //Caching
-        $this->memory->saveData($this->getDatabaseName() . '-primary', $this->primaryKeys);
+        $this->memory->saveData($this->getSource() . '-primary', $this->primaryKeys);
 
         return $this->primaryKeys[$table];
     }

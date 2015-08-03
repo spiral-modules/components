@@ -79,6 +79,25 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
+    public function prepareParameters(array $parameters)
+    {
+        $result = parent::prepareParameters($parameters);
+
+        array_walk_recursive($result, function (&$value)
+        {
+            if (is_bool($value))
+            {
+                //PDO casts boolean as string, Postgres can't understand it, let's cast it as int
+                $value = (int)$value;
+            }
+        });
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasTable($name)
     {
         $query = 'SELECT "table_name" FROM "information_schema"."tables" '
@@ -103,25 +122,6 @@ class PostgresDriver extends Driver
         }
 
         return $tables;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function prepareParameters(array $parameters)
-    {
-        $result = parent::prepareParameters($parameters);
-
-        array_walk_recursive($result, function (&$value)
-        {
-            if (is_bool($value))
-            {
-                //PDO casts boolean as string, Postgres can't understand it, let's cast it as int
-                $value = (int)$value;
-            }
-        });
-
-        return $result;
     }
 
     /**

@@ -23,7 +23,7 @@ trait JoinsTrait
      *
      * @var array
      */
-    protected $joins = [];
+    protected $joinTokens = [];
 
     /**
      * Join parameters has to be stored separately from other query parameters as they have their
@@ -93,7 +93,7 @@ trait JoinsTrait
      */
     public function join($type, $table, $on = null)
     {
-        $this->joins[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->currentJoin = $table] = [
             'type' => strtoupper($type),
             'on'   => []
         ];
@@ -113,7 +113,7 @@ trait JoinsTrait
      */
     public function innerJoin($table, $on = null)
     {
-        $this->joins[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->currentJoin = $table] = [
             'type' => 'INNER',
             'on'   => []
         ];
@@ -136,7 +136,7 @@ trait JoinsTrait
      */
     public function rightJoin($table, $on = null)
     {
-        $this->joins[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->currentJoin = $table] = [
             'type' => 'RIGHT',
             'on'   => []
         ];
@@ -156,7 +156,7 @@ trait JoinsTrait
      */
     public function leftJoin($table, $on = null)
     {
-        $this->joins[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->currentJoin = $table] = [
             'type' => 'LEFT',
             'on'   => []
         ];
@@ -177,7 +177,7 @@ trait JoinsTrait
      */
     public function fullJoin($table, $on = null)
     {
-        $this->joins[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->currentJoin = $table] = [
             'type' => 'FULL',
             'on'   => []
         ];
@@ -221,7 +221,7 @@ trait JoinsTrait
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joins[$this->currentJoin]['on'],
+            $this->joinTokens[$this->currentJoin]['on'],
             $this->joinWrapper()
         );
 
@@ -243,7 +243,7 @@ trait JoinsTrait
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joins[$this->currentJoin]['on'],
+            $this->joinTokens[$this->currentJoin]['on'],
             $this->joinWrapper()
         );
 
@@ -263,7 +263,7 @@ trait JoinsTrait
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joins[$this->currentJoin]['on'],
+            $this->joinTokens[$this->currentJoin]['on'],
             $this->joinWrapper()
         );
 
@@ -289,7 +289,7 @@ trait JoinsTrait
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joins[$this->currentJoin]['on'],
+            $this->joinTokens[$this->currentJoin]['on'],
             $this->onWrapper()
         );
 
@@ -315,7 +315,7 @@ trait JoinsTrait
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joins[$this->currentJoin]['on'],
+            $this->joinTokens[$this->currentJoin]['on'],
             $this->onWrapper()
         );
 
@@ -341,7 +341,7 @@ trait JoinsTrait
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joins[$this->currentJoin]['on'],
+            $this->joinTokens[$this->currentJoin]['on'],
             $this->onWrapper()
         );
 

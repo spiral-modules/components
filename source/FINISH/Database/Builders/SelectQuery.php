@@ -137,7 +137,7 @@ class SelectQuery extends AbstractSelect
             $this->fromTables,
             $this->distinct,
             $this->columns,
-            $this->joins,
+            $this->joinTokens,
             $this->whereTokens,
             $this->havingTokens,
             $this->groupBy,

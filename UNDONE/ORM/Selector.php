@@ -336,7 +336,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             [$this->loader->getTable() . ' AS ' . $this->loader->getAlias()],
             $this->distinct,
             $columns,
-            $this->joins,
+            $this->joinTokens,
             $this->whereTokens,
             $this->havingTokens,
             $this->groupBy,
@@ -650,7 +650,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         return $compiler->update(
             $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
             $columns,
-            $this->joins,
+            $this->joinTokens,
             $this->whereTokens
         );
     }
@@ -668,7 +668,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         return $compiler->delete(
             $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
-            $this->joins,
+            $this->joinTokens,
             $this->whereTokens
         );
     }

@@ -34,6 +34,7 @@ trait HavingTrait
      * Parameters collected while generating HAVING tokens, must be in a same order as parameters
      * in resulted query.
      *
+     * @see AbstractWhere
      * @var array
      */
     protected $havingParameters = [];

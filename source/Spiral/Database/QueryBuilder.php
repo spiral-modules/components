@@ -146,7 +146,7 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface, B
         $result = [];
         foreach ($parameters as $parameter)
         {
-            if ($parameter instanceof QueryBuilder)
+            if ($parameter instanceof BuilderInterface)
             {
                 $result = array_merge($result, $parameter->getParameters());
                 continue;

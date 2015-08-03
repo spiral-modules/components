@@ -82,8 +82,9 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * The number of rows selected by SQL statement. Attention, this method will return 0 for SQLite
-     * databases.
+     * {@inheritdoc}
+     *
+     * Attention, this method will return 0 for SQLite databases.
      *
      * @link http://php.net/manual/en/pdostatement.rowcount.php
      * @link http://stackoverflow.com/questions/15003232/pdo-returns-wrong-rowcount-after-select-statement
@@ -95,10 +96,9 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * The number of columns in the result set.
+     * {@inheritdoc}
      *
      * @link http://php.net/manual/en/pdostatement.columncount.php
-     * @return int
      */
     public function countColumns()
     {
@@ -121,10 +121,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Fetch one result row as array.
-     *
-     * @param bool $mode
-     * @return array
+     * {@inheritdoc}
      */
     public function fetch($mode = null)
     {
@@ -137,10 +134,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Returns a single column value from the next row of a result set.
-     *
-     * @param int $columnID Column number (0 - first column)
-     * @return mixed
+     * {@inheritdoc}
      */
     public function fetchColumn($columnID = 0)
     {
@@ -148,25 +142,26 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Bind a column to a PHP variable.
+     * {@inheritdoc}
      *
      * @link http://www.php.net/manual/en/function.PDOStatement-bindColumn.php
-     * @param integer|string $columnID Column number (1 - first column) or name to bind data to.
-     * @param mixed          $variable
      * @return $this
      */
     public function bind($columnID, &$variable)
     {
+        if (is_numeric($columnID))
+        {
+            //PDO columns are 1-indexed
+            $columnID = $columnID + 1;
+        }
+
         $this->statement->bindColumn($columnID, $variable);
 
         return $this;
     }
 
     /**
-     * Returns an array containing all of the result set rows, do not use this method on big datasets.
-     *
-     * @param bool $mode
-     * @return array
+     * {@inheritdoc}
      */
     public function fetchAll($mode = null)
     {
@@ -224,7 +219,7 @@ class QueryResult implements \Countable, \Iterator, \JsonSerializable
     }
 
     /**
-     * Closes the reader cursor, buffer resources will be freed after that.
+     * {@inheritdoc}
      *
      * @link http://php.net/manual/en/pdostatement.closecursor.php
      * @return bool

@@ -33,6 +33,14 @@ interface ResultIteratorInterface extends \Countable, \Iterator
     public function fetchColumn($columnID = 0);
 
     /**
+     * Bind a column value to a PHP variable.
+     *
+     * @param integer|string $columnID Column number (0 - first column)
+     * @param mixed          $variable
+     */
+    public function bind($columnID, &$variable);
+
+    /**
      * Returns an array containing all of the result set rows, do not use this method on big datasets.
      *
      * @return array
@@ -41,8 +49,6 @@ interface ResultIteratorInterface extends \Countable, \Iterator
 
     /**
      * Close result iterator. Must free as much memory as it can.
-     *
-     * @return bool
      */
     public function close();
 }

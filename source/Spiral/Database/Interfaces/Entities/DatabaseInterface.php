@@ -10,7 +10,6 @@ namespace Spiral\Database\Interfaces\Entities;
 
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Interfaces\Builders\DeleteBuilderInterface;
-use Spiral\Database\Interfaces\Builders\InsertBuilderInterface;
 use Spiral\Database\Interfaces\Builders\SelectBuilderInterface;
 use Spiral\Database\Interfaces\Builders\UpdateBuilderInterface;
 use Spiral\Database\Interfaces\Query\ResultIteratorInterface;
@@ -45,15 +44,7 @@ interface DatabaseInterface
      */
     public function query($query, array $parameters = []);
 
-    /**
-     * Get instance of InsertBuilder associated with current Database.
-     *
-     * @param string $table
-     * @return InsertBuilderInterface
-     */
-    public function insert($table = '');
-
-    /**
+       /**
      * Get instance of UpdateBuilderInterface associated with current Database.
      *
      * @param string $table

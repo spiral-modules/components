@@ -8,6 +8,10 @@
  */
 namespace Spiral\Database\Interfaces\Entities;
 
+use Spiral\Database\Interfaces\Builders\DeleteBuilderInterface;
+use Spiral\Database\Interfaces\Builders\SelectBuilderInterface;
+use Spiral\Database\Interfaces\Builders\UpdateBuilderInterface;
+
 interface TableInterface extends \Countable
 {
     /**
@@ -58,7 +62,7 @@ interface TableInterface extends \Countable
      * Get SelectQuery builder with pre-populated from tables.
      *
      * @param string $columns
-     * @return SelectQuery
+     * @return SelectBuilderInterface
      */
     public function select($columns = '*');
 
@@ -68,7 +72,7 @@ interface TableInterface extends \Countable
      *
      * @param array $values Initial set of columns associated with values.
      * @param array $where  Initial set of where rules specified as array.
-     * @return UpdateQuery
+     * @return UpdateBuilderInterface
      */
     public function update(array $values = [], array $where = []);
 
@@ -78,7 +82,7 @@ interface TableInterface extends \Countable
      * Table->truncate() method. Call ->run() to perform query.
      *
      * @param array $where Initial set of where rules specified as array.
-     * @return DeleteQuery
+     * @return DeleteBuilderInterface
      */
     public function delete(array $where = []);
 }

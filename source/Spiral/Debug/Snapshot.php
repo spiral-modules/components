@@ -13,12 +13,13 @@ use Exception;
 use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;
+use Spiral\Views\ViewInterface;
 use Spiral\Views\ViewsInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using views.
  */
-class Snapshot extends Component implements SnapshotInterface, SaturableInterlace
+class Snapshot extends Component implements SnapshotInterface, SaturableInterlace, ViewInterface
 {
     /**
      * Message format.
@@ -215,5 +216,13 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
             'snapshot'      => $this,
             'container'     => $this->container
         ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->render();
     }
 }

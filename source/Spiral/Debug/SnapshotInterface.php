@@ -9,12 +9,11 @@
 namespace Spiral\Debug;
 
 use Exception;
-use Spiral\Views\ViewInterface;
 
 /**
  * Wrapper used to describe and show exception information in user friendly way.
  */
-interface SnapshotInterface extends ViewInterface
+interface SnapshotInterface
 {
     /**
      * @param Exception $exception

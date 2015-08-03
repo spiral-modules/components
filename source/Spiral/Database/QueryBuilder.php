@@ -11,8 +11,6 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Exceptions\BuilderException;
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Interfaces\BuilderInterface;
 

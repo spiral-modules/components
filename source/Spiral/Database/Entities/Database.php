@@ -11,16 +11,12 @@ namespace Spiral\Database\Entities;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
-use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
-use Spiral\Database\Builders\SelectQuery;
-use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Interfaces\Entities\DatabaseInterface;
 use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Query\QueryResult;
 use Spiral\Events\Traits\EventsTrait;
 
 /**

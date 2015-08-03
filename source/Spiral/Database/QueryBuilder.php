@@ -14,12 +14,13 @@ use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Interfaces\BuilderInterface;
 
 /**
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
  */
-abstract class QueryBuilder extends Component implements SQLFragmentInterface
+abstract class QueryBuilder extends Component implements SQLFragmentInterface, BuilderInterface
 {
     /**
      * @invisible
@@ -44,29 +45,23 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface
     }
 
     /**
-     * Get ordered list of builder parameters.
+     * {@inheritdoc}
      *
      * @param QueryCompiler $compiler
-     * @return array
-     * @throws BuilderException
      */
     abstract public function getParameters(QueryCompiler $compiler = null);
 
     /**
-     * Get or render SQL statement.
+     * {@inheritdoc}
      *
      * @param QueryCompiler $compiler
-     * @return string
-     * @throws BuilderException
      */
     abstract public function sqlStatement(QueryCompiler $compiler = null);
 
     /**
-     * Run QueryBuilder statement against parent database. Method will be overloaded by child builder
-     * to return correct value.
+     * {@inheritdoc}
      *
      * @return \PDOStatement
-     * @throws QueryException
      */
     public function run()
     {

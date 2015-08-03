@@ -299,6 +299,7 @@ class Database extends Component implements DatabaseInterface
      * {@inheritdoc}
      *
      * @param string $isolationLevel
+     * @throws \Exception
      */
     public function transaction(callable $callback, $isolationLevel = null)
     {

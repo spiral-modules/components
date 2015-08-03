@@ -9,12 +9,13 @@
 namespace Spiral\Database\Injections;
 
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Interfaces\Injections\ParameterInterface;
 
 /**
  * Default implementation of ParameterInterface, provides ability to mock value or array of values
  * and automatically create valid query placeholder at moment of query compilation (? vs (?, ?, ?)).
  */
-class Parameter implements ParameterInterface
+class Parameter extends SQLFragment implements ParameterInterface
 {
     /**
      * Mocked value or array of values.
@@ -51,6 +52,8 @@ class Parameter implements ParameterInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param QueryCompiler $compiler
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
@@ -61,14 +64,6 @@ class Parameter implements ParameterInterface
         }
 
         return '?';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
-    {
-        return $this->sqlStatement();
     }
 
     /**

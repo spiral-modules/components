@@ -11,14 +11,13 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Interfaces\BuilderInterface;
 
 /**
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
  */
-abstract class QueryBuilder extends Component implements SQLFragmentInterface, BuilderInterface
+abstract class QueryBuilder extends Component implements BuilderInterface
 {
     /**
      * @invisible

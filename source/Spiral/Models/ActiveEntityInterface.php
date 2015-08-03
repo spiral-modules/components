@@ -9,9 +9,9 @@
 namespace Spiral\Models;
 
 /**
- * Represents generic active record patten.
+ * Represents generic ActiveRecord patten.
  */
-interface ActiveRecordInterface extends EntityInterface
+interface ActiveEntityInterface extends EntityInterface
 {
     //TODO: SAVE
     //TODO: CREATE

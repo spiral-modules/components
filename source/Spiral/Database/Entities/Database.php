@@ -11,12 +11,16 @@ namespace Spiral\Database\Entities;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
+use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Interfaces\Entities\DatabaseInterface;
 use Spiral\Database\Query\CachedResult;
+use Spiral\Database\Query\QueryResult;
 use Spiral\Events\Traits\EventsTrait;
 
 /**
@@ -184,6 +188,7 @@ class Database extends Component implements DatabaseInterface
     /**
      * {@inheritdoc}
      *
+     * @return QueryResult
      * @event statement($statement, $query, $parameters, $database): statement
      */
     public function query($query, array $parameters = [])
@@ -255,6 +260,8 @@ class Database extends Component implements DatabaseInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return UpdateQuery
      */
     public function update($table = '', array $values = [], array $where = [])
     {
@@ -263,6 +270,8 @@ class Database extends Component implements DatabaseInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return DeleteQuery
      */
     public function delete($table = '', array $where = [])
     {
@@ -271,6 +280,8 @@ class Database extends Component implements DatabaseInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return SelectQuery
      */
     public function select($columns = '*')
     {
@@ -344,6 +355,8 @@ class Database extends Component implements DatabaseInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return Table
      */
     public function table($name)
     {
@@ -352,6 +365,8 @@ class Database extends Component implements DatabaseInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return Table[]
      */
     public function getTables()
     {

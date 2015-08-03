@@ -248,9 +248,8 @@ class Database extends Component implements DatabaseInterface
     }
 
     /**
-     * Get instance of InsertBuilder associated with current Database.
+     * {@inheritdoc}
      *
-     * @param string $table Table where values should be inserted to.
      * @return InsertQuery
      */
     public function insert($table = '')

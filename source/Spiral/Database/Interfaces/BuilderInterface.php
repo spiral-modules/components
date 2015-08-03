@@ -13,7 +13,7 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
 
 /**
- * Declares generic query builder interface.
+ * Declares generic query builder functionality.
  */
 interface BuilderInterface extends SQLFragmentInterface
 {
@@ -26,7 +26,7 @@ interface BuilderInterface extends SQLFragmentInterface
     public function getParameters();
 
     /**
-     * Run QueryBuilder statement against parent database.
+     * Run built statement against parent database.
      *
      * @throws QueryException
      */

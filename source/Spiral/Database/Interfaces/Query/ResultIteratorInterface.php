@@ -8,6 +8,9 @@
  */
 namespace Spiral\Database\Interfaces\Query;
 
+/**
+ * Must represent single query result.
+ */
 interface ResultIteratorInterface extends \Countable, \Iterator
 {
     /**

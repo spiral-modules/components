@@ -54,7 +54,7 @@ interface DatabaseInterface
     public function insert($table = '');
 
     /**
-     * Get instance of UpdateBuilder associated with current Database.
+     * Get instance of UpdateBuilderInterface associated with current Database.
      *
      * @param string $table
      * @param array  $values Initial set of columns to update associated with their values.
@@ -64,7 +64,7 @@ interface DatabaseInterface
     public function update($table = '', array $values = [], array $where = []);
 
     /**
-     * Get instance of DeleteBuilder associated with current Database.
+     * Get instance of DeleteBuilderInterface associated with current Database.
      *
      * @param string $table
      * @param array  $where Initial set of where rules specified as array.
@@ -73,7 +73,7 @@ interface DatabaseInterface
     public function delete($table = '', array $where = []);
 
     /**
-     * Get instance of SelectBuilder associated with current Database.
+     * Get instance of SelectBuilderInterface associated with current Database.
      *
      * @param array|string $columns Columns to select.
      * @return SelectBuilderInterface

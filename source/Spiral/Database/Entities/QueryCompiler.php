@@ -11,7 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Core\Component;
 use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\ParameterInterface;
+use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\QueryBuilder;
 
 /**

@@ -12,7 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Exceptions\MissingContainerException;
 use Spiral\Models\Exceptions\AccessorException;
 use Spiral\Models\Exceptions\TraitException;
-use Spiral\Models\Schemas\ReflectionEntity;
+use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
 
@@ -89,11 +89,9 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     protected $accessors = [];
 
     /**
-     * Set field value.
+     * {@inheritdoc}
      *
-     * @param string $name
-     * @param mixed  $value
-     * @param bool   $filter If false, associated field setter or accessor will be ignored.
+     * @param bool $filter If false, associated field setter or accessor will be ignored.
      * @throws AccessorException
      */
     public function setField($name, $value, $filter = true)
@@ -138,12 +136,9 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     }
 
     /**
-     * Get value of data entity field.
+     * {@inheritdoc}
      *
-     * @param string $name
-     * @param mixed  $default
-     * @param bool   $filter If false, associated field getter will be ignored.
-     * @return mixed|AccessorInterface
+     * @param bool $filter If false, associated field getter will be ignored.
      * @throws AccessorException
      */
     public function getField($name, $default = null, $filter = true)
@@ -252,7 +247,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     }
 
     /**
-     * User model fields using mass assignment. Only allowed fields will be set.
+     * {@inheritdoc}
      *
      * @see   $fillable
      * @see   $secured
@@ -277,11 +272,11 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
     }
 
     /**
-     * Get entity fields. Every getter and accessor will be applied/constructed if filter argument
-     * set to true.
+     * {@inheritdoc}
+     *
+     * Every getter and accessor will be applied/constructed if filter argument set to true.
      *
      * @param bool $filter
-     * @return array
      */
     public function getFields($filter = true)
     {
@@ -312,6 +307,7 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
 
         return $this->fire('publicFields', $fields);
     }
+
 
     /**
      * Serialize entity data into plain array.
@@ -452,8 +448,8 @@ abstract class DataEntity extends Component implements \JsonSerializable, \Itera
      * Method used while entity static analysis to describe model related property using even dispatcher
      * and associated model traits.
      *
-     * @param string       $property
-     * @param mixed        $value
+     * @param string           $property
+     * @param mixed            $value
      * @param ReflectionEntity $schema
      * @return mixed Returns filtered value.
      * @event describe($property, $value, EntitySchema $schema)

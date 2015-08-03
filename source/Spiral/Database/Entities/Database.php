@@ -18,6 +18,7 @@ use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Interfaces\Entities\DatabaseInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Events\Traits\EventsTrait;
@@ -27,7 +28,7 @@ use Spiral\Events\Traits\EventsTrait;
  * and use different by table prefix. Databases usually linked to real database or logical portion
  * of database (filtered by prefix).
  */
-class Database extends Component
+class Database extends Component implements DatabaseInterface
 {
     /**
      * Query and statement events.
@@ -177,6 +178,24 @@ class Database extends Component
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function execute($query, array $parameters = [])
+    {
+        return $this->statement($query, $parameters)->rowCount();
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @event statement($statement, $query, $parameters, $database): statement
+     */
+    public function query($query, array $parameters = [])
+    {
+        return $this->driver->query($query, $parameters);
+    }
+
+    /**
      * Get instance of PDOStatement from Driver.
      *
      * @param string $query
@@ -190,40 +209,6 @@ class Database extends Component
     {
         return $this->fire('statement', [
             'statement'  => $this->driver->statement($query, $parameters),
-            'query'      => $query,
-            'parameters' => $parameters,
-            'database'   => $this
-        ])['statement'];
-    }
-
-    /**
-     * Execute statement and return number of affected rows.
-     *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     * @return int
-     * @throws DriverException
-     * @throws QueryException
-     */
-    public function execute($query, array $parameters = [])
-    {
-        return $this->statement($query, $parameters)->rowCount();
-    }
-
-    /**
-     * Execute statement and return query iterator.
-     *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     * @return QueryResult
-     * @throws DriverException
-     * @throws QueryException
-     * @event statement($statement, $query, $parameters, $database): statement
-     */
-    public function query($query, array $parameters = [])
-    {
-        return $this->fire('query', [
-            'statement'  => $this->driver->query($query, $parameters),
             'query'      => $query,
             'parameters' => $parameters,
             'database'   => $this
@@ -273,12 +258,7 @@ class Database extends Component
     }
 
     /**
-     * Get instance of UpdateBuilder associated with current Database.
-     *
-     * @param string $table  Table where rows should be updated in.
-     * @param array  $values Initial set of columns to update associated with their values.
-     * @param array  $where  Initial set of where rules specified as array.
-     * @return UpdateQuery
+     * {@inheritdoc}
      */
     public function update($table = '', array $values = [], array $where = [])
     {
@@ -286,11 +266,7 @@ class Database extends Component
     }
 
     /**
-     * Get instance of DeleteBuilder associated with current Database.
-     *
-     * @param string $table Table where rows should be deleted from.
-     * @param array  $where Initial set of where rules specified as array.
-     * @return DeleteQuery
+     * {@inheritdoc}
      */
     public function delete($table = '', array $where = [])
     {
@@ -298,10 +274,7 @@ class Database extends Component
     }
 
     /**
-     * Get instance of SelectBuilder associated with current Database.
-     *
-     * @param array|string $columns Columns to select.
-     * @return SelectQuery
+     * {@inheritdoc}
      */
     public function select($columns = '*')
     {
@@ -316,13 +289,9 @@ class Database extends Component
     }
 
     /**
-     * Execute multiple commands defined by Closure function inside one transaction. Closure or
-     * function will receive only one argument - Database instance.
+     * {@inheritdoc}
      *
-     * @param callable $callback
-     * @param string   $isolationLevel
-     * @return mixed
-     * @throws \Exception
+     * @param string $isolationLevel
      */
     public function transaction(callable $callback, $isolationLevel = null)
     {
@@ -343,12 +312,10 @@ class Database extends Component
     }
 
     /**
-     * Start SQL transaction with specified isolation level, not all database types support it.
+     * {@inheritdoc}
      *
-     * @link http://en.wikipedia.org/wiki/Database_transaction
      * @link http://en.wikipedia.org/wiki/Isolation_(database_systems)
      * @param string $isolationLevel
-     * @return bool
      */
     public function begin($isolationLevel = null)
     {
@@ -356,9 +323,7 @@ class Database extends Component
     }
 
     /**
-     * Commit the active database transaction.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function commit()
     {
@@ -366,9 +331,7 @@ class Database extends Component
     }
 
     /**
-     * Rollback the active database transaction.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function rollback()
     {
@@ -376,10 +339,7 @@ class Database extends Component
     }
 
     /**
-     * Check if table exists.
-     *
-     * @param string $name Table name without prefix.
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasTable($name)
     {
@@ -387,10 +347,7 @@ class Database extends Component
     }
 
     /**
-     * Get Table abstraction.
-     *
-     * @param string $name Table name without prefix.
-     * @return Table
+     * {@inheritdoc}
      */
     public function table($name)
     {
@@ -398,9 +355,7 @@ class Database extends Component
     }
 
     /**
-     * Get every available database Table abstraction.
-     *
-     * @return Table[]
+     * {@inheritdoc}
      */
     public function getTables()
     {

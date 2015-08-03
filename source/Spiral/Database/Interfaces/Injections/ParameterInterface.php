@@ -6,7 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Injections;
+namespace Spiral\Database\Interfaces\Injections;
+
+use Spiral\Database\Injections\SQLFragmentInterface;
 
 /**
  * Parameter interface is very similar to sql fragments, however it can not only mock sql expressions

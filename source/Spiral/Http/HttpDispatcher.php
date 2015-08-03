@@ -33,7 +33,10 @@ use Zend\Diactoros\ServerRequestFactory;
  * Basic spiral Http Dispatcher implementation. Used for web based applications and can route requests
  * to controllers or custom endpoints.
  */
-class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwareInterface
+class HttpDispatcher extends Singleton implements
+    DispatcherInterface,
+    LoggerAwareInterface,
+    HttpInterface
 {
     /**
      * HttpDispatcher has embedded router and log it's errors.
@@ -114,21 +117,6 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
         $this->views = $views;
 
         return $this;
-    }
-
-    /**
-     * Get associated views component or fetch it from container.
-     *
-     * @return ViewsInterface
-     */
-    protected function views()
-    {
-        if (!empty($this->views))
-        {
-            return $this->views;
-        }
-
-        return $this->views = $this->container->get(ViewsInterface::class);
     }
 
     /**
@@ -291,6 +279,21 @@ class HttpDispatcher extends Singleton implements DispatcherInterface, LoggerAwa
         }
 
         $this->dispatch($response);
+    }
+
+    /**
+     * Get associated views component or fetch it from container.
+     *
+     * @return ViewsInterface
+     */
+    protected function views()
+    {
+        if (!empty($this->views))
+        {
+            return $this->views;
+        }
+
+        return $this->views = $this->container->get(ViewsInterface::class);
     }
 
     /**

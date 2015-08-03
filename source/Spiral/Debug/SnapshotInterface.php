@@ -9,11 +9,12 @@
 namespace Spiral\Debug;
 
 use Exception;
+use Spiral\Views\ViewInterface;
 
 /**
  * Wrapper used to describe and show exception information in user friendly way.
  */
-interface SnapshotInterface
+interface SnapshotInterface extends ViewInterface
 {
     /**
      * @param Exception $exception
@@ -72,11 +73,4 @@ interface SnapshotInterface
      * @return array
      */
     public function describe();
-
-    /**
-     * Render exception snapshot into string.
-     *
-     * @return string
-     */
-    public function render();
 }

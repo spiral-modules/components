@@ -10,9 +10,9 @@ namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Database\Exceptions\CompilerException;
-use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Interfaces\BuilderInterface;
+use Spiral\Database\Interfaces\Injections\ParameterInterface;
+use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
 
 /**
  * Responsible for conversion set of query parameters (where tokens, table names and etc) int sql
@@ -342,7 +342,7 @@ class QueryCompiler extends Component
     {
         foreach ($columns as $column => &$value)
         {
-            if ($value instanceof QueryBuilder)
+            if ($value instanceof BuilderInterface)
             {
                 $value = '(' . $value->sqlStatement($this) . ')';
             }
@@ -481,7 +481,7 @@ class QueryCompiler extends Component
                 continue;
             }
 
-            if ($context instanceof QueryBuilder)
+            if ($context instanceof BuilderInterface)
             {
                 $statement .= $joiner . ' (' . $context->sqlStatement($this) . ') ';
                 continue;
@@ -495,7 +495,7 @@ class QueryCompiler extends Component
             }
 
             list($identifier, $operator, $value) = $context;
-            if ($identifier instanceof QueryBuilder)
+            if ($identifier instanceof BuilderInterface)
             {
                 $identifier = '(' . $identifier->sqlStatement($this) . ')';
             }
@@ -532,7 +532,7 @@ class QueryCompiler extends Component
                 $operator = 'IN';
             }
 
-            if ($value instanceof QueryBuilder)
+            if ($value instanceof BuilderInterface)
             {
                 $value = ' (' . $value . ') ';
             }

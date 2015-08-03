@@ -93,7 +93,7 @@ abstract class AbstractWhere extends QueryBuilder
     protected $whereTokens = [];
 
     /**
-     * Parameters collected while generating where tokens, must be in a same order as parameters
+     * Parameters collected while generating WHERE tokens, must be in a same order as parameters
      * in resulted query.
      *
      * @var array

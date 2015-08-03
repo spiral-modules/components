@@ -8,92 +8,73 @@
  */
 namespace Spiral\Database\Builders\Traits;
 
-use Spiral\Database\DatabaseException;
-use Spiral\Database\Parameter;
+use Spiral\Database\Exceptions\BuilderException;
+use Spiral\Database\Injections\Parameter;
+use Spiral\Database\Injections\SQLExpression;
+use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\ParameterInterface;
 use Spiral\Database\QueryBuilder;
-use Spiral\Database\SqlExpression;
-use Spiral\Database\SqlFragmentInterface;
 
+/**
+ * * Examples:
+ * $select->join('LEFT', 'info', 'userID', 'users.id')->columns('info.balance');
+ * $select->join('LEFT', 'info', 'userID', '=', 'users.id')->columns('info.balance');
+ * $select->join('LEFT', 'info', ['userID' => 'users.id'])->columns('info.balance');
+ *
+ * $select->join('LEFT', 'info', function($select) {
+ *      $select->on('userID', 'users.id')->orOn('userID', 'users.masterID');
+ * })->columns('info.balance');
+ *
+ * Aliases can be also used:
+ * $select->join('LEFT', 'info as i', 'i.userID', 'users.id')->columns('i.balance');
+ * $select->join('LEFT', 'info as i', 'i.userID', '=', 'users.id')->columns('i.balance');
+ * $select->join('LEFT', 'info as i', ['i.userID' => 'users.id'])->columns('i.balance');
+ *
+ * $select->join('LEFT', 'info as i', function($select) {
+ *      $select->on('i.userID', 'users.id')->orOn('i.userID', 'users.masterID');
+ * })->columns('i.balance');
+ *
+ *
+ * @see AbstractWhere
+ */
 trait JoinsTrait
 {
     /**
-     * Array of joined tables with specified JOIN type (LEFT, RIGHT, INNER) and ON conditions.
-     * Joined table can define alias which will be handled in columns and were conditions.
+     * Name/id of last join, every ON and ON WHERE call will be associated with this join.
+     *
+     * @var string
+     */
+    private $activeJoin = null;
+
+    /**
+     * Set of join tokens with on and on where conditions associated, must be supported by
+     * QueryCompilers.
      *
      * @var array
      */
     protected $joinTokens = [];
 
     /**
-     * Join parameters has to be stored separately from other query parameters as they have their
-     * own order.
+     * Parameters collected while generating ON WHERE tokens, must be in a same order as parameters
+     * in resulted query.
      *
      * @var array
      */
     protected $onParameters = [];
 
-    /**
-     * Name of last join, next on() or orOn() method calls will attached conditions to that join.
-     *
-     * @var string
-     */
-    protected $currentJoin = null;
 
     /**
-     * Helper methods used to processed user input in where methods to internal where token, method
-     * support all different combinations, closures and nested queries. Additionally i can be used
-     * not only for where but for having and join tokens.
+     * Register new
      *
-     * @param string        $joiner     Boolean joiner (AND|OR).
-     * @param array         $parameters Set of parameters collected from where functions.
-     * @param array         $tokens     Array to aggregate compiled tokens.
-     * @param \Closure|null $wrapper    Callback or closure used to handle all catched
-     *                                  parameters, by default $this->addParameter will be used.
-     * @return array
-     * @throws DatabaseException
-     */
-    abstract protected function whereToken(
-        $joiner,
-        array $parameters,
-        &$tokens = [],
-        callable $wrapper = null
-    );
-
-    /**
-     * Register new table join, all future on() method calls will associate conditions to this
-     * join.
-     *
-     * Examples:
-     * $select->join('LEFT', 'info', 'userID', 'users.id')->columns('info.balance');
-     * $select->join('LEFT', 'info', 'userID', '=', 'users.id')->columns('info.balance');
-     * $select->join('LEFT', 'info', ['userID' => 'users.id'])->columns('info.balance');
-     *
-     * $select->join('LEFT', 'info', function($select) {
-     *      $select->on('userID', 'users.id')->orOn('userID', 'users.masterID');
-     * })->columns('info.balance');
-     *
-     * Aliases can be also used:
-     * $select->join('LEFT', 'info as i', 'i.userID', 'users.id')->columns('i.balance');
-     * $select->join('LEFT', 'info as i', 'i.userID', '=', 'users.id')->columns('i.balance');
-     * $select->join('LEFT', 'info as i', ['i.userID' => 'users.id'])->columns('i.balance');
-     *
-     * $select->join('LEFT', 'info as i', function($select) {
-     *      $select->on('i.userID', 'users.id')->orOn('i.userID', 'users.masterID');
-     * })->columns('i.balance');
-     *
-     * Join aliases can be used in columns, where conditions, having conditions, order by, sort by
-     * and aggregations.
-     *
-     * @link http://www.w3schools.com/sql/sql_join_inner.asp
      * @param string $type  Join type. Allowed values, LEFT, RIGHT, INNER and etc.
      * @param string $table Joined table name (without prefix), can have defined alias.
      * @param mixed  $on    Where parameters, closure of array of where conditions.
      * @return $this
+     * @throws BuilderException
      */
     public function join($type, $table, $on = null)
     {
-        $this->joinTokens[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->activeJoin = $table] = [
             'type' => strtoupper($type),
             'on'   => []
         ];
@@ -105,15 +86,16 @@ trait JoinsTrait
      * Register new INNER table join, all future on() method calls will associate conditions to this
      * join.
      *
-
      * @link http://www.w3schools.com/sql/sql_join_inner.asp
+     * @see  join()
      * @param string $table Joined table name (without prefix), can have defined alias.
      * @param mixed  $on    Where parameters, closure of array of where conditions.
      * @return $this
+     * @throws BuilderException
      */
     public function innerJoin($table, $on = null)
     {
-        $this->joinTokens[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->activeJoin = $table] = [
             'type' => 'INNER',
             'on'   => []
         ];
@@ -125,18 +107,19 @@ trait JoinsTrait
      * Register new RIGHT table join, all future on() method calls will associate conditions to this
      * join.
      *
-
      * Join aliases can be used in columns, where conditions, having conditions, order by, sort by
      * and aggregations.
      *
      * @link http://www.w3schools.com/sql/sql_join_right.asp
+     * @see  join()
      * @param string $table Joined table name (without prefix), can have defined alias.
      * @param mixed  $on    Where parameters, closure of array of where conditions.
      * @return $this
+     * @throws BuilderException
      */
     public function rightJoin($table, $on = null)
     {
-        $this->joinTokens[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->activeJoin = $table] = [
             'type' => 'RIGHT',
             'on'   => []
         ];
@@ -150,13 +133,15 @@ trait JoinsTrait
      *
      *
      * @link http://www.w3schools.com/sql/sql_join_left.asp
+     * @see  join()
      * @param string $table Joined table name (without prefix), can have defined alias.
      * @param mixed  $on    Where parameters, closure of array of where conditions.
      * @return $this
+     * @throws BuilderException
      */
     public function leftJoin($table, $on = null)
     {
-        $this->joinTokens[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->activeJoin = $table] = [
             'type' => 'LEFT',
             'on'   => []
         ];
@@ -168,16 +153,17 @@ trait JoinsTrait
      * Register new FULL table join, all future on() method calls will associate conditions to this
      * join.
      *
-
      *
-     * @link http://www.w3schools.com/sql/sql_join_left.asp
+     * @link http://www.w3schools.com/sql/sql_join_full.asp
+     * @see  join()
      * @param string $table Joined table name (without prefix), can have defined alias.
      * @param mixed  $on    Where parameters, closure of array of where conditions.
      * @return $this
+     * @throws BuilderException
      */
     public function fullJoin($table, $on = null)
     {
-        $this->joinTokens[$this->currentJoin = $table] = [
+        $this->joinTokens[$this->activeJoin = $table] = [
             'type' => 'FULL',
             'on'   => []
         ];
@@ -186,42 +172,18 @@ trait JoinsTrait
     }
 
     /**
-     * Add on condition to last registered join. On condition will be specified with AND boolean
-     * joiner. Method supports nested queries and array based (mongo like) where conditions. Syntax
-     * is identical to where methods except no arguments should be identifiers and not values.
-     *
-     * Examples:
-     * $select->join('info')->on('userID', 'users.id')->columns('info.balance');
-     * $select->join('info')->on('userID', '=', 'users.id')->columns('info.balance');
-     * $select->join('info')->on(['userID' => 'users.id'])->columns('info.balance');
-     *
-     * $select->join('info')->on(function($select) {
-     *      $select->on('userID', 'users.id')->orOn('userID', 'users.masterID');
-     * })->columns('info.balance');
-     *
-     * Aliases can be also used:
-     * $select->join('info as i')->on('i.userID', 'users.id')->columns('i.balance');
-     * $select->join('info as i')->on('i.userID', '=', 'users.id')->columns('i.balance');
-     * $select->join('info as i')->on(['i.userID' => 'users.id'])->columns('i.balance');
-     *
-     * $select->join('info as i')->on(function($select) {
-     *      $select->on('i.userID', 'users.id')->orOn('i.userID', 'users.masterID');
-     * })->columns('i.balance');
-     *
-     * @see parseWhere()
-     * @see whereToken()
      * @param mixed $on         Joined column name or SQLFragment, or where array.
      * @param mixed $operator   Foreign column is operator specified.
      * @param mixed $identifier Foreign column.
      * @return $this
-     * @throws DatabaseException
+     * @throws BuilderException
      */
     public function on($on = null, $operator = null, $identifier = null)
     {
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joinTokens[$this->currentJoin]['on'],
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->joinWrapper()
         );
 
@@ -229,21 +191,18 @@ trait JoinsTrait
     }
 
     /**
-
-     * @see parseWhere()
-     * @see whereToken()
      * @param mixed $on         Joined column name or SQLFragment, or where array.
      * @param mixed $operator   Foreign column is operator specified.
      * @param mixed $identifier Foreign column.
      * @return $this
-     * @throws DatabaseException
+     * @throws BuilderException
      */
     public function andOn($on = null, $operator = null, $identifier = null)
     {
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joinTokens[$this->currentJoin]['on'],
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->joinWrapper()
         );
 
@@ -251,19 +210,18 @@ trait JoinsTrait
     }
 
     /**
-
      * @param mixed $on         Joined column name or SQLFragment, or where array.
      * @param mixed $operator   Foreign column is operator specified.
      * @param mixed $identifier Foreign column.
      * @return $this
-     * @throws DatabaseException
+     * @throws BuilderException
      */
     public function orOn($on = null, $operator = null, $identifier = null)
     {
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joinTokens[$this->currentJoin]['on'],
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->joinWrapper()
         );
 
@@ -271,25 +229,18 @@ trait JoinsTrait
     }
 
     /**
-     * Add on condition to last registered join. On condition will be specified with AND boolean
-     * joiner. Method supports nested queries and array based (mongo like) where conditions. Syntax
-     * is identical to where methods except no arguments should be identifiers and not values.
-     *
-      *
-     * @see parseWhere()
-     * @see whereToken()
      * @param mixed $on       Joined column name or SQLFragment, or where array.
      * @param mixed $operator Foreign column is operator specified.
      * @param mixed $value    Value.
      * @return $this
-     * @throws DatabaseException
+     * @throws BuilderException
      */
     public function onWhere($on = null, $operator = null, $value = null)
     {
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joinTokens[$this->currentJoin]['on'],
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
@@ -297,25 +248,18 @@ trait JoinsTrait
     }
 
     /**
-     * Add on condition to last registered join. On condition will be specified with AND boolean
-     * joiner. Method supports nested queries and array based (mongo like) where conditions. Syntax
-     * is identical to where methods except no arguments should be identifiers and not values.
-     *
-
-     * @see parseWhere()
-     * @see whereToken()
      * @param mixed $on       Joined column name or SQLFragment, or where array.
      * @param mixed $operator Foreign column is operator specified.
      * @param mixed $value    Value.
      * @return $this
-     * @throws DatabaseException
+     * @throws BuilderException
      */
     public function andOnWhere($on = null, $operator = null, $value = null)
     {
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joinTokens[$this->currentJoin]['on'],
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
@@ -323,34 +267,40 @@ trait JoinsTrait
     }
 
     /**
-     * Add on condition to last registered join. On condition will be specified with OR boolean
-     * joiner. Method supports nested queries and array based (mongo like) where conditions. Syntax
-     * is identical to where methods except no arguments should be identifiers and not values.
-     *
-
-     * @see parseWhere()
-     * @see whereToken()
      * @param mixed $on       Joined column name or SQLFragment, or where array.
      * @param mixed $operator Foreign column is operator specified.
      * @param mixed $value    Value.
      * @return $this
-     * @throws DatabaseException
+     * @throws BuilderException
      */
     public function orOnWhere($on = null, $operator = null, $value = null)
     {
         $this->whereToken(
             'AND',
             func_get_args(),
-            $this->joinTokens[$this->currentJoin]['on'],
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
         return $this;
     }
 
+
     /**
-     * Parameter wrapper used to convert all found parameters to valid sql expressions. Used in join
-     * on functions.
+     * Convert various amount of where function arguments into valid where token.
+     *
+     * @see AbstractWhere
+     * @param string        $joiner     Boolean joiner (AND | OR).
+     * @param array         $parameters Set of parameters collected from where functions.
+     * @param array         $tokens     Array to aggregate compiled tokens. Reference.
+     * @param \Closure|null $wrapper    Callback or closure used to wrap/collect every potential
+     *                                  parameter.
+     * @throws BuilderException
+     */
+    abstract protected function whereToken($joiner, array $parameters, &$tokens = [], callable $wrapper);
+
+    /**
+     * Convert parameters used in JOIN ON statements into sql expressions.
      *
      * @return \Closure
      */
@@ -358,9 +308,9 @@ trait JoinsTrait
     {
         return function ($parameter)
         {
-            if (!$parameter instanceof SqlFragmentInterface)
+            if (!$parameter instanceof SQLFragmentInterface)
             {
-                return new SqlExpression($parameter);
+                return new SQLExpression($parameter);
             }
 
             return $parameter;
@@ -368,11 +318,7 @@ trait JoinsTrait
     }
 
     /**
-     * Used to wrap and collect parameters used in join where conditions, this parameters stored
-     * separately from other parameters.
-     *
-     * Method follows same logic as addParameter() method of QueryBuilder with exception of where
-     * parameters stored into.
+     * Applied to every potential parameter while ON WHERE tokens generation.
      *
      * @return \Closure
      */
@@ -387,7 +333,7 @@ trait JoinsTrait
 
             if
             (
-                $parameter instanceof SqlFragmentInterface
+                $parameter instanceof SQLFragmentInterface
                 && !$parameter instanceof ParameterInterface
                 && !$parameter instanceof QueryBuilder
             )

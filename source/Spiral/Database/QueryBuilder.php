@@ -11,6 +11,7 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\SQLFragmentInterface;
 
@@ -47,6 +48,7 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface
      *
      * @param QueryCompiler $compiler
      * @return array
+     * @throws BuilderException
      */
     abstract public function getParameters(QueryCompiler $compiler = null);
 
@@ -55,6 +57,7 @@ abstract class QueryBuilder extends Component implements SQLFragmentInterface
      *
      * @param QueryCompiler $compiler
      * @return string
+     * @throws BuilderException
      */
     abstract public function sqlStatement(QueryCompiler $compiler = null);
 

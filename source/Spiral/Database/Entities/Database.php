@@ -282,7 +282,7 @@ class Database extends Component
      */
     public function update($table = '', array $values = [], array $where = [])
     {
-        return $this->driver->updateBuilder($this, compact('table', 'values', 'where'));
+        return $this->driver->updateBuilder($this, compact('table', 'where', 'values'));
     }
 
     /**

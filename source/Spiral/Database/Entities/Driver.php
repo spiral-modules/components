@@ -408,10 +408,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
             return $this->getPDO()->beginTransaction();
         }
-        else
-        {
-            $this->savepointCreate($this->transactionLevel);
-        }
+
+        $this->savepointCreate($this->transactionLevel);
 
         return true;
     }
@@ -430,10 +428,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
             return $this->getPDO()->commit();
         }
-        else
-        {
-            $this->savepointRelease($this->transactionLevel + 1);
-        }
+
+        $this->savepointRelease($this->transactionLevel + 1);
 
         return true;
     }
@@ -453,10 +449,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
             return $this->getPDO()->rollBack();
         }
-        else
-        {
-            $this->savepointRollback($this->transactionLevel + 1);
-        }
+
+        $this->savepointRollback($this->transactionLevel + 1);
 
         return true;
     }

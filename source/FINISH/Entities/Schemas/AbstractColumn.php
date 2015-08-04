@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities\Schemas;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Database\Database;
+use Spiral\Database\Schemas\ColumnInterface;
 use Spiral\Database\SqlFragment;
 use Spiral\Database\SqlFragmentInterface;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -40,7 +41,7 @@ use Spiral\Debug\Traits\LoggerTrait;
  * @method AbstractColumn|$this tinyBinary()
  * @method AbstractColumn|$this longBinary()
  */
-abstract class AbstractColumn extends Component implements LoggerAwareInterface
+abstract class AbstractColumn extends Component implements ColumnInterface, LoggerAwareInterface
 {
     /**
      * Logging.
@@ -241,9 +242,9 @@ abstract class AbstractColumn extends Component implements LoggerAwareInterface
     /**
      * ColumnSchema
      *
-     * @param AbstractTable $table  Parent TableSchema.
-     * @param string              $name   Column name.
-     * @param mixed               $schema Column information fetched from database by TableSchema.
+     * @param AbstractTable $table        Parent TableSchema.
+     * @param string        $name         Column name.
+     * @param mixed         $schema       Column information fetched from database by TableSchema.
      *                                    Format depends on database type.
      */
     public function __construct(AbstractTable $table, $name, $schema = null)

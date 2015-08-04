@@ -8,7 +8,9 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
-abstract class AbstractReference
+use Spiral\Database\Schemas\ReferenceInterface;
+
+abstract class AbstractReference implements ReferenceInterface
 {
     /**
      * Default delete and update behaviours.

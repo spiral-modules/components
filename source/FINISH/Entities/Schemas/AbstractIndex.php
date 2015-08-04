@@ -8,7 +8,9 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
-abstract class AbstractIndex
+use Spiral\Database\Schemas\IndexInterface;
+
+abstract class AbstractIndex implements IndexInterface
 {
     /**
      * Index types.
@@ -52,8 +54,8 @@ abstract class AbstractIndex
      * create multiple indexes with same set of columns, as they will be resolved as one index.
      *
      * @param AbstractTable $table
-     * @param  string             $name
-     * @param mixed               $schema Index information fetched from database by TableSchema.
+     * @param  string       $name
+     * @param mixed         $schema       Index information fetched from database by TableSchema.
      *                                    Format depends on database type.
      */
     public function __construct(AbstractTable $table, $name, $schema = null)

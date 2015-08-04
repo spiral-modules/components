@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities\Schemas;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Schemas\TableInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
@@ -36,7 +37,7 @@ use Spiral\Debug\Traits\LoggerTrait;
  * @method AbstractColumn tinyBinary($column)
  * @method AbstractColumn longBinary($column)
  */
-abstract class AbstractTable extends Component implements LoggerAwareInterface
+abstract class AbstractTable extends Component implements TableInterface, LoggerAwareInterface
 {
     /**
      * Logging.

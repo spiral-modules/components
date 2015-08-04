@@ -15,12 +15,17 @@ use Spiral\Models\Exceptions\TraitException;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
+use Spiral\Validation\ValidatesInterface;
 
 /**
  * DataEntity in spiral used to represent basic data set with validation rules, filters and
  * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity.
  */
-abstract class DataEntity extends Component implements \JsonSerializable, \IteratorAggregate, \ArrayAccess
+abstract class DataEntity extends Component implements
+    \JsonSerializable,
+    \IteratorAggregate,
+    \ArrayAccess,
+    ValidatesInterface
 {
     /**
      * Every entity can be validated, in addition validation trait will load Translator and Event

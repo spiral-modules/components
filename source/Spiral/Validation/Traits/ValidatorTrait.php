@@ -65,7 +65,7 @@ trait ValidatorTrait
      *
      * @param array              $rules
      * @param ContainerInterface $container
-     * @return mixed|null|object|ValidatorInterface
+     * @return ValidatorInterface
      * @throws MissingContainerException
      */
     public function validator(array $rules = [], ContainerInterface $container = null)

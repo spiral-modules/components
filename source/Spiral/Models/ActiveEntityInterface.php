@@ -7,11 +7,12 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Models;
+use Spiral\Validation\ValidatesInterface;
 
 /**
  * Represents generic ActiveRecord patten.
  */
-interface ActiveEntityInterface extends EntityInterface
+interface ActiveEntityInterface extends EntityInterface, ValidatesInterface
 {
     //TODO: SAVE
     //TODO: CREATE

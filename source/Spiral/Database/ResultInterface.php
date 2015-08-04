@@ -6,12 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Interfaces\Query;
+namespace Spiral\Database;
 
 /**
  * Must represent single query result.
  */
-interface ResultIteratorInterface extends \Countable, \Iterator
+interface ResultInterface extends \Countable, \Iterator
 {
     /**
      * The number of columns in the result set.

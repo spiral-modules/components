@@ -10,12 +10,12 @@ namespace Spiral\Database\Query;
 
 use PDOStatement;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Interfaces\Query\ResultIteratorInterface;
+use Spiral\Database\Interfaces\Query\ResultInterface;
 
 /**
  * Query result iteration class.
  */
-class QueryResult implements ResultIteratorInterface, \JsonSerializable
+class QueryResult implements ResultInterface, \JsonSerializable
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.

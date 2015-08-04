@@ -11,13 +11,13 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Interfaces\BuilderInterface;
+use Spiral\Database\Exceptions\QueryException;
 
 /**
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
  */
-abstract class QueryBuilder extends Component implements BuilderInterface
+abstract class QueryBuilder extends Component
 {
     /**
      * @invisible
@@ -42,9 +42,10 @@ abstract class QueryBuilder extends Component implements BuilderInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get ordered list of builder parameters.
      *
-     * @param QueryCompiler $compiler
+     * @return array
+     * @throws BuilderException
      */
     abstract public function getParameters(QueryCompiler $compiler = null);
 
@@ -56,9 +57,9 @@ abstract class QueryBuilder extends Component implements BuilderInterface
     abstract public function sqlStatement(QueryCompiler $compiler = null);
 
     /**
-     * {@inheritdoc}
+     * Run built statement against parent database.
      *
-     * @return \PDOStatement
+     * @throws QueryException
      */
     public function run()
     {

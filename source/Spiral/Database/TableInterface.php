@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Interfaces\Entities;
+namespace Spiral\Database;
 
 use Spiral\Database\Exceptions\QueryException;
 
@@ -56,7 +56,7 @@ interface TableInterface extends \Countable
     /**
      * Get table schema. Must return schema instance even if table does not exists.
      *
-     * @return \Spiral\Database\Interfaces\Entities\Schemas\TableInterface
+     * @return \Spiral\Database\Schemas\TableInterface
      */
     public function schema();
 }

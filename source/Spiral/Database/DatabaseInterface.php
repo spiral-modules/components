@@ -6,10 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Interfaces\Entities;
+namespace Spiral\Database;
 
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Interfaces\Query\ResultIteratorInterface;
 
 /**
  * DatabaseInterface is high level abstraction used to represent single database.
@@ -36,7 +35,7 @@ interface DatabaseInterface
      *
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
-     * @return ResultIteratorInterface
+     * @return ResultInterface
      * @throws QueryException
      */
     public function query($query, array $parameters = []);

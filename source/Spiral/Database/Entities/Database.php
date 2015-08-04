@@ -18,7 +18,7 @@ use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Interfaces\Entities\DatabaseInterface;
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Events\Traits\EventsTrait;
@@ -248,8 +248,9 @@ class Database extends Component implements DatabaseInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get instance of InsertBuilder associated with current Database.
      *
+     * @param string $table Table where values should be inserted to.
      * @return InsertQuery
      */
     public function insert($table = '')
@@ -258,8 +259,11 @@ class Database extends Component implements DatabaseInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get instance of UpdateBuilder associated with current Database.
      *
+     * @param string $table  Table where rows should be updated in.
+     * @param array  $values Initial set of columns to update associated with their values.
+     * @param array  $where  Initial set of where rules specified as array.
      * @return UpdateQuery
      */
     public function update($table = '', array $values = [], array $where = [])
@@ -268,8 +272,10 @@ class Database extends Component implements DatabaseInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get instance of DeleteBuilder associated with current Database.
      *
+     * @param string $table Table where rows should be deleted from.
+     * @param array  $where Initial set of where rules specified as array.
      * @return DeleteQuery
      */
     public function delete($table = '', array $where = [])
@@ -278,8 +284,9 @@ class Database extends Component implements DatabaseInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get instance of SelectBuilder associated with current Database.
      *
+     * @param array|string $columns Columns to select.
      * @return SelectQuery
      */
     public function select($columns = '*')

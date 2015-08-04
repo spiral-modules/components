@@ -10,7 +10,7 @@ namespace Spiral\Database\Query;
 
 use PDOStatement;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Interfaces\Query\ResultInterface;
+use Spiral\Database\ResultInterface;
 
 /**
  * Query result iteration class.

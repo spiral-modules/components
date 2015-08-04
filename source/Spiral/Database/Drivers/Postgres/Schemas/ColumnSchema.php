@@ -106,6 +106,193 @@ class ColumnSchema extends AbstractColumn
     /**
      * {@inheritdoc}
      */
+    public function abstractType()
+    {
+        if ($this->enumValues)
+        {
+            return 'enum';
+        }
+
+        return parent::abstractType();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function primary()
+    {
+        $this->autoIncrement = true;
+
+        //Changing type of already created primary key (we can't use "serial" alias here)
+        if ($this->type && $this->type != 'serial')
+        {
+            $this->type = 'integer';
+
+            return $this;
+        }
+
+        return parent::primary();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bigPrimary()
+    {
+        $this->autoIncrement = true;
+
+        //Changing type of already created primary key (we can't use "serial" alias here)
+        if ($this->type && $this->type != 'bigserial')
+        {
+            $this->type = 'bigint';
+
+            return $this;
+        }
+
+        return parent::bigPrimary();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function enum($values)
+    {
+        $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
+
+        $this->type = 'character';
+        foreach ($this->enumValues as $value)
+        {
+            $this->size = max((int)$this->size, strlen($value));
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConstraints()
+    {
+        $constraints = parent::getConstraints();
+
+        if ($this->enumConstraint)
+        {
+            $constraints[] = $this->enumConstraint;
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function sqlStatement()
+    {
+        $statement = parent::sqlStatement();
+
+        if ($this->abstractType() != 'enum')
+        {
+            return $statement;
+        }
+
+        //We have add constraint for enum type
+        $enumValues = [];
+        foreach ($this->enumValues as $value)
+        {
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+        }
+
+        return "$statement CONSTRAINT {$this->enumConstraint(true, true)} "
+        . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
+    }
+
+    /**
+     * Generate set of altering operations should be applied to column to change it's type, size,
+     * default value or null flag.
+     *
+     * @param ColumnSchema $original
+     * @return array
+     */
+    public function alterOperations(ColumnSchema $original)
+    {
+        $operations = [];
+
+        $typeDefinition = [$this->type, $this->size, $this->precision, $this->scale];
+        $originalType = [$original->type, $original->size, $original->precision, $original->scale];
+
+        if ($typeDefinition != $originalType)
+        {
+            if ($this->abstractType() == 'enum')
+            {
+                //Getting longest value
+                $enumSize = $this->size;
+                foreach ($this->enumValues as $value)
+                {
+                    $enumSize = max($enumSize, strlen($value));
+                }
+
+                $type = "ALTER COLUMN {$this->getName(true)} TYPE character($enumSize)";
+                $operations[] = $type;
+            }
+            else
+            {
+                $type = "ALTER COLUMN {$this->getName(true)} TYPE {$this->type}";
+
+                if ($this->size)
+                {
+                    $type .= "($this->size)";
+                }
+                elseif ($this->precision)
+                {
+                    $type .= "($this->precision, $this->scale)";
+                }
+
+                //Required to perform cross conversion
+                $operations[] = "{$type} USING {$this->getName(true)}::{$this->type}";
+            }
+        }
+
+        if ($original->abstractType() == 'enum' && $this->enumConstraint)
+        {
+            $operations[] = 'DROP CONSTRAINT ' . $this->enumConstraint(true);
+        }
+
+        if ($original->defaultValue != $this->defaultValue)
+        {
+            if (is_null($this->defaultValue))
+            {
+                $operations[] = "ALTER COLUMN {$this->getName(true)} DROP DEFAULT";
+            }
+            else
+            {
+                $operations[] = "ALTER COLUMN {$this->getName(true)} SET DEFAULT {$this->prepareDefault()}";
+            }
+        }
+
+        if ($original->nullable != $this->nullable)
+        {
+            $operations[] = "ALTER COLUMN {$this->getName(true)} "
+                . (!$this->nullable ? 'SET' : 'DROP') . " NOT NULL";
+        }
+
+        if ($this->abstractType() == 'enum')
+        {
+            $enumValues = [];
+            foreach ($this->enumValues as $value)
+            {
+                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            }
+
+            $operations[] = "ADD CONSTRAINT {$this->enumConstraint(true)} "
+                . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
+        }
+
+        return $operations;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function resolveSchema($schema)
     {
         $this->type = $schema['data_type'];
@@ -218,193 +405,6 @@ class ColumnSchema extends AbstractColumn
                 $this->defaultValue = (strtolower($this->defaultValue) == 'true');
             }
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function abstractType()
-    {
-        if ($this->enumValues)
-        {
-            return 'enum';
-        }
-
-        return parent::abstractType();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function primary()
-    {
-        $this->autoIncrement = true;
-
-        //Changing type of already created primary key (we can't use "serial" alias here)
-        if ($this->type && $this->type != 'serial')
-        {
-            $this->type = 'integer';
-
-            return $this;
-        }
-
-        return parent::primary();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bigPrimary()
-    {
-        $this->autoIncrement = true;
-
-        //Changing type of already created primary key (we can't use "serial" alias here)
-        if ($this->type && $this->type != 'bigserial')
-        {
-            $this->type = 'bigint';
-
-            return $this;
-        }
-
-        return parent::bigPrimary();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function enum($values)
-    {
-        $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
-
-        $this->type = 'character';
-        foreach ($this->enumValues as $value)
-        {
-            $this->size = max((int)$this->size, strlen($value));
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getConstraints()
-    {
-        $constraints = parent::getConstraints();
-
-        if ($this->enumConstraint)
-        {
-            $constraints[] = $this->enumConstraint;
-        }
-
-        return $constraints;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function sqlStatement()
-    {
-        $statement = parent::sqlStatement();
-
-        if ($this->abstractType() != 'enum')
-        {
-            return $statement;
-        }
-
-        //We have add constraint for enum type
-        $enumValues = [];
-        foreach ($this->enumValues as $value)
-        {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
-        }
-
-        return "$statement CONSTRAINT {$this->enumConstraint(true, true)} "
-        . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
-    }
-
-    /**
-     * Generate set of altering operations should be applied to column to change it's type, size,
-     * default value or null flag.
-     *
-     * @param AbstractColumn $original
-     * @return array
-     */
-    public function alterOperations(AbstractColumn $original)
-    {
-        $operations = [];
-
-        $typeDefinition = [$this->type, $this->size, $this->precision, $this->scale];
-        $originalType = [$original->type, $original->size, $original->precision, $original->scale];
-
-        if ($typeDefinition != $originalType)
-        {
-            if ($this->abstractType() == 'enum')
-            {
-                //Getting longest value
-                $enumSize = $this->size;
-                foreach ($this->enumValues as $value)
-                {
-                    $enumSize = max($enumSize, strlen($value));
-                }
-
-                $type = "ALTER COLUMN {$this->getName(true)} TYPE character($enumSize)";
-                $operations[] = $type;
-            }
-            else
-            {
-                $type = "ALTER COLUMN {$this->getName(true)} TYPE {$this->type}";
-
-                if ($this->size)
-                {
-                    $type .= "($this->size)";
-                }
-                elseif ($this->precision)
-                {
-                    $type .= "($this->precision, $this->scale)";
-                }
-
-                //Required to perform cross conversion
-                $operations[] = "{$type} USING {$this->getName(true)}::{$this->type}";
-            }
-        }
-
-        if ($original->abstractType() == 'enum' && $this->enumConstraint)
-        {
-            $operations[] = 'DROP CONSTRAINT ' . $this->enumConstraint(true);
-        }
-
-        if ($original->defaultValue != $this->defaultValue)
-        {
-            if (is_null($this->defaultValue))
-            {
-                $operations[] = "ALTER COLUMN {$this->getName(true)} DROP DEFAULT";
-            }
-            else
-            {
-                $operations[] = "ALTER COLUMN {$this->getName(true)} SET DEFAULT {$this->prepareDefault()}";
-            }
-        }
-
-        if ($original->nullable != $this->nullable)
-        {
-            $operations[] = "ALTER COLUMN {$this->getName(true)} "
-                . (!$this->nullable ? 'SET' : 'DROP') . " NOT NULL";
-        }
-
-        if ($this->abstractType() == 'enum')
-        {
-            $enumValues = [];
-            foreach ($this->enumValues as $value)
-            {
-                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
-            }
-
-            $operations[] = "ADD CONSTRAINT {$this->enumConstraint(true)} "
-                . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
-        }
-
-        return $operations;
     }
 
     /**

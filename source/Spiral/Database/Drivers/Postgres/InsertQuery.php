@@ -15,7 +15,7 @@ use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
- * Postgres driver requires little bit different method to handle last insert id.
+ * Postgres driver requires little bit different way to handle last insert id.
  */
 class InsertQuery extends BaseInsertQuery
 {
@@ -44,7 +44,7 @@ class InsertQuery extends BaseInsertQuery
             ]);
         }
 
-        $compiler = !empty($compiler) ? $compiler : $this->compiler;
+        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
         return $compiler->insert($this->table, $this->columns, $this->rowsets, $primary);
     }
@@ -55,8 +55,7 @@ class InsertQuery extends BaseInsertQuery
     public function run()
     {
         return (int)$this->database->statement(
-            $this->sqlStatement(),
-            $this->getParameters()
+            $this->sqlStatement(), $this->getParameters()
         )->fetchColumn();
     }
 }

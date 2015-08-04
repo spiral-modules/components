@@ -1,0 +1,62 @@
+<?php
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ * @copyright ©2009-2015
+ */
+namespace Spiral\Database\Interfaces\Entities;
+
+use Spiral\Database\Exceptions\QueryException;
+
+/**
+ * TableInterface is table level abstraction linked to existed or not existed database table.
+ */
+interface TableInterface extends \Countable
+{
+    /**
+     * Table name in a context of parent database.
+     *
+     * @return string
+     */
+    public function getName();
+
+    /**
+     * Truncate (clean) current table.
+     */
+    public function truncate();
+
+    /**
+     * Perform single rowset insertion into table. Method must return lastInsertID on success.
+     *
+     * Example:
+     * $table->insert(["name" => "Wolfy J"])
+     *
+     * @param array $rowset Associated array (key => value).
+     * @return mixed
+     * @throws QueryException
+     */
+    public function insert(array $rowset = []);
+
+    /**
+     * Perform batch insert into table, every rowset should have identical amount of values matched
+     * with column names provided in first argument. Method must return lastInsertID on success.
+     *
+     * Example:
+     * $table->insert(["name", "balance"], array(["Bob", 10], ["Jack", 20]))
+     *
+     * @param array $columns Array of columns.
+     * @param array $rowsets Array of rowsets.
+     * @return mixed
+     * @throws QueryException
+     */
+    public function batchInsert(array $columns = [], array $rowsets = []);
+
+    /**
+     * Get table schema. Must return schema instance even if table does not exists.
+     *
+     * @return \Spiral\Database\Interfaces\Entities\Schemas\TableInterface
+     */
+    public function schema();
+}

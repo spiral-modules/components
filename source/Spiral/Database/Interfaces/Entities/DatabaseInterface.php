@@ -9,9 +9,6 @@
 namespace Spiral\Database\Interfaces\Entities;
 
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Interfaces\Builders\DeleteBuilderInterface;
-use Spiral\Database\Interfaces\Builders\SelectBuilderInterface;
-use Spiral\Database\Interfaces\Builders\UpdateBuilderInterface;
 use Spiral\Database\Interfaces\Query\ResultIteratorInterface;
 
 /**
@@ -43,33 +40,6 @@ interface DatabaseInterface
      * @throws QueryException
      */
     public function query($query, array $parameters = []);
-
-       /**
-     * Get instance of UpdateBuilderInterface associated with current Database.
-     *
-     * @param string $table
-     * @param array  $values Initial set of columns to update associated with their values.
-     * @param array  $where  Initial set of where rules specified as array.
-     * @return UpdateBuilderInterface
-     */
-    public function update($table = '', array $values = [], array $where = []);
-
-    /**
-     * Get instance of DeleteBuilderInterface associated with current Database.
-     *
-     * @param string $table
-     * @param array  $where Initial set of where rules specified as array.
-     * @return DeleteBuilderInterface
-     */
-    public function delete($table = '', array $where = []);
-
-    /**
-     * Get instance of SelectBuilderInterface associated with current Database.
-     *
-     * @param array|string $columns Columns to select.
-     * @return SelectBuilderInterface
-     */
-    public function select($columns = '*');
 
     /**
      * Execute multiple commands defined by Closure function inside one transaction. Closure or
@@ -112,7 +82,7 @@ interface DatabaseInterface
     public function hasTable($name);
 
     /**
-     * Get Table abstraction.
+     * Get Table abstraction. Must return valid instance if table does not exists.
      *
      * @param string $name
      * @return TableInterface

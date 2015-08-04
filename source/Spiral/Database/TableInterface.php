@@ -11,7 +11,8 @@ namespace Spiral\Database;
 use Spiral\Database\Exceptions\QueryException;
 
 /**
- * TableInterface is table level abstraction linked to existed or not existed database table.
+ * TableInterface is table level abstraction linked to existed or not existed database table. You can
+ * check if table exist or not exist using "exists" method of table schema.
  */
 interface TableInterface extends \Countable
 {
@@ -21,6 +22,13 @@ interface TableInterface extends \Countable
      * @return string
      */
     public function getName();
+
+    /**
+     * Get table schema. Must return schema instance even if table does not exists.
+     *
+     * @return \Spiral\Database\Schemas\TableInterface
+     */
+    public function schema();
 
     /**
      * Truncate (clean) current table.
@@ -52,11 +60,4 @@ interface TableInterface extends \Countable
      * @throws QueryException
      */
     public function batchInsert(array $columns = [], array $rowsets = []);
-
-    /**
-     * Get table schema. Must return schema instance even if table does not exists.
-     *
-     * @return \Spiral\Database\Schemas\TableInterface
-     */
-    public function schema();
 }

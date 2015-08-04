@@ -41,6 +41,11 @@ abstract class Driver extends Component implements LoggerAwareInterface
     use LoggerTrait, BenchmarkTrait;
 
     /**
+     * One of DatabaseInterface types.
+     */
+    const TYPE = '';
+
+    /**
      * Driver schemas.
      */
     const SCHEMA_TABLE     = '';
@@ -149,6 +154,16 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function getSource()
     {
         return $this->source;
+    }
+
+    /**
+     * Database type driver linked to.
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return static::TYPE;
     }
 
     /**

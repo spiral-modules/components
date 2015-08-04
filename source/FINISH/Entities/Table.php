@@ -92,7 +92,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     public function getColumns()
     {
         $columns = [];
-        foreach ($this->schema()->getColumns() as $column)
+        foreach ($this->getSchema()->getColumns() as $column)
         {
             $columns[$column->getName()] = $column->abstractType();
         }
@@ -114,7 +114,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return AbstractTable
      */
-    public function schema()
+    public function getSchema()
     {
         return $this->database->getDriver()->tableSchema(
             $this->database->getPrefix() . $this->name,

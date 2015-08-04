@@ -21,9 +21,9 @@ use PDO;
 class SQLServerDriver extends Driver
 {
     /**
-     * Driver name, for convenience.
+     * Driver type.
      */
-    const NAME = 'SQLServer';
+    const TYPE = 'SQLServer';
 
     /**
      * Driver schemas.

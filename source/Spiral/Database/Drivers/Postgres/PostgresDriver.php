@@ -25,9 +25,9 @@ use Spiral\Database\Exceptions\DriverException;
 class PostgresDriver extends Driver
 {
     /**
-     * Driver name, for convenience.
+     * Driver type.
      */
-    const NAME = 'PostgresSQL';
+    const TYPE = 'Postgres';
 
     /**
      * Driver schemas.

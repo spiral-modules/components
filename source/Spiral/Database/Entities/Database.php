@@ -159,6 +159,14 @@ class Database extends Component implements DatabaseInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getType()
+    {
+        return $this->driver->getType();
+    }
+
+    /**
      * @param string $tablePrefix
      * @return $this
      */

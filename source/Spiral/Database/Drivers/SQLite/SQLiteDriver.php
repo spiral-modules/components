@@ -21,9 +21,9 @@ use Spiral\Database\Entities\Driver;
 class SQLiteDriver extends Driver
 {
     /**
-     * Driver name, for convenience.
+     * Driver type.
      */
-    const NAME = 'SQLite';
+    const TYPE = 'SQLite';
 
     /**
      * Driver schemas.

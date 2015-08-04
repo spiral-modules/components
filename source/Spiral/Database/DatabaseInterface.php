@@ -11,14 +11,31 @@ namespace Spiral\Database;
 use Spiral\Database\Exceptions\QueryException;
 
 /**
- * DatabaseInterface is high level abstraction used to represent single database.
+ * DatabaseInterface is high level abstraction used to represent single database. You MUST always
+ * check database type using getType() method before writing SQL for execute and query methods.
  */
 interface DatabaseInterface
 {
     /**
+     * Known database types.
+     */
+    const MYSQL      = 'MySQL';
+    const POSTGRES   = 'Postgres';
+    const SQLITE     = 'SQLite';
+    const SQL_SERVER = 'SQLServer';
+
+    /**
      * @return string
      */
     public function getName();
+
+    /**
+     * Database type matched to one of database constants. You MUST write SQL for execute and query
+     * method by respecting result of this method.
+     *
+     * @return string
+     */
+    public function getType();
 
     /**
      * Execute statement and return number of affected rows.

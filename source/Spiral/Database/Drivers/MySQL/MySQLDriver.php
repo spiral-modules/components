@@ -21,9 +21,9 @@ use PDO;
 class MySQLDriver extends Driver
 {
     /**
-     * Driver name, for convenience.
+     * Driver type.
      */
-    const NAME = 'MySQL';
+    const TYPE = 'MySQL';
 
     /**
      * Driver schemas.

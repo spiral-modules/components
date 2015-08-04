@@ -28,7 +28,7 @@ interface TableInterface extends \Countable
      *
      * @return \Spiral\Database\Schemas\TableInterface
      */
-    public function schema();
+    public function getSchema();
 
     /**
      * Truncate (clean) current table.

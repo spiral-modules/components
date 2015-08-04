@@ -20,7 +20,7 @@ interface ReferenceInterface
     const NO_ACTION = 'NO ACTION';
 
     /**
-     * Constraint name
+     * Constraint name.
      *
      * @return string
      */

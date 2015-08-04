@@ -12,13 +12,7 @@ use Spiral\Database\Schemas\IndexInterface;
 
 abstract class AbstractIndex implements IndexInterface
 {
-    /**
-     * Index types.
-     */
-    const NORMAL = 'INDEX';
-    const UNIQUE = 'UNIQUE';
-
-    /**
+     /**
      * Parent table schema.
      *
      * @invisible

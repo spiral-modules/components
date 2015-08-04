@@ -8,8 +8,13 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
+use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\ReferenceInterface;
 
+/**
+ * Abstract foreign schema with read (see ReferenceInterface) and write abilities. Must be implemented
+ * by driver to support DBMS specific syntax and creation rules.
+ */
 abstract class AbstractReference implements ReferenceInterface
 {
     /**
@@ -17,14 +22,6 @@ abstract class AbstractReference implements ReferenceInterface
      */
     const CASCADE   = 'CASCADE';
     const NO_ACTION = 'NO ACTION';
-
-    /**
-     * Parent table schema.
-     *
-     * @invisible
-     * @var AbstractTable
-     */
-    protected $table = null;
 
     /**
      * Constraint name.
@@ -55,51 +52,40 @@ abstract class AbstractReference implements ReferenceInterface
     protected $foreignKey = '';
 
     /**
-     * Action on local column value deletion.
+     * Action on foreign column value deletion.
      *
      * @var string
      */
     protected $deleteRule = self::NO_ACTION;
 
     /**
-     * Action on local column value update.
+     * Action on foreign column value update.
      *
      * @var string
      */
     protected $updateRule = self::NO_ACTION;
 
     /**
-     * Instance on ConstraintSchema represent table foreign key, it should contain information about
-     * referenced table, column name and delete/update rules.
-     *
+     * @invisible
+     * @var AbstractTable
+     */
+    protected $table = null;
+
+    /**
      * @param AbstractTable $table
-     * @param  string       $name
-     * @param mixed         $schema       Constraint information fetched from database by TableSchema.
-     *                                    Format depends on driver type.
+     * @param string        $name
+     * @param mixed         $schema Driver specific reference information.
      */
     public function __construct(AbstractTable $table, $name, $schema = null)
     {
         $this->name = $name;
         $this->table = $table;
 
-        $schema && $this->resolveSchema($schema);
+        !empty($schema) && $this->resolveSchema($schema);
     }
 
     /**
-     * Parse schema information provided by parent TableSchema and populate foreign key values.
-     *
-     * @param mixed $schema Foreign key information fetched from database by TableSchema. Format
-     *                      depends on database type.
-     * @return mixed
-     */
-    abstract protected function resolveSchema($schema);
-
-    /**
-     * Constraint name. Foreign key name can not be changed manually, while table creation name will
-     * be generated automatically.
-     *
-     * @param bool $quoted If true constraint name will be quoted accordingly to driver rules.
-     * @return string
+     * {@inheritdoc}
      */
     public function getName($quoted = false)
     {
@@ -119,9 +105,7 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Get column name foreign key assigned to.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getColumn()
     {
@@ -129,10 +113,42 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Set foreign key column name, make sure column type is the same as foreign column one. Some
-     * drivers will automatically create index while registering foreign key.
+     * {@inheritdoc}
+     */
+    public function getForeignTable()
+    {
+        return $this->foreignTable;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getForeignKey()
+    {
+        return $this->foreignKey;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDeleteRule()
+    {
+        return $this->deleteRule;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUpdateRule()
+    {
+        return $this->updateRule;
+    }
+
+    /**
+     * Set local column name foreign key relates to. Make sure column type is the same as foreign
+     * column one.
      *
-     * @param string $column In-table column name.
+     * @param string $column
      * @return $this
      */
     public function column($column)
@@ -143,10 +159,10 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Set references table and key names, make sure that local column type and identical to foreign
-     * one. Some drivers will automatically create index while registering foreign key.
+     * Set foreign table name and key local column must reference to. Make sure local and foreign
+     * column types are identical.
      *
-     * @param string $table  Foreign table name without prefix.
+     * @param string $table  Foreign table name without database prefix (will be added automatically).
      * @param string $column Foreign key name (id by default).
      * @return $this
      */
@@ -159,40 +175,9 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Foreign table name.
+     * Set foreign key delete behaviour.
      *
-     * @return string
-     */
-    public function getForeignTable()
-    {
-        return $this->foreignTable;
-    }
-
-    /**
-     * Foreign key (column name).
-     *
-     * @return string
-     */
-    public function getForeignKey()
-    {
-        return $this->foreignKey;
-    }
-
-    /**
-     * Get delete rule, possible values: NO ACTION, CASCADE
-     *
-     * @return string
-     */
-    public function getDeleteRule()
-    {
-        return $this->deleteRule;
-    }
-
-    /**
-     * Set foreign key delete behaviour. Originally was named "deleteRule", but it created bad
-     * associations.
-     *
-     * @param string $rule Possible values: NO ACTION, CASCADE
+     * @param string $rule Possible values: NO ACTION, CASCADE, etc (driver specific).
      * @return $this
      */
     public function onDelete($rule = self::NO_ACTION)
@@ -203,19 +188,9 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Get update rule, possible values: NO ACTION, CASCADE
-     *
-     * @return string
-     */
-    public function getUpdateRule()
-    {
-        return $this->updateRule;
-    }
-
-    /**
      * Set foreign key update behaviour.
      *
-     * @param string $rule Possible values: NO ACTION, CASCADE
+     * @param string $rule Possible values: NO ACTION, CASCADE, etc (driver specific).
      * @return $this
      */
     public function onUpdate($rule = self::NO_ACTION)
@@ -226,7 +201,7 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Drop foreign key from table schema, change will be applied on next TableSchema->save() call.
+     * Schedule foreign key drop when parent table schema will be saved.
      */
     public function drop()
     {
@@ -234,7 +209,7 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Compare two foreign key schemas to check if data were altered.
+     * Must compare two instances of AbstractReference.
      *
      * @param AbstractReference $original
      * @return bool
@@ -245,7 +220,7 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Get foreign key definition statement.
+     * Foreign key creation syntax.
      *
      * @return string
      */
@@ -268,12 +243,18 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * __toString
-     *
      * @return string
      */
     public function __toString()
     {
         return $this->sqlStatement();
     }
+
+    /**
+     * Parse driver specific schema information and populate schema fields.
+     *
+     * @param mixed $schema
+     * @throws SchemaException
+     */
+    abstract protected function resolveSchema($schema);
 }

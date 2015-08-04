@@ -11,6 +11,12 @@ namespace Spiral\Database\Entities\Schemas;
 abstract class AbstractReference
 {
     /**
+     * Default delete and update behaviours.
+     */
+    const CASCADE   = 'CASCADE';
+    const NO_ACTION = 'NO ACTION';
+
+    /**
      * Parent table schema.
      *
      * @invisible

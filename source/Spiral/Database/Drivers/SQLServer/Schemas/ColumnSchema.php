@@ -10,8 +10,32 @@ namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 
+/**
+ * SQL Server specific column schema.
+ */
 class ColumnSchema extends AbstractColumn
 {
+    /**
+     * Field is table identity.
+     *
+     * @var bool
+     */
+    private $identity = false;
+
+    /**
+     * Name of default constraint.
+     *
+     * @var string
+     */
+    private $defaultConstraint = '';
+
+    /**
+     * Name of enum constraint.
+     *
+     * @var string
+     */
+    private $enumConstraint = '';
+
     /**
      * {@inheritdoc}
      */
@@ -93,28 +117,6 @@ class ColumnSchema extends AbstractColumn
     ];
 
     /**
-     * If field table identity.
-     *
-     * @var bool
-     */
-    protected $identity = false;
-
-
-    /**
-     * Name of default constraint.
-     *
-     * @var string
-     */
-    protected $defaultConstraint = '';
-
-    /**
-     * Name of enum constraint.
-     *
-     * @var string
-     */
-    protected $enumConstraint = '';
-
-    /**
      * {@inheritdoc}
      */
     public function abstractType()
@@ -125,6 +127,26 @@ class ColumnSchema extends AbstractColumn
         }
 
         return parent::abstractType();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getConstraints()
+    {
+        $constraints = parent::getConstraints();
+
+        if ($this->defaultConstraint)
+        {
+            $constraints[] = $this->defaultConstraint;
+        }
+
+        if ($this->enumConstraint)
+        {
+            $constraints[] = $this->enumConstraint;
+        }
+
+        return $constraints;
     }
 
     /**
@@ -145,10 +167,9 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Compile column create statement.
+     * {@inheritdoc}
      *
-     * @param bool $enum Bypass enum statement condition.
-     * @return string
+     * @param bool $enum If true ENUM declaration statement will be returned only. Internal helper.
      */
     public function sqlStatement($enum = false)
     {
@@ -193,38 +214,18 @@ class ColumnSchema extends AbstractColumn
 
         $statement = $this->sqlStatement(true);
 
-        return "$statement CONSTRAINT {$this->getEnumConstraint(true, true)} "
+        return "$statement CONSTRAINT {$this->enumConstraint(true, true)} "
         . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getConstraints()
-    {
-        $constraints = parent::getConstraints();
-
-        if ($this->defaultConstraint)
-        {
-            $constraints[] = $this->defaultConstraint;
-        }
-
-        if ($this->enumConstraint)
-        {
-            $constraints[] = $this->enumConstraint;
-        }
-
-        return $constraints;
     }
 
     /**
      * Generate set of altering operations should be applied to column to change it's type, size,
      * default value or null flag.
      *
-     * @param AbstractColumn $original
+     * @param ColumnSchema $original
      * @return array
      */
-    protected function alterOperations(AbstractColumn $original)
+    protected function alterOperations(ColumnSchema $original)
     {
         $operations = [];
 
@@ -304,7 +305,7 @@ class ColumnSchema extends AbstractColumn
                 $enumValues[] = $this->table->driver()->getPDO()->quote($value);
             }
 
-            $operations[] = "ADD CONSTRAINT {$this->getEnumConstraint(true)} "
+            $operations[] = "ADD CONSTRAINT {$this->enumConstraint(true)} "
                 . "CHECK ({$this->getName(true)} IN (" . join(', ', $enumValues) . "))";
         }
 
@@ -421,7 +422,6 @@ class ColumnSchema extends AbstractColumn
         return $defaultValue;
     }
 
-
     /**
      * Get name of enum constraint.
      *
@@ -429,9 +429,9 @@ class ColumnSchema extends AbstractColumn
      * @param bool $temporary If true enumConstraint identifier will be generated only for visual purposes.
      * @return string
      */
-    protected function getEnumConstraint($quote = false, $temporary = false)
+    protected function enumConstraint($quote = false, $temporary = false)
     {
-        if (!$this->enumConstraint)
+        if (empty($this->enumConstraint))
         {
             if ($temporary)
             {

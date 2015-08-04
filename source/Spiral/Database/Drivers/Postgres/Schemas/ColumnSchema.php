@@ -425,7 +425,7 @@ class ColumnSchema extends AbstractColumn
      */
     private function enumConstraint($quote = false, $temporary = false)
     {
-        if (!$this->enumConstraint)
+        if (empty($this->enumConstraint))
         {
             if ($temporary)
             {

@@ -8,7 +8,6 @@
  */
 namespace Spiral\Database\Drivers\Postgres\Builders;
 
-use Spiral\Database\Builders\InsertQuery as BaseInsertQuery;
 use Spiral\Database\Drivers\Postgres\PostgresDriver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
@@ -17,7 +16,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 /**
  * Postgres driver requires little bit different way to handle last insert id.
  */
-class InsertQuery extends BaseInsertQuery
+class InsertQuery extends \Spiral\Database\Builders\InsertQuery
 {
     /**
      * Debug messages.

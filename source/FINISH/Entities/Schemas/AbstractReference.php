@@ -11,12 +11,6 @@ namespace Spiral\Database\Entities\Schemas;
 abstract class AbstractReference
 {
     /**
-     * Delete and update foreign key rules.
-     */
-    const CASCADE   = 'CASCADE';
-    const NO_ACTION = 'NO ACTION';
-
-    /**
      * Parent table schema.
      *
      * @invisible
@@ -71,8 +65,8 @@ abstract class AbstractReference
      * referenced table, column name and delete/update rules.
      *
      * @param AbstractTable $table
-     * @param  string             $name
-     * @param mixed               $schema Constraint information fetched from database by TableSchema.
+     * @param  string       $name
+     * @param mixed         $schema       Constraint information fetched from database by TableSchema.
      *                                    Format depends on driver type.
      */
     public function __construct(AbstractTable $table, $name, $schema = null)

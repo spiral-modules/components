@@ -14,11 +14,11 @@ use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\Parameter;
-use Spiral\Database\Interfaces\BuilderInterface;
 use Spiral\Database\Interfaces\Injections\ParameterInterface;
 use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
+use Spiral\Database\QueryBuilder;
 use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
@@ -426,7 +426,7 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
             (
                 $parameter instanceof SQLFragmentInterface
                 && !$parameter instanceof ParameterInterface
-                && !$parameter instanceof BuilderInterface
+                && !$parameter instanceof QueryBuilder
             )
             {
                 return $parameter;

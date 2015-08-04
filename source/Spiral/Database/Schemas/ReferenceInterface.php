@@ -8,11 +8,19 @@
  */
 namespace Spiral\Database\Schemas;
 
+/**
+ * Represents single foreign key and it's options.
+ */
 interface ReferenceInterface
 {
     /**
-     * Constraint name. Foreign key name can not be changed manually, while table creation name will
-     * be generated automatically.
+     * Default delete and update foreign key rules.
+     */
+    const CASCADE   = 'CASCADE';
+    const NO_ACTION = 'NO ACTION';
+
+    /**
+     * Constraint name
      *
      * @return string
      */
@@ -40,14 +48,14 @@ interface ReferenceInterface
     public function getForeignKey();
 
     /**
-     * Get delete rule, possible values: NO ACTION, CASCADE
+     * Get delete rule, possible values: NO ACTION, CASCADE and etc.
      *
      * @return string
      */
     public function getDeleteRule();
 
     /**
-     * Get update rule, possible values: NO ACTION, CASCADE
+     * Get update rule, possible values: NO ACTION, CASCADE and etc.
      *
      * @return string
      */

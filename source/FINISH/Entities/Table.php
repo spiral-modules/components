@@ -105,7 +105,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function truncate()
     {
-        $this->database->getDriver()->truncateTable($this->name);
+        $this->database->driver()->truncateTable($this->name);
     }
 
     /**
@@ -116,7 +116,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function schema()
     {
-        return $this->database->getDriver()->tableSchema(
+        return $this->database->driver()->tableSchema(
             $this->database->getPrefix() . $this->name,
             $this->database->getPrefix()
         );

@@ -8,8 +8,19 @@
  */
 namespace Spiral\Database\Schemas;
 
+/**
+ * Must represent table schema column abstraction.
+ */
 interface ColumnInterface
 {
+    /**
+     * PHP types for phpType() method.
+     */
+    const INT    = 'int';
+    const BOOL   = 'bool';
+    const STRING = 'string';
+    const FLOAT  = 'float';
+
     /**
      * Column name.
      *
@@ -23,6 +34,13 @@ interface ColumnInterface
      * @return string
      */
     public function getType();
+
+    /**
+     * Must return PHP type column value can be better mapped into: int, bool, string or float.
+     *
+     * @return string
+     */
+    public function phpType();
 
     /**
      * Column size.
@@ -52,11 +70,15 @@ interface ColumnInterface
      */
     public function isNullable();
 
-
+    /**
+     * Indication that column has default value.
+     *
+     * @return bool
+     */
     public function hasDefaultValue();
 
     /**
-     * Get column default value, value will be automatically converted to appropriate internal type.
+     * Get column default value, value must be automatically converted to appropriate internal type.
      *
      * @return mixed
      */

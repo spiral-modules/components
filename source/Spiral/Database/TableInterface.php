@@ -17,6 +17,13 @@ use Spiral\Database\Exceptions\QueryException;
 interface TableInterface extends \Countable
 {
     /**
+     * Must return schema instance even if table does not exists.
+     *
+     * @return \Spiral\Database\Schemas\TableInterface
+     */
+    public function schema();
+
+    /**
      * Table name in a context of parent database.
      *
      * @return string
@@ -39,11 +46,4 @@ interface TableInterface extends \Countable
      * @throws QueryException
      */
     public function insert(array $rowset = []);
-
-    /**
-     * Must return schema instance even if table does not exists.
-     *
-     * @return \Spiral\Database\Schemas\TableInterface
-     */
-    public function schema();
 }

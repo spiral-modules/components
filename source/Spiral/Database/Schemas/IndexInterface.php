@@ -8,11 +8,13 @@
  */
 namespace Spiral\Database\Schemas;
 
+/**
+ * Represent single table index associated with set of columns.
+ */
 interface IndexInterface
 {
     /**
-     * Index name. Name can be changed by calling name($name) method, by default all indexes will
-     * get automatically generated identifier including table name and index columns.
+     * Index name.
      *
      * @return string
      */
@@ -28,7 +30,7 @@ interface IndexInterface
     /**
      * Column names used to form index.
      *
-     * @@return array
+     * @return array
      */
     public function getColumns();
 }

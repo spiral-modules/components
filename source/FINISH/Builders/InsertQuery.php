@@ -172,7 +172,7 @@ class InsertQuery extends QueryBuilder
     {
         parent::run();
 
-        return $this->database->getDriver()->lastInsertID();
+        return $this->database->driver()->lastInsertID();
     }
 
     /**

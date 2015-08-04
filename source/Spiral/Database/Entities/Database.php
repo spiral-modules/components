@@ -145,7 +145,7 @@ class Database extends Component implements DatabaseInterface
     /**
      * @return Driver
      */
-    public function getDriver()
+    public function driver()
     {
         return $this->driver;
     }

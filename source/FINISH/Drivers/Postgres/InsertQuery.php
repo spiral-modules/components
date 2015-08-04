@@ -29,7 +29,7 @@ class InsertQuery extends BaseInsertQuery
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        $driver = $this->database->getDriver();
+        $driver = $this->database->driver();
         if (!$driver instanceof PostgresDriver)
         {
             throw new BuilderException("Postgres InsertQuery can be used only with Postgres driver.");

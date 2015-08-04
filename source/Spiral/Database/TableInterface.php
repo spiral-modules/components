@@ -24,19 +24,12 @@ interface TableInterface extends \Countable
     public function getName();
 
     /**
-     * Get table schema. Must return schema instance even if table does not exists.
-     *
-     * @return \Spiral\Database\Schemas\TableInterface
-     */
-    public function getSchema();
-
-    /**
      * Truncate (clean) current table.
      */
     public function truncate();
 
     /**
-     * Perform single rowset insertion into table. Method must return lastInsertID on success.
+     * Must perform single rowset insertion into table. Method must return lastInsertID on success.
      *
      * Example:
      * $table->insert(["name" => "Wolfy J"])
@@ -48,16 +41,9 @@ interface TableInterface extends \Countable
     public function insert(array $rowset = []);
 
     /**
-     * Perform batch insert into table, every rowset should have identical amount of values matched
-     * with column names provided in first argument. Method must return lastInsertID on success.
+     * Must return schema instance even if table does not exists.
      *
-     * Example:
-     * $table->insert(["name", "balance"], array(["Bob", 10], ["Jack", 20]))
-     *
-     * @param array $columns Array of columns.
-     * @param array $rowsets Array of rowsets.
-     * @return mixed
-     * @throws QueryException
+     * @return \Spiral\Database\Schemas\TableInterface
      */
-    public function batchInsert(array $columns = [], array $rowsets = []);
+    public function schema();
 }

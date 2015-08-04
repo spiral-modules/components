@@ -31,7 +31,7 @@ interface DatabaseInterface
 
     /**
      * Database type matched to one of database constants. You MUST write SQL for execute and query
-     * method by respecting result of this method.
+     * methods by respecting result of this method.
      *
      * @return string
      */

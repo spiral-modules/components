@@ -8,55 +8,81 @@
  */
 namespace Spiral\Database\Entities;
 
+use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Cache\StoreInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Database\TableInterface;
+use Spiral\Pagination\PaginableInterface;
 
 /**
- * @method SelectQuery distinct(bool $distinct = true)
- * @method SelectQuery columns(mixed $columns)
- * @method SelectQuery groupBy(string $identifier)
- * @method SelectQuery orderBy(string $identifier, string $direction = 'ASC')
- * @method SelectQuery cache(int $lifetime)
- * @method QueryResult run(bool $paginate = true)
- * @method SelectQuery limit(int $limit = 0)
- * @method SelectQuery offset(int $offset = 0)
- * @method SelectQuery paginate($limit = 50, $pageParameter = 'page', $fetchCount = true, $request = null)
+ * Represent table level abstraction with simplified access to SelectQuery associated with such table.
+ *
+ * @method SelectQuery columns($columns)
+ * @method SelectQuery union(SQLFragmentInterface $query)
+ * @method SelectQuery unionAll(SQLFragmentInterface $query)
+ *
+ * @method SelectQuery distinct($distinct = 1)
+ * @method SelectQuery having($identifier, $variousA = null, $variousB = null, $variousC = null)
+ * @method SelectQuery andHaving($identifier, $variousA = null, $variousB = null, $variousC = null)
+ * @method SelectQuery orHaving($identifier, $variousA = [], $variousB = null, $variousC = null)
+ *
+ * @method SelectQuery orderBy($expression, $direction = 'ASC')
+ * @method SelectQuery groupBy($expression)
+ *
+ * @method SelectQuery cache($lifetime, $key = '', StoreInterface $store = null)
+ *
+ * @method QueryResult run($paginate = 1)
+ * @method chunked($limit, $callback)
+ *
  * @method SelectQuery where($identifier, $variousA = null, $variousB = null, $variousC = null)
  * @method SelectQuery andWhere($identifier, $variousA = null, $variousB = null, $variousC = null)
  * @method SelectQuery orWhere($identifier, $variousA = [], $variousB = null, $variousC = null)
- * @method SelectQuery join(string $table, mixed $on = null)
- * @method SelectQuery innerJoin(string $table, mixed $on = null)
- * @method SelectQuery rightJoin(string $table, mixed $on = null)
- * @method SelectQuery leftJoin(string $table, mixed $on = null)
- * @method int avg($identifier) Perform aggregation based on column or expression value.
- * @method int min($identifier) Perform aggregation based on column or expression value.
- * @method int max($identifier) Perform aggregation based on column or expression value.
- * @method int sum($identifier) Perform aggregation based on column or expression value.
+ *
+ * @method SelectQuery limit($limit = 0)
+ * @method int getLimit()
+ * @method SelectQuery offset($offset = 0)
+ * @method int getOffset()
+ *
+ * @method SelectQuery paginate($limit = 25, $count = null, $pageParameter = 'page', ServerRequestInterface $request = null)
+ * @method PaginableInterface getPaginator()
+ *
+ * @method SelectQuery join($type, $table, $on = null)
+ * @method SelectQuery innerJoin($table, $on = null)
+ * @method SelectQuery rightJoin($table, $on = null)
+ * @method SelectQuery leftJoin($table, $on = null)
+ * @method SelectQuery fullJoin($table, $on = null)
+ *
+ * @method SelectQuery on($joined = null, $operator = null, $outer = null)
+ * @method SelectQuery andOn($joined = null, $operator = null, $outer = null)
+ * @method SelectQuery orOn($joined = null, $operator = null, $outer = null)
+ *
+ * @method SelectQuery onWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+ * @method SelectQuery andOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+ * @method SelectQuery orOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+ *
+ * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
+ * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
+ * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
+ * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
 class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
 {
     /**
-     * Table name, without prefix.
-     *
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
-     * Parent DBAL database.
-     *
      * @var Database
      */
     protected $database = null;
 
     /**
-     * DBAL Table instance is helper class used to aggregate common table operation together, such
-     * as select, update, insert and delete. Additionally it can be used to request table schema.
-     *
      * @param Database $database Parent DBAL database.
      * @param string   $name     Table name without prefix.
      */

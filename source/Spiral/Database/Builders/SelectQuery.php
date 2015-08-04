@@ -11,7 +11,7 @@ namespace Spiral\Database\Builders;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\QueryBuilder;
 
 /**

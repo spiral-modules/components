@@ -16,7 +16,7 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Interfaces\Injections\ParameterInterface;
+use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;

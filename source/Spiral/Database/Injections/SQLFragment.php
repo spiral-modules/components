@@ -9,7 +9,6 @@
 namespace Spiral\Database\Injections;
 
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
 
 /**
  * Default implementation of SQLFragmentInterface, provides ability to inject custom SQL code into

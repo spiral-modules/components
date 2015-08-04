@@ -9,7 +9,6 @@
 namespace Spiral\Database\Injections;
 
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Interfaces\Injections\ParameterInterface;
 
 /**
  * Default implementation of ParameterInterface, provides ability to mock value or array of values

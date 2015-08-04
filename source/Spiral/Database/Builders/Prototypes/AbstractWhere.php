@@ -10,8 +10,8 @@ namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
-use Spiral\Database\Interfaces\Injections\ParameterInterface;
-use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\ParameterInterface;
+use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\QueryBuilder;
 
 /**

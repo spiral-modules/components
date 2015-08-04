@@ -11,8 +11,8 @@ namespace Spiral\Database\Builders\Traits;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\SQLExpression;
-use Spiral\Database\Interfaces\Injections\ParameterInterface;
-use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\ParameterInterface;
+use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\QueryBuilder;
 
 /**

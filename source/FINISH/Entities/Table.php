@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Database\Query\QueryResult;
 use Spiral\Database\TableInterface;
 
 /**
@@ -65,13 +66,16 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * Table name without included prefix.
+     * {@inheritdoc}
      *
-     * @return string
+     * @return AbstractTable
      */
-    public function getName()
+    public function schema()
     {
-        return $this->name;
+        return $this->database->driver()->tableSchema(
+            $this->database->getPrefix() . $this->name,
+            $this->database->getPrefix()
+        );
     }
 
     /**
@@ -79,9 +83,17 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return bool
      */
-    public function isExists()
+    public function exists()
     {
         return $this->database->hasTable($this->name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -101,35 +113,16 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * Truncate (clean) current table.
+     * {@inheritdoc}
      */
     public function truncate()
     {
         $this->database->driver()->truncateTable($this->name);
     }
 
-    /**
-     * Get schema for specified table. TableSchema contains information about all table columns,
-     * indexes and foreign keys. Schema can also be used to manipulate table structure.
-     *
-     * @return AbstractTable
-     */
-    public function schema()
-    {
-        return $this->database->driver()->tableSchema(
-            $this->database->getPrefix() . $this->name,
-            $this->database->getPrefix()
-        );
-    }
 
     /**
-     * Perform single rowset insertion into table. Method will return lastInsertID on success.
-     *
-     * Example:
-     * $table->insert(["name" => "Wolfy J"])
-     *
-     * @param array $rowset Associated array (key=>value).
-     * @return mixed
+     * {@inheritdoc}
      */
     public function insert(array $rowset = [])
     {
@@ -221,11 +214,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * (PHP 5 > 5.4.0)
-     * Specify data which should be serialized to JSON.
-     *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
@@ -233,7 +222,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * Automatically create table selection.
+     * Bypass call to SelectQuery builder.
      *
      * @param string $method
      * @param array  $arguments

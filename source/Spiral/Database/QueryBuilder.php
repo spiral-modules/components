@@ -11,6 +11,7 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 
 /**
@@ -44,6 +45,7 @@ abstract class QueryBuilder extends Component
     /**
      * Get ordered list of builder parameters.
      *
+     * @param QueryCompiler $compiler
      * @return array
      * @throws BuilderException
      */
@@ -146,7 +148,7 @@ abstract class QueryBuilder extends Component
         $result = [];
         foreach ($parameters as $parameter)
         {
-            if ($parameter instanceof BuilderInterface)
+            if ($parameter instanceof QueryBuilder)
             {
                 $result = array_merge($result, $parameter->getParameters());
                 continue;

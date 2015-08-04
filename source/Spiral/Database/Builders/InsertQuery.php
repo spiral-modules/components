@@ -8,38 +8,36 @@
  */
 namespace Spiral\Database\Builders;
 
-use Spiral\Database\Database;
-use Spiral\Database\Parameter;
+use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Injections\Parameter;
 use Spiral\Database\QueryBuilder;
-use Spiral\Database\QueryCompiler;
 
+/**
+ * Insert statement query builder, support singular and batch inserts.
+ */
 class InsertQuery extends QueryBuilder
 {
     /**
-     * Table name to insert data to, should not include postfix.
-     *
      * @var string
      */
     protected $table = '';
 
     /**
-     * Column names should be inserts, every rowset should include this columns is strict order.
+     * Column names associated with insert.
      *
      * @var array
      */
     protected $columns = [];
 
     /**
-     * Parameters to be inserted.
+     * Rowsets to be inserted.
      *
      * @var array
      */
-    protected $values = [];
+    protected $rowsets = [];
 
     /**
-     * InsertQuery is query builder used to compile insert query into one associated table. It support
-     * as single as batch rowsets.
-     *
      * @param Database      $database Parent database.
      * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
      * @param string        $table    Associated table name.
@@ -47,14 +45,13 @@ class InsertQuery extends QueryBuilder
     public function __construct(Database $database, QueryCompiler $compiler, $table = '')
     {
         parent::__construct($database, $compiler);
-
         $this->table = $table;
     }
 
     /**
-     * Change target table, table name should be provided without postfix.
+     * Set target insertion table.
      *
-     * @param string $into Table name without prefix.
+     * @param string $into
      * @return $this
      */
     public function into($into)
@@ -73,7 +70,7 @@ class InsertQuery extends QueryBuilder
      * $insert->columns("name", "email");
      * $insert->columns("name, email");
      *
-     * @param array|string $columns Array of columns, or comma separated string or multiple parameters.
+     * @param array|string $columns
      * @return $this
      */
     public function columns($columns)
@@ -105,31 +102,29 @@ class InsertQuery extends QueryBuilder
      *  ]
      * ]);
      *
-     * @param mixed $values Array of values, array of rowsets of multiple parameters represents one
-     *                      rowset.
+     * @param mixed $rowsets
      * @return $this
      */
-    public function values($values)
+    public function values($rowsets)
     {
-        if (!is_array($values))
+        if (!is_array($rowsets))
         {
             return $this->values(func_get_args());
         }
 
         //Checking if provided set is array of multiple
-        reset($values);
+        reset($rowsets);
 
-        $multiple = is_array($values[key($values)]);
-        if (!$multiple)
+        if (!is_array($rowsets[key($rowsets)]))
         {
-            $this->columns = array_keys($values);
-            $this->values[] = new Parameter(array_values($values));
+            $this->columns = array_keys($rowsets);
+            $this->rowsets[] = new Parameter(array_values($rowsets));
         }
         else
         {
-            foreach ($values as $rowset)
+            foreach ($rowsets as $rowset)
             {
-                $this->values[] = new Parameter(array_values($rowset));
+                $this->rowsets[] = new Parameter(array_values($rowset));
             }
         }
 
@@ -137,36 +132,29 @@ class InsertQuery extends QueryBuilder
     }
 
     /**
-     * Reset all insertion rowsets to make builder reusable (columns still set).
-     */
-    public function flushValues()
-    {
-        $this->values = [];
-    }
-
-    /**
-     * Get ordered list of builder parameters.
-     *
-     * @param QueryCompiler $compiler
-     * @return array
+     * {@inheritdoc}
      */
     public function getParameters(QueryCompiler $compiler = null)
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
         return $this->flattenParameters($compiler->prepareParameters(
-            QueryCompiler::INSERT_QUERY,
-            [],
-            [],
-            [],
-            $this->values
+            QueryCompiler::INSERT_QUERY, [], [], [], $this->rowsets
         ));
     }
 
     /**
-     * Run QueryBuilder statement against parent database. Method will return lastInsertID value.
-     *
-     * @return mixed
+     * {@inheritdoc}
+     */
+    public function sqlStatement(QueryCompiler $compiler = null)
+    {
+        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+
+        return $compiler->insert($this->table, $this->columns, $this->rowsets);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function run()
     {
@@ -176,15 +164,10 @@ class InsertQuery extends QueryBuilder
     }
 
     /**
-     * Get or render SQL statement.
-     *
-     * @param QueryCompiler $compiler
-     * @return string
+     * Reset all insertion rowsets to make builder reusable (columns still set).
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function flushValues()
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->resetAliases();
-
-        return $compiler->insert($this->table, $this->columns, $this->values);
+        $this->rowsets = [];
     }
 }

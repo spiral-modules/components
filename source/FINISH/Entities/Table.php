@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Database\TableInterface;
 
@@ -56,8 +57,8 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      * DBAL Table instance is helper class used to aggregate common table operation together, such
      * as select, update, insert and delete. Additionally it can be used to request table schema.
      *
-     * @param string   $name     Table name without prefix.
      * @param Database $database Parent DBAL database.
+     * @param string   $name     Table name without prefix.
      */
     public function __construct(Database $database, $name)
     {
@@ -117,7 +118,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function truncate()
     {
-        $this->database->driver()->truncateTable($this->name);
+        $this->database->driver()->truncate($this->database->getPrefix() . $this->name);
     }
 
 

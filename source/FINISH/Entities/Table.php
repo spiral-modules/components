@@ -11,7 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\TableInterface;
 
 /**
  * @method SelectQuery distinct(bool $distinct = true)
@@ -35,7 +35,7 @@ use Spiral\Database\Schemas\AbstractTable;
  * @method int max($identifier) Perform aggregation based on column or expression value.
  * @method int sum($identifier) Perform aggregation based on column or expression value.
  */
-class Table implements \JsonSerializable, \IteratorAggregate, \Countable
+class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
 {
     /**
      * Table name, without prefix.

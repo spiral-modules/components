@@ -9,7 +9,7 @@
 namespace Spiral\Database\Drivers\SQLServer;
 
 /**
- * SQLServer specific result file, required due server need additional column for sorting in some
+ * SQLServer specific result reader, required due server need additional column for sorting in some
  * cases.
  */
 class QueryResult extends \Spiral\Database\Query\QueryResult

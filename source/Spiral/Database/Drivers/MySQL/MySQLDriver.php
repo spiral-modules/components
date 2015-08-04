@@ -8,6 +8,7 @@
  */
 namespace Spiral\Database\Drivers\MySQL;
 
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\IndexSchema;
@@ -23,7 +24,7 @@ class MySQLDriver extends Driver
     /**
      * Driver type.
      */
-    const TYPE = 'MySQL';
+    const TYPE = DatabaseInterface::MYSQL;
 
     /**
      * Driver schemas.

@@ -10,6 +10,7 @@ namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\Postgres\Builders\InsertQuery;
 use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Drivers\Postgres\Schemas\ColumnSchema;
@@ -27,7 +28,7 @@ class PostgresDriver extends Driver
     /**
      * Driver type.
      */
-    const TYPE = 'Postgres';
+    const TYPE = DatabaseInterface::POSTGRES;
 
     /**
      * Driver schemas.

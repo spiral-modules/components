@@ -9,6 +9,7 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Core\ContainerInterface;
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\IndexSchema;
@@ -23,7 +24,7 @@ class SQLiteDriver extends Driver
     /**
      * Driver type.
      */
-    const TYPE = 'SQLite';
+    const TYPE = DatabaseInterface::SQLITE;
 
     /**
      * Driver schemas.

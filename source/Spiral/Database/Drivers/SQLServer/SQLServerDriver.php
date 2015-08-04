@@ -8,6 +8,7 @@
  */
 namespace Spiral\Database\Drivers\SQLServer;
 
+use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
 use Spiral\Database\Drivers\SQLServer\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\SQLServer\Schemas\IndexSchema;
@@ -23,7 +24,7 @@ class SQLServerDriver extends Driver
     /**
      * Driver type.
      */
-    const TYPE = 'SQLServer';
+    const TYPE = DatabaseInterface::SQL_SERVER;
 
     /**
      * Driver schemas.

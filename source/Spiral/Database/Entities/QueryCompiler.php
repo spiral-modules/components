@@ -580,7 +580,7 @@ class QueryCompiler extends Component
         $statement = '';
         foreach ($unions as $union)
         {
-            $statement .= "\nUNION {$union[1]} \n({$union[0]})";
+            $statement .= "\nUNION {$union[1]}\n({$union[0]})";
         }
 
         return $statement;

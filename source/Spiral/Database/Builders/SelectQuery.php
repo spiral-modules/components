@@ -8,34 +8,34 @@
  */
 namespace Spiral\Database\Builders;
 
-use Spiral\Database\Database;
+use Spiral\Database\Builders\Prototypes\AbstractSelect;
+use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Interfaces\Injections\SQLFragmentInterface;
 use Spiral\Database\QueryBuilder;
-use Spiral\Database\QueryCompiler;
 
+/**
+ * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION
+ * of multiple select queries.
+ */
 class SelectQuery extends AbstractSelect
 {
     /**
-     * Array of table names data should be fetched from. This list may include aliases (AS) construction,
-     * system will automatically resolve them which allows fetching columns from multiples aliased
-     * tables even if databases has table prefix.
+     * Table names to select data from.
      *
      * @var array
      */
-    protected $fromTables = [];
+    protected $tables = [];
 
     /**
-     * List of QueryBuilder or SQLFragment object which should be joined to query using UNION or UNION
-     * ALL syntax. If query is instance of SelectBuilder it'a all parameters will be automatically
-     * merged with query parameters.
+     * Select queries represented by sql fragments or query builders to be united. Stored as
+     * [UNION TYPE, SELECT QUERY].
      *
      * @var array
      */
     protected $unions = [];
 
     /**
-     * SelectBuilder used to generate SELECT query statements, it can as to directly fetch data from
-     * database or as nested select query in other builders.
-     *
      * @param Database      $database Parent database.
      * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
      * @param array         $from     Initial set of table names.
@@ -50,11 +50,25 @@ class SelectQuery extends AbstractSelect
     {
         parent::__construct($database, $compiler);
 
-        $this->fromTables = $from;
-        if ($columns)
+        $this->tables = $from;
+        if (!empty($columns))
         {
             $this->columns = $this->fetchIdentifiers($columns);
         }
+    }
+
+    /**
+     * Set table names SELECT query should be performed for. Table names can be provided with specified
+     * alias (AS construction).
+     *
+     * @param array|string|mixed $tables Array of names, comma separated string or set of parameters.
+     * @return $this
+     */
+    public function from($tables)
+    {
+        $this->tables = $this->fetchIdentifiers(func_get_args());
+
+        return $this;
     }
 
     /**
@@ -71,11 +85,8 @@ class SelectQuery extends AbstractSelect
         return $this;
     }
 
-    //TODO: UNION
-
     /**
-     * Alias for columns() method. Set columns should be fetched as result of SELECT query. Columns
-     * can be provided with specified alias (AS construction).
+     * Alias for columns() method.
      *
      * @param array|string|mixed $columns Array of names, comma separated string or set of parameters.
      * @return $this
@@ -88,29 +99,38 @@ class SelectQuery extends AbstractSelect
     }
 
     /**
-     * Set table names SELECT query should be performed for. Table names can be provided with specified
-     * alias (AS construction).
+     * Add select query to be united with.
      *
-     * @param array|string|mixed $tables Array of names, comma separated string or set of parameters.
+     * @param SQLFragmentInterface $query
      * @return $this
      */
-    public function from($tables)
+    public function union(SQLFragmentInterface $query)
     {
-        $this->fromTables = $this->fetchIdentifiers(func_get_args());
+        $this->unions[] = ['', $query];
 
         return $this;
     }
 
     /**
-     * Get ordered list of builder parameters.
+     * Add select query to be united with. Duplicate values will be included in result.
      *
-     * @param QueryCompiler $compiler
-     * @return array
+     * @param SQLFragmentInterface $query
+     * @return $this
+     */
+    public function unionAll(SQLFragmentInterface $query)
+    {
+        $this->unions[] = ['ALL', $query];
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function getParameters(QueryCompiler $compiler = null)
     {
         $parameters = parent::getParameters(
-            $compiler = !empty($compiler) ? $compiler : $this->compiler
+            $compiler = !empty($compiler) ? $compiler : $this->compiler->reset()
         );
 
         //Unions always located at the end of query.
@@ -126,17 +146,15 @@ class SelectQuery extends AbstractSelect
     }
 
     /**
-     * Get or render SQL statement.
-     *
-     * @param QueryCompiler $compiler
-     * @return string
+     * {@inheritdoc}
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->resetAliases();
+        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
+        //11 parameters!
         return $compiler->select(
-            $this->fromTables,
+            $this->tables,
             $this->distinct,
             $this->columns,
             $this->joinTokens,

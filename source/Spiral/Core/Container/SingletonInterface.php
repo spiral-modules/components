@@ -12,8 +12,8 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\MissingContainerException;
 
 /**
- * Class treated as singleton MUST be saved as reference in IoC bindings. Must declare SINGLETON
- * constant.
+ * Class treated as singleton MAY be saved as reference in IoC bindings - this is spiral Container
+ * specific class. Must declare SINGLETON constant.
  */
 interface SingletonInterface
 {

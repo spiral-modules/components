@@ -39,7 +39,7 @@ interface TableInterface extends \Countable
      * Must perform single rowset insertion into table. Method must return lastInsertID on success.
      *
      * Example:
-     * $table->insert(["name" => "Wolfy J"])
+     * $table->insert(["name" => "Bob"])
      *
      * @param array $rowset Associated array (key => value).
      * @return mixed

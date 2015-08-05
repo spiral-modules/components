@@ -240,7 +240,7 @@ abstract class Model extends DataEntity
      * @param bool  $loaded
      * @param ORM   $orm
      */
-    public function __construct(array $data = [], $loaded = false, ORM $orm = null)
+    public function __construct(array $data = [], $loaded = false, array $schema = [], ORM $orm = null)
     {
         $this->loaded = $loaded;
 

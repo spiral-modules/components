@@ -27,8 +27,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function listen($event, $listener)
     {
-        if (!isset($this->listeners[$event]))
-        {
+        if (!isset($this->listeners[$event])) {
             $this->listeners[$event] = [];
         }
 
@@ -42,8 +41,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function remove($event, $listener)
     {
-        if (isset($this->listeners[$event]))
-        {
+        if (isset($this->listeners[$event])) {
             unset($this->listeners[$event][array_search($listener, $this->listeners[$event])]);
         }
 
@@ -55,8 +53,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function hasListener($event, $listener)
     {
-        if (isset($this->listeners[$event]))
-        {
+        if (isset($this->listeners[$event])) {
             return in_array($listener, $this->listeners[$event]);
         }
 
@@ -68,8 +65,7 @@ class Dispatcher implements DispatcherInterface
      */
     public function listeners($event)
     {
-        if (array_key_exists($event, $this->listeners))
-        {
+        if (array_key_exists($event, $this->listeners)) {
             return $this->listeners[$event];
         }
 
@@ -81,31 +77,26 @@ class Dispatcher implements DispatcherInterface
      */
     public function fire($event, $context = null)
     {
-        if (is_object($event) && !($event instanceof EventInterface))
-        {
+        if (is_object($event) && !($event instanceof EventInterface)) {
             throw new InvalidArgumentException(
                 "Only instances of EventInterface or event name can be fired."
             );
         }
 
-        if (is_string($event))
-        {
+        if (is_string($event)) {
             $event = new Event($event, $context);
         }
 
         /**
          * @var Event $event
          */
-        if (empty($this->listeners[$event->name()]))
-        {
+        if (empty($this->listeners[$event->name()])) {
             return $event->context();
         }
 
-        foreach ($this->listeners[$event->name()] as $listener)
-        {
+        foreach ($this->listeners[$event->name()] as $listener) {
             call_user_func($listener, $event);
-            if ($event->isStopped())
-            {
+            if ($event->isStopped()) {
                 break;
             }
         }

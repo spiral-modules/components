@@ -107,23 +107,18 @@ class InsertQuery extends QueryBuilder
      */
     public function values($rowsets)
     {
-        if (!is_array($rowsets))
-        {
+        if (!is_array($rowsets)) {
             return $this->values(func_get_args());
         }
 
         //Checking if provided set is array of multiple
         reset($rowsets);
 
-        if (!is_array($rowsets[key($rowsets)]))
-        {
+        if (!is_array($rowsets[key($rowsets)])) {
             $this->columns = array_keys($rowsets);
             $this->rowsets[] = new Parameter(array_values($rowsets));
-        }
-        else
-        {
-            foreach ($rowsets as $rowset)
-            {
+        } else {
+            foreach ($rowsets as $rowset) {
                 $this->rowsets[] = new Parameter(array_values($rowset));
             }
         }

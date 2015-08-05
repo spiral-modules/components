@@ -77,17 +77,17 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     }
 
     /**
-     * @param ContainerInterface $container
-     * @param Debugger           $debugger
-     * @param FilesInterface     $files
-     * @param ViewProviderInterface     $views
+     * @param ContainerInterface    $container
+     * @param Debugger              $debugger
+     * @param FilesInterface        $files
+     * @param ViewProviderInterface $views
      */
     public function saturate(
         ContainerInterface $container,
         Debugger $debugger,
         FilesInterface $files,
-        ViewProviderInterface $views)
-    {
+        ViewProviderInterface $views
+    ) {
         $this->config = $debugger->config()[static::CONFIG];
 
         $this->container = $container;
@@ -166,8 +166,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     {
         $this->debugger->logger()->error($this->getMessage());
 
-        if (!$this->config['reporting']['enabled'])
-        {
+        if (!$this->config['reporting']['enabled']) {
             //No need to record anything
             return;
         }
@@ -206,8 +205,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
      */
     public function render()
     {
-        if (!empty($this->renderCache))
-        {
+        if (!empty($this->renderCache)) {
             return $this->renderCache;
         }
 

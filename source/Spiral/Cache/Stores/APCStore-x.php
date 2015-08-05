@@ -73,8 +73,7 @@ class APCStore extends CacheStore
      */
     public function has($name)
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             return apcu_exists($this->options['prefix'] . $name);
         }
 
@@ -86,8 +85,7 @@ class APCStore extends CacheStore
      */
     public function get($name)
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             return apcu_fetch($this->options['prefix'] . $name);
         }
 
@@ -99,8 +97,7 @@ class APCStore extends CacheStore
      */
     public function set($name, $data, $lifetime)
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             return apcu_store($this->options['prefix'] . $name, $data, $lifetime);
         }
 
@@ -120,8 +117,7 @@ class APCStore extends CacheStore
      */
     public function delete($name)
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             apcu_delete($this->options['prefix'] . $name);
 
             return;
@@ -135,8 +131,7 @@ class APCStore extends CacheStore
      */
     public function increment($name, $delta = 1)
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             return apcu_inc($this->options['prefix'] . $name, $delta);
         }
 
@@ -148,8 +143,7 @@ class APCStore extends CacheStore
      */
     public function decrement($name, $delta = 1)
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             return apcu_dec($this->options['prefix'] . $name, $delta);
         }
 
@@ -161,8 +155,7 @@ class APCStore extends CacheStore
      */
     public function flush()
     {
-        if ($this->driver == self::APCU_DRIVER)
-        {
+        if ($this->driver == self::APCU_DRIVER) {
             apcu_clear_cache();
 
             return;

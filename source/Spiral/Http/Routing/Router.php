@@ -65,10 +65,8 @@ class Router implements RouterInterface
     public function __construct(ContainerInterface $container, array $routes = [], array $default = [])
     {
         $this->container = $container;
-        foreach ($routes as $route)
-        {
-            if (!$route instanceof RouteInterface)
-            {
+        foreach ($routes as $route) {
+            if (!$route instanceof RouteInterface) {
                 throw new InvalidArgumentException("Routes should be array of Route instances.");
             }
 
@@ -76,15 +74,13 @@ class Router implements RouterInterface
             $this->routes[$route->getName()] = $route;
         }
 
-        if ($default instanceof RouteInterface)
-        {
+        if ($default instanceof RouteInterface) {
             $this->routes[self::DEFAULT_ROUTE] = $default;
 
             return;
         }
 
-        if (!isset($this->routes[self::DEFAULT_ROUTE]) && !empty($default))
-        {
+        if (!isset($this->routes[self::DEFAULT_ROUTE]) && !empty($default)) {
             $this->routes[self::DEFAULT_ROUTE] = new DirectRoute(
                 self::DEFAULT_ROUTE,
                 $default['pattern'],
@@ -107,8 +103,7 @@ class Router implements RouterInterface
         $outerRouter = $this->container->replace(self::class, $this);
 
         $this->activePath = $request->getAttribute('activePath', $this->activePath);
-        if (!$this->activeRoute = $this->findRoute($request, $this->activePath))
-        {
+        if (!$this->activeRoute = $this->findRoute($request, $this->activePath)) {
             throw new ClientException(ClientException::NOT_FOUND);
         }
 
@@ -131,10 +126,8 @@ class Router implements RouterInterface
      */
     protected function findRoute(ServerRequestInterface $request, $basePath)
     {
-        foreach ($this->routes as $route)
-        {
-            if ($route->match($request, $basePath))
-            {
+        foreach ($this->routes as $route) {
+            if ($route->match($request, $basePath)) {
                 return $route;
             }
         }
@@ -155,8 +148,7 @@ class Router implements RouterInterface
      */
     public function getRoute($route)
     {
-        if (!isset($this->routes[$route]))
-        {
+        if (!isset($this->routes[$route])) {
             throw new RouterException("Undefined route '{$route}'.");
         }
 
@@ -184,14 +176,12 @@ class Router implements RouterInterface
      */
     public function createUri($route, array $parameters = [], SlugifyInterface $slugify = null)
     {
-        if (isset($this->routes[$route]))
-        {
+        if (isset($this->routes[$route])) {
             return $this->routes[$route]->createUri($parameters, $this->activePath, $slugify);
         }
 
         //Will be handled via default route where route name is specified as controller::action
-        if (strpos($route, RouteInterface::SEPARATOR) == false && strpos($route, '/') === false)
-        {
+        if (strpos($route, RouteInterface::SEPARATOR) == false && strpos($route, '/') === false) {
             throw new RouterException(
                 "Unable to locate route or use default route with controller::action pattern."
             );

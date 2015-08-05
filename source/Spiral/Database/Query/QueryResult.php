@@ -126,8 +126,7 @@ class QueryResult implements ResultInterface, \JsonSerializable
      */
     public function fetch($mode = null)
     {
-        if (!empty($mode))
-        {
+        if (!empty($mode)) {
             $this->fetchMode($mode);
         }
 
@@ -150,8 +149,7 @@ class QueryResult implements ResultInterface, \JsonSerializable
      */
     public function bind($columnID, &$variable)
     {
-        if (is_numeric($columnID))
-        {
+        if (is_numeric($columnID)) {
             //PDO columns are 1-indexed
             $columnID = $columnID + 1;
         }
@@ -166,8 +164,7 @@ class QueryResult implements ResultInterface, \JsonSerializable
      */
     public function fetchAll($mode = null)
     {
-        if (!empty($mode))
-        {
+        if (!empty($mode)) {
             $this->fetchMode($mode);
         }
 

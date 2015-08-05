@@ -47,8 +47,7 @@ class StorageObject implements ObjectInterface
         $this->storage = $storage;
 
         //Trying to find bucket using address
-        if (empty($address))
-        {
+        if (empty($address)) {
             throw new ObjectException("Unable to create StorageObject with empty address.");
         }
 
@@ -85,8 +84,7 @@ class StorageObject implements ObjectInterface
      */
     public function exists()
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             return false;
         }
 
@@ -98,8 +96,7 @@ class StorageObject implements ObjectInterface
      */
     public function getSize()
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             return false;
         }
 
@@ -111,8 +108,7 @@ class StorageObject implements ObjectInterface
      */
     public function localFilename()
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             throw new ObjectException("Unable to allocate filename for unassigned storage object.");
         }
 
@@ -124,8 +120,7 @@ class StorageObject implements ObjectInterface
      */
     public function getStream()
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             throw new ObjectException("Unable to get stream for unassigned storage object.");
         }
 
@@ -137,8 +132,7 @@ class StorageObject implements ObjectInterface
      */
     public function delete()
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             return;
         }
 
@@ -153,8 +147,7 @@ class StorageObject implements ObjectInterface
      */
     public function rename($newname)
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             throw new ObjectException("Unable to rename unassigned storage object.");
         }
 
@@ -169,13 +162,11 @@ class StorageObject implements ObjectInterface
      */
     public function copy($destination)
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             throw new ObjectException("Unable to copy unassigned storage object.");
         }
 
-        if (is_string($destination))
-        {
+        if (is_string($destination)) {
             $destination = $this->storage->bucket($destination);
         }
 
@@ -187,13 +178,11 @@ class StorageObject implements ObjectInterface
      */
     public function replace($destination)
     {
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             throw new ObjectException("Unable to replace unassigned storage object.");
         }
 
-        if (is_string($destination))
-        {
+        if (is_string($destination)) {
             $destination = $this->storage->bucket($destination);
         }
 

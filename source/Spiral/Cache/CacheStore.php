@@ -61,8 +61,7 @@ abstract class CacheStore implements StoreInterface
      */
     public function remember($name, $lifetime, $callback)
     {
-        if (!$this->has($name))
-        {
+        if (!$this->has($name)) {
             $this->set($name, $value = call_user_func($callback), $lifetime);
 
             return $value;

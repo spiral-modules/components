@@ -55,13 +55,11 @@ class TypeChecker extends Checker
      */
     public function datetime($value)
     {
-        if (!is_scalar($value))
-        {
+        if (!is_scalar($value)) {
             return false;
         }
 
-        if (is_numeric($value))
-        {
+        if (is_numeric($value)) {
             return true;
         }
 

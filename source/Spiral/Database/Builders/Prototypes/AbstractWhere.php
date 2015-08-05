@@ -169,14 +169,12 @@ abstract class AbstractWhere extends QueryBuilder
     {
         list($identifier, $valueA, $valueB, $valueC) = $parameters + array_fill(0, 5, null);
 
-        if (empty($identifier))
-        {
+        if (empty($identifier)) {
             //Nothing to do
             return;
         }
 
-        if (is_array($identifier))
-        {
+        if (is_array($identifier)) {
             $tokens[] = [$joiner, '('];
             $this->parseSimplified(self::TOKEN_AND, $identifier, $tokens, $wrapper);
             $tokens[] = ['', ')'];
@@ -184,8 +182,7 @@ abstract class AbstractWhere extends QueryBuilder
             return;
         }
 
-        if ($identifier instanceof \Closure)
-        {
+        if ($identifier instanceof \Closure) {
             $tokens[] = [$joiner, '('];
             call_user_func($identifier, $this, $joiner, $wrapper);
             $tokens[] = ['', ')'];
@@ -193,14 +190,12 @@ abstract class AbstractWhere extends QueryBuilder
             return;
         }
 
-        if ($identifier instanceof QueryBuilder)
-        {
+        if ($identifier instanceof QueryBuilder) {
             //This will copy every parameter from QueryBuilder
             $wrapper($identifier);
         }
 
-        switch (count($parameters))
-        {
+        switch (count($parameters)) {
             case 1:
                 //AND|OR [identifier: sub-query]
                 $tokens[] = [$joiner, $identifier];
@@ -216,8 +211,7 @@ abstract class AbstractWhere extends QueryBuilder
             case 4:
                 //BETWEEN or NOT BETWEEN
                 $valueA = strtoupper($valueA);
-                if (!in_array($valueA, ['BETWEEN', 'NOT BETWEEN']))
-                {
+                if (!in_array($valueA, ['BETWEEN', 'NOT BETWEEN'])) {
                     throw new BuilderException(
                         'Only "BETWEEN" or "NOT BETWEEN" can define second comparasions value.'
                     );
@@ -242,18 +236,15 @@ abstract class AbstractWhere extends QueryBuilder
     private function parseSimplified($grouper, array $where, &$tokens, callable $wrapper)
     {
         $joiner = $grouper == self::TOKEN_AND ? 'AND' : 'OR';
-        foreach ($where as $name => $value)
-        {
+        foreach ($where as $name => $value) {
             $token = strtoupper($name);
 
             //Grouping identifier (@OR, @AND), MongoDB like style
-            if ($token == self::TOKEN_AND || $token == self::TOKEN_OR)
-            {
+            if ($token == self::TOKEN_AND || $token == self::TOKEN_OR) {
                 //Open group
                 $tokens[] = [$joiner, '('];
 
-                foreach ($value as $nestedWhere)
-                {
+                foreach ($value as $nestedWhere) {
                     $this->parseSimplified($token, $nestedWhere, $tokens, $wrapper);
                 }
 
@@ -261,32 +252,27 @@ abstract class AbstractWhere extends QueryBuilder
                 continue;
             }
 
-            if (!is_array($value))
-            {
+            if (!is_array($value)) {
                 //AND|OR [name] = [value]
                 $tokens[] = [$joiner, [$name, '=', $wrapper($value)]];
                 continue;
             }
 
             $innerJoiner = $joiner;
-            if (count($value) > 1)
-            {
+            if (count($value) > 1) {
                 $tokens[] = [$joiner, '('];
 
                 //Multiple values to be joined by AND condition (x = 1, x != 5)
                 $innerJoiner = 'AND';
             }
 
-            foreach ($value as $key => $nestedValue)
-            {
-                if (is_numeric($key))
-                {
+            foreach ($value as $key => $nestedValue) {
+                if (is_numeric($key)) {
                     throw new BuilderException("Nested conditions should have defined operator.");
                 }
 
                 $operation = strtoupper($key);
-                if (!in_array($operation, ['BETWEEN', 'NOT BETWEEN']))
-                {
+                if (!in_array($operation, ['BETWEEN', 'NOT BETWEEN'])) {
                     //AND|OR [name] [OPERATION] [nestedValue]
                     $tokens[] = [$innerJoiner, [$name, $operation, $wrapper($nestedValue)]];
                     continue;
@@ -296,8 +282,7 @@ abstract class AbstractWhere extends QueryBuilder
                  * Between and not between condition described using array of [left, right] syntax.
                  */
 
-                if (!is_array($nestedValue) || count($nestedValue) != 2)
-                {
+                if (!is_array($nestedValue) || count($nestedValue) != 2) {
                     throw new BuilderException(
                         "Exactly 2 array values are required for between statement."
                     );
@@ -305,12 +290,12 @@ abstract class AbstractWhere extends QueryBuilder
 
                 $tokens[] = [
                     //AND|OR [name] [BETWEEN|NOT BETWEEN] [value 1] [value 2]
-                    $innerJoiner, [$name, $operation, $wrapper($nestedValue[0]), $wrapper($nestedValue[1])]
+                    $innerJoiner,
+                    [$name, $operation, $wrapper($nestedValue[0]), $wrapper($nestedValue[1])]
                 ];
             }
 
-            if (count($value) > 1)
-            {
+            if (count($value) > 1) {
                 $tokens[] = ['', ')'];
             }
         }
@@ -326,10 +311,8 @@ abstract class AbstractWhere extends QueryBuilder
      */
     private function whereWrapper()
     {
-        return function ($parameter)
-        {
-            if (!$parameter instanceof ParameterInterface && is_array($parameter))
-            {
+        return function ($parameter) {
+            if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
                 $parameter = new Parameter($parameter);
             }
 
@@ -338,8 +321,7 @@ abstract class AbstractWhere extends QueryBuilder
                 $parameter instanceof SQLFragmentInterface
                 && !$parameter instanceof ParameterInterface
                 && !$parameter instanceof QueryBuilder
-            )
-            {
+            ) {
                 return $parameter;
             }
 

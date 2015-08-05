@@ -35,10 +35,8 @@ class TableSchema extends AbstractTable
          */
         $tableStatement = explode("\n", $tableSQL);
 
-        foreach ($this->driver->query("PRAGMA TABLE_INFO({$this->getName(true)})") as $column)
-        {
-            if ($column['pk'])
-            {
+        foreach ($this->driver->query("PRAGMA TABLE_INFO({$this->getName(true)})") as $column) {
+            if ($column['pk']) {
                 $this->primaryKeys[] = $column['name'];
                 $this->dbPrimaryKeys[] = $column['name'];
             }
@@ -55,11 +53,9 @@ class TableSchema extends AbstractTable
      */
     protected function loadIndexes()
     {
-        foreach ($this->driver->query("PRAGMA index_list({$this->getName(true)})") as $index)
-        {
+        foreach ($this->driver->query("PRAGMA index_list({$this->getName(true)})") as $index) {
             $index = $this->registerIndex($index['name'], $index);
-            if ($index->getColumns() == $this->primaryKeys)
-            {
+            if ($index->getColumns() == $this->primaryKeys) {
                 unset($this->indexes[$index->getName()], $this->dbIndexes[$index->getName()]);
             }
         }
@@ -71,8 +67,7 @@ class TableSchema extends AbstractTable
     protected function loadReferences()
     {
         foreach ($this->driver->query("PRAGMA foreign_key_list({$this->getName(true)})") as
-                 $reference)
-        {
+                 $reference) {
             $this->registerReference($reference['id'], $reference);
         }
     }
@@ -82,30 +77,24 @@ class TableSchema extends AbstractTable
      */
     protected function updateSchema()
     {
-        if ($this->primaryKeys != $this->dbPrimaryKeys)
-        {
+        if ($this->primaryKeys != $this->dbPrimaryKeys) {
             throw new SchemaException(
                 "Primary keys can not be changed for already exists table ({$this->getName()})."
             );
         }
 
         $this->driver->beginTransaction();
-        try
-        {
+        try {
             $rebuildRequired = false;
-            if ($this->alteredColumns() || $this->alteredReferences())
-            {
+            if ($this->alteredColumns() || $this->alteredReferences()) {
                 $rebuildRequired = true;
             }
 
-            if (!$rebuildRequired)
-            {
-                foreach ($this->alteredIndexes() as $name => $schema)
-                {
+            if (!$rebuildRequired) {
+                foreach ($this->alteredIndexes() as $name => $schema) {
                     $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
 
-                    if (!$schema)
-                    {
+                    if (!$schema) {
                         $this->logger()->info(
                             "Dropping index [{statement}] from table {table}.", [
                             'statement' => $dbIndex->sqlStatement(true),
@@ -116,8 +105,7 @@ class TableSchema extends AbstractTable
                         continue;
                     }
 
-                    if (!$dbIndex)
-                    {
+                    if (!$dbIndex) {
                         $this->logger()->info(
                             "Adding index [{statement}] into table {table}.", [
                             'statement' => $schema->sqlStatement(false),
@@ -138,9 +126,7 @@ class TableSchema extends AbstractTable
 
                     $this->doIndexChange($schema, $dbIndex);
                 }
-            }
-            else
-            {
+            } else {
                 $this->logger()->info(
                     "Rebuilding table {table} to apply required modifications.", [
                     'table' => $this->getName(true)
@@ -160,10 +146,8 @@ class TableSchema extends AbstractTable
 
                 //Mapping columns
                 $mapping = [];
-                foreach ($this->columns as $name => $schema)
-                {
-                    if (isset($this->dbColumns[$name]))
-                    {
+                foreach ($this->columns as $name => $schema) {
+                    if (isset($this->dbColumns[$name])) {
                         $mapping[$schema->getName(true)] = $this->dbColumns[$name]->getName(true);
                     }
                 }
@@ -202,14 +186,11 @@ class TableSchema extends AbstractTable
 
                 //Restoring indexes, we can create them now
                 $this->indexes = $indexes;
-                foreach ($this->indexes as $index)
-                {
+                foreach ($this->indexes as $index) {
                     $this->doIndexAdd($index);
                 }
             }
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             $this->driver->rollbackTransaction();
             throw $exception;
         }

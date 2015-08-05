@@ -37,8 +37,7 @@ class ArgumentException extends ContainerException
         $this->context = $context;
 
         $name = $context->getName();
-        if ($context instanceof \ReflectionMethod)
-        {
+        if ($context instanceof \ReflectionMethod) {
             $name = $context->class . '::' . $name;
         }
 

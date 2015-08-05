@@ -56,8 +56,7 @@ class Parameter extends SQLFragment implements ParameterInterface
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        if (is_array($this->value))
-        {
+        if (is_array($this->value)) {
             //Array were mocked
             return '(' . trim(str_repeat('?, ', count($this->value)), ', ') . ')';
         }

@@ -220,33 +220,26 @@ abstract class AbstractRoute implements RouteInterface
      */
     public function match(ServerRequestInterface $request, $basePath = '/')
     {
-        if (!empty($this->methods) && !in_array($request->getMethod(), $this->methods))
-        {
+        if (!empty($this->methods) && !in_array($request->getMethod(), $this->methods)) {
             return false;
         }
 
-        if (empty($this->compiled))
-        {
+        if (empty($this->compiled)) {
             $this->compile();
         }
 
         $path = $request->getUri()->getPath();
-        if (empty($path) || $path[0] !== '/')
-        {
+        if (empty($path) || $path[0] !== '/') {
             $path = '/' . $path;
         }
 
-        if ($this->withHost)
-        {
+        if ($this->withHost) {
             $uri = $request->getUri()->getHost() . $path;
-        }
-        else
-        {
+        } else {
             $uri = substr($path, strlen($basePath));
         }
 
-        if (preg_match($this->compiled['pattern'], rtrim($uri, '/'), $this->matches))
-        {
+        if (preg_match($this->compiled['pattern'], rtrim($uri, '/'), $this->matches)) {
             //To get only named matches
             $this->matches = array_intersect_key($this->matches, $this->compiled['options']);
             $this->matches = array_merge(
@@ -266,8 +259,7 @@ abstract class AbstractRoute implements RouteInterface
      */
     public function createUri(array $parameters = [], $basePath = '/', SlugifyInterface $slugify = null)
     {
-        if (empty($this->compiled))
-        {
+        if (empty($this->compiled)) {
             $this->compile();
         }
 
@@ -285,8 +277,7 @@ abstract class AbstractRoute implements RouteInterface
         $uri = new Uri(($this->withHost ? '' : $basePath) . $uri);
 
         //Getting additional query parameters
-        if (!empty($queryParameters = array_diff_key($parameters, $this->compiled['options'])))
-        {
+        if (!empty($queryParameters = array_diff_key($parameters, $this->compiled['options']))) {
             $uri->withQuery(http_build_query($queryParameters));
         }
 
@@ -308,24 +299,18 @@ abstract class AbstractRoute implements RouteInterface
         $controller,
         $action,
         array $parameters = []
-    )
-    {
-        if (empty($this->core))
-        {
+    ) {
+        if (empty($this->core)) {
             $this->core = $container->get(CoreInterface::class);
         }
 
-        try
-        {
+        try {
             return $this->core->callAction($controller, $action, $parameters);
-        }
-        catch (ControllerException $exception)
-        {
+        } catch (ControllerException $exception) {
             if (
                 $exception->getCode() == ControllerException::BAD_ACTION
                 || $exception->getCode() == ControllerException::NOT_FOUND
-            )
-            {
+            ) {
                 throw new ClientException(ClientException::NOT_FOUND, $exception->getMessage());
             }
 
@@ -341,11 +326,9 @@ abstract class AbstractRoute implements RouteInterface
         $replaces = ['/' => '\\/', '[' => '(?:', ']' => ')?', '.' => '\.'];
 
         $options = [];
-        if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches))
-        {
+        if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches)) {
             $variables = array_combine($matches[1], $matches[2]);
-            foreach ($variables as $name => $segment)
-            {
+            foreach ($variables as $name => $segment) {
                 $segment = $segment ?: self::DEFAULT_SEGMENT;
                 $replaces["<$name>"] = "(?P<$name>$segment)";
                 $options[] = $name;

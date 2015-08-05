@@ -92,8 +92,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         ContainerInterface $container,
         TokenizerInterface $tokenizer,
         FilesInterface $files
-    )
-    {
+    ) {
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->container = $container;
@@ -122,8 +121,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      */
     public function configure()
     {
-        if ($this->isConfigured())
-        {
+        if ($this->isConfigured()) {
             return;
         }
 
@@ -144,15 +142,11 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     {
         $migrations = [];
 
-        foreach ($this->getFiles() as $filename => $definition)
-        {
-            if (!class_exists($definition['class'], false))
-            {
+        foreach ($this->getFiles() as $filename => $definition) {
+            if (!class_exists($definition['class'], false)) {
                 //Can happen sometimes
                 require_once($filename);
-            }
-            else
-            {
+            } else {
                 $this->logger()->warning(
                     "Migration '{class}' already presented in loaded classes.",
                     $definition
@@ -183,17 +177,14 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      */
     public function registerMigration($name, $class)
     {
-        if (!class_exists($class))
-        {
+        if (!class_exists($class)) {
             throw new MigrationException(
                 "Unable to register migration, representing class does not exists."
             );
         }
 
-        foreach ($this->getMigrations() as $migration)
-        {
-            if (get_class($migration) == $class)
-            {
+        foreach ($this->getMigrations() as $migration) {
+            if (get_class($migration) == $class) {
                 //Already presented
                 return false;
             }
@@ -213,10 +204,8 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      */
     public function run()
     {
-        foreach ($this->getMigrations() as $migration)
-        {
-            if ($migration->getStatus()->getState() == StatusInterface::PENDING)
-            {
+        foreach ($this->getMigrations() as $migration) {
+            if ($migration->getStatus()->getState() == StatusInterface::PENDING) {
                 //Yey!
                 $migration->up();
 
@@ -241,10 +230,8 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         /**
          * @var MigrationInterface $migration
          */
-        foreach (array_reverse($this->getMigrations()) as $migration)
-        {
-            if ($migration->getStatus()->getState() == StatusInterface::EXECUTED)
-            {
+        foreach (array_reverse($this->getMigrations()) as $migration) {
+            if ($migration->getStatus()->getState() == StatusInterface::EXECUTED) {
                 //Rolling back
                 $migration->down();
 
@@ -279,8 +266,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     {
         $filenames = [];
 
-        foreach ($this->files->getFiles($this->config['directory'], 'php') as $filename)
-        {
+        foreach ($this->files->getFiles($this->config['directory'], 'php') as $filename) {
             $reflection = new ReflectionFile($filename, $this->tokenizer);
 
             $definition = explode('_', $filename);
@@ -307,8 +293,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             'migration' => $definition['name']
         ])->select('id', 'timePerformed')->run()->fetch();
 
-        if (empty($migration['timePerformed']))
-        {
+        if (empty($migration['timePerformed'])) {
             return new Status(
                 $definition['name'],
                 StatusInterface::PENDING,

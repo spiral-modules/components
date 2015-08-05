@@ -92,13 +92,11 @@ abstract class AbstractReference implements ReferenceInterface
     public function getName($quoted = false)
     {
         $name = $this->name;
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             $name = $this->table->getName() . '_foreign_' . $this->column . '_' . uniqid();
         }
 
-        if (strlen($name) > 64)
-        {
+        if (strlen($name) > 64) {
             //Many dbs has limitations on identifier length
             $name = md5($name);
         }

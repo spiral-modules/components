@@ -39,8 +39,7 @@ class UpdateQuery extends AbstractAffect
         $table = '',
         array $where = [],
         array $values = []
-    )
-    {
+    ) {
         parent::__construct($database, $compiler, $table, $where);
         $this->values = $values;
     }
@@ -104,20 +103,16 @@ class UpdateQuery extends AbstractAffect
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
         $values = [];
-        foreach ($this->values as $value)
-        {
-            if ($value instanceof QueryBuilder)
-            {
-                foreach ($value->getParameters() as $parameter)
-                {
+        foreach ($this->values as $value) {
+            if ($value instanceof QueryBuilder) {
+                foreach ($value->getParameters() as $parameter) {
                     $values[] = $parameter;
                 }
 
                 continue;
             }
 
-            if ($value instanceof SQLFragmentInterface && !$value instanceof ParameterInterface)
-            {
+            if ($value instanceof SQLFragmentInterface && !$value instanceof ParameterInterface) {
                 continue;
             }
 
@@ -135,8 +130,7 @@ class UpdateQuery extends AbstractAffect
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        if (empty($this->values))
-        {
+        if (empty($this->values)) {
             throw new BuilderException("Update values must be specified.");
         }
 

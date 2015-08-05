@@ -20,8 +20,7 @@ class IndexSchema extends AbstractIndex
      */
     protected function resolveSchema($schema)
     {
-        foreach ($schema as $index)
-        {
+        foreach ($schema as $index) {
             $this->type = $index['isUnique'] ? self::UNIQUE : self::NORMAL;
             $this->columns[] = $index['columnName'];
         }

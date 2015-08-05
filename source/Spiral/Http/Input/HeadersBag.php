@@ -40,8 +40,7 @@ class HeadersBag extends InputBag
     {
         $value = parent::get($this->normalize($name), $default);
 
-        if (!empty($implode))
-        {
+        if (!empty($implode)) {
             return implode($implode, $value);
         }
 
@@ -59,10 +58,8 @@ class HeadersBag extends InputBag
 
         $values = parent::fetch($keys, $fill, $filler);
 
-        if (!empty($implode))
-        {
-            foreach ($values as &$value)
-            {
+        if (!empty($implode)) {
+            foreach ($values as &$value) {
                 $value = implode($implode, $value);
                 unset($value);
             }

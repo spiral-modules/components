@@ -39,18 +39,15 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function connect()
     {
-        foreach ($this->options['options'] as $option => $value)
-        {
+        foreach ($this->options['options'] as $option => $value) {
             $this->service->setOption($option, $value);
         }
 
-        foreach ($this->options['servers'] as $server)
-        {
+        foreach ($this->options['servers'] as $server) {
             $server = $server + $this->options['defaultServer'];
             $this->service->addServer(
                 $server['host'],
                 $server['port'],
-                $server['persistent'],
                 $server['weight']
             );
         }
@@ -69,8 +66,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function has($name)
     {
-        if ($this->service->get($name) === false)
-        {
+        if ($this->service->get($name) === false) {
             return $this->service->getResultCode() != \Memcached::RES_NOTFOUND;
         }
 
@@ -116,8 +112,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function increment($name, $delta = 1)
     {
-        if (!$this->has($name))
-        {
+        if (!$this->has($name)) {
             $this->forever($name, $delta);
 
             return $delta;

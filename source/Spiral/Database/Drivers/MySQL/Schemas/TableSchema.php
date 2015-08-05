@@ -54,8 +54,7 @@ class TableSchema extends AbstractTable
             "SHOW FULL COLUMNS FROM {table}", ['table' => $this->getName(true)]
         );
 
-        foreach ($this->driver->query($query)->bind(1, $columnName) as $column)
-        {
+        foreach ($this->driver->query($query)->bind(1, $columnName) as $column) {
             $this->registerColumn($columnName, $column);
         }
     }
@@ -67,10 +66,8 @@ class TableSchema extends AbstractTable
     {
         $indexes = [];
         $query = \Spiral\interpolate("SHOW INDEXES FROM {table}", ['table' => $this->getName(true)]);
-        foreach ($this->driver->query($query) as $index)
-        {
-            if ($index['Key_name'] == 'PRIMARY')
-            {
+        foreach ($this->driver->query($query) as $index) {
+            if ($index['Key_name'] == 'PRIMARY') {
                 $this->primaryKeys[] = $index['Column_name'];
                 $this->dbPrimaryKeys[] = $index['Column_name'];
                 continue;
@@ -79,8 +76,7 @@ class TableSchema extends AbstractTable
             $indexes[$index['Key_name']][] = $index;
         }
 
-        foreach ($indexes as $index => $schema)
-        {
+        foreach ($indexes as $index => $schema) {
             $this->registerIndex($index, $schema);
         }
     }
@@ -95,8 +91,7 @@ class TableSchema extends AbstractTable
 
         $references = $this->driver->query($query, [$this->driver->getSource(), $this->name]);
 
-        foreach ($references as $reference)
-        {
+        foreach ($references as $reference) {
             $query = "SELECT * FROM information_schema.key_column_usage "
                 . "WHERE constraint_name = ? AND table_schema = ? AND table_name = ?";
 
@@ -124,11 +119,9 @@ class TableSchema extends AbstractTable
         //Executing
         $execute && $this->driver->statement($statement);
 
-        if ($execute)
-        {
+        if ($execute) {
             //Not all databases support adding index while table creation, so we can do it after
-            foreach ($this->indexes as $index)
-            {
+            foreach ($this->indexes as $index) {
                 $this->doIndexAdd($index);
             }
         }

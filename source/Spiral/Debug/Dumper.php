@@ -104,11 +104,9 @@ class Dumper extends Singleton
      */
     public function dump($value, $output = self::OUTPUT_ECHO)
     {
-        if (php_sapi_name() === 'cli' && $output != self::OUTPUT_LOG)
-        {
+        if (php_sapi_name() === 'cli' && $output != self::OUTPUT_LOG) {
             print_r($value);
-            if (is_string($value))
-            {
+            if (is_string($value)) {
                 echo "\n";
             }
 
@@ -119,8 +117,7 @@ class Dumper extends Singleton
             'dump' => $this->dumpValue($value, '', 0)
         ]);
 
-        switch ($output)
-        {
+        switch ($output) {
             case self::OUTPUT_ECHO:
                 echo $result;
                 break;
@@ -154,21 +151,15 @@ class Dumper extends Singleton
      */
     public function style($element, $type, $subType = '')
     {
-        if (isset($this->options['styles'][$type . '-' . $subType]))
-        {
+        if (isset($this->options['styles'][$type . '-' . $subType])) {
             $style = $this->options['styles'][$type . '-' . $subType];
-        }
-        elseif (isset($this->options['styles'][$type]))
-        {
+        } elseif (isset($this->options['styles'][$type])) {
             $style = $this->options['styles'][$type];
-        }
-        else
-        {
+        } else {
             $style = $this->options['styles']['common'];
         }
 
-        if (!empty($style))
-        {
+        if (!empty($style)) {
             $element = \Spiral\interpolate($this->options['element'], compact('style', 'element'));
         }
 
@@ -187,30 +178,25 @@ class Dumper extends Singleton
     private function dumpValue($value, $name = '', $level = 0, $hideType = false)
     {
         $result = $indent = $this->indent($level);
-        if (!$hideType && !empty($name))
-        {
+        if (!$hideType && !empty($name)) {
             $result .= $this->style($name, "name") . $this->style(" = ", "indent", "equal");
         }
 
-        if ($level > $this->options['maxLevel'])
-        {
+        if ($level > $this->options['maxLevel']) {
             return $indent . $this->style('-possible recursion-', 'recursion') . "\n";
         }
 
         $type = strtolower(gettype($value));
 
-        if ($type == 'array')
-        {
+        if ($type == 'array') {
             return $result . $this->dumpArray($value, $level, $hideType);
         }
 
-        if ($type == 'object')
-        {
+        if ($type == 'object') {
             return $result . $this->dumpObject($value, $level, $hideType);
         }
 
-        if ($type == 'resource')
-        {
+        if ($type == 'resource') {
             $result .= $this->style(
                     get_resource_type($value) . " resource ",
                     "type",
@@ -223,8 +209,7 @@ class Dumper extends Singleton
         $result .= $this->style($type . "(" . strlen($value) . ")", "type", $type);
 
         $element = null;
-        switch ($type)
-        {
+        switch ($type) {
             case "string":
                 $element = htmlspecialchars($value);
                 break;
@@ -234,8 +219,7 @@ class Dumper extends Singleton
                 break;
 
             default:
-                if ($value !== null)
-                {
+                if ($value !== null) {
                     //Not showing null value, type is enough
                     $element = var_export($value, true);
                 }
@@ -254,19 +238,15 @@ class Dumper extends Singleton
     {
         $result = '';
         $indent = $this->indent($level);
-        if (!$hideType)
-        {
+        if (!$hideType) {
             $count = count($array);
             $result .= $this->style("array({$count})", "type", "array")
                 . "\n" . $indent . $this->style("(", "indent", "(") . "\n";
         }
 
-        foreach ($array as $name => $value)
-        {
-            if (!is_numeric($name))
-            {
-                if (is_string($name))
-                {
+        foreach ($array as $name => $value) {
+            if (!is_numeric($name)) {
+                if (is_string($name)) {
                     $name = htmlspecialchars($name);
                 }
                 $name = "'" . $name . "'";
@@ -275,8 +255,7 @@ class Dumper extends Singleton
             $result .= $this->dumpValue($value, "[{$name}]", $level + 1);
         }
 
-        if (!$hideType)
-        {
+        if (!$hideType) {
             $result .= $indent . $this->style(")", "indent", ")") . "\n";
         }
 
@@ -294,20 +273,17 @@ class Dumper extends Singleton
     {
         $result = '';
         $indent = $this->indent($level);
-        if (!$hideType)
-        {
+        if (!$hideType) {
             $type = ($class ?: get_class($object)) . " object ";
 
             $result .= $this->style($type, "type", "object") .
                 "\n" . $indent . $this->style("(", "indent", "(") . "\n";
         }
 
-        if (method_exists($object, '__debugInfo'))
-        {
+        if (method_exists($object, '__debugInfo')) {
             $debugInfo = $object->__debugInfo();
 
-            if (is_object($debugInfo))
-            {
+            if (is_object($debugInfo)) {
                 return $this->dumpObject($debugInfo, $level, false, get_class($object));
             }
 
@@ -322,32 +298,25 @@ class Dumper extends Singleton
         }
 
         $refection = new \ReflectionObject($object);
-        foreach ($refection->getProperties() as $property)
-        {
-            if ($property->isStatic())
-            {
+        foreach ($refection->getProperties() as $property) {
+            if ($property->isStatic()) {
                 continue;
             }
 
             //Memory loop while reading doc comment for stdClass variables?
-            if (!($object instanceof \stdClass) && strpos($property->getDocComment(), '@invisible'))
-            {
+            if (!($object instanceof \stdClass) && strpos($property->getDocComment(), '@invisible')) {
                 continue;
             }
 
             $access = "public";
-            if ($property->isPrivate())
-            {
+            if ($property->isPrivate()) {
                 $access = "private";
-            }
-            elseif ($property->isProtected())
-            {
+            } elseif ($property->isProtected()) {
                 $access = "protected";
             }
             $property->setAccessible(true);
 
-            if ($object instanceof \stdClass)
-            {
+            if ($object instanceof \stdClass) {
                 $access = 'dynamic';
             }
 
@@ -370,8 +339,7 @@ class Dumper extends Singleton
      */
     private function indent($level)
     {
-        if ($level == 0)
-        {
+        if ($level == 0) {
             return '';
         }
 

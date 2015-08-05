@@ -112,8 +112,7 @@ class Cookie
         $domain = null,
         $secure = false,
         $httpOnly = true
-    )
-    {
+    ) {
         $this->name = $name;
         $this->value = $value;
         $this->lifetime = $lifetime;
@@ -155,8 +154,7 @@ class Cookie
      */
     public function getExpires()
     {
-        if ($this->lifetime === null)
-        {
+        if ($this->lifetime === null) {
             return null;
         }
 
@@ -242,29 +240,24 @@ class Cookie
             rawurlencode($this->name) . '=' . rawurlencode($this->value)
         ];
 
-        if ($this->lifetime !== null)
-        {
+        if ($this->lifetime !== null) {
             $header[] = 'Expires=' . gmdate(\DateTime::COOKIE, $this->getExpires());
             $header[] = 'Max-Age=' . $this->lifetime;
         }
 
-        if (!empty($this->path))
-        {
+        if (!empty($this->path)) {
             $header[] = 'Path=' . $this->path;
         }
 
-        if (!empty($this->domain))
-        {
+        if (!empty($this->domain)) {
             $header[] = 'Domain=' . $this->domain;
         }
 
-        if ($this->secure)
-        {
+        if ($this->secure) {
             $header[] = 'Secure';
         }
 
-        if ($this->httpOnly)
-        {
+        if ($this->httpOnly) {
             $header[] = 'HttpOnly';
         }
 
@@ -311,8 +304,7 @@ class Cookie
         $domain = null,
         $secure = false,
         $httpOnly = true
-    )
-    {
+    ) {
         return new self($name, $value, $lifetime, $path, $domain, $secure, $httpOnly);
     }
 

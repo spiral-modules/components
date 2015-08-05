@@ -309,10 +309,8 @@ trait JoinsTrait
      */
     private function onWrapper()
     {
-        return function ($parameter)
-        {
-            if (!$parameter instanceof SQLFragmentInterface)
-            {
+        return function ($parameter) {
+            if (!$parameter instanceof SQLFragmentInterface) {
                 return new SQLExpression($parameter);
             }
 
@@ -327,10 +325,8 @@ trait JoinsTrait
      */
     private function whereWrapper()
     {
-        return function ($parameter)
-        {
-            if (!$parameter instanceof ParameterInterface && is_array($parameter))
-            {
+        return function ($parameter) {
+            if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
                 $parameter = new Parameter($parameter);
             }
 
@@ -339,8 +335,7 @@ trait JoinsTrait
                 $parameter instanceof SQLFragmentInterface
                 && !$parameter instanceof ParameterInterface
                 && !$parameter instanceof QueryBuilder
-            )
-            {
+            ) {
                 return $parameter;
             }
 

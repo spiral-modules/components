@@ -71,8 +71,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
         array $options,
         StorageInterface $storage,
         FilesInterface $files
-    )
-    {
+    ) {
         $this->prefix = $prefix;
         $this->server = $server;
         $this->options = $options;
@@ -117,8 +116,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
      */
     public function hasAddress($address)
     {
-        if (strpos($address, $this->prefix) === 0)
-        {
+        if (strpos($address, $this->prefix) === 0) {
             return strlen($this->prefix);
         }
 
@@ -174,14 +172,12 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             "Put '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
         );
 
-        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface)
-        {
+        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface) {
             //Known simplification for UploadedFile
             $source = $source->getStream();
         }
 
-        if (is_resource($source))
-        {
+        if (is_resource($source)) {
             $source = \GuzzleHttp\Psr7\stream_for($source);
         }
 
@@ -243,8 +239,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
      */
     public function rename($oldname, $newname)
     {
-        if ($oldname == $newname)
-        {
+        if ($oldname == $newname) {
             return true;
         }
 
@@ -265,14 +260,12 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
      */
     public function copy(BucketInterface $destination, $name)
     {
-        if ($destination == $this)
-        {
-            return new StorageObject($this->buildAddress($name), $name, $this->storage, $this);
+        if ($destination == $this) {
+            return $this->storage->open($this->buildAddress($name));
         }
 
         //Internal copying
-        if ($this->getServerID() == $destination->getServerID())
-        {
+        if ($this->getServerID() == $destination->getServerID()) {
             $this->logger()->info(
                 "Internal copy of '{$this->buildAddress($name)}' "
                 . "to '{$destination->buildAddress($name)}' at '{$this->server}' server."
@@ -281,9 +274,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             $this->benchmark($this->getServerID(), "copy::{$this->buildAddress($name)}");
             $this->server()->copy($this, $destination, $name);
             $this->benchmark($this->getServerID(), "copy::{$this->buildAddress($name)}");
-        }
-        else
-        {
+        } else {
             $this->logger()->info(
                 "External copy of '{$this->getServerID()}'.'{$this->buildAddress($name)}' "
                 . "to '{$destination->getServerID()}'.'{$destination->buildAddress($name)}'."
@@ -300,14 +291,12 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
      */
     public function replace(BucketInterface $destination, $name)
     {
-        if ($destination == $this)
-        {
+        if ($destination == $this) {
             return $this->buildAddress($name);
         }
 
         //Internal copying
-        if ($this->getServerID() == $destination->getServerID())
-        {
+        if ($this->getServerID() == $destination->getServerID()) {
             $this->logger()->info(
                 "Internal move '{$this->buildAddress($name)}' "
                 . "to '{$destination->buildAddress($name)}' at '{$this->getServerID()}' server."
@@ -316,9 +305,7 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             $this->benchmark($this->getServerID(), "replace::{$this->buildAddress($name)}");
             $this->server()->replace($this, $destination, $name);
             $this->benchmark($this->getServerID(), "replace::{$this->buildAddress($name)}");
-        }
-        else
-        {
+        } else {
             $this->logger()->info(
                 "External move '{$this->getServerID()}'.'{$this->buildAddress($name)}'"
                 . " to '{$destination->getServerID()}'.'{$destination->buildAddress($name)}'."

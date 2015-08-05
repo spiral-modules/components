@@ -61,8 +61,7 @@ class Encrypter extends Singleton implements EncrypterInterface
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->setKey($this->config['key']);
-        if (!empty($this->config['method']))
-        {
+        if (!empty($this->config['method'])) {
             $this->method = $this->config['method'];
         }
     }
@@ -127,20 +126,17 @@ class Encrypter extends Singleton implements EncrypterInterface
      */
     public function random($length, $passWeak = false)
     {
-        if ($length < 1)
-        {
+        if ($length < 1) {
             throw new EncrypterException("Random string length should be at least 1 byte long.");
         }
 
-        if (!$result = openssl_random_pseudo_bytes($length, $cryptoStrong))
-        {
+        if (!$result = openssl_random_pseudo_bytes($length, $cryptoStrong)) {
             throw new EncrypterException(
                 "Unable to generate pseudo-random string with {$length} length."
             );
         }
 
-        if (!$passWeak && !$cryptoStrong)
-        {
+        if (!$passWeak && !$cryptoStrong) {
             throw new EncrypterException("Weak random result received.");
         }
 
@@ -153,8 +149,7 @@ class Encrypter extends Singleton implements EncrypterInterface
      */
     public function encrypt($data)
     {
-        if (empty($this->key))
-        {
+        if (empty($this->key)) {
             throw new EncrypterException("Encryption key should not be empty.");
         }
 
@@ -182,32 +177,26 @@ class Encrypter extends Singleton implements EncrypterInterface
      */
     public function decrypt($payload)
     {
-        try
-        {
+        try {
             $payload = json_decode(base64_decode($payload), true);
 
-            if (empty($payload) || !is_array($payload))
-            {
+            if (empty($payload) || !is_array($payload)) {
                 throw new DecryptException("Invalid dataset.");
             }
 
             assert(!empty($payload[self::IV]));
             assert(!empty($payload[self::DATA]));
             assert(!empty($payload[self::SIGNATURE]));
-        }
-        catch (\ErrorException $exception)
-        {
+        } catch (\ErrorException $exception) {
             throw new DecryptException("Unable to unpack provided data.");
         }
 
         //Verifying signature
-        if ($payload[self::SIGNATURE] !== $this->sign($payload[self::DATA], $payload[self::IV]))
-        {
+        if ($payload[self::SIGNATURE] !== $this->sign($payload[self::DATA], $payload[self::IV])) {
             throw new DecryptException("Encrypted data does not have valid signature.");
         }
 
-        try
-        {
+        try {
             $decrypted = openssl_decrypt(
                 base64_decode($payload[self::DATA]),
                 $this->method,
@@ -217,9 +206,7 @@ class Encrypter extends Singleton implements EncrypterInterface
             );
 
             return unserialize($decrypted);
-        }
-        catch (\ErrorException $exception)
-        {
+        } catch (\ErrorException $exception) {
             throw new DecryptException($exception->getMessage(), $exception->getCode());
         }
     }
@@ -245,6 +232,6 @@ class Encrypter extends Singleton implements EncrypterInterface
      */
     private function createIV($length = 16)
     {
-        return $length ? $this->random($length, true, false) : '';
+        return $length ? $this->random($length, false) : '';
     }
 }

@@ -72,8 +72,7 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
     public function store($store = null, array $options = [])
     {
         $store = $store ?: $this->config['store'];
-        if (isset($this->stores[$store]))
-        {
+        if (isset($this->stores[$store])) {
             return $this->stores[$store];
         }
 
@@ -86,8 +85,7 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
         ]);
         $this->benchmark('store', $store);
 
-        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable())
-        {
+        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
             throw new CacheException(
                 "Unable to use default store '{$store}', driver is unavailable."
             );
@@ -105,8 +103,7 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
      */
     public function storeOptions($adapter)
     {
-        if (empty($this->optionsPull[$adapter]))
-        {
+        if (empty($this->optionsPull[$adapter])) {
             return $this->config['stores'][$adapter];
         }
 
@@ -120,14 +117,12 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
     {
-        if (!$class->isInstantiable())
-        {
+        if (!$class->isInstantiable()) {
             return $this->store();
         }
 
         $store = $this->container->get($class->getName(), ['cache' => $this]);
-        if (!$store->isAvailable())
-        {
+        if (!$store->isAvailable()) {
             throw new CacheException(
                 "Unable to use store '" . get_class($store) . "', driver is unavailable."
             );

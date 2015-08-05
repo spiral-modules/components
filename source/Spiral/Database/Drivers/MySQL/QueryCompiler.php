@@ -20,32 +20,26 @@ class QueryCompiler extends AbstractCompiler
      */
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
-        if (empty($joins))
-        {
+        if (empty($joins)) {
             return parent::update($table, $columns, $joins, $where);
         }
 
         $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
+        if (preg_match('/ as /i', $alias, $matches)) {
             list(, $alias) = explode($matches[0], $table);
-        }
-        else
-        {
+        } else {
             $table = "{$table} AS {$table}";
         }
 
         $statement = "UPDATE " . $this->quote($table, true, true);
 
-        if (!empty($joins))
-        {
+        if (!empty($joins)) {
             $statement .= $this->joins($joins);
         }
 
         $statement .= "\nSET" . $this->prepareColumns($columns, $alias);
 
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
 
@@ -58,25 +52,20 @@ class QueryCompiler extends AbstractCompiler
     public function delete($table, array $joins = [], array $where = [])
     {
         $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
+        if (preg_match('/ as /i', $alias, $matches)) {
             list(, $alias) = explode($matches[0], $table);
-        }
-        else
-        {
+        } else {
             $table = "{$table} AS {$table}";
         }
 
         $statement = 'DELETE ' . $this->quote($alias) . ".*\n"
             . 'FROM ' . $this->quote($table, true, true) . ' ';
 
-        if (!empty($joins))
-        {
+        if (!empty($joins)) {
             $statement .= $this->joins($joins) . ' ';
         }
 
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
 
@@ -92,10 +81,8 @@ class QueryCompiler extends AbstractCompiler
         $joins = [],
         array $having = [],
         array $columns = []
-    )
-    {
-        if ($type == self::UPDATE_QUERY)
-        {
+    ) {
+        if ($type == self::UPDATE_QUERY) {
             //Where statement has pretty specific order
             return array_merge($joins, $columns, $where);
         }
@@ -112,14 +99,12 @@ class QueryCompiler extends AbstractCompiler
     {
         $statement = '';
 
-        if (!empty($limit) || !empty($offset))
-        {
+        if (!empty($limit) || !empty($offset)) {
             //When limit is not provided but offset does we can replace limit value with PHP_INT_MAX
             $statement = "LIMIT " . ($limit ?: '18446744073709551615') . ' ';
         }
 
-        if (!empty($offset))
-        {
+        if (!empty($offset)) {
             $statement .= "OFFSET {$offset}";
         }
 

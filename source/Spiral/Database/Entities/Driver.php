@@ -140,8 +140,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         $this->config = $config + $this->config;
         $this->options = $config['options'] + $this->options;
 
-        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches))
-        {
+        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches)) {
             $this->source = $matches[1];
         }
     }
@@ -253,8 +252,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function getPDO()
     {
-        if (!empty($this->pdo))
-        {
+        if (!empty($this->pdo)) {
             return $this->pdo;
         }
 
@@ -299,10 +297,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
     {
         $preparedParameters = $parameters = $this->prepareParameters($parameters);
 
-        try
-        {
-            if ($this->isProfiling())
-            {
+        try {
+            if ($this->isProfiling()) {
                 $queryString = QueryCompiler::interpolate($query, $parameters);
                 $this->benchmark($this->source, $queryString);
             }
@@ -312,14 +308,11 @@ abstract class Driver extends Component implements LoggerAwareInterface
             //Configuring statement binded parameters
             $pdoStatement->execute($parameters);
 
-            if ($this->isProfiling() && isset($queryString))
-            {
+            if ($this->isProfiling() && isset($queryString)) {
                 $this->benchmark($this->source, $queryString);
                 $this->logger()->debug($queryString, compact('query', 'parameters'));
             }
-        }
-        catch (\PDOException $exception)
-        {
+        } catch (\PDOException $exception) {
             $this->logger()->error(
                 !empty($queryString) ? $queryString : QueryCompiler::interpolate($query, $parameters),
                 compact('query', 'parameters')
@@ -373,23 +366,19 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function prepareParameters(array $parameters)
     {
         $result = [];
-        foreach ($parameters as $parameter)
-        {
-            if ($parameter instanceof ParameterInterface)
-            {
+        foreach ($parameters as $parameter) {
+            if ($parameter instanceof ParameterInterface) {
                 $parameter = $parameter->getValue();
             }
 
-            if ($parameter instanceof \DateTime)
-            {
+            if ($parameter instanceof \DateTime) {
                 //We are going to convert all timestamps to database timezone which is UTC by default
                 $parameter = $parameter->setTimezone(
                     new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE)
                 )->format(static::DATETIME);
             }
 
-            if (is_array($parameter))
-            {
+            if (is_array($parameter)) {
                 $result = array_merge($result, $this->prepareParameters($parameter));
                 continue;
             }
@@ -412,10 +401,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function beginTransaction($isolationLevel = null)
     {
         $this->transactionLevel++;
-        if ($this->transactionLevel == 1)
-        {
-            if (!empty($isolationLevel))
-            {
+        if ($this->transactionLevel == 1) {
+            if (!empty($isolationLevel)) {
                 $this->setIsolationLevel($isolationLevel);
             }
 
@@ -437,8 +424,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function commitTransaction()
     {
         $this->transactionLevel--;
-        if ($this->transactionLevel == 0)
-        {
+        if ($this->transactionLevel == 0) {
             $this->logger()->info('Committing transaction.');
 
             return $this->getPDO()->commit();
@@ -458,8 +444,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
     {
         $this->transactionLevel--;
 
-        if ($this->transactionLevel == 0)
-        {
+        if ($this->transactionLevel == 0) {
             $this->logger()->info('Rolling black transaction.');
 
             return $this->getPDO()->rollBack();

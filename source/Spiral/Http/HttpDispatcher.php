@@ -177,8 +177,7 @@ class HttpDispatcher extends Singleton implements
      */
     public function start()
     {
-        if (empty($this->endpoints[$this->basePath()]))
-        {
+        if (empty($this->endpoints[$this->basePath()])) {
             //Base path wasn't handled, let's attach our router
             $this->endpoints[$this->basePath()] = $this->router();
         }
@@ -194,8 +193,7 @@ class HttpDispatcher extends Singleton implements
      */
     public function request()
     {
-        if (!empty($this->request))
-        {
+        if (!empty($this->request)) {
             return $this->request;
         }
 
@@ -214,8 +212,7 @@ class HttpDispatcher extends Singleton implements
      */
     public function perform(ServerRequestInterface $request)
     {
-        if (!$endpoint = $this->findEndpoint($request->getUri(), $activePath))
-        {
+        if (!$endpoint = $this->findEndpoint($request->getUri(), $activePath)) {
             //This should never happen as request should be handled at least by Router middleware
             throw new ClientException(Response::SERVER_ERROR, 'Unable to select endpoint.');
         }
@@ -232,8 +229,7 @@ class HttpDispatcher extends Singleton implements
      */
     public function dispatch(ResponseInterface $response)
     {
-        if (empty($this->emitter))
-        {
+        if (empty($this->emitter)) {
             $this->emitter = new SapiEmitter();
         }
 
@@ -245,8 +241,7 @@ class HttpDispatcher extends Singleton implements
      */
     public function handleException(\Exception $exception)
     {
-        if ($exception instanceof ClientException)
-        {
+        if ($exception instanceof ClientException) {
             $this->logError($exception);
             $this->dispatch($this->errorResponse($exception->getCode()));
 
@@ -261,20 +256,16 @@ class HttpDispatcher extends Singleton implements
      */
     public function handleSnapshot(SnapshotInterface $snapshot)
     {
-        if (!$this->config['exposeErrors'])
-        {
+        if (!$this->config['exposeErrors']) {
             $this->handleException($snapshot->getException());
 
             return;
         }
 
-        if ($this->request->getHeaderLine('Accept') == 'application/json')
-        {
+        if ($this->request->getHeaderLine('Accept') == 'application/json') {
             $context = ['status' => Response::SERVER_ERROR] + $snapshot->describe();
             $response = new JsonResponse($context, Response::SERVER_ERROR);
-        }
-        else
-        {
+        } else {
             $response = new HtmlResponse($snapshot->render(), Response::SERVER_ERROR);
         }
 
@@ -288,8 +279,7 @@ class HttpDispatcher extends Singleton implements
      */
     protected function views()
     {
-        if (!empty($this->views))
-        {
+        if (!empty($this->views)) {
             return $this->views;
         }
 
@@ -315,25 +305,17 @@ class HttpDispatcher extends Singleton implements
      */
     protected function findEndpoint(UriInterface $uri, &$uriPath = null)
     {
-        if (empty($uriPath = strtolower($uri->getPath())))
-        {
+        if (empty($uriPath = strtolower($uri->getPath()))) {
             $uriPath = '/';
-        }
-        elseif ($uriPath[0] !== '/')
-        {
+        } elseif ($uriPath[0] !== '/') {
             $uriPath = '/' . $uriPath;
         }
 
-        if (isset($this->endpoints[$uriPath]))
-        {
+        if (isset($this->endpoints[$uriPath])) {
             return $this->endpoints[$uriPath];
-        }
-        else
-        {
-            foreach ($this->endpoints as $path => $middleware)
-            {
-                if (strpos($uriPath, $path) === 0)
-                {
+        } else {
+            foreach ($this->endpoints as $path => $middleware) {
+                if (strpos($uriPath, $path) === 0) {
                     $uriPath = $path;
 
                     return $middleware;
@@ -352,8 +334,7 @@ class HttpDispatcher extends Singleton implements
     private function logError(ClientException $exception)
     {
         $remoteAddr = '-undefined-';
-        if (!empty($this->request->getServerParams()['REMOTE_ADDR']))
-        {
+        if (!empty($this->request->getServerParams()['REMOTE_ADDR'])) {
             $remoteAddr = $this->request->getServerParams()['REMOTE_ADDR'];
         }
 
@@ -378,13 +359,11 @@ class HttpDispatcher extends Singleton implements
      */
     private function errorResponse($code)
     {
-        if ($this->request->getHeaderLine('Accept') == 'application/json')
-        {
+        if ($this->request->getHeaderLine('Accept') == 'application/json') {
             return new JsonResponse(['status' => $code], $code);
         }
 
-        if (isset($this->config['httpErrors'][$code]))
-        {
+        if (isset($this->config['httpErrors'][$code])) {
             //We can show custom error page
             return new HtmlResponse(
                 $this->views()->render($this->config['httpErrors'][$code], ['http' => $this]),

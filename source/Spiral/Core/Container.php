@@ -33,8 +33,7 @@ class Container extends Component implements ContainerInterface
      */
     public function __construct()
     {
-        if (empty(self::container()))
-        {
+        if (empty(self::container())) {
             self::setContainer($this);
         }
     }
@@ -44,30 +43,25 @@ class Container extends Component implements ContainerInterface
      */
     public function get($alias, $parameters = [], \ReflectionParameter $context = null)
     {
-        if ($alias == ContainerInterface::class)
-        {
+        if ($alias == ContainerInterface::class) {
             //Shortcut
             return $this;
         }
 
-        if (!isset($this->bindings[$alias]))
-        {
+        if (!isset($this->bindings[$alias])) {
             return $this->createInstance($alias, $parameters, $context);
         }
 
-        if (is_object($binding = $this->bindings[$alias]))
-        {
+        if (is_object($binding = $this->bindings[$alias])) {
             //Singleton
             return $binding;
         }
 
-        if (is_string($binding))
-        {
+        if (is_string($binding)) {
             //Binding is pointing to something else
             $instance = $this->get($binding, $parameters, $context);
 
-            if ($instance instanceof SingletonInterface)
-            {
+            if ($instance instanceof SingletonInterface) {
                 //To prevent double binding
                 $this->bindings[$binding] = $this->bindings[get_class($instance)] = $instance;
             }
@@ -75,21 +69,16 @@ class Container extends Component implements ContainerInterface
             return $instance;
         }
 
-        if (is_array($binding))
-        {
-            if (is_string($binding[0]))
-            {
+        if (is_array($binding)) {
+            if (is_string($binding[0])) {
                 //Class name with singleton flag
                 $instance = $this->get($binding[0], $parameters, $context);
-            }
-            else
-            {
+            } else {
                 //Closure with singleton flag
                 $instance = call_user_func_array($binding[0], $parameters);
             }
 
-            if ($binding[1])
-            {
+            if ($binding[1]) {
                 //Singleton
                 $this->bindings[$alias] = $instance;
             }
@@ -106,21 +95,17 @@ class Container extends Component implements ContainerInterface
     public function resolveArguments(ContextFunction $reflection, array $parameters = [])
     {
         $arguments = [];
-        foreach ($reflection->getParameters() as $parameter)
-        {
+        foreach ($reflection->getParameters() as $parameter) {
             $name = $parameter->getName();
 
-            if (empty($class = $parameter->getClass()))
-            {
-                if (array_key_exists($name, $parameters))
-                {
+            if (empty($class = $parameter->getClass())) {
+                if (array_key_exists($name, $parameters)) {
                     //Scalar value supplied by user
                     $arguments[] = $parameters[$name];
                     continue;
                 }
 
-                if ($parameter->isDefaultValueAvailable())
-                {
+                if ($parameter->isDefaultValueAvailable()) {
                     //Or default value?
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
@@ -130,24 +115,19 @@ class Container extends Component implements ContainerInterface
                 throw new ArgumentException($parameter, $reflection);
             }
 
-            if (isset($parameters[$name]) && is_object($parameters[$name]))
-            {
+            if (isset($parameters[$name]) && is_object($parameters[$name])) {
                 //Supplied by user
                 $arguments[] = $parameters[$name];
                 continue;
             }
 
-            try
-            {
+            try {
                 //Trying to resolve dependency
                 $arguments[] = $this->get($class->getName(), [], $parameter);
 
                 continue;
-            }
-            catch (InstanceException $exception)
-            {
-                if ($parameter->isDefaultValueAvailable())
-                {
+            } catch (InstanceException $exception) {
+                if ($parameter->isDefaultValueAvailable()) {
                     //Let's try to use default value instead
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
@@ -165,8 +145,7 @@ class Container extends Component implements ContainerInterface
      */
     public function bind($alias, $resolver)
     {
-        if (is_array($resolver) || $resolver instanceof \Closure)
-        {
+        if (is_array($resolver) || $resolver instanceof \Closure) {
             $this->bindings[$alias] = [$resolver, false];
 
             return;
@@ -189,8 +168,7 @@ class Container extends Component implements ContainerInterface
     public function replace($alias, $resolver)
     {
         $payload = [$alias, null];
-        if (isset($this->bindings[$alias]))
-        {
+        if (isset($this->bindings[$alias])) {
             $payload[1] = $this->bindings[$alias];
         }
 
@@ -207,8 +185,7 @@ class Container extends Component implements ContainerInterface
         list($alias, $resolver) = $replacePayload;
 
         unset($this->bindings[$alias]);
-        if (!empty($resolver))
-        {
+        if (!empty($resolver)) {
             //Restoring original value
             $this->bindings[$alias] = $replacePayload;
         }
@@ -227,8 +204,7 @@ class Container extends Component implements ContainerInterface
      */
     public function hasInstance($alias)
     {
-        if (!$this->hasBinding($alias))
-        {
+        if (!$this->hasBinding($alias)) {
             return false;
         }
 
@@ -254,17 +230,13 @@ class Container extends Component implements ContainerInterface
      */
     private function createInstance($class, array $parameters, \ReflectionParameter $context = null)
     {
-        try
-        {
+        try {
             $reflector = new \ReflectionClass($class);
-        }
-        catch (\ReflectionException $exception)
-        {
+        } catch (\ReflectionException $exception) {
             throw new InstanceException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        if (!empty($context) && $injector = $reflector->getConstant('INJECTOR'))
-        {
+        if (!empty($context) && $injector = $reflector->getConstant('INJECTOR')) {
             //We have to construct class using external injector. Remember about this magick constant?
             return call_user_func(
                 [$this->get($injector), 'createInjection'],
@@ -272,31 +244,25 @@ class Container extends Component implements ContainerInterface
             );
         }
 
-        if (!$reflector->isInstantiable())
-        {
+        if (!$reflector->isInstantiable()) {
             throw new InstanceException("Class '{$class}' can not be constructed.");
         }
 
-        if (!empty($constructor = $reflector->getConstructor()))
-        {
+        if (!empty($constructor = $reflector->getConstructor())) {
             $instance = $reflector->newInstanceArgs(
                 $this->resolveArguments($constructor, $parameters)
             );
-        }
-        else
-        {
+        } else {
             //No constructor specified
             $instance = $reflector->newInstance();
         }
 
-        if (!empty($singleton = $reflector->getConstant('SINGLETON')))
-        {
+        if (!empty($singleton = $reflector->getConstant('SINGLETON'))) {
             //Component declared SINGLETON constant, binding as constant value and class name.
             $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
         }
 
-        if ($instance instanceof SaturableInterlace)
-        {
+        if ($instance instanceof SaturableInterlace) {
             //Saturating object with required dependencies
             $saturate = $reflector->getMethod(SaturableInterlace::SATURATE_METHOD);
             $saturate->invokeArgs($instance, $this->resolveArguments($saturate, $parameters));

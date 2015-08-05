@@ -177,15 +177,12 @@ class CookieManager extends Component implements MiddlewareInterface
         $domain = null,
         $secure = null,
         $httpOnly = true
-    )
-    {
-        if (is_null($domain))
-        {
+    ) {
+        if (is_null($domain)) {
             $domain = $this->cookieDomain();
         }
 
-        if (is_null($secure))
-        {
+        if (is_null($secure)) {
             $secure = $this->request->getMethod() == 'https';
         }
 
@@ -234,8 +231,7 @@ class CookieManager extends Component implements MiddlewareInterface
         $domain = null,
         $secure = null,
         $httpOnly = true
-    )
-    {
+    ) {
         $cookie = $this->create($name, $value, $lifetime, $path, $domain, $secure, $httpOnly);
         $this->scheduled[] = $cookie;
 
@@ -249,10 +245,8 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     public function delete($name)
     {
-        foreach ($this->scheduled as $index => $cookie)
-        {
-            if ($cookie->getName() == $name)
-            {
+        foreach ($this->scheduled as $index => $cookie) {
+            if ($cookie->getName() == $name) {
                 unset($this->scheduled[$index]);
             }
         }
@@ -290,8 +284,7 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     protected function encrypter()
     {
-        if (!empty($this->encrypter))
-        {
+        if (!empty($this->encrypter)) {
             return $this->encrypter;
         }
 
@@ -314,19 +307,16 @@ class CookieManager extends Component implements MiddlewareInterface
         $host = $this->request->getUri()->getHost();
 
         $pattern = $this->config['domain'];
-        if (filter_var($host, FILTER_VALIDATE_IP))
-        {
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
             //We can't use sub domains
             $pattern = ltrim($pattern, '.');
         }
 
-        if (!empty($port = $this->request->getUri()->getPort()))
-        {
+        if (!empty($port = $this->request->getUri()->getPort())) {
             $host = $host . ':' . $port;
         }
 
-        if (strpos($pattern, '%s') === false)
-        {
+        if (strpos($pattern, '%s') === false) {
             //Forced domain
             return $pattern;
         }
@@ -345,10 +335,8 @@ class CookieManager extends Component implements MiddlewareInterface
         $altered = false;
         $cookies = $request->getCookieParams();
 
-        foreach ($cookies as $name => $cookie)
-        {
-            if (in_array($name, $this->exclude) || $this->config['method'] == self::NONE)
-            {
+        foreach ($cookies as $name => $cookie) {
+            if (in_array($name, $this->exclude) || $this->config['method'] == self::NONE) {
                 continue;
             }
 
@@ -365,19 +353,14 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     private function decodeCookie($cookie)
     {
-        if ($this->config['method'] == self::ENCRYPT)
-        {
-            try
-            {
-                if (is_array($cookie))
-                {
+        if ($this->config['method'] == self::ENCRYPT) {
+            try {
+                if (is_array($cookie)) {
                     return array_map([$this, 'decodeCookie'], $cookie);
                 }
 
                 return $this->encrypter()->decrypt($cookie);
-            }
-            catch (DecryptException $exception)
-            {
+            } catch (DecryptException $exception) {
                 return null;
             }
         }
@@ -386,8 +369,7 @@ class CookieManager extends Component implements MiddlewareInterface
         $hmac = substr($cookie, -1 * self::MAC_LENGTH);
         $value = substr($cookie, 0, strlen($cookie) - strlen($hmac));
 
-        if ($this->hmacSign($value) != $hmac)
-        {
+        if ($this->hmacSign($value) != $hmac) {
             return null;
         }
 
@@ -403,18 +385,15 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     protected function mountCookies(ResponseInterface $response)
     {
-        if (empty($this->scheduled))
-        {
+        if (empty($this->scheduled)) {
             return $response;
         }
 
         $cookies = $response->getHeader('Set-Cookie');
 
         //Merging cookies
-        foreach ($this->scheduled as $cookie)
-        {
-            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE)
-            {
+        foreach ($this->scheduled as $cookie) {
+            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE) {
                 $cookies[] = $cookie->packHeader();
                 continue;
             }
@@ -433,8 +412,7 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     private function encodeCookie(Cookie $cookie)
     {
-        if ($this->config['method'] == self::ENCRYPT)
-        {
+        if ($this->config['method'] == self::ENCRYPT) {
             return $cookie->withValue(
                 $this->encrypter()->encrypt($cookie->getValue())
             );

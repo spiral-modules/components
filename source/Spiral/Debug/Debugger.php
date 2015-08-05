@@ -62,14 +62,12 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
      */
     public function configureLogger(Logger $logger)
     {
-        if (!isset($this->config['loggers'][$logger->getName()]))
-        {
+        if (!isset($this->config['loggers'][$logger->getName()])) {
             //Nothing to configure
             return;
         }
 
-        foreach ($this->config['loggers'][$logger->getName()] as $logLevel => $handler)
-        {
+        foreach ($this->config['loggers'][$logger->getName()] as $logLevel => $handler) {
             $logger->setHandler($logLevel, $this->container->get($handler['class'], [
                 'options' => $handler
             ]));
@@ -85,8 +83,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
         $callerID = is_object($caller) ? spl_object_hash($caller) : $caller;
 
         $name = $callerID . '|' . $record . '|' . $context;
-        if (!isset($this->benchmarks[$name]))
-        {
+        if (!isset($this->benchmarks[$name])) {
             $this->benchmarks[$name] = [$caller, $context, microtime(true)];
 
             return true;

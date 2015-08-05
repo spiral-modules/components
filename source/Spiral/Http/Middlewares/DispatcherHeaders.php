@@ -40,10 +40,8 @@ class DispatcherHeaders implements MiddlewareInterface
          * @var ResponseInterface $response
          */
         $response = $next($request);
-        foreach ($this->headers as $header => $value)
-        {
-            if (!$response->hasHeader($header))
-            {
+        foreach ($this->headers as $header => $value) {
+            if (!$response->hasHeader($header)) {
                 $response = $response->withHeader($header, $value);
             }
         }

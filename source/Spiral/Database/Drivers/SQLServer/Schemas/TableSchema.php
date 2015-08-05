@@ -31,8 +31,7 @@ class TableSchema extends AbstractTable
             . 'ON (object_name(object_id) = table_name AND sysColumns.name = COLUMN_NAME) '
             . 'WHERE table_name = ?';
 
-        foreach ($this->driver->query($query, [$this->name]) as $column)
-        {
+        foreach ($this->driver->query($query, [$this->name]) as $column) {
             $this->registerColumn($column['COLUMN_NAME'], $column);
         }
     }
@@ -57,10 +56,8 @@ class TableSchema extends AbstractTable
             . 'ORDER BY indexes.name, indexes.index_id, columns.index_column_id';
 
         $indexes = [];
-        foreach ($this->driver->query($query, [$this->name]) as $index)
-        {
-            if ($index['isPrimary'])
-            {
+        foreach ($this->driver->query($query, [$this->name]) as $index) {
+            if ($index['isPrimary']) {
                 $this->primaryKeys[] = $index['columnName'];
                 $this->dbPrimaryKeys[] = $index['columnName'];
                 continue;
@@ -69,8 +66,7 @@ class TableSchema extends AbstractTable
             $indexes[$index['indexName']][] = $index;
         }
 
-        foreach ($indexes as $index => $schema)
-        {
+        foreach ($indexes as $index => $schema) {
             $this->registerIndex($index, $schema);
         }
     }
@@ -81,8 +77,7 @@ class TableSchema extends AbstractTable
     protected function loadReferences()
     {
         $references = $this->driver->query("sp_fkeys @fktable_name = ?", [$this->name]);
-        foreach ($references as $reference)
-        {
+        foreach ($references as $reference) {
             $this->registerReference($reference['FK_NAME'], $reference);
         }
     }
@@ -105,8 +100,7 @@ class TableSchema extends AbstractTable
          */
 
         //Renaming is separate operation
-        if ($column->getName() != $dbColumn->getName())
-        {
+        if ($column->getName() != $dbColumn->getName()) {
             $this->driver->statement("sp_rename ?, ?, 'COLUMN'", [
                 $this->getName() . '.' . $dbColumn->getName(),
                 $column->getName()
@@ -119,32 +113,26 @@ class TableSchema extends AbstractTable
         //applying type change... yeah...
         $indexesBackup = [];
         $foreignBackup = [];
-        foreach ($this->indexes as $index)
-        {
-            if (in_array($column->getName(), $index->getColumns()))
-            {
+        foreach ($this->indexes as $index) {
+            if (in_array($column->getName(), $index->getColumns())) {
                 $indexesBackup[] = $index;
                 $this->doIndexDrop($index);
             }
         }
 
-        foreach ($this->references as $foreign)
-        {
-            if ($foreign->getColumn() == $column->getName())
-            {
+        foreach ($this->references as $foreign) {
+            if ($foreign->getColumn() == $column->getName()) {
                 $foreignBackup[] = $foreign;
                 $this->doForeignDrop($foreign);
             }
         }
 
         //Column will recreate needed constraints
-        foreach ($column->getConstraints() as $constraint)
-        {
+        foreach ($column->getConstraints() as $constraint) {
             $this->doConstraintDrop($constraint);
         }
 
-        foreach ($column->alterOperations($dbColumn) as $operation)
-        {
+        foreach ($column->alterOperations($dbColumn) as $operation) {
             $query = \Spiral\interpolate('ALTER TABLE {table} {operation}', [
                 'table'     => $this->getName(true),
                 'operation' => $operation
@@ -154,13 +142,11 @@ class TableSchema extends AbstractTable
         }
 
         //Recreating indexes
-        foreach ($indexesBackup as $index)
-        {
+        foreach ($indexesBackup as $index) {
             $this->doIndexAdd($index);
         }
 
-        foreach ($foreignBackup as $foreign)
-        {
+        foreach ($foreignBackup as $foreign) {
             $this->doForeignAdd($foreign);
         }
     }

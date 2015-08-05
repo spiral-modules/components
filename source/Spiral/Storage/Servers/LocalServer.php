@@ -53,8 +53,7 @@ class LocalServer extends StorageServer
      */
     public function allocateFilename(BucketInterface $bucket, $name)
     {
-        if (!$this->exists($bucket, $name))
-        {
+        if (!$this->exists($bucket, $name)) {
             throw new ServerException(
                 "Unable to create local filename for '{$name}', object does not exists."
             );
@@ -68,8 +67,7 @@ class LocalServer extends StorageServer
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
-        if (!$this->exists($bucket, $name))
-        {
+        if (!$this->exists($bucket, $name)) {
             throw new ServerException(
                 "Unable to create stream for '{$name}', object does not exists."
             );
@@ -134,16 +132,14 @@ class LocalServer extends StorageServer
      */
     protected function internalMove(BucketInterface $bucket, $filename, $destination)
     {
-        if (!$this->files->exists($filename))
-        {
+        if (!$this->files->exists($filename)) {
             throw new ServerException("Unable to move '{$filename}', object does not exists.");
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
         $this->files->ensureLocation(dirname($destination), $mode);
 
-        if (!$this->files->move($filename, $destination))
-        {
+        if (!$this->files->move($filename, $destination)) {
             throw new ServerException("Unable to move '{$filename}' to '{$destination}'.");
         }
 
@@ -161,16 +157,14 @@ class LocalServer extends StorageServer
      */
     protected function internalCopy(BucketInterface $bucket, $filename, $destination)
     {
-        if (!$this->files->exists($filename))
-        {
+        if (!$this->files->exists($filename)) {
             throw new ServerException("Unable to copy '{$filename}', object does not exists.");
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
         $this->files->ensureLocation(dirname($destination), $mode);
 
-        if (!$this->files->copy($filename, $destination))
-        {
+        if (!$this->files->copy($filename, $destination)) {
             throw new ServerException("Unable to copy '{$filename}' to '{$destination}'.");
         }
 

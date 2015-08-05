@@ -31,8 +31,7 @@ class MixedChecker extends Checker
      */
     public function cardNumber($cardNumber)
     {
-        if (!is_string($cardNumber) || strlen($cardNumber) < 12)
-        {
+        if (!is_string($cardNumber) || strlen($cardNumber) < 12) {
             return false;
         }
 
@@ -40,8 +39,7 @@ class MixedChecker extends Checker
         $odd = strlen($cardNumber) % 2;
         preg_replace('/[^0-9]+/', '', $cardNumber);
 
-        for ($i = 0; $i < strlen($cardNumber); $i++)
-        {
+        for ($i = 0; $i < strlen($cardNumber); $i++) {
             $result += $odd
                 ? $cardNumber[$i]
                 : (($cardNumber[$i] * 2 > 9) ? $cardNumber[$i] * 2 - 9 : $cardNumber[$i] * 2);

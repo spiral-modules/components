@@ -54,18 +54,15 @@ trait LoggerTrait
      */
     public function logger()
     {
-        if (!empty($this->logger))
-        {
+        if (!empty($this->logger)) {
             return $this->logger;
         }
 
-        if (!empty(self::$loggers[static::class]))
-        {
+        if (!empty(self::$loggers[static::class])) {
             return self::$loggers[static::class];
         }
 
-        if (empty($container = $this->container()) || !$container->hasBinding(LoggerInterface::class))
-        {
+        if (empty($container = $this->container()) || !$container->hasBinding(LoggerInterface::class)) {
             //That's easy
             return new NullLogger();
         }

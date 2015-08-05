@@ -95,12 +95,9 @@ abstract class QueryBuilder extends Component
      */
     public function __debugInfo()
     {
-        try
-        {
+        try {
             $queryString = $this->queryString();
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             $queryString = "[ERROR: {$exception->getMessage()}]";
         }
 
@@ -124,13 +121,11 @@ abstract class QueryBuilder extends Component
      */
     protected function fetchIdentifiers(array $identifiers)
     {
-        if (count($identifiers) == 1 && is_string($identifiers[0]))
-        {
+        if (count($identifiers) == 1 && is_string($identifiers[0])) {
             return array_map('trim', explode(',', $identifiers[0]));
         }
 
-        if (count($identifiers) == 1 && is_array($identifiers[0]))
-        {
+        if (count($identifiers) == 1 && is_array($identifiers[0])) {
             return $identifiers[0];
         }
 
@@ -146,10 +141,8 @@ abstract class QueryBuilder extends Component
     protected function flattenParameters(array $parameters)
     {
         $result = [];
-        foreach ($parameters as $parameter)
-        {
-            if ($parameter instanceof QueryBuilder)
-            {
+        foreach ($parameters as $parameter) {
+            if ($parameter instanceof QueryBuilder) {
                 $result = array_merge($result, $parameter->getParameters());
                 continue;
             }

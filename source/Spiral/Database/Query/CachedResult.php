@@ -70,8 +70,7 @@ class CachedResult extends QueryResult
         $queryString,
         array $parameters = [],
         array $data = []
-    )
-    {
+    ) {
         $this->store = $store;
         $this->key = $cacheID;
         $this->queryString = $queryString;
@@ -102,8 +101,7 @@ class CachedResult extends QueryResult
      */
     public function fetchMode($mode)
     {
-        if ($mode != PDO::FETCH_ASSOC && $mode != PDO::FETCH_NUM)
-        {
+        if ($mode != PDO::FETCH_ASSOC && $mode != PDO::FETCH_NUM) {
             throw new QueryException(
                 'Cached query supports only FETCH_ASSOC and FETCH_NUM fetching modes.'
             );
@@ -119,26 +117,21 @@ class CachedResult extends QueryResult
      */
     public function fetch($mode = null)
     {
-        if (!empty($mode))
-        {
+        if (!empty($mode)) {
             $this->fetchMode($mode);
         }
 
-        if (!isset($this->data[$this->cursor]))
-        {
+        if (!isset($this->data[$this->cursor])) {
             return false;
         }
 
-        if ($data = $this->data[$this->cursor++])
-        {
-            foreach ($this->bindings as $columnID => &$variable)
-            {
+        if ($data = $this->data[$this->cursor++]) {
+            foreach ($this->bindings as $columnID => &$variable) {
                 $variable = $data[$columnID];
             }
         }
 
-        if ($this->fetchMode == PDO::FETCH_NUM)
-        {
+        if ($this->fetchMode == PDO::FETCH_NUM) {
             return $data ? array_values($data) : false;
         }
 
@@ -160,18 +153,14 @@ class CachedResult extends QueryResult
      */
     public function bind($columnID, &$variable)
     {
-        if (!$this->data)
-        {
+        if (!$this->data) {
             return $this;
         }
 
-        if (is_numeric($columnID))
-        {
+        if (is_numeric($columnID)) {
             //Getting column number
-            foreach (array_keys($this->data[0]) as $index => $name)
-            {
-                if ($index == $columnID - 1)
-                {
+            foreach (array_keys($this->data[0]) as $index => $name) {
+                if ($index == $columnID - 1) {
                     $this->bindings[$name] = &$variable;
 
                     return $this;
@@ -179,11 +168,8 @@ class CachedResult extends QueryResult
             }
 
             throw new QueryException("No such index '{$columnID}' in the result columns.");
-        }
-        else
-        {
-            if (!isset($this->data[0][$columnID]))
-            {
+        } else {
+            if (!isset($this->data[0][$columnID])) {
                 throw new QueryException("No such column name '{$columnID}' in the result columns.");
             }
 
@@ -202,8 +188,7 @@ class CachedResult extends QueryResult
 
         //So we can properly emulate bindings and etc.
         $result = [];
-        foreach ($this as $row)
-        {
+        foreach ($this as $row) {
             $result[] = $row;
         }
 

@@ -122,20 +122,16 @@ class Logger extends AbstractLogger
             self::MESSAGE_CONTEXT   => $context
         ];
 
-        if (self::$memoryLogging)
-        {
+        if (self::$memoryLogging) {
             self::$logMessages[] = $payload;
         }
 
         //We don't need this information for log handlers
         unset($payload[self::MESSAGE_CHANNEL], $payload[self::MESSAGE_TIMESTAMP]);
 
-        if (isset($this->handlers[$level]))
-        {
+        if (isset($this->handlers[$level])) {
             call_user_func_array($this->handlers[$level], $payload);
-        }
-        elseif (isset($this->handlers[self::ALL]))
-        {
+        } elseif (isset($this->handlers[self::ALL])) {
             call_user_func_array($this->handlers[self::ALL], $payload);
         }
 

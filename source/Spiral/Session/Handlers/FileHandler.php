@@ -64,10 +64,8 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterlace
      */
     public function gc($maxlifetime)
     {
-        foreach ($this->files->getFiles($this->location) as $filename)
-        {
-            if ($this->files->time($filename) < time() - $maxlifetime)
-            {
+        foreach ($this->files->getFiles($this->location) as $filename) {
+            if ($this->files->time($filename) < time() - $maxlifetime) {
                 $this->files->delete($filename);
             }
         }
@@ -96,15 +94,12 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterlace
      */
     public function write($session_id, $session_data)
     {
-        try
-        {
+        try {
             return $this->files->write(
                 $this->location . FilesInterface::SEPARATOR . $session_id,
                 $session_data
             );
-        }
-        catch (\ErrorException $exception)
-        {
+        } catch (\ErrorException $exception) {
             //Possibly that directory doesn't exists, we don't want to force directory by default,
             //but we can try now.
             return $this->files->write(

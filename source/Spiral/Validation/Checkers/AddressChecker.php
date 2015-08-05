@@ -46,8 +46,7 @@ class AddressChecker extends Checker
      */
     public function url($url, $requireProtocol = true)
     {
-        if (!$requireProtocol && stripos($url, 'http://') === false && stripos($url, 'https://') === false)
-        {
+        if (!$requireProtocol && stripos($url, 'http://') === false && stripos($url, 'https://') === false) {
             $url = 'http://' . $url;
         }
 

@@ -58,14 +58,10 @@ class AmazonServer extends StorageServer
      */
     public function exists(BucketInterface $bucket, $name)
     {
-        try
-        {
+        try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 404)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 404) {
                 return false;
             }
 
@@ -73,8 +69,7 @@ class AmazonServer extends StorageServer
             throw $exception;
         }
 
-        if ($response->getStatusCode() !== 200)
-        {
+        if ($response->getStatusCode() !== 200) {
             return false;
         }
 
@@ -86,8 +81,7 @@ class AmazonServer extends StorageServer
      */
     public function size(BucketInterface $bucket, $name)
     {
-        if (empty($response = $this->exists($bucket, $name)))
-        {
+        if (empty($response = $this->exists($bucket, $name))) {
             return false;
         }
 
@@ -99,8 +93,7 @@ class AmazonServer extends StorageServer
      */
     public function put(BucketInterface $bucket, $name, $source)
     {
-        if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name)))
-        {
+        if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
         }
 
@@ -119,8 +112,7 @@ class AmazonServer extends StorageServer
         );
 
         $response = $this->client->send($request->withBody($this->castStream($source)));
-        if ($response->getStatusCode() != 200)
-        {
+        if ($response->getStatusCode() != 200) {
             throw new ServerException("Unable to put '{$name}' to Amazon server.");
         }
     }
@@ -130,14 +122,10 @@ class AmazonServer extends StorageServer
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
-        try
-        {
+        try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() != 404)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() != 404) {
                 //Some authorization or other error
                 throw $exception;
             }
@@ -161,8 +149,7 @@ class AmazonServer extends StorageServer
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        try
-        {
+        try {
             $this->client->send($this->buildRequest(
                 'PUT',
                 $bucket,
@@ -173,11 +160,8 @@ class AmazonServer extends StorageServer
                     'Copy-Source' => $this->buildUri($bucket, $oldname)->getPath()
                 ]
             ));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() != 404)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() != 404) {
                 //Some authorization or other error
                 throw $exception;
             }
@@ -195,8 +179,7 @@ class AmazonServer extends StorageServer
      */
     public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        try
-        {
+        try {
             $this->client->send($this->buildRequest(
                 'PUT',
                 $destination,
@@ -207,11 +190,8 @@ class AmazonServer extends StorageServer
                     'Copy-Source' => $this->buildUri($bucket, $name)->getPath()
                 ]
             ));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() != 404)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() != 404) {
                 //Some authorization or other error
                 throw $exception;
             }
@@ -252,8 +232,7 @@ class AmazonServer extends StorageServer
         $name,
         array $headers = [],
         array $commands = []
-    )
-    {
+    ) {
         $headers += [
             'Date'         => gmdate('D, d M Y H:i:s T'),
             'Content-MD5'  => '',
@@ -277,8 +256,7 @@ class AmazonServer extends StorageServer
     private function packCommands(array $commands)
     {
         $headers = [];
-        foreach ($commands as $command => $value)
-        {
+        foreach ($commands as $command => $value) {
             $headers['X-Amz-' . $command] = $value;
         }
 
@@ -303,16 +281,13 @@ class AmazonServer extends StorageServer
         ];
 
         $normalizedCommands = [];
-        foreach ($packedCommands as $command => $value)
-        {
-            if (!empty($value))
-            {
+        foreach ($packedCommands as $command => $value) {
+            if (!empty($value)) {
                 $normalizedCommands[] = strtolower($command) . ':' . $value;
             }
         }
 
-        if ($normalizedCommands)
-        {
+        if ($normalizedCommands) {
             sort($normalizedCommands);
             $signature[] = join("\n", $normalizedCommands);
         }

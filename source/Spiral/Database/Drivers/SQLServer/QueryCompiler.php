@@ -43,12 +43,9 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
         $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
+        if (preg_match('/ as /i', $alias, $matches)) {
             list(, $alias) = explode($matches[0], $table);
-        }
-        else
-        {
+        } else {
             $table = "{$table} AS {$table}";
         }
 
@@ -59,15 +56,13 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
         //We have to compile JOINs first
         $joinsStatement = '';
-        if (!empty($joins))
-        {
+        if (!empty($joins)) {
             $joinsStatement = $this->joins($joins);
         }
 
         $statement .= "\nSET" . $this->prepareColumns($columns) . "\nFROM " . $table . $joinsStatement;
 
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
 
@@ -80,24 +75,19 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
     public function delete($table, array $joins = [], array $where = [])
     {
         $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
+        if (preg_match('/ as /i', $alias, $matches)) {
             list(, $alias) = explode($matches[0], $table);
-        }
-        else
-        {
+        } else {
             $alias = $this->tablePrefix . $alias;
         }
 
         $statement = "DELETE " . $this->quote($alias) . " FROM " . $this->quote($table, true);
 
-        if (!empty($joins))
-        {
+        if (!empty($joins)) {
             $statement .= $this->joins($joins) . ' ';
         }
 
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
 
@@ -126,36 +116,28 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         $limit = 0,
         $offset = 0,
         array $unions = []
-    )
-    {
+    ) {
         if (
             empty($limit) && empty($offset)
             || ($this->driver->getServerVersion() >= 12 && !empty($orderBy))
-        )
-        {
+        ) {
             return call_user_func_array(['parent', 'select'], func_get_args());
         }
 
-        if ($this->driver->getServerVersion() >= 12)
-        {
+        if ($this->driver->getServerVersion() >= 12) {
             $this->logger()->warning(
                 "You can't use query limiting without specifying ORDER BY statement, sql fallback used."
             );
-        }
-        else
-        {
+        } else {
             $this->logger()->warning(
                 "You are using older version of SQLServer, "
                 . "it has some limitation with query limiting and unions."
             );
         }
 
-        if ($orderBy)
-        {
+        if ($orderBy) {
             $orderBy = 'ORDER BY ' . $this->orderBy($orderBy);
-        }
-        else
-        {
+        } else {
             $orderBy = "ORDER BY (SELECT NULL)";
         }
 
@@ -189,12 +171,10 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      */
     protected function limit($limit, $offset, $rowNumber = null)
     {
-        if (!$rowNumber && $this->driver->getServerVersion() >= 12)
-        {
+        if (!$rowNumber && $this->driver->getServerVersion() >= 12) {
             $statement = "OFFSET {$offset} ROWS ";
 
-            if ($limit)
-            {
+            if ($limit) {
                 $statement .= "FETCH NEXT {$limit} ROWS ONLY";
             }
 
@@ -206,12 +186,9 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         //0 = row_number(1)
         $offset = $offset + 1;
 
-        if ($limit)
-        {
+        if ($limit) {
             $statement .= "BETWEEN {$offset} AND " . ($offset + $limit - 1);
-        }
-        else
-        {
+        } else {
             $statement .= ">= {$offset}";
         }
 

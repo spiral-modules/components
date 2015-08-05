@@ -80,8 +80,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         parent::__construct($files, $options);
         $this->store = $store;
 
-        if ($this->options['cache'])
-        {
+        if ($this->options['cache']) {
             $this->authToken = $this->store->get($this->options['username'] . '@rackspace-token');
             $this->regions = $this->store->get($this->options['username'] . '@rackspace-regions');
         }
@@ -98,19 +97,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function exists(BucketInterface $bucket, $name)
     {
-        try
-        {
+        try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 404)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 404) {
                 return false;
             }
 
-            if ($exception->getCode() == 401)
-            {
+            if ($exception->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->exists($bucket, $name);
@@ -120,8 +114,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        if ($response->getStatusCode() !== 200)
-        {
+        if ($response->getStatusCode() !== 200) {
             return false;
         }
 
@@ -133,8 +126,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function size(BucketInterface $bucket, $name)
     {
-        if (empty($response = $this->exists($bucket, $name)))
-        {
+        if (empty($response = $this->exists($bucket, $name))) {
             return false;
         }
 
@@ -146,13 +138,11 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function put(BucketInterface $bucket, $name, $source)
     {
-        if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name)))
-        {
+        if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
         }
 
-        try
-        {
+        try {
             $request = $this->buildRequest(
                 'PUT',
                 $bucket,
@@ -164,11 +154,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             );
 
             $this->client->send($request->withBody($this->castStream($source)));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->put($bucket, $name, $source);
@@ -186,14 +173,10 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
-        try
-        {
+        try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->allocateStream($bucket, $name);
@@ -210,19 +193,13 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function delete(BucketInterface $bucket, $name)
     {
-        try
-        {
+        try {
             $this->client->send($this->buildRequest('DELETE', $bucket, $name));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 401) {
                 $this->reconnect();
                 $this->delete($bucket, $name);
-            }
-            elseif ($exception->getCode() != 404)
-            {
+            } elseif ($exception->getCode() != 404) {
                 throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
             }
         }
@@ -233,8 +210,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        try
-        {
+        try {
             $this->client->send($this->buildRequest(
                 'PUT',
                 $bucket,
@@ -244,11 +220,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                     'Content-Length' => 0
                 ]
             ));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->rename($bucket, $oldname, $newname);
@@ -268,8 +241,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        if ($bucket->getOption('region') != $destination->getOption('region'))
-        {
+        if ($bucket->getOption('region') != $destination->getOption('region')) {
             $this->logger()->warning(
                 "Copying between regions are not allowed by Rackspace and performed using local buffer."
             );
@@ -278,8 +250,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             return parent::copy($bucket, $destination, $name);
         }
 
-        try
-        {
+        try {
             $this->client->send($this->buildRequest(
                 'PUT',
                 $destination,
@@ -289,11 +260,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                     'Content-Length' => 0
                 ]
             ));
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->copy($bucket, $destination, $name);
@@ -312,8 +280,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     protected function connect()
     {
-        if (!empty($this->authToken))
-        {
+        if (!empty($this->authToken)) {
             //Already got credentials from cache
             return;
         }
@@ -333,17 +300,13 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             ])
         );
 
-        try
-        {
+        try {
             /**
              * @var ResponseInterface $response
              */
             $response = $this->client->send($request);
-        }
-        catch (ClientException $exception)
-        {
-            if ($exception->getCode() == 401)
-            {
+        } catch (ClientException $exception) {
+            if ($exception->getCode() == 401) {
                 throw new ServerException(
                     "Unable to perform Rackspace authorization using given credentials."
                 );
@@ -353,26 +316,21 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         }
 
         $response = json_decode((string)$response->getBody(), 1);
-        foreach ($response['access']['serviceCatalog'] as $location)
-        {
-            if ($location['name'] == 'cloudFiles')
-            {
-                foreach ($location['endpoints'] as $server)
-                {
+        foreach ($response['access']['serviceCatalog'] as $location) {
+            if ($location['name'] == 'cloudFiles') {
+                foreach ($location['endpoints'] as $server) {
                     $this->regions[$server['region']] = $server['publicURL'];
                 }
             }
         }
 
-        if (!isset($response['access']['token']['id']))
-        {
+        if (!isset($response['access']['token']['id'])) {
             throw new ServerException("Unable to fetch rackspace auth token.");
         }
 
         $this->authToken = $response['access']['token']['id'];
 
-        if ($this->options['cache'])
-        {
+        if ($this->options['cache']) {
             $this->store->set(
                 $this->options['username'] . '@rackspace-token',
                 $this->authToken,
@@ -408,14 +366,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      */
     protected function buildUri(BucketInterface $bucket, $name)
     {
-        if (empty($bucket->getOption('region')))
-        {
+        if (empty($bucket->getOption('region'))) {
             throw new ServerException("Every rackspace container should have specified region.");
         }
 
         $region = $bucket->getOption('region');
-        if (!isset($this->regions[$region]))
-        {
+        if (!isset($this->regions[$region])) {
             throw new ServerException("'{$region}' region is not supported by Rackspace.");
         }
 

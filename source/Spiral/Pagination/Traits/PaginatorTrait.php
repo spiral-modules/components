@@ -21,16 +21,6 @@ use Spiral\Pagination\PaginatorInterface;
 trait PaginatorTrait
 {
     /**
-     * @var int
-     */
-    private $limit = 0;
-
-    /**
-     * @var int
-     */
-    private $offset = 0;
-
-    /**
      * @var Paginator
      */
     private $paginator = null;
@@ -42,6 +32,16 @@ trait PaginatorTrait
      * @var int
      */
     private $paginationCount = 0;
+
+    /**
+     * @var int
+     */
+    protected $limit = 0;
+
+    /**
+     * @var int
+     */
+    protected $offset = 0;
 
     /**
      * @return ContainerInterface
@@ -115,23 +115,18 @@ trait PaginatorTrait
         $count = null,
         $pageParameter = PaginatorInterface::DEFAULT_PARAMETER,
         ServerRequestInterface $request = null
-    )
-    {
-        if (empty($container = $this->container()) && empty($request))
-        {
+    ) {
+        if (empty($container = $this->container()) && empty($request)) {
             throw new PaginationException("Unable to create pagination without specified request.");
         }
 
         //If no request provided we can try to fetch it from container
         $request = !empty($request) ? $request : $container->get(ServerRequestInterface::class);
 
-        if (empty($container) || !$container->hasBinding(PaginatorInterface::class))
-        {
+        if (empty($container) || !$container->hasBinding(PaginatorInterface::class)) {
             //Let's use default paginator
             $this->paginator = new Paginator($request, $pageParameter);
-        }
-        else
-        {
+        } else {
             $this->paginator = $container->get(PaginatorInterface::class, compact(
                 'request', 'pageParameter'
             ));
@@ -152,8 +147,7 @@ trait PaginatorTrait
      */
     public function getPaginator()
     {
-        if (!$this->paginator)
-        {
+        if (!$this->paginator) {
             throw new PaginationException(
                 "Selection has to be paginated before requesting Paginator."
             );
@@ -169,13 +163,11 @@ trait PaginatorTrait
      */
     protected function runPagination()
     {
-        if (empty($this->paginator))
-        {
+        if (empty($this->paginator)) {
             return $this;
         }
 
-        if (!empty($this->paginationCount))
-        {
+        if (!empty($this->paginationCount)) {
             $this->paginator->setCount($this->paginationCount);
         }
 

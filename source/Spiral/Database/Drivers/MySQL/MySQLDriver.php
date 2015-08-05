@@ -78,8 +78,7 @@ class MySQLDriver extends Driver
     public function tableNames()
     {
         $result = [];
-        foreach ($this->query('SHOW TABLES')->fetchMode(PDO::FETCH_NUM) as $row)
-        {
+        foreach ($this->query('SHOW TABLES')->fetchMode(PDO::FETCH_NUM) as $row) {
             $result[] = $row[0];
         }
 

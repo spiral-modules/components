@@ -24,8 +24,7 @@ class SQLExpression extends SQLFragment
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        if (empty($compiler))
-        {
+        if (empty($compiler)) {
             //We might need to throw an exception here
             return parent::sqlStatement();
         }

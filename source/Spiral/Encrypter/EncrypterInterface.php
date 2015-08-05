@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Encrypter;
+
 use Spiral\Encrypter\Exceptions\EncrypterException;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncryptException;

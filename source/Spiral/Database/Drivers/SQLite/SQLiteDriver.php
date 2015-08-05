@@ -79,10 +79,8 @@ class SQLiteDriver extends Driver
     public function tableNames()
     {
         $tables = [];
-        foreach ($this->query("SELECT * FROM sqlite_master WHERE type = 'table'") as $table)
-        {
-            if ($table['name'] != 'sqlite_sequence')
-            {
+        foreach ($this->query("SELECT * FROM sqlite_master WHERE type = 'table'") as $table) {
+            if ($table['name'] != 'sqlite_sequence') {
                 $tables[] = $table['name'];
             }
         }

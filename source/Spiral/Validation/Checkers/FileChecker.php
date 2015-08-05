@@ -69,8 +69,7 @@ class FileChecker extends Checker
      */
     public function size($filename, $size)
     {
-        if (empty($filename = $this->filename($filename, false)))
-        {
+        if (empty($filename = $this->filename($filename, false))) {
             return false;
         }
 
@@ -86,13 +85,11 @@ class FileChecker extends Checker
      */
     public function extension($filename, $extensions)
     {
-        if (!is_array($extensions))
-        {
+        if (!is_array($extensions)) {
             $extensions = array_slice(func_get_args(), 1);
         }
 
-        if ($filename instanceof UploadedFileInterface)
-        {
+        if ($filename instanceof UploadedFileInterface) {
             return in_array($this->files->extension($filename->getClientFilename()), $extensions);
         }
 
@@ -108,18 +105,15 @@ class FileChecker extends Checker
      */
     protected function filename($filename, $onlyUploaded = true)
     {
-        if ($onlyUploaded && !$this->isUploaded($filename))
-        {
+        if ($onlyUploaded && !$this->isUploaded($filename)) {
             return false;
         }
 
-        if ($filename instanceof UploadedFileInterface || $filename instanceof StreamableInterface)
-        {
+        if ($filename instanceof UploadedFileInterface || $filename instanceof StreamableInterface) {
             return StreamWrapper::getUri($filename->getStream());
         }
 
-        if (is_array($filename))
-        {
+        if (is_array($filename)) {
             $filename = $filename['tmp_name'];
         }
 
@@ -134,19 +128,16 @@ class FileChecker extends Checker
      */
     private function isUploaded($filename)
     {
-        if (is_string($filename))
-        {
+        if (is_string($filename)) {
             //We can use native method
             return is_uploaded_file($filename);
         }
 
-        if (is_array($filename))
-        {
+        if (is_array($filename)) {
             return isset($filename['tmp_name']) && is_uploaded_file($filename['tmp_name']);
         }
 
-        if ($filename instanceof UploadedFileInterface)
-        {
+        if ($filename instanceof UploadedFileInterface) {
             return empty($filename->getError());
         }
 

@@ -101,8 +101,7 @@ abstract class DataEntity extends Component implements
      */
     public function setField($name, $value, $filter = true)
     {
-        if ($value instanceof AccessorInterface)
-        {
+        if ($value instanceof AccessorInterface) {
             $this->fields[$name] = $value->embed($this);
 
             return;
@@ -110,31 +109,24 @@ abstract class DataEntity extends Component implements
 
         $this->validated = false;
 
-        if (!$filter)
-        {
+        if (!$filter) {
             $this->fields[$name] = $value;
 
             return;
         }
 
-        if ($accessor = $this->getMutator($name, 'accessor'))
-        {
-            if (empty($this->fields[$name]) || !($this->fields[$name] instanceof AccessorInterface))
-            {
+        if ($accessor = $this->getMutator($name, 'accessor')) {
+            if (empty($this->fields[$name]) || !($this->fields[$name] instanceof AccessorInterface)) {
                 $this->fields[$name] = $this->createAccessor($this->fields[$name], $accessor);
             }
 
             $this->fields[$name]->setData($value);
         }
 
-        if ($setter = $this->getMutator($name, 'setter'))
-        {
-            try
-            {
+        if ($setter = $this->getMutator($name, 'setter')) {
+            try {
                 $this->fields[$name] = call_user_func($setter, $value);
-            }
-            catch (\ErrorException $exception)
-            {
+            } catch (\ErrorException $exception) {
                 $this->fields[$name] = call_user_func($setter, null);
             }
         }
@@ -150,24 +142,18 @@ abstract class DataEntity extends Component implements
     {
         $value = isset($this->fields[$name]) ? $this->fields[$name] : $default;
 
-        if ($value instanceof AccessorInterface)
-        {
+        if ($value instanceof AccessorInterface) {
             return $value;
         }
 
-        if ($accessor = $this->getMutator($name, 'accessor'))
-        {
+        if ($accessor = $this->getMutator($name, 'accessor')) {
             return $this->fields[$name] = $this->createAccessor($value, $accessor);
         }
 
-        if ($filter && $getter = $this->getMutator($name, 'getter'))
-        {
-            try
-            {
+        if ($filter && $getter = $this->getMutator($name, 'getter')) {
+            try {
                 return call_user_func($getter, $value);
-            }
-            catch (\ErrorException $exception)
-            {
+            } catch (\ErrorException $exception) {
                 return null;
             }
         }
@@ -263,13 +249,11 @@ abstract class DataEntity extends Component implements
      */
     public function setFields($fields = [])
     {
-        if (!is_array($fields) && !$fields instanceof \Traversable)
-        {
+        if (!is_array($fields) && !$fields instanceof \Traversable) {
             return $this;
         }
 
-        foreach ($this->fire('setFields', $fields) as $name => $field)
-        {
+        foreach ($this->fire('setFields', $fields) as $name => $field) {
             $this->isFillable($field) && $this->setField($name, $field, true);
         }
 
@@ -286,8 +270,7 @@ abstract class DataEntity extends Component implements
     public function getFields($filter = true)
     {
         $result = [];
-        foreach ($this->fields as $name => $field)
-        {
+        foreach ($this->fields as $name => $field) {
             $result[$name] = $this->getField($name, $filter);
         }
 
@@ -305,8 +288,7 @@ abstract class DataEntity extends Component implements
     public function publicFields()
     {
         $fields = $this->getFields();
-        foreach ($this->hidden as $secured)
-        {
+        foreach ($this->hidden as $secured) {
             unset($fields[$secured]);
         }
 
@@ -322,10 +304,8 @@ abstract class DataEntity extends Component implements
     public function serializeData()
     {
         $result = $this->fields;
-        foreach ($result as $field => $value)
-        {
-            if ($value instanceof AccessorInterface)
-            {
+        foreach ($result as $field => $value) {
+            if ($value instanceof AccessorInterface) {
                 $result[$field] = $value->serializeData();
             }
         }
@@ -366,13 +346,10 @@ abstract class DataEntity extends Component implements
      */
     protected function validate()
     {
-        if (empty($this->validates))
-        {
+        if (empty($this->validates)) {
             //Nothing change since last validation
             $this->validated = true;
-        }
-        elseif (!$this->validated)
-        {
+        } elseif (!$this->validated) {
             $this->fire('validation');
 
             $this->errors = $this->validator()->getErrors();
@@ -398,8 +375,7 @@ abstract class DataEntity extends Component implements
      */
     protected function isFillable($field)
     {
-        if (!empty($this->fillable))
-        {
+        if (!empty($this->fillable)) {
             return in_array($field, $this->fillable);
         }
 
@@ -419,8 +395,7 @@ abstract class DataEntity extends Component implements
         //referenced to valid field name by adding "s" at the end
         $mutator = $mutator . 's';
 
-        if (isset($this->{$mutator}[$field]))
-        {
+        if (isset($this->{$mutator}[$field])) {
             return $this->{$mutator}[$field];
         }
 
@@ -475,15 +450,12 @@ abstract class DataEntity extends Component implements
      */
     protected static function initialize($analysis = false)
     {
-        if (isset(self::$initiated[$class = static::class]) && empty($options))
-        {
+        if (isset(self::$initiated[$class = static::class]) && empty($options)) {
             return;
         }
 
-        foreach (get_class_methods($class) as $method)
-        {
-            if (substr($method, 0, 4) === 'init' && $method != 'initialize')
-            {
+        foreach (get_class_methods($class) as $method) {
+            if (substr($method, 0, 4) === 'init' && $method != 'initialize') {
                 forward_static_call(['static', $method], $analysis);
             }
         }

@@ -240,22 +240,14 @@ abstract class Model extends DataEntity
      * @param bool  $loaded
      * @param ORM   $orm
      */
-    public function __construct(array $data = [], $loaded = false, array $schema = [], ORM $orm = null)
+    public function __construct(array $data = [], $loaded = false, ORM $orm = null, array $schema = [])
     {
         $this->loaded = $loaded;
 
-        //Will work only when global container is set!
-        $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
+        $this->orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
+        $this->schema = !empty($schema) ? $schema : $orm->getSchema(static::class);
 
-        $this->orm = $orm;
-        if (!isset(self::$schemaCache[$class = static::class]))
-        {
-            static::initialize();
-            self::$schemaCache[$class] = $this->orm->getSchema($class);
-        }
-
-        //Prepared document schema
-        $this->schema = self::$schemaCache[$class];
+        static::initialize();
 
         if (isset($data[ORM::PIVOT_DATA]))
         {

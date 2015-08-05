@@ -46,13 +46,11 @@ class SelectQuery extends AbstractSelect
         QueryCompiler $compiler,
         array $from = [],
         array $columns = []
-    )
-    {
+    ) {
         parent::__construct($database, $compiler);
 
         $this->tables = $from;
-        if (!empty($columns))
-        {
+        if (!empty($columns)) {
             $this->columns = $this->fetchIdentifiers($columns);
         }
     }
@@ -134,10 +132,8 @@ class SelectQuery extends AbstractSelect
         );
 
         //Unions always located at the end of query.
-        foreach ($this->unions as $union)
-        {
-            if ($union[0] instanceof QueryBuilder)
-            {
+        foreach ($this->unions as $union) {
+            if ($union[0] instanceof QueryBuilder) {
                 $parameters = array_merge($parameters, $union[0]->getParameters($compiler));
             }
         }

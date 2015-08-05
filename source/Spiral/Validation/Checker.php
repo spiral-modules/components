@@ -67,24 +67,19 @@ abstract class Checker extends Component
      */
     public function getMessage($method, \ReflectionClass $reflection = null)
     {
-        if (!empty($reflection))
-        {
+        if (!empty($reflection)) {
             $messages = $reflection->getDefaultProperties()['messages'];
-            if (isset($messages[$method]))
-            {
+            if (isset($messages[$method])) {
                 //We are inheriting parent messages
                 return $this->translate($messages[$method]);
             }
-        }
-        elseif (isset($this->messages[$method]))
-        {
+        } elseif (isset($this->messages[$method])) {
             return $this->translate($this->messages[$method]);
         }
 
         //Looking for message in parent realization
         $reflection = $reflection ?: new \ReflectionClass($this);
-        if ($reflection->getParentClass())
-        {
+        if ($reflection->getParentClass()) {
             return $this->getMessage($method, $reflection->getParentClass());
         }
 

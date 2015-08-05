@@ -177,6 +177,10 @@ class ODM extends Singleton implements InjectorInterface
         return $this->container->get(SchemaBuilder::class, ['config' => $this->config]);
     }
 
+    public function document($class, $data)
+    {
+    }
+
     /**
      * Refresh ODM schema state, will reindex all found document models. This is slow method using
      * Tokenizer, refreshSchema() should not be called by user request.

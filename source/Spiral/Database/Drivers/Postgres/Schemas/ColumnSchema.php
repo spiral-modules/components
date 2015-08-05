@@ -37,45 +37,35 @@ class ColumnSchema extends AbstractColumn
         //Primary sequences
         'primary'     => ['type' => 'serial', 'autoIncrement' => true, 'nullable' => false],
         'bigPrimary'  => ['type' => 'bigserial', 'autoIncrement' => true, 'nullable' => false],
-
         //Enum type (mapped via method)
         'enum'        => 'enum',
-
         //Logical types
         'boolean'     => 'boolean',
-
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => 'integer',
         'tinyInteger' => 'smallint',
         'bigInteger'  => 'bigint',
-
         //String with specified length (mapped via method)
         'string'      => 'character varying',
-
         //Generic types
         'text'        => 'text',
         'tinyText'    => 'text',
         'longText'    => 'text',
-
         //Real types
         'double'      => 'double precision',
         'float'       => 'real',
-
         //Decimal type (mapped via method)
         'decimal'     => 'numeric',
-
         //Date and Time types
         'datetime'    => 'timestamp without time zone',
         'date'        => 'date',
         'time'        => 'time',
         'timestamp'   => 'timestamp without time zone',
-
         //Binary types
         'binary'      => 'bytea',
         'tinyBinary'  => 'bytea',
         'longBinary'  => 'bytea',
-
         //Additional types
         'json'        => 'json'
     ];
@@ -108,8 +98,7 @@ class ColumnSchema extends AbstractColumn
      */
     public function abstractType()
     {
-        if ($this->enumValues)
-        {
+        if (!empty($this->enumValues)) {
             return 'enum';
         }
 
@@ -124,8 +113,7 @@ class ColumnSchema extends AbstractColumn
         $this->autoIncrement = true;
 
         //Changing type of already created primary key (we can't use "serial" alias here)
-        if ($this->type && $this->type != 'serial')
-        {
+        if (!empty($this->type) && $this->type != 'serial') {
             $this->type = 'integer';
 
             return $this;
@@ -142,8 +130,7 @@ class ColumnSchema extends AbstractColumn
         $this->autoIncrement = true;
 
         //Changing type of already created primary key (we can't use "serial" alias here)
-        if ($this->type && $this->type != 'bigserial')
-        {
+        if (!empty($this->type) && $this->type != 'bigserial') {
             $this->type = 'bigint';
 
             return $this;
@@ -160,8 +147,7 @@ class ColumnSchema extends AbstractColumn
         $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
 
         $this->type = 'character';
-        foreach ($this->enumValues as $value)
-        {
+        foreach ($this->enumValues as $value) {
             $this->size = max((int)$this->size, strlen($value));
         }
 
@@ -175,8 +161,7 @@ class ColumnSchema extends AbstractColumn
     {
         $constraints = parent::getConstraints();
 
-        if ($this->enumConstraint)
-        {
+        if ($this->enumConstraint) {
             $constraints[] = $this->enumConstraint;
         }
 
@@ -190,15 +175,13 @@ class ColumnSchema extends AbstractColumn
     {
         $statement = parent::sqlStatement();
 
-        if ($this->abstractType() != 'enum')
-        {
+        if ($this->abstractType() != 'enum') {
             return $statement;
         }
 
         //We have add constraint for enum type
         $enumValues = [];
-        foreach ($this->enumValues as $value)
-        {
+        foreach ($this->enumValues as $value) {
             $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
@@ -220,30 +203,22 @@ class ColumnSchema extends AbstractColumn
         $typeDefinition = [$this->type, $this->size, $this->precision, $this->scale];
         $originalType = [$original->type, $original->size, $original->precision, $original->scale];
 
-        if ($typeDefinition != $originalType)
-        {
-            if ($this->abstractType() == 'enum')
-            {
+        if ($typeDefinition != $originalType) {
+            if ($this->abstractType() == 'enum') {
                 //Getting longest value
                 $enumSize = $this->size;
-                foreach ($this->enumValues as $value)
-                {
+                foreach ($this->enumValues as $value) {
                     $enumSize = max($enumSize, strlen($value));
                 }
 
                 $type = "ALTER COLUMN {$this->getName(true)} TYPE character($enumSize)";
                 $operations[] = $type;
-            }
-            else
-            {
+            } else {
                 $type = "ALTER COLUMN {$this->getName(true)} TYPE {$this->type}";
 
-                if ($this->size)
-                {
+                if ($this->size) {
                     $type .= "($this->size)";
-                }
-                elseif ($this->precision)
-                {
+                } elseif ($this->precision) {
                     $type .= "($this->precision, $this->scale)";
                 }
 
@@ -252,34 +227,26 @@ class ColumnSchema extends AbstractColumn
             }
         }
 
-        if ($original->abstractType() == 'enum' && $this->enumConstraint)
-        {
+        if ($original->abstractType() == 'enum' && $this->enumConstraint) {
             $operations[] = 'DROP CONSTRAINT ' . $this->enumConstraint(true);
         }
 
-        if ($original->defaultValue != $this->defaultValue)
-        {
-            if (is_null($this->defaultValue))
-            {
+        if ($original->defaultValue != $this->defaultValue) {
+            if (is_null($this->defaultValue)) {
                 $operations[] = "ALTER COLUMN {$this->getName(true)} DROP DEFAULT";
-            }
-            else
-            {
+            } else {
                 $operations[] = "ALTER COLUMN {$this->getName(true)} SET DEFAULT {$this->prepareDefault()}";
             }
         }
 
-        if ($original->nullable != $this->nullable)
-        {
+        if ($original->nullable != $this->nullable) {
             $operations[] = "ALTER COLUMN {$this->getName(true)} "
                 . (!$this->nullable ? 'SET' : 'DROP') . " NOT NULL";
         }
 
-        if ($this->abstractType() == 'enum')
-        {
+        if ($this->abstractType() == 'enum') {
             $enumValues = [];
-            foreach ($this->enumValues as $value)
-            {
+            foreach ($this->enumValues as $value) {
                 $enumValues[] = $this->table->driver()->getPDO()->quote($value);
             }
 
@@ -302,8 +269,7 @@ class ColumnSchema extends AbstractColumn
         if (
             in_array($this->type, ['int', 'bigint', 'integer'])
             && preg_match("/nextval(.*)/", $this->defaultValue)
-        )
-        {
+        ) {
             $this->type = ($this->type == 'bigint' ? 'bigserial' : 'serial');
             $this->autoIncrement = true;
 
@@ -317,13 +283,11 @@ class ColumnSchema extends AbstractColumn
                 $this->type == 'character varying' || $this->type == 'character'
             )
             && $schema['character_maximum_length']
-        )
-        {
+        ) {
             $this->size = $schema['character_maximum_length'];
         }
 
-        if ($this->type == 'numeric')
-        {
+        if ($this->type == 'numeric') {
             $this->precision = $schema['numeric_precision'];
             $this->scale = $schema['numeric_scale'];
         }
@@ -332,16 +296,14 @@ class ColumnSchema extends AbstractColumn
          * Attention, this is not default spiral enum type emulated via CHECK. This is real Postgres
          * enum type.
          */
-        if ($this->type == 'USER-DEFINED' && $schema['typtype'] == 'e')
-        {
+        if ($this->type == 'USER-DEFINED' && $schema['typtype'] == 'e') {
             $this->type = $schema['typname'];
             $range = $this->table->driver()->query('SELECT enum_range(NULL::' . $this->type . ')')
                 ->fetchColumn(0);
 
             $this->enumValues = explode(',', substr($range, 1, -1));
 
-            if (!empty($this->defaultValue))
-            {
+            if (!empty($this->defaultValue)) {
                 //In database: 'value'::enumType
                 $this->defaultValue = substr(
                     $this->defaultValue,
@@ -355,8 +317,7 @@ class ColumnSchema extends AbstractColumn
         if (
             ($this->type == 'character' || $this->type == 'character varying')
             && $this->size
-        )
-        {
+        ) {
             $query = "SELECT conname, consrc FROM pg_constraint "
                 . "WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
 
@@ -365,15 +326,11 @@ class ColumnSchema extends AbstractColumn
                 [$schema['tableOID'], '(' . $this->name . '%']
             );
 
-            foreach ($constraints as $constraint)
-            {
-                if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches))
-                {
+            foreach ($constraints as $constraint) {
+                if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches)) {
                     $enumValues = explode(',', $matches[1]);
-                    foreach ($enumValues as &$value)
-                    {
-                        if (preg_match("/^'?(.*?)'?::(.+)/", trim($value), $matches))
-                        {
+                    foreach ($enumValues as &$value) {
+                        if (preg_match("/^'?(.*?)'?::(.+)/", trim($value), $matches)) {
                             //In database: 'value'::TYPE
                             $value = $matches[1];
                         }
@@ -387,21 +344,15 @@ class ColumnSchema extends AbstractColumn
             }
         }
 
-        if ($this->defaultValue !== null)
-        {
-            if (preg_match("/^'?(.*?)'?::(.+)/", $this->defaultValue, $matches))
-            {
+        if ($this->defaultValue !== null) {
+            if (preg_match("/^'?(.*?)'?::(.+)/", $this->defaultValue, $matches)) {
                 //In database: 'value'::TYPE
                 $this->defaultValue = $matches[1];
-            }
-            elseif ($this->type == 'bit')
-            {
+            } elseif ($this->type == 'bit') {
                 $this->defaultValue = bindec(
                     substr($this->defaultValue, 2, strpos($this->defaultValue, '::') - 3)
                 );
-            }
-            elseif ($this->type == 'boolean')
-            {
+            } elseif ($this->type == 'boolean') {
                 $this->defaultValue = (strtolower($this->defaultValue) == 'true');
             }
         }
@@ -425,10 +376,8 @@ class ColumnSchema extends AbstractColumn
      */
     private function enumConstraint($quote = false, $temporary = false)
     {
-        if (empty($this->enumConstraint))
-        {
-            if ($temporary)
-            {
+        if (empty($this->enumConstraint)) {
+            if ($temporary) {
                 return $this->table->getName() . '_' . $this->getName() . '_enum';
             }
 

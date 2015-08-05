@@ -39,15 +39,13 @@ trait TranslatorTrait
         if (
             substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
             && substr($string, -2) === TranslatorInterface::I18N_POSTFIX
-        )
-        {
+        ) {
             //This string was defined in class attributes
             $string = substr($string, 2, -2);
         }
 
         $container = self::container();
-        if (empty($container) || !$container->hasBinding(TranslatorInterface::class))
-        {
+        if (empty($container) || !$container->hasBinding(TranslatorInterface::class)) {
             //Unable to localize
             return $string;
         }

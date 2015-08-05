@@ -45,8 +45,7 @@ class FtpServer extends StorageServer
     {
         parent::__construct($files, $options);
 
-        if (!extension_loaded('ftp'))
-        {
+        if (!extension_loaded('ftp')) {
             throw new ServerException(
                 "Unable to initialize ftp storage server, extension 'ftp' not found."
             );
@@ -68,8 +67,7 @@ class FtpServer extends StorageServer
      */
     public function size(BucketInterface $bucket, $name)
     {
-        if (($size = ftp_size($this->connection, $this->getPath($bucket, $name))) != -1)
-        {
+        if (($size = ftp_size($this->connection, $this->getPath($bucket, $name))) != -1) {
             return $size;
         }
 
@@ -82,8 +80,7 @@ class FtpServer extends StorageServer
     public function put(BucketInterface $bucket, $name, $source)
     {
         $location = $this->ensureLocation($bucket, $name);
-        if (!ftp_put($this->connection, $location, $this->castFilename($source), FTP_BINARY))
-        {
+        if (!ftp_put($this->connection, $location, $this->castFilename($source), FTP_BINARY)) {
             throw new ServerException("Unable to put '{$name}' to FTP server.");
         }
 
@@ -95,8 +92,7 @@ class FtpServer extends StorageServer
      */
     public function allocateFilename(BucketInterface $bucket, $name)
     {
-        if (!$this->exists($bucket, $name))
-        {
+        if (!$this->exists($bucket, $name)) {
             throw new ServerException(
                 "Unable to create local filename for '{$name}', object does not exists."
             );
@@ -105,8 +101,7 @@ class FtpServer extends StorageServer
         //File should be removed after processing
         $tempFilename = $this->files->tempFilename($this->files->extension($name));
 
-        if (!ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY))
-        {
+        if (!ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY)) {
             throw new ServerException("Unable to create local filename for '{$name}'.");
         }
 
@@ -118,8 +113,7 @@ class FtpServer extends StorageServer
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
-        if (!$filename = $this->allocateFilename($bucket, $name))
-        {
+        if (!$filename = $this->allocateFilename($bucket, $name)) {
             throw new ServerException("Unable to create stream for '{$name}', object does not exists.");
         }
 
@@ -131,8 +125,7 @@ class FtpServer extends StorageServer
      */
     public function delete(BucketInterface $bucket, $name)
     {
-        if ($this->exists($bucket, $name))
-        {
+        if ($this->exists($bucket, $name)) {
             ftp_delete($this->connection, $this->getPath($bucket, $name));
         }
     }
@@ -142,14 +135,12 @@ class FtpServer extends StorageServer
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        if (!$this->exists($bucket, $oldname))
-        {
+        if (!$this->exists($bucket, $oldname)) {
             throw new ServerException("Unable to rename '{$oldname}', object does not exists.");
         }
 
         $location = $this->ensureLocation($bucket, $newname);
-        if (!ftp_rename($this->connection, $this->getPath($bucket, $oldname), $location))
-        {
+        if (!ftp_rename($this->connection, $this->getPath($bucket, $oldname), $location)) {
             throw new ServerException("Unable to rename '{$oldname}' to '{$newname}'.");
         }
 
@@ -161,14 +152,12 @@ class FtpServer extends StorageServer
      */
     public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        if (!$this->exists($bucket, $name))
-        {
+        if (!$this->exists($bucket, $name)) {
             throw new ServerException("Unable to replace '{$name}', object does not exists.");
         }
 
         $location = $this->ensureLocation($bucket, $name);
-        if (!ftp_rename($this->connection, $this->getPath($bucket, $name), $location))
-        {
+        if (!ftp_rename($this->connection, $this->getPath($bucket, $name), $location)) {
             throw new ServerException("Unable to replace '{$name}'.");
         }
 
@@ -188,22 +177,19 @@ class FtpServer extends StorageServer
             $this->options['timeout']
         );
 
-        if (empty($this->connection))
-        {
+        if (empty($this->connection)) {
             throw new ServerException(
                 "Unable to connect to remote FTP server '{$this->options['host']}'."
             );
         }
 
-        if (!ftp_login($this->connection, $this->options['login'], $this->options['password']))
-        {
+        if (!ftp_login($this->connection, $this->options['login'], $this->options['password'])) {
             throw new ServerException(
                 "Unable to connect to remote FTP server '{$this->options['host']}'."
             );
         }
 
-        if (!ftp_pasv($this->connection, $this->options['passive']))
-        {
+        if (!ftp_pasv($this->connection, $this->options['passive'])) {
             throw new ServerException(
                 "Unable to set passive mode at remote FTP server '{$this->options['host']}'."
             );
@@ -225,36 +211,27 @@ class FtpServer extends StorageServer
         $directory = dirname($this->getPath($bucket, $name));
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 
-        try
-        {
-            if (ftp_chdir($this->connection, $directory))
-            {
+        try {
+            if (ftp_chdir($this->connection, $directory)) {
                 ftp_chmod($this->connection, $mode | 0111, $directory);
 
                 return $this->getPath($bucket, $name);
             }
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             //Directory has to be created
         }
 
         ftp_chdir($this->connection, $this->options['home']);
 
         $directories = explode('/', substr($directory, strlen($this->options['home'])));
-        foreach ($directories as $directory)
-        {
-            if (!$directory)
-            {
+        foreach ($directories as $directory) {
+            if (!$directory) {
                 continue;
             }
 
-            try
-            {
+            try {
                 ftp_chdir($this->connection, $directory);
-            }
-            catch (\Exception $exception)
-            {
+            } catch (\Exception $exception) {
                 ftp_mkdir($this->connection, $directory);
                 ftp_chmod($this->connection, $mode | 0111, $directory);
                 ftp_chdir($this->connection, $directory);
@@ -297,8 +274,7 @@ class FtpServer extends StorageServer
      */
     public function __destruct()
     {
-        if (!empty($this->connection))
-        {
+        if (!empty($this->connection)) {
             ftp_close($this->connection);
         }
     }

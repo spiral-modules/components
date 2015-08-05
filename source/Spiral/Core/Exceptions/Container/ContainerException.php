@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Core\Exceptions\Container;
+
 use Spiral\Core\Exceptions\CoreException;
 
 /**

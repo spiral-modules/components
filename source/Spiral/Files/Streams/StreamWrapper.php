@@ -78,8 +78,7 @@ class StreamWrapper
      */
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        if (!isset(self::$uris[$path]))
-        {
+        if (!isset(self::$uris[$path])) {
             return false;
         }
 
@@ -158,8 +157,7 @@ class StreamWrapper
      */
     public function url_stat($path, $flags)
     {
-        if (!isset(self::$uris[$path]))
-        {
+        if (!isset(self::$uris[$path])) {
             return null;
         }
 
@@ -175,15 +173,12 @@ class StreamWrapper
     private function getStreamStats(StreamInterface $stream)
     {
         $mode = $this->mode;
-        if (empty($mode))
-        {
-            if ($stream->isReadable())
-            {
+        if (empty($mode)) {
+            if ($stream->isReadable()) {
                 $mode = 'r';
             }
 
-            if ($stream->isWritable())
-            {
+            if ($stream->isWritable()) {
                 $mode = !empty($mode) ? 'r+' : 'w';
             }
         }
@@ -210,8 +205,7 @@ class StreamWrapper
      */
     public static function register()
     {
-        if (self::$registered)
-        {
+        if (self::$registered) {
             return;
         }
 
@@ -256,18 +250,15 @@ class StreamWrapper
     public static function getResource(StreamInterface $stream)
     {
         $mode = null;
-        if ($stream->isReadable())
-        {
+        if ($stream->isReadable()) {
             $mode = 'r';
         }
 
-        if ($stream->isWritable())
-        {
+        if ($stream->isWritable()) {
             $mode = !empty($mode) ? 'r+' : 'w';
         }
 
-        if (empty($mode))
-        {
+        if (empty($mode)) {
             throw new WrapperException("Stream is not available in read or write modes.");
         }
 
@@ -281,8 +272,7 @@ class StreamWrapper
      */
     public static function releaseUri($uri)
     {
-        if ($uri instanceof StreamInterface)
-        {
+        if ($uri instanceof StreamInterface) {
             $uri = 'spiral://' . spl_object_hash($uri);
         }
 

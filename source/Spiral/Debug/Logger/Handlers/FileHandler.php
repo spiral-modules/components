@@ -65,10 +65,8 @@ class FileHandler implements HandlerInterface, SaturableInterlace
             'message' => $message
         ]);
 
-        if ($this->files->append($this->options['filename'], "{$message}\n", $this->options['mode'], true))
-        {
-            if ($this->files->size($this->options['filename']) > $this->options['filesize'])
-            {
+        if ($this->files->append($this->options['filename'], "{$message}\n", $this->options['mode'], true)) {
+            if ($this->files->size($this->options['filename']) > $this->options['filesize']) {
                 $this->files->move(
                     $this->options['filename'],
                     $this->options['filename'] . $this->options['rotatePostfix']

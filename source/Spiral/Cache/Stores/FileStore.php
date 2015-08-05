@@ -69,14 +69,12 @@ class FileStore extends CacheStore
      */
     public function get($name, &$expiration = null)
     {
-        if (!$this->files->exists($filename = $this->makeFilename($name)))
-        {
+        if (!$this->files->exists($filename = $this->makeFilename($name))) {
             return null;
         }
 
         $cacheData = unserialize($this->files->read($filename));
-        if (!empty($cacheData[0]) && $cacheData[0] < time())
-        {
+        if (!empty($cacheData[0]) && $cacheData[0] < time()) {
             $this->delete($name);
 
             return null;
@@ -143,8 +141,7 @@ class FileStore extends CacheStore
     public function flush()
     {
         $files = $this->files->getFiles($this->options['directory'], $this->options['extension']);
-        foreach ($files as $filename)
-        {
+        foreach ($files as $filename) {
             $this->files->delete($filename);
         }
 

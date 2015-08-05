@@ -131,8 +131,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     public function getColumns()
     {
         $columns = [];
-        foreach ($this->schema()->getColumns() as $column)
-        {
+        foreach ($this->schema()->getColumns() as $column) {
             $columns[$column->getName()] = $column->abstractType();
         }
 

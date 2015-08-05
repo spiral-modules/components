@@ -54,12 +54,9 @@ class CsrfFilter implements MiddlewareInterface
         $setCookie = false;
 
         $cookies = $request->getCookieParams();
-        if (isset($cookies[self::COOKIE]))
-        {
+        if (isset($cookies[self::COOKIE])) {
             $token = $cookies[self::COOKIE];
-        }
-        else
-        {
+        } else {
             //Making new token
             $token = substr(
                 base64_encode(openssl_random_pseudo_bytes(self::TOKEN_LENGTH)), 0, self::TOKEN_LENGTH
@@ -68,18 +65,15 @@ class CsrfFilter implements MiddlewareInterface
             $setCookie = true;
         }
 
-        if ($this->isRequired($request))
-        {
-            if (!$this->compare($token, $this->fetchToken($request)))
-            {
+        if ($this->isRequired($request)) {
+            if (!$this->compare($token, $this->fetchToken($request))) {
                 //Let's return response directly
                 return (new EmptyResponse(412))->withStatus(412, 'Bad CSRF Token');
             }
         }
 
         $response = $next($request->withAttribute('csrfToken', $token));
-        if ($setCookie && $response instanceof ResponseInterface)
-        {
+        if ($setCookie && $response instanceof ResponseInterface) {
             //Will work even with non spiral responses
             $response = $response->withAddedHeader(
                 'Set-Cookie',
@@ -115,16 +109,13 @@ class CsrfFilter implements MiddlewareInterface
      */
     protected function fetchToken(ServerRequestInterface $request)
     {
-        if ($request->hasHeader(self::HEADER))
-        {
+        if ($request->hasHeader(self::HEADER)) {
             return (string)$request->getHeaderLine(self::HEADER);
         }
 
         $data = $request->getParsedBody();
-        if (is_array($data) && isset($data[self::PARAMETER]))
-        {
-            if (is_string($data[self::PARAMETER]))
-            {
+        if (is_array($data) && isset($data[self::PARAMETER])) {
+            if (is_string($data[self::PARAMETER])) {
                 return (string)$data[self::PARAMETER];
             }
         }
@@ -142,22 +133,19 @@ class CsrfFilter implements MiddlewareInterface
      */
     protected function compare($token, $clientToken)
     {
-        if (function_exists('hash_compare'))
-        {
+        if (function_exists('hash_compare')) {
             return hash_compare($token, $clientToken);
         }
 
         $tokenLength = strlen($token);
         $clientLength = strlen($clientToken);
 
-        if ($clientLength != $tokenLength)
-        {
+        if ($clientLength != $tokenLength) {
             return false;
         }
 
         $result = 0;
-        for ($i = 0; $i < $clientLength; $i++)
-        {
+        for ($i = 0; $i < $clientLength; $i++) {
             $result |= (ord($token[$i]) ^ ord($clientToken[$i]));
         }
 

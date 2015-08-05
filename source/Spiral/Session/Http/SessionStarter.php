@@ -59,8 +59,7 @@ class SessionStarter implements MiddlewareInterface
      */
     protected function store()
     {
-        if (!empty($this->encrypter))
-        {
+        if (!empty($this->encrypter)) {
             return $this->store;
         }
 
@@ -75,10 +74,8 @@ class SessionStarter implements MiddlewareInterface
         $cookies = $request->getCookieParams();
 
         $outerID = null;
-        if (isset($cookies[self::COOKIE]))
-        {
-            if ($this->store()->isStarted())
-            {
+        if (isset($cookies[self::COOKIE])) {
+            if ($this->store()->isStarted()) {
                 $outerID = $this->store()->getID();
             }
 
@@ -91,14 +88,12 @@ class SessionStarter implements MiddlewareInterface
          */
         $response = $next($request);
 
-        if (empty($this->store) && $this->container->hasInstance(SessionStore::class))
-        {
+        if (empty($this->store) && $this->container->hasInstance(SessionStore::class)) {
             //Store were started by itself
             $this->store = $this->container->get(SessionStore::class);
         }
 
-        if (!empty($this->store) && ($this->store->isStarted() || $this->store->isDestroyed()))
-        {
+        if (!empty($this->store) && ($this->store->isStarted() || $this->store->isDestroyed())) {
             $response = $this->setCookie($request, $response, $this->store, $cookies);
         }
 
@@ -122,14 +117,11 @@ class SessionStarter implements MiddlewareInterface
         ResponseInterface $response,
         SessionStore $store,
         array $cookies
-    )
-    {
+    ) {
         $store->isStarted() && $store->commit();
 
-        if (!isset($cookies[self::COOKIE]) || $cookies[self::COOKIE] != $store->getID())
-        {
-            if ($response instanceof ResponseInterface)
-            {
+        if (!isset($cookies[self::COOKIE]) || $cookies[self::COOKIE] != $store->getID()) {
+            if ($response instanceof ResponseInterface) {
                 return $response->withAddedHeader(
                     'Set-Cookie',
                     Cookie::create(

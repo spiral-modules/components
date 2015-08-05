@@ -55,8 +55,7 @@ trait RouterTrait
      */
     public function router()
     {
-        if (!empty($this->router))
-        {
+        if (!empty($this->router)) {
             return $this->router;
         }
 
@@ -100,8 +99,7 @@ trait RouterTrait
      */
     protected function createRouter()
     {
-        if (empty($container = $this->container()))
-        {
+        if (empty($container = $this->container())) {
             throw new RouterException("Unable to create default router, default container not set.");
         }
 

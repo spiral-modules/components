@@ -72,13 +72,11 @@ abstract class AbstractIndex implements IndexInterface
     public function getName($quoted = false)
     {
         $name = $this->name;
-        if (empty($this->name))
-        {
+        if (empty($this->name)) {
             $name = $this->table->getName() . '_index_' . join('_', $this->columns) . '_' . uniqid();
         }
 
-        if (strlen($name) > 64)
-        {
+        if (strlen($name) > 64) {
             //Many dbs has limitations on identifier length
             $name = md5($name);
         }
@@ -141,8 +139,7 @@ abstract class AbstractIndex implements IndexInterface
      */
     public function columns($columns)
     {
-        if (!is_array($columns))
-        {
+        if (!is_array($columns)) {
             $columns = func_get_args();
         }
 
@@ -182,8 +179,7 @@ abstract class AbstractIndex implements IndexInterface
         $statement[] = $this->type . ($this->type == self::UNIQUE ? ' INDEX' : '');
         $statement[] = $this->getName(true);
 
-        if ($includeTable)
-        {
+        if ($includeTable) {
             $statement[] = 'ON ' . $this->table->getName(true);
         }
 

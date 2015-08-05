@@ -52,13 +52,11 @@ trait EventsTrait
      */
     public static function events()
     {
-        if (isset(self::$dispatchers[static::class]))
-        {
+        if (isset(self::$dispatchers[static::class])) {
             return self::$dispatchers[static::class];
         }
 
-        if (empty($container = self::container()) || !$container->hasBinding(DispatcherInterface::class))
-        {
+        if (empty($container = self::container()) || !$container->hasBinding(DispatcherInterface::class)) {
             //Let's use default Dispatcher, no one will be harmed
             return self::$dispatchers[static::class] = new Dispatcher();
         }
@@ -76,8 +74,7 @@ trait EventsTrait
      */
     protected function fire($event, $context = null)
     {
-        if (empty(self::$dispatchers[static::class]))
-        {
+        if (empty(self::$dispatchers[static::class])) {
             //We can bypass dispatcher creation
             return $context;
         }

@@ -65,8 +65,7 @@ class Isolator extends Component
         $this->prefix = $prefix;
         $this->postfix = $postfix;
 
-        if ($shortTags)
-        {
+        if ($shortTags) {
             $this->addPattern('<?=', false, "<?php /*%s*/ echo ");
             $this->addPattern('<?', '/<\?(?!php)/is');
         }
@@ -89,16 +88,13 @@ class Isolator extends Component
         $blockID = 0;
 
         $source = '';
-        foreach ($tokens as $token)
-        {
-            if ($token[0] == T_OPEN_TAG || $token[0] == T_OPEN_TAG_WITH_ECHO)
-            {
+        foreach ($tokens as $token) {
+            if ($token[0] == T_OPEN_TAG || $token[0] == T_OPEN_TAG_WITH_ECHO) {
                 $phpBlock = $token[1];
                 continue;
             }
 
-            if ($token[0] == T_CLOSE_TAG)
-            {
+            if ($token[0] == T_CLOSE_TAG) {
                 $phpBlock .= $token[1];
                 $this->phpBlocks[$blockID] = $phpBlock;
                 $phpBlock = '';
@@ -108,18 +104,14 @@ class Isolator extends Component
                 continue;
             }
 
-            if (!empty($phpBlock))
-            {
+            if (!empty($phpBlock)) {
                 $phpBlock .= is_array($token) ? $token[1] : $token;
-            }
-            else
-            {
+            } else {
                 $source .= is_array($token) ? $token[1] : $token;
             }
         }
 
-        foreach ($this->phpBlocks as &$phpBlock)
-        {
+        foreach ($this->phpBlocks as &$phpBlock) {
             //Will repair php source with correct (original) tags
             $phpBlock = $this->restoreTags($phpBlock);
             unset($phpBlock);
@@ -214,8 +206,7 @@ class Isolator extends Component
      */
     protected function getBlock($blockID)
     {
-        if (!isset($this->phpBlocks[$blockID['id']]))
-        {
+        if (!isset($this->phpBlocks[$blockID['id']])) {
             return $blockID[0];
         }
 
@@ -232,12 +223,9 @@ class Isolator extends Component
     private function replaceTags($source)
     {
         $replaces = &$this->replaces;
-        foreach ($this->patterns as $tag => $pattern)
-        {
-            if (empty($pattern['regexp']))
-            {
-                if ($replace = array_search($tag, $replaces))
-                {
+        foreach ($this->patterns as $tag => $pattern) {
+            if (empty($pattern['regexp'])) {
+                if ($replace = array_search($tag, $replaces)) {
                     $source = str_replace($tag, $replace, $source);
                     continue;
                 }
@@ -250,12 +238,10 @@ class Isolator extends Component
                 continue;
             }
 
-            $source = preg_replace_callback($pattern['regexp'], function ($tag) use (&$replaces, $pattern)
-            {
+            $source = preg_replace_callback($pattern['regexp'], function ($tag) use (&$replaces, $pattern) {
                 $tag = $tag[0];
 
-                if ($key = array_search($tag, $replaces))
-                {
+                if ($key = array_search($tag, $replaces)) {
                     return $key;
                 }
 

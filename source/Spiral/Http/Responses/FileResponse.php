@@ -24,8 +24,7 @@ class FileResponse extends Response
      */
     public function __construct($filename, $name = null, $status = 200, array $headers = [])
     {
-        if (!$name)
-        {
+        if (!$name) {
             $name = basename($filename);
         }
 

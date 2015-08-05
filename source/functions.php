@@ -23,17 +23,13 @@ namespace Spiral;
 function interpolate($string, array $values, $prefix = '{', $postfix = '}')
 {
     $replaces = [];
-    foreach ($values as $key => $value)
-    {
+    foreach ($values as $key => $value) {
         $value = (is_array($value) || $value instanceof \Closure) ? '' : $value;
 
-        try
-        {
+        try {
             //Object as string
             $value = is_object($value) ? (string)$value : $value;
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $value = '';
         }
 

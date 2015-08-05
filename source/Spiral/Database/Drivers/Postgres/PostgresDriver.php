@@ -72,8 +72,7 @@ class PostgresDriver extends Driver
         ContainerInterface $container,
         HippocampusInterface $memory,
         array $config
-    )
-    {
+    ) {
         parent::__construct($container, $config);
         $this->memory = $memory;
     }
@@ -85,10 +84,8 @@ class PostgresDriver extends Driver
     {
         $result = parent::prepareParameters($parameters);
 
-        array_walk_recursive($result, function (&$value)
-        {
-            if (is_bool($value))
-            {
+        array_walk_recursive($result, function (&$value) {
+            if (is_bool($value)) {
                 //PDO casts boolean as string, Postgres can't understand it, let's cast it as int
                 $value = (int)$value;
             }
@@ -118,8 +115,7 @@ class PostgresDriver extends Driver
             . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\'';
 
         $tables = [];
-        foreach ($this->query($query) as $row)
-        {
+        foreach ($this->query($query) as $row) {
             $tables[] = $row['table_name'];
         }
 
@@ -135,29 +131,23 @@ class PostgresDriver extends Driver
      */
     public function getPrimary($table)
     {
-        if (empty($this->primaryKeys))
-        {
+        if (empty($this->primaryKeys)) {
             $this->primaryKeys = $this->memory->loadData($this->getSource() . '-primary');
         }
 
-        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys))
-        {
+        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
             return $this->primaryKeys[$table];
         }
-        if (!$this->hasTable($table))
-        {
+        if (!$this->hasTable($table)) {
             throw new DriverException(
                 "Unable to fetch table primary key, no such table '{$table}' exists."
             );
         }
         $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
-        if (count($this->primaryKeys[$table]) === 1)
-        {
+        if (count($this->primaryKeys[$table]) === 1) {
             //We do support only single primary key
             $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
-        }
-        else
-        {
+        } else {
             $this->primaryKeys[$table] = null;
         }
 

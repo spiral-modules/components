@@ -62,18 +62,14 @@ class Hightligher extends Component
     public function highlight($filename, $target = null, $return = 10)
     {
         $result = "";
-        foreach ($this->tokenizer->fetchTokens($filename) as $position => $token)
-        {
+        foreach ($this->tokenizer->fetchTokens($filename) as $position => $token) {
             $source = htmlentities($token[TokenizerInterface::CODE]);
-            foreach ($this->options['styles'] as $style => $tokens)
-            {
-                if (!in_array($token[TokenizerInterface::TYPE], $tokens))
-                {
+            foreach ($this->options['styles'] as $style => $tokens) {
+                if (!in_array($token[TokenizerInterface::TYPE], $tokens)) {
                     continue;
                 }
 
-                if (strpos($source, "\n") === false)
-                {
+                if (strpos($source, "\n") === false) {
                     $source = \Spiral\interpolate($this->options['templates']['token'], [
                         'style' => $style,
                         'token' => $token[TokenizerInterface::CODE]
@@ -83,8 +79,7 @@ class Hightligher extends Component
                 }
 
                 $lines = [];
-                foreach (explode("\n", $source) as $line)
-                {
+                foreach (explode("\n", $source) as $line) {
                     $lines[] = \Spiral\interpolate($this->options['templates']['token'], [
                         'style' => $style,
                         'token' => $line
@@ -113,11 +108,9 @@ class Hightligher extends Component
         $lines = explode("\n", str_replace("\r\n", "\n", $source));
 
         $result = "";
-        foreach ($lines as $number => $code)
-        {
+        foreach ($lines as $number => $code) {
             $number++;
-            if (empty($return) || $number >= $target - $return && $number <= $target + $return)
-            {
+            if (empty($return) || $number >= $target - $return && $number <= $target + $return) {
                 $template = $this->options['templates'][$number === $target ? 'highlighted' : 'line'];
                 $result .= \Spiral\interpolate($template, [
                     'number' => $number,

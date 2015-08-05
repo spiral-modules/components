@@ -121,8 +121,7 @@ class Paginator implements PaginatorInterface
     {
         $this->pageParameter = $pageParameter;
         $queryParams = $this->request->getQueryParams();
-        if (isset($queryParams[$this->pageParameter]))
-        {
+        if (isset($queryParams[$this->pageParameter])) {
             $this->setPage($queryParams[$this->pageParameter]);
         }
 
@@ -143,12 +142,9 @@ class Paginator implements PaginatorInterface
     public function setCount($count)
     {
         $this->count = abs(intval($count));
-        if ($this->count > 0)
-        {
+        if ($this->count > 0) {
             $this->countPages = ceil($this->count / $this->limit);
-        }
-        else
-        {
+        } else {
             $this->countPages = 1;
         }
 
@@ -169,12 +165,9 @@ class Paginator implements PaginatorInterface
     public function setLimit($limit)
     {
         $this->limit = abs(intval($limit));
-        if ($this->count > 0)
-        {
+        if ($this->count > 0) {
             $this->countPages = ceil($this->count / $this->limit);
-        }
-        else
-        {
+        } else {
             $this->countPages = 1;
         }
 
@@ -221,8 +214,7 @@ class Paginator implements PaginatorInterface
      */
     public function countDisplayed()
     {
-        if ($this->currentPage() == $this->countPages)
-        {
+        if ($this->currentPage() == $this->countPages) {
             return $this->count - $this->getOffset();
         }
 
@@ -242,13 +234,11 @@ class Paginator implements PaginatorInterface
      */
     public function currentPage()
     {
-        if ($this->pageNumber < 1)
-        {
+        if ($this->pageNumber < 1) {
             return 1;
         }
 
-        if ($this->pageNumber > $this->countPages)
-        {
+        if ($this->pageNumber > $this->countPages) {
             return $this->countPages;
         }
 
@@ -260,8 +250,7 @@ class Paginator implements PaginatorInterface
      */
     public function nextPage()
     {
-        if ($this->currentPage() != $this->countPages)
-        {
+        if ($this->currentPage() != $this->countPages) {
             return $this->currentPage() + 1;
         }
 
@@ -273,8 +262,7 @@ class Paginator implements PaginatorInterface
      */
     public function previousPage()
     {
-        if ($this->currentPage() > 1)
-        {
+        if ($this->currentPage() > 1) {
             return $this->currentPage() - 1;
         }
 
@@ -310,12 +298,9 @@ class Paginator implements PaginatorInterface
     public function createURL($pageNumber)
     {
         $path = $this->uri->getPath();
-        if (!$path)
-        {
+        if (!$path) {
             $path = '/';
-        }
-        elseif ($path[0] != '/')
-        {
+        } elseif ($path[0] != '/') {
             $path = '/' . $path;
         }
 

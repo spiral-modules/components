@@ -33,8 +33,7 @@ class QueryCompiler extends AbstractCompiler
      */
     public function update($table, array $columns, array $joins = [], array $where = [])
     {
-        if (empty($joins))
-        {
+        if (empty($joins)) {
             return parent::update($table, $columns, $joins, $where);
         }
 
@@ -45,8 +44,7 @@ class QueryCompiler extends AbstractCompiler
 
         //Converting JOINS into FROM tables
         $fromTables = [];
-        foreach ($joins as $table => $join)
-        {
+        foreach ($joins as $table => $join) {
             $fromTables[] = $this->quote($table, true, true);
             $whereTokens = array_merge($whereTokens, $join['on']);
         }
@@ -58,8 +56,7 @@ class QueryCompiler extends AbstractCompiler
         $whereTokens = array_merge($whereTokens, $where);
         $whereTokens[] = ['', ')'];
 
-        if (!empty($whereTokens))
-        {
+        if (!empty($whereTokens)) {
             $statement .= "\nWHERE " . $this->where($whereTokens);
         }
 
@@ -73,8 +70,7 @@ class QueryCompiler extends AbstractCompiler
      */
     public function delete($table, array $joins = [], array $where = [])
     {
-        if (empty($joins))
-        {
+        if (empty($joins)) {
             return parent::delete($table, $joins, $where);
         }
 
@@ -86,8 +82,7 @@ class QueryCompiler extends AbstractCompiler
 
         //Converting JOINS into USING tables
         $usingTables = [];
-        foreach ($joins as $table => $join)
-        {
+        foreach ($joins as $table => $join) {
             $usingTables[] = $this->quote($table, true, true);
             $whereTokens = array_merge($whereTokens, $join['on']);
         }
@@ -98,8 +93,7 @@ class QueryCompiler extends AbstractCompiler
         $whereTokens = array_merge($whereTokens, $where);
         $whereTokens[] = ['', ')'];
 
-        if (!empty($whereTokens))
-        {
+        if (!empty($whereTokens)) {
             $statement .= "\nWHERE " . $this->where($whereTokens);
         }
 

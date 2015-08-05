@@ -85,8 +85,7 @@ class ReflectionCall
         $openTID,
         $closeTID,
         $level
-    )
-    {
+    ) {
         $this->filename = $filename;
         $this->line = $line;
         $this->class = $class;

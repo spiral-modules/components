@@ -85,8 +85,7 @@ class InputManager extends Singleton
     public function request()
     {
         //Check if we still pointing to right request
-        if ($this->request !== $this->container->get(ServerRequestInterface::class))
-        {
+        if ($this->request !== $this->container->get(ServerRequestInterface::class)) {
             $this->request = null;
 
             //Our parameter bags has expired
@@ -117,12 +116,9 @@ class InputManager extends Singleton
     public function path()
     {
         $path = $this->uri()->getPath();
-        if (empty($path))
-        {
+        if (empty($path)) {
             return '/';
-        }
-        elseif ($path[0] !== '/')
-        {
+        } elseif ($path[0] !== '/') {
             return '/' . $path;
         }
 
@@ -190,13 +186,11 @@ class InputManager extends Singleton
      */
     public function bag($name)
     {
-        if (isset($this->bagInstances[$name]))
-        {
+        if (isset($this->bagInstances[$name])) {
             return $this->bagInstances[$name];
         }
 
-        if (!isset($this->bagAssociations[$name]))
-        {
+        if (!isset($this->bagAssociations[$name])) {
             throw new \RuntimeException("Undefined input bag '{$name}'.");
         }
 

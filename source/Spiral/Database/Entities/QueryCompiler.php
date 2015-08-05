@@ -71,13 +71,11 @@ class QueryCompiler extends Component
      */
     public function insert($table, array $columns, array $rowsets)
     {
-        if (empty($columns))
-        {
+        if (empty($columns)) {
             throw new CompilerException("Unable to build insert statement, columns must be set.");
         }
 
-        if (empty($rowsets))
-        {
+        if (empty($rowsets)) {
             throw new CompilerException(
                 "Unable to build insert statement, at least one value set must be provided."
             );
@@ -103,8 +101,7 @@ class QueryCompiler extends Component
         $statement = "UPDATE " . $this->quote($table, true, true)
             . "\nSET" . $this->prepareColumns($columns);
 
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
 
@@ -123,8 +120,7 @@ class QueryCompiler extends Component
     public function delete($table, array $joins = [], array $where = [])
     {
         $statement = 'DELETE FROM ' . $this->quote($table, true);
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
 
@@ -163,8 +159,7 @@ class QueryCompiler extends Component
         $limit = 0,
         $offset = 0,
         array $unions = []
-    )
-    {
+    ) {
         //This statement parts should be processed first to define set of table and column aliases
         $from = $this->tables($from);
         $joins = $joins ? $this->joins($joins) . ' ' : '';
@@ -184,23 +179,19 @@ class QueryCompiler extends Component
                 "SELECT{$distinct}\n{$columns}" . "\nFROM {$from} {$joins}{$where}{$groupBy}{$having}"
             ) . ' ';
 
-        if (empty($unions) && !empty($orderBy))
-        {
+        if (empty($unions) && !empty($orderBy)) {
             $statement .= "\nORDER BY " . $this->orderBy($orderBy);
         }
 
-        if (!empty($unions))
-        {
+        if (!empty($unions)) {
             $statement .= $this->unions($unions);
         }
 
-        if (!empty($unions) && !empty($orderBy))
-        {
+        if (!empty($unions) && !empty($orderBy)) {
             $statement .= "\nORDER BY " . $this->orderBy($orderBy);
         }
 
-        if ($limit || $offset)
-        {
+        if ($limit || $offset) {
             $statement .= "\n" . $this->limit($limit, $offset);
         }
 
@@ -219,13 +210,11 @@ class QueryCompiler extends Component
      */
     public function quote($identifier, $table = false, $forceTable = false)
     {
-        if ($identifier instanceof SQLFragmentInterface)
-        {
+        if ($identifier instanceof SQLFragmentInterface) {
             return $identifier->sqlStatement($this);
         }
 
-        if (preg_match('/ as /i', $identifier, $matches))
-        {
+        if (preg_match('/ as /i', $identifier, $matches)) {
             list($identifier, $alias) = explode($matches[0], $identifier);
 
             /**
@@ -236,8 +225,7 @@ class QueryCompiler extends Component
                 . $matches[0]
                 . $this->driver->identifier($alias);
 
-            if ($table && strpos($identifier, '.') === false)
-            {
+            if ($table && strpos($identifier, '.') === false) {
                 //We have to apply operation post factum to prevent self aliasing (name AS name
                 //when db has prefix, expected: prefix_name as name)
                 $this->aliases[$alias] = $identifier;
@@ -246,19 +234,15 @@ class QueryCompiler extends Component
             return $quoted;
         }
 
-        if (strpos($identifier, '(') || strpos($identifier, ' '))
-        {
-            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i', function ($identifier) use (&$table)
-            {
+        if (strpos($identifier, '(') || strpos($identifier, ' ')) {
+            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i', function ($identifier) use (&$table) {
                 $identifier = $identifier[1];
-                if (substr($identifier, -1) == '(')
-                {
+                if (substr($identifier, -1) == '(') {
                     //Function name
                     return $identifier;
                 }
 
-                if ($table)
-                {
+                if ($table) {
                     $table = false;
 
                     //Only first table has to be escaped
@@ -269,12 +253,9 @@ class QueryCompiler extends Component
             }, $identifier);
         }
 
-        if (strpos($identifier, '.') === false)
-        {
-            if (($table && !isset($this->aliases[$identifier])) || $forceTable)
-            {
-                if (!isset($this->aliases[$this->tablePrefix . $identifier]))
-                {
+        if (strpos($identifier, '.') === false) {
+            if (($table && !isset($this->aliases[$identifier])) || $forceTable) {
+                if (!isset($this->aliases[$this->tablePrefix . $identifier])) {
                     $this->aliases[$this->tablePrefix . $identifier] = $identifier;
                 }
 
@@ -287,8 +268,7 @@ class QueryCompiler extends Component
         $identifier = explode('.', $identifier);
 
         //Expecting first element be table name
-        if (!isset($this->aliases[$identifier[0]]))
-        {
+        if (!isset($this->aliases[$identifier[0]])) {
             $identifier[0] = $this->tablePrefix . $identifier[0];
         }
 
@@ -314,8 +294,7 @@ class QueryCompiler extends Component
         array  $joins = [],
         array $having = [],
         array $columns = []
-    )
-    {
+    ) {
         return array_merge($columns, $joins, $where, $having);
     }
 
@@ -340,23 +319,16 @@ class QueryCompiler extends Component
      */
     protected function prepareColumns(array $columns, $tableAlias = '')
     {
-        foreach ($columns as $column => &$value)
-        {
-            if ($value instanceof QueryBuilder)
-            {
+        foreach ($columns as $column => &$value) {
+            if ($value instanceof QueryBuilder) {
                 $value = '(' . $value->sqlStatement($this) . ')';
-            }
-            elseif ($value instanceof SQLFragmentInterface)
-            {
+            } elseif ($value instanceof SQLFragmentInterface) {
                 $value = $value->sqlStatement($this);
-            }
-            else
-            {
+            } else {
                 $value = '?';
             }
 
-            if (strpos($column, '.') === false && !empty($tableAlias))
-            {
+            if (strpos($column, '.') === false && !empty($tableAlias)) {
                 $column = $tableAlias . '.' . $column;
             }
 
@@ -387,8 +359,7 @@ class QueryCompiler extends Component
      */
     protected function tables(array $tables)
     {
-        foreach ($tables as &$table)
-        {
+        foreach ($tables as &$table) {
             $table = $this->quote($table, true, true);
             unset($table);
         }
@@ -416,12 +387,10 @@ class QueryCompiler extends Component
     protected function joins(array $joins)
     {
         $statement = '';
-        foreach ($joins as $table => $join)
-        {
+        foreach ($joins as $table => $join) {
             $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
 
-            if (!empty($join['on']))
-            {
+            if (!empty($join['on'])) {
                 $statement .= "\n    ON " . $this->where($join['on']);
             }
         }
@@ -438,41 +407,34 @@ class QueryCompiler extends Component
      */
     protected function where(array $tokens)
     {
-        if (empty($tokens))
-        {
+        if (empty($tokens)) {
             return '';
         }
 
         $statement = '';
 
         $activeGroup = true;
-        foreach ($tokens as $condition)
-        {
+        foreach ($tokens as $condition) {
             $joiner = $condition[0];
             $context = $condition[1];
 
             //First condition in group/query, no any AND, OR required
-            if ($activeGroup)
-            {
+            if ($activeGroup) {
                 //Kill AND, OR and etc.
                 $joiner = '';
 
                 //Next conditions require AND or OR
                 $activeGroup = false;
-            }
-            else
-            {
+            } else {
                 $joiner .= ' ';
             }
 
-            if ($context == '(')
-            {
+            if ($context == '(') {
                 //New where group.
                 $activeGroup = true;
             }
 
-            if (is_string($context))
-            {
+            if (is_string($context)) {
                 $statement = rtrim($statement . $joiner)
                     . ($joiner && $context == '(' ? ' ' : '')
                     . $context
@@ -481,43 +443,34 @@ class QueryCompiler extends Component
                 continue;
             }
 
-            if ($context instanceof QueryBuilder)
-            {
+            if ($context instanceof QueryBuilder) {
                 $statement .= $joiner . ' (' . $context->sqlStatement($this) . ') ';
                 continue;
             }
 
-            if ($context instanceof SQLFragmentInterface)
-            {
+            if ($context instanceof SQLFragmentInterface) {
                 //( ?? )
                 $statement .= $joiner . ' ' . $context->sqlStatement($this) . ' ';
                 continue;
             }
 
             list($identifier, $operator, $value) = $context;
-            if ($identifier instanceof QueryBuilder)
-            {
+            if ($identifier instanceof QueryBuilder) {
                 $identifier = '(' . $identifier->sqlStatement($this) . ')';
-            }
-            elseif ($identifier instanceof SQLFragmentInterface)
-            {
+            } elseif ($identifier instanceof SQLFragmentInterface) {
                 $identifier = $identifier->sqlStatement($this);
-            }
-            else
-            {
+            } else {
                 $identifier = $this->quote($identifier);
             }
 
-            if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN')
-            {
+            if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN') {
                 $statement .= "{$joiner} {$identifier} " . "{$operator} "
                     . "{$this->getPlaceholder($value)} AND {$this->getPlaceholder($context[3])} ";
 
                 continue;
             }
 
-            if ($value === null || ($value instanceof ParameterInterface && $value->getValue() === null))
-            {
+            if ($value === null || ($value instanceof ParameterInterface && $value->getValue() === null)) {
                 $operator = $operator == '=' ? 'IS' : 'IS NOT';
             }
 
@@ -527,25 +480,20 @@ class QueryCompiler extends Component
                     is_array($value)
                     || ($value instanceof ParameterInterface && is_array($value->getValue()))
                 )
-            )
-            {
+            ) {
                 $operator = 'IN';
             }
 
-            if ($value instanceof QueryBuilder)
-            {
+            if ($value instanceof QueryBuilder) {
                 $value = ' (' . $value . ') ';
-            }
-            else
-            {
+            } else {
                 $value = $this->getPlaceholder($value);
             }
 
             $statement .= "{$joiner}{$identifier} {$operator} {$value} ";
         }
 
-        if ($activeGroup)
-        {
+        if ($activeGroup) {
             throw new CompilerException("Unable to build where statement, unclosed where group.");
         }
 
@@ -560,8 +508,7 @@ class QueryCompiler extends Component
      */
     protected function getPlaceholder($value)
     {
-        if ($value instanceof SQLFragmentInterface)
-        {
+        if ($value instanceof SQLFragmentInterface) {
             return $value->sqlStatement($this);
         }
 
@@ -578,8 +525,7 @@ class QueryCompiler extends Component
     protected function unions(array $unions)
     {
         $statement = '';
-        foreach ($unions as $union)
-        {
+        foreach ($unions as $union) {
             $statement .= "\nUNION {$union[1]}\n({$union[0]})";
         }
 
@@ -595,8 +541,7 @@ class QueryCompiler extends Component
     protected function orderBy(array $orderBy)
     {
         $statement = '';
-        foreach ($orderBy as $item)
-        {
+        foreach ($orderBy as $item) {
             $statement .= $this->quote($item[0]) . ' ' . strtoupper($item[1]);
         }
 
@@ -612,8 +557,7 @@ class QueryCompiler extends Component
     protected function groupBy(array $groupBy)
     {
         $statement = '';
-        foreach ($groupBy as $identifier)
-        {
+        foreach ($groupBy as $identifier) {
             $statement .= $this->quote($identifier);
         }
 
@@ -630,13 +574,11 @@ class QueryCompiler extends Component
     protected function limit($limit, $offset)
     {
         $statement = '';
-        if (!empty($limit))
-        {
+        if (!empty($limit)) {
             $statement = "LIMIT {$limit} ";
         }
 
-        if (!empty($offset))
-        {
+        if (!empty($offset)) {
             $statement .= "OFFSET {$offset}";
         }
 
@@ -653,15 +595,12 @@ class QueryCompiler extends Component
      */
     public static function interpolate($query, array $parameters = [])
     {
-        if (empty($parameters))
-        {
+        if (empty($parameters)) {
             return $query;
         }
 
-        array_walk($parameters, function (&$parameter)
-        {
-            switch (gettype($parameter))
-            {
+        array_walk($parameters, function (&$parameter) {
+            switch (gettype($parameter)) {
                 case "boolean":
                     return $parameter = $parameter ? 'true' : 'false';
                 case "integer":
@@ -673,8 +612,7 @@ class QueryCompiler extends Component
                 case "string":
                     return $parameter = "'" . addcslashes($parameter, "'") . "'";
                 case 'object':
-                    if (method_exists($parameter, '__toString'))
-                    {
+                    if (method_exists($parameter, '__toString')) {
                         return $parameter = "'" . addcslashes((string)$parameter, "'") . "'";
                     }
             }
@@ -683,13 +621,11 @@ class QueryCompiler extends Component
         });
 
         reset($parameters);
-        if (!is_int(key($parameters)))
-        {
+        if (!is_int(key($parameters))) {
             return \Spiral\interpolate($query, $parameters, '', '');
         }
 
-        foreach ($parameters as $parameter)
-        {
+        foreach ($parameters as $parameter) {
             $query = preg_replace('/\?/', $parameter, $query, 1);
         }
 

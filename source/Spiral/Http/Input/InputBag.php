@@ -70,8 +70,7 @@ class InputBag implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function get($name, $default = null)
     {
-        if (!$this->has($name))
-        {
+        if (!$this->has($name)) {
             return $default;
         }
 
@@ -90,8 +89,7 @@ class InputBag implements \Countable, \IteratorAggregate, \ArrayAccess
     {
         $result = array_intersect_key($this->data, array_flip($keys));;
 
-        if (!$fill)
-        {
+        if (!$fill) {
             return $result;
         }
 

@@ -120,16 +120,12 @@ class DirectRoute extends AbstractRoute
     {
         $route = $this;
 
-        return function (ServerRequestInterface $request) use ($container, $route)
-        {
+        return function (ServerRequestInterface $request) use ($container, $route) {
             $controller = $route->matches['controller'];
-            if (isset($route->controllers[$controller]))
-            {
+            if (isset($route->controllers[$controller])) {
                 //Aliased
                 $controller = $route->controllers[$controller];
-            }
-            else
-            {
+            } else {
                 $controller = $route->namespace . '\\' . ucfirst($controller) . $route->postfix;
             }
 

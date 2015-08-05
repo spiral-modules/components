@@ -95,13 +95,11 @@ class MiddlewarePipeline
      */
     protected function next($position, ServerRequestInterface $outerRequest)
     {
-        $next = function ($request = null) use ($position, $outerRequest)
-        {
+        $next = function ($request = null) use ($position, $outerRequest) {
             return $this->next(++$position, $request ?: $outerRequest);
         };
 
-        if (!isset($this->middlewares[$position]))
-        {
+        if (!isset($this->middlewares[$position])) {
             return $this->createResponse($outerRequest);
         }
 
@@ -128,15 +126,12 @@ class MiddlewarePipeline
         $outerRequest = $this->container->replace(ServerRequestInterface::class, $request);
 
         ob_start();
-        if ($this->target instanceof \Closure)
-        {
+        if ($this->target instanceof \Closure) {
             $reflection = new \ReflectionFunction($this->target);
             $response = $reflection->invokeArgs(
                 $this->container->resolveArguments($reflection, ['request' => $request])
             );
-        }
-        else
-        {
+        } else {
             $response = call_user_func($this->target, $request);
         }
         $output = ob_get_clean();
@@ -157,28 +152,22 @@ class MiddlewarePipeline
      */
     private function wrapResponse($response, $output = '')
     {
-        if ($response instanceof ResponseInterface)
-        {
-            if (!empty($output))
-            {
+        if ($response instanceof ResponseInterface) {
+            if (!empty($output)) {
                 $response->getBody()->write($output);
             }
 
             return $response;
         }
 
-        if (is_array($response) || $response instanceof \JsonSerializable)
-        {
+        if (is_array($response) || $response instanceof \JsonSerializable) {
             $code = 200;
-            if (is_array($response))
-            {
-                if (!empty($output))
-                {
+            if (is_array($response)) {
+                if (!empty($output)) {
                     $response['output'] = $output;
                 }
 
-                if (isset($response['status']))
-                {
+                if (isset($response['status'])) {
                     $code = $response['status'];
                 }
             }

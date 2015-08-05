@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Validation;
+
 use Spiral\Validation\Exceptions\ValidationException;
 
 /**

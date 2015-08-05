@@ -58,8 +58,7 @@ class GridfsServer extends StorageServer
      */
     public function size(BucketInterface $bucket, $name)
     {
-        if (!$file = $this->exists($bucket, $name))
-        {
+        if (!$file = $this->exists($bucket, $name)) {
             return false;
         }
 
@@ -90,8 +89,7 @@ class GridfsServer extends StorageServer
         $tempFilename = $this->files->tempFilename();
         copy($this->castFilename($source), $tempFilename);
 
-        if (!$this->gridFS($bucket)->storeFile($tempFilename, ['filename' => $name]))
-        {
+        if (!$this->gridFS($bucket)->storeFile($tempFilename, ['filename' => $name])) {
             throw new ServerException("Unable to store {$name} in GridFS server.");
         }
 
@@ -105,8 +103,7 @@ class GridfsServer extends StorageServer
      */
     public function allocateStream(BucketInterface $bucket, $name)
     {
-        if (!$file = $this->exists($bucket, $name))
-        {
+        if (!$file = $this->exists($bucket, $name)) {
             throw new ServerException(
                 "Unable to create stream for '{$name}', object does not exists."
             );

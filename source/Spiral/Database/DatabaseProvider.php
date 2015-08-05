@@ -78,20 +78,16 @@ class DatabaseProvider extends Singleton implements InjectorInterface
     public function db($database = null, array $config = [], Driver $driver = null)
     {
         $database = !empty($database) ? $database : $this->config['default'];
-        if (isset($this->config['aliases'][$database]))
-        {
+        if (isset($this->config['aliases'][$database])) {
             $database = $this->config['aliases'][$database];
         }
 
-        if (isset($this->databases[$database]))
-        {
+        if (isset($this->databases[$database])) {
             return $this->databases[$database];
         }
 
-        if (empty($config))
-        {
-            if (!isset($this->config['databases'][$database]))
-            {
+        if (empty($config)) {
+            if (!isset($this->config['databases'][$database])) {
                 throw new DatabaseException(
                     "Unable to create database, no presets for '{$database}' found."
                 );
@@ -100,8 +96,7 @@ class DatabaseProvider extends Singleton implements InjectorInterface
             $config = $this->config['databases'][$database];
         }
 
-        if (empty($driver))
-        {
+        if (empty($driver)) {
             //Driver identifier can be fetched from connection string
             $driver = substr($config['connection'], 0, strpos($config['connection'], ':'));
 

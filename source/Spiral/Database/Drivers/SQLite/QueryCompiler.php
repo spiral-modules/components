@@ -27,28 +27,22 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      */
     public function insert($table, array $columns, array $rowsets)
     {
-        if (count($rowsets) == 1)
-        {
+        if (count($rowsets) == 1) {
             return parent::insert($table, $columns, $rowsets);
         }
 
         //SQLite uses alternative syntax
         $statement[] = "INSERT INTO {$this->quote($table, true)} ({$this->columns($columns)})";
 
-        foreach ($rowsets as $rowset)
-        {
-            if (count($statement) == 1)
-            {
+        foreach ($rowsets as $rowset) {
+            if (count($statement) == 1) {
                 $selectColumns = [];
-                foreach ($columns as $column)
-                {
+                foreach ($columns as $column) {
                     $selectColumns[] = "? AS {$this->quote($column)}";
                 }
 
                 $statement[] = 'SELECT ' . join(', ', $selectColumns);
-            }
-            else
-            {
+            } else {
                 $statement[] = 'UNION SELECT ' . trim(str_repeat('?, ', count($columns)), ', ');
             }
         }
@@ -66,12 +60,9 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         );
 
         $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
+        if (preg_match('/ as /i', $alias, $matches)) {
             list($table, $alias) = explode($matches[0], $table);
-        }
-        elseif (empty($joins))
-        {
+        } elseif (empty($joins)) {
             return parent::update($table, $columns, $joins, $where);
         }
 
@@ -86,12 +77,9 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
     public function delete($table, array $joins = [], array $where = [])
     {
         $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches))
-        {
+        if (preg_match('/ as /i', $alias, $matches)) {
             list($table, $alias) = explode($matches[0], $table);
-        }
-        elseif (empty($joins))
-        {
+        } elseif (empty($joins)) {
             return parent::delete($table, $joins, $where);
         }
 
@@ -109,13 +97,11 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
     {
         $statement = '';
 
-        if ($limit || $offset)
-        {
+        if ($limit || $offset) {
             $statement = "LIMIT " . ($limit ?: '-1') . " ";
         }
 
-        if ($offset)
-        {
+        if ($offset) {
             $statement .= "OFFSET {$offset}";
         }
 

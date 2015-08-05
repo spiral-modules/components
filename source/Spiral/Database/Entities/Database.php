@@ -241,14 +241,12 @@ class Database extends Component implements DatabaseInterface
     {
         $store = !empty($store) ? $store : $this->container->get(StoreInterface::class);
 
-        if (empty($key))
-        {
+        if (empty($key)) {
             //Trying to build unique query id based on provided options and environment.
             $key = md5(serialize([$query, $parameters, $this->name, $this->tablePrefix]));
         }
 
-        $data = $store->remember($key, $lifetime, function () use ($query, $parameters)
-        {
+        $data = $store->remember($key, $lifetime, function () use ($query, $parameters) {
             return $this->query($query, $parameters)->fetchAll();
         });
 
@@ -300,8 +298,7 @@ class Database extends Component implements DatabaseInterface
     public function select($columns = '*')
     {
         $columns = func_get_args();
-        if (is_array($columns) && isset($columns[0]) && is_array($columns[0]))
-        {
+        if (is_array($columns) && isset($columns[0]) && is_array($columns[0])) {
             //Can be required in some cases while collecting data from Table->select(), stupid bug.
             $columns = $columns[0];
         }
@@ -319,15 +316,12 @@ class Database extends Component implements DatabaseInterface
     {
         $this->begin($isolationLevel);
 
-        try
-        {
+        try {
             $result = call_user_func($callback, $this);
             $this->commit();
 
             return $result;
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             $this->rollBack();
             throw $exception;
         }
@@ -386,10 +380,8 @@ class Database extends Component implements DatabaseInterface
     public function getTables()
     {
         $result = [];
-        foreach ($this->driver->tableNames() as $table)
-        {
-            if ($this->tablePrefix && strpos($table, $this->tablePrefix) !== 0)
-            {
+        foreach ($this->driver->tableNames() as $table) {
+            if ($this->tablePrefix && strpos($table, $this->tablePrefix) !== 0) {
                 //Logical partitioning
                 continue;
             }

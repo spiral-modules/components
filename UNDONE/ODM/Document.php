@@ -218,26 +218,13 @@ abstract class Document extends DataEntity implements CompositableInterface
      * @param ODM                   $odm    ODM component, will be received from container if not
      *                                      provided.
      */
-    public function __construct($data = [], $parent = null, $options = null, array $schema = [], ODM $odm = null)
+    public function __construct($data = [], $parent = null, $options = null, ODM $odm = null, array $schema = [])
     {
         $this->parent = $parent;
+        $this->odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
+        $this->schema = !empty($schema) ? $schema : $odm->getSchema(static::class);
 
-        if (empty($odm))
-        {
-            //Will work only when global container is set!
-            $odm = self::getContainer()->get(ODM::class);
-        }
-
-        $this->odm = $odm;
-
-        if (!isset(self::$schemaCache[$class = get_class($this)]))
-        {
-            static::initialize();
-            self::$schemaCache[$class] = $this->odm->getSchema(get_class($this));
-        }
-
-        //Prepared document schema
-        $this->schema = self::$schemaCache[$class];
+        static::initialize();
 
         //Forcing default values
         if (!empty($this->schema[ODM::D_DEFAULTS]))

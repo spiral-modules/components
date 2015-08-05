@@ -63,8 +63,7 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
         $this->container = $bucket;
 
         //Loading buckets
-        foreach ($this->config['buckets'] as $name => $bucket)
-        {
+        foreach ($this->config['buckets'] as $name => $bucket) {
             //Using default implementation
             $this->buckets[$name] = $this->container->get(StorageBucket::class, [
                     'storage' => $this
@@ -78,8 +77,7 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
      */
     public function registerBucket($name, $prefix, $server, array $options = [])
     {
-        if (isset($this->buckets[$name]))
-        {
+        if (isset($this->buckets[$name])) {
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
         }
 
@@ -95,13 +93,11 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
      */
     public function bucket($bucket)
     {
-        if (empty($bucket))
-        {
+        if (empty($bucket)) {
             throw new StorageException("Unable to fetch bucket, name can not be empty.");
         }
 
-        if (isset($this->buckets[$bucket]))
-        {
+        if (isset($this->buckets[$bucket])) {
             return $this->buckets[$bucket];
         }
 
@@ -125,12 +121,9 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
          * @var BucketInterface $bestBucket
          */
         $bestBucket = null;
-        foreach ($this->buckets as $bucket)
-        {
-            if (!empty($prefixLength = $bucket->hasAddress($address)))
-            {
-                if (empty($bestBucket) || strlen($bestBucket->getPrefix()) < $prefixLength)
-                {
+        foreach ($this->buckets as $bucket) {
+            if (!empty($prefixLength = $bucket->hasAddress($address))) {
+                if (empty($bestBucket) || strlen($bestBucket->getPrefix()) < $prefixLength) {
                     $bestBucket = $bucket;
                     $name = substr($address, $prefixLength);
                 }
@@ -145,18 +138,15 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
      */
     public function server($server, array $options = [])
     {
-        if (isset($this->servers[$server]))
-        {
+        if (isset($this->servers[$server])) {
             return $this->servers[$server];
         }
 
-        if (!empty($options))
-        {
+        if (!empty($options)) {
             $this->config['servers'][$server] = $options;
         }
 
-        if (!array_key_exists($server, $this->config['servers']))
-        {
+        if (!array_key_exists($server, $this->config['servers'])) {
             throw new StorageException("Undefined storage server '{$server}'.");
         }
 
@@ -180,6 +170,6 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
      */
     public function open($address)
     {
-        return new StorageObject($address, '', $this);
+        return new StorageObject($address, $this);
     }
 }

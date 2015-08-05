@@ -81,20 +81,17 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
      */
     public function setID($id)
     {
-        if ($this->id == $id)
-        {
+        if ($this->id == $id) {
             return;
         }
 
-        if ($this->started)
-        {
+        if ($this->started) {
             $this->commit();
             $this->id = $id;
             $this->start();
         }
 
-        if ($this->destroyed)
-        {
+        if ($this->destroyed) {
             $this->destroyed = false;
             $this->id = $id;
             $this->start();
@@ -108,8 +105,7 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
      */
     public function getID($start = true)
     {
-        if (!$this->started && $start)
-        {
+        if (!$this->started && $start) {
             $this->start();
         }
 
@@ -123,8 +119,7 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
      */
     public function start(\SessionHandler $handler = null)
     {
-        if ($this->started)
-        {
+        if ($this->started) {
             return true;
         }
 
@@ -133,12 +128,10 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
 
         !empty($this->id) && session_id($this->id);
 
-        if (empty($handler))
-        {
+        if (empty($handler)) {
             $defaultHandler = $this->config['handler'];
 
-            if ($defaultHandler != self::NATIVE_HANDLER)
-            {
+            if ($defaultHandler != self::NATIVE_HANDLER) {
                 $config = $this->config['handlers'][$this->config['handler']];
 
                 $this->benchmark('handler', $this->config['handler']);
@@ -152,8 +145,7 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
 
         !empty($handler) && session_set_save_handler($handler, true);
 
-        try
-        {
+        try {
             $this->benchmark('start');
             session_start();
             $this->benchmark('start');
@@ -161,9 +153,7 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
             $this->id = session_id();
             $this->started = true;
             $this->destroyed = false;
-        }
-        catch (\ErrorException $exception)
-        {
+        } catch (\ErrorException $exception) {
             throw new SessionException($exception->getMessage(), $exception->getCode());
         }
 
@@ -217,8 +207,7 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
      */
     public function destroy()
     {
-        if (empty($this->id))
-        {
+        if (empty($this->id)) {
             return;
         }
 

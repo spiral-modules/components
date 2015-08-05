@@ -44,8 +44,7 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
         QueryCompiler $compiler,
         $table = '',
         array $where = []
-    )
-    {
+    ) {
         parent::__construct($database, $compiler);
 
         $this->table = $table;
@@ -61,8 +60,7 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
      */
     public function run()
     {
-        if (empty($this->whereTokens) && empty($this->joinTokens))
-        {
+        if (empty($this->whereTokens) && empty($this->joinTokens)) {
             $this->logger()->warning("Affect query performed without any limiting condition.");
         }
 

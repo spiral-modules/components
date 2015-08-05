@@ -79,10 +79,8 @@ class Loader extends Singleton
      */
     public function enable()
     {
-        if (!$this->enabled)
-        {
-            if ((!$this->loadmap = $this->memory->loadData($this->name)) || !is_array($this->loadmap))
-            {
+        if (!$this->enabled) {
+            if ((!$this->loadmap = $this->memory->loadData($this->name)) || !is_array($this->loadmap)) {
                 $this->loadmap = [];
             }
 
@@ -121,10 +119,8 @@ class Loader extends Singleton
      */
     public function setName($name)
     {
-        if ($this->name != $name)
-        {
-            if (empty($this->loadmap = $this->memory->loadData($name)) || !is_array($this->loadmap))
-            {
+        if ($this->name != $name) {
+            if (empty($this->loadmap = $this->memory->loadData($name)) || !is_array($this->loadmap)) {
                 $this->loadmap = [];
             }
         }
@@ -140,15 +136,11 @@ class Loader extends Singleton
      */
     public function loadClass($class)
     {
-        if (isset($this->loadmap[$class]))
-        {
-            try
-            {
+        if (isset($this->loadmap[$class])) {
+            try {
                 //We already know route to class declaration
                 include_once($this->classes[$class] = $this->loadmap[$class]);
-            }
-            catch (\ErrorException $exception)
-            {
+            } catch (\ErrorException $exception) {
                 //File was replaced or removed
                 unset($this->loadmap[$class]);
                 $this->memory->saveData($this->name, $this->loadmap);
@@ -161,38 +153,26 @@ class Loader extends Singleton
         }
 
         //Composer and other loaders.
-        foreach (spl_autoload_functions() as $function)
-        {
-            if ($function instanceof \Closure || $function[0] != $this)
-            {
+        foreach (spl_autoload_functions() as $function) {
+            if ($function instanceof \Closure || $function[0] != $this) {
                 call_user_func($function, $class);
 
-                if (
-                    class_exists($class, false)
-                    || interface_exists($class, false)
-                    || trait_exists($class, false)
-                )
-                {
+                if (class_exists($class, false) || interface_exists($class, false) || trait_exists($class, false)) {
                     //Class has been successfully found by external loader
-
                     //External loader are not going to provide us any information about class
-                    // location, let's get it via Reflection
+                    //location, let's get it via Reflection
                     $reflector = new \ReflectionClass($class);
 
-                    try
-                    {
+                    try {
                         $filename = str_replace('\\', '/', $reflector->getFileName());
                         $filename = rtrim(str_replace('//', '/', $filename), '/');
 
                         //Direct access to filesystem, yep.
-                        if (file_exists($filename))
-                        {
+                        if (file_exists($filename)) {
                             $this->loadmap[$class] = $this->classes[$class] = $filename;
                             $this->memory->saveData($this->name, $this->loadmap);
                         }
-                    }
-                    catch (\ErrorException $exception)
-                    {
+                    } catch (\ErrorException $exception) {
                         //getFileName can throw and exception, we can ignore it
                     }
 

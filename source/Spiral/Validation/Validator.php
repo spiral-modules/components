@@ -126,7 +126,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     }
 
     /**
-     * @param ContainerInterface     $container
+     * @param ContainerInterface $container
      * @param ValidationProvider $configurator
      */
     public function saturate(ContainerInterface $container, ValidationProvider $configurator)
@@ -216,12 +216,9 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     protected function validate()
     {
         $this->errors = [];
-        foreach ($this->rules as $field => $rules)
-        {
-            foreach ($rules as $rule)
-            {
-                if (isset($this->errors[$field]))
-                {
+        foreach ($this->rules as $field => $rules) {
+            foreach ($rules as $rule) {
+                if (isset($this->errors[$field])) {
                     //We are validating field till first error
                     continue;
                 }
@@ -229,8 +226,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                 //Condition either rule itself or first array element
                 $condition = is_string($rule) ? $rule : $rule[0];
 
-                if (empty($this->field($field)) && !in_array($condition, $this->options['emptyConditions']))
-                {
+                if (empty($this->field($field)) && !in_array($condition, $this->options['emptyConditions'])) {
                     //There is no need to validate empty field except for special conditions
                     break;
                 }
@@ -242,22 +238,18 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                     $arguments = is_string($rule) ? [] : $this->fetchArguments($rule)
                 );
 
-                if ($result === true)
-                {
+                if ($result === true) {
                     //No errors
                     continue;
                 }
 
-                if ($result == self::STOP_VALIDATION)
-                {
+                if ($result == self::STOP_VALIDATION) {
                     //Validation has to be stopped per rule request
                     break;
                 }
 
-                if ($result instanceof Checker)
-                {
-                    if ($message = $result->getMessage($condition[1]))
-                    {
+                if ($result instanceof Checker) {
+                    if ($message = $result->getMessage($condition[1])) {
                         //Checker provides it's own message for condition
                         $this->addMessage(
                             $field,
@@ -298,22 +290,17 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     protected function check($field, $value, &$condition, array $arguments = [])
     {
-        if (is_string($condition) && isset($this->options['aliases'][$condition]))
-        {
+        if (is_string($condition) && isset($this->options['aliases'][$condition])) {
             //Condition were aliased
             $condition = $this->options['aliases'][$condition];
         }
 
-        try
-        {
-            if (strpos($condition, '::'))
-            {
+        try {
+            if (strpos($condition, '::')) {
                 $condition = explode('::', $condition);
-                if (isset($this->options['checkers'][$condition[0]]))
-                {
+                if (isset($this->options['checkers'][$condition[0]])) {
                     $checker = $this->checker($condition[0]);
-                    if (!$result = $checker->check($condition[1], $value, $arguments, $this))
-                    {
+                    if (!$result = $checker->check($condition[1], $value, $arguments, $this)) {
                         //To let validation() method know that message should be handled via Checker
                         return $checker;
                     }
@@ -322,20 +309,15 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                 }
             }
 
-            if (is_string($condition) || is_array($condition))
-            {
+            if (is_string($condition) || is_array($condition)) {
                 array_unshift($arguments, $value);
 
                 return call_user_func_array($condition, $arguments);
             }
-        }
-        catch (\ErrorException $exception)
-        {
+        } catch (\ErrorException $exception) {
             $condition = func_get_arg(1);
-            if (is_array($condition))
-            {
-                if (is_object($condition[0]))
-                {
+            if (is_array($condition)) {
+                if (is_object($condition[0])) {
                     $condition[0] = get_class($condition[0]);
                 }
 
@@ -362,13 +344,11 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     protected function checker($name)
     {
-        if (isset(self::$checkers[$name]))
-        {
+        if (isset(self::$checkers[$name])) {
             return self::$checkers[$name];
         }
 
-        if (!isset($this->options['checkers'][$name]))
-        {
+        if (!isset($this->options['checkers'][$name])) {
             throw new ValidationException(
                 "Unable to create validation checker defined by '{$name}' name."
             );
@@ -400,13 +380,11 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     private function fetchMessage(array $rule, $message)
     {
-        if (isset($rule['message']))
-        {
+        if (isset($rule['message'])) {
             $message = $rule['message'];
         }
 
-        if (isset($rule['error']))
-        {
+        if (isset($rule['error'])) {
             $message = $rule['error'];
         }
 
@@ -423,25 +401,20 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     private function addMessage($field, $message, $condition, array $arguments = [])
     {
-        if (is_array($condition))
-        {
-            if (is_object($condition[0]))
-            {
+        if (is_array($condition)) {
+            if (is_object($condition[0])) {
                 $condition[0] = get_class($condition[0]);
             }
 
             $condition = join('::', $condition);
         }
 
-        if ($this->options['names'])
-        {
+        if ($this->options['names']) {
             $this->errors[$field] = \Spiral\interpolate(
                 $message,
                 compact('field', 'condition') + $arguments
             );
-        }
-        else
-        {
+        } else {
             $this->errors[$field] = \Spiral\interpolate(
                 $message,
                 compact('condition') + $arguments

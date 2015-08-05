@@ -79,8 +79,7 @@ class Translator extends Singleton implements TranslatorInterface
      */
     public function setLanguage($language)
     {
-        if (!isset($this->config['languages'][$language]))
-        {
+        if (!isset($this->config['languages'][$language])) {
             throw new LanguageException("Invalid language '{$language}', no presets found.");
         }
 
@@ -106,20 +105,17 @@ class Translator extends Singleton implements TranslatorInterface
     {
         $this->loadBundle($bundle);
 
-        if (!isset($this->bundles[$bundle][$string = $this->normalize($string)]))
-        {
+        if (!isset($this->bundles[$bundle][$string = $this->normalize($string)])) {
             $this->bundles[$bundle][$string] = func_get_arg(1);
             $this->saveBundle($bundle);
         }
 
-        if (func_num_args() == 2)
-        {
+        if (func_num_args() == 2) {
             //Just simple text line
             return $this->bundles[$bundle][$string];
         }
 
-        if (is_array(func_get_arg(2)))
-        {
+        if (is_array(func_get_arg(2))) {
             return \Spiral\interpolate($this->bundles[$bundle][$string], func_get_arg(2));
         }
 
@@ -137,8 +133,7 @@ class Translator extends Singleton implements TranslatorInterface
     {
         $this->loadBundle($bundle = $this->config['plurals']);
 
-        if (!isset($this->bundles[$bundle][$phrase = $this->normalize($phrase)]))
-        {
+        if (!isset($this->bundles[$bundle][$phrase = $this->normalize($phrase)])) {
             $this->bundles[$bundle][$phrase] = array_pad(
                 [],
                 $this->pluralizer()->countForms(),
@@ -148,8 +143,7 @@ class Translator extends Singleton implements TranslatorInterface
             $this->saveBundle($bundle);
         }
 
-        if (is_null($number))
-        {
+        if (is_null($number)) {
             return $this->bundles[$bundle][$phrase];
         }
 
@@ -168,8 +162,7 @@ class Translator extends Singleton implements TranslatorInterface
     public function pluralizer($language = null)
     {
         $language = !empty($language) ? $language : $this->language;
-        if (isset($this->pluralizers[$language]))
-        {
+        if (isset($this->pluralizers[$language])) {
             return $this->pluralizers[$language];
         }
 
@@ -185,14 +178,12 @@ class Translator extends Singleton implements TranslatorInterface
      */
     protected function loadBundle($bundle)
     {
-        if (isset($this->bundles[$bundle]))
-        {
+        if (isset($this->bundles[$bundle])) {
             return;
         }
 
         $this->bundles[$bundle] = $this->memory->loadData($bundle, $this->languageOptions['directory']);
-        if (empty($this->bundles[$bundle]))
-        {
+        if (empty($this->bundles[$bundle])) {
             $this->bundles[$bundle] = [];
         }
     }
@@ -204,8 +195,7 @@ class Translator extends Singleton implements TranslatorInterface
      */
     protected function saveBundle($bundle)
     {
-        if (!isset($this->bundles[$bundle]))
-        {
+        if (!isset($this->bundles[$bundle])) {
             return;
         }
 

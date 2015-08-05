@@ -12,7 +12,7 @@ use Psr\Http\Message\UploadedFileInterface;
 use Spiral\Files\Streams\StreamWrapper;
 
 /**
- * Used to provice access to UploadedFiles property of request.
+ * Used to provide access to UploadedFiles property of request.
  *
  * @method UploadedFileInterface|null get($name, $default = null)
  * @method UploadedFileInterface[] all()
@@ -29,8 +29,7 @@ class FilesBag extends InputBag
      */
     public function uri($name)
     {
-        if (!empty($file = $this->get($name)) && !$file->getError())
-        {
+        if (!empty($file = $this->get($name)) && !$file->getError()) {
             return StreamWrapper::getUri($file->getStream());
         }
 

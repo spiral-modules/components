@@ -39,8 +39,7 @@ class MemcacheDriver extends CacheStore implements DriverInterface
      */
     public function connect()
     {
-        foreach ($this->options['servers'] as $server)
-        {
+        foreach ($this->options['servers'] as $server) {
             $server = $server + $this->options['defaultServer'];
             $this->service->addServer(
                 $server['host'],
@@ -106,8 +105,7 @@ class MemcacheDriver extends CacheStore implements DriverInterface
      */
     public function increment($name, $delta = 1)
     {
-        if (!$this->has($name))
-        {
+        if (!$this->has($name)) {
             $this->forever($name, $delta);
 
             return $delta;

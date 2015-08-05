@@ -67,25 +67,21 @@ class Route extends AbstractRoute
      */
     protected function createEndpoint(ContainerInterface $container)
     {
-        if (is_object($this->target) || is_array($this->target))
-        {
+        if (is_object($this->target) || is_array($this->target)) {
             return $this->target;
         }
 
-        if (is_string($this->target) && strpos($this->target, self::SEPARATOR) === false)
-        {
+        if (is_string($this->target) && strpos($this->target, self::SEPARATOR) === false) {
             //Middleware
             return $container->get($this->target);
         }
 
         $route = $this;
 
-        return function (ServerRequestInterface $request) use ($container, $route)
-        {
+        return function (ServerRequestInterface $request) use ($container, $route) {
             list($controller, $action) = explode(self::SEPARATOR, $route->target);
 
-            if ($action == self::DYNAMIC_ACTION)
-            {
+            if ($action == self::DYNAMIC_ACTION) {
                 $action = $route->matches['action'];
             }
 

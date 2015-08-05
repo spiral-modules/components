@@ -22,8 +22,7 @@ class JsonParser implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, \Closure $next = null)
     {
-        if ($request->getHeaderLine('Content-Type') == 'application/json')
-        {
+        if ($request->getHeaderLine('Content-Type') == 'application/json') {
             $jsonBody = $request->getBody()->__toString();
 
             return $next($request->withParsedBody(json_decode($jsonBody, true)));

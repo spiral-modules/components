@@ -44,11 +44,6 @@ use Spiral\Debug\Traits\LoggerTrait;
 abstract class AbstractColumn extends Component implements ColumnInterface, LoggerAwareInterface
 {
     /**
-     * Logging.
-     */
-    use LoggerTrait;
-
-    /**
      * Direct mapping from base abstract type to database internal type with specified data options,
      * such as size, precision scale, unsigned flag and etc. Every declared type can be assigned
      * using ->type() method, however to pass custom type parameters, methods has to be declared in
@@ -65,45 +60,35 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
         //Primary sequences
         'primary'     => null,
         'bigPrimary'  => null,
-
         //Enum type (mapped via method)
         'enum'        => null,
-
         //Logical types
         'boolean'     => null,
-
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => null,
         'tinyInteger' => null,
         'bigInteger'  => null,
-
         //String with specified length (mapped via method)
         'string'      => null,
-
         //Generic types
         'text'        => null,
         'tinyText'    => null,
         'longText'    => null,
-
         //Real types
         'double'      => null,
         'float'       => null,
-
         //Decimal type (mapped via method)
         'decimal'     => null,
-
         //Date and Time types
         'datetime'    => null,
         'date'        => null,
         'time'        => null,
         'timestamp'   => null,
-
         //Binary types
         'binary'      => null,
         'tinyBinary'  => null,
         'longBinary'  => null,
-
         //Additional types
         'json'        => null
     ];
@@ -265,68 +250,17 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
     abstract protected function resolveSchema($schema);
 
     /**
-     * Column name.
-     *
-     * @param bool $quoted If true column name will be quoted accordingly to driver rules.
-     * @return string
-     */
-    public function getName($quoted = false)
-    {
-        return $quoted ? $this->table->driver()->identifier($this->name) : $this->name;
-    }
-
-    /**
      * Give new name to column. Do not use this method to rename existed columns, use
      * TableSchema->renameColumn(). This is internal method used to rename column inside schema.
      *
      * @param string $name New column name.
      * @return $this
      */
-    public function setName($name)
+    public function name($name)
     {
         $this->name = $name;
 
         return $this;
-    }
-
-    /**
-     * Internal database type, can vary based on database driver.
-     *
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * Column size.
-     *
-     * @return int
-     */
-    public function getSize()
-    {
-        return $this->size;
-    }
-
-    /**
-     * Column precision.
-     *
-     * @return int
-     */
-    public function getPrecision()
-    {
-        return $this->precision;
-    }
-
-    /**
-     * Column scale value.
-     *
-     * @return int
-     */
-    public function getScale()
-    {
-        return $this->scale;
     }
 
     /**
@@ -345,13 +279,11 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
      */
     public function type($type)
     {
-        if (isset($this->aliases[$type]))
-        {
+        if (isset($this->aliases[$type])) {
             $type = $this->aliases[$type];
         }
 
-        if (!isset($this->mapping[$type]))
-        {
+        if (!isset($this->mapping[$type])) {
             throw new SchemaException("Undefined abstract/virtual type '{$type}'.");
         }
 
@@ -361,95 +293,17 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
         $this->size = $this->precision = $this->scale = 0;
         $this->enumValues = [];
 
-        if (is_string($this->mapping[$type]))
-        {
+        if (is_string($this->mapping[$type])) {
             $this->type = $this->mapping[$type];
 
             return $this;
         }
 
-        foreach ($this->mapping[$type] as $property => $value)
-        {
+        foreach ($this->mapping[$type] as $property => $value) {
             $this->$property = $value;
         }
 
         return $this;
-    }
-
-    /**
-     * Get abstract type name, this method will map one of database types to limited set of ColumnSchema
-     * abstract types.
-     *
-     * Attention, this method is not used for schema comparasions (database type used), it's only for
-     * decorative purposes. If schema can't resolve type - "unknown" will be returned (by default
-     * mapped to php type string).
-     *
-     * @return string
-     */
-    public function abstractType()
-    {
-        foreach ($this->reverseMapping as $type => $candidates)
-        {
-            foreach ($candidates as $candidate)
-            {
-                if (is_string($candidate))
-                {
-                    if (strtolower($candidate) == strtolower($this->type))
-                    {
-                        return $type;
-                    }
-
-                    continue;
-                }
-
-                if (strtolower($candidate['type']) != strtolower($this->type))
-                {
-                    continue;
-                }
-
-                foreach ($candidate as $option => $required)
-                {
-                    if ($option == 'type')
-                    {
-                        continue;
-                    }
-
-                    if ($this->$option != $required)
-                    {
-                        continue 2;
-                    }
-                }
-
-                return $type;
-            }
-        }
-
-        return 'unknown';
-    }
-
-    /**
-     * Get one of internal php types to represent column values (including default value):
-     * integer (int),
-     * boolean (bool),
-     * string,
-     * float.
-     *
-     * Mapping will be performed using phpMapping attribute values.
-     *
-     * @return string
-     */
-    public function phpType()
-    {
-        $schemaType = $this->abstractType();
-        foreach ($this->phpMapping as $phpType => $candidates)
-        {
-            if (in_array($schemaType, $candidates))
-            {
-                return $phpType;
-            }
-        }
-
-        return 'string';
     }
 
     /**
@@ -482,33 +336,27 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
      */
     public function getDefaultValue()
     {
-        if (is_null($this->defaultValue))
-        {
+        if (is_null($this->defaultValue)) {
             return null;
         }
 
-        if ($this->defaultValue instanceof SqlFragmentInterface)
-        {
+        if ($this->defaultValue instanceof SqlFragmentInterface) {
             return $this->defaultValue;
         }
 
-        if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp']))
-        {
-            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->timestampNow()))
-            {
+        if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
+            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->timestampNow())) {
                 return new SqlFragment($this->defaultValue);
             }
         }
 
-        switch ($this->phpType())
-        {
+        switch ($this->phpType()) {
             case 'int':
                 return (int)$this->defaultValue;
             case 'float':
                 return (float)$this->defaultValue;
             case 'bool':
-                if (strtolower($this->defaultValue) == 'false')
-                {
+                if (strtolower($this->defaultValue) == 'false') {
                     return false;
                 }
 
@@ -531,8 +379,7 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
         if (
             $this->abstractType() == 'timestamp'
             && strtolower($value) == strtolower(Database::TIMESTAMP_NOW)
-        )
-        {
+        ) {
             $this->defaultValue = $this->table->driver()->timestampNow();
         }
 
@@ -614,15 +461,13 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
     {
         $this->type('string');
 
-        if ($size > 255)
-        {
+        if ($size > 255) {
             throw new \InvalidArgumentException(
                 "String size can't exceed 255 characters. Use text instead."
             );
         }
 
-        if ($size < 0)
-        {
+        if ($size < 0) {
             throw new \InvalidArgumentException("Invalid string length value.");
         }
 
@@ -642,8 +487,7 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
     {
         $this->type('decimal');
 
-        if (!$precision)
-        {
+        if (!$precision) {
             throw new \InvalidArgumentException("Invalid precision value.");
         }
 
@@ -697,8 +541,7 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
      */
     public function foreign($table, $column = 'id')
     {
-        if ($this->phpType() != 'int')
-        {
+        if ($this->phpType() != 'int') {
             throw new SchemaException(
                 "Only numeric types can be defined with foreign key constraint."
             );
@@ -724,8 +567,7 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
      */
     public function compare(AbstractColumn $dbColumn)
     {
-        if ($this == $dbColumn)
-        {
+        if ($this == $dbColumn) {
             return true;
         }
         $columnVars = get_object_vars($this);
@@ -733,13 +575,10 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
 
         $difference = [];
 
-        foreach ($columnVars as $name => $value)
-        {
+        foreach ($columnVars as $name => $value) {
             //Default values has to compared via type-casted value
-            if ($name == 'defaultValue')
-            {
-                if ($this->getDefaultValue() != $dbColumn->getDefaultValue())
-                {
+            if ($name == 'defaultValue') {
+                if ($this->getDefaultValue() != $dbColumn->getDefaultValue()) {
                     //We have to compare casted default values
                     $difference[] = $name . ' ('
                         . $dbColumn->getDefaultValue() . ' => ' . $this->getDefaultValue()
@@ -749,16 +588,10 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
                 continue;
             }
 
-            if ($value != $dbColumnVars[$name])
-            {
+            if ($value != $dbColumnVars[$name]) {
                 $difference[] = $name;
             }
         }
-
-        $this->logger()->debug("Column '{name}' has changed attributes: {difference}.", [
-            'name'       => $this->name,
-            'difference' => join(', ', $difference)
-        ]);
 
         return empty($difference);
     }
@@ -770,28 +603,23 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
      */
     protected function prepareDefault()
     {
-        if (($defaultValue = $this->getDefaultValue()) === null)
-        {
+        if (($defaultValue = $this->getDefaultValue()) === null) {
             return 'NULL';
         }
 
-        if ($defaultValue instanceof SQLFragmentInterface)
-        {
+        if ($defaultValue instanceof SQLFragmentInterface) {
             return $defaultValue->sqlStatement();
         }
 
-        if ($this->phpType() == 'bool')
-        {
+        if ($this->phpType() == 'bool') {
             return $defaultValue ? 'TRUE' : 'FALSE';
         }
 
-        if ($this->phpType() == 'float')
-        {
+        if ($this->phpType() == 'float') {
             return sprintf('%F', $defaultValue);
         }
 
-        if ($this->phpType() == 'int')
-        {
+        if ($this->phpType() == 'int') {
             return $defaultValue;
         }
 
@@ -806,52 +634,15 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
     protected function enumType()
     {
         $enumValues = [];
-        foreach ($this->enumValues as $value)
-        {
+        foreach ($this->enumValues as $value) {
             $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
-        if (!empty($enumValues))
-        {
+        if (!empty($enumValues)) {
             return '(' . join(', ', $enumValues) . ')';
         }
 
         return '';
-    }
-
-    /**
-     * Compile column create statement.
-     *
-     * @return string
-     */
-    public function sqlStatement()
-    {
-        $statement = [$this->getName(true), $this->type];
-
-        if ($this->abstractType() == 'enum')
-        {
-            if ($enumDefinition = $this->enumType())
-            {
-                $statement[] = $enumDefinition;
-            }
-        }
-        elseif (!empty($this->precision))
-        {
-            $statement[] = "({$this->precision}, {$this->scale})";
-        }
-        elseif (!empty($this->size))
-        {
-            $statement[] = "({$this->size})";
-        }
-
-        $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
-
-        if ($this->defaultValue !== null)
-        {
-            $statement[] = "DEFAULT {$this->prepareDefault()}";
-        }
-
-        return join(' ', $statement);
     }
 
     /**
@@ -865,58 +656,4 @@ abstract class AbstractColumn extends Component implements ColumnInterface, Logg
         return [];
     }
 
-    /**
-     * __toString
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->sqlStatement();
-    }
-
-    /**
-     * Simplified way to dump information.
-     *
-     * @return object
-     */
-    public function __debugInfo()
-    {
-        $column = [
-            'name' => $this->name,
-            'type' => [
-                'database' => $this->type,
-                'schema'   => $this->abstractType(),
-                'php'      => $this->phpType()
-            ]
-        ];
-
-        if (!empty($this->size))
-        {
-            $column['size'] = $this->size;
-        }
-
-        if ($this->nullable)
-        {
-            $column['nullable'] = true;
-        }
-
-        if ($this->defaultValue !== null)
-        {
-            $column['defaultValue'] = $this->getDefaultValue();
-        }
-
-        if ($this->abstractType() == 'enum')
-        {
-            $column['enumValues'] = $this->enumValues;
-        }
-
-        if ($this->abstractType() == 'decimal')
-        {
-            $column['precision'] = $this->precision;
-            $column['scale'] = $this->scale;
-        }
-
-        return (object)$column;
-    }
 }

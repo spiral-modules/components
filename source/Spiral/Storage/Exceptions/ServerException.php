@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\Storage\Exceptions;
+
 use Spiral\Core\Exceptions\RuntimeException;
 
 /**

@@ -42,34 +42,26 @@ class ColumnSchema extends AbstractColumn
             'autoIncrement' => true,
             'nullable'      => false
         ],
-
         //Enum type (mapped via method)
         'enum'        => 'enum',
-
         //Logical types
         'boolean'     => ['type' => 'tinyint', 'size' => 1],
-
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => ['type' => 'int', 'size' => 11],
         'tinyInteger' => ['type' => 'tinyint', 'size' => 4],
         'bigInteger'  => ['type' => 'bigint', 'size' => 20],
-
         //String with specified length (mapped via method)
         'string'      => 'varchar',
-
         //Generic types
         'text'        => 'text',
         'tinyText'    => 'tinytext',
         'longText'    => 'longtext',
-
         //Real types
         'double'      => 'double',
         'float'       => 'float',
-
         //Decimal type (mapped via method)
         'decimal'     => 'decimal',
-
         //Date and Time types
         'datetime'    => 'datetime',
         'date'        => 'date',
@@ -78,12 +70,10 @@ class ColumnSchema extends AbstractColumn
             'type'         => 'timestamp',
             'defaultValue' => MySQLDriver::DEFAULT_DATETIME
         ],
-
         //Binary types
         'binary'      => 'blob',
         'tinyBinary'  => 'tinyblob',
         'longBinary'  => 'longblob',
-
         //Additional types
         'json'        => 'text'
     ];
@@ -121,7 +111,13 @@ class ColumnSchema extends AbstractColumn
      * @var array
      */
     protected $forbiddenDefaults = [
-        'text', 'mediumtext', 'tinytext', 'longtext', 'blog', 'tinyblob', 'longblob'
+        'text',
+        'mediumtext',
+        'tinytext',
+        'longtext',
+        'blog',
+        'tinyblob',
+        'longblob'
     ];
 
     /**
@@ -131,8 +127,7 @@ class ColumnSchema extends AbstractColumn
     {
         $defaultValue = parent::getDefaultValue();
 
-        if (in_array($this->type, $this->forbiddenDefaults))
-        {
+        if (in_array($this->type, $this->forbiddenDefaults)) {
             return null;
         }
 
@@ -145,8 +140,7 @@ class ColumnSchema extends AbstractColumn
     public function sqlStatement()
     {
         $defaultValue = $this->defaultValue;
-        if (in_array($this->type, $this->forbiddenDefaults))
-        {
+        if (in_array($this->type, $this->forbiddenDefaults)) {
             //Flushing default value for forbidden types
             $this->defaultValue = null;
 
@@ -158,8 +152,7 @@ class ColumnSchema extends AbstractColumn
         $statement = parent::sqlStatement();
 
         $this->defaultValue = $defaultValue;
-        if ($this->autoIncrement)
-        {
+        if ($this->autoIncrement) {
             return "{$statement} AUTO_INCREMENT";
         }
 
@@ -176,52 +169,42 @@ class ColumnSchema extends AbstractColumn
         $this->defaultValue = $schema['Default'];
         $this->autoIncrement = stripos($schema['Extra'], 'auto_increment') !== false;
 
-        if (!preg_match('/^(?P<type>[a-z]+)(?:\((?P<options>[^\)]+)\))?/', $this->type, $matches))
-        {
+        if (!preg_match('/^(?P<type>[a-z]+)(?:\((?P<options>[^\)]+)\))?/', $this->type, $matches)) {
             return;
         }
 
         $this->type = $matches['type'];
 
         $options = null;
-        if (!empty($matches['options']))
-        {
+        if (!empty($matches['options'])) {
             $options = $matches['options'];
         }
 
-        if ($this->abstractType() == 'enum')
-        {
-            $this->enumValues = array_map(function ($value)
-            {
+        if ($this->abstractType() == 'enum') {
+            $this->enumValues = array_map(function ($value) {
                 return trim($value, $value[0]);
             }, explode(',', $options));
 
             return;
         }
 
-        $options = array_map(function ($value)
-        {
+        $options = array_map(function ($value) {
             return intval($value);
         }, explode(',', $options));
 
-        if (count($options) > 1)
-        {
+        if (count($options) > 1) {
             list($this->precision, $this->scale) = $options;
-        }
-        elseif ($options)
-        {
+        } elseif ($options) {
             $this->size = $options[0];
         }
 
         //Default value conversions
-        if ($this->type == 'bit' && $this->defaultValue)
-        {
+        if ($this->type == 'bit' && $this->hasDefaultValue()) {
             //Cutting b\ and '
             $this->defaultValue = new SQLFragment($this->defaultValue);
         }
 
-        if ($this->abstractType() == 'timestamp' && $this->defaultValue == '0000-00-00 00:00:00')
-        {
+        if ($this->abstractType() == 'timestamp' && $this->defaultValue == '0000-00-00 00:00:00') {
             $this->defaultValue = MySqlDriver::DEFAULT_DATETIME;
         }
     }
@@ -231,10 +214,8 @@ class ColumnSchema extends AbstractColumn
      */
     protected function prepareDefault()
     {
-        if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue))
-        {
-            if (is_numeric($this->defaultValue))
-            {
+        if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue)) {
+            if (is_numeric($this->defaultValue)) {
                 //Nothing to do
                 return (int)$this->defaultValue;
             }

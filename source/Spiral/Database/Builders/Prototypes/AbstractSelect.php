@@ -209,15 +209,13 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
      */
     public function orderBy($expression, $direction = self::SORT_ASC)
     {
-        if (!is_array($expression))
-        {
+        if (!is_array($expression)) {
             $this->orderBy[] = [$expression, $direction];
 
             return $this;
         }
 
-        foreach ($expression as $nested => $direction)
-        {
+        foreach ($expression as $nested => $direction) {
             $this->orderBy[] = [$nested, $direction];
         }
 
@@ -266,22 +264,16 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
     {
         $backup = [$this->limit, $this->offset];
 
-        if ($paginate)
-        {
+        if ($paginate) {
             $this->runPagination();
-        }
-        else
-        {
+        } else {
             //We have to flush limit and offset values when pagination is not required.
             $this->limit = $this->offset = 0;
         }
 
-        if (empty($this->cacheLifetime))
-        {
+        if (empty($this->cacheLifetime)) {
             $result = $this->database->query($this->sqlStatement(), $this->getParameters());
-        }
-        else
-        {
+        } else {
             $result = $this->database->cached(
                 $this->cacheLifetime,
                 $this->sqlStatement(),
@@ -318,11 +310,9 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
         $this->limit($limit);
         $offset = 0;
 
-        while ($offset + $limit <= $count)
-        {
+        while ($offset + $limit <= $count) {
             $result = call_user_func($callback, $this->offset($offset)->getIterator(), $offset, $count);
-            if ($result === false)
-            {
+            if ($result === false) {
                 //Stop iteration
                 return;
             }
@@ -372,13 +362,11 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
      */
     public function __call($method, $arguments)
     {
-        if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM']))
-        {
+        if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
             throw new BuilderException("Unknown aggregation method '{$method}'.");
         }
 
-        if (!isset($arguments[0]) || count($arguments) > 1)
-        {
+        if (!isset($arguments[0]) || count($arguments) > 1) {
             throw new BuilderException("Aggregation methods can support exactly one column.");
         }
 
@@ -415,10 +403,8 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
      */
     private function havingWrapper()
     {
-        return function ($parameter)
-        {
-            if (!$parameter instanceof ParameterInterface && is_array($parameter))
-            {
+        return function ($parameter) {
+            if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
                 $parameter = new Parameter($parameter);
             }
 
@@ -427,8 +413,7 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
                 $parameter instanceof SQLFragmentInterface
                 && !$parameter instanceof ParameterInterface
                 && !$parameter instanceof QueryBuilder
-            )
-            {
+            ) {
                 return $parameter;
             }
 

@@ -36,8 +36,23 @@ class ImageChecker extends FileChecker
      * @var array
      */
     protected $imageTypes = [
-        'null', 'gif', 'jpeg', 'png', 'swf', 'psd', 'bmp', 'tiff', 'tiff', 'jpc', 'jp2', 'jpx',
-        'jb2', 'swc', 'iff', 'wbmp', 'xbm'
+        'null',
+        'gif',
+        'jpeg',
+        'png',
+        'swf',
+        'psd',
+        'bmp',
+        'tiff',
+        'tiff',
+        'jpc',
+        'jp2',
+        'jpx',
+        'jb2',
+        'swc',
+        'iff',
+        'wbmp',
+        'xbm'
     ];
 
     /**
@@ -49,13 +64,11 @@ class ImageChecker extends FileChecker
      */
     public function type($filename, $types)
     {
-        if (empty($image = $this->imageData($filename)))
-        {
+        if (empty($image = $this->imageData($filename))) {
             return false;
         }
 
-        if (!is_array($types))
-        {
+        if (!is_array($types)) {
             $types = array_slice(func_get_args(), 1);
         }
 
@@ -83,18 +96,15 @@ class ImageChecker extends FileChecker
      */
     public function smaller($filename, $width, $height = null)
     {
-        if (empty($image = $this->imageData($filename)))
-        {
+        if (empty($image = $this->imageData($filename))) {
             return false;
         }
 
-        if ($image[self::WIDTH] >= $width)
-        {
+        if ($image[self::WIDTH] >= $width) {
             return false;
         }
 
-        if ($height && $image[self::HEIGHT] >= $height)
-        {
+        if ($height && $image[self::HEIGHT] >= $height) {
             return false;
         }
 
@@ -111,18 +121,15 @@ class ImageChecker extends FileChecker
      */
     public function bigger($filename, $width, $height = null)
     {
-        if (empty($image = $this->imageData($filename)))
-        {
+        if (empty($image = $this->imageData($filename))) {
             return false;
         }
 
-        if ($image[self::WIDTH] < $width)
-        {
+        if ($image[self::WIDTH] < $width) {
             return false;
         }
 
-        if ($height && $image[self::HEIGHT] < $height)
-        {
+        if ($height && $image[self::HEIGHT] < $height) {
             return false;
         }
 
@@ -138,12 +145,9 @@ class ImageChecker extends FileChecker
      */
     protected function imageData($filename)
     {
-        try
-        {
+        try {
             return getimagesize($this->filename($filename));
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
         }
 
         return false;

@@ -78,16 +78,14 @@ class Tokenizer extends Singleton implements TokenizerInterface
         HippocampusInterface $runtime,
         FilesInterface $files,
         Loader $loader
-    )
-    {
+    ) {
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->memory = $runtime;
         $this->files = $files;
         $this->loader = $loader;
 
-        foreach ($this->config['directories'] as &$directory)
-        {
+        foreach ($this->config['directories'] as &$directory) {
             $directory = $files->normalizePath($directory, true);
             unset($directory);
         }
@@ -103,15 +101,12 @@ class Tokenizer extends Singleton implements TokenizerInterface
         $tokens = token_get_all($this->files->read($filename));
 
         $line = 0;
-        foreach ($tokens as &$token)
-        {
-            if (isset($token[self::LINE]))
-            {
+        foreach ($tokens as &$token) {
+            if (isset($token[self::LINE])) {
                 $line = $token[self::LINE];
             }
 
-            if (!is_array($token))
-            {
+            if (!is_array($token)) {
                 $token = [$token, $token, $line];
             }
 
@@ -129,12 +124,10 @@ class Tokenizer extends Singleton implements TokenizerInterface
     public function getClasses($parent = null, $namespace = null, $postfix = '')
     {
         $result = [];
-        foreach ($this->availableFiles() as $filename)
-        {
+        foreach ($this->availableFiles() as $filename) {
             $reflection = $this->fileReflection($filename);
 
-            if ($reflection->hasIncludes())
-            {
+            if ($reflection->hasIncludes()) {
                 $this->logger()->warning(
                     "File '{filename}' has includes and will be excluded from analysis.",
                     ['filename' => $filename]
@@ -162,15 +155,13 @@ class Tokenizer extends Singleton implements TokenizerInterface
     {
         $traits = [];
 
-        while ($class)
-        {
+        while ($class) {
             $traits = array_merge(class_uses($class), $traits);
             $class = get_parent_class($class);
         }
 
         //Traits from traits
-        foreach (array_flip($traits) as $trait)
-        {
+        foreach (array_flip($traits) as $trait) {
             $traits = array_merge(class_uses($trait), $traits);
         }
 
@@ -186,16 +177,14 @@ class Tokenizer extends Singleton implements TokenizerInterface
      */
     public function fileReflection($filename)
     {
-        if (empty($this->cache))
-        {
+        if (empty($this->cache)) {
             $this->cache = $this->memory->loadData('tokenizer');
         }
 
         $fileMD5 = $this->files->md5($filename = $this->files->normalizePath($filename));
 
         //Let's check if file already cached
-        if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5)
-        {
+        if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5) {
             return new ReflectionFile($this, $filename, $this->cache[$filename]);
         }
 
@@ -223,48 +212,36 @@ class Tokenizer extends Singleton implements TokenizerInterface
         $parent = null,
         $namespace = null,
         $postfix = ''
-    )
-    {
+    ) {
         $namespace = ltrim($namespace, '\\');
-        if (!empty($parent) && (is_object($parent) || is_string($parent)))
-        {
+        if (!empty($parent) && (is_object($parent) || is_string($parent))) {
             $parent = new \ReflectionClass($parent);
         }
 
-        $this->loader->enable()->events()->listen('notFound', $listener = function (Event $event)
-        {
+        $this->loader->enable()->events()->listen('notFound', $listener = function (Event $event) {
             //We want exception if class can not be loaded
             throw new TokenizerException("Class {$event->context()['class']} can not be loaded.");
         });
 
         $result = [];
-        foreach ($fileReflection->getClasses() as $class)
-        {
-            if (!$this->isTargeted($class, $namespace, $postfix))
-            {
+        foreach ($fileReflection->getClasses() as $class) {
+            if (!$this->isTargeted($class, $namespace, $postfix)) {
                 continue;
             }
 
-            try
-            {
+            try {
                 $reflection = new \ReflectionClass($class);
 
-                if (!empty($parent))
-                {
-                    if ($parent->isTrait())
-                    {
-                        if (!in_array($parent->getName(), self::getTraits($class)))
-                        {
+                if (!empty($parent)) {
+                    if ($parent->isTrait()) {
+                        if (!in_array($parent->getName(), self::getTraits($class))) {
                             continue;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         if (
                             !$reflection->isSubclassOf($parent)
                             && $reflection->getName() != $parent->getName()
-                        )
-                        {
+                        ) {
                             continue;
                         }
                     }
@@ -275,9 +252,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
                     'filename' => $fileReflection->getFileName(),
                     'abstract' => $reflection->isAbstract()
                 ];
-            }
-            catch (\Exception $exception)
-            {
+            } catch (\Exception $exception) {
                 $this->logger()->error(
                     "Unable to resolve class '{class}', error \"{message}\".",
                     [
@@ -303,13 +278,11 @@ class Tokenizer extends Singleton implements TokenizerInterface
      */
     private function isTargeted($class, $namespace, $postfix)
     {
-        if (!empty($namespace) && strpos(ltrim($class, '\\'), $namespace) === false)
-        {
+        if (!empty($namespace) && strpos(ltrim($class, '\\'), $namespace) === false) {
             return false;
         }
 
-        if (!empty($postfix) && substr($class, -1 * strlen($postfix)) != $postfix)
-        {
+        if (!empty($postfix) && substr($class, -1 * strlen($postfix)) != $postfix) {
             return false;
         }
 
@@ -324,14 +297,10 @@ class Tokenizer extends Singleton implements TokenizerInterface
     private function availableFiles()
     {
         $result = [];
-        foreach ($this->config['directories'] as $directory)
-        {
-            foreach ($this->files->getFiles($directory, ['php']) as $filename)
-            {
-                foreach ($this->config['exclude'] as $exclude)
-                {
-                    if (strpos($filename, $exclude) !== false)
-                    {
+        foreach ($this->config['directories'] as $directory) {
+            foreach ($this->files->getFiles($directory, ['php']) as $filename) {
+                foreach ($this->config['exclude'] as $exclude) {
+                    if (strpos($filename, $exclude) !== false) {
                         continue 2;
                     }
                 }

@@ -105,8 +105,7 @@ class SQLServerDriver extends Driver
         $query = 'SELECT table_name FROM information_schema.tables WHERE table_type = \'BASE TABLE\'';
 
         $tables = [];
-        foreach ($this->query($query)->fetchMode(PDO::FETCH_NUM) as $row)
-        {
+        foreach ($this->query($query)->fetchMode(PDO::FETCH_NUM) as $row) {
             $tables[] = $row[0];
         }
 
@@ -121,8 +120,7 @@ class SQLServerDriver extends Driver
      */
     public function getServerVersion()
     {
-        if (empty($this->serverVersion))
-        {
+        if (empty($this->serverVersion)) {
             $this->serverVersion = (int)$this->getPDO()->getAttribute(\PDO::ATTR_SERVER_VERSION);
         }
 

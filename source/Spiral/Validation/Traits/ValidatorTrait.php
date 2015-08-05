@@ -70,8 +70,7 @@ trait ValidatorTrait
      */
     public function validator(array $rules = [], ContainerInterface $container = null)
     {
-        if (!empty($this->validator))
-        {
+        if (!empty($this->validator)) {
             //Refreshing data
             $validator = $this->validator->setData($this->fields);
             !empty($rules) && $validator->setRules($rules);
@@ -80,8 +79,7 @@ trait ValidatorTrait
         }
 
         $container = !empty($container) ? $container : $this->container();
-        if (empty($container) || !$container->hasBinding(ValidatorInterface::class))
-        {
+        if (empty($container) || !$container->hasBinding(ValidatorInterface::class)) {
             //We can't create default validation without any rule, this is not secure
             throw new MissingContainerException(
                 "Unable to create Validator instance, no global container set or binding is missing."
@@ -137,14 +135,12 @@ trait ValidatorTrait
     {
         $this->validate();
         $errors = [];
-        foreach ($this->errors as $field => $error)
-        {
+        foreach ($this->errors as $field => $error) {
             if (
                 is_string($error)
                 && substr($error, 0, 2) == Translator::I18N_PREFIX
                 && substr($error, -2) == Translator::I18N_POSTFIX
-            )
-            {
+            ) {
                 //We will localize only messages embraced with [[ and ]]
                 $error = $this->translate($error);
             }
@@ -152,8 +148,7 @@ trait ValidatorTrait
             $errors[$field] = $error;
         }
 
-        if ($reset)
-        {
+        if ($reset) {
             $this->errors = [];
         }
 

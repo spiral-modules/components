@@ -44,117 +44,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     use LoggerTrait;
 
-    /**
-     * Rename SQL statement is usually the same... we all know who has different syntax. :)
-     */
-    const RENAME_STATEMENT = "ALTER TABLE {table} RENAME TO {name}";
 
     /**
-     * Fully clarified table name (prefix should be included).
-     *
-     * Attention! BaseColumnSchema type added to make IDE work properly as "name" is really common
-     * column name. However you better use longer syntax $table->column('name');
-     *
-     * @var string|AbstractColumn
-     */
-    protected $name = '';
-
-    /**
-     * Driver instance table schema associated with, all commands will be performed using it.
-     *
-     * @var Driver
-     */
-    protected $driver = null;
-
-    /**
-     * Table prefix is not required, but if provided all foreign keys will be created using it.
-     *
-     * @var string
-     */
-    protected $tablePrefix = '';
-
-    /**
-     * Indication that table is exists and current schema is fetched from database.
-     *
-     * @var bool
-     */
-    protected $exists = false;
-
-    /**
-     * Primary key columns are stored separately from other indexes and can be modified only during
-     * table creation. Column types "primary" and "bigPrimary" will automatically ensure it's column
-     * name in that index, however for most database drivers that types will additionally declare
-     * auto-incrementing which can be applied to one column only. To create compound primary index
-     * call primaryKeys() method on table level. Attention, Spiral ORM and ActiveRecord models can
-     * not support compound primary keys.
-     *
-     * @var array
-     */
-    protected $primaryKeys = [];
-
-    /**
-     * Column names fetched from database table and used to build primary index. Primary index can
-     * not be modified for already exists tables.
-     *
-     * @invisible
-     * @var array
-     */
-    protected $dbPrimaryKeys = [];
-
-    /**
-     * ColumnSchema(s) describing table columns, represents desired table structure to be applied
-     * on save() method.
-     *
-     * @var AbstractColumn[]
-     */
-    protected $columns = [];
-
-    /**
-     * ColumnSchema(s) fetched from database (if table exists), this schemas used as column references
-     * to build table diff.
-     *
-     * @invisible
-     * @var AbstractColumn[]
-     */
-    protected $dbColumns = [];
-
-    /**
-     * IndexSchema(s) used to described desired table indexes, this schemas will be synced with
-     * database on save() method call. IndexSchemas should not include primary keys.
-     *
-     * @var AbstractIndex[]
-     */
-    protected $indexes = [];
-
-    /**
-     * IndexSchema(s) fetched from database, this indexes used as references to build table diff.
-     *
-     * @invisible
-     * @var AbstractIndex[]
-     */
-    protected $dbIndexes = [];
-
-    /**
-     * ReferenceSchema(s) used to define table foreign key references, this schemas will be applied
-     * to database on save() method call. ReferenceSchemas table name depends on tablePrefix, make
-     * sure correct value were specified.
-     *
-     * @var AbstractReference[]
-     */
-    protected $references = [];
-
-    /**
-     * ReferenceSchema(s) fetched from database and used to build table diff.
-     *
-     * @invisible
-     * @var AbstractReference[]
-     */
-    protected $dbReferences = [];
-
-    /**
-     * Table schema instance used both for reading and writing table schema in database. TableSchema
-     * provides set of abstractions used to unify database architecting across different DBMS.
-     *
      * @param string $name        Fully clarified table name (prefix should be included).
      * @param string $tablePrefix Table prefix is not required, but if provided all foreign keys
      *                            will be created using it.
@@ -168,8 +59,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $this->driver = $driver;
 
         //Loading table information
-        if ($this->driver->hasTable($this->name))
-        {
+        if ($this->driver->hasTable($this->name)) {
             $this->loadColumns();
             $this->loadIndexes();
             $this->loadReferences();
@@ -178,73 +68,6 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         }
     }
 
-    /**
-     * Driver specific method to load table columns schemas.  Method will not be called if table not
-     * exists. To create and register column schema use internal table method "registerColumn()".
-     **/
-    abstract protected function loadColumns();
-
-    /**
-     * Create and register ColumnSchema by provided column name and driver specific column information.
-     * This method will automatically create ColumnSchema in both "columns" and "dbColumns" properties.
-     *
-     * @param string $name   Column name.
-     * @param mixed  $schema Driver specific column information schema.
-     * @return AbstractColumn
-     */
-    protected function registerColumn($name, $schema)
-    {
-        $column = $this->driver->columnSchema($this, $name, $schema);
-        $this->dbColumns[$name] = clone $column;
-
-        return $this->columns[$name] = $column;
-    }
-
-    /**
-     * Driver specific method to load table indexes schema(s). Method will not be called if table
-     * not exists. To create* and register index schema use internal table method "registerIndex()".
-     */
-    abstract protected function loadIndexes();
-
-    /**
-     * Create and register IndexSchema by provided index name and driver specific information. This
-     * method will automatically create IndexSchema in both "indexes" and "dbIndexes" properties.
-     *
-     * @param string $name   Index name.
-     * @param mixed  $schema Driver specific index information schema.
-     * @return AbstractIndex
-     */
-    protected function registerIndex($name, $schema)
-    {
-        $index = $this->driver->indexSchema($this, $name, $schema);
-        $this->dbIndexes[$name] = clone $index;
-
-        return $this->indexes[$name] = $index;
-    }
-
-    /**
-     * Driver specific method to load table foreign key schema(s). Method will not be called if table
-     * not exists. To create and register reference (foreign key) schema use internal table method
-     * "registerReference()".
-     */
-    abstract protected function loadReferences();
-
-    /**
-     * Create and register ReferenceSchema by provided foreign keyF name and driver specific information.
-     * This method will automatically create ReferenceSchema in both "references" and "dbReferences"
-     * properties.
-     *
-     * @param string $name   Foreign key name.
-     * @param mixed  $schema Driver specific foreign key information schema.
-     * @return AbstractReference
-     */
-    protected function registerReference($name, $schema)
-    {
-        $reference = $this->driver->referenceSchema($this, $name, $schema);
-        $this->dbReferences[$name] = clone $reference;
-
-        return $this->references[$name] = $reference;
-    }
 
     /**
      * Table name (including prefix).
@@ -277,15 +100,6 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         return $this->driver;
     }
 
-    /**
-     * Check if table exists in database.
-     *
-     * @return bool
-     */
-    public function isExists()
-    {
-        return $this->exists;
-    }
 
     /**
      * Array of columns dedicated to primary index. Attention, this methods will ALWAYS return array,
@@ -349,8 +163,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function column($column)
     {
-        if (!isset($this->columns[$column]))
-        {
+        if (!isset($this->columns[$column])) {
             $this->columns[$column] = $this->driver->columnSchema($this, $column);
         }
 
@@ -391,10 +204,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     protected function findIndex(array $columns)
     {
-        foreach ($this->indexes as $index)
-        {
-            if ($index->getColumns() == $columns)
-            {
+        foreach ($this->indexes as $index) {
+            if ($index->getColumns() == $columns) {
                 return $index;
             }
         }
@@ -437,8 +248,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     {
         $columns = is_array($columns) ? $columns : func_get_args();
 
-        if (!$this->hasIndex($columns))
-        {
+        if (!$this->hasIndex($columns)) {
             return false;
         }
 
@@ -475,8 +285,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function index($columns)
     {
         $columns = is_array($columns) ? $columns : func_get_args();
-        if ($index = $this->findIndex($columns))
-        {
+        if ($index = $this->findIndex($columns)) {
             return $index;
         }
 
@@ -520,10 +329,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     protected function findForeign($column)
     {
-        foreach ($this->references as $reference)
-        {
-            if ($reference->getColumn() == $column)
-            {
+        foreach ($this->references as $reference) {
+            if ($reference->getColumn() == $column) {
                 return $reference;
             }
         }
@@ -563,8 +370,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function foreign($column)
     {
-        if ($foreign = $this->findForeign($column))
-        {
+        if ($foreign = $this->findForeign($column)) {
             return $foreign;
         }
 
@@ -588,11 +394,9 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function renameColumn($column, $name)
     {
-        foreach ($this->columns as $columnSchema)
-        {
-            if ($columnSchema->getName() == $column)
-            {
-                $columnSchema->setName($name);
+        foreach ($this->columns as $columnSchema) {
+            if ($columnSchema->getName() == $column) {
+                $columnSchema->name($name);
                 break;
             }
         }
@@ -610,10 +414,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function dropColumn($column)
     {
         $column = is_array($column) ? $column : func_get_args();
-        foreach ($this->columns as $id => $columnSchema)
-        {
-            if (in_array($columnSchema->getName(), $column))
-            {
+        foreach ($this->columns as $id => $columnSchema) {
+            if (in_array($columnSchema->getName(), $column)) {
                 unset($this->columns[$id]);
                 break;
             }
@@ -633,10 +435,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function renameIndex($index, $name)
     {
-        foreach ($this->indexes as $indexSchema)
-        {
-            if ($indexSchema->getName() == $index)
-            {
+        foreach ($this->indexes as $indexSchema) {
+            if ($indexSchema->getName() == $index) {
                 $indexSchema->name($name);
                 break;
             }
@@ -656,10 +456,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function dropIndex($index)
     {
         $index = is_array($index) ? $index : func_get_args();
-        foreach ($this->indexes as $id => $indexSchema)
-        {
-            if (in_array($indexSchema->getName(), $index))
-            {
+        foreach ($this->indexes as $id => $indexSchema) {
+            if (in_array($indexSchema->getName(), $index)) {
                 unset($this->indexes[$id]);
                 break;
             }
@@ -681,10 +479,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function dropForeign($foreign)
     {
         $foreign = is_array($foreign) ? $foreign : func_get_args();
-        foreach ($this->references as $id => $foreignSchema)
-        {
-            if (in_array($foreignSchema->getName(), $foreign))
-            {
+        foreach ($this->references as $id => $foreignSchema) {
+            if (in_array($foreignSchema->getName(), $foreign)) {
                 unset($this->references[$id]);
                 break;
             }
@@ -715,24 +511,19 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function alteredColumns()
     {
         $altered = [];
-        foreach ($this->columns as $column => $schema)
-        {
-            if (!isset($this->dbColumns[$column]))
-            {
+        foreach ($this->columns as $column => $schema) {
+            if (!isset($this->dbColumns[$column])) {
                 $altered[$column] = $schema;
                 continue;
             }
 
-            if (!$schema->compare($this->dbColumns[$column]))
-            {
+            if (!$schema->compare($this->dbColumns[$column])) {
                 $altered[$column] = $schema;
             }
         }
 
-        foreach ($this->dbColumns as $column => $schema)
-        {
-            if (!isset($this->columns[$column]))
-            {
+        foreach ($this->dbColumns as $column => $schema) {
+            if (!isset($this->columns[$column])) {
                 //Going to be dropped
                 $altered[$column] = null;
             }
@@ -750,24 +541,19 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function alteredIndexes()
     {
         $altered = [];
-        foreach ($this->indexes as $index => $schema)
-        {
-            if (!isset($this->dbIndexes[$index]))
-            {
+        foreach ($this->indexes as $index => $schema) {
+            if (!isset($this->dbIndexes[$index])) {
                 $altered[$index] = $schema;
                 continue;
             }
 
-            if (!$schema->compare($this->dbIndexes[$index]))
-            {
+            if (!$schema->compare($this->dbIndexes[$index])) {
                 $altered[$index] = $schema;
             }
         }
 
-        foreach ($this->dbIndexes as $index => $schema)
-        {
-            if (!isset($this->indexes[$index]))
-            {
+        foreach ($this->dbIndexes as $index => $schema) {
+            if (!isset($this->indexes[$index])) {
                 //Going to be dropped
                 $altered[$index] = null;
             }
@@ -785,24 +571,19 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function alteredReferences()
     {
         $altered = [];
-        foreach ($this->references as $constraint => $schema)
-        {
-            if (!isset($this->dbReferences[$constraint]))
-            {
+        foreach ($this->references as $constraint => $schema) {
+            if (!isset($this->dbReferences[$constraint])) {
                 $altered[$constraint] = $schema;
                 continue;
             }
 
-            if (!$schema->compare($this->dbReferences[$constraint]))
-            {
+            if (!$schema->compare($this->dbReferences[$constraint])) {
                 $altered[$constraint] = $schema;
             }
         }
 
-        foreach ($this->dbReferences as $constraint => $schema)
-        {
-            if (!isset($this->references[$constraint]))
-            {
+        foreach ($this->dbReferences as $constraint => $schema) {
+            if (!isset($this->references[$constraint])) {
                 //Going to be dropped
                 $altered[$constraint] = null;
             }
@@ -823,8 +604,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     {
         $tables = [];
 
-        foreach ($this->getForeigns() as $foreign)
-        {
+        foreach ($this->getForeigns() as $foreign) {
             $tables[] = $foreign->getForeignTable();
         }
 
@@ -839,8 +619,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function rename($name)
     {
-        if ($this->isExists())
-        {
+        if ($this->isExists()) {
             $this->driver->statement(\Spiral\interpolate(static::RENAME_STATEMENT, [
                 'table' => $this->getName(true),
                 'name'  => $this->driver->identifier($this->tablePrefix . $name)
@@ -856,8 +635,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function drop()
     {
-        if (!$this->isExists())
-        {
+        if (!$this->isExists()) {
             $this->columns = $this->dbColumns = $this->primaryKeys = $this->dbPrimaryKeys = [];
             $this->indexes = $this->dbIndexes = $this->references = $this->dbReferences = [];
 
@@ -879,12 +657,9 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function save()
     {
-        if (!$this->isExists())
-        {
+        if (!$this->isExists()) {
             $this->createSchema(true);
-        }
-        else
-        {
+        } else {
             $this->hasChanges() && $this->updateSchema();
         }
 
@@ -898,22 +673,19 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
         //Required due renames
         $this->columns = $this->dbColumns = [];
-        foreach ($columns as $column)
-        {
+        foreach ($columns as $column) {
             $this->columns[$column->getName()] = $column;
             $this->dbColumns[$column->getName()] = clone $column;
         }
 
         $this->indexes = $this->dbIndexes = [];
-        foreach ($indexes as $index)
-        {
+        foreach ($indexes as $index) {
             $this->indexes[$index->getName()] = $index;
             $this->dbIndexes[$index->getName()] = clone $index;
         }
 
         $this->references = $this->dbReferences = [];
-        foreach ($references as $reference)
-        {
+        foreach ($references as $reference) {
             $this->references[$reference->getName()] = $reference;
             $this->dbReferences[$reference->getName()] = clone $reference;
         }
@@ -935,14 +707,12 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $inner = [];
 
         //Columns
-        foreach ($this->columns as $column)
-        {
+        foreach ($this->columns as $column) {
             $inner[] = $column->sqlStatement();
         }
 
         //Primary key
-        if (!empty($this->primaryKeys))
-        {
+        if (!empty($this->primaryKeys)) {
             $inner[] = 'PRIMARY KEY (' . join(', ', array_map(
                     [$this->driver, 'identifier'],
                     $this->primaryKeys
@@ -950,8 +720,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         }
 
         //Constraints
-        foreach ($this->references as $reference)
-        {
+        foreach ($this->references as $reference) {
             $inner[] = $reference->sqlStatement();
         }
 
@@ -962,22 +731,17 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
         $this->driver->beginTransaction();
 
-        try
-        {
+        try {
             //Executing
             $execute && $this->driver->statement($statement);
 
-            if ($execute)
-            {
+            if ($execute) {
                 //Not all databases support adding index while table creation, so we can do it after
-                foreach ($this->indexes as $index)
-                {
+                foreach ($this->indexes as $index) {
                     $this->doIndexAdd($index);
                 }
             }
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             $this->driver->rollbackTransaction();
             throw $exception;
         }
@@ -999,22 +763,18 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     protected function updateSchema()
     {
-        if ($this->primaryKeys != $this->dbPrimaryKeys)
-        {
+        if ($this->primaryKeys != $this->dbPrimaryKeys) {
             throw new SchemaException(
                 "Primary keys can not be changed for already exists table."
             );
         }
 
         $this->driver->beginTransaction();
-        try
-        {
-            foreach ($this->alteredColumns() as $name => $schema)
-            {
+        try {
+            foreach ($this->alteredColumns() as $name => $schema) {
                 $dbColumn = isset($this->dbColumns[$name]) ? $this->dbColumns[$name] : null;
 
-                if (empty($schema))
-                {
+                if (empty($schema)) {
                     $this->logger()->info(
                         "Dropping column [{statement}] from table {table}.",
                         [
@@ -1027,8 +787,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
                     continue;
                 }
 
-                if (empty($dbColumn))
-                {
+                if (empty($dbColumn)) {
                     $this->logger()->info(
                         "Adding column [{statement}] into table {table}.",
                         [
@@ -1054,12 +813,10 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
                 $this->doColumnChange($schema, $dbColumn);
             }
 
-            foreach ($this->alteredIndexes() as $name => $schema)
-            {
+            foreach ($this->alteredIndexes() as $name => $schema) {
                 $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
 
-                if (empty($schema))
-                {
+                if (empty($schema)) {
                     $this->logger()->info(
                         "Dropping index [{statement}] from table {table}.",
                         [
@@ -1072,8 +829,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
                     continue;
                 }
 
-                if (empty($dbIndex))
-                {
+                if (empty($dbIndex)) {
                     $this->logger()->info(
                         "Adding index [{statement}] into table {table}.",
                         [
@@ -1099,12 +855,10 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
                 $this->doIndexChange($schema, $dbIndex);
             }
 
-            foreach ($this->alteredReferences() as $name => $schema)
-            {
+            foreach ($this->alteredReferences() as $name => $schema) {
                 $dbForeign = isset($this->dbReferences[$name]) ? $this->dbReferences[$name] : null;
 
-                if (empty($schema))
-                {
+                if (empty($schema)) {
                     $this->logger()->info(
                         "Dropping foreign key [{statement}] in table {table}.",
                         [
@@ -1117,8 +871,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
                     continue;
                 }
 
-                if (empty($dbForeign))
-                {
+                if (empty($dbForeign)) {
                     $this->logger()->info(
                         "Adding foreign key [{statement}] into table {table}.",
                         [
@@ -1143,9 +896,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
                 $this->doForeignChange($schema, $dbForeign);
             }
-        }
-        catch (\Exception $exception)
-        {
+        } catch (\Exception $exception) {
             $this->driver->rollbackTransaction();
             throw $exception;
         }
@@ -1172,13 +923,11 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     protected function doColumnDrop(AbstractColumn $column)
     {
         //We have to erase all associated constraints
-        foreach ($column->getConstraints() as $constraint)
-        {
+        foreach ($column->getConstraints() as $constraint) {
             $this->doConstraintDrop($constraint);
         }
 
-        if ($this->hasForeign($column->getName()))
-        {
+        if ($this->hasForeign($column->getName())) {
             $this->doForeignDrop($this->foreign($column->getName()));
         }
 
@@ -1270,8 +1019,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     protected function doForeignChange(
         AbstractReference $foreign,
         AbstractReference $dbForeign
-    )
-    {
+    ) {
         $this->doForeignDrop($dbForeign);
         $this->doForeignAdd($foreign);
     }

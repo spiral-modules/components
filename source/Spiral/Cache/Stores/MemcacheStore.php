@@ -64,33 +64,28 @@ class MemcacheStore extends CacheStore
     {
         parent::__construct($cache);
 
-        if (is_object($driver))
-        {
+        if (is_object($driver)) {
             $this->setDriver($driver, $connect);
 
             return;
         }
 
-        if (empty($this->options['servers']))
-        {
+        if (empty($this->options['servers'])) {
             throw new StoreException(
                 'Unable to create Memcache[d] cache store. A lest one server must be specified.'
             );
         }
 
         //New Driver creation
-        if (class_exists('Memcache'))
-        {
+        if (class_exists('Memcache')) {
             $this->setDriver(new MemcacheDriver($this->options), true);
         }
 
-        if (class_exists('Memcached'))
-        {
+        if (class_exists('Memcached')) {
             $this->setDriver(new MemcachedDriver($this->options), true);
         }
 
-        if (empty($this->driver))
-        {
+        if (empty($this->driver)) {
             throw new StoreException('No available Memcache drivers found.');
         }
     }
@@ -127,8 +122,7 @@ class MemcacheStore extends CacheStore
     public function set($name, $data, $lifetime)
     {
         $lifetime = min(self::MAX_EXPIRATION + time(), $lifetime + time());
-        if ($lifetime < 0)
-        {
+        if ($lifetime < 0) {
             $lifetime = 0;
         }
 

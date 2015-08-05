@@ -33,8 +33,7 @@ class QueryResult extends \Spiral\Database\Query\QueryResult
     {
         parent::__construct($statement, $parameters);
 
-        if ($this->statement->getColumnMeta($this->countColumns() - 1)['name'] == self::ROW_NUMBER_COLUMN)
-        {
+        if ($this->statement->getColumnMeta($this->countColumns() - 1)['name'] == self::ROW_NUMBER_COLUMN) {
             $this->helperRow = true;
         }
     }
@@ -63,14 +62,12 @@ class QueryResult extends \Spiral\Database\Query\QueryResult
      */
     public function fetchAll($mode = null)
     {
-        if (!$this->helperRow)
-        {
+        if (!$this->helperRow) {
             return parent::fetchAll($mode);
         }
 
         $result = [];
-        while ($rowset = $this->fetch($mode))
-        {
+        while ($rowset = $this->fetch($mode)) {
             $result[] = $rowset;
         }
 

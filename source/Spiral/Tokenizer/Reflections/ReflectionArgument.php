@@ -66,8 +66,7 @@ class ReflectionArgument
      */
     public function stringValue()
     {
-        if ($this->type != self::STRING)
-        {
+        if ($this->type != self::STRING) {
             return null;
         }
 
@@ -87,40 +86,33 @@ class ReflectionArgument
         $parenthesisLevel = 0;
 
         $result = [];
-        foreach ($tokens as $token)
-        {
-            if ($token[ReflectionFile::TOKEN_TYPE] == T_WHITESPACE)
-            {
+        foreach ($tokens as $token) {
+            if ($token[ReflectionFile::TOKEN_TYPE] == T_WHITESPACE) {
                 continue;
             }
 
-            if (empty($definition))
-            {
+            if (empty($definition)) {
                 $definition = ['type' => self::EXPRESSION, 'value' => '', 'tokens' => []];
             }
 
-            if ($token[ReflectionFile::TOKEN_TYPE] == '(')
-            {
+            if ($token[ReflectionFile::TOKEN_TYPE] == '(') {
                 $parenthesisLevel++;
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
 
-            if ($token[ReflectionFile::TOKEN_TYPE] == ')')
-            {
+            if ($token[ReflectionFile::TOKEN_TYPE] == ')') {
                 $parenthesisLevel--;
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
 
-            if ($parenthesisLevel)
-            {
+            if ($parenthesisLevel) {
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
 
-            if ($token[ReflectionFile::TOKEN_TYPE] == ',')
-            {
+            if ($token[ReflectionFile::TOKEN_TYPE] == ',') {
                 $result[] = self::createArgument($definition);
                 $definition = null;
                 continue;
@@ -131,11 +123,9 @@ class ReflectionArgument
         }
 
         //Last argument
-        if (is_array($definition))
-        {
+        if (is_array($definition)) {
             $definition = self::createArgument($definition);
-            if (!empty($definition->getType()))
-            {
+            if (!empty($definition->getType())) {
                 $result[] = $definition;
             }
         }
@@ -154,11 +144,9 @@ class ReflectionArgument
     {
         $result = new static(self::EXPRESSION, $definition['value']);
 
-        if (count($definition['tokens']) == 1)
-        {
+        if (count($definition['tokens']) == 1) {
             //If argument represent by one token we can try to resolve it's type more precisely
-            switch ($definition['tokens'][0][0])
-            {
+            switch ($definition['tokens'][0][0]) {
                 case T_VARIABLE:
                     $result->type = self::VARIABLE;
                     break;

@@ -52,8 +52,7 @@ abstract class StorageServer extends Component implements ServerInterface
      */
     public function allocateFilename(BucketInterface $bucket, $name)
     {
-        if (empty($stream = $this->allocateStream($bucket, $name)))
-        {
+        if (empty($stream = $this->allocateStream($bucket, $name))) {
             throw new ServerException("Unable to allocate local filename for '{$name}'.");
         }
 
@@ -75,8 +74,7 @@ abstract class StorageServer extends Component implements ServerInterface
      */
     public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
-        if ($this->copy($bucket, $destination, $name))
-        {
+        if ($this->copy($bucket, $destination, $name)) {
             $this->delete($bucket, $name);
 
             return true;
@@ -93,23 +91,19 @@ abstract class StorageServer extends Component implements ServerInterface
      */
     protected function castFilename($source)
     {
-        if (empty($source) || is_string($source))
-        {
-            if (!$this->files->exists($source))
-            {
+        if (empty($source) || is_string($source)) {
+            if (!$this->files->exists($source)) {
                 return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
             }
 
             return $source;
         }
 
-        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface)
-        {
+        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface) {
             $source = $source->getStream();
         }
 
-        if ($source instanceof StreamInterface)
-        {
+        if ($source instanceof StreamInterface) {
             return StreamWrapper::getUri($source);
         }
 
@@ -124,18 +118,15 @@ abstract class StorageServer extends Component implements ServerInterface
      */
     protected function castStream($source)
     {
-        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface)
-        {
+        if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface) {
             $source = $source->getStream();
         }
 
-        if ($source instanceof StreamInterface)
-        {
+        if ($source instanceof StreamInterface) {
             return $source;
         }
 
-        if (empty($source))
-        {
+        if (empty($source)) {
             return \GuzzleHttp\Psr7\stream_for('');
         }
 

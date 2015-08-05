@@ -33,8 +33,23 @@ class ReflectionFile extends Component
      * @var array
      */
     static private $useTokens = [
-        '{', '}', ';', T_PAAMAYIM_NEKUDOTAYIM, T_NAMESPACE, T_STRING, T_CLASS, T_INTERFACE, T_TRAIT,
-        T_FUNCTION, T_NS_SEPARATOR, T_INCLUDE, T_INCLUDE_ONCE, T_REQUIRE, T_REQUIRE_ONCE, T_USE, T_AS
+        '{',
+        '}',
+        ';',
+        T_PAAMAYIM_NEKUDOTAYIM,
+        T_NAMESPACE,
+        T_STRING,
+        T_CLASS,
+        T_INTERFACE,
+        T_TRAIT,
+        T_FUNCTION,
+        T_NS_SEPARATOR,
+        T_INCLUDE,
+        T_INCLUDE_ONCE,
+        T_REQUIRE,
+        T_REQUIRE_ONCE,
+        T_USE,
+        T_AS
     ];
 
     /**
@@ -111,8 +126,7 @@ class ReflectionFile extends Component
         $this->tokenizer = $tokenizer;
         $this->filename = $filename;
 
-        if (!empty($cache))
-        {
+        if (!empty($cache)) {
             $this->importSchema($cache);
 
             return;
@@ -129,8 +143,7 @@ class ReflectionFile extends Component
         $this->locateDeclarations();
 
         //No need to record empty namespace
-        if (isset($this->namespaces['']))
-        {
+        if (isset($this->namespaces[''])) {
             $this->namespaces['\\'] = $this->namespaces[''];
             unset($this->namespaces['']);
         }
@@ -177,8 +190,7 @@ class ReflectionFile extends Component
      */
     public function getClasses()
     {
-        if (!isset($this->declarations['T_CLASS']))
-        {
+        if (!isset($this->declarations['T_CLASS'])) {
             return [];
         }
 
@@ -192,8 +204,7 @@ class ReflectionFile extends Component
      */
     public function getTraits()
     {
-        if (!isset($this->declarations['T_TRAIT']))
-        {
+        if (!isset($this->declarations['T_TRAIT'])) {
             return [];
         }
 
@@ -207,8 +218,7 @@ class ReflectionFile extends Component
      */
     public function getInterfaces()
     {
-        if (!isset($this->declarations['T_INTERFACE']))
-        {
+        if (!isset($this->declarations['T_INTERFACE'])) {
             return [];
         }
 
@@ -233,8 +243,7 @@ class ReflectionFile extends Component
      */
     public function getCalls()
     {
-        if (empty($this->calls))
-        {
+        if (empty($this->calls)) {
             $this->locateCalls($this->tokens ?: $this->tokenizer->fetchTokens($this->filename));
         }
 
@@ -246,10 +255,8 @@ class ReflectionFile extends Component
      */
     protected function locateDeclarations()
     {
-        foreach ($this->tokens as $TID => $token)
-        {
-            switch ($token[self::TOKEN_TYPE])
-            {
+        foreach ($this->tokens as $TID => $token) {
+            switch ($token[self::TOKEN_TYPE]) {
                 case T_NAMESPACE:
                     $this->registerNamespace($TID);
                     break;
@@ -269,8 +276,7 @@ class ReflectionFile extends Component
                         $this->tokens[$TID][self::TOKEN_TYPE] == T_CLASS
                         && isset($this->tokens[$TID - 1])
                         && $this->tokens[$TID - 1][self::TOKEN_TYPE] == T_PAAMAYIM_NEKUDOTAYIM
-                    )
-                    {
+                    ) {
                         //PHP5.5 ClassName::class constant
                         continue;
                     }
@@ -296,10 +302,8 @@ class ReflectionFile extends Component
     private function cleanTokens(array $tokens)
     {
         $result = [];
-        foreach ($tokens as $TID => $token)
-        {
-            if (!in_array($token[self::TOKEN_TYPE], self::$useTokens))
-            {
+        foreach ($tokens as $TID => $token) {
+            if (!in_array($token[self::TOKEN_TYPE], self::$useTokens)) {
                 continue;
             }
 
@@ -331,30 +335,25 @@ class ReflectionFile extends Component
         $namespace = '';
         $TID = $firstTID + 1;
 
-        do
-        {
+        do {
             $token = $this->tokens[$TID++];
-            if ($token[self::TOKEN_CODE] == '{')
-            {
+            if ($token[self::TOKEN_CODE] == '{') {
                 break;
             }
 
             $namespace .= $token[self::TOKEN_CODE];
-        }
-        while (
+        } while (
             isset($this->tokens[$TID])
             && $this->tokens[$TID][self::TOKEN_CODE] != '{'
             && $this->tokens[$TID][self::TOKEN_CODE] != ';'
         );
 
         $uses = [];
-        if (isset($this->namespaces[$namespace]))
-        {
+        if (isset($this->namespaces[$namespace])) {
             $uses = $this->namespaces[$namespace];
         }
 
-        if ($this->tokens[$TID][self::TOKEN_CODE] == ';')
-        {
+        if ($this->tokens[$TID][self::TOKEN_CODE] == ';') {
             return $this->namespaces[$namespace] = [
                 'firstTID' => $this->tokens[$firstTID][self::TOKEN_ID],
                 'lastTID'  => $this->tokens[count($this->tokens) - 1][self::TOKEN_ID],
@@ -377,13 +376,10 @@ class ReflectionFile extends Component
      */
     private function registerFunction($firstTID)
     {
-        foreach ($this->declarations as $declarations)
-        {
-            foreach ($declarations as $location)
-            {
+        foreach ($this->declarations as $declarations) {
+            foreach ($declarations as $location) {
                 $tokenID = $this->tokens[$firstTID][self::TOKEN_ID];
-                if ($tokenID >= $location['firstTID'] && $tokenID <= $location['lastTID'])
-                {
+                if ($tokenID >= $location['firstTID'] && $tokenID <= $location['lastTID']) {
                     //We are inside class, function is method
                     return;
                 }
@@ -424,26 +420,20 @@ class ReflectionFile extends Component
 
         $class = '';
         $localAlias = null;
-        for ($TID = $firstTID + 1; $this->tokens[$TID][self::TOKEN_CODE] != ';'; $TID++)
-        {
-            if ($this->tokens[$TID][self::TOKEN_TYPE] == T_AS)
-            {
+        for ($TID = $firstTID + 1; $this->tokens[$TID][self::TOKEN_CODE] != ';'; $TID++) {
+            if ($this->tokens[$TID][self::TOKEN_TYPE] == T_AS) {
                 $localAlias = '';
                 continue;
             }
 
-            if ($localAlias === null)
-            {
+            if ($localAlias === null) {
                 $class .= $this->tokens[$TID][self::TOKEN_CODE];
-            }
-            else
-            {
+            } else {
                 $localAlias .= $this->tokens[$TID][self::TOKEN_CODE];
             }
         }
 
-        if (empty($localAlias))
-        {
+        if (empty($localAlias)) {
             $names = explode('\\', $class);
             $localAlias = end($names);
         }
@@ -460,22 +450,18 @@ class ReflectionFile extends Component
     private function endingTID($firstTID)
     {
         $level = null;
-        for ($TID = $firstTID; $TID < $this->countTokens; $TID++)
-        {
+        for ($TID = $firstTID; $TID < $this->countTokens; $TID++) {
             $token = $this->tokens[$TID];
-            if ($token[self::TOKEN_CODE] == '{')
-            {
+            if ($token[self::TOKEN_CODE] == '{') {
                 $level++;
                 continue;
             }
 
-            if ($token[self::TOKEN_CODE] == '}')
-            {
+            if ($token[self::TOKEN_CODE] == '}') {
                 $level--;
             }
 
-            if ($level === 0)
-            {
+            if ($level === 0) {
                 break;
             }
         }
@@ -506,24 +492,18 @@ class ReflectionFile extends Component
 
         //Tokens used to re-enable token detection
         $stopTokens = [T_STRING, T_WHITESPACE, T_DOUBLE_COLON, T_NS_SEPARATOR];
-        foreach ($tokens as $TID => $token)
-        {
+        foreach ($tokens as $TID => $token) {
             $tokenType = $token[self::TOKEN_TYPE];
 
             //We are not indexing function declarations or functions called from $objects.
-            if ($tokenType == T_FUNCTION || $tokenType == T_OBJECT_OPERATOR || $tokenType == T_NEW)
-            {
+            if ($tokenType == T_FUNCTION || $tokenType == T_OBJECT_OPERATOR || $tokenType == T_NEW) {
                 //Not a call, function declaration, or object method
-                if (!$argumentsTID)
-                {
+                if (!$argumentsTID) {
                     $skipTokens = true;
                     continue;
                 }
-            }
-            elseif ($skipTokens)
-            {
-                if (!in_array($tokenType, $stopTokens))
-                {
+            } elseif ($skipTokens) {
+                if (!in_array($tokenType, $stopTokens)) {
                     //Returning to search
                     $skipTokens = false;
                 }
@@ -531,16 +511,13 @@ class ReflectionFile extends Component
             }
 
             //We are inside function, and there is "(", indexing arguments.
-            if ($functionTID && $tokenType == '(')
-            {
-                if (!$argumentsTID)
-                {
+            if ($functionTID && $tokenType == '(') {
+                if (!$argumentsTID) {
                     $argumentsTID = $TID;
                 }
 
                 $parenthesisLevel++;
-                if ($parenthesisLevel != 1)
-                {
+                if ($parenthesisLevel != 1) {
                     //Not arguments beginning, but arguments part
                     $arguments[$TID] = $token;
                 }
@@ -549,11 +526,9 @@ class ReflectionFile extends Component
             }
 
             //We are inside function arguments and ")" met.
-            if ($functionTID && $tokenType == ')')
-            {
+            if ($functionTID && $tokenType == ')') {
                 $parenthesisLevel--;
-                if ($parenthesisLevel == -1)
-                {
+                if ($parenthesisLevel == -1) {
                     $functionTID = false;
                     $parenthesisLevel = 0;
 
@@ -561,11 +536,9 @@ class ReflectionFile extends Component
                 }
 
                 //Function fully indexed, we can process it now.
-                if (!$parenthesisLevel)
-                {
+                if (!$parenthesisLevel) {
                     $source = '';
-                    for ($tokenID = $functionTID; $tokenID <= $TID; $tokenID++)
-                    {
+                    for ($tokenID = $functionTID; $tokenID <= $TID; $tokenID++) {
                         //Collecting function usage source
                         $source .= $tokens[$tokenID][self::TOKEN_CODE];
                     }
@@ -574,8 +547,7 @@ class ReflectionFile extends Component
                     $class = $this->fetchClass($tokens, $functionTID, $argumentsTID);
 
                     $call = null;
-                    if ($class != 'self' && $class != 'static')
-                    {
+                    if ($class != 'self' && $class != 'static') {
                         $call = new ReflectionCall(
                             $this->filename,
                             $line,
@@ -596,9 +568,7 @@ class ReflectionFile extends Component
                     //Closing search
                     $arguments = [];
                     $argumentsTID = $functionTID = false;
-                }
-                else
-                {
+                } else {
                     //Not arguments beginning, but arguments part
                     $arguments[$TID] = $token;
                 }
@@ -607,21 +577,18 @@ class ReflectionFile extends Component
             }
 
             //Still inside arguments.
-            if ($functionTID && $parenthesisLevel)
-            {
+            if ($functionTID && $parenthesisLevel) {
                 $arguments[$TID] = $token;
                 continue;
             }
 
             //Nothing valuable to remember, will be parsed later.
-            if ($functionTID && in_array($tokenType, $stopTokens))
-            {
+            if ($functionTID && in_array($tokenType, $stopTokens)) {
                 continue;
             }
 
             //Seems like we found function/method call
-            if ($tokenType == T_STRING || $tokenType == T_STATIC || $tokenType == T_NS_SEPARATOR)
-            {
+            if ($tokenType == T_STRING || $tokenType == T_STATIC || $tokenType == T_NS_SEPARATOR) {
                 $functionTID = $TID;
                 $line = $token[self::TOKEN_LINE];
 
@@ -647,17 +614,14 @@ class ReflectionFile extends Component
     private function fetchName(array $tokens, $callTID, $argumentsTID)
     {
         $function = [];
-        for (; $callTID < $argumentsTID; $callTID++)
-        {
+        for (; $callTID < $argumentsTID; $callTID++) {
             $token = $tokens[$callTID];
-            if ($token[self::TOKEN_TYPE] == T_STRING || $token[self::TOKEN_TYPE] == T_STATIC)
-            {
+            if ($token[self::TOKEN_TYPE] == T_STRING || $token[self::TOKEN_TYPE] == T_STATIC) {
                 $function[] = $token[self::TOKEN_CODE];
             }
         }
 
-        if (count($function) > 1)
-        {
+        if (count($function) > 1) {
             return end($function);
         }
 
@@ -675,17 +639,14 @@ class ReflectionFile extends Component
     private function fetchClass(array $tokens, $callTID, $argumentsTID)
     {
         $function = [];
-        for (; $callTID < $argumentsTID; $callTID++)
-        {
+        for (; $callTID < $argumentsTID; $callTID++) {
             $token = $tokens[$callTID];
-            if ($token[self::TOKEN_TYPE] == T_STRING || $token[self::TOKEN_TYPE] == T_STATIC)
-            {
+            if ($token[self::TOKEN_TYPE] == T_STRING || $token[self::TOKEN_TYPE] == T_STATIC) {
                 $function[] = $token[self::TOKEN_CODE];
             }
         }
 
-        if (count($function) == 1)
-        {
+        if (count($function) == 1) {
             return null;
         }
 
@@ -694,24 +655,17 @@ class ReflectionFile extends Component
         //Resolving class
         $class = join('\\', $function);
 
-        if (strtolower($class) == 'self' || strtolower($class) == 'static')
-        {
-            foreach ($this->declarations as $declarations)
-            {
-                foreach ($declarations as $name => $location)
-                {
-                    if ($callTID >= $location['firstTID'] && $callTID <= $location['lastTID'])
-                    {
+        if (strtolower($class) == 'self' || strtolower($class) == 'static') {
+            foreach ($this->declarations as $declarations) {
+                foreach ($declarations as $name => $location) {
+                    if ($callTID >= $location['firstTID'] && $callTID <= $location['lastTID']) {
                         return $name;
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             $namespace = rtrim($this->detectNamespace($callTID), '\\');
-            if (isset($this->namespaces[$namespace ?: '\\']['uses'][$class]))
-            {
+            if (isset($this->namespaces[$namespace ?: '\\']['uses'][$class])) {
                 return $this->namespaces[$namespace ?: '\\']['uses'][$class];
             }
         }
@@ -728,10 +682,8 @@ class ReflectionFile extends Component
     private function detectNamespace($TID)
     {
         $TID = isset($this->tokens[$TID][self::TOKEN_ID]) ? $this->tokens[$TID][self::TOKEN_ID] : $TID;
-        foreach ($this->namespaces as $namespace => $position)
-        {
-            if ($TID >= $position['firstTID'] && $TID <= $position['lastTID'])
-            {
+        foreach ($this->namespaces as $namespace => $position) {
+            if ($TID >= $position['firstTID'] && $TID <= $position['lastTID']) {
                 return $namespace ? $namespace . '\\' : '';
             }
         }

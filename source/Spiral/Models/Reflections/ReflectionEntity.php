@@ -94,10 +94,8 @@ abstract class ReflectionEntity extends \ReflectionClass
     {
         $methods = [];
 
-        foreach ($this->getMethods() as $method)
-        {
-            if ($local && $method->getDeclaringClass()->getName() != $this->getName())
-            {
+        foreach ($this->getMethods() as $method) {
+            if ($local && $method->getDeclaringClass()->getName() != $this->getName()) {
                 continue;
             }
 
@@ -134,18 +132,15 @@ abstract class ReflectionEntity extends \ReflectionClass
             'accessor' => []
         ];
 
-        foreach ($this->property('getters', true) as $field => $filter)
-        {
+        foreach ($this->property('getters', true) as $field => $filter) {
             $mutators['getter'][$field] = $filter;
         }
 
-        foreach ($this->property('setters', true) as $field => $filter)
-        {
+        foreach ($this->property('setters', true) as $field => $filter) {
             $mutators['setter'][$field] = $filter;
         }
 
-        foreach ($this->property('accessors', true) as $field => $filter)
-        {
+        foreach ($this->property('accessors', true) as $field => $filter) {
             $mutators['accessor'][$field] = $filter;
         }
 
@@ -161,28 +156,21 @@ abstract class ReflectionEntity extends \ReflectionClass
      */
     final protected function property($property, $merge = false)
     {
-        if (isset($this->cache[$property]))
-        {
+        if (isset($this->cache[$property])) {
             return $this->cache[$property];
         }
 
         $defaults = $this->getDefaultProperties();
-        if (isset($defaults[$property]))
-        {
+        if (isset($defaults[$property])) {
             $value = $defaults[$property];
-        }
-        else
-        {
+        } else {
             return null;
         }
 
-        if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS))
-        {
-            if (is_array($value))
-            {
+        if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS)) {
+            if (is_array($value)) {
                 $parent = $this->parentSchema($this->getParentClass()->getName());
-                if (!empty($parent))
-                {
+                if (!empty($parent)) {
                     $value = array_merge($parent->property($property, $merge), $value);
                 }
             }

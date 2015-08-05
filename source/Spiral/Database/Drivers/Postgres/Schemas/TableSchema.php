@@ -52,14 +52,12 @@ class TableSchema extends AbstractTable
 
         $columns = $this->driver->query($query, [$this->name])->bind('column_name', $columnName);
 
-        foreach ($columns as $column)
-        {
+        foreach ($columns as $column) {
             if (preg_match(
                 '/^nextval\([\'"]([a-z0-9_"]+)[\'"](?:::regclass)?\)$/i',
                 $column['column_default'],
                 $matches
-            ))
-            {
+            )) {
                 $this->sequenceName[$columnName] = $matches[1];
             }
 
@@ -73,24 +71,20 @@ class TableSchema extends AbstractTable
     protected function loadIndexes()
     {
         $query = "SELECT * FROM pg_indexes WHERE schemaname = 'public' AND tablename = ?";
-        foreach ($this->driver->query($query, [$this->name]) as $index)
-        {
+        foreach ($this->driver->query($query, [$this->name]) as $index) {
             $index = $this->registerIndex($index['indexname'], $index['indexdef']);
 
             $conType = $this->driver
                 ->query("SELECT contype FROM pg_constraint WHERE conname = ?", [$index->getName()])
                 ->fetchColumn();
 
-            if ($conType == 'p')
-            {
+            if ($conType == 'p') {
                 $this->primaryKeys = $this->dbPrimaryKeys = $index->getColumns();
                 unset($this->indexes[$index->getName()], $this->dbIndexes[$index->getName()]);
 
-                if (is_array($this->sequenceName) && count($index->getColumns()) === 1)
-                {
+                if (is_array($this->sequenceName) && count($index->getColumns()) === 1) {
                     $column = $index->getColumns()[0];
-                    if (isset($this->sequenceName[$column]))
-                    {
+                    if (isset($this->sequenceName[$column])) {
                         //We found our primary sequence
                         $this->sequenceName = $this->sequenceName[$column];
                     }
@@ -98,8 +92,7 @@ class TableSchema extends AbstractTable
             }
         }
 
-        if (is_array($this->sequenceName))
-        {
+        if (is_array($this->sequenceName)) {
             //Unable to resolve
             $this->sequenceName = null;
         }
@@ -122,8 +115,7 @@ class TableSchema extends AbstractTable
                       ON rc.constraint_name = tc.constraint_name
                   WHERE constraint_type = 'FOREIGN KEY' AND tc.table_name=?";
 
-        foreach ($this->driver->query($query, [$this->name]) as $reference)
-        {
+        foreach ($this->driver->query($query, [$this->name]) as $reference) {
             $this->registerReference($reference['constraint_name'], $reference);
         }
     }
@@ -138,8 +130,7 @@ class TableSchema extends AbstractTable
          */
 
         //Rename is separate operation
-        if ($column->getName() != $dbColumn->getName())
-        {
+        if ($column->getName() != $dbColumn->getName()) {
             $this->driver->statement(\Spiral\interpolate(
                 'ALTER TABLE {table} RENAME COLUMN {original} TO {column}',
                 [
@@ -153,8 +144,7 @@ class TableSchema extends AbstractTable
         }
 
         //Postgres columns should be altered using set of operations
-        if (!$operations = $column->alterOperations($dbColumn))
-        {
+        if (!$operations = $column->alterOperations($dbColumn)) {
             return;
         }
 

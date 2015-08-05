@@ -35,14 +35,11 @@ class SftpServer extends StorageServer
         'methods'    => [],
         'port'       => 22,
         'home'       => '/',
-
         //Authorization method and username
         'authMethod' => 'password',
         'username'   => '',
-
         //Used with "password" authorization
         'password'   => '',
-
         //User with "pubkey" authorization
         'publicKey'  => '',
         'privateKey' => '',
@@ -63,8 +60,7 @@ class SftpServer extends StorageServer
     {
         parent::__construct($files, $options);
 
-        if (!extension_loaded('ssh2'))
-        {
+        if (!extension_loaded('ssh2')) {
             throw new ServerException(
                 "Unable to initialize sftp storage server, extension 'ssh2' not found."
             );
@@ -86,8 +82,7 @@ class SftpServer extends StorageServer
      */
     public function size(BucketInterface $bucket, $name)
     {
-        if (!$this->exists($bucket, $name))
-        {
+        if (!$this->exists($bucket, $name)) {
             return false;
         }
 
@@ -99,13 +94,10 @@ class SftpServer extends StorageServer
      */
     public function put(BucketInterface $bucket, $name, $source)
     {
-        if ($source instanceof StreamInterface)
-        {
+        if ($source instanceof StreamInterface) {
             $expectedSize = $source->getSize();
             $source = StreamWrapper::getResource($source);
-        }
-        else
-        {
+        } else {
             $expectedSize = filesize($source);
             $source = fopen($source, 'r');
         }
@@ -138,8 +130,7 @@ class SftpServer extends StorageServer
      */
     public function delete(BucketInterface $bucket, $name)
     {
-        if ($this->exists($bucket, $name))
-        {
+        if ($this->exists($bucket, $name)) {
             ssh2_sftp_unlink($this->sftp, $this->getPath($bucket, $name));
         }
     }
@@ -149,22 +140,19 @@ class SftpServer extends StorageServer
      */
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
-        if (!$this->exists($bucket, $oldname))
-        {
+        if (!$this->exists($bucket, $oldname)) {
             throw new ServerException(
                 "Unable to rename storage object '{$oldname}', object does not exists at SFTP server."
             );
         }
 
         $location = $this->ensureLocation($bucket, $newname);
-        if (file_exists($this->getUri($bucket, $newname)))
-        {
+        if (file_exists($this->getUri($bucket, $newname))) {
             //We have to clean location before renaming
             $this->delete($bucket, $newname);
         }
 
-        if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldname), $location))
-        {
+        if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldname), $location)) {
             throw new ServerException(
                 "Unable to rename storage object '{$oldname}' to '{$newname}'."
             );
@@ -186,16 +174,14 @@ class SftpServer extends StorageServer
             $this->options['methods']
         );
 
-        if (empty($session))
-        {
+        if (empty($session)) {
             throw new ServerException(
                 "Unable to connect to remote SSH server '{$this->options['host']}'."
             );
         }
 
         //Authorization
-        switch ($this->options['authMethod'])
-        {
+        switch ($this->options['authMethod']) {
             case self::NONE:
                 ssh2_auth_none($session, $this->options['username']);
                 break;
@@ -258,10 +244,8 @@ class SftpServer extends StorageServer
         $directory = dirname($this->getPath($bucket, $name));
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
-        if (file_exists('ssh2.sftp://' . $this->sftp . $directory))
-        {
-            if (function_exists('ssh2_sftp_chmod'))
-            {
+        if (file_exists('ssh2.sftp://' . $this->sftp . $directory)) {
+            if (function_exists('ssh2_sftp_chmod')) {
                 ssh2_sftp_chmod($this->sftp, $directory, $mode | 0111);
             }
 
@@ -271,26 +255,21 @@ class SftpServer extends StorageServer
         $directories = explode('/', substr($directory, strlen($this->options['home'])));
 
         $location = $this->options['home'];
-        foreach ($directories as $directory)
-        {
-            if (!$directory)
-            {
+        foreach ($directories as $directory) {
+            if (!$directory) {
                 continue;
             }
 
             $location .= '/' . $directory;
 
-            if (!file_exists('ssh2.sftp://' . $this->sftp . $location))
-            {
-                if (!ssh2_sftp_mkdir($this->sftp, $location))
-                {
+            if (!file_exists('ssh2.sftp://' . $this->sftp . $location)) {
+                if (!ssh2_sftp_mkdir($this->sftp, $location)) {
                     throw new ServerException(
                         "Unable to create directory {$location} using sftp connection."
                     );
                 }
 
-                if (function_exists('ssh2_sftp_chmod'))
-                {
+                if (function_exists('ssh2_sftp_chmod')) {
                     ssh2_sftp_chmod($this->sftp, $directory, $mode | 0111);
                 }
             }
@@ -308,8 +287,7 @@ class SftpServer extends StorageServer
      */
     protected function refreshPermissions(BucketInterface $bucket, $name)
     {
-        if (!function_exists('ssh2_sftp_chmod'))
-        {
+        if (!function_exists('ssh2_sftp_chmod')) {
             return true;
         }
 

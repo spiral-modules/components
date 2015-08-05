@@ -44,29 +44,24 @@ class FileManager extends Singleton implements FilesInterface
     public function ensureLocation($location, $mode = self::RUNTIME, $recursive = true)
     {
         $mode = $mode | 0111;
-        if (is_dir($location))
-        {
+        if (is_dir($location)) {
             //Exists :(
             return $this->setPermissions($location, $mode);
         }
 
-        if (!$recursive)
-        {
+        if (!$recursive) {
             return mkdir($location, $mode, true);
         }
 
         $directoryChain = [basename($location)];
 
         $baseDirectory = $location;
-        while (!is_dir($baseDirectory = dirname($baseDirectory)))
-        {
+        while (!is_dir($baseDirectory = dirname($baseDirectory))) {
             $directoryChain[] = basename($baseDirectory);
         }
 
-        foreach (array_reverse($directoryChain) as $directory)
-        {
-            if (!mkdir($baseDirectory = $baseDirectory . '/' . $directory))
-            {
+        foreach (array_reverse($directoryChain) as $directory) {
+            if (!mkdir($baseDirectory = $baseDirectory . '/' . $directory)) {
                 return false;
             }
 
@@ -93,8 +88,7 @@ class FileManager extends Singleton implements FilesInterface
     {
         $ensureLocation && $this->ensureLocation(dirname($filename), $mode);
 
-        if (!empty($mode) && $this->exists($filename))
-        {
+        if (!empty($mode) && $this->exists($filename)) {
             //Forcing mode for existed file
             $this->setPermissions($filename, $mode);
         }
@@ -103,8 +97,7 @@ class FileManager extends Singleton implements FilesInterface
                 $filename, $data, $append ? FILE_APPEND | LOCK_EX : LOCK_EX
             ) !== false);
 
-        if ($result && !empty($mode))
-        {
+        if ($result && !empty($mode)) {
             //Forcing mode after file creation
             $this->setPermissions($filename, $mode);
         }
@@ -125,8 +118,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function delete($filename)
     {
-        if ($this->exists($filename))
-        {
+        if ($this->exists($filename)) {
             return unlink($filename);
         }
 
@@ -170,8 +162,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function size($filename)
     {
-        if (!$this->exists($filename))
-        {
+        if (!$this->exists($filename)) {
             return false;
         }
 
@@ -191,8 +182,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function md5($filename)
     {
-        if (!$this->exists($filename))
-        {
+        if (!$this->exists($filename)) {
             return false;
         }
 
@@ -204,8 +194,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function time($filename)
     {
-        if (!$this->exists($filename))
-        {
+        if (!$this->exists($filename)) {
             return false;
         }
 
@@ -217,8 +206,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function getPermissions($filename)
     {
-        if (!$this->exists($filename))
-        {
+        if (!$this->exists($filename)) {
             return false;
         }
 
@@ -230,8 +218,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function setPermissions($filename, $mode)
     {
-        if (is_dir($filename))
-        {
+        if (is_dir($filename)) {
             $mode |= 0111;
         }
 
@@ -243,24 +230,20 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function getFiles($location, $extension = null, &$result = [])
     {
-        if (is_string($extension))
-        {
+        if (is_string($extension)) {
             $extension = [$extension];
         }
 
         $location = $this->normalizePath($location) . static::SEPARATOR;
 
         $glob = glob($location . '*');
-        foreach ($glob as $item)
-        {
-            if (is_dir($item))
-            {
+        foreach ($glob as $item) {
+            if (is_dir($item)) {
                 $this->getFiles($item . '/', $extension, $result);
                 continue;
             }
 
-            if (!empty($extension) && !in_array($this->extension($item), $extension))
-            {
+            if (!empty($extension) && !in_array($this->extension($item), $extension)) {
                 continue;
             }
 
@@ -275,15 +258,13 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function tempFilename($extension = '', $location = null)
     {
-        if (!empty($location))
-        {
+        if (!empty($location)) {
             $location = sys_get_temp_dir();
         }
 
         $filename = tempnam($location, 'spiral');
 
-        if ($extension)
-        {
+        if ($extension) {
             //I should probably find more original way of doing that
             rename($filename, $filename = $filename . '.' . $extension);
             $this->destruct[] = $filename;
@@ -316,8 +297,7 @@ class FileManager extends Singleton implements FilesInterface
         $directory = $this->normalizePath($directory) . '/';
         $path = $this->normalizePath($path);
 
-        if (is_dir($path))
-        {
+        if (is_dir($path)) {
             $path = rtrim($path, '/') . '/';
         }
 
@@ -325,27 +305,20 @@ class FileManager extends Singleton implements FilesInterface
         $path = explode('/', $path);
 
         $relPath = $path;
-        foreach ($directory as $depth => $nested)
-        {
+        foreach ($directory as $depth => $nested) {
             //Find first non-matching directory
-            if ($nested === $path[$depth])
-            {
+            if ($nested === $path[$depth]) {
                 //Ignore this directory
                 array_shift($relPath);
-            }
-            else
-            {
+            } else {
                 //Get number of remaining dirs to $from
                 $remaining = count($nested) - $depth;
-                if ($remaining > 1)
-                {
+                if ($remaining > 1) {
                     // add traversals up to first matching dir
                     $padLength = (count($relPath) + $remaining - 1) * -1;
                     $relPath = array_pad($relPath, $padLength, '..');
                     break;
-                }
-                else
-                {
+                } else {
                     $relPath[0] = './' . $relPath[0];
                 }
             }
@@ -359,8 +332,7 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function __destruct()
     {
-        foreach ($this->destruct as $filename)
-        {
+        foreach ($this->destruct as $filename) {
             $this->delete($filename);
         }
     }

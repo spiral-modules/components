@@ -51,45 +51,35 @@ class ColumnSchema extends AbstractColumn
             'identity' => true,
             'nullable' => false
         ],
-
         //Enum type (mapped via method)
         'enum'        => 'enum',
-
         //Logical types
         'boolean'     => 'bit',
-
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => 'int',
         'tinyInteger' => 'tinyint',
         'bigInteger'  => 'bigint',
-
         //String with specified length (mapped via method)
         'string'      => 'varchar',
-
         //Generic types
         'text'        => ['type' => 'varchar', 'size' => 0],
         'tinyText'    => ['type' => 'varchar', 'size' => 0],
         'longText'    => ['type' => 'varchar', 'size' => 0],
-
         //Real types
         'double'      => 'float',
         'float'       => 'real',
-
         //Decimal type (mapped via method)
         'decimal'     => 'decimal',
-
         //Date and Time types
         'datetime'    => 'datetime',
         'date'        => 'date',
         'time'        => 'time',
         'timestamp'   => 'datetime',
-
         //Binary types
         'binary'      => ['type' => 'varbinary', 'size' => 0],
         'tinyBinary'  => ['type' => 'varbinary', 'size' => 0],
         'longBinary'  => ['type' => 'varbinary', 'size' => 0],
-
         //Additional types
         'json'        => ['type' => 'varchar', 'size' => 0]
     ];
@@ -121,8 +111,7 @@ class ColumnSchema extends AbstractColumn
      */
     public function abstractType()
     {
-        if ($this->enumValues)
-        {
+        if ($this->enumValues) {
             return 'enum';
         }
 
@@ -136,13 +125,11 @@ class ColumnSchema extends AbstractColumn
     {
         $constraints = parent::getConstraints();
 
-        if ($this->defaultConstraint)
-        {
+        if ($this->defaultConstraint) {
             $constraints[] = $this->defaultConstraint;
         }
 
-        if ($this->enumConstraint)
-        {
+        if ($this->enumConstraint) {
             $constraints[] = $this->enumConstraint;
         }
 
@@ -158,8 +145,7 @@ class ColumnSchema extends AbstractColumn
         sort($this->enumValues);
 
         $this->type = 'varchar';
-        foreach ($this->enumValues as $value)
-        {
+        foreach ($this->enumValues as $value) {
             $this->size = max((int)$this->size, strlen($value));
         }
 
@@ -173,32 +159,24 @@ class ColumnSchema extends AbstractColumn
      */
     public function sqlStatement($enum = false)
     {
-        if ($enum || $this->abstractType() != 'enum')
-        {
+        if ($enum || $this->abstractType() != 'enum') {
             $statement = [$this->getName(true), $this->type];
 
-            if ($this->precision)
-            {
+            if ($this->precision) {
                 $statement[] = "({$this->precision}, {$this->scale})";
-            }
-            elseif ($this->size)
-            {
+            } elseif ($this->size) {
                 $statement[] = "({$this->size})";
-            }
-            elseif ($this->type == 'varchar' || $this->type == 'varbinary')
-            {
+            } elseif ($this->type == 'varchar' || $this->type == 'varbinary') {
                 $statement[] = "(max)";
             }
 
-            if ($this->identity)
-            {
+            if ($this->identity) {
                 $statement[] = 'IDENTITY(1,1)';
             }
 
             $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
 
-            if ($this->defaultValue !== null)
-            {
+            if ($this->defaultValue !== null) {
                 $statement[] = "DEFAULT {$this->prepareDefault()}";
             }
 
@@ -207,8 +185,7 @@ class ColumnSchema extends AbstractColumn
 
         //We have add constraint for enum type
         $enumValues = [];
-        foreach ($this->enumValues as $value)
-        {
+        foreach ($this->enumValues as $value) {
             $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
@@ -245,30 +222,22 @@ class ColumnSchema extends AbstractColumn
             $original->nullable
         ];
 
-        if ($typeDefinition != $originalType)
-        {
-            if ($this->abstractType() == 'enum')
-            {
+        if ($typeDefinition != $originalType) {
+            if ($this->abstractType() == 'enum') {
                 //Getting longest value
                 $enumSize = $this->size;
-                foreach ($this->enumValues as $value)
-                {
+                foreach ($this->enumValues as $value) {
                     $enumSize = max($enumSize, strlen($value));
                 }
 
                 $type = "ALTER COLUMN {$this->getName(true)} varchar($enumSize)";
                 $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
-            }
-            else
-            {
+            } else {
                 $type = "ALTER COLUMN {$this->getName(true)} {$this->type}";
 
-                if ($this->size)
-                {
+                if ($this->size) {
                     $type .= "($this->size)";
-                }
-                elseif ($this->precision)
-                {
+                } elseif ($this->precision) {
                     $type .= "($this->precision, $this->scale)";
                 }
 
@@ -277,10 +246,8 @@ class ColumnSchema extends AbstractColumn
         }
 
         //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
-        if ($this->defaultValue !== null)
-        {
-            if (!$this->defaultConstraint)
-            {
+        if ($this->defaultValue !== null) {
+            if (!$this->defaultConstraint) {
                 //Making new name
                 $this->defaultConstraint = $this->table->getName() . '_'
                     . $this->getName() . '_default_' . uniqid();
@@ -297,11 +264,9 @@ class ColumnSchema extends AbstractColumn
         }
 
         //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
-        if ($this->abstractType() == 'enum')
-        {
+        if ($this->abstractType() == 'enum') {
             $enumValues = [];
-            foreach ($this->enumValues as $value)
-            {
+            foreach ($this->enumValues as $value) {
                 $enumValues[] = $this->table->driver()->getPDO()->quote($value);
             }
 
@@ -324,25 +289,21 @@ class ColumnSchema extends AbstractColumn
         $this->identity = (bool)$schema['is_identity'];
 
         $this->size = (int)$schema['CHARACTER_MAXIMUM_LENGTH'];
-        if ($this->size == -1)
-        {
+        if ($this->size == -1) {
             $this->size = 0;
         }
 
-        if ($this->type == 'decimal')
-        {
+        if ($this->type == 'decimal') {
             $this->precision = (int)$schema['NUMERIC_PRECISION'];
             $this->scale = (int)$schema['NUMERIC_SCALE'];
         }
 
         //Processing default value
-        if ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')')
-        {
+        if ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')') {
             $this->defaultValue = substr($this->defaultValue, 1, -1);
         }
 
-        if (preg_match('/^[\'""].*?[\'"]$/', $this->defaultValue))
-        {
+        if (preg_match('/^[\'""].*?[\'"]$/', $this->defaultValue)) {
             $this->defaultValue = substr($this->defaultValue, 1, -1);
         }
 
@@ -352,8 +313,7 @@ class ColumnSchema extends AbstractColumn
                 $this->defaultValue[0] == '('
                 && $this->defaultValue[strlen($this->defaultValue) - 1] == ')'
             )
-        )
-        {
+        ) {
             $this->defaultValue = substr($this->defaultValue, 1, -1);
         }
 
@@ -363,8 +323,7 @@ class ColumnSchema extends AbstractColumn
          */
 
         $tableDriver = $this->table->driver();
-        if (!empty($schema['default_object_id']))
-        {
+        if (!empty($schema['default_object_id'])) {
             $this->defaultConstraint = $tableDriver->query(
                 "SELECT name FROM sys.default_constraints WHERE object_id = ?", [
                 $schema['default_object_id']
@@ -372,8 +331,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         //Potential enum
-        if ($this->type == 'varchar' && $this->size)
-        {
+        if ($this->type == 'varchar' && $this->size) {
             $query = "SELECT object_definition(o.object_id) AS [definition],
                              OBJECT_NAME(o.OBJECT_ID) AS [name]
                       FROM sys.objects AS o
@@ -386,8 +344,7 @@ class ColumnSchema extends AbstractColumn
                 $schema['column_id']
             ]);
 
-            foreach ($constraints as $checkConstraint)
-            {
+            foreach ($constraints as $checkConstraint) {
                 $this->enumConstraint = $checkConstraint['name'];
 
                 $name = preg_quote($this->getName(true));
@@ -397,8 +354,7 @@ class ColumnSchema extends AbstractColumn
                     '/' . $name . '=[\']?([^\']+)[\']?/i',
                     $checkConstraint['definition'],
                     $matches
-                ))
-                {
+                )) {
                     $this->enumValues = $matches[1];
                     sort($this->enumValues);
                 }
@@ -414,8 +370,7 @@ class ColumnSchema extends AbstractColumn
     protected function prepareDefault()
     {
         $defaultValue = parent::prepareDefault();
-        if ($this->abstractType() == 'boolean')
-        {
+        if ($this->abstractType() == 'boolean') {
             $defaultValue = (int)$this->defaultValue;
         }
 
@@ -431,10 +386,8 @@ class ColumnSchema extends AbstractColumn
      */
     protected function enumConstraint($quote = false, $temporary = false)
     {
-        if (empty($this->enumConstraint))
-        {
-            if ($temporary)
-            {
+        if (empty($this->enumConstraint)) {
+            if ($temporary) {
                 return $this->table->getName() . '_' . $this->getName() . '_enum';
             }
 

@@ -7,6 +7,7 @@
  * @copyright ©2009-2015
  */
 namespace Spiral\ODM\Exceptions;
+
 use Spiral\Models\Exceptions\EntityException;
 
 /**

@@ -35,15 +35,12 @@ class RequiredChecker extends Checker
      */
     public function with($value, array $with)
     {
-        if (!empty($value))
-        {
+        if (!empty($value)) {
             return true;
         }
 
-        foreach ($with as $field)
-        {
-            if ($this->validator->field($field))
-            {
+        foreach ($with as $field) {
+            if ($this->validator->field($field)) {
                 //Some value presented
                 return false;
             }
@@ -61,15 +58,12 @@ class RequiredChecker extends Checker
      */
     public function withAll($value, array $with)
     {
-        if (!empty($value))
-        {
+        if (!empty($value)) {
             return true;
         }
 
-        foreach ($with as $field)
-        {
-            if (!$this->validator->field($field))
-            {
+        foreach ($with as $field) {
+            if (!$this->validator->field($field)) {
                 return Validator::STOP_VALIDATION;
             }
         }
@@ -86,15 +80,12 @@ class RequiredChecker extends Checker
      */
     public function without($value, array $without)
     {
-        if (!empty($value))
-        {
+        if (!empty($value)) {
             return true;
         }
 
-        foreach ($without as $field)
-        {
-            if (!$this->validator->field($field))
-            {
+        foreach ($without as $field) {
+            if (!$this->validator->field($field)) {
                 //Some value presented
                 return false;
             }
@@ -112,15 +103,12 @@ class RequiredChecker extends Checker
      */
     public function withoutAll($value, array $without)
     {
-        if (!empty($value))
-        {
+        if (!empty($value)) {
             return true;
         }
 
-        foreach ($without as $field)
-        {
-            if ($this->validator->field($field))
-            {
+        foreach ($without as $field) {
+            if ($this->validator->field($field)) {
                 return Validator::STOP_VALIDATION;
             }
         }

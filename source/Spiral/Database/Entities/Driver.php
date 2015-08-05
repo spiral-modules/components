@@ -182,7 +182,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * @param bool $enabled Enable or disable driver profiling.
      * @return $this
      */
-    public function profiling($enabled = true)
+    public function setProfiling($enabled = true)
     {
         $this->config['profiling'] = $enabled;
 

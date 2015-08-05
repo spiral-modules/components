@@ -637,7 +637,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         {
             if ($indexSchema->getName() == $index)
             {
-                $indexSchema->setName($name);
+                $indexSchema->name($name);
                 break;
             }
         }

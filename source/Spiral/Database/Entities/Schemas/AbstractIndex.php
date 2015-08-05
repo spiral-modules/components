@@ -8,12 +8,12 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
+use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\IndexInterface;
 
 /**
- *      * Instance on IndexSchema represent one table index - name, type and involved columns. Attention,
- * based on index mapping and resolving (based on set of column name), there is no simple way to
- * create multiple indexes with same set of columns, as they will be resolved as one index.
+ * Abstract index schema with read (see ReferenceInterface) and write abilities. Must be implemented
+ * by driver to support DBMS specific syntax and creation rules.
  */
 abstract class AbstractIndex implements IndexInterface
 {
@@ -61,7 +61,7 @@ abstract class AbstractIndex implements IndexInterface
         $this->name = $name;
         $this->table = $table;
 
-        $schema && $this->resolveSchema($schema);
+        !empty($schema) && $this->resolveSchema($schema);
     }
 
     /**
@@ -101,4 +101,113 @@ abstract class AbstractIndex implements IndexInterface
     {
         return $this->columns;
     }
+
+    /**
+     * Set index name. It's recommended to use AbstractTable->renameIndex() to safely rename indexes.
+     *
+     * @param string $name New index name.
+     * @return $this
+     */
+    public function name($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Change index type and behaviour to unique/non-unique state.
+     *
+     * @param bool $unique
+     * @return $this
+     */
+    public function unique($unique = true)
+    {
+        $this->type = $unique ? self::UNIQUE : self::NORMAL;
+
+        return $this;
+    }
+
+    /**
+     * Change set of index forming columns. Method must support both array and string parameters.
+     *
+     * Example:
+     * $index->columns('key');
+     * $index->columns('key', 'key2');
+     * $index->columns(array('key', 'key2'));
+     *
+     * @param string|array $columns Columns array or comma separated list of parameters.
+     * @return $this
+     */
+    public function columns($columns)
+    {
+        if (!is_array($columns))
+        {
+            $columns = func_get_args();
+        }
+
+        $this->columns = $columns;
+
+        return $this;
+    }
+
+    /**
+     * Schedule index drop when parent table schema will be saved.
+     */
+    public function drop()
+    {
+        $this->table->dropIndex($this->getName());
+    }
+
+    /**
+     * Must compare two instances of AbstractIndex.
+     *
+     * @param AbstractIndex $original
+     * @return bool
+     */
+    public function compare(AbstractIndex $original)
+    {
+        return $this == $original;
+    }
+
+    /**
+     * Index sql creation syntax.
+     *
+     * @param bool $includeTable Include table ON statement (not required for inline index creation).
+     * @return string
+     */
+    public function sqlStatement($includeTable = true)
+    {
+        $statement = [];
+        $statement[] = $this->type . ($this->type == self::UNIQUE ? ' INDEX' : '');
+        $statement[] = $this->getName(true);
+
+        if ($includeTable)
+        {
+            $statement[] = 'ON ' . $this->table->getName(true);
+        }
+
+        $statement[] = '(' . join(', ', array_map(
+                [$this->table->driver(), 'identifier'],
+                $this->columns
+            )) . ')';
+
+        return join(' ', $statement);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->sqlStatement();
+    }
+
+    /**
+     * Parse driver specific schema information and populate schema fields.
+     *
+     * @param mixed $schema
+     * @throws SchemaException
+     */
+    abstract protected function resolveSchema($schema);
 }

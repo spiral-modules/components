@@ -9,7 +9,7 @@
 namespace Spiral\Cache\Stores;
 
 use Spiral\Cache\CacheStore;
-use Spiral\Cache\CacheManager;
+use Spiral\Cache\CacheProvider;
 use Spiral\Cache\Exceptions\StoreException;
 use Spiral\Cache\Stores\Memcache\DriverInterface;
 use Spiral\Cache\Stores\Memcache\MemcachedDriver;
@@ -60,7 +60,7 @@ class MemcacheStore extends CacheStore
      * @param bool            $connect If true, custom driver will be connected.
      * @throws StoreException
      */
-    public function __construct(CacheManager $cache, DriverInterface $driver = null, $connect = true)
+    public function __construct(CacheProvider $cache, DriverInterface $driver = null, $connect = true)
     {
         parent::__construct($cache);
 

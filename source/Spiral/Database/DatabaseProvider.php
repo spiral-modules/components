@@ -20,7 +20,7 @@ use Spiral\Database\Exceptions\DatabaseException;
 /**
  * DatabaseManager responsible for database creation, configuration storage and drivers factory.
  */
-class DatabaseManager extends Singleton implements InjectorInterface
+class DatabaseProvider extends Singleton implements InjectorInterface
 {
     /**
      * Configuration.

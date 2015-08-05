@@ -19,7 +19,7 @@ use Spiral\Core\Container\InjectorInterface;
 /**
  * Default implementation of CacheInterface. Better fit for spiral.
  */
-class CacheManager extends Singleton implements ProviderInterface, InjectorInterface
+class CacheProvider extends Singleton implements CacheProviderInterface, InjectorInterface
 {
     /**
      * Some operations can be slow.

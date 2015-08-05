@@ -13,7 +13,7 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Database;
-use Spiral\Database\DatabaseManager;
+use Spiral\Database\DatabaseProvider;
 use Spiral\Events\Traits\EventsTrait;
 use Spiral\ORM\Schemas\ModelSchema;
 use Spiral\ORM\Schemas\RelationSchemaInterface;
@@ -82,7 +82,7 @@ class ORM extends Singleton
     /**
      * DatabaseManager.
      *
-     * @var DatabaseManager
+     * @var DatabaseProvider
      */
     protected $dbal = null;
 
@@ -110,13 +110,13 @@ class ORM extends Singleton
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
      * @param HippocampusInterface  $runtime
-     * @param DatabaseManager       $dbal
+     * @param DatabaseProvider       $dbal
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         ContainerInterface $container,
         HippocampusInterface $runtime,
-        DatabaseManager $dbal
+        DatabaseProvider $dbal
     )
     {
         $this->config = $configurator->getConfig(static::CONFIG);

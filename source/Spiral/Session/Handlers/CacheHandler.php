@@ -8,7 +8,7 @@
  */
 namespace Spiral\Session\Handlers;
 
-use Spiral\Cache\ProviderInterface;
+use Spiral\Cache\CacheProviderInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Container\SaturableInterlace;
 
@@ -43,9 +43,9 @@ class CacheHandler implements \SessionHandlerInterface, SaturableInterlace
     }
 
     /**
-     * @param ProviderInterface $cache
+     * @param CacheProviderInterface $cache
      */
-    public function saturate(ProviderInterface $cache)
+    public function saturate(CacheProviderInterface $cache)
     {
         $this->cacheStore = $cache->store($this->options['store']);
     }

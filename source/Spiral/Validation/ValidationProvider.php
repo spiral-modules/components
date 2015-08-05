@@ -15,7 +15,7 @@ use Spiral\Core\Traits\ConfigurableTrait;
 /**
  * Used to configure instances of Validator with set of aliases, checkers and etc.
  */
-class ValidationConfigurator extends Singleton
+class ValidationProvider extends Singleton
 {
     /**
      * Provides configuration.

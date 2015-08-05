@@ -127,9 +127,9 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
 
     /**
      * @param ContainerInterface     $container
-     * @param ValidationConfigurator $configurator
+     * @param ValidationProvider $configurator
      */
-    public function saturate(ContainerInterface $container, ValidationConfigurator $configurator)
+    public function saturate(ContainerInterface $container, ValidationProvider $configurator)
     {
         $this->container = $container;
         $this->options = $configurator->config() + $this->options;

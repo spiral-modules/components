@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
-use Spiral\Database\DatabaseManager;
+use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Injections\SQLFragment;
@@ -241,7 +241,7 @@ class ColumnSchema extends AbstractColumn
 
             $datetime = new \DateTime(
                 $this->defaultValue,
-                new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
+                new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE)
             );
 
             return $datetime->getTimestamp();

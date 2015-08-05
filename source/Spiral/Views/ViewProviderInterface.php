@@ -13,7 +13,7 @@ use Spiral\Views\Exceptions\ViewException;
 /**
  * Provides access to views functionality.
  */
-interface ViewsInterface
+interface ViewProviderInterface
 {
     /**
      * In some cases namespace is not specified, this namespace will be used instead.

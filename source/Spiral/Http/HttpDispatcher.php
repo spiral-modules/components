@@ -24,7 +24,7 @@ use Spiral\Http\Responses\EmptyResponse;
 use Spiral\Http\Responses\HtmlResponse;
 use Spiral\Http\Responses\JsonResponse;
 use Spiral\Http\Routing\Traits\RouterTrait;
-use Spiral\Views\ViewsInterface;
+use Spiral\Views\ViewProviderInterface;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
@@ -66,7 +66,7 @@ class HttpDispatcher extends Singleton implements
     /**
      * Required to render error pages.
      *
-     * @var ViewsInterface
+     * @var ViewProviderInterface
      */
     protected $views = null;
 
@@ -109,10 +109,10 @@ class HttpDispatcher extends Singleton implements
     /**
      * Views instance will be requested on demand, method used to manually specify it.
      *
-     * @param ViewsInterface $views
+     * @param ViewProviderInterface $views
      * @return $this
      */
-    public function setViews(ViewsInterface $views)
+    public function setViews(ViewProviderInterface $views)
     {
         $this->views = $views;
 
@@ -284,7 +284,7 @@ class HttpDispatcher extends Singleton implements
     /**
      * Get associated views component or fetch it from container.
      *
-     * @return ViewsInterface
+     * @return ViewProviderInterface
      */
     protected function views()
     {
@@ -293,7 +293,7 @@ class HttpDispatcher extends Singleton implements
             return $this->views;
         }
 
-        return $this->views = $this->container->get(ViewsInterface::class);
+        return $this->views = $this->container->get(ViewProviderInterface::class);
     }
 
     /**

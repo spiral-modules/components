@@ -74,7 +74,7 @@ abstract class AbstractReference implements ReferenceInterface
     /**
      * @param AbstractTable $table
      * @param string        $name
-     * @param mixed         $schema Driver specific reference information.
+     * @param mixed         $schema
      */
     public function __construct(AbstractTable $table, $name, $schema = null)
     {
@@ -86,6 +86,8 @@ abstract class AbstractReference implements ReferenceInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param bool $quoted Quote name.
      */
     public function getName($quoted = false)
     {

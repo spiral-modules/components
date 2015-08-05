@@ -12,13 +12,6 @@ use Spiral\Database\Schemas\IndexInterface;
 
 abstract class AbstractIndex implements IndexInterface
 {
-     /**
-     * Parent table schema.
-     *
-     * @invisible
-     * @var AbstractTable
-     */
-    protected $table = null;
 
     /**
      * Index name.
@@ -69,31 +62,7 @@ abstract class AbstractIndex implements IndexInterface
      */
     abstract protected function resolveSchema($schema);
 
-    /**
-     * Index name. Name can be changed by calling name($name) method, by default all indexes will
-     * get automatically generated identifier including table name and index columns.
-     *
-     * @param bool $quoted If true index name will be quoted accordingly to driver rules.
-     * @return string
-     */
-    public function getName($quoted = false)
-    {
-        $name = $this->name;
-        if (empty($this->name))
-        {
-            $name = $this->table->getName() . '_index_' . join('_', $this->columns) . '_' . uniqid();
-        }
-
-        if (strlen($name) > 64)
-        {
-            //Many dbs has limitations on identifier length
-            $name = md5($name);
-        }
-
-        return $quoted ? $this->table->driver()->identifier($name) : $name;
-    }
-
-    /**
+     /**
      * Give new name to index. Do not use this method to rename indexes, however it can be used to
      * give initial custom name for newly created indexes. If you really need to rename existed index,
      * use TableSchema->renameIndex() method.
@@ -108,17 +77,7 @@ abstract class AbstractIndex implements IndexInterface
         return $this;
     }
 
-    /**
-     * Check if index is unique.
-     *
-     * @return bool
-     */
-    public function isUnique()
-    {
-        return $this->type == self::UNIQUE;
-    }
-
-    /**
+       /**
      * Change index type and behaviour to unique/non-unique state.
      *
      * @param bool $unique

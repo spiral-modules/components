@@ -14,7 +14,7 @@ use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\Database\DatabaseManager;
+use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\MigrationException;
@@ -323,7 +323,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             $definition['created'],
             new \DateTime(
                 $migration['timePerformed'],
-                new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
+                new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE)
             )
         );
     }

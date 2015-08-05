@@ -218,7 +218,7 @@ abstract class Document extends DataEntity implements CompositableInterface
      * @param ODM                   $odm    ODM component, will be received from container if not
      *                                      provided.
      */
-    public function __construct($data = [], $parent = null, $options = null, ODM $odm = null)
+    public function __construct($data = [], $parent = null, $options = null, array $schema = [], ODM $odm = null)
     {
         $this->parent = $parent;
 

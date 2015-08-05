@@ -14,7 +14,7 @@ use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewInterface;
-use Spiral\Views\ViewsInterface;
+use Spiral\Views\ViewProviderInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using views.
@@ -64,7 +64,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     protected $files = null;
 
     /**
-     * @var ViewsInterface
+     * @var ViewProviderInterface
      */
     protected $views = null;
 
@@ -80,13 +80,13 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
      * @param ContainerInterface $container
      * @param Debugger           $debugger
      * @param FilesInterface     $files
-     * @param ViewsInterface     $views
+     * @param ViewProviderInterface     $views
      */
     public function saturate(
         ContainerInterface $container,
         Debugger $debugger,
         FilesInterface $files,
-        ViewsInterface $views)
+        ViewProviderInterface $views)
     {
         $this->config = $debugger->config()[static::CONFIG];
 

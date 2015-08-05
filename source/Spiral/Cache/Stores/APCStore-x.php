@@ -8,7 +8,7 @@
  */
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheManager;
+use Spiral\Cache\CacheProvider;
 use Spiral\Cache\CacheStore;
 
 /**
@@ -44,7 +44,7 @@ class APCStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function __construct(CacheManager $cache)
+    public function __construct(CacheProvider $cache)
     {
         parent::__construct($cache);
         $this->driver = function_exists('apcu_store') ? self::APCU_DRIVER : self::APC_DRIVER;

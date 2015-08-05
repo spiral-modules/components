@@ -8,7 +8,7 @@
  */
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheManager;
+use Spiral\Cache\CacheProvider;
 use Spiral\Cache\CacheStore;
 use Spiral\Files\FilesInterface;
 
@@ -40,7 +40,7 @@ class FileStore extends CacheStore
      *
      * @param FilesInterface $files
      */
-    public function __construct(CacheManager $cache, FilesInterface $files)
+    public function __construct(CacheProvider $cache, FilesInterface $files)
     {
         parent::__construct($cache);
         $this->files = $files;

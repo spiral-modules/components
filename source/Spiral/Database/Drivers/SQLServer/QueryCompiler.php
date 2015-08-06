@@ -39,64 +39,6 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
     /**
      * {@inheritdoc}
-     */
-    public function update($table, array $columns, array $joins = [], array $where = [])
-    {
-        $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches)) {
-            list(, $alias) = explode($matches[0], $table);
-        } else {
-            $table = "{$table} AS {$table}";
-        }
-
-        //This is required to prepare alias
-        $table = $this->quote($table, true, true);
-
-        $statement = "UPDATE " . $this->quote($alias);
-
-        //We have to compile JOINs first
-        $joinsStatement = '';
-        if (!empty($joins)) {
-            $joinsStatement = $this->joins($joins);
-        }
-
-        $statement .= "\nSET" . $this->prepareColumns($columns) . "\nFROM " . $table . $joinsStatement;
-
-        if (!empty($where)) {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
-
-        return rtrim($statement);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete($table, array $joins = [], array $where = [])
-    {
-        $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches)) {
-            list(, $alias) = explode($matches[0], $table);
-        } else {
-            $alias = $this->tablePrefix . $alias;
-        }
-
-        $statement = "DELETE " . $this->quote($alias) . " FROM " . $this->quote($table, true);
-
-        if (!empty($joins)) {
-            $statement .= $this->joins($joins) . ' ';
-        }
-
-        if (!empty($where)) {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
-
-        return rtrim($statement);
-    }
-
-
-    /**
-     * {@inheritdoc}
      *
      * Attention, limiting and ordering UNIONS will fail in SQL SERVER < 2012.
      * For future upgrades: think about using top command.
@@ -147,17 +89,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         );
 
         $selection = parent::select(
-            $from,
-            $distinct,
-            $columns,
-            $joins,
-            $where,
-            $having,
-            $groupBy,
-            [],
-            0,
-            0,
-            $unions
+            $from, $distinct, $columns, $joins, $where, $having, $groupBy, [], 0, 0, $unions
         );
 
         return "SELECT * FROM (\n{$selection}\n) AS [selection_alias] "
@@ -171,10 +103,10 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      */
     protected function limit($limit, $offset, $rowNumber = null)
     {
-        if (!$rowNumber && $this->driver->getServerVersion() >= 12) {
+        if (empty($rowNumber) && $this->driver->getServerVersion() >= 12) {
             $statement = "OFFSET {$offset} ROWS ";
 
-            if ($limit) {
+            if (!empty($limit)) {
                 $statement .= "FETCH NEXT {$limit} ROWS ONLY";
             }
 
@@ -186,7 +118,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         //0 = row_number(1)
         $offset = $offset + 1;
 
-        if ($limit) {
+        if (!empty($limit)) {
             $statement .= "BETWEEN {$offset} AND " . ($offset + $limit - 1);
         } else {
             $statement .= ">= {$offset}";

@@ -12,7 +12,7 @@ use Spiral\Database\Builders\Prototypes\AbstractAffect;
 use Spiral\Database\Entities\QueryCompiler;
 
 /**
- * Delete statement builder with WHERE and JOINS support.
+ * Update statement builder.
  */
 class DeleteQuery extends AbstractAffect
 {
@@ -37,7 +37,7 @@ class DeleteQuery extends AbstractAffect
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
         return $this->flattenParameters($compiler->prepareParameters(
-            QueryCompiler::DELETE_QUERY, $this->whereParameters, $this->onParameters
+            QueryCompiler::DELETE_QUERY, $this->whereParameters
         ));
     }
 
@@ -48,6 +48,6 @@ class DeleteQuery extends AbstractAffect
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
-        return $compiler->delete($this->table, $this->joinTokens, $this->whereTokens);
+        return $compiler->delete($this->table, $this->whereTokens);
     }
 }

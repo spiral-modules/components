@@ -78,8 +78,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     public function all()
     {
         $result = [];
-        foreach ($this as $item)
-        {
+        foreach ($this as $item) {
             $result[] = $item;
         }
 
@@ -96,8 +95,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     public function current()
     {
         $data = $this->data[$this->position];
-        if (isset($this->instances[$this->position]))
-        {
+        if (isset($this->instances[$this->position])) {
             //Update instance context
             return $this->instances[$this->position]->setContext($data);
         }

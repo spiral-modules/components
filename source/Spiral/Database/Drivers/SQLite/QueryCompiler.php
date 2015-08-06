@@ -52,44 +52,6 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
     /**
      * {@inheritdoc}
-     */
-    public function update($table, array $columns, array $joins = [], array $where = [])
-    {
-        $this->logger()->warning(
-            "SQLite UPDATE statement are very limited, you can not use complex SET statements."
-        );
-
-        $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches)) {
-            list($table, $alias) = explode($matches[0], $table);
-        } elseif (empty($joins)) {
-            return parent::update($table, $columns, $joins, $where);
-        }
-
-        return parent::update($table, $columns) . " WHERE {$this->quote('rowid')} IN (\n"
-        . self::select([$table . ' AS ' . $alias], false, [$alias . '.rowid'], $joins, $where)
-        . "\n)";
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function delete($table, array $joins = [], array $where = [])
-    {
-        $alias = $table;
-        if (preg_match('/ as /i', $alias, $matches)) {
-            list($table, $alias) = explode($matches[0], $table);
-        } elseif (empty($joins)) {
-            return parent::delete($table, $joins, $where);
-        }
-
-        return self::delete($table) . "\nWHERE {$this->quote('rowid')} IN (\n"
-        . self::select([$table . ' AS ' . $alias], false, [$alias . '.rowid'], $joins, $where)
-        . "\n)";
-    }
-
-    /**
-     * {@inheritdoc}
      *
      * @link http://stackoverflow.com/questions/10491492/sqllite-with-skip-offset-only-not-limit
      */

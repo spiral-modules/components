@@ -107,8 +107,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $this->columns = $this->registeredColumns = [];
 
         //We aways need primary loader
-        if (empty($this->loader = $loader))
-        {
+        if (empty($this->loader = $loader)) {
             $this->loader = new RootLoader(
                 $this->orm,
                 null,
@@ -154,8 +153,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     public function registerColumns($table, array $columns)
     {
         $offset = count($this->registeredColumns);
-        foreach ($columns as $column)
-        {
+        foreach ($columns as $column) {
             $columnAlias = 'c' . (++$this->countColumns);
             $this->registeredColumns[] = $table . '.' . $column . ' AS ' . $columnAlias;
         }
@@ -202,17 +200,12 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function with($relation, array $options = [])
     {
-        if (is_array($relation))
-        {
-            foreach ($relation as $name => $options)
-            {
-                if (is_string($options))
-                {
+        if (is_array($relation)) {
+            foreach ($relation as $name => $options) {
+                if (is_string($options)) {
                     //Array of relation names
                     $this->with($options, []);
-                }
-                else
-                {
+                } else {
                     //Multiple relations or relation with addition load options
                     $this->with($name, $options);
                 }
@@ -291,17 +284,12 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function load($relation, array $options = [])
     {
-        if (is_array($relation))
-        {
-            foreach ($relation as $name => $subOption)
-            {
-                if (is_string($subOption))
-                {
+        if (is_array($relation)) {
+            foreach ($relation as $name => $subOption) {
+                if (is_string($subOption)) {
                     //Array of relation names
                     $this->load($subOption, $options);
-                }
-                else
-                {
+                } else {
                     //Multiple relations or relation with addition load options
                     $this->load($name, $subOption + $options);
                 }
@@ -327,8 +315,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         //Primary loader may add custom conditions to select query
         $this->loader->configureSelector($this);
 
-        if (empty($columns = $this->columns))
-        {
+        if (empty($columns = $this->columns)) {
             $columns = !empty($this->registeredColumns) ? $this->registeredColumns : ['*'];
         }
 
@@ -351,8 +338,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function getIterator()
     {
-        if (!empty($this->columns))
-        {
+        if (!empty($this->columns)) {
             return $this->run();
         }
 
@@ -429,7 +415,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     public function find($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
         return call_user_func_array([
-            $this, 'where'
+            $this,
+            'where'
         ], func_get_args());
     }
 
@@ -442,14 +429,12 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function findOne(array $where = [])
     {
-        if (!empty($where))
-        {
+        if (!empty($where)) {
             $this->where($where);
         }
 
         $data = $this->limit(1)->fetchData();
-        if (empty($data))
-        {
+        if (empty($data)) {
             return null;
         }
 
@@ -468,13 +453,11 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     {
         $primaryKey = $this->loader->getPrimaryKey();
 
-        if (empty($primaryKey))
-        {
+        if (empty($primaryKey)) {
             throw new ORMException("Unable to fetch data by primary key, no primary key found.");
         }
 
-        if (empty($data = $this->where($primaryKey, $id)->fetchData()))
-        {
+        if (empty($data = $this->where($primaryKey, $id)->fetchData())) {
             return null;
         }
 
@@ -491,12 +474,10 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     {
         $statement = $this->sqlStatement();
 
-        if (!empty($this->cacheLifetime))
-        {
+        if (!empty($this->cacheLifetime)) {
             $cacheKey = $this->cacheKey ?: md5(serialize([$statement, $this->getParameters()]));
 
-            if ($this->cacheStore->has($cacheKey))
-            {
+            if ($this->cacheStore->has($cacheKey)) {
                 $this->logger()->debug("Selector result fetched from cache.");
 
                 //We are going to store parsed result, not queries
@@ -527,8 +508,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $data = $this->loader->getResult();
         $this->loader->clean();
 
-        if (!empty($this->cacheLifetime) && !empty($cacheStore) && !empty($cacheKey))
-        {
+        if (!empty($this->cacheLifetime) && !empty($cacheStore) && !empty($cacheKey)) {
             $cacheStore->set($cacheKey, $data, $this->cacheLifetime);
         }
 
@@ -546,17 +526,14 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     protected function checkCounts($dataCount, $rowsCount)
     {
         $dataRatio = $rowsCount / $dataCount;
-        if ($dataRatio == 1)
-        {
+        if ($dataRatio == 1) {
             //No need to log it, everything seems fine
             return;
         }
 
         $logLevel = $this->logLevels[0];
-        foreach ($this->logLevels as $ratio => $logLevel)
-        {
-            if ($dataRatio >= $ratio)
-            {
+        foreach ($this->logLevels as $ratio => $logLevel) {
+            if ($dataRatio >= $ratio) {
                 break;
             }
         }
@@ -576,28 +553,23 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function update(array $columns)
     {
-        if (!empty($this->havingTokens))
-        {
+        if (!empty($this->havingTokens)) {
             throw new ORMException("Unable to build udpate statement with non empty having tokens.");
         }
 
         $statement = $this->updateStatement($columns);
 
         $normalized = [];
-        foreach ($columns as $value)
-        {
-            if ($value instanceof QueryBuilder)
-            {
-                foreach ($value->getParameters() as $parameter)
-                {
+        foreach ($columns as $value) {
+            if ($value instanceof QueryBuilder) {
+                foreach ($value->getParameters() as $parameter) {
                     $normalized[] = $parameter;
                 }
 
                 continue;
             }
 
-            if ($value instanceof SqlFragmentInterface && !$value instanceof ParameterInterface)
-            {
+            if ($value instanceof SqlFragmentInterface && !$value instanceof ParameterInterface) {
                 continue;
             }
 
@@ -614,7 +586,6 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
 
-
     /**
      * Delete all matched records and return count of affected rows.
      *
@@ -623,8 +594,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function delete()
     {
-        if (!empty($this->havingTokens))
-        {
+        if (!empty($this->havingTokens)) {
             throw new ORMException("Unable to build delete statement with non empty having tokens.");
         }
 

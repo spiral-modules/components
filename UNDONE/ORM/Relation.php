@@ -78,11 +78,11 @@ abstract class Relation extends Component implements
      * parent active record, relations by itself not used in query building - but they can be used
      * to create valid query selector.
      *
-     * @param ORM          $orm        ORM component.
+     * @param ORM   $orm        ORM component.
      * @param Model $parent     Parent ActiveRecord object.
-     * @param array        $definition Relation definition.
-     * @param mixed        $data       Pre-loaded relation data.
-     * @param bool         $loaded     Indication that relation data has been loaded.
+     * @param array $definition Relation definition.
+     * @param mixed $data       Pre-loaded relation data.
+     * @param bool  $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
@@ -90,8 +90,7 @@ abstract class Relation extends Component implements
         array $definition,
         $data = null,
         $loaded = false
-    )
-    {
+    ) {
         $this->orm = $orm;
         $this->parent = $parent;
         $this->definition = $definition;
@@ -117,14 +116,12 @@ abstract class Relation extends Component implements
      */
     public function reset(array $data = [], $loaded = false)
     {
-        if (!empty($this->data) && $this->data == $data)
-        {
+        if (!empty($this->data) && $this->data == $data) {
             //Nothing to do, context is the same
             return;
         }
 
-        if (!$loaded || !($this->instance instanceof Model))
-        {
+        if (!$loaded || !($this->instance instanceof Model)) {
             //Flushing instance
             $this->instance = null;
         }
@@ -151,10 +148,8 @@ abstract class Relation extends Component implements
      */
     public function getInstance()
     {
-        if (!empty($this->instance))
-        {
-            if ($this->instance instanceof Model && !empty($this->data))
-            {
+        if (!empty($this->instance)) {
+            if ($this->instance instanceof Model && !empty($this->data)) {
                 $this->instance->setContext($this->data);
             }
 
@@ -165,8 +160,7 @@ abstract class Relation extends Component implements
         //Loading data if not already loaded
         !$this->isLoaded() && $this->loadData();
 
-        if (empty($this->data))
-        {
+        if (empty($this->data)) {
             //Can not be loaded
             return static::MULTIPLE ? new ModelIterator($this->orm, $this->getClass(), []) : null;
         }
@@ -255,20 +249,17 @@ abstract class Relation extends Component implements
      */
     protected function loadData()
     {
-        if (!$this->parent->isLoaded())
-        {
+        if (!$this->parent->isLoaded()) {
             return null;
         }
 
         $this->loaded = true;
-        if (static::MULTIPLE)
-        {
+        if (static::MULTIPLE) {
             return $this->data = $this->createSelector()->fetchData();
         }
 
         $data = $this->createSelector()->fetchData();
-        if (isset($data[0]))
-        {
+        if (isset($data[0])) {
             return $this->data = $data[0];
         }
 
@@ -286,20 +277,17 @@ abstract class Relation extends Component implements
      */
     public function setInstance(Model $instance)
     {
-        if (static::MULTIPLE)
-        {
+        if (static::MULTIPLE) {
             throw new ORMException(
                 "Unable to assign relation data (relation represent multiple records)."
             );
         }
 
-        if (!is_array($allowed = $this->getClass()))
-        {
+        if (!is_array($allowed = $this->getClass())) {
             $allowed = [$allowed];
         }
 
-        if (!is_object($instance) || !in_array(get_class($instance), $allowed))
-        {
+        if (!is_object($instance) || !in_array(get_class($instance), $allowed)) {
             $allowed = join("', '", $allowed);
 
             throw new ORMException(
@@ -321,26 +309,21 @@ abstract class Relation extends Component implements
      */
     public function saveInstance($validate = true)
     {
-        if (empty($instance = $this->getInstance()))
-        {
+        if (empty($instance = $this->getInstance())) {
             //Nothing to save
             return true;
         }
 
-        if (static::MULTIPLE)
-        {
+        if (static::MULTIPLE) {
             /**
              * @var Model[] $instance
              */
-            foreach ($instance as $model)
-            {
-                if ($model->isDeleted())
-                {
+            foreach ($instance as $model) {
+                if ($model->isDeleted()) {
                     continue;
                 }
 
-                if (!$this->mountRelation($model)->save($validate, true))
-                {
+                if (!$this->mountRelation($model)->save($validate, true)) {
                     return false;
                 }
 
@@ -353,13 +336,11 @@ abstract class Relation extends Component implements
         /**
          * @var Model $instance
          */
-        if ($instance->isDeleted())
-        {
+        if ($instance->isDeleted()) {
             return true;
         }
 
-        if (!$this->mountRelation($instance)->save($validate, true))
-        {
+        if (!$this->mountRelation($instance)->save($validate, true)) {
             return false;
         }
 
@@ -376,16 +357,13 @@ abstract class Relation extends Component implements
      */
     public function getErrors($reset = false)
     {
-        if (static::MULTIPLE)
-        {
+        if (static::MULTIPLE) {
             /**
              * @var Model[] $data
              */
             $errors = [];
-            foreach ($data as $position => $model)
-            {
-                if (!$model->isValid())
-                {
+            foreach ($data as $position => $model) {
+                if (!$model->isValid()) {
                     $errors[$position] = $model->getErrors(true);
                 }
             }

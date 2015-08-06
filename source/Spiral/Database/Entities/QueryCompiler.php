@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Core\Component;
 use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\ParameterInterface;
+use Spiral\Database\Injections\SQLExpression;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\QueryBuilder;
 
@@ -87,16 +88,15 @@ class QueryCompiler extends Component
 
 
     /**
-     * Create update statement. Compiler must mount joins and where conditions.
+     * Create update statement.
      *
      * @param string $table
      * @param array  $columns
-     * @param array  $joins
      * @param array  $where
      * @return string
      * @throws CompilerException
      */
-    public function update($table, array $columns, array $joins = [], array $where = [])
+    public function update($table, array $columns, array $where = [])
     {
         $statement = "UPDATE " . $this->quote($table, true, true)
             . "\nSET" . $this->prepareColumns($columns);
@@ -109,22 +109,19 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Create delete statement. Compiler must mount joins and where conditions.
+     * Create delete statement.
      *
      * @param string $table
-     * @param array  $joins
      * @param array  $where
      * @return string
      * @throws CompilerException
      */
-    public function delete($table, array $joins = [], array $where = [])
+    public function delete($table, array $where = [])
     {
         $statement = 'DELETE FROM ' . $this->quote($table, true);
         if (!empty($where)) {
             $statement .= "\nWHERE " . $this->where($where);
         }
-
-        //Joins must be rendered by database specific compiler
 
         return rtrim($statement);
     }
@@ -191,7 +188,7 @@ class QueryCompiler extends Component
             $statement .= "\nORDER BY " . $this->orderBy($orderBy);
         }
 
-        if ($limit || $offset) {
+        if (!empty($limit) || !empty($offset)) {
             $statement .= "\n" . $this->limit($limit, $offset);
         }
 
@@ -210,8 +207,10 @@ class QueryCompiler extends Component
      */
     public function quote($identifier, $table = false, $forceTable = false)
     {
-        if ($identifier instanceof SQLFragmentInterface) {
+        if ($identifier instanceof SQLExpression) {
             return $identifier->sqlStatement($this);
+        } elseif ($identifier instanceof SQLFragmentInterface) {
+            return $identifier->sqlStatement();
         }
 
         if (preg_match('/ as /i', $identifier, $matches)) {
@@ -322,8 +321,10 @@ class QueryCompiler extends Component
         foreach ($columns as $column => &$value) {
             if ($value instanceof QueryBuilder) {
                 $value = '(' . $value->sqlStatement($this) . ')';
-            } elseif ($value instanceof SQLFragmentInterface) {
+            } elseif ($value instanceof SQLExpression) {
                 $value = $value->sqlStatement($this);
+            } elseif ($value instanceof SQLFragmentInterface) {
+                $value = $value->sqlStatement();
             } else {
                 $value = '?';
             }

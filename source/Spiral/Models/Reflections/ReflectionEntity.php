@@ -169,7 +169,7 @@ abstract class ReflectionEntity extends \ReflectionClass
 
         if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS)) {
             if (is_array($value)) {
-                $parent = $this->parentSchema($this->getParentClass()->getName());
+                $parent = $this->parentSchema();
                 if (!empty($parent)) {
                     $value = array_merge($parent->property($property, $merge), $value);
                 }
@@ -178,8 +178,7 @@ abstract class ReflectionEntity extends \ReflectionClass
 
         //To let traits apply schema changes
         return $this->cache[$property] = call_user_func(
-            [$this->getName(), 'describeProperty'],
-            $property, $value, $this
+            [$this->getName(), 'describeProperty'], $property, $value, $this
         );
     }
 }

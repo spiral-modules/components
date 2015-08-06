@@ -15,5 +15,14 @@ use Spiral\Core\Exceptions\RuntimeException;
  */
 class QueryException extends RuntimeException
 {
+    /**
+     * {@inheritdoc}
+     *
+     * @param \PDOException $exception
+     */
+    public function __construct(\PDOException $exception)
+    {
+        parent::__construct($exception->getMessage(), $exception->getCode(), $exception);
+    }
 
 }

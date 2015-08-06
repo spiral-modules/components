@@ -31,7 +31,6 @@ abstract class AbstractTable implements TableInterface
      */
     const RENAME_STATEMENT = "ALTER TABLE {table} RENAME TO {name}";
 
-
     /**
      * Indication that table is exists and current schema is fetched from database.
      *
@@ -40,45 +39,29 @@ abstract class AbstractTable implements TableInterface
     protected $exists = false;
 
     /**
-     * Fully clarified table name (prefix should be included).
-     *
-     * Attention! BaseColumnSchema type added to make IDE work properly as "name" is really common
-     * column name. However you better use longer syntax $table->column('name');
+     * Table name including table prefix.
      *
      * @var string|AbstractColumn
      */
     protected $name = '';
 
     /**
-     * Table prefix is not required, but if provided all foreign keys will be created using it.
+     * Database specific tablePrefix. Required for table renames.
      *
      * @var string
      */
     protected $tablePrefix = '';
 
-
-    /**
-     * Driver instance table schema associated with, all commands will be performed using it.
-     *
-     * @var Driver
-     */
-    protected $driver = null;
-
     /**
      * Primary key columns are stored separately from other indexes and can be modified only during
-     * table creation. Column types "primary" and "bigPrimary" will automatically ensure it's column
-     * name in that index, however for most database drivers that types will additionally declare
-     * auto-incrementing which can be applied to one column only. To create compound primary index
-     * call primaryKeys() method on table level. Attention, Spiral ORM and ActiveRecord models can
-     * not support compound primary keys.
+     * table creation.
      *
      * @var array
      */
     protected $primaryKeys = [];
 
     /**
-     * Column names fetched from database table and used to build primary index. Primary index can
-     * not be modified for already exists tables.
+     * Primary keys fetched from database.
      *
      * @invisible
      * @var array
@@ -86,16 +69,14 @@ abstract class AbstractTable implements TableInterface
     protected $dbPrimaryKeys = [];
 
     /**
-     * ColumnSchema(s) describing table columns, represents desired table structure to be applied
-     * on save() method.
+     * Column schemas fetched from db or created by user.
      *
      * @var AbstractColumn[]
      */
     protected $columns = [];
 
     /**
-     * ColumnSchema(s) fetched from database (if table exists), this schemas used as column references
-     * to build table diff.
+     * Column schemas fetched from db. Synced with $columns in table save() method.
      *
      * @invisible
      * @var AbstractColumn[]
@@ -103,15 +84,14 @@ abstract class AbstractTable implements TableInterface
     protected $dbColumns = [];
 
     /**
-     * IndexSchema(s) used to described desired table indexes, this schemas will be synced with
-     * database on save() method call. IndexSchemas should not include primary keys.
+     * Index schemas fetched from db or created by user.
      *
      * @var AbstractIndex[]
      */
     protected $indexes = [];
 
     /**
-     * IndexSchema(s) fetched from database, this indexes used as references to build table diff.
+     * Index schemas fetched from db. Synced with $indexes in table save() method.
      *
      * @invisible
      * @var AbstractIndex[]
@@ -119,16 +99,14 @@ abstract class AbstractTable implements TableInterface
     protected $dbIndexes = [];
 
     /**
-     * ReferenceSchema(s) used to define table foreign key references, this schemas will be applied
-     * to database on save() method call. ReferenceSchemas table name depends on tablePrefix, make
-     * sure correct value were specified.
+     * Foreign key schemas fetched from db or created by user.
      *
      * @var AbstractReference[]
      */
     protected $references = [];
 
     /**
-     * ReferenceSchema(s) fetched from database and used to build table diff.
+     * Foreign key schemas fetched from db. Synced with $references in table save() method.
      *
      * @invisible
      * @var AbstractReference[]
@@ -136,11 +114,15 @@ abstract class AbstractTable implements TableInterface
     protected $dbReferences = [];
 
     /**
-     * @param string $name        Fully clarified table name (prefix should be included).
-     * @param string $tablePrefix Table prefix is not required, but if provided all foreign keys
-     *                            will be created using it.
-     * @param Driver $driver      Driver instance table schema associated with, all commands will
-     *                            be performed using it).
+     * @invisible
+     * @var Driver
+     */
+    protected $driver = null;
+
+    /**
+     * @param string $name        Table name, must include table prefix.
+     * @param string $tablePrefix Database specific table prefix.
+     * @param Driver $driver
      */
     public function __construct($name, $tablePrefix, Driver $driver)
     {
@@ -148,16 +130,25 @@ abstract class AbstractTable implements TableInterface
         $this->tablePrefix = $tablePrefix;
         $this->driver = $driver;
 
-        //Loading table information
-        if ($this->driver->hasTable($this->name)) {
-            $this->loadColumns();
-            $this->loadIndexes();
-            $this->loadReferences();
-
-            $this->exists = true;
+        if (!$this->driver->hasTable($this->name)) {
+            return;
         }
+
+        //Loading table information
+        $this->loadColumns();
+        $this->loadIndexes();
+        $this->loadReferences();
+
+        $this->exists = true;
     }
 
+    /**
+     * @return Driver
+     */
+    public function driver()
+    {
+        return $this->driver;
+    }
 
     /**
      * {@inheritdoc}
@@ -169,10 +160,12 @@ abstract class AbstractTable implements TableInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param bool $quoted Quote name.
      */
-    public function getName()
+    public function getName($quoted = false)
     {
-        return $this->name;
+        return $quoted ? $this->driver->identifier($this->name) : $this->name;
     }
 
     /**
@@ -180,6 +173,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function getPrimaryKeys()
     {
+        return $this->primaryKeys;
     }
 
     /**
@@ -187,6 +181,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function hasColumn($name)
     {
+        return isset($this->columns[$name]);
     }
 
     /**
@@ -196,6 +191,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function getColumns()
     {
+        return $this->columns;
     }
 
     /**
@@ -237,6 +233,9 @@ abstract class AbstractTable implements TableInterface
     {
     }
 
+
+
+    ///--------------------
 
     /**
      * Driver specific method to load table columns schemas.  Method will not be called if table not
@@ -306,5 +305,22 @@ abstract class AbstractTable implements TableInterface
         return $this->references[$name] = $reference;
     }
 
+    ///--------------------
 
+    /**
+     * Find index using it's forming columns.
+     *
+     * @param array $columns
+     * @return AbstractIndex|null
+     */
+    private function findIndex(array $columns)
+    {
+        foreach ($this->indexes as $index) {
+            if ($index->getColumns() == $columns) {
+                return $index;
+            }
+        }
+
+        return null;
+    }
 }

@@ -21,10 +21,9 @@ use Spiral\Debug\Traits\LoggerTrait;
 abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterface
 {
     /**
-     * Spiral allow JOINs in DELETE and UPDATE statements and shows warning where update or delete
-     * comes without any limiting condition.
+     * Few builder warnings.
      */
-    use LoggerTrait, JoinsTrait;
+    use LoggerTrait;
 
     /**
      * Every affect builder must be associated with specific table.

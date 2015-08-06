@@ -111,7 +111,7 @@ class ColumnSchema extends AbstractColumn
      */
     public function abstractType()
     {
-        if ($this->enumValues) {
+        if (!empty($this->enumValues)) {
             return 'enum';
         }
 
@@ -162,9 +162,9 @@ class ColumnSchema extends AbstractColumn
         if ($enum || $this->abstractType() != 'enum') {
             $statement = [$this->getName(true), $this->type];
 
-            if ($this->precision) {
+            if (!empty($this->precision)) {
                 $statement[] = "({$this->precision}, {$this->scale})";
-            } elseif ($this->size) {
+            } elseif (!empty($this->size)) {
                 $statement[] = "({$this->size})";
             } elseif ($this->type == 'varchar' || $this->type == 'varbinary') {
                 $statement[] = "(max)";
@@ -176,7 +176,7 @@ class ColumnSchema extends AbstractColumn
 
             $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
 
-            if ($this->defaultValue !== null) {
+            if ($this->hasDefaultValue()) {
                 $statement[] = "DEFAULT {$this->prepareDefault()}";
             }
 
@@ -235,9 +235,9 @@ class ColumnSchema extends AbstractColumn
             } else {
                 $type = "ALTER COLUMN {$this->getName(true)} {$this->type}";
 
-                if ($this->size) {
+                if (!empty($this->size)) {
                     $type .= "($this->size)";
-                } elseif ($this->precision) {
+                } elseif (!empty($this->precision)) {
                     $type .= "($this->precision, $this->scale)";
                 }
 
@@ -246,7 +246,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
-        if ($this->defaultValue !== null) {
+        if ($this->hasDefaultValue()) {
             if (!$this->defaultConstraint) {
                 //Making new name
                 $this->defaultConstraint = $this->table->getName() . '_'
@@ -308,11 +308,8 @@ class ColumnSchema extends AbstractColumn
         }
 
         if (
-            ($this->phpType() != 'string')
-            && (
-                $this->defaultValue[0] == '('
-                && $this->defaultValue[strlen($this->defaultValue) - 1] == ')'
-            )
+            $this->phpType() != 'string'
+            && ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')')
         ) {
             $this->defaultValue = substr($this->defaultValue, 1, -1);
         }
@@ -331,7 +328,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         //Potential enum
-        if ($this->type == 'varchar' && $this->size) {
+        if ($this->type == 'varchar' && !empty($this->size)) {
             $query = "SELECT object_definition(o.object_id) AS [definition],
                              OBJECT_NAME(o.OBJECT_ID) AS [name]
                       FROM sys.objects AS o
@@ -363,9 +360,7 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Prepare default value to be used in sql statements, string values will be quoted.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     protected function prepareDefault()
     {

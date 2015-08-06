@@ -8,16 +8,23 @@
  */
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
+use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Injections\SQLFragment;
+use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * MySQL column schema.
  */
-class ColumnSchema extends AbstractColumn
+class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
 {
+    /**
+     * Default value warning.
+     */
+    use LoggerTrait;
+
     /**
      * Column is auto incremental.
      *

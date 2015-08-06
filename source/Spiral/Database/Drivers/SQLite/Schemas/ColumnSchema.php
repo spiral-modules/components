@@ -173,7 +173,7 @@ class ColumnSchema extends AbstractColumn
     /**
      * {@inheritdoc}
      */
-    protected function enumType()
+    protected function prepareEnum()
     {
         return '';
     }

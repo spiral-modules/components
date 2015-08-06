@@ -11,6 +11,7 @@ namespace Spiral\ORM;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Database;
 use Spiral\Database\DatabaseProvider;
@@ -18,7 +19,6 @@ use Spiral\Events\Traits\EventsTrait;
 use Spiral\ORM\Schemas\ModelSchema;
 use Spiral\ORM\Schemas\RelationSchemaInterface;
 use Spiral\ORM\Selector\LoaderInterface;
-use Spiral\Core\Singleton;
 
 class ORM extends Singleton
 {
@@ -110,15 +110,14 @@ class ORM extends Singleton
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
      * @param HippocampusInterface  $runtime
-     * @param DatabaseProvider       $dbal
+     * @param DatabaseProvider      $dbal
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         ContainerInterface $container,
         HippocampusInterface $runtime,
         DatabaseProvider $dbal
-    )
-    {
+    ) {
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->runtime = $runtime;
@@ -136,8 +135,7 @@ class ORM extends Singleton
     public function entityCache($enabled, $maxSize = null)
     {
         $this->config['entityCache']['enabled'] = (bool)$enabled;
-        if (!empty($maxSize))
-        {
+        if (!empty($maxSize)) {
             $this->config['entityCache']['maxSize'] = $maxSize;
         }
 
@@ -160,8 +158,7 @@ class ORM extends Singleton
      */
     public function registerEntity(Model $record)
     {
-        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled'])
-        {
+        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled']) {
             return $record;
         }
 
@@ -175,8 +172,7 @@ class ORM extends Singleton
      */
     public function removeEntity(Model $record)
     {
-        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled'])
-        {
+        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled']) {
             return;
         }
 
@@ -203,13 +199,11 @@ class ORM extends Singleton
      */
     public function getSchema($item, $update = true)
     {
-        if ($this->schema === null)
-        {
+        if ($this->schema === null) {
             $this->schema = $this->runtime->loadData('ormSchema');
         }
 
-        if (!isset($this->schema[$item]) && $update)
-        {
+        if (!isset($this->schema[$item]) && $update) {
             $this->updateSchema();
         }
 
@@ -226,8 +220,7 @@ class ORM extends Singleton
      */
     public function construct($class, array $data = [], $cache = true)
     {
-        if (!$this->config['entityCache']['enabled'] || !$cache)
-        {
+        if (!$this->config['entityCache']['enabled'] || !$cache) {
             //Entity cache is disabled
             return new $class($data, !empty($data), $this);
         }
@@ -237,19 +230,16 @@ class ORM extends Singleton
         if (
             !empty($this->schema[$class][self::E_PRIMARY_KEY])
             && !empty($data[$this->schema[$class][self::E_PRIMARY_KEY]])
-        )
-        {
+        ) {
             $criteria = $class . '.' . $data[$this->schema[$class][self::E_PRIMARY_KEY]];
         }
 
-        if (isset($this->entityCache[$criteria]))
-        {
+        if (isset($this->entityCache[$criteria])) {
             //Retrieving reconfigured model from the cache
             return $this->entityCache[$criteria]->setContext($data);
         }
 
-        if (count($this->entityCache) > $this->config['entityCache']['maxSize'])
-        {
+        if (count($this->entityCache) > $this->config['entityCache']['maxSize']) {
             return new $class($data, !empty($data), $this);
         }
 
@@ -259,18 +249,17 @@ class ORM extends Singleton
     /**
      * Instance of ActiveRecord relation accessor.
      *
-     * @param int          $type
+     * @param int   $type
      * @param Model $parent
-     * @param array        $definition
-     * @param array        $data
-     * @param bool         $loaded
+     * @param array $definition
+     * @param array $data
+     * @param bool  $loaded
      * @return RelationInterface
      * @throws ORMException
      */
     public function relation($type, Model $parent, $definition, $data = null, $loaded = false)
     {
-        if (!isset($this->config['relations'][$type]['class']))
-        {
+        if (!isset($this->config['relations'][$type]['class'])) {
             throw new ORMException("Undefined relation type '{$type}'.");
         }
 
@@ -295,10 +284,8 @@ class ORM extends Singleton
         ModelSchema $model,
         $name,
         array $definition
-    )
-    {
-        if (!isset($this->config['relations'][$type]['schema']))
-        {
+    ) {
+        if (!isset($this->config['relations'][$type]['schema'])) {
             throw new ORMException("Undefined relation schema '{$type}'.");
         }
 
@@ -319,8 +306,7 @@ class ORM extends Singleton
      */
     public function relationLoader($type, $container, array $definition, LoaderInterface $parent = null)
     {
-        if (!isset($this->config['relations'][$type]['schema']))
-        {
+        if (!isset($this->config['relations'][$type]['schema'])) {
             throw new ORMException("Undefined relation loader '{$type}'.");
         }
 

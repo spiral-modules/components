@@ -318,7 +318,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
                 compact('query', 'parameters')
             );
 
-            throw new QueryException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new QueryException($exception);
         }
 
         return $pdoStatement;

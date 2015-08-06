@@ -10,9 +10,7 @@ namespace Spiral\Database\Entities\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\TableInterface;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * @method AbstractColumn primary($column)
@@ -40,79 +38,6 @@ use Spiral\Debug\Traits\LoggerTrait;
 abstract class AbstractTable extends Component implements TableInterface, LoggerAwareInterface
 {
     /**
-     * Logging.
-     */
-    use LoggerTrait;
-
-
-    /**
-     * @param string $name        Fully clarified table name (prefix should be included).
-     * @param string $tablePrefix Table prefix is not required, but if provided all foreign keys
-     *                            will be created using it.
-     * @param Driver $driver      Driver instance table schema associated with, all commands will
-     *                            be performed using it).
-     */
-    public function __construct($name, $tablePrefix, Driver $driver)
-    {
-        $this->name = $name;
-        $this->tablePrefix = $tablePrefix;
-        $this->driver = $driver;
-
-        //Loading table information
-        if ($this->driver->hasTable($this->name)) {
-            $this->loadColumns();
-            $this->loadIndexes();
-            $this->loadReferences();
-
-            $this->exists = true;
-        }
-    }
-
-
-    /**
-     * Table name (including prefix).
-     *
-     * @param bool $quoted If true table name will be quoted accordingly to driver rules.
-     * @return string
-     */
-    public function getName($quoted = false)
-    {
-        return $quoted ? $this->driver->identifier($this->name) : $this->name;
-    }
-
-    /**
-     * Table prefix is not required, but if provided all foreign keys will be created using it.
-     *
-     * @return string
-     */
-    public function getTablePrefix()
-    {
-        return $this->tablePrefix;
-    }
-
-    /**
-     * Get databases driver associated with table schema.
-     *
-     * @return Driver
-     */
-    public function driver()
-    {
-        return $this->driver;
-    }
-
-
-    /**
-     * Array of columns dedicated to primary index. Attention, this methods will ALWAYS return array,
-     * even if there is only one primary key.
-     *
-     * @return array
-     */
-    public function getPrimaryKeys()
-    {
-        return $this->primaryKeys;
-    }
-
-    /**
      * Update table primary keys index. Attention, this change is not possible after table is created,
      * additionally, ColumnSchema will automatically call this method with it's own name on setting
      * "primary" or "bigPrimary" types. Use this method only in cases where you have to define compound
@@ -129,29 +54,6 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $this->primaryKeys = is_array($columns) ? $columns : func_get_args();
 
         return $this;
-    }
-
-    /**
-     * Check if table have specified column. Method will check column existence in "columns" attribute,
-     * so it's not necessary that column exists in database table, it can be simply declared earlier.
-     *
-     * @param string $name Column name.
-     * @return bool
-     */
-    public function hasColumn($name)
-    {
-        return isset($this->columns[$name]);
-    }
-
-    /**
-     * Get all declared columns. This list may be not identical to dbColumns property as it will
-     * represent desired table state.
-     *
-     * @return AbstractColumn[]
-     */
-    public function getColumns()
-    {
-        return $this->columns;
     }
 
     /**
@@ -196,22 +98,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         return call_user_func_array([$this->column($arguments[0]), $type], array_slice($arguments, 1));
     }
 
-    /**
-     * Internal helper method used to find index by column names. Attention, column order does matter!
-     *
-     * @param array $columns
-     * @return AbstractIndex|null
-     */
-    protected function findIndex(array $columns)
-    {
-        foreach ($this->indexes as $index) {
-            if ($index->getColumns() == $columns) {
-                return $index;
-            }
-        }
 
-        return null;
-    }
 
     /**
      * Check if table has existed or declared index by it's columns, to additionally check index type

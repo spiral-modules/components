@@ -17,7 +17,7 @@ use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\QueryBuilder;
 
 /**
- * Update statement builder with WHERE and JOINS support.
+ * Update statement builder.
  */
 class UpdateQuery extends AbstractAffect
 {
@@ -121,7 +121,7 @@ class UpdateQuery extends AbstractAffect
 
         //Join and where parameters are going after values
         return $this->flattenParameters($compiler->prepareParameters(
-            QueryCompiler::UPDATE_QUERY, $this->whereParameters, $this->onParameters, [], $values
+            QueryCompiler::UPDATE_QUERY, $this->whereParameters, [], [], $values
         ));
     }
 
@@ -136,6 +136,6 @@ class UpdateQuery extends AbstractAffect
 
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
-        return $compiler->update($this->table, $this->values, $this->joinTokens, $this->whereTokens);
+        return $compiler->update($this->table, $this->values, $this->whereTokens);
     }
 }

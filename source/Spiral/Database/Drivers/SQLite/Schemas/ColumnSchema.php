@@ -16,13 +16,6 @@ use Spiral\Database\Entities\Schemas\AbstractColumn;
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Is column primary key.
-     *
-     * @var bool
-     */
-    private $primaryKey = false;
-
-    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -90,6 +83,13 @@ class ColumnSchema extends AbstractColumn
         'timestamp'   => ['timestamp'],
         'binary'      => ['blob']
     ];
+
+    /**
+     * Is column primary key.
+     *
+     * @var bool
+     */
+    protected $primaryKey = false;
 
     /**
      * {@inheritdoc}

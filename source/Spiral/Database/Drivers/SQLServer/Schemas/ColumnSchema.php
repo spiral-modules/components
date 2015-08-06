@@ -16,27 +16,6 @@ use Spiral\Database\Entities\Schemas\AbstractColumn;
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Field is table identity.
-     *
-     * @var bool
-     */
-    private $identity = false;
-
-    /**
-     * Name of default constraint.
-     *
-     * @var string
-     */
-    private $defaultConstraint = '';
-
-    /**
-     * Name of enum constraint.
-     *
-     * @var string
-     */
-    private $enumConstraint = '';
-
-    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -105,6 +84,27 @@ class ColumnSchema extends AbstractColumn
         'time'        => ['time'],
         'binary'      => ['varbinary'],
     ];
+
+    /**
+     * Field is table identity.
+     *
+     * @var bool
+     */
+    protected $identity = false;
+
+    /**
+     * Name of default constraint.
+     *
+     * @var string
+     */
+    protected $defaultConstraint = '';
+
+    /**
+     * Name of enum constraint.
+     *
+     * @var string
+     */
+    protected $enumConstraint = '';
 
     /**
      * {@inheritdoc}

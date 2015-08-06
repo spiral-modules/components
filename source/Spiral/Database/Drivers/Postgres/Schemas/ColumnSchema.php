@@ -17,20 +17,6 @@ use Spiral\Database\Injections\SQLFragment;
 class ColumnSchema extends AbstractColumn
 {
     /**
-     * Field is auto incremental.
-     *
-     * @var bool
-     */
-    private $autoIncrement = false;
-
-    /**
-     * Name of enum constraint associated with field.
-     *
-     * @var string
-     */
-    private $enumConstraint = '';
-
-    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -92,6 +78,20 @@ class ColumnSchema extends AbstractColumn
         'binary'      => ['bytea'],
         'json'        => ['json']
     ];
+
+    /**
+     * Field is auto incremental.
+     *
+     * @var bool
+     */
+    protected $autoIncrement = false;
+
+    /**
+     * Name of enum constraint associated with field.
+     *
+     * @var string
+     */
+    protected $enumConstraint = '';
 
     /**
      * {@inheritdoc}

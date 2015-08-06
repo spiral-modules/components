@@ -26,13 +26,6 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
     use LoggerAwareTrait;
 
     /**
-     * Column is auto incremental.
-     *
-     * @var bool
-     */
-    private $autoIncrement = false;
-
-    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -126,6 +119,13 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
         'tinyblob',
         'longblob'
     ];
+
+    /**
+     * Column is auto incremental.
+     *
+     * @var bool
+     */
+    protected $autoIncrement = false;
 
     /**
      * {@inheritdoc}

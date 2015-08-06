@@ -9,6 +9,7 @@
 namespace Spiral\Database\Entities\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
+use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\TableInterface;
@@ -44,7 +45,7 @@ use Spiral\Debug\Traits\LoggerTrait;
  * @method AbstractColumn tinyBinary($column)
  * @method AbstractColumn longBinary($column)
  */
-abstract class AbstractTable implements TableInterface
+abstract class AbstractTable extends Component implements TableInterface
 {
     /**
      * AbstractTable will raise few warning and debug messages to console.

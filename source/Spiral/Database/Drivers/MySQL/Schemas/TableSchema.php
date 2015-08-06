@@ -116,10 +116,9 @@ class TableSchema extends AbstractTable
         $options = "ENGINE = {engine}";
         $statement = $statement . ' ' . \Spiral\interpolate($options, ['engine' => $this->engine]);
 
-        //Executing
-        $execute && $this->driver->statement($statement);
-
         if ($execute) {
+            $this->driver->statement($statement);
+
             //Not all databases support adding index while table creation, so we can do it after
             foreach ($this->indexes as $index) {
                 $this->doIndexAdd($index);

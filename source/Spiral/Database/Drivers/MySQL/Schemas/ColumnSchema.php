@@ -9,11 +9,11 @@
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Injections\SQLFragment;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * MySQL column schema.
@@ -23,7 +23,7 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
     /**
      * Default value warning.
      */
-    use LoggerTrait;
+    use LoggerAwareTrait;
 
     /**
      * Column is auto incremental.
@@ -151,9 +151,11 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
             //Flushing default value for forbidden types
             $this->defaultValue = null;
 
-            $this->logger()->warning("Default value is not allowed for MySQL type '{type}'.", [
-                'type' => $this->type
-            ]);
+            if (!empty($this->logger)) {
+                $this->logger->warning("Default value is not allowed for MySQL type '{type}'.", [
+                    'type' => $this->type
+                ]);
+            }
         }
 
         $statement = parent::sqlStatement();
@@ -227,10 +229,7 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
                 return (int)$this->defaultValue;
             }
 
-            $datetime = new \DateTime(
-                $this->defaultValue,
-                new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE)
-            );
+            $datetime = new \DateTime($this->defaultValue, new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE));
 
             return $datetime->getTimestamp();
         }

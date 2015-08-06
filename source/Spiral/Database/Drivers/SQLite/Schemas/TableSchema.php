@@ -36,7 +36,7 @@ class TableSchema extends AbstractTable
         $tableStatement = explode("\n", $tableSQL);
 
         foreach ($this->driver->query("PRAGMA TABLE_INFO({$this->getName(true)})") as $column) {
-            if ($column['pk']) {
+            if (!empty($column['pk'])) {
                 $this->primaryKeys[] = $column['name'];
                 $this->dbPrimaryKeys[] = $column['name'];
             }
@@ -84,6 +84,7 @@ class TableSchema extends AbstractTable
         }
 
         $this->driver->beginTransaction();
+
         try {
             $rebuildRequired = false;
             if ($this->alteredColumns() || $this->alteredReferences()) {
@@ -153,8 +154,7 @@ class TableSchema extends AbstractTable
                 }
 
                 $this->logger()->info(
-                    "Migrating table data from {source} to {table} "
-                    . "with columns mappings ({columns}) => ({target}).",
+                    "Migrating table data from {source} to {table} with columns mappings ({columns}) => ({target}).",
                     [
                         'source'  => $this->driver->identifier($tableName),
                         'table'   => $this->getName(true),

@@ -21,7 +21,7 @@ class QueryCompiler extends AbstractCompiler
     public function prepareParameters(
         $type,
         array $where = [],
-        $joins = [],
+        array $joins = [],
         array $having = [],
         array $columns = []
     ) {

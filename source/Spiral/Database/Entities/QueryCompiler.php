@@ -290,7 +290,7 @@ class QueryCompiler extends Component
     public function prepareParameters(
         $type,
         array $where = [],
-        array  $joins = [],
+        array $joins = [],
         array $having = [],
         array $columns = []
     ) {

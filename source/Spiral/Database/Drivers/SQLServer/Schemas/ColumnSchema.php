@@ -109,6 +109,24 @@ class ColumnSchema extends AbstractColumn
     /**
      * {@inheritdoc}
      */
+    public function getConstraints()
+    {
+        $constraints = parent::getConstraints();
+
+        if (!empty($this->defaultConstraint)) {
+            $constraints[] = $this->defaultConstraint;
+        }
+
+        if (!empty($this->enumConstraint)) {
+            $constraints[] = $this->enumConstraint;
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function abstractType()
     {
         if (!empty($this->enumValues)) {
@@ -118,23 +136,6 @@ class ColumnSchema extends AbstractColumn
         return parent::abstractType();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getConstraints()
-    {
-        $constraints = parent::getConstraints();
-
-        if ($this->defaultConstraint) {
-            $constraints[] = $this->defaultConstraint;
-        }
-
-        if ($this->enumConstraint) {
-            $constraints[] = $this->enumConstraint;
-        }
-
-        return $constraints;
-    }
 
     /**
      * {@inheritdoc}

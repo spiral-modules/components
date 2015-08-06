@@ -140,7 +140,7 @@ class TableSchema extends AbstractTable
                 ]
             ));
 
-            $column->setName($dbColumn->getName());
+            $column->name($dbColumn->getName());
         }
 
         //Postgres columns should be altered using set of operations

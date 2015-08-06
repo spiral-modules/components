@@ -96,6 +96,20 @@ class ColumnSchema extends AbstractColumn
     /**
      * {@inheritdoc}
      */
+    public function getConstraints()
+    {
+        $constraints = parent::getConstraints();
+
+        if (!empty($this->enumConstraint)) {
+            $constraints[] = $this->enumConstraint;
+        }
+
+        return $constraints;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function abstractType()
     {
         if (!empty($this->enumValues)) {
@@ -157,20 +171,6 @@ class ColumnSchema extends AbstractColumn
     /**
      * {@inheritdoc}
      */
-    public function getConstraints()
-    {
-        $constraints = parent::getConstraints();
-
-        if ($this->enumConstraint) {
-            $constraints[] = $this->enumConstraint;
-        }
-
-        return $constraints;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function sqlStatement()
     {
         $statement = parent::sqlStatement();
@@ -190,8 +190,8 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Generate set of altering operations should be applied to column to change it's type, size,
-     * default value or null flag.
+     * Generate set of altering operations should be applied to column to change it's type, size, default value or null
+     * flag.
      *
      * @param ColumnSchema $original
      * @return array
@@ -216,9 +216,9 @@ class ColumnSchema extends AbstractColumn
             } else {
                 $type = "ALTER COLUMN {$this->getName(true)} TYPE {$this->type}";
 
-                if ($this->size) {
+                if (!empty($this->size)) {
                     $type .= "($this->size)";
-                } elseif ($this->precision) {
+                } elseif (!empty($this->precision)) {
                     $type .= "($this->precision, $this->scale)";
                 }
 
@@ -227,7 +227,7 @@ class ColumnSchema extends AbstractColumn
             }
         }
 
-        if ($original->abstractType() == 'enum' && $this->enumConstraint) {
+        if ($original->abstractType() == 'enum' && !empty($this->enumConstraint)) {
             $operations[] = 'DROP CONSTRAINT ' . $this->enumConstraint(true);
         }
 
@@ -266,10 +266,7 @@ class ColumnSchema extends AbstractColumn
         $this->defaultValue = $schema['column_default'];
         $this->nullable = $schema['is_nullable'] == 'YES';
 
-        if (
-            in_array($this->type, ['int', 'bigint', 'integer'])
-            && preg_match("/nextval(.*)/", $this->defaultValue)
-        ) {
+        if (in_array($this->type, ['int', 'bigint', 'integer']) && preg_match("/nextval(.*)/", $this->defaultValue)) {
             $this->type = ($this->type == 'bigint' ? 'bigserial' : 'serial');
             $this->autoIncrement = true;
 
@@ -278,12 +275,7 @@ class ColumnSchema extends AbstractColumn
             return;
         }
 
-        if (
-            (
-                $this->type == 'character varying' || $this->type == 'character'
-            )
-            && $schema['character_maximum_length']
-        ) {
+        if (($this->type == 'character varying' || $this->type == 'character') && $schema['character_maximum_length']) {
             $this->size = $schema['character_maximum_length'];
         }
 
@@ -298,8 +290,10 @@ class ColumnSchema extends AbstractColumn
          */
         if ($this->type == 'USER-DEFINED' && $schema['typtype'] == 'e') {
             $this->type = $schema['typname'];
-            $range = $this->table->driver()->query('SELECT enum_range(NULL::' . $this->type . ')')
-                ->fetchColumn(0);
+
+            $range = $this->table->driver()->query(
+                'SELECT enum_range(NULL::' . $this->type . ')'
+            )->fetchColumn(0);
 
             $this->enumValues = explode(',', substr($range, 1, -1));
 
@@ -314,13 +308,8 @@ class ColumnSchema extends AbstractColumn
         }
 
         //Potential enum with manually created constraint (check in)
-        if (
-            ($this->type == 'character' || $this->type == 'character varying')
-            && $this->size
-        ) {
-            $query = "SELECT conname, consrc FROM pg_constraint "
-                . "WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
-
+        if (($this->type == 'character' || $this->type == 'character varying') && !empty($this->size)) {
+            $query = "SELECT conname, consrc FROM pg_constraint WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
             $constraints = $this->table->driver()->query(
                 $query,
                 [$schema['tableOID'], '(' . $this->name . '%']
@@ -344,7 +333,7 @@ class ColumnSchema extends AbstractColumn
             }
         }
 
-        if ($this->defaultValue !== null) {
+        if ($this->hasDefaultValue()) {
             if (preg_match("/^'?(.*?)'?::(.+)/", $this->defaultValue, $matches)) {
                 //In database: 'value'::TYPE
                 $this->defaultValue = $matches[1];
@@ -381,12 +370,9 @@ class ColumnSchema extends AbstractColumn
                 return $this->table->getName() . '_' . $this->getName() . '_enum';
             }
 
-            $this->enumConstraint = $this->table->getName() . '_'
-                . $this->getName() . '_enum_' . uniqid();
+            $this->enumConstraint = $this->table->getName() . '_' . $this->getName() . '_enum_' . uniqid();
         }
 
-        return $quote
-            ? $this->table->driver()->identifier($this->enumConstraint)
-            : $this->enumConstraint;
+        return $quote ? $this->table->driver()->identifier($this->enumConstraint) : $this->enumConstraint;
     }
 }

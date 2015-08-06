@@ -18,12 +18,6 @@ use Spiral\Database\Schemas\ReferenceInterface;
 abstract class AbstractReference implements ReferenceInterface
 {
     /**
-     * Default delete and update behaviours.
-     */
-    const CASCADE   = 'CASCADE';
-    const NO_ACTION = 'NO ACTION';
-
-    /**
      * Constraint name.
      *
      * @var string

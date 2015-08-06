@@ -10,11 +10,11 @@ namespace Spiral\Cache;
 
 use Spiral\Cache\Exceptions\CacheException;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Core\Singleton;
-use Spiral\Core\Container\InjectorInterface;
 
 /**
  * Default implementation of CacheInterface. Better fit for spiral.

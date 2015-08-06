@@ -8,8 +8,8 @@
  */
 namespace Spiral\Debug;
 
-use Spiral\Core\Component;
 use Exception;
+use Spiral\Core\Component;
 use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;

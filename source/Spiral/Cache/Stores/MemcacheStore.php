@@ -8,8 +8,8 @@
  */
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheStore;
 use Spiral\Cache\CacheProvider;
+use Spiral\Cache\CacheStore;
 use Spiral\Cache\Exceptions\StoreException;
 use Spiral\Cache\Stores\Memcache\DriverInterface;
 use Spiral\Cache\Stores\Memcache\MemcachedDriver;

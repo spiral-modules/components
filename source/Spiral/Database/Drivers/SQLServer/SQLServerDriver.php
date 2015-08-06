@@ -8,13 +8,13 @@
  */
 namespace Spiral\Database\Drivers\SQLServer;
 
+use PDO;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
 use Spiral\Database\Drivers\SQLServer\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\SQLServer\Schemas\IndexSchema;
 use Spiral\Database\Drivers\SQLServer\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
-use PDO;
 
 /**
  * Talk to microsoft sql server databases.

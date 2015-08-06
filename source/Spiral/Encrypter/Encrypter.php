@@ -9,8 +9,8 @@
 namespace Spiral\Encrypter;
 
 use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
+use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
 

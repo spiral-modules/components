@@ -8,8 +8,8 @@
  */
 namespace Spiral\Database\Query;
 
-use Spiral\Cache\StoreInterface;
 use PDO;
+use Spiral\Cache\StoreInterface;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\QueryException;
 

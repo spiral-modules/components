@@ -9,9 +9,9 @@
 namespace Spiral\Storage\Servers;
 
 use Psr\Http\Message\StreamInterface;
+use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Storage\BucketInterface;
-use Spiral\Files\FilesInterface;
 use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\StorageServer;
 

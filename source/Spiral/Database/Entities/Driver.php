@@ -8,23 +8,23 @@
  */
 namespace Spiral\Database\Entities;
 
+use PDO;
+use PDOStatement;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
+use Spiral\Core\ContainerInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseProvider;
-use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Query\QueryResult;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractReference;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use PDO;
-use PDOStatement;
-use Spiral\Core\ContainerInterface;
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\ParameterInterface;
+use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 

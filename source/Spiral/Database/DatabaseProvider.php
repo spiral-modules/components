@@ -11,9 +11,9 @@ namespace Spiral\Database;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Database;
-use Spiral\Core\Singleton;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DatabaseException;
 

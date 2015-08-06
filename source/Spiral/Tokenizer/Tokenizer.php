@@ -8,17 +8,17 @@
  */
 namespace Spiral\Tokenizer;
 
-use Spiral\Tokenizer\Exceptions\ReflectionException;
-use Spiral\Tokenizer\Exceptions\TokenizerException;
-use Spiral\Tokenizer\Reflections\ReflectionFile;
+use Spiral\Core\Components\Loader;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Components\Loader;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Events\Event;
 use Spiral\Files\FilesInterface;
+use Spiral\Tokenizer\Exceptions\ReflectionException;
+use Spiral\Tokenizer\Exceptions\TokenizerException;
+use Spiral\Tokenizer\Reflections\ReflectionFile;
 
 /**
  * Default implementation of spiral tokenizer support while and blacklisted directories and etc.

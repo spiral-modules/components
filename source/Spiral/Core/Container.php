@@ -8,11 +8,11 @@
  */
 namespace Spiral\Core;
 
+use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\InstanceException;
-use ReflectionFunctionAbstract as ContextFunction;
 
 /**
  * Default implementation of IoC container, support controllable injections and post controller

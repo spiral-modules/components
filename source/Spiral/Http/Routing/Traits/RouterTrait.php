@@ -8,9 +8,9 @@
  */
 namespace Spiral\Http\Routing\Traits;
 
+use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\RouterException;
 use Spiral\Http\Routing\Route;
-use Spiral\Core\ContainerInterface;
 use Spiral\Http\Routing\RouteInterface;
 use Spiral\Http\Routing\Router;
 use Spiral\Http\Routing\RouterInterface;

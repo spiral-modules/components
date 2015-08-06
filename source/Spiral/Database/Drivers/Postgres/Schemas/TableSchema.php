@@ -8,8 +8,8 @@
  */
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractTable;
 
 /**
  * Postgres table schema.

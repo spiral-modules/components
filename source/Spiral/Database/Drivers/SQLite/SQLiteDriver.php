@@ -10,10 +10,10 @@ namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Core\ContainerInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\IndexSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 
 /**

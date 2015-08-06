@@ -13,8 +13,8 @@ use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\CoreInterface;
-use Spiral\Http\Exceptions\ClientException;
 use Spiral\Core\Exceptions\ControllerException;
+use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\MiddlewareInterface;
 use Spiral\Http\Uri;
 

@@ -9,6 +9,7 @@
 namespace Spiral\Database\Drivers\Postgres\Builders;
 
 use Spiral\Database\Drivers\Postgres\PostgresDriver;
+use Spiral\Database\Drivers\Postgres\QueryCompiler as PostgresCompiler;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -29,8 +30,8 @@ class InsertQuery extends \Spiral\Database\Builders\InsertQuery
     public function sqlStatement(QueryCompiler $compiler = null)
     {
         $driver = $this->database->driver();
-        if (!$driver instanceof PostgresDriver) {
-            throw new BuilderException("Postgres InsertQuery can be used only with Postgres driver.");
+        if (!$driver instanceof PostgresDriver || (!empty($compiler) && !$compiler instanceof PostgresCompiler)) {
+            throw new BuilderException("Postgres InsertQuery can be used only with Postgres driver and compiler.");
         }
 
         if ($primary = $driver->getPrimary($this->database->getPrefix() . $this->table)) {

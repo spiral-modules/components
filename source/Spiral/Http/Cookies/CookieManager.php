@@ -10,15 +10,15 @@ namespace Spiral\Http\Cookies;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Encrypter\Exceptions\DecryptException;
-use Spiral\Encrypter\Exceptions\EncrypterException;
-use Spiral\Http\HttpDispatcher;
-use Spiral\Http\Middlewares\CsrfFilter;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Encrypter\EncrypterInterface;
+use Spiral\Encrypter\Exceptions\DecryptException;
+use Spiral\Encrypter\Exceptions\EncrypterException;
+use Spiral\Http\HttpDispatcher;
 use Spiral\Http\MiddlewareInterface;
+use Spiral\Http\Middlewares\CsrfFilter;
 use Spiral\Session\Http\SessionStarter;
 
 /**

@@ -8,14 +8,14 @@
  */
 namespace Spiral\Http;
 
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Spiral\Core\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\Singleton;
-use Spiral\Http\Input\InputBag;
 use Spiral\Http\Input\FilesBag;
 use Spiral\Http\Input\HeadersBag;
+use Spiral\Http\Input\InputBag;
 use Spiral\Http\Input\ServerBag;
 
 /**

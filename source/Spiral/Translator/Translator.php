@@ -10,8 +10,8 @@ namespace Spiral\Translator;
 
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Singleton;
+use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Translator\Exceptions\LanguageException;
 
 /**

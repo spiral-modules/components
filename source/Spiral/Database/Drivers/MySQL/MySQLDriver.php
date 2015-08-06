@@ -8,13 +8,13 @@
  */
 namespace Spiral\Database\Drivers\MySQL;
 
+use PDO;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\IndexSchema;
 use Spiral\Database\Drivers\MySQL\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
-use PDO;
 
 /**
  * Talks to mysql databases.

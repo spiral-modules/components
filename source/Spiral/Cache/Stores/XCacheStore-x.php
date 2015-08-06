@@ -8,7 +8,6 @@
  */
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheProvider;
 use Spiral\Cache\CacheStore;
 
 /**

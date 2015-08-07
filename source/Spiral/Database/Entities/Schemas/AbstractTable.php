@@ -452,8 +452,6 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function renameIndex($index, $name)
     {
-        //TODO: FIND INDEX
-
         foreach ($this->indexes as $indexSchema) {
             if (is_array($index) && $indexSchema->getColumns() == $index) {
                 $indexSchema->name($name);
@@ -515,8 +513,6 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function dropForeign($column)
     {
-        //TODO: FIND INDEX
-
         foreach ($this->references as $id => $foreignSchema) {
             if ($foreignSchema->getColumn() == $column) {
                 unset($this->references[$id]);
@@ -671,6 +667,10 @@ abstract class AbstractTable extends Component implements TableInterface
                 throw new SchemaException("Column '{$column}' already exists in '{$this->getName()}'.");
             }
 
+            if (empty($columnSchema)) {
+                throw new SchemaException("Column '{$column}' removal is not allowed in add() method.");
+            }
+
             $this->columns[$column] = $columnSchema;
         }
 
@@ -679,12 +679,21 @@ abstract class AbstractTable extends Component implements TableInterface
                 throw new SchemaException("Index '{$index}' already exists in '{$this->getName()}'.");
             }
 
+            if (empty($indexSchema)) {
+                throw new SchemaException("Index '{$index}' removal is not allowed in add() method.");
+            }
+
+
             $this->indexes[$index] = $indexSchema;
         }
 
         foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
             if ($this->hasForeign($foreignSchema->getColumns())) {
                 throw new SchemaException("Foreign key '{$reference}' already exists in '{$this->getName()}'.");
+            }
+
+            if (empty($foreignSchema)) {
+                throw new SchemaException("Foreign key '{$reference}' removal is not allowed in add() method.");
             }
 
             $this->references[$reference] = $foreignSchema;
@@ -738,6 +747,10 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function alter(callable $alter)
     {
+        if (!$this->exists()) {
+            throw new SchemaException("Table '{$this->getName()}' does not exists.");
+        }
+
         //To isolate adding
         $table = clone $this;
         call_user_func($alter, $table);
@@ -749,7 +762,11 @@ abstract class AbstractTable extends Component implements TableInterface
                 throw new SchemaException("Column '{$column}' does not exists in '{$this->getName()}'.");
             }
 
-            $this->columns[$column] = $columnSchema;
+            if (!empty($columnSchema)) {
+                $this->columns[$column] = $columnSchema;
+            } else {
+                unset($this->columns[$column]);
+            }
         }
 
         foreach ($table->alteredIndexes() as $index => $indexSchema) {
@@ -758,7 +775,12 @@ abstract class AbstractTable extends Component implements TableInterface
             }
 
             $previous = array_search($this->findIndex($indexSchema->getColumns()), $this->indexes);
-            $this->indexes[$previous] = $indexSchema;
+
+            if (!empty($indexSchema)) {
+                $this->indexes[$previous] = $indexSchema;
+            } else {
+            }
+            unset($this->indexes[$previous]);
         }
 
         foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
@@ -767,7 +789,12 @@ abstract class AbstractTable extends Component implements TableInterface
             }
 
             $previous = array_search($this->findIndex($foreignSchema->getColumns()), $this->references);
-            $this->references[$previous] = $foreignSchema;
+
+            if (!empty($foreignSchema)) {
+                $this->references[$previous] = $foreignSchema;
+            } else {
+                unset($this->references[$previous]);
+            }
         }
 
         $this->save();

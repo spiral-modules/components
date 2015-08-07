@@ -489,7 +489,7 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function primary()
     {
-        $this->table->setPrimaryKeys($this->name);
+        $this->table->setPrimaryKeys([$this->name]);
 
         return $this->type('primary');
     }
@@ -502,7 +502,7 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function bigPrimary()
     {
-        $this->table->setPrimaryKeys($this->name);
+        $this->table->setPrimaryKeys([$this->name]);
 
         return $this->type('bigPrimary');
     }

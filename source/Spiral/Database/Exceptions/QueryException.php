@@ -22,7 +22,7 @@ class QueryException extends RuntimeException
      */
     public function __construct(\PDOException $exception)
     {
-        parent::__construct($exception->getMessage(), $exception->getCode(), $exception);
+        parent::__construct($exception->getMessage(), (int)$exception->getCode(), $exception);
     }
 
 }

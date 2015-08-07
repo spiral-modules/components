@@ -54,7 +54,7 @@ class TableSchema extends AbstractTable
             "SHOW FULL COLUMNS FROM {table}", ['table' => $this->getName(true)]
         );
 
-        foreach ($this->driver->query($query)->bind(1, $columnName) as $column) {
+        foreach ($this->driver->query($query)->bind(0, $columnName) as $column) {
             $this->registerColumn($columnName, $column);
         }
     }
@@ -169,8 +169,6 @@ class TableSchema extends AbstractTable
      */
     protected function doForeignDrop(AbstractReference $foreign)
     {
-        $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} DROP FOREIGN KEY {$foreign->getName(true)}"
-        );
+        $this->driver->statement("ALTER TABLE {$this->getName(true)} DROP FOREIGN KEY {$foreign->getName(true)}");
     }
 }

@@ -275,17 +275,17 @@ abstract class AbstractTable extends Component implements TableInterface
      * Set table primary keys. Operation can be applied for newly created tables. Now every database might support
      * compound indexes.
      *
-     * @param array|mixed $columns Array or comma separated set of column names.
+     * @param array $columns
      * @return $this
      * @throws SchemaException
      */
-    public function setPrimaryKeys($columns)
+    public function setPrimaryKeys(array $columns)
     {
-        if ($this->exists()) {
+        if ($this->exists() && $this->primaryKeys != $columns) {
             throw new SchemaException("Unable to change primary keys for already exists table.");
         }
 
-        $this->primaryKeys = is_array($columns) ? $columns : func_get_args();
+        $this->primaryKeys = $columns;
 
         return $this;
     }
@@ -660,6 +660,8 @@ abstract class AbstractTable extends Component implements TableInterface
         $table = clone $this;
         call_user_func($add, $table);
 
+        $this->setPrimaryKeys($table->primaryKeys);
+
         foreach ($table->alteredColumns() as $column) {
             if ($this->hasColumn($column->getName())) {
                 throw new SchemaException("Column '{$column->getName()}' already exists in '{$this->getName()}'.");
@@ -735,6 +737,8 @@ abstract class AbstractTable extends Component implements TableInterface
         //To isolate adding
         $table = clone $this;
         call_user_func($alter, $table);
+
+        $this->setPrimaryKeys($table->primaryKeys);
 
         foreach ($table->alteredColumns() as $column) {
             if (!$this->hasColumn($column->getName())) {
@@ -1151,8 +1155,7 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     protected function doColumnAdd(AbstractColumn $column)
     {
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} "
-            . "ADD COLUMN {$column->sqlStatement()}");
+        $this->driver->statement("ALTER TABLE {$this->getName(true)} ADD COLUMN {$column->sqlStatement()}");
     }
 
     /**
@@ -1171,8 +1174,7 @@ abstract class AbstractTable extends Component implements TableInterface
             $this->doForeignDrop($this->foreign($column->getName()));
         }
 
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} "
-            . "DROP COLUMN {$column->getName(true)}");
+        $this->driver->statement("ALTER TABLE {$this->getName(true)} DROP COLUMN {$column->getName(true)}");
     }
 
     /**
@@ -1232,8 +1234,7 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     protected function doForeignDrop(AbstractReference $foreign)
     {
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} "
-            . "DROP CONSTRAINT {$foreign->getName(true)}");
+        $this->driver->statement("ALTER TABLE {$this->getName(true)} DROP CONSTRAINT {$foreign->getName(true)}");
     }
 
     /**

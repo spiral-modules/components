@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities\Schemas;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -427,17 +428,37 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
+     * Drop multiple columns using it's name.
+     *
+     * @param array $columns
+     * @return $this
+     */
+    public function dropColumns(array $columns)
+    {
+        foreach ($columns as $column) {
+            $this->dropColumn($column);
+        }
+
+        return $this;
+    }
+
+    /**
      * Rename existed index or change name of scheduled index schema. Index name must be used. This operation can be
      * safe to use on recurring basis as rename will be skipped if target index does not exists or already named so.
      *
-     * @param string $index
-     * @param string $name New index name.
+     * @param string $index Index name or forming columns.
+     * @param string $name  New index name.
      * @return $this
      */
     public function renameIndex($index, $name)
     {
         foreach ($this->indexes as $indexSchema) {
-            if ($indexSchema->getName() == $index) {
+            if (is_array($index) && $indexSchema->getColumns() == $index) {
+                $indexSchema->name($name);
+                break;
+            }
+
+            if (is_string($index) && $indexSchema->getName() == $index) {
                 $indexSchema->name($name);
                 break;
             }
@@ -447,15 +468,20 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Drop index from table schema using it's name.
+     * Drop index from table schema using it's name or forming columns.
      *
-     * @param string $index
+     * @param string|array $index Index name or forming columns.
      * @return $this
      */
     public function dropIndex($index)
     {
         foreach ($this->indexes as $id => $indexSchema) {
-            if ($indexSchema->getName() == $index) {
+            if (is_array($index) && $indexSchema->getColumns() == $index) {
+                unset($this->indexes[$id]);
+                break;
+            }
+
+            if (is_string($index) && $indexSchema->getName() == $index) {
                 unset($this->indexes[$id]);
                 break;
             }
@@ -465,18 +491,48 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Drop foreign key from table schema using it's name.
+     *Drop multiple indexes using it's forming columns or names.
      *
-     * @param string $foreign
+     * @param array $indexes
      * @return $this
      */
-    public function dropForeign($foreign)
+    public function dropIndexes(array $indexes)
+    {
+        foreach ($indexes as $index) {
+            $this->dropIndex($index);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Drop foreign key from table schema using it's forming column.
+     *
+     * @param string $column
+     * @return $this
+     */
+    public function dropForeign($column)
     {
         foreach ($this->references as $id => $foreignSchema) {
-            if ($foreignSchema->getName() == $foreign) {
+            if ($foreignSchema->getColumn() == $column) {
                 unset($this->references[$id]);
                 break;
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Drop multiple foreign keys using it's forming columns.
+     *
+     * @param array $columns
+     * @return $this
+     */
+    public function dropForeigns(array $columns)
+    {
+        foreach ($columns as $column) {
+            $this->dropForeign($column);
         }
 
         return $this;
@@ -581,6 +637,134 @@ abstract class AbstractTable extends Component implements TableInterface
         }
 
         return $altered;
+    }
+
+    /**
+     * Add new schema entities into table, method will strictly forbid altering existed columns. Column, index and foreign
+     * key creation must be performed in provided function using table copy.
+     *
+     * Examples:
+     * $table->add(function(AbstractTable $table) {
+     *      $table->string("email')->unique();
+     *      $table->integer("balance');
+     * });
+     *
+     * @param callable $add
+     * @return $this
+     * @throws SchemaException
+     * @throws QueryException
+     */
+    public function add(callable $add)
+    {
+        //To isolate adding
+        $table = clone $this;
+        call_user_func($add, $table);
+
+        foreach ($table->alteredColumns() as $column) {
+            if ($this->hasColumn($column->getName())) {
+                throw new SchemaException("Column '{$column->getName()}' already exists in '{$this->getName()}'.");
+            }
+
+            $this->columns[$column->getName()] = $column;
+        }
+
+        foreach ($table->alteredIndexes() as $index) {
+            if ($this->hasIndex($index->getColumns())) {
+                throw new SchemaException("Index '{$index->getName()}' already exists in '{$this->getName()}'.");
+            }
+
+            $this->indexes[$index->getName()] = $index;
+        }
+
+        foreach ($table->alteredIndexes() as $reference) {
+            if ($this->hasForeign($reference->getColumns())) {
+                throw new SchemaException("Foreign key '{$reference->getName()}' already exists in '{$this->getName()}'.");
+            }
+
+            $this->references[$reference->getName()] = $reference;
+        }
+
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Perform table creation, function syntax must be compatible with add() method but it will be applied if table
+     * does not exists.
+     *
+     * Examples:
+     * $table->create(function(AbstractTable $table) {
+     *      $table->primary('id');
+     *      $table->string("email')->unique();
+     *      $table->integer("balance');
+     * });
+     *
+     * @param callable $create
+     * @return $this
+     * @throws SchemaException
+     * @throws QueryException
+     */
+    public function create(callable $create)
+    {
+        if ($this->exists()) {
+            throw new SchemaException("Table '{$this->getName()}' already exists.");
+        }
+
+        return $this->add($create);
+    }
+
+    /**
+     * Alter schema entities into table, method will strictly forbid adding new columns. Column, index and foreign
+     * key altering must be performed in provided function using table copy.
+     *
+     * Examples:
+     * $table->create(function(AbstractTable $table) {
+     *      $table->dropIndex('email');
+     *      $table->column('email')->drop();
+     *      $table->renameColumn('balance', 'coins');
+     * });
+     *
+     * @param callable $alter
+     * @return $this
+     * @throws SchemaException
+     * @throws QueryException
+     */
+    public function alter(callable $alter)
+    {
+        //To isolate adding
+        $table = clone $this;
+        call_user_func($alter, $table);
+
+        foreach ($table->alteredColumns() as $column) {
+            if (!$this->hasColumn($column->getName())) {
+                throw new SchemaException("Column '{$column->getName()}' does not exists in '{$this->getName()}'.");
+            }
+
+            $this->columns[$column->getName()] = $column;
+        }
+
+        foreach ($table->alteredIndexes() as $index) {
+            if (!$this->hasIndex($index->getColumns())) {
+                throw new SchemaException("Index '{$index->getName()}' does not exists in '{$this->getName()}'.");
+            }
+
+            $previous = array_search($this->findIndex($index->getColumns()), $this->indexes);
+            $this->indexes[$previous] = $index;
+        }
+
+        foreach ($table->alteredIndexes() as $reference) {
+            if (!$this->hasForeign($reference->getColumns())) {
+                throw new SchemaException("Foreign key '{$reference->getName()}' does not exists in '{$this->getName()}'.");
+            }
+
+            $previous = array_search($this->findIndex($reference->getColumns()), $this->references);
+            $this->references[$previous] = $reference;
+        }
+
+        $this->save();
+
+        return $this;
     }
 
     /**

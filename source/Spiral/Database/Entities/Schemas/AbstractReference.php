@@ -199,7 +199,7 @@ abstract class AbstractReference implements ReferenceInterface
      */
     public function drop()
     {
-        $this->table->dropForeign($this->getName());
+        $this->table->dropForeign($this->getColumn());
     }
 
     /**

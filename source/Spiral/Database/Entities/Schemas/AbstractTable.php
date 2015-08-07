@@ -452,6 +452,8 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function renameIndex($index, $name)
     {
+        //TODO: FIND INDEX
+
         foreach ($this->indexes as $indexSchema) {
             if (is_array($index) && $indexSchema->getColumns() == $index) {
                 $indexSchema->name($name);
@@ -513,6 +515,8 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function dropForeign($column)
     {
+        //TODO: FIND INDEX
+
         foreach ($this->references as $id => $foreignSchema) {
             if ($foreignSchema->getColumn() == $column) {
                 unset($this->references[$id]);
@@ -662,28 +666,28 @@ abstract class AbstractTable extends Component implements TableInterface
 
         $this->setPrimaryKeys($table->primaryKeys);
 
-        foreach ($table->alteredColumns() as $column) {
-            if ($this->hasColumn($column->getName())) {
-                throw new SchemaException("Column '{$column->getName()}' already exists in '{$this->getName()}'.");
+        foreach ($table->alteredColumns() as $column => $columnSchema) {
+            if ($this->hasColumn($column)) {
+                throw new SchemaException("Column '{$column}' already exists in '{$this->getName()}'.");
             }
 
-            $this->columns[$column->getName()] = $column;
+            $this->columns[$column] = $columnSchema;
         }
 
-        foreach ($table->alteredIndexes() as $index) {
-            if ($this->hasIndex($index->getColumns())) {
-                throw new SchemaException("Index '{$index->getName()}' already exists in '{$this->getName()}'.");
+        foreach ($table->alteredIndexes() as $index => $indexSchema) {
+            if ($this->hasIndex($indexSchema->getColumns())) {
+                throw new SchemaException("Index '{$index}' already exists in '{$this->getName()}'.");
             }
 
-            $this->indexes[$index->getName()] = $index;
+            $this->indexes[$index] = $indexSchema;
         }
 
-        foreach ($table->alteredIndexes() as $reference) {
-            if ($this->hasForeign($reference->getColumns())) {
-                throw new SchemaException("Foreign key '{$reference->getName()}' already exists in '{$this->getName()}'.");
+        foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
+            if ($this->hasForeign($foreignSchema->getColumns())) {
+                throw new SchemaException("Foreign key '{$reference}' already exists in '{$this->getName()}'.");
             }
 
-            $this->references[$reference->getName()] = $reference;
+            $this->references[$reference] = $foreignSchema;
         }
 
         $this->save();
@@ -740,30 +744,30 @@ abstract class AbstractTable extends Component implements TableInterface
 
         $this->setPrimaryKeys($table->primaryKeys);
 
-        foreach ($table->alteredColumns() as $column) {
-            if (!$this->hasColumn($column->getName())) {
-                throw new SchemaException("Column '{$column->getName()}' does not exists in '{$this->getName()}'.");
+        foreach ($table->alteredColumns() as $column => $columnSchema) {
+            if (!$this->hasColumn($column)) {
+                throw new SchemaException("Column '{$column}' does not exists in '{$this->getName()}'.");
             }
 
-            $this->columns[$column->getName()] = $column;
+            $this->columns[$column] = $columnSchema;
         }
 
-        foreach ($table->alteredIndexes() as $index) {
-            if (!$this->hasIndex($index->getColumns())) {
-                throw new SchemaException("Index '{$index->getName()}' does not exists in '{$this->getName()}'.");
+        foreach ($table->alteredIndexes() as $index => $indexSchema) {
+            if (!$this->hasIndex($indexSchema->getColumns())) {
+                throw new SchemaException("Index '{$index}' does not exists in '{$this->getName()}'.");
             }
 
-            $previous = array_search($this->findIndex($index->getColumns()), $this->indexes);
-            $this->indexes[$previous] = $index;
+            $previous = array_search($this->findIndex($indexSchema->getColumns()), $this->indexes);
+            $this->indexes[$previous] = $indexSchema;
         }
 
-        foreach ($table->alteredIndexes() as $reference) {
-            if (!$this->hasForeign($reference->getColumns())) {
-                throw new SchemaException("Foreign key '{$reference->getName()}' does not exists in '{$this->getName()}'.");
+        foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
+            if (!$this->hasForeign($foreignSchema->getColumns())) {
+                throw new SchemaException("Foreign key '{$reference}' does not exists in '{$this->getName()}'.");
             }
 
-            $previous = array_search($this->findIndex($reference->getColumns()), $this->references);
-            $this->references[$previous] = $reference;
+            $previous = array_search($this->findIndex($foreignSchema->getColumns()), $this->references);
+            $this->references[$previous] = $foreignSchema;
         }
 
         $this->save();

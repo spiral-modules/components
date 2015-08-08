@@ -290,26 +290,34 @@ class ODM extends Singleton implements InjectorInterface
      */
     protected function defineClass($class, $fields, &$schema = [])
     {
-        //        //get definition from there
-        //
-        //        if (is_string($definition)) {
-        //            return $definition;
-        //        }
-        //
-        //        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
-        //            //Function based
-        //            $definition = call_user_func($definition[self::DEFINITION_OPTIONS], $fields);
-        //        } else {
-        //            //Property based
-        //            foreach ($definition[self::DEFINITION_OPTIONS] as $class => $field) {
-        //                $definition = $class;
-        //                if (array_key_exists($field, $fields)) {
-        //                    break;
-        //                }
-        //            }
-        //        }
-        //
-        //        return $definition;
+        $schema = $this->getSchema($class);
+
+        $definition = $schema[self::D_DEFINITION];
+        if (is_string($definition)) {
+            //Document has no variations
+            return $definition;
+        }
+
+        $defined = $class;
+        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
+            //Resolve using logic function
+            if (empty($defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields))) {
+                throw new DefinitionException(
+                    "Unable to resolve (logical definition) valid class for document '{$class}'."
+                );
+            }
+        } elseif ($definition[self::DEFINITION] == Document::DEFINITION_FIELDS) {
+            foreach ($definition[self::DEFINITION_OPTIONS] as $field => $child) {
+                if (array_key_exists($field, $fields)) {
+                    //Apparently this is child
+                    $defined = $child;
+                    break;
+                }
+            }
+        }
+
+        //Child may change definition method or declare it's own children
+        return $defined == $class ? $class : $this->defineClass($defined, $fields, $schema);
     }
 
     /**

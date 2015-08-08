@@ -9,6 +9,8 @@
 namespace Spiral\ODM\Entities;
 
 use Spiral\ODM\Document;
+use Spiral\ODM\Exceptions\DefinitionException;
+use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
 /**
@@ -16,7 +18,7 @@ use Spiral\ODM\ODM;
  *
  * @method array explain()
  */
-class DocumentIterator implements \Iterator
+class DocumentIterator implements \Iterator, \JsonSerializable
 {
     /**
      * MongoCursor instance.
@@ -75,7 +77,27 @@ class DocumentIterator implements \Iterator
     }
 
     /**
+     * Select all documents.
+     *
+     * @return Document[]
+     * @throws ODMException
+     * @throws DefinitionException
+     */
+    public function all()
+    {
+        $result = [];
+        foreach ($this as $document) {
+            $result[] = $document;
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
+     *
+     * @throws ODMException
+     * @throws DefinitionException
      */
     public function current()
     {
@@ -132,6 +154,19 @@ class DocumentIterator implements \Iterator
         $this->cursor->next();
 
         return $this->current();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        $result = [];
+        foreach ($this as $document) {
+            $result[] = $document->publicFields();
+        }
+
+        return $result;
     }
 
     /**

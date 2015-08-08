@@ -44,7 +44,12 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method bool|array distinct($key, $query)
  * @method array aggregate(array $pipeline, array $op, array $pipelineOperators)
  */
-class Collection extends Component implements \Countable, \IteratorAggregate, PaginableInterface, LoggerAwareInterface
+class Collection extends Component implements
+    \Countable,
+    \IteratorAggregate,
+    PaginableInterface,
+    LoggerAwareInterface,
+    \JsonSerializable
 {
     /**
      * Collection queries can be paginated, in addition profiling messages will be dumped into log.
@@ -276,6 +281,14 @@ class Collection extends Component implements \Countable, \IteratorAggregate, Pa
     public function __call($method, array $arguments = [])
     {
         return call_user_func_array([$this->mongoCollection(), $method], $arguments);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->getIterator();
     }
 
     /**

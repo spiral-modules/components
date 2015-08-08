@@ -370,7 +370,7 @@ abstract class DataEntity extends Component implements
             $this->errors = $this->fire('validated', $this->errors);
         }
 
-        return $this->validated;
+        return empty($this->errors);
     }
 
     /**

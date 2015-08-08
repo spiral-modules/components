@@ -11,7 +11,6 @@ namespace Spiral\ODM\Entities;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\ODM\Collection\DocumentIterator;
 use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 use Spiral\Pagination\PaginableInterface;
@@ -315,11 +314,10 @@ class Collection extends Component implements \Countable, \IteratorAggregate, Pa
     {
         $this->query($query);
         $this->runPagination();
-
         $cursorReader = new DocumentIterator(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,
-            $this->odm->collectionClass($this->database, $this->collection),
+            $this->odm->collectionClass($this->database, $this->name),
             $this->sort,
             !empty($limit) ? $limit : $this->limit,
             $this->offset

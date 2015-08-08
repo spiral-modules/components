@@ -482,6 +482,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     public function save($validate = null)
     {
         $validate = !is_null($validate) ? $validate : static::VALIDATE_SAVE;
+
         if ($validate && !$this->isValid()) {
             return false;
         }
@@ -700,7 +701,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         if (empty($this->collection)) {
             return (object)[
                 'fields'  => $this->getFields(),
-                'atomics' => $this->buildAtomics(),
+                'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
                 'errors'  => $this->getErrors()
             ];
         }
@@ -708,7 +709,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         return (object)[
             'collection' => $this->database . '/' . $this->collection,
             'fields'     => $this->getFields(),
-            'atomics'    => $this->buildAtomics(),
+            'atomics'    => $this->hasUpdates() ? $this->buildAtomics() : [],
             'errors'     => $this->getErrors()
         ];
     }
@@ -753,21 +754,22 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     protected function validate()
     {
-        parent::validate();
-
+        $errors = [];
         //Validating all compositions
         foreach ($this->schema[ODM::D_COMPOSITIONS] as $field) {
-            //We don't need to force document construction here
-            $composition = $this->fields[$field];
-
+            $composition = $this->getField($field);
             if (!$composition instanceof CompositableInterface) {
+                //Something weird.
                 continue;
             }
 
             if (!$composition->isValid()) {
-                $this->errors[$field] = $composition->getErrors();
+                $errors[$field] = $composition->getErrors();
             }
         }
+
+        parent::validate();
+        $this->errors = $this->errors + $errors;
 
         return empty($this->errors);
     }
@@ -813,10 +815,17 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
         if ($accessor == ODM::CMP_ONE) {
             //Pointing to document instance
-            return $this->odm->document($options, $value);
+            $accessor = $this->odm->document($options, $value);
+        } else {
+            $accessor = new $accessor($value, $this, $options, $this->odm);
         }
 
-        return new $accessor($value, $this, $options, $this->odm);
+        if ($accessor instanceof CompositableInterface) {
+            //Let's force validation if accessor was constructed under non valid parent, usually while document creation
+            return $accessor;
+        }
+
+        return $accessor;
     }
 
     /**

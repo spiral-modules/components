@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ODM;
+namespace Spiral\ODM\Entities;
 
 use Spiral\ODM\Schemas\CollectionSchema;
 use Spiral\ODM\Schemas\DocumentSchema;

@@ -295,7 +295,6 @@ abstract class DataEntity extends Component implements
         return $this->fire('publicFields', $fields);
     }
 
-
     /**
      * Serialize entity data into plain array.
      *
@@ -461,5 +460,13 @@ abstract class DataEntity extends Component implements
         }
 
         self::$initiated[$class] = true;
+    }
+
+    /**
+     * Clear initiated objects list.
+     */
+    public static function resetInitiated()
+    {
+        self::$initiated = [];
     }
 }

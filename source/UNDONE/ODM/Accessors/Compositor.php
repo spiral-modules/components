@@ -8,20 +8,18 @@
  */
 namespace Spiral\ODM\Accessors;
 
-use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\CompositableInterface;
-use Spiral\ODM\ODM;
 use Spiral\ODM\Document;
-use Spiral\ODM\ODMException;
+use Spiral\ODM\DocumentAccessorInterface;
+use Spiral\ODM\Exceptions\CompositorException;
+use Spiral\ODM\ODM;
 
 /**
- * This class can be potentially should be merged with ORM collection and Models EntityIterator.
+ *
  */
 class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Countable, \ArrayAccess
 {
     /**
-     * Parent Document.
-     *
      * @invisible
      * @var CompositableInterface
      */
@@ -90,28 +88,21 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     protected $errors = [];
 
     /**
-     * New instance of Compositor. Compositor used to perform various atomic operations and manipulations
-     * with documents embedded to another document (as array).
+     * {@inheritdoc}
      *
-     * @param array|mixed           $data
-     * @param CompositableInterface $parent
-     * @param array|string          $classDefinition
-     * @param ODM                   $odm ODM component.
-     * @throws ODMException
+     * @throws CompositorException
      */
-    public function __construct($data = null, $parent = null, $classDefinition = null, ODM $odm = null)
+    public function __construct($data = null, $parent = null, $options = null, ODM $odm = null)
     {
         $this->parent = $parent;
 
-        if (empty($this->odm = $odm))
-        {
-            throw new ODMException("ODM instance should be always set.");
+        if (empty($this->odm = $odm)) {
+            throw new CompositorException("ODM instance should always be set.");
         }
 
         $this->documents = is_array($data) ? $data : [];
-        if (!$this->classDefinition = $classDefinition)
-        {
-            throw new ODMException(
+        if (!$this->classDefinition = $options) {
+            throw new CompositorException(
                 "Compositor can not be created without defined class definition way."
             );
         }
@@ -145,30 +136,23 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     }
 
     /**
-     * Copy Compositable to embed into specified parent. Documents with already set parent will return
-     * copy of themselves, in other scenario document will return itself.
+     * {@inheritdoc}
      *
-     * @param CompositableInterface $parent Parent ODMCompositable object should be copied or prepared
-     *                                      for.
-     * @return $this|self
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function embed($parent)
     {
-        if (!$parent instanceof Document)
-        {
-            throw new ODMException("Compositors can be embedded only to ODM objects.");
+        if (!$parent instanceof Document) {
+            throw new CompositorException("Compositors can be embedded only to ODM objects.");
         }
 
-        if (empty($this->parent))
-        {
+        if (empty($this->parent)) {
             $this->parent = $parent;
 
             return $this->solidState(true);
         }
 
-        if ($parent === $this->parent)
-        {
+        if ($parent === $this->parent) {
             return $this;
         }
 
@@ -184,8 +168,7 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     {
         $this->changedDirectly = $this->solidState = true;
 
-        if (!is_array($data))
-        {
+        if (!is_array($data)) {
             //Ignoring
             return;
         }
@@ -193,8 +176,7 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
         $this->documents = [];
 
         //Filling documents
-        foreach ($data as $item)
-        {
+        foreach ($data as $item) {
             is_array($item) && $this->create($item);
         }
     }
@@ -208,8 +190,7 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     public function serializeData()
     {
         $result = [];
-        foreach ($this->documents as $document)
-        {
+        foreach ($this->documents as $document) {
             $result[] = $document instanceof CompositableInterface
                 ? $document->serializeData()
                 : $document;
@@ -226,8 +207,7 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     public function publicFields()
     {
         $result = [];
-        foreach ($this as $document)
-        {
+        foreach ($this as $document) {
             $result[] = $document->publicFields();
         }
 
@@ -241,15 +221,12 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      */
     public function hasUpdates()
     {
-        if ($this->changedDirectly || !empty($this->operations))
-        {
+        if ($this->changedDirectly || !empty($this->operations)) {
             return true;
         }
 
-        foreach ($this->documents as $document)
-        {
-            if ($document instanceof CompositableInterface && $document->hasUpdates())
-            {
+        foreach ($this->documents as $document) {
+            if ($document instanceof CompositableInterface && $document->hasUpdates()) {
                 return true;
             }
         }
@@ -265,10 +242,8 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
         $this->operations = [];
         $this->changedDirectly = false;
 
-        foreach ($this->documents as $document)
-        {
-            if ($document instanceof CompositableInterface)
-            {
+        foreach ($this->documents as $document) {
+            if ($document instanceof CompositableInterface) {
                 $document->flushUpdates();
             }
         }
@@ -279,25 +254,24 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      *
      * @param string $container Name of field or index where document stored into.
      * @return array
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function buildAtomics($container = '')
     {
-        if (!$this->hasUpdates())
-        {
+        if (!$this->hasUpdates()) {
             return [];
         }
 
-        if ($this->solidState)
-        {
-            return [Document::ATOMIC_SET => [
-                $container => $this->serializeData()
-            ]];
+        if ($this->solidState) {
+            return [
+                Document::ATOMIC_SET => [
+                    $container => $this->serializeData()
+                ]
+            ];
         }
 
-        if ($this->changedDirectly)
-        {
-            throw new ODMException(
+        if ($this->changedDirectly) {
+            throw new CompositorException(
                 "Composition were changed with low level array manipulations, "
                 . "unable to generate atomic set (solid state off)."
             );
@@ -307,14 +281,11 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
         $atomics = [];
 
         $handledDocuments = [];
-        foreach ($this->operations as $operation => $items)
-        {
-            if ($operation != 'pull')
-            {
+        foreach ($this->operations as $operation => $items) {
+            if ($operation != 'pull') {
                 $handledDocuments = array_merge($handledDocuments, $items);
 
-                foreach ($items as &$item)
-                {
+                foreach ($items as &$item) {
                     /**
                      * @var Document $item
                      */
@@ -325,12 +296,9 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
             $atomics['$' . $operation][$container] = $items;
         }
 
-        foreach ($this->documents as $offset => $document)
-        {
-            if ($document instanceof CompositableInterface)
-            {
-                if (in_array($document, $handledDocuments))
-                {
+        foreach ($this->documents as $offset => $document) {
+            if ($document instanceof CompositableInterface) {
+                if (in_array($document, $handledDocuments)) {
                     //Handler on higher level
                     continue;
                 }
@@ -362,13 +330,12 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      *
      * @param array $fields
      * @return Document
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function create(array $fields = [])
     {
-        if (!$this->solidState)
-        {
-            throw new ODMException(
+        if (!$this->solidState) {
+            throw new CompositorException(
                 "Direct offset operation can not be performed for compositor in non solid state."
             );
         }
@@ -415,13 +382,11 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     protected function validate()
     {
         $this->errors = [];
-        foreach ($this->documents as $offset => $document)
-        {
+        foreach ($this->documents as $offset => $document) {
             $document = $this->getDocument($offset);
             $this->validationRequired && $document->requestValidation();
 
-            if (!$document->isValid())
-            {
+            if (!$document->isValid()) {
                 $this->errors[$offset] = $document->getErrors();
             }
         }
@@ -453,26 +418,6 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     }
 
     /**
-     * Get document by array offset, instance will be automatically constructed if it's the first
-     * call to the model.
-     *
-     * @param int $offset
-     * @return Document
-     */
-    protected function getDocument($offset)
-    {
-        $document = $this->documents[$offset];
-
-        if (!$document instanceof Document)
-        {
-            $class = $this->odm->defineClass($this->documents[$offset], $this->classDefinition);
-            $this->documents[$offset] = $document = new $class($document, $this, [], $this->odm);
-        }
-
-        return $document;
-    }
-
-    /**
      * Find composited (nested document) by matched query. Query can be or array of fields, or
      * Document instance.
      *
@@ -481,21 +426,18 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      */
     public function find($query = [])
     {
-        if ($query instanceof Document)
-        {
+        if ($query instanceof Document) {
             //Not sure why you would do that...
             $query = $query->serializeData();
         }
 
         $result = [];
-        foreach ($this->documents as $offset => $document)
-        {
+        foreach ($this->documents as $offset => $document) {
             //We have to pass document thought model construction to ensure default values
             $document = $this->getDocument($offset);
             $documentData = $document->serializeData();
 
-            if (!$query || (array_intersect_assoc($documentData, $query) == $query))
-            {
+            if (!$query || (array_intersect_assoc($documentData, $query) == $query)) {
                 $result[] = $document;
             }
         }
@@ -512,8 +454,7 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      */
     public function findOne($query = [])
     {
-        if (!$documents = $this->find($query))
-        {
+        if (!$documents = $this->find($query)) {
             return null;
         }
 
@@ -538,8 +479,7 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      */
     public function getIterator()
     {
-        foreach ($this->documents as $offset => $document)
-        {
+        foreach ($this->documents as $offset => $document) {
             $this->getDocument($offset);
         }
 
@@ -566,13 +506,12 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
      * @param mixed $offset The offset to retrieve.
      * @return Document
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function offsetGet($offset)
     {
-        if (!isset($this->documents[$offset]))
-        {
-            throw new ODMException("Undefined offset '{$offset}'.");
+        if (!isset($this->documents[$offset])) {
+            throw new CompositorException("Undefined offset '{$offset}'.");
         }
 
         return $this->getDocument($offset);
@@ -586,24 +525,20 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      * @param mixed $offset The offset to assign the value to.
      * @param mixed $value  The value to set.
      * @return void
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function offsetSet($offset, $value)
     {
-        if (!$this->solidState)
-        {
-            throw new ODMException(
+        if (!$this->solidState) {
+            throw new CompositorException(
                 "Direct offset operation can not be performed for compositor in non solid state."
             );
         }
 
         $this->changedDirectly = true;
-        if (is_null($offset))
-        {
+        if (is_null($offset)) {
             $this->documents[] = $value;
-        }
-        else
-        {
+        } else {
             $this->documents[$offset] = $value;
         }
     }
@@ -615,13 +550,12 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      * @param mixed $offset The offset to unset.
      * @return void
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function offsetUnset($offset)
     {
-        if (!$this->solidState)
-        {
-            throw new ODMException(
+        if (!$this->solidState) {
+            throw new CompositorException(
                 "Direct offset operation can not be performed for compositor in non solid state."
             );
         }
@@ -636,26 +570,21 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      * @param Document $document
      * @param bool     $ignoreState Set to true to reset compositor solid state.
      * @return $this|Document[]
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function push(Document $document, $ignoreState = true)
     {
-        if ($ignoreState)
-        {
+        if ($ignoreState) {
             $this->solidState = false;
         }
 
         $this->documents[] = $document->embed($this);
 
-        if ($this->solidState)
-        {
+        if ($this->solidState) {
             $this->changedDirectly = true;
-        }
-        else
-        {
-            if ($this->operations && !isset($this->operations['push']))
-            {
-                throw new ODMException(
+        } else {
+            if ($this->operations && !isset($this->operations['push'])) {
+                throw new CompositorException(
                     "Unable to apply multiple atomic operation to composition."
                 );
             }
@@ -672,40 +601,32 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      * @param array|Document $query
      * @param bool           $ignoreState Set to true to reset compositor solid state.
      * @return $this|Document[]
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function pull($query, $ignoreState = true)
     {
-        if ($ignoreState)
-        {
+        if ($ignoreState) {
             $this->solidState = false;
         }
 
-        if ($query instanceof Document)
-        {
+        if ($query instanceof Document) {
             $query = $query->serializeData();
         }
 
-        foreach ($this->documents as $offset => $document)
-        {
+        foreach ($this->documents as $offset => $document) {
             //We have to pass document thought model construction to ensure default values
             $document = $this->getDocument($offset)->serializeData();
 
-            if (array_intersect_assoc($document, $query) == $query)
-            {
+            if (array_intersect_assoc($document, $query) == $query) {
                 unset($this->documents[$offset]);
             }
         }
 
-        if ($this->solidState)
-        {
+        if ($this->solidState) {
             $this->changedDirectly = true;
-        }
-        else
-        {
-            if ($this->operations && !isset($this->operations['pull']))
-            {
-                throw new ODMException("Unable to apply multiple atomic operation to composition.");
+        } else {
+            if ($this->operations && !isset($this->operations['pull'])) {
+                throw new CompositorException("Unable to apply multiple atomic operation to composition.");
             }
 
             $this->operations['pull'][] = $query;
@@ -720,39 +641,31 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
      * @param Document $document
      * @param bool     $ignoreState Set to true to reset compositor solid state.
      * @return $this|Document[]
-     * @throws ODMException
+     * @throws CompositorException
      */
     public function addToSet(Document $document, $ignoreState = true)
     {
-        if ($ignoreState)
-        {
+        if ($ignoreState) {
             $this->solidState = false;
         }
 
         $found = false;
-        foreach ($this->documents as $offset => $innerDocument)
-        {
-            if ($document->serializeData() == $this->getDocument($offset)->serializeData())
-            {
+        foreach ($this->documents as $offset => $innerDocument) {
+            if ($document->serializeData() == $this->getDocument($offset)->serializeData()) {
                 $found = true;
                 break;
             }
         }
 
-        if (!$found)
-        {
+        if (!$found) {
             $this->documents[] = $document->embed($this);
         }
 
-        if ($this->solidState)
-        {
+        if ($this->solidState) {
             $this->changedDirectly = true;
-        }
-        else
-        {
-            if ($this->operations && !isset($this->operations['addToSet']))
-            {
-                throw new ODMException("Unable to apply multiple atomic operation to composition.");
+        } else {
+            if ($this->operations && !isset($this->operations['addToSet'])) {
+                throw new CompositorException("Unable to apply multiple atomic operation to composition.");
             }
 
             $this->operations['addToSet'][] = $document;
@@ -762,20 +675,33 @@ class Compositor implements DocumentAccessorInterface, \IteratorAggregate, \Coun
     }
 
     /**
-     * (PHP 5 >= 5.4.0)
-     * Specify data which should be serialized to JSON
+     * Get document by array offset, instance will be automatically constructed if it's the first call to the model.
      *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed
+     * @param int $offset
+     * @return Document
      */
-    function jsonSerialize()
+    protected function getDocument($offset)
+    {
+        $document = $this->documents[$offset];
+
+        if (!$document instanceof Document) {
+            //TODO: CREATE CLASS
+            $class = $this->odm->defineClass($this->documents[$offset], $this->classDefinition);
+            $this->documents[$offset] = $document = new $class($document, $this, [], $this->odm);
+        }
+
+        return $document;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
     {
         return $this->serializeData();
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return Object
      */
     public function __debugInfo()

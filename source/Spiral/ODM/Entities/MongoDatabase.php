@@ -6,40 +6,36 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ODM;
+namespace Spiral\ODM\Entities;
+
+use Spiral\ODM\ODM;
 
 class MongoDatabase extends \MongoDB
 {
     /**
-     * This is magick constant used by Spiral Constant, it helps system to resolve controllable injections,
-     * once set - Container will ask specific binding for injection.
+     * This is magick constant used by Spiral Container, it helps system to resolve controllable
+     * injections.
      */
     const INJECTOR = ODM::class;
 
     /**
-     * Profiling levels.
+     * Profiling levels. Not identical to MongoDB profiling levels.
      */
-    const PROFILE_SIMPLE  = 1;
-    const PROFILE_EXPLAIN = 2;
+    const PROFILE_DISABLED = false;
+    const PROFILE_SIMPLE   = 1;
+    const PROFILE_EXPLAIN  = 2;
 
     /**
-     * ODMManager component.
-     *
-     * @invisible
-     * @var ODM
-     */
-    protected $odm = null;
-
-    /**
-     * ODM database instance name/id.
-     *
      * @var string
      */
-    protected $name = '';
+    private $name = '';
 
     /**
-     * Connection configuration.
-     *
+     * @var \Mongo|\MongoClient
+     */
+    private $connection = null;
+
+    /**
      * @var array
      */
     protected $config = [
@@ -47,18 +43,15 @@ class MongoDatabase extends \MongoDB
     ];
 
     /**
-     * Mongo connection instance.
-     *
-     * @var \Mongo|\MongoClient
+     * @invisible
+     * @var ODM
      */
-    protected $connection = null;
+    protected $odm = null;
 
     /**
-     * New MongoDatabase instance.
-     *
-     * @param ODM    $odm    ODMManager component.
-     * @param string $name   ODM database instance name/id.
-     * @param array  $config Connection configuration.
+     * @param ODM    $odm
+     * @param string $name
+     * @param array  $config
      */
     public function __construct(ODM $odm, $name, array $config)
     {
@@ -67,12 +60,9 @@ class MongoDatabase extends \MongoDB
         $this->config = $this->config + $config;
 
         //Selecting client
-        if (class_exists('MongoClient', false))
-        {
+        if (class_exists('MongoClient', false)) {
             $this->connection = new \MongoClient($this->config['server'], $this->config['options']);
-        }
-        else
-        {
+        } else {
             $this->connection = new \Mongo($this->config['server'], $this->config['options']);
         }
 
@@ -80,8 +70,6 @@ class MongoDatabase extends \MongoDB
     }
 
     /**
-     * Internal database name.
-     *
      * @return string
      */
     public function getName()
@@ -90,15 +78,15 @@ class MongoDatabase extends \MongoDB
     }
 
     /**
-     * While profiling enabled driver will create query logging and benchmarking events. This is
-     * recommended option on development environment.
+     * While profiling enabled driver will create query logging and benchmarking events. This is recommended option on
+     * development environment. Profiling will be applied for ODM Collection queries only.
      *
-     * @param bool $enabled Enable or disable driver profiling.
+     * @param bool|int $profiling Enable or disable driver profiling.
      * @return $this
      */
-    public function profiling($enabled = true)
+    public function setProfiling($profiling = self::PROFILE_SIMPLE)
     {
-        $this->config['profiling'] = $enabled;
+        $this->config['profiling'] = $profiling;
 
         return $this;
     }
@@ -114,18 +102,17 @@ class MongoDatabase extends \MongoDB
     }
 
     /**
-     * Get database profiling level.
+     * Get database profiling. Not identical to getProfilingLevel().
      *
      * @return int
      */
-    public function getProfilingLevel()
+    public function getProfiling()
     {
         return $this->config['profiling'];
     }
 
     /**
-     * ODM collection instance for current db. ODMCollection has all the featured from MongoCollection,
-     * but it will resolve results as ODM Document.
+     * ODM collection associated with current database.
      *
      * @param string $name  Collection name.
      * @param array  $query Initial collection query.

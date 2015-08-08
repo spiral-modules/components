@@ -140,6 +140,10 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     public function setData($data)
     {
+        if ($this->data == $data) {
+            return $this;
+        }
+
         $this->validated = false;
 
         $this->data = $data;
@@ -153,6 +157,10 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     public function setRules(array $rules)
     {
+        if ($this->rules == $rules) {
+            return $this;
+        }
+
         $this->validated = false;
         $this->rules = $rules;
         $this->errors = [];

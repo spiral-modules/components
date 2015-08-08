@@ -8,6 +8,8 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\ORM\Exceptions\ORMException;
+
 interface RelationInterface
 {
     /**

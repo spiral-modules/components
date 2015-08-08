@@ -805,6 +805,8 @@ abstract class Model extends DataEntity
         $this->fields = $this->schema[ORM::E_COLUMNS];
         $this->loaded = self::DELETED;
 
+        //TODO: remove from entity cache
+
         $this->fire('deleted');
     }
 
@@ -940,13 +942,5 @@ abstract class Model extends DataEntity
         }
 
         return (object)$info;
-    }
-
-    /**
-     * Clear existed schema cache (will re-initiate models).
-     */
-    public static function resetInitiated()
-    {
-        self::$schemaCache = [];
     }
 }

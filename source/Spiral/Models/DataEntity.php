@@ -118,7 +118,7 @@ abstract class DataEntity extends Component implements
         if ($accessor = $this->getMutator($name, 'accessor')) {
             $field = $this->fields[$name];
             if (empty($field) || !($field instanceof AccessorInterface)) {
-                $this->fields[$name] = $field = $this->createAccessor($field, $accessor);
+                $this->fields[$name] = $field = $this->createAccessor($accessor, $field);
             }
 
             $field->setData($value);
@@ -148,7 +148,7 @@ abstract class DataEntity extends Component implements
         }
 
         if ($accessor = $this->getMutator($name, 'accessor')) {
-            return $this->fields[$name] = $this->createAccessor($value, $accessor);
+            return $this->fields[$name] = $this->createAccessor($accessor, $value);
         }
 
         if ($filter && $getter = $this->getMutator($name, 'getter')) {

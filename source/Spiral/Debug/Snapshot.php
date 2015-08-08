@@ -49,6 +49,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
     protected $config = [];
 
     /**
+     * @invisible
      * @var ContainerInterface
      */
     protected $container = null;

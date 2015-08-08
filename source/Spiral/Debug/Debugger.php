@@ -41,6 +41,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     private $benchmarks = [];
 
     /**
+     * @invisible
      * @var ContainerInterface
      */
     protected $container = null;

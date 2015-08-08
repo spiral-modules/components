@@ -152,7 +152,7 @@ class SchemaBuilder
             }
 
             //We can safely create odm Collection here, as we not going to use functionality requires finalized schema
-            $odmCollection = $this->odm->db($collection->getDatabase())->odmCollection($collection->getCollection());
+            $odmCollection = $this->odm->db($collection->getDatabase())->odmCollection($collection->getName());
 
             foreach ($indexes as $index) {
                 $options = [];
@@ -177,7 +177,7 @@ class SchemaBuilder
     {
         $result = [];
         foreach ($this->getCollections() as $collection) {
-            $result[$collection->getDatabase() . '/' . $collection->getName()] = $collection->getParent()->getClass();
+            $result[$collection->getDatabase() . '/' . $collection->getName()] = $collection->getParent()->getName();
         }
 
         foreach ($this->getDocuments() as $document) {

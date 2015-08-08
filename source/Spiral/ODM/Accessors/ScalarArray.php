@@ -104,8 +104,16 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      */
     public function defaultValue()
     {
-        //Accessor expects to be initiated with default value.
-        return $this->data;
+        $result = [];
+        foreach ($this->data as $value) {
+            $value = $this->filter($value);
+
+            if ($value !== null) {
+                $result[] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**

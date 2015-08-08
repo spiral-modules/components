@@ -222,7 +222,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
         //Only when global container is set
         $this->odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
-        $this->schema = !empty($schema) ? $schema : $odm->getSchema(static::class);
+        $this->schema = !empty($schema) ? $schema : $this->odm->getSchema(static::class);
 
         static::initialize();
 

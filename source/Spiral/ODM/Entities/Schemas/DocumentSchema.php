@@ -73,11 +73,11 @@ class DocumentSchema extends ReflectionEntity
     {
         $database = $this->property('database');
         if (empty($database)) {
-            $database = $this->builder->getODM()['default'];
+            $database = $this->builder->getODM()->config()['default'];
         }
 
-        $aliases = $this->builder->getODM()['aliases'];
-        while (!isset($aliases[$database])) {
+        $aliases = $this->builder->getODM()->config()['aliases'];
+        while (isset($aliases[$database])) {
             $database = $aliases[$database];
         }
 
@@ -530,7 +530,7 @@ class DocumentSchema extends ReflectionEntity
      */
     private function isAggregation($type)
     {
-        return is_array($type) && (!array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
+        return is_array($type) && (array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
     }
 
     /**

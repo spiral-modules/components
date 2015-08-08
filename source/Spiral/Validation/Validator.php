@@ -241,8 +241,8 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
 
                 $result = $this->check(
                     $field,
-                    $condition,
                     $this->field($field),
+                    $condition,
                     $arguments = is_string($rule) ? [] : $this->fetchArguments($rule)
                 );
 
@@ -251,7 +251,8 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                     continue;
                 }
 
-                if ($result == self::STOP_VALIDATION) {
+
+                if ($result === self::STOP_VALIDATION) {
                     //Validation has to be stopped per rule request
                     break;
                 }

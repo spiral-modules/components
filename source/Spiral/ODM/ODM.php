@@ -67,15 +67,10 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * Normalized aggregation constants.
      */
-    const AGR_TYPE  = 0;
-    const AGR_QUERY = 1;
-
-    /**
-     * Matched to D_COLLECTION and D_DB to use in Document::odmCollection() method. But this is still aggregation
-     * constants.
-     */
-    const AGR_COLLECTION = 0;
-    const AGR_DB         = 1;
+    const AGR_TYPE       = 1;
+    const AGR_COLLECTION = 2;
+    const AGR_DB         = 3;
+    const AGR_QUERY      = 4;
 
     /**
      * Normalized composition constants.

@@ -648,9 +648,9 @@ class Compositor extends Component implements
         $this->validate();
 
         return (object)[
-            'documents' => $this->serializeData(),
-            'atomics'   => $this->buildAtomics('composition'),
-            'errors'    => $this->getErrors()
+            'data'    => $this->serializeData(),
+            'atomics' => $this->buildAtomics('@compositor'),
+            'errors'  => $this->getErrors()
         ];
     }
 

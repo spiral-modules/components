@@ -395,7 +395,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
         return (object)[
             'data'    => $this->serializeData(),
             'type'    => $this->getType(),
-            'atomics' => $this->buildAtomics('scalarArray')
+            'atomics' => $this->buildAtomics('@scalarArray')
         ];
     }
 

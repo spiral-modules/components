@@ -8,6 +8,7 @@
  */
 namespace Spiral\Templater;
 
+use Spiral\Components\View\Compiler\Processors\Templater\Behaviours\IncludeBehaviour;
 use Spiral\Templater\Behaviours\BlockBehaviour;
 use Spiral\Templater\Behaviours\ExtendsBehaviour;
 use Spiral\Templater\Exporters\AttributeExporter;
@@ -50,25 +51,28 @@ abstract class Templater implements SupervisorInterface
      * @var array
      */
     protected $options = [
-        'prefixes'  => [
+        'strictMode' => false,
+        'prefixes'   => [
             self::TYPE_BLOCK   => ['block:', 'section:', 'yield:', 'define:'],
             self::TYPE_EXTENDS => ['extends:'],
             self::TYPE_IMPORT  => ['use']
         ],
-        'imports'   => [
-            AliasedImport::class   => ['path', 'as'],
-            NamespaceImport::class => ['path', 'namespace'],
-            BundleImport::class    => ['bundle'],
-            NativeImport::class    => ['native']
-        ],
-        'keywords'  => [
+        'keywords'   => [
             'namespace' => ['view:namespace', 'node:namespace'],
             'view'      => ['view:parent', 'node:parent']
         ],
-        'exporters' => [
+        'exporters'  => [
             AttributeExporter::class
         ]
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isStrictMode()
+    {
+        return $this->options['strictMode'];
+    }
 
     /**
      * Add new elements import locator.
@@ -144,6 +148,29 @@ abstract class Templater implements SupervisorInterface
         }
 
         return BehaviourInterface::SIMPLE_TAG;
+    }
+
+    /**
+     * Outer blocks (usually user attributes) can be exported to template using non default rendering technique, for
+     * example every "extra" attribute can be passed to specific template location.
+     *
+     * @param string $content
+     * @param array  $blocks
+     * @return string
+     */
+    public function exportBlocks($content, array $blocks)
+    {
+        foreach ($this->options['exporters'] as $exporter) {
+            /**
+             * @var ExporterInterface $exporter
+             */
+            $exporter = new $exporter($content, $blocks);
+
+            //Exporting
+            $content = $exporter->mountBlocks();
+        }
+
+        return $content;
     }
 
     /**

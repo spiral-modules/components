@@ -23,14 +23,14 @@ interface SupervisorInterface
      *
      * @return bool
      */
-    static function isStrictMode();
+    public function isStrictMode();
 
     /**
      * Define html tag behaviour based on supervisor syntax settings.
      *
      * @param array $token
      * @param array $content
-     * @param Node  $node
+     * @param Node  $node Node which called behaviour creation. Just in case.
      * @return mixed|BehaviourInterface
      */
     public function getBehaviour(array $token, array $content, Node $node);

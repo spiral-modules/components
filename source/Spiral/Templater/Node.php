@@ -20,11 +20,6 @@ use Spiral\Templater\Exceptions\StrictModeException;
 class Node
 {
     /**
-     * Name of block used to represent import context.
-     */
-    const CONTEXT_BLOCK = 'context';
-
-    /**
      * Short tags expression, usually used inside attributes and etc.
      */
     const SHORT_TAGS = '/\${(?P<name>[a-z0-9_\.\-]+)(?: *\| *(?P<default>[^}]+) *)?}/i';

@@ -15,11 +15,13 @@ use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
+use Spiral\Models\DataEntity;
 use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ORM\Exceptions\ORMException;
 
 /**
  * ODM class used to manage state of cached Document's schema, document creation and schema analysis.
@@ -50,16 +52,17 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * Normalized document constants.
      */
-    const D_COLLECTION   = 0;
-    const D_DB           = 1;
-    const D_DEFAULTS     = 2;
-    const D_HIDDEN       = 3;
-    const D_SECURED      = 4;
-    const D_FILLABLE     = 5;
-    const D_MUTATORS     = 6;
-    const D_VALIDATES    = 7;
-    const D_AGGREGATIONS = 8;
-    const D_COMPOSITIONS = 9;
+    const D_DEFINITION   = self::DEFINITION;
+    const D_COLLECTION   = 1;
+    const D_DB           = 2;
+    const D_DEFAULTS     = 3;
+    const D_HIDDEN       = 4;
+    const D_SECURED      = 5;
+    const D_FILLABLE     = 6;
+    const D_MUTATORS     = 7;
+    const D_VALIDATES    = 8;
+    const D_AGGREGATIONS = 9;
+    const D_COMPOSITIONS = 10;
 
     /**
      * Normalized aggregation constants.
@@ -119,6 +122,7 @@ class ODM extends Singleton implements InjectorInterface
         ContainerInterface $container
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
+        $this->schema = $memory->loadData('odmSchema');
 
         $this->memory = $memory;
         $this->container = $container;
@@ -183,8 +187,7 @@ class ODM extends Singleton implements InjectorInterface
      */
     public function document($class, array $fields)
     {
-        //TODO: MUST GET SCHEMA FOR PARENT CLASS??
-        $class = $this->defineClass($fields, $schema = $this->getSchema($class));
+        $class = $this->defineClass($class, $fields, $schema);
 
         return new $class($fields, null, $this, $schema);
     }
@@ -220,15 +223,16 @@ class ODM extends Singleton implements InjectorInterface
      *
      * @param string $item
      * @return mixed
+     * @throws ODMException
      */
     public function getSchema($item)
     {
-        if ($this->schema === null) {
-            $this->schema = $this->memory->loadData('odmSchema');
+        if (!isset($this->schema[$item])) {
+            $this->updateSchema();
         }
 
         if (!isset($this->schema[$item])) {
-            $this->updateSchema();
+            throw new ORMException("Undefined ODM schema item '{$item}'.");
         }
 
         return $this->schema[$item];
@@ -258,13 +262,50 @@ class ODM extends Singleton implements InjectorInterface
         $builder = !empty($builder) ? $builder : $this->schemaBuilder();
 
         //We will create all required indexes now
-        $builder->createIndexes($this);
+        $builder->createIndexes();
 
         //Saving
         $this->memory->saveData('odmSchema', $this->schema = $builder->normalizeSchema());
 
+        //Let's reinitialize models
+        DataEntity::resetInitiated();
+
         return $builder;
     }
+
+    /**
+     * Define document class using it's fieldset and definition.
+     *
+     * @see Document::DEFINITION
+     * @param string $class
+     * @param array  $fields
+     * @return string
+     * @throws DefinitionException
+     */
+    protected function defineClass($class, $fields, &$schema = [])
+    {
+        //        //get definition from there
+        //
+        //        if (is_string($definition)) {
+        //            return $definition;
+        //        }
+        //
+        //        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
+        //            //Function based
+        //            $definition = call_user_func($definition[self::DEFINITION_OPTIONS], $fields);
+        //        } else {
+        //            //Property based
+        //            foreach ($definition[self::DEFINITION_OPTIONS] as $class => $field) {
+        //                $definition = $class;
+        //                if (array_key_exists($field, $fields)) {
+        //                    break;
+        //                }
+        //            }
+        //        }
+        //
+        //        return $definition;
+    }
+
 
     /**
      * Create valid MongoId object based on string or id provided from client side.
@@ -292,39 +333,5 @@ class ODM extends Singleton implements InjectorInterface
         }
 
         return $mongoID;
-    }
-
-
-    /**
-     * Define document class using it's fieldset and definition.
-     *
-     * @see Document::DEFINITION
-     * @param string $class
-     * @param array  $fields
-     * @return string
-     * @throws DefinitionException
-     */
-    protected function defineClass($class, $fields)
-    {
-        //        //get definition from there
-        //
-        //        if (is_string($definition)) {
-        //            return $definition;
-        //        }
-        //
-        //        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
-        //            //Function based
-        //            $definition = call_user_func($definition[self::DEFINITION_OPTIONS], $fields);
-        //        } else {
-        //            //Property based
-        //            foreach ($definition[self::DEFINITION_OPTIONS] as $class => $field) {
-        //                $definition = $class;
-        //                if (array_key_exists($field, $fields)) {
-        //                    break;
-        //                }
-        //            }
-        //        }
-        //
-        //        return $definition;
     }
 }

@@ -21,6 +21,13 @@ abstract class ReflectionEntity extends \ReflectionClass
     const BASE_CLASS = DataEntity::class;
 
     /**
+     * Mutator names.
+     */
+    const MUTATOR_SETTER   = 'setter';
+    const MUTATOR_GETTER   = 'getter';
+    const MUTATOR_ACCESSOR = 'accessor';
+
+    /**
      * Properties cache.
      *
      * @invisible
@@ -65,7 +72,7 @@ abstract class ReflectionEntity extends \ReflectionClass
      */
     public function getSetters()
     {
-        return $this->getMutators()['setter'];
+        return $this->getMutators()[self::MUTATOR_SETTER];
     }
 
     /**
@@ -73,7 +80,7 @@ abstract class ReflectionEntity extends \ReflectionClass
      */
     public function getGetters()
     {
-        return $this->getMutators()['getter'];
+        return $this->getMutators()[self::MUTATOR_GETTER];
     }
 
     /**
@@ -81,7 +88,7 @@ abstract class ReflectionEntity extends \ReflectionClass
      */
     public function getAccessors()
     {
-        return $this->getMutators()['accessor'];
+        return $this->getMutators()[self::MUTATOR_ACCESSOR];
     }
 
     /**
@@ -113,6 +120,34 @@ abstract class ReflectionEntity extends \ReflectionClass
     abstract public function getFields();
 
     /**
+     * Model mutators grouped by their type.
+     *
+     * @return array
+     */
+    public function getMutators()
+    {
+        $mutators = [
+            self::MUTATOR_GETTER   => [],
+            self::MUTATOR_SETTER   => [],
+            self::MUTATOR_ACCESSOR => []
+        ];
+
+        foreach ($this->property('getters', true) as $field => $filter) {
+            $mutators[self::MUTATOR_GETTER][$field] = $filter;
+        }
+
+        foreach ($this->property('setters', true) as $field => $filter) {
+            $mutators[self::MUTATOR_SETTER][$field] = $filter;
+        }
+
+        foreach ($this->property('accessors', true) as $field => $filter) {
+            $mutators[self::MUTATOR_ACCESSOR][$field] = $filter;
+        }
+
+        return $mutators;
+    }
+
+    /**
      * @return string
      */
     public function __toString()
@@ -126,34 +161,6 @@ abstract class ReflectionEntity extends \ReflectionClass
      * @return self|null
      */
     abstract protected function parentSchema();
-
-    /**
-     * Model mutators grouped by their type.
-     *
-     * @return array
-     */
-    protected function getMutators()
-    {
-        $mutators = [
-            'getter'   => [],
-            'setter'   => [],
-            'accessor' => []
-        ];
-
-        foreach ($this->property('getters', true) as $field => $filter) {
-            $mutators['getter'][$field] = $filter;
-        }
-
-        foreach ($this->property('setters', true) as $field => $filter) {
-            $mutators['setter'][$field] = $filter;
-        }
-
-        foreach ($this->property('accessors', true) as $field => $filter) {
-            $mutators['accessor'][$field] = $filter;
-        }
-
-        return $mutators;
-    }
 
     /**
      * Read default model property value, will read "protected" and "private" properties.

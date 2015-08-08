@@ -55,6 +55,16 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
+     * Document has not collection and only be embedded.
+     *
+     * @return bool
+     */
+    public function isEmbeddable()
+    {
+        return empty($this->getCollection());
+    }
+
+    /**
      * Database document data should be stored in. Database alias must be resolved.
      *
      * @return mixed
@@ -328,7 +338,7 @@ class DocumentSchema extends ReflectionEntity
             }
 
             $document = $this->builder->document($class);
-            if (!$document->getCollection()) {
+            if ($document->isEmbeddable()) {
                 throw new SchemaException(
                     "Unable to build aggregation {$this}.{$field}, document '{$class}' does not have any collection."
                 );
@@ -344,6 +354,77 @@ class DocumentSchema extends ReflectionEntity
         }
 
         return $aggregations;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMutators()
+    {
+        $mutators = parent::getMutators();
+
+        //Trying to resolve mutators based on field type
+        foreach ($this->getFields() as $field => $type) {
+            $resolved = [];
+
+            if (
+                is_array($type)
+                && is_scalar($type[0])
+                && $filter = $this->builder->getMutators('array::' . $type[0])
+            ) {
+                //Mutator associated to array with specified type
+                $resolved += $filter;
+            } elseif (is_array($type) && $filter = $this->builder->getMutators('array')) {
+                //Default array mutator
+                $resolved += $filter;
+            } elseif (!is_array($type) && $filter = $this->builder->getMutators($type)) {
+                //Mutator associated with type directly
+                $resolved += $filter;
+            }
+
+            if (isset($resolved[self::MUTATOR_ACCESSOR])) {
+                //Accessor options include field type.
+                $resolved[self::MUTATOR_ACCESSOR] = [
+                    $resolved[self::MUTATOR_ACCESSOR],
+                    is_array($type) ? $type[0] : $type
+                ];
+            }
+
+            //Merging mutators and default mutators
+            foreach ($resolved as $mutator => $filter) {
+                if (!array_key_exists($field, $mutators[$mutator])) {
+                    $mutators[$mutator][$field] = $filter;
+                }
+            }
+        }
+
+        //Some mutators may be described using aliases (for shortness)
+        foreach ($mutators as $mutator => &$filters) {
+            foreach ($filters as $field => $filter) {
+                $filters[$field] = $this->builder->mutatorAlias($filter);
+
+                if ($mutator == self::MUTATOR_ACCESSOR && is_string($filters[$field])) {
+
+                    $type = null;
+                    if (!empty($this->getFields()[$field])) {
+                        $type = $this->getFields()[$field];
+                    }
+
+                    $filters[$field] = [$filters[$field], is_array($type) ? $type[0] : $type];
+                }
+            }
+            unset($filters);
+        }
+
+        //Every composition is counted as field accessor :)
+        foreach ($this->getCompositions() as $field => $composition) {
+            $mutators[self::MUTATOR_ACCESSOR][$field] = [
+                $composition['type'] == ODM::CMP_MANY ? Compositor::class : ODM::CMP_ONE,
+                $composition['class']
+            ];
+        }
+
+        return $mutators;
     }
 
     /**
@@ -427,74 +508,6 @@ class DocumentSchema extends ReflectionEntity
         }
 
         return $this->builder->document($this->getParentClass()->getName());
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getMutators()
-    {
-        $mutators = parent::getMutators();
-
-        //Trying to resolve mutators based on field type
-        foreach ($this->getFields() as $field => $type) {
-            $resolved = [];
-
-            if (
-                is_array($type)
-                && is_scalar($type[0])
-                && $filter = $this->builder->getMutators('array::' . $type[0])
-            ) {
-                //Mutator associated to array with specified type
-                $resolved += $filter;
-            } elseif (is_array($type) && $filter = $this->builder->getMutators('array')) {
-                //Default array mutator
-                $resolved += $filter;
-            } elseif (!is_array($type) && $filter = $this->builder->getMutators($type)) {
-                //Mutator associated with type directly
-                $resolved += $filter;
-            }
-
-            if (isset($resolved['accessor'])) {
-                //Accessor options include field type.
-                $resolved['accessor'] = [$resolved['accessor'], is_array($type) ? $type[0] : $type];
-            }
-
-            //Merging mutators and default mutators
-            foreach ($resolved as $mutator => $filter) {
-                if (!array_key_exists($field, $mutators[$mutator])) {
-                    $mutators[$mutator][$field] = $filter;
-                }
-            }
-        }
-
-        //Some mutators may be described using aliases (for shortness)
-        foreach ($mutators as $mutator => &$filters) {
-            foreach ($filters as $field => $filter) {
-                $filters[$field] = $this->builder->mutatorAlias($filter);
-
-                if ($mutator == 'accessor' && is_string($filters[$field])) {
-
-                    $type = null;
-                    if (!empty($this->getFields()[$field])) {
-                        $type = $this->getFields()[$field];
-                    }
-
-                    $filters[$field] = [$filters[$field], is_array($type) ? $type[0] : $type];
-                }
-            }
-            unset($filters);
-        }
-
-        //Every composition is counted as field accessor :)
-        foreach ($this->getCompositions() as $field => $composition) {
-            $mutators['accessor'][$field] = [
-                $composition['type'] == ODM::CMP_MANY ? Compositor::class : ODM::CMP_ONE,
-                $composition['class']
-            ];
-        }
-
-        return $mutators;
     }
 
     /**

@@ -309,6 +309,7 @@ class Collection extends Component implements \Countable, \IteratorAggregate, Pa
      * @param array    $fields Fields of the results to return.
      * @param int|null $limit  Custom limit value.
      * @return DocumentIterator
+     * @throws \MongoException
      */
     protected function createCursor($query = [], $fields = [], $limit = null)
     {

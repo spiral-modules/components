@@ -12,6 +12,7 @@ use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
+use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\ODM;
 use Spiral\Tokenizer\TokenizerInterface;
@@ -139,6 +140,76 @@ class SchemaBuilder
     }
 
     /**
+     * Create every requested collection index.
+     *
+     * @throws \MongoException
+     */
+    public function createIndexes()
+    {
+        foreach ($this->getCollections() as $collection) {
+            if (empty($indexes = $collection->getIndexes())) {
+                continue;
+            }
+
+            //We can safely create odm Collection here, as we not going to use functionality requires finalized schema
+            $odmCollection = $this->odm->db($collection->getDatabase())->odmCollection($collection->getCollection());
+
+            foreach ($indexes as $index) {
+                $options = [];
+                if (isset($index[Document::INDEX_OPTIONS])) {
+                    $options = $index[Document::INDEX_OPTIONS];
+                    unset($index[Document::INDEX_OPTIONS]);
+                }
+
+                $odmCollection->ensureIndex($index, $options);
+            }
+        }
+    }
+
+    /**
+     * Normalize document schema in lighter structure to be saved in ODM component memory.
+     *
+     * @return array
+     * @throws SchemaException
+     * @throws DefinitionException
+     */
+    public function normalizeSchema()
+    {
+        $result = [];
+        foreach ($this->getCollections() as $collection) {
+            $result[$collection->getDatabase() . '/' . $collection->getName()] = $collection->getParent()->getClass();
+        }
+
+        foreach ($this->getDocuments() as $document) {
+            if ($document->isAbstract()) {
+                continue;
+            }
+
+            $schema = [
+                ODM::D_DEFINITION   => $this->packDefinition($document->classDefinition()),
+                ODM::D_DEFAULTS     => $document->getDefaults(),
+                ODM::D_HIDDEN       => $document->getHidden(),
+                ODM::D_SECURED      => $document->getSecured(),
+                ODM::D_FILLABLE     => $document->getFillable(),
+                ODM::D_MUTATORS     => $document->getMutators(),
+                ODM::D_VALIDATES    => $document->getValidates(),
+                ODM::D_AGGREGATIONS => $this->packAggregations($document->getAggregations()),
+                ODM::D_COMPOSITIONS => array_keys($document->getCompositions())
+            ];
+
+            if (!$document->isEmbeddable()) {
+                $schema[ODM::D_COLLECTION] = $document->getCollection();
+                $schema[ODM::D_DB] = $document->getDatabase();
+            }
+
+            ksort($schema);
+            $result[$document->getName()] = $schema;
+        }
+
+        return $result;
+    }
+
+    /**
      * Locate every available Document class.
      *
      * @param TokenizerInterface $tokenizer
@@ -154,41 +225,69 @@ class SchemaBuilder
         }
     }
 
+    /**
+     * Create instances of CollectionSchema associated with found DocumentSchema instances.
+     *
+     * @throws SchemaException
+     */
     protected function describeCollections()
     {
-        foreach ($this->getDocuments() as $schema) {
-            if (empty($collection = $schema->getCollection())) {
+        foreach ($this->getDocuments() as $document) {
+            if ($document->isEmbeddable()) {
                 //Skip embedded models
                 continue;
             }
 
             //Getting fully specified collection name (with specified db)
-            $collection = $schema->getDatabase() . '/' . $collection;
-
-            if (!isset($this->collections[$collection])) {
-                $primaryDocument = $this->documentSchema($schema->getParent());
-
-                if ($schema->getCollection() == $primaryDocument->getCollection()) {
-                    //Child document use same collection as parent?
-                    $this->collections[$collection] = new CollectionSchema(
-                        $this,
-                        $primaryDocument->getCollection(),
-                        $primaryDocument->getDatabase(),
-                        $primaryDocument->classDefinition(),
-                        $primaryDocument->getClass()
-                    );
-                } else {
-
-                    $this->collections[$collection] = new CollectionSchema(
-                        $this,
-                        $schema->getCollection(),
-                        $schema->getDatabase(),
-                        $schema->classDefinition(),
-                        $schema->getClass()
-
-                    );
-                }
+            $collection = $document->getDatabase() . '/' . $document->getCollection();
+            if (isset($this->collections[$collection])) {
+                //Already described by parent class
+                continue;
             }
+
+            //Collection must be described by parent Document
+            $parent = $document->getParent(true);
+            $this->collections[$collection] = new CollectionSchema($parent);
         }
+    }
+
+    /**
+     * Pack (normalize) class definition.
+     *
+     * @param mixed $definition
+     * @return array|string
+     */
+    private function packDefinition($definition)
+    {
+        if (is_string($definition)) {
+            //Single collection class
+            return $definition;
+        }
+
+        return [
+            ODM::DEFINITION         => $definition['type'],
+            ODM::DEFINITION_OPTIONS => $definition['options']
+        ];
+    }
+
+    /**
+     * Pack (normalize) document aggregations.
+     *
+     * @param array $aggregations
+     * @return array
+     */
+    private function packAggregations(array $aggregations)
+    {
+        $result = [];
+        foreach ($aggregations as $name => $aggregation) {
+            $result[$name] = [
+                ODM::AGR_TYPE       => $aggregation['type'],
+                ODM::AGR_COLLECTION => $aggregation['collection'],
+                ODM::AGR_DB         => $aggregation['database'],
+                ODM::AGR_QUERY      => $aggregation['query']
+            ];
+        }
+
+        return $result;
     }
 }

@@ -14,11 +14,35 @@ use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
 /**
- * Walks thought query result and creates instances of Document on demand.
+ * Walks thought query result and creates instances of Document on demand. Class decorates methods of MongoCursor.
  *
- * @method array explain()
+ * @see MongoCursor
+ *
+ * Wrapped methods.
+ * @method bool hasNext()
+ * @method static limit($number)
+ * @method static batchSize($number)
+ * @method static skip($number)
+ * @method static addOption($key, $value)
+ * @method static snapshot()
+ * @method static sort($fields)
+ * @method static hint($keyPattern)
+ * @method array  explain()
+ * @method static setFlag($bit, $set)
+ * @method static slaveOkay($okay)
+ * @method static tailable($tail)
+ * @method static immortal($liveForever)
+ * @method static awaitData($wait)
+ * @method static partial($okay)
+ * @method array getReadPreference()
+ * @method static setReadPreference($read_preference, array $tags)
+ * @method static timeout()
+ * @method static info()
+ * @method bool dead()
+ * @method static reset()
+ * @method int count($foundOnly)
  */
-class DocumentIterator implements \Iterator, \JsonSerializable
+class DocumentCursor implements \Iterator, \JsonSerializable
 {
     /**
      * MongoCursor instance.
@@ -179,7 +203,7 @@ class DocumentIterator implements \Iterator, \JsonSerializable
     public function __call($method, array $arguments)
     {
         $result = call_user_func_array([$this->cursor, $method], $arguments);
-        if ($result === $this->cursor) {
+        if ($result === $this->cursor || $result === null) {
             return $this;
         }
 

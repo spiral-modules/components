@@ -264,9 +264,19 @@ class Collection extends Component implements
     /**
      * {@inheritdoc}
      *
-     * @return DocumentIterator|Document[]
+     * @return DocumentCursor|Document[]
      */
     public function getIterator()
+    {
+        return $this->createCursor();
+    }
+
+    /**
+     * Get instance of DocumentCursor.
+     *
+     * @return DocumentCursor
+     */
+    public function gerCursor()
     {
         return $this->createCursor();
     }
@@ -320,14 +330,14 @@ class Collection extends Component implements
      * @param array    $query  Fields and conditions to query by.
      * @param array    $fields Fields of the results to return.
      * @param int|null $limit  Custom limit value.
-     * @return DocumentIterator
+     * @return DocumentCursor
      * @throws \MongoException
      */
     protected function createCursor($query = [], $fields = [], $limit = null)
     {
         $this->query($query);
         $this->runPagination();
-        $cursorReader = new DocumentIterator(
+        $cursorReader = new DocumentCursor(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,
             $this->odm->collectionClass($this->database, $this->name),

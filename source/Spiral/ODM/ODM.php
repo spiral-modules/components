@@ -21,10 +21,9 @@ use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ORM\Exceptions\ORMException;
 
 /**
- * ODM class used to manage state of cached Document's schema, document creation and schema analysis.
+ * ODM component used to manage state of cached Document's schema, document creation and schema analysis.
  */
 class ODM extends Singleton implements InjectorInterface
 {
@@ -172,6 +171,26 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
+     * Get cached schema data by it's item name (document name, collection name).
+     *
+     * @param string $item
+     * @return mixed
+     * @throws ODMException
+     */
+    public function getSchema($item)
+    {
+        if (!isset($this->schema[$item])) {
+            $this->updateSchema();
+        }
+
+        if (!isset($this->schema[$item])) {
+            throw new ODMException("Undefined ODM schema item '{$item}'.");
+        }
+
+        return $this->schema[$item];
+    }
+
+    /**
      * Create instance of document by given class name and set of fields, ODM component must automatically find appropriate
      * class to be used as ODM support model inheritance.
      *
@@ -254,26 +273,6 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
-     * Get cached schema data by it's item name (document name, collection name).
-     *
-     * @param string $item
-     * @return mixed
-     * @throws ODMException
-     */
-    public function getSchema($item)
-    {
-        if (!isset($this->schema[$item])) {
-            $this->updateSchema();
-        }
-
-        if (!isset($this->schema[$item])) {
-            throw new ORMException("Undefined ODM schema item '{$item}'.");
-        }
-
-        return $this->schema[$item];
-    }
-
-    /**
      * Get primary document class to be associated with collection. Attention, collection may return parent document
      * instance even if query was made using children implementation.
      *
@@ -284,19 +283,6 @@ class ODM extends Singleton implements InjectorInterface
     public function collectionClass($database, $collection)
     {
         return $this->getSchema($database . '/' . $collection);
-    }
-
-    /**
-     * Get instance of ODM SchemaBuilder.
-     *
-     * @return SchemaBuilder
-     */
-    public function schemaBuilder()
-    {
-        return $this->container->get(SchemaBuilder::class, [
-            'odm'    => $this,
-            'config' => $this->config['schemas']
-        ]);
     }
 
     /**
@@ -319,6 +305,19 @@ class ODM extends Singleton implements InjectorInterface
         DataEntity::resetInitiated();
 
         return $builder;
+    }
+
+    /**
+     * Get instance of ODM SchemaBuilder.
+     *
+     * @return SchemaBuilder
+     */
+    public function schemaBuilder()
+    {
+        return $this->container->get(SchemaBuilder::class, [
+            'odm'    => $this,
+            'config' => $this->config['schemas']
+        ]);
     }
 
     /**

@@ -11,9 +11,9 @@ namespace Spiral\ORM\Exceptions;
 use Spiral\Models\Exceptions\EntityExceptionInterface;
 
 /**
- * ActiveRecord related exception.
+ * Model related exception.
  */
-class ModelExceptionInterface extends EntityExceptionInterface
+class ModelException extends ORMException implements EntityExceptionInterface
 {
 
 }

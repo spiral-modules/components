@@ -255,14 +255,14 @@ abstract class Model extends DataEntity
             unset($data[ORM::PIVOT_DATA]);
         }
 
-        foreach (array_intersect_key($data, $this->schema[ORM::E_RELATIONS]) as $name => $relation)
+        foreach (array_intersect_key($data, $this->schema[ORM::M_RELATIONS]) as $name => $relation)
         {
             $this->relations[$name] = $relation;
             unset($data[$name]);
         }
 
         //Merging with default values
-        $this->fields = $data + $this->schema[ORM::E_COLUMNS];
+        $this->fields = $data + $this->schema[ORM::M_COLUMNS];
 
         if (!$this->isLoaded())
         {
@@ -288,7 +288,7 @@ abstract class Model extends DataEntity
      */
     public function getRoleName()
     {
-        return $this->schema[ORM::E_ROLE_NAME];
+        return $this->schema[ORM::M_ROLE_NAME];
     }
 
     /**
@@ -303,7 +303,7 @@ abstract class Model extends DataEntity
         //Mounting context pivot data
         $this->pivotData = isset($data[ORM::PIVOT_DATA]) ? $data[ORM::PIVOT_DATA] : [];
 
-        foreach (array_intersect_key($data, $this->schema[ORM::E_RELATIONS]) as $name => $relation)
+        foreach (array_intersect_key($data, $this->schema[ORM::M_RELATIONS]) as $name => $relation)
         {
             if (!isset($this->relations[$name]) || is_array($this->relations[$name]))
             {
@@ -339,13 +339,13 @@ abstract class Model extends DataEntity
 
         if ($forceUpdate)
         {
-            if ($this->schema[ORM::E_PRIMARY_KEY])
+            if ($this->schema[ORM::M_PRIMARY_KEY])
             {
                 $this->updates = $this->getCriteria();
             }
             else
             {
-                $this->updates = $this->schema[ORM::E_COLUMNS];
+                $this->updates = $this->schema[ORM::M_COLUMNS];
             }
         }
 
@@ -360,8 +360,8 @@ abstract class Model extends DataEntity
      */
     public function primaryKey()
     {
-        return isset($this->fields[$this->schema[ORM::E_PRIMARY_KEY]])
-            ? $this->fields[$this->schema[ORM::E_PRIMARY_KEY]]
+        return isset($this->fields[$this->schema[ORM::M_PRIMARY_KEY]])
+            ? $this->fields[$this->schema[ORM::M_PRIMARY_KEY]]
             : null;
     }
 
@@ -400,9 +400,9 @@ abstract class Model extends DataEntity
      */
     protected function getMutator($field, $mutator)
     {
-        if (isset($this->schema[ORM::E_MUTATORS][$mutator][$field]))
+        if (isset($this->schema[ORM::M_MUTATORS][$mutator][$field]))
         {
-            return $this->schema[ORM::E_MUTATORS][$mutator][$field];
+            return $this->schema[ORM::M_MUTATORS][$mutator][$field];
         }
 
         return null;
@@ -414,10 +414,10 @@ abstract class Model extends DataEntity
     protected function isFillable($field)
     {
         //Better replace it with isset later
-        return !in_array($field, $this->schema[ORM::E_SECURED])
+        return !in_array($field, $this->schema[ORM::M_SECURED])
         && !(
-            $this->schema[ORM::E_FILLABLE]
-            && !in_array($field, $this->schema[ORM::E_FILLABLE])
+            $this->schema[ORM::M_FILLABLE]
+            && !in_array($field, $this->schema[ORM::M_FILLABLE])
         );
     }
 
@@ -446,12 +446,12 @@ abstract class Model extends DataEntity
         }
 
         //Constructing relation
-        if (!isset($this->schema[ORM::E_RELATIONS][$name]))
+        if (!isset($this->schema[ORM::M_RELATIONS][$name]))
         {
             throw new ORMException("Undefined relation {$name} in model " . static::class . ".");
         }
 
-        $relation = $this->schema[ORM::E_RELATIONS][$name];
+        $relation = $this->schema[ORM::M_RELATIONS][$name];
 
         return $this->relations[$name] = $this->orm->relation(
             $relation[ORM::R_TYPE],
@@ -467,7 +467,7 @@ abstract class Model extends DataEntity
      */
     public function __get($offset)
     {
-        if (isset($this->schema[ORM::E_RELATIONS][$offset]))
+        if (isset($this->schema[ORM::M_RELATIONS][$offset]))
         {
             return $this->relation($offset)->getInstance();
         }
@@ -501,7 +501,7 @@ abstract class Model extends DataEntity
      */
     public function __set($offset, $value)
     {
-        if (isset($this->schema[ORM::E_RELATIONS][$offset]))
+        if (isset($this->schema[ORM::M_RELATIONS][$offset]))
         {
             $this->relation($offset)->setInstance($value);
 
@@ -610,7 +610,7 @@ abstract class Model extends DataEntity
         }
 
         //Primary key should present in update set
-        unset($updates[$this->schema[ORM::E_PRIMARY_KEY]]);
+        unset($updates[$this->schema[ORM::M_PRIMARY_KEY]]);
 
         return $updates;
     }
@@ -621,7 +621,7 @@ abstract class Model extends DataEntity
     public function publicFields()
     {
         $fields = $this->getFields();
-        foreach ($this->schema[ORM::E_HIDDEN] as $secured)
+        foreach ($this->schema[ORM::M_HIDDEN] as $secured)
         {
             unset($fields[$secured]);
         }
@@ -642,7 +642,7 @@ abstract class Model extends DataEntity
             return $this->validator->setData($this->fields);
         }
 
-        return parent::validator(!empty($validates) ? $validates : $this->schema[ORM::E_VALIDATES]);
+        return parent::validator(!empty($validates) ? $validates : $this->schema[ORM::M_VALIDATES]);
     }
 
     /**
@@ -660,9 +660,9 @@ abstract class Model extends DataEntity
         $schema = $orm->getSchema(static::class);
 
         //We can bypass dbalDatabase() method here.
-        $database = !empty($database) ? $database : $orm->getDatabase($schema[ORM::E_DB]);
+        $database = !empty($database) ? $database : $orm->getDatabase($schema[ORM::M_DB]);
 
-        return $database->table($schema[ORM::E_TABLE]);
+        return $database->table($schema[ORM::M_TABLE]);
     }
 
     /**
@@ -676,7 +676,7 @@ abstract class Model extends DataEntity
         //Will work only when global container is set!
         $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
 
-        return $orm->getDatabase($orm->getSchema(static::class)[ORM::E_DB]);
+        return $orm->getDatabase($orm->getSchema(static::class)[ORM::M_DB]);
     }
 
     /**
@@ -727,7 +727,7 @@ abstract class Model extends DataEntity
         }
 
         //Primary key field name
-        $primaryKey = $this->schema[ORM::E_PRIMARY_KEY];
+        $primaryKey = $this->schema[ORM::M_PRIMARY_KEY];
         if (!$this->isLoaded())
         {
             $this->fire('saving');
@@ -768,7 +768,7 @@ abstract class Model extends DataEntity
             //We would like to save all relations under one transaction, so we can easily revert them
             //all, in future it will be reasonable to save primary model and relations under one
             //transaction
-            $this->orm->getDatabase($this->schema[ORM::E_DB])->transaction(function () use ($validate)
+            $this->orm->getDatabase($this->schema[ORM::M_DB])->transaction(function () use ($validate)
             {
                 foreach ($this->relations as $name => $relation)
                 {
@@ -802,7 +802,7 @@ abstract class Model extends DataEntity
             static::dbalTable($this->orm)->delete($this->getCriteria())->run();
         }
 
-        $this->fields = $this->schema[ORM::E_COLUMNS];
+        $this->fields = $this->schema[ORM::M_COLUMNS];
         $this->loaded = self::DELETED;
 
         //TODO: remove from entity cache
@@ -818,9 +818,9 @@ abstract class Model extends DataEntity
      */
     protected function getCriteria()
     {
-        if (!empty($this->schema[ORM::E_PRIMARY_KEY]))
+        if (!empty($this->schema[ORM::M_PRIMARY_KEY]))
         {
-            return [$this->schema[ORM::E_PRIMARY_KEY] => $this->primaryKey()];
+            return [$this->schema[ORM::M_PRIMARY_KEY] => $this->primaryKey()];
         }
 
         //We have to serialize model data
@@ -930,7 +930,7 @@ abstract class Model extends DataEntity
     public function __debugInfo()
     {
         $info = [
-            'table'     => $this->schema[ORM::E_DB] . '/' . $this->schema[ORM::E_TABLE],
+            'table'     => $this->schema[ORM::M_DB] . '/' . $this->schema[ORM::M_TABLE],
             'pivotData' => $this->pivotData,
             'fields'    => $this->getFields(),
             'errors'    => $this->getErrors()

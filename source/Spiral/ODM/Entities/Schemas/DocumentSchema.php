@@ -65,7 +65,7 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Database document data should be stored in. Database alias must be resolved.
+     * Database document data should be stored in. Database alias will be resolved.
      *
      * @return mixed
      */
@@ -82,17 +82,6 @@ class DocumentSchema extends ReflectionEntity
         }
 
         return $database;
-    }
-
-    /**
-     * Get document declared schema (merged with parent model(s) values).
-     *
-     * @return array
-     */
-    public function getSchema()
-    {
-        //Reading schema as property to inherit all values
-        return $this->property('schema', true);
     }
 
     /**
@@ -496,6 +485,17 @@ class DocumentSchema extends ReflectionEntity
         }
 
         return $definition;
+    }
+
+    /**
+     * Get document declared schema (merged with parent model(s) values).
+     *
+     * @return array
+     */
+    protected function getSchema()
+    {
+        //Reading schema as property to inherit all values
+        return $this->property('schema', true);
     }
 
     /**

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ORM\Schemas;
+namespace Spiral\ORM;
 
 use Spiral\ORM\ORMException;
 use Spiral\ORM\SchemaBuilder;

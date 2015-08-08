@@ -83,11 +83,11 @@ class HasOneLoader extends Loader
         {
             if ($this->isJoined())
             {
-                $selector->onWhere($morphKey, $this->parent->schema[ORM::E_ROLE_NAME]);
+                $selector->onWhere($morphKey, $this->parent->schema[ORM::M_ROLE_NAME]);
             }
             else
             {
-                $selector->where($morphKey, $this->parent->schema[ORM::E_ROLE_NAME]);
+                $selector->where($morphKey, $this->parent->schema[ORM::M_ROLE_NAME]);
             }
         }
 

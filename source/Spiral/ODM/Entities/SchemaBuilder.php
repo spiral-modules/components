@@ -8,6 +8,7 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
@@ -21,7 +22,7 @@ use Spiral\Tokenizer\TokenizerInterface;
  * Schema builder responsible for static analysis of existed Documents, their schemas, validations, requested indexes
  * and etc.
  */
-class SchemaBuilder
+class SchemaBuilder extends Component
 {
     /**
      * Schema builder configuration includes mutators list and etc.
@@ -66,7 +67,7 @@ class SchemaBuilder
     }
 
     /**
-     * Check if Document class known to schema bulder.
+     * Check if Document class known to schema builder.
      *
      * @param string $class
      * @return bool
@@ -111,32 +112,6 @@ class SchemaBuilder
     public function getCollections()
     {
         return $this->collections;
-    }
-
-    /**
-     * Get all mutators associated with field type.
-     *
-     * @param string $type Field type.
-     * @return array
-     */
-    public function getMutators($type)
-    {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
-    }
-
-    /**
-     * Get mutator alias if presented. Aliases used to simplify schema definition.
-     *
-     * @param string $alias
-     * @return string|array
-     */
-    public function mutatorAlias($alias)
-    {
-        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias])) {
-            return $alias;
-        }
-
-        return $this->config['mutatorAliases'][$alias];
     }
 
     /**
@@ -207,6 +182,32 @@ class SchemaBuilder
         }
 
         return $result;
+    }
+
+    /**
+     * Get all mutators associated with field type.
+     *
+     * @param string $type Field type.
+     * @return array
+     */
+    public function getMutators($type)
+    {
+        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+    }
+
+    /**
+     * Get mutator alias if presented. Aliases used to simplify schema definition.
+     *
+     * @param string $alias
+     * @return string|array
+     */
+    public function mutatorAlias($alias)
+    {
+        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias])) {
+            return $alias;
+        }
+
+        return $this->config['mutatorAliases'][$alias];
     }
 
     /**

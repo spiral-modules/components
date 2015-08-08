@@ -405,8 +405,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Create Document and add it to composition. Document class will be automatically detected by ODM based on provided
-     * set of fields. You can force class to be added using second argument.
+     * Create Document and add it to composition. Compositor will use it's primary class to construct document. You can
+     * force custom class name to be added using second argument.
      *
      * @param array  $fields
      * @param string $class
@@ -422,7 +422,7 @@ class Compositor extends Component implements
         }
 
         //Locating class to be used
-        $class = $this->odm->defineClass(!empty($class) ? $class : $this->class, $fields);
+        $class = !empty($class) ? $class : $this->class;
 
         $this->changedDirectly = true;
         $this->documents[] = $document = call_user_func([$class, 'create'], $fields, $this->odm)->embed($this);

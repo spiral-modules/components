@@ -194,7 +194,7 @@ class ManyToManyLoader extends Loader
         {
             $router->where(
                 $morphKey,
-                !empty($parentRole) ? $parentRole : $this->parent->schema[ORM::E_ROLE_NAME]
+                !empty($parentRole) ? $parentRole : $this->parent->schema[ORM::M_ROLE_NAME]
             );
         }
 

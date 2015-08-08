@@ -31,9 +31,9 @@ class RootLoader extends Loader
         $this->options['method'] = Selector::INLOAD;
 
         //Primary table will be named under it's declared table name by default (without prefix)
-        $this->options['alias'] = $this->schema[ORM::E_TABLE];
+        $this->options['alias'] = $this->schema[ORM::M_TABLE];
 
-        $this->columns = array_keys($this->schema[ORM::E_COLUMNS]);
+        $this->columns = array_keys($this->schema[ORM::M_COLUMNS]);
     }
 
     /**

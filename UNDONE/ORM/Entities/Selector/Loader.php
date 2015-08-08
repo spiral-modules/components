@@ -178,7 +178,7 @@ abstract class Loader implements LoaderInterface
             $this->options['method'] = Selector::POSTLOAD;
         }
 
-        $this->columns = array_keys($this->schema[ORM::E_COLUMNS]);
+        $this->columns = array_keys($this->schema[ORM::M_COLUMNS]);
     }
 
     /**
@@ -198,7 +198,7 @@ abstract class Loader implements LoaderInterface
      */
     public function getTable()
     {
-        return $this->schema[ORM::E_TABLE];
+        return $this->schema[ORM::M_TABLE];
     }
 
     /**
@@ -208,7 +208,7 @@ abstract class Loader implements LoaderInterface
      */
     public function getDatabase()
     {
-        return $this->schema[ORM::E_DB];
+        return $this->schema[ORM::M_DB];
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class Loader implements LoaderInterface
      */
     public function dbalDatabase()
     {
-        return $this->orm->getDatabase($this->schema[ORM::E_DB]);
+        return $this->orm->getDatabase($this->schema[ORM::M_DB]);
     }
 
     /**
@@ -268,12 +268,12 @@ abstract class Loader implements LoaderInterface
      */
     public function getPrimaryKey()
     {
-        if (!isset($this->schema[ORM::E_PRIMARY_KEY]))
+        if (!isset($this->schema[ORM::M_PRIMARY_KEY]))
         {
             return null;
         }
 
-        return $this->getAlias() . '.' . $this->schema[ORM::E_PRIMARY_KEY];
+        return $this->getAlias() . '.' . $this->schema[ORM::M_PRIMARY_KEY];
     }
 
     /**
@@ -388,9 +388,9 @@ abstract class Loader implements LoaderInterface
             return $parent->loader(substr($relation, $position + 1), $options);
         }
 
-        if (!isset($this->schema[ORM::E_RELATIONS][$relation]))
+        if (!isset($this->schema[ORM::M_RELATIONS][$relation]))
         {
-            $container = $this->container ?: $this->schema[ORM::E_ROLE_NAME];
+            $container = $this->container ?: $this->schema[ORM::M_ROLE_NAME];
 
             throw new ORMException("Undefined relation '{$relation}' under '{$container}'.");
         }
@@ -408,7 +408,7 @@ abstract class Loader implements LoaderInterface
             return $this->loaders[$relation];
         }
 
-        $relationOptions = $this->schema[ORM::E_RELATIONS][$relation];
+        $relationOptions = $this->schema[ORM::M_RELATIONS][$relation];
 
         $loader = $this->orm->relationLoader(
             $relationOptions[ORM::R_TYPE],
@@ -456,9 +456,9 @@ abstract class Loader implements LoaderInterface
             );
         }
 
-        if (!isset($this->schema[ORM::E_RELATIONS][$relation]))
+        if (!isset($this->schema[ORM::M_RELATIONS][$relation]))
         {
-            $container = $this->container ?: $this->schema[ORM::E_ROLE_NAME];
+            $container = $this->container ?: $this->schema[ORM::M_ROLE_NAME];
             throw new ORMException("Undefined relation '{$relation}' under '{$container}'.");
         }
 
@@ -468,7 +468,7 @@ abstract class Loader implements LoaderInterface
             return $this->joiners[$relation]->setOptions($options);
         }
 
-        $relationOptions = $this->schema[ORM::E_RELATIONS][$relation];
+        $relationOptions = $this->schema[ORM::M_RELATIONS][$relation];
 
         $joiner = $this->orm->relationLoader(
             $relationOptions[ORM::R_TYPE],
@@ -744,10 +744,10 @@ abstract class Loader implements LoaderInterface
      */
     protected function deduplicate(array &$data)
     {
-        if (isset($this->schema[ORM::E_PRIMARY_KEY]))
+        if (isset($this->schema[ORM::M_PRIMARY_KEY]))
         {
             //We can use model id as de-duplication criteria
-            $criteria = $data[$this->schema[ORM::E_PRIMARY_KEY]];
+            $criteria = $data[$this->schema[ORM::M_PRIMARY_KEY]];
         }
         else
         {

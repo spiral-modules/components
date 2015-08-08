@@ -8,6 +8,8 @@
  */
 namespace Spiral\ODM;
 
+use Spiral\ODM\Exceptions\AccessorException;
+
 /**
  * Declares requirement for every ODM field accessor to be an instance of EmbeddableInterface and declare it's default
  * value. In addition construction is unified for every accessor.
@@ -21,6 +23,7 @@ interface DocumentAccessorInterface extends EmbeddableInterface
      *
      * @param mixed $options Implementation specific options. In ODM always contain field type.
      * @param ODM   $odm     ODM component.
+     * @throws AccessorException
      */
     public function __construct($data, $parent, $options = null, ODM $odm = null);
 

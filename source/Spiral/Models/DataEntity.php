@@ -10,8 +10,8 @@ namespace Spiral\Models;
 
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\MissingContainerException;
-use Spiral\Models\Exceptions\AccessorException;
-use Spiral\Models\Exceptions\TraitException;
+use Spiral\Models\Exceptions\AccessorExceptionInterface;
+use Spiral\Models\Exceptions\TraitExceptionInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
@@ -97,7 +97,7 @@ abstract class DataEntity extends Component implements
      * {@inheritdoc}
      *
      * @param bool $filter If false, associated field setter or accessor will be ignored.
-     * @throws AccessorException
+     * @throws AccessorExceptionInterface
      */
     public function setField($name, $value, $filter = true)
     {
@@ -116,11 +116,12 @@ abstract class DataEntity extends Component implements
         }
 
         if ($accessor = $this->getMutator($name, 'accessor')) {
-            if (empty($this->fields[$name]) || !($this->fields[$name] instanceof AccessorInterface)) {
-                $this->fields[$name] = $this->createAccessor($this->fields[$name], $accessor);
+            $field = $this->fields[$name];
+            if (empty($field) || !($field instanceof AccessorInterface)) {
+                $this->fields[$name] = $field = $this->createAccessor($field, $accessor);
             }
 
-            $this->fields[$name]->setData($value);
+            $field->setData($value);
         }
 
         if ($setter = $this->getMutator($name, 'setter')) {
@@ -136,7 +137,7 @@ abstract class DataEntity extends Component implements
      * {@inheritdoc}
      *
      * @param bool $filter If false, associated field getter will be ignored.
-     * @throws AccessorException
+     * @throws AccessorExceptionInterface
      */
     public function getField($name, $default = null, $filter = true)
     {
@@ -173,6 +174,7 @@ abstract class DataEntity extends Component implements
     /**
      * @param mixed $offset
      * @return mixed
+     * @throws AccessorExceptionInterface
      */
     public function __get($offset)
     {
@@ -182,6 +184,7 @@ abstract class DataEntity extends Component implements
     /**
      * @param mixed $offset
      * @param mixed $value
+     * @throws AccessorExceptionInterface
      */
     public function __set($offset, $value)
     {
@@ -207,6 +210,8 @@ abstract class DataEntity extends Component implements
 
     /**
      * {@inheritdoc}
+     *
+     * @throws AccessorExceptionInterface
      */
     public function offsetGet($offset)
     {
@@ -215,6 +220,8 @@ abstract class DataEntity extends Component implements
 
     /**
      * {@inheritdoc}
+     *
+     * @throws AccessorExceptionInterface
      */
     public function offsetSet($offset, $value)
     {
@@ -245,6 +252,7 @@ abstract class DataEntity extends Component implements
      * @see   isFillable()
      * @param array|\Traversable $fields
      * @return $this
+     * @throws AccessorExceptionInterface
      * @event setFields($fields)
      */
     public function setFields($fields = [])
@@ -266,6 +274,7 @@ abstract class DataEntity extends Component implements
      * Every getter and accessor will be applied/constructed if filter argument set to true.
      *
      * @param bool $filter
+     * @throws AccessorExceptionInterface
      */
     public function getFields($filter = true)
     {
@@ -283,6 +292,7 @@ abstract class DataEntity extends Component implements
      * @see   $hidden
      * @see   getFields()
      * @return array
+     * @throws AccessorExceptionInterface
      * @event publicFields($publicFields)
      */
     public function publicFields()
@@ -299,6 +309,7 @@ abstract class DataEntity extends Component implements
      * Serialize entity data into plain array.
      *
      * @return array
+     * @throws AccessorExceptionInterface
      */
     public function serializeData()
     {
@@ -407,7 +418,7 @@ abstract class DataEntity extends Component implements
      * @param string $accessor
      * @param mixed  $value
      * @return AccessorInterface
-     * @throws AccessorException
+     * @throws AccessorExceptionInterface
      */
     protected function createAccessor($accessor, $value)
     {
@@ -432,7 +443,7 @@ abstract class DataEntity extends Component implements
      * @param ReflectionEntity $schema
      * @return mixed Returns filtered value.
      * @event describe($property, $value, EntitySchema $schema)
-     * @throws TraitException
+     * @throws TraitExceptionInterface
      */
     public static function describeProperty($property, $value, ReflectionEntity $schema)
     {
@@ -445,7 +456,7 @@ abstract class DataEntity extends Component implements
      * Initiate associated model traits. System will look for static method with "init" prefix.
      *
      * @param bool $analysis Must be set to true while static analysis.
-     * @throws TraitException
+     * @throws TraitExceptionInterface
      */
     protected static function initialize($analysis = false)
     {

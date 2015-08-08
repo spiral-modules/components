@@ -139,7 +139,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $parent = null;
 
     /**
-     * SolidState will force document to be saved as one data set without any atomic operations (dirty fields).
+     * SolidState will force document to be saved as one big data set without any atomic operations (dirty fields).
      *
      * @var bool
      */
@@ -242,16 +242,16 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      *
      * @return array
      */
-    public function odmSchema()
+    public function getSchema()
     {
         return $this->schema;
     }
 
     /**
-     * Change document solid state. SolidState will force document to be saved as one data set without any atomic
+     * Change document solid state. SolidState will force document to be saved as one big data set without any atomic
      * operations (dirty fields).
      *
-     * @param bool $solidState  Solid state flag value.
+     * @param bool $solidState
      * @param bool $forceUpdate Mark all fields as changed to force update later.
      * @return $this
      */
@@ -360,7 +360,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * Alias for atomic operation $set. Attention, this operation is not identical to setField() method, it performs low
-     * level operation and can be used only on simple fields.
+     * level operation and can be used only on simple fields. No filters will be applied to field!
      *
      * @param string $field
      * @param mixed  $value

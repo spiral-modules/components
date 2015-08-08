@@ -8,7 +8,10 @@
  */
 namespace Spiral\Models\Exceptions;
 
-class ReflectionException extends EntityException
+/**
+ * Errors raised by data entity accessors.
+ */
+interface AccessorExceptionInterface extends EntityExceptionInterface
 {
 
 }

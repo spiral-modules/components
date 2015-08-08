@@ -8,7 +8,7 @@
  */
 namespace Spiral\Models;
 
-use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\EntityExceptionInterface;
 use Spiral\Validation\ValidatesInterface;
 
 /**
@@ -28,7 +28,7 @@ interface ActiveEntityInterface extends EntityInterface, ValidatesInterface
      * Save entity content into it's primary storage and return true if operation went successfully.
      *
      * @return bool
-     * @throws EntityException
+     * @throws EntityExceptionInterface
      */
     public function save();
 

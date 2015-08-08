@@ -8,7 +8,7 @@
  */
 namespace Spiral\Models;
 
-use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\EntityExceptionInterface;
 
 /**
  * Generic data entity instance.
@@ -20,7 +20,7 @@ interface EntityInterface extends \ArrayAccess
      *
      * @param string $name
      * @param mixed  $value
-     * @throws EntityException
+     * @throws EntityExceptionInterface
      */
     public function setField($name, $value);
 
@@ -30,7 +30,7 @@ interface EntityInterface extends \ArrayAccess
      * @param string $name
      * @param mixed  $default
      * @return mixed|AccessorInterface
-     * @throws EntityException
+     * @throws EntityExceptionInterface
      */
     public function getField($name, $default = null);
 
@@ -38,7 +38,7 @@ interface EntityInterface extends \ArrayAccess
      * Update model fields using mass assignment. Only known fields must be set.
      *
      * @param array|\Traversable $fields
-     * @throws EntityException
+     * @throws EntityExceptionInterface
      */
     public function setFields($fields = []);
 
@@ -46,7 +46,7 @@ interface EntityInterface extends \ArrayAccess
      * Get entity fields.
      *
      * @return array
-     * @throws EntityException
+     * @throws EntityExceptionInterface
      */
     public function getFields();
 }

@@ -8,6 +8,7 @@
  */
 namespace Spiral\Models;
 
+use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Validation\ValueInterface;
 
 /**
@@ -21,6 +22,7 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      *
      * @param mixed  $data
      * @param object $parent
+     * @throws AccessorExceptionInterface
      */
     public function __construct($data, $parent);
 
@@ -28,6 +30,8 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      * Must embed accessor to another parent model. Allowed to clone itself.
      *
      * @param object $parent
+     * @return static
+     * @throws AccessorExceptionInterface
      */
     public function embed($parent);
 
@@ -35,6 +39,7 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      * Change mocked data.
      *
      * @param mixed $data
+     * @throws AccessorExceptionInterface
      */
     public function setData($data);
 
@@ -42,6 +47,7 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      * Serialize mocked data to be stored in database or retrieved by user.
      *
      * @return mixed
+     * @throws AccessorExceptionInterface
      */
     public function serializeData();
 }

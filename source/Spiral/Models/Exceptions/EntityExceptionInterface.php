@@ -8,12 +8,12 @@
  */
 namespace Spiral\Models\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+use Spiral\Core\Exceptions\ExceptionInterface;
 
 /**
  * Exception related to error while working with DataEntity.
  */
-class EntityException extends RuntimeException
+interface EntityExceptionInterface extends ExceptionInterface
 {
 
 }

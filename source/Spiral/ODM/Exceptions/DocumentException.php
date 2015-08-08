@@ -8,12 +8,12 @@
  */
 namespace Spiral\ODM\Exceptions;
 
-use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\EntityExceptionInterface;
 
 /**
  * Exceptions raised by document.
  */
-class DocumentException extends EntityException
+class DocumentException extends ODMException implements EntityExceptionInterface
 {
 
 }

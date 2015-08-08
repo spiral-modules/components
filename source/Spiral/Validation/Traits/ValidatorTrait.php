@@ -101,7 +101,7 @@ trait ValidatorTrait
     {
         $this->validate();
 
-        return !((bool)$this->errors);
+        return empty($this->errors);
     }
 
     /**

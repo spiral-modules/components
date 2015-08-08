@@ -8,7 +8,6 @@
  */
 namespace Spiral\ODM\Accessors;
 
-use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Exceptions\AccessorException;
@@ -40,6 +39,29 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     protected $data = [];
 
     /**
+     * When solid state is enabled no atomic operations will be pushed to databases and array will be saved as one big
+     * set. Enabled by default.
+     *
+     * @var bool
+     */
+    protected $solidState = true;
+
+    /**
+     * Indication that were updated.
+     *
+     * @var array
+     */
+    protected $updated = false;
+
+    /**
+     * Low level atomic operations.
+     *
+     * @var array
+     */
+    protected $atomics = [];
+
+    /**
+     * @invisible
      * @var Document
      */
     protected $parent = null;
@@ -56,28 +78,6 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
         'MongoId'  => [ODM::class, 'mongoID'],
         '\MongoId' => [ODM::class, 'mongoID']
     ];
-
-    /**
-     * Indication that were updated.
-     *
-     * @var array
-     */
-    protected $updated = false;
-
-    /**
-     * When solid state is enabled no atomic operations will be pushed to databases and array will be saved as one big
-     * set request. Enabled by default.
-     *
-     * @var bool
-     */
-    protected $solidState = true;
-
-    /**
-     * Low level atomic operations.
-     *
-     * @var array
-     */
-    protected $atomics = [];
 
     /**
      * {@inheritdoc}
@@ -137,8 +137,12 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      */
     public function embed($parent)
     {
-        if (!$parent instanceof CompositableInterface) {
-            throw new AccessorException("ScalarArrays can be embedded only to ODM objects.");
+        if (!$parent instanceof Document) {
+            throw new AccessorException("ScalarArrays can be embedded only into Documents.");
+        }
+
+        if ($parent === $this->parent) {
+            return $this;
         }
 
         $accessor = clone $this;

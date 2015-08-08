@@ -193,6 +193,53 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
+     * Define document class using it's fieldset and definition.
+     *
+     * @see Document::DEFINITION
+     * @param string $class
+     * @param array  $fields
+     * @param array  $schema Found class schema, reference.
+     * @return string
+     * @throws DefinitionException
+     */
+    public function defineClass($class, $fields, &$schema = [])
+    {
+        $schema = $this->getSchema($class);
+
+        $definition = $schema[self::D_DEFINITION];
+        if (is_string($definition)) {
+            //Document has no variations
+            return $definition;
+        }
+
+        if (!is_array($fields)) {
+            //Unable to resolve
+            return $class;
+        }
+
+        $defined = $class;
+        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
+            //Resolve using logic function
+            if (empty($defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields))) {
+                throw new DefinitionException(
+                    "Unable to resolve (logical definition) valid class for document '{$class}'."
+                );
+            }
+        } elseif ($definition[self::DEFINITION] == Document::DEFINITION_FIELDS) {
+            foreach ($definition[self::DEFINITION_OPTIONS] as $field => $child) {
+                if (array_key_exists($field, $fields)) {
+                    //Apparently this is child
+                    $defined = $child;
+                    break;
+                }
+            }
+        }
+
+        //Child may change definition method or declare it's own children
+        return $defined == $class ? $class : $this->defineClass($defined, $fields, $schema);
+    }
+
+    /**
      * Instance of ODM Collection associated with specified document class.
      *
      * @param string $class
@@ -276,48 +323,6 @@ class ODM extends Singleton implements InjectorInterface
         DataEntity::resetInitiated();
 
         return $builder;
-    }
-
-    /**
-     * Define document class using it's fieldset and definition.
-     *
-     * @see Document::DEFINITION
-     * @param string $class
-     * @param array  $fields
-     * @param array  $schema Found class schema, reference.
-     * @return string
-     * @throws DefinitionException
-     */
-    protected function defineClass($class, $fields, &$schema = [])
-    {
-        $schema = $this->getSchema($class);
-
-        $definition = $schema[self::D_DEFINITION];
-        if (is_string($definition)) {
-            //Document has no variations
-            return $definition;
-        }
-
-        $defined = $class;
-        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
-            //Resolve using logic function
-            if (empty($defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields))) {
-                throw new DefinitionException(
-                    "Unable to resolve (logical definition) valid class for document '{$class}'."
-                );
-            }
-        } elseif ($definition[self::DEFINITION] == Document::DEFINITION_FIELDS) {
-            foreach ($definition[self::DEFINITION_OPTIONS] as $field => $child) {
-                if (array_key_exists($field, $fields)) {
-                    //Apparently this is child
-                    $defined = $child;
-                    break;
-                }
-            }
-        }
-
-        //Child may change definition method or declare it's own children
-        return $defined == $class ? $class : $this->defineClass($defined, $fields, $schema);
     }
 
     /**

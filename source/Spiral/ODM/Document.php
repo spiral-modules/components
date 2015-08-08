@@ -133,12 +133,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $indexes = [];
 
     /**
-     * @invisible
-     * @var CompositableInterface|Document
-     */
-    protected $parent = null;
-
-    /**
      * SolidState will force document to be saved as one big data set without any atomic operations (dirty fields).
      *
      * @var bool
@@ -206,6 +200,12 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $atomics = [];
 
     /**
+     * @invisible
+     * @var CompositableInterface|Document
+     */
+    protected $parent = null;
+
+    /**
      * @var ODM
      */
     protected $odm = null;
@@ -231,7 +231,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             $this->fields = array_replace_recursive($this->schema[ODM::D_DEFAULTS], $fields);
         }
 
-        if ((!$this->isLoaded() && empty($this->parent) || !is_array($fields))) {
+        if ((!$this->isLoaded() && !$this->isEmbedded()) || empty($fields)) {
             //Document is newly created instance
             $this->solidState(true)->validated = false;
         }
@@ -310,8 +310,12 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             return $this;
         }
 
-        //We will give new parent our copy
-        return (new static($this->serializeData(), $parent, $this->odm, $this->schema))->solidState(true, true);
+        /**
+         * @var Document $document
+         */
+        $document = new static($this->serializeData(), $parent, $this->odm, $this->schema);
+
+        return $document->solidState(true, true)->invalidate(true);
     }
 
     /**
@@ -712,31 +716,56 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * {@inheritdoc}
      *
+     * Will invalidate every composited object.
+     *
+     * @param bool $soft Do not invalidate composited documents.
+     * @return $this
+     */
+    public function invalidate($soft = true)
+    {
+        $this->validated = false;
+
+        if ($soft) {
+            return $this;
+        }
+
+        //Invalidating all compositions
+        foreach ($this->schema[ODM::D_COMPOSITIONS] as $field) {
+
+            //Let's force composition construction
+            $composition = $this->getField($field);
+            if (!$composition instanceof CompositableInterface) {
+                throw new DocumentException("All compositions must be an instance of CompositableInterface.");
+            }
+
+            $composition->invalidate();
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * Will validate every CompositableInterface instance.
      *
      * @throws DocumentException
      */
     protected function validate()
     {
-        //Remember original document state
-        $validated = $this->validated;
         parent::validate();
 
         //Validating all compositions
         foreach ($this->schema[ODM::D_COMPOSITIONS] as $field) {
-            $composited = $this->getField($field);
+            //We don't need to force document construction here
+            $composition = $this->fields[$field];
 
-            if (!$composited instanceof CompositableInterface) {
-                throw new DocumentException("All compositions must be an instance of CompositableInterface.");
+            if (!$composition instanceof CompositableInterface) {
+                continue;
             }
 
-            if (!$validated) {
-                //Invalidating, due parent requested so, it's not necessary in every case, but more reliable
-                $composited->invalidate();
-            }
-
-            if (!$composited->isValid()) {
-                $this->errors[$field] = $composited->getErrors();
+            if (!$composition->isValid()) {
+                $this->errors[$field] = $composition->getErrors();
             }
         }
 
@@ -802,7 +831,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         array_walk_recursive($query, function (&$value) use ($fields) {
             if (strpos($value, 'key::') === 0) {
                 $value = $fields[substr($value, 5)];
-                if ($value instanceof CompositableInterface) {
+                if ($value instanceof EmbeddableInterface) {
                     $value = $value->serializeData();
                 }
             }
@@ -820,13 +849,16 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public static function create($fields = [], ODM $odm = null)
     {
+        //Only when global container is set
+        $odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
+
         /**
          * @var Document $document
          */
         $document = new static([], null, $odm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $document->validated = true;
+        $document->validated = false;
         $document->setFields($fields)->fire('created');
 
         return $document;

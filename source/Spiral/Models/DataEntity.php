@@ -357,13 +357,12 @@ abstract class DataEntity extends Component implements
     protected function validate()
     {
         if (empty($this->validates)) {
-            //Nothing change since last validation
             $this->validated = true;
         } elseif (!$this->validated) {
             $this->fire('validation');
 
             $this->errors = $this->validator()->getErrors();
-            $this->validated = true;
+            $this->validated = empty($this->errors);
 
             //Cleaning memory
             $this->validator->setData([]);
@@ -371,7 +370,7 @@ abstract class DataEntity extends Component implements
             $this->errors = $this->fire('validated', $this->errors);
         }
 
-        return empty($this->errors);
+        return $this->validated;
     }
 
     /**
@@ -443,7 +442,6 @@ abstract class DataEntity extends Component implements
      * @param ReflectionEntity $schema
      * @return mixed Returns filtered value.
      * @event describe($property, $value, EntitySchema $schema)
-     * @throws TraitExceptionInterface
      */
     public static function describeProperty($property, $value, ReflectionEntity $schema)
     {
@@ -456,7 +454,6 @@ abstract class DataEntity extends Component implements
      * Initiate associated model traits. System will look for static method with "init" prefix.
      *
      * @param bool $analysis Must be set to true while static analysis.
-     * @throws TraitExceptionInterface
      */
     protected static function initialize($analysis = false)
     {

@@ -8,12 +8,10 @@
  */
 namespace Spiral\ODM\Exceptions;
 
-use Spiral\ORM\Exceptions\ORMException;
-
 /**
  * Errors inside ODM document compositor.
  */
-class CompositorException extends ORMException
+class CompositorException extends AccessorException
 {
 
 }

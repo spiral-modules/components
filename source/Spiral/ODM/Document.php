@@ -779,8 +779,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     protected function isFillable($field)
     {
-        if (!empty($this->$this->schema[ODM::D_FILLABLE])) {
-            return in_array($field, $this->$this->schema[ODM::D_FILLABLE]);
+        if (!empty($this->schema[ODM::D_FILLABLE])) {
+            return in_array($field, $this->schema[ODM::D_FILLABLE]);
         }
 
         return !in_array($field, $this->schema[ODM::D_SECURED]);
@@ -815,14 +815,14 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
         if ($accessor == ODM::CMP_ONE) {
             //Pointing to document instance
-            $accessor = $this->odm->document($options, $value);
+            $accessor = $this->odm->document($options, $value, $this);
         } else {
             $accessor = new $accessor($value, $this, $options, $this->odm);
         }
 
-        if ($accessor instanceof CompositableInterface) {
-            //Let's force validation if accessor was constructed under non valid parent, usually while document creation
-            return $accessor;
+        if ($accessor instanceof CompositableInterface && !$this->isLoaded() && !$this->isEmbedded()) {
+            //Newly created object
+            $accessor->invalidate();
         }
 
         return $accessor;

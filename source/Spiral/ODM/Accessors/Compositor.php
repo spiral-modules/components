@@ -690,7 +690,7 @@ class Compositor extends Component implements
         }
 
         //Trying to create using ODM
-        return $this->documents[$offset] = $this->odm->document($this->class, $document);
+        return $this->documents[$offset] = $this->odm->document($this->class, $document, $this);
     }
 
     /**

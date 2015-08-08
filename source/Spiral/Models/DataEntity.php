@@ -11,7 +11,6 @@ namespace Spiral\Models;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\MissingContainerException;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
-use Spiral\Models\Exceptions\TraitExceptionInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;

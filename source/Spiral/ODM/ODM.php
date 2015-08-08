@@ -180,16 +180,17 @@ class ODM extends Singleton implements InjectorInterface
      * Create instance of document by given class name and set of fields, ODM component must automatically find appropriate
      * class to be used as ODM support model inheritance.
      *
-     * @param string $class
-     * @param array  $fields
+     * @param string                $class
+     * @param array                 $fields
+     * @param CompositableInterface $parent
      * @return Document
      * @throws DefinitionException
      */
-    public function document($class, array $fields)
+    public function document($class, array $fields, CompositableInterface $parent = null)
     {
         $class = $this->defineClass($class, $fields, $schema);
 
-        return new $class($fields, null, $this, $schema);
+        return new $class($fields, $parent, $this, $schema);
     }
 
     /**

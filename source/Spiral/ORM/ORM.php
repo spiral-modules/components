@@ -294,7 +294,7 @@ class ORM extends Singleton
     }
 
     /**
-     * Enable or disable entity cache.
+     * Enable or disable entity cache. Disabling cache will not flush it's values.
      *
      * @param bool $enabled
      * @param int  $maxSize
@@ -319,7 +319,7 @@ class ORM extends Singleton
     }
 
     /**
-     * Add Model to entity cache (cache limit will be ignored).
+     * Add Model to entity cache (cache limit will be ignored). Primary key is required for caching.
      *
      * @param Model $record
      * @return Model
@@ -334,13 +334,13 @@ class ORM extends Singleton
     }
 
     /**
-     * Remove Model model from entity cache.
+     * Remove Model model from entity cache. Primary key is required for caching.
      *
      * @param Model $record
      */
     public function removeEntity(Model $record)
     {
-        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled']) {
+        if (empty($record->primaryKey())) {
             return;
         }
 

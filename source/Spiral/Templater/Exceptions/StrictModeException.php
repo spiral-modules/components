@@ -8,15 +8,13 @@
  */
 namespace Spiral\Templater\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Error caused by strict mode enabled by node supervisor.
  *
  * @see SupervisorInterface
  * @see Node
  */
-class StrictModeException extends RuntimeException
+class StrictModeException extends TemplaterException
 {
 
 }

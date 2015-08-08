@@ -201,21 +201,13 @@ class ODM extends Singleton implements InjectorInterface
      */
     public function odmCollection($class)
     {
-        //TODO: !!!
-    }
+        $schema = $this->getSchema($class);
 
-    /**
-     * Get primary document class to be associated with collection. Attention, collection may return parent document
-     * instance even if query was made using children implementation.
-     *
-     * @param string $database
-     * @param string $collection
-     * @return string
-     */
-    public function resolveClass($database, $collection)
-    {
-        //TODO: ???
-        return $this->getSchema($database . '/' . $collection);
+        if (empty($schema[self::D_DB])) {
+            throw new ODMException("Document '{$class}' does not have any associated collection.");
+        }
+
+        return new Collection($this, $schema[self::D_DB], $schema[self::D_COLLECTION], []);
     }
 
     /**
@@ -236,6 +228,19 @@ class ODM extends Singleton implements InjectorInterface
         }
 
         return $this->schema[$item];
+    }
+
+    /**
+     * Get primary document class to be associated with collection. Attention, collection may return parent document
+     * instance even if query was made using children implementation.
+     *
+     * @param string $database
+     * @param string $collection
+     * @return string
+     */
+    public function collectionClass($database, $collection)
+    {
+        return $this->getSchema($database . '/' . $collection);
     }
 
     /**
@@ -279,6 +284,7 @@ class ODM extends Singleton implements InjectorInterface
      * @see Document::DEFINITION
      * @param string $class
      * @param array  $fields
+     * @param array  $schema Found class schema, reference.
      * @return string
      * @throws DefinitionException
      */
@@ -305,7 +311,6 @@ class ODM extends Singleton implements InjectorInterface
         //
         //        return $definition;
     }
-
 
     /**
      * Create valid MongoId object based on string or id provided from client side.

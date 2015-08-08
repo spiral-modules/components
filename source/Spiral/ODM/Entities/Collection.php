@@ -319,7 +319,7 @@ class Collection extends Component implements \Countable, \IteratorAggregate, Pa
         $cursorReader = new DocumentIterator(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,
-            $this->odm->resolveClass($this->database, $this->collection),
+            $this->odm->collectionClass($this->database, $this->collection),
             $this->sort,
             !empty($limit) ? $limit : $this->limit,
             $this->offset

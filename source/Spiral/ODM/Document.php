@@ -482,9 +482,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             return false;
         }
 
-        if (empty($this->collection) || $this->isEmbedded()) {
+        if ($this->isEmbedded()) {
             throw new DocumentException(
-                "Unable to save " . get_class($this) . ", no direct access to collection."
+                "Embedded document '" . get_class($this) . "' can not be saved into collection."
             );
         }
 
@@ -519,9 +519,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public function delete()
     {
-        if (empty($this->collection) || $this->isEmbedded()) {
+        if ($this->isEmbedded()) {
             throw new DocumentException(
-                "Unable to delete " . get_class($this) . ", no direct access to collection."
+                "Embedded document '" . get_class($this) . "' can not be deleted from collection."
             );
         }
 

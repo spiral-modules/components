@@ -769,24 +769,26 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * {@inheritdoc}
+     *
+     * Accessor options include field type resolved by DocumentSchema.
+     *
+     * @throws ODMException
+     * @throws DefinitionException
      */
     protected function createAccessor($accessor, $value)
     {
-        //TODO: REWRITE
-
         $options = null;
         if (is_array($accessor)) {
             list($accessor, $options) = $accessor;
         }
 
         if ($accessor == ODM::CMP_ONE) {
-            //Not an accessor by composited class
-            $accessor = $this->odm->defineClass($value, $options);
+            //Pointing to document instance
+            return $this->odm->document($options, $value);
         }
 
         return new $accessor($value, $this, $options, $this->odm);
     }
-
 
     /**
      * Interpolate aggregation query with document values.

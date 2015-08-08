@@ -113,6 +113,14 @@ abstract class ReflectionEntity extends \ReflectionClass
     abstract public function getFields();
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
      * Must return instance of ReflectionEntity or null if no parent found.
      *
      * @return self|null
@@ -169,8 +177,7 @@ abstract class ReflectionEntity extends \ReflectionClass
 
         if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS)) {
             if (is_array($value)) {
-                $parent = $this->parentSchema();
-                if (!empty($parent)) {
+                if (!empty($parent = $this->parentSchema())) {
                     $value = array_merge($parent->property($property, $merge), $value);
                 }
             }

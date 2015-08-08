@@ -190,6 +190,18 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
+     * Instance of ODM Collection associated with specified document class.
+     *
+     * @param string $class
+     * @return Collection
+     * @throws ODMException
+     */
+    public function odmCollection($class)
+    {
+        //TODO: !!!
+    }
+
+    /**
      * Get primary document class to be associated with collection. Attention, collection may return parent document
      * instance even if query was made using children implementation.
      *
@@ -199,18 +211,8 @@ class ODM extends Singleton implements InjectorInterface
      */
     public function resolveClass($database, $collection)
     {
+        //TODO: ???
         return $this->getSchema($database . '/' . $collection);
-    }
-
-    /**
-     * Instance of ODM Collection associated with specified document class.
-     *
-     * @param string $class
-     * @return Collection
-     * @throws ODMException
-     */
-    public function odmCollection($class)
-    {
     }
 
     /**
@@ -239,7 +241,10 @@ class ODM extends Singleton implements InjectorInterface
      */
     public function schemaBuilder()
     {
-        return $this->container->get(SchemaBuilder::class, ['config' => $this->config]);
+        return $this->container->get(SchemaBuilder::class, [
+            'odm'    => $this,
+            'config' => $this->config['schemas']
+        ]);
     }
 
     /**

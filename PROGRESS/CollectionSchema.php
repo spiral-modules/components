@@ -10,7 +10,7 @@ namespace Spiral\ODM\Schemas;
 
 use Spiral\ODM\SchemaBuilder;
 
-class CollectionSchema
+class CollectionSchema2
 {
     /**
      * Parent ODM schema builder holds all other documents.
@@ -125,5 +125,9 @@ class CollectionSchema
     public function primaryDocument()
     {
         return $this->builder->documentSchema($this->primaryClass);
+    }
+
+    public function getIndexes(){
+
     }
 }

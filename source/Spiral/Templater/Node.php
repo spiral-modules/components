@@ -229,6 +229,43 @@ class Node
     }
 
     /**
+     * Once supervisor defined custom token behaviour we can process it's content accordingly.
+     *
+     * @param BehaviourInterface $behaviour
+     * @param array              $content
+     */
+    public function applyBehaviour(BehaviourInterface $behaviour, array $content = [])
+    {
+        if ($behaviour instanceof ExtendsBehaviourInterface) {
+            //We have to copy nodes from parent
+            $this->nodes = $behaviour->getParent()->nodes;
+
+            //Indication that this node has parent, meaning we have to handle blocks little
+            //bit different way
+            $this->extended = true;
+
+            foreach ($behaviour->getBlocks() as $block => $blockContent) {
+                //Blocks defined at moment of import
+                $this->registerBlock($block, $blockContent);
+            }
+
+            return;
+        }
+
+        if ($behaviour instanceof BlockBehaviourInterface) {
+            //Registering block
+            $this->registerBlock($behaviour->getName(), $content);
+
+            return;
+        }
+
+        if ($behaviour instanceof IncludeBehaviourInterface) {
+            //We got external content as Node
+            $this->nodes[] = $behaviour->createNode();
+        }
+    }
+
+    /**
      * Parse set of tokens provided by html Tokenizer and create blocks and other control constructions.
      * Basically it will try to created html tree.
      *
@@ -341,44 +378,7 @@ class Node
         }
 
         //Now we have to process more complex behaviours
-        $this->handleBehaviour($behaviour, $content);
-    }
-
-    /**
-     * Once supervisor defined custom token behaviour we can process it's content accordingly.
-     *
-     * @param BehaviourInterface $behaviour
-     * @param array              $content
-     */
-    private function handleBehaviour(BehaviourInterface $behaviour, array $content = [])
-    {
-        if ($behaviour instanceof ExtendsBehaviourInterface) {
-            //We have to copy nodes from parent
-            $this->nodes = $behaviour->getParent()->nodes;
-
-            //Indication that this node has parent, meaning we have to handle blocks little
-            //bit different way
-            $this->extended = true;
-
-            foreach ($behaviour->getBlocks() as $block => $blockContent) {
-                //Blocks defined at moment of import
-                $this->registerBlock($block, $blockContent);
-            }
-
-            return;
-        }
-
-        if ($behaviour instanceof BlockBehaviourInterface) {
-            //Registering block
-            $this->registerBlock($behaviour->getName(), $content);
-
-            return;
-        }
-
-        if ($behaviour instanceof IncludeBehaviourInterface) {
-            //We got external content as Node
-            $this->nodes[] = $behaviour->createNode();
-        }
+        $this->applyBehaviour($behaviour, $content);
     }
 
     /**

@@ -8,9 +8,9 @@
  */
 namespace Spiral\Templater;
 
-use Spiral\Components\View\Compiler\Processors\Templater\Behaviours\IncludeBehaviour;
 use Spiral\Templater\Behaviours\BlockBehaviour;
 use Spiral\Templater\Behaviours\ExtendsBehaviour;
+use Spiral\Templater\Behaviours\IncludeBehaviour;
 use Spiral\Templater\Exceptions\TemplaterException;
 use Spiral\Templater\Exporters\AttributeExporter;
 use Spiral\Templater\Imports\StopImport;

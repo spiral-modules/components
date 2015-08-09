@@ -34,12 +34,18 @@ class ExtendsBehaviour implements ExtendsBehaviourInterface
     private $attributes = [];
 
     /**
+     * @var array
+     */
+    private $token = [];
+
+    /**
      * @param Node  $parent
      * @param array $token
      */
     public function __construct(Node $parent, array $token)
     {
         $this->parent = $parent;
+        $this->token = $token;
         $this->attributes = $token[HtmlTokenizer::TOKEN_ATTRIBUTES];
     }
 
@@ -61,7 +67,7 @@ class ExtendsBehaviour implements ExtendsBehaviourInterface
         $supervisor = $this->parent->getSupervisor();
 
         if (!$supervisor instanceof Templater) {
-            throw new TemplaterException("ExtendsBehaviour must be executed using Templater.");
+            throw new TemplaterException("ExtendsBehaviour must be executed using Templater.", $this->token);
         }
 
         return $supervisor->getImports();

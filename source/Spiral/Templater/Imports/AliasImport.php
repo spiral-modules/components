@@ -13,17 +13,22 @@ use Spiral\Templater\ImportInterface;
 use Spiral\Templater\Templater;
 
 /**
- * Declares to templater that element must be treated as html tag, not Node include. Stop keyword must be located in
- * "stop" attribute of tag caused import.
+ * {@inheritdoc}
+ *
+ * Simple aliased based import, declared relation between tag name and it's location. Element alias must be located in
+ * "as" attribute caused import, location in "path" attribute (will be passed thought Templater->fetchLocation()).
  */
-class StopImport implements ImportInterface
+class AliasImport implements ImportInterface
 {
     /**
-     * Html tag name.
-     *
      * @var string
      */
-    protected $element = '';
+    private $alias = '';
+
+    /**
+     * @var mixed
+     */
+    private $location = null;
 
     /**
      * {@inheritdoc}
@@ -32,8 +37,8 @@ class StopImport implements ImportInterface
     {
         $attributes = $token[HtmlTokenizer::TOKEN_ATTRIBUTES];
 
-        //Html tag name must be stored in this attribute
-        $this->element = $attributes['stop'];
+        $this->location = $templater->fetchLocation($attributes['path'], $token);
+        $this->alias = $attributes['as'];
     }
 
     /**
@@ -41,12 +46,7 @@ class StopImport implements ImportInterface
      */
     public function isImported($element, array $token)
     {
-        if ($this->element == '*') {
-            //To disable every lower level importer, you can still define more importers after that
-            return true;
-        }
-
-        return strtolower($element) == strtolower($this->element);
+        return strtolower($element) == strtolower($this->alias);
     }
 
     /**
@@ -54,6 +54,6 @@ class StopImport implements ImportInterface
      */
     public function getLocation($element, array $token)
     {
-        return null;
+        return $this->location;
     }
 }

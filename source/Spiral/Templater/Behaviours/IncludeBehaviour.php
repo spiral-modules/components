@@ -6,9 +6,8 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\View\Compiler\Processors\Templater\Behaviours;
+namespace Spiral\Templater\Behaviours;
 
-use Spiral\Templater\Behaviours\IncludeBehaviourInterface;
 use Spiral\Templater\HtmlTokenizer;
 use Spiral\Templater\Node;
 use Spiral\Templater\Templater;

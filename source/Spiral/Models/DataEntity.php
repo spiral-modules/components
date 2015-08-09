@@ -101,13 +101,13 @@ abstract class DataEntity extends Component implements
      * @see getFeld()
      * @see setField()
      * @param string $method
-     * @param array $arguments
+     * @param array  $arguments
      * @return $this|mixed|null|AccessorInterface
      * @throws EntityException
      */
-    public function __call($method, $arguments)
+    public function __call($method, array $arguments)
     {
-        if (count($arguments) !== 1 && strlen($method) <= 3) {
+        if (count($arguments) <= 1 && strlen($method) <= 3) {
             //Get/set needs exactly 1 argument
             throw new EntityException("Undefined method {$method}.");
         }
@@ -115,12 +115,10 @@ abstract class DataEntity extends Component implements
         //get/set
         $operation = substr($method, 0, 3);
         if ($operation === 'get' && count($arguments) === 0) {
-
             return $this->getField(Inflector::camelize(substr($method, 3)));
         }
 
-        if ($operation === 'set' && count($arguments) !== 1) {
-
+        if ($operation === 'set' && count($arguments) === 1) {
             $this->setField(Inflector::camelize(substr($method, 3)), $arguments[0]);
 
             //setFieldA($a)->setFieldB($b)

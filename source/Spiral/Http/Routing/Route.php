@@ -10,7 +10,6 @@ namespace Spiral\Http\Routing;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Http\MiddlewarePipeline;
 
 /**
  * {@inheritdoc} General purpose route.
@@ -51,19 +50,6 @@ class Route extends AbstractRoute
 
     /**
      * {@inheritdoc}
-     */
-    public function perform(ServerRequestInterface $request, ContainerInterface $container)
-    {
-        $pipeline = new MiddlewarePipeline($container, $this->middlewares);
-
-        return $pipeline->target($this->createEndpoint($container))->run($request);
-    }
-
-    /**
-     * Create callable route endpoint.
-     *
-     * @param ContainerInterface $container
-     * @return callable
      */
     protected function createEndpoint(ContainerInterface $container)
     {

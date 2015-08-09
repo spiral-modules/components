@@ -42,6 +42,13 @@ class Router implements RouterInterface
     private $activePath = '/';
 
     /**
+     * Keep buffered output (MiddlewarePipeline option).
+     *
+     * @var bool
+     */
+    private $keepOutput = false;
+
+    /**
      * Active route instance, this value will be populated only after router successfully handled
      * incoming request.
      *
@@ -60,13 +67,17 @@ class Router implements RouterInterface
      *
      * @param RouteInterface|array $default Default route or options to construct instance
      *                                      of DirectRoute.
+     * @param bool                 $keepOutput
      * @throws InvalidArgumentException
      */
     public function __construct(
         ContainerInterface $container,
         array $routes = [],
-        array $default = []
+        array $default = [],
+        $keepOutput = false
     ) {
+        $this->keepOutput = $keepOutput;
+
         $this->container = $container;
         foreach ($routes as $route) {
             if (!$route instanceof RouteInterface) {
@@ -113,9 +124,20 @@ class Router implements RouterInterface
             throw new ClientException(ClientException::NOT_FOUND);
         }
 
-        $response = $this->activeRoute->perform(
-            $request->withAttribute('route', $this->activeRoute), $this->container
-        );
+        //Default routes will understand about keepOutput
+        if ($this->activeRoute instanceof AbstractRoute) {
+            $response = $this->activeRoute->perform(
+                $request->withAttribute('route', $this->activeRoute),
+                $this->container,
+                $this->keepOutput
+            );
+        } else {
+
+            $response = $this->activeRoute->perform(
+                $request->withAttribute('route', $this->activeRoute),
+                $this->container
+            );
+        }
 
         //Close router scope
         $this->container->restore($outerRouter);

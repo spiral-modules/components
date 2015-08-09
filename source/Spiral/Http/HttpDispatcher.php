@@ -107,7 +107,8 @@ class HttpDispatcher extends Singleton implements
     }
 
     /**
-     * Views instance will be requested on demand, method used to manually specify it.
+     * Views instance will be requested on demand (error) via container, method used to manually
+     * specify it.
      *
      * @param ViewProviderInterface $views
      * @return $this
@@ -217,10 +218,15 @@ class HttpDispatcher extends Singleton implements
             throw new ClientException(Response::SERVER_ERROR, 'Unable to select endpoint.');
         }
 
-        $pipeline = new MiddlewarePipeline($this->container, $this->middlewares);
+        $pipeline = new MiddlewarePipeline(
+            $this->container,
+            $this->middlewares,
+            $this->config['keepOutput']
+        );
 
-        return $pipeline->target($endpoint)->run($request->withAttribute('activePath',
-            $activePath));
+        return $pipeline->target($endpoint)->run(
+            $request->withAttribute('activePath', $activePath)
+        );
     }
 
     /**
@@ -293,7 +299,8 @@ class HttpDispatcher extends Singleton implements
     protected function createRouter()
     {
         return $this->container->get($this->config['router']['class'], [
-                'routes' => $this->routes
+                'routes'     => $this->routes,
+                'keepOutput' => $this->config['keepOutput']
             ] + $this->config['router']);
     }
 

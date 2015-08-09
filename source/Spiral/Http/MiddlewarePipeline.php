@@ -149,14 +149,13 @@ class MiddlewarePipeline
                 $response = call_user_func($this->target, $request);
             }
         } finally {
-            while (ob_get_level() > $outputLevel) {
+            while (ob_get_level() > $outputLevel + 1) {
                 ob_end_clean();
             }
         }
 
         //Closing request scope
         $this->container->restore($outerRequest);
-
         $output = ob_get_clean();
         if (!$this->keepOutput) {
             $output = '';

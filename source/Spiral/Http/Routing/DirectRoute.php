@@ -10,7 +10,6 @@ namespace Spiral\Http\Routing;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Http\MiddlewarePipeline;
 
 /**
  * {@inheritdoc}
@@ -70,9 +69,9 @@ class DirectRoute extends AbstractRoute
      *
      * @param string $name
      * @param string $pattern
-     * @param string $namespace Default controllers namespace.
-     * @param string $postfix Default controller postfix.
-     * @param array  $defaults Default values (including default controller).
+     * @param string $namespace   Default controllers namespace.
+     * @param string $postfix     Default controller postfix.
+     * @param array  $defaults    Default values (including default controller).
      * @param array  $controllers Controllers aliased by their name, namespace and postfix will be
      *                            ignored in this case.
      */
@@ -108,19 +107,6 @@ class DirectRoute extends AbstractRoute
 
     /**
      * {@inheritdoc}
-     */
-    public function perform(ServerRequestInterface $request, ContainerInterface $container)
-    {
-        $pipeline = new MiddlewarePipeline($container, $this->middlewares);
-
-        return $pipeline->target($this->createEndpoint($container))->run($request);
-    }
-
-    /**
-     * Create callable route endpoint.
-     *
-     * @param ContainerInterface $container
-     * @return callable
      */
     protected function createEndpoint(ContainerInterface $container)
     {

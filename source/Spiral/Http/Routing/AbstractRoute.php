@@ -16,6 +16,7 @@ use Spiral\Core\CoreInterface;
 use Spiral\Core\Exceptions\ControllerException;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\MiddlewareInterface;
+use Spiral\Http\MiddlewarePipeline;
 use Spiral\Http\Uri;
 
 /**
@@ -267,6 +268,19 @@ abstract class AbstractRoute implements RouteInterface
     /**
      * {@inheritdoc}
      */
+    public function perform(
+        ServerRequestInterface $request,
+        ContainerInterface $container,
+        $keepOutput = false
+    ) {
+        $pipeline = new MiddlewarePipeline($container, $this->middlewares, $keepOutput);
+
+        return $pipeline->target($this->createEndpoint($container))->run($request);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createUri(
         array $parameters = [],
         $basePath = '/',
@@ -296,6 +310,14 @@ abstract class AbstractRoute implements RouteInterface
 
         return $uri;
     }
+
+    /**
+     * Create callable route endpoint.
+     *
+     * @param ContainerInterface $container
+     * @return callable
+     */
+    abstract protected function createEndpoint(ContainerInterface $container);
 
     /**
      * Internal helper used to create execute controller action using associated core instance.
@@ -350,9 +372,9 @@ abstract class AbstractRoute implements RouteInterface
 
         $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
         $this->compiled = [
-            'pattern' => '/^' . strtr($template, $replaces) . '$/u',
+            'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
             'template' => stripslashes(str_replace('?', '', $template)),
-            'options' => array_fill_keys($options, null)
+            'options'  => array_fill_keys($options, null)
         ];
     }
 }

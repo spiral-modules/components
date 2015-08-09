@@ -11,7 +11,7 @@ namespace Spiral\Events;
 use Spiral\Events\Exceptions\InvalidArgumentException;
 
 /**
- * Used by models and other classes to add events support.
+ * Used by models and other classes to add event chain support.
  */
 interface DispatcherInterface
 {

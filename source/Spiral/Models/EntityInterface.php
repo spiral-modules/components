@@ -16,7 +16,7 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 interface EntityInterface extends \ArrayAccess
 {
     /**
-     * Set model field value.
+     * Set entity field value.
      *
      * @param string $name
      * @param mixed  $value
@@ -25,7 +25,7 @@ interface EntityInterface extends \ArrayAccess
     public function setField($name, $value);
 
     /**
-     * Get value of model field.
+     * Get value of entity field.
      *
      * @param string $name
      * @param mixed  $default
@@ -35,7 +35,7 @@ interface EntityInterface extends \ArrayAccess
     public function getField($name, $default = null);
 
     /**
-     * Update model fields using mass assignment. Only known fields must be set.
+     * Update entity fields using mass assignment. Only allowed fields must be set.
      *
      * @param array|\Traversable $fields
      * @throws EntityExceptionInterface
@@ -43,7 +43,7 @@ interface EntityInterface extends \ArrayAccess
     public function setFields($fields = []);
 
     /**
-     * Get entity fields.
+     * Get entity field values.
      *
      * @return array
      * @throws EntityExceptionInterface

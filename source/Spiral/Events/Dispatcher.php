@@ -11,7 +11,7 @@ namespace Spiral\Events;
 use Spiral\Events\Exceptions\InvalidArgumentException;
 
 /**
- * Default dispatcher implementation.
+ * Default event dispatcher implementation.
  */
 class Dispatcher implements DispatcherInterface
 {

@@ -655,6 +655,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     }
 
     /**
+     * {@inheritdoc} See DataEntity class.
+     *
+     * ODM:
      * Get instance of Collection or Document associated with described aggregation. Use method arguments to specify
      * additional query.
      *
@@ -662,17 +665,13 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * $parentGroup = $user->group();
      * echo $user->posts(['published' => true])->count();
      *
-     * @param string $offset
-     * @param array  $arguments
      * @return Collection|Document[]|Document
      * @throws DocumentException
      */
     public function __call($offset, array $arguments)
     {
         if (!isset($this->schema[ODM::D_AGGREGATIONS][$offset])) {
-            throw new DocumentException(
-                "Unable to call " . get_class($this) . "->{$offset}(), no such function or aggregation."
-            );
+            return parent::__call($offset, $arguments);
         }
 
         $aggregation = $this->schema[ODM::D_AGGREGATIONS][$offset];

@@ -64,6 +64,14 @@ abstract class Templater implements SupervisorInterface
     ];
 
     /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function isStrictMode()
@@ -228,7 +236,11 @@ abstract class Templater implements SupervisorInterface
      * @return string
      * @throws TemplaterException
      */
-    abstract protected function getSource($location, Templater &$templater = null, array $token = []);
+    abstract protected function getSource(
+        $location,
+        Templater &$templater = null,
+        array $token = []
+    );
 
     /**
      * Helper method used to define tag type based on defined templater syntax.

@@ -166,7 +166,7 @@ interface FilesInterface
     public function setPermissions($filename, $mode);
 
     /**
-     * Flat list of every file in every sub location.
+     * Flat list of every file in every sub location. Locations must be normalized.
      *
      * @param string            $location  Location for search.
      * @param null|string|array $extension Extension or array of extensions to files.

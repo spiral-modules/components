@@ -15,7 +15,7 @@ use Spiral\Templater\Templater;
 /**
  * Declares to templater that element must be treated as html tag, not Node include.
  */
-class NativeImport implements ImportInterface
+class StopImport implements ImportInterface
 {
     /**
      * Html tag name.
@@ -38,7 +38,7 @@ class NativeImport implements ImportInterface
     /**
      * {@inheritdoc}
      */
-    public function isImported($element)
+    public function isImported($element, array $token)
     {
         if ($this->element == '*') {
             //To disable every lower level importer, you can still define more importers after that
@@ -51,15 +51,7 @@ class NativeImport implements ImportInterface
     /**
      * {@inheritdoc}
      */
-    public function getLocation($element)
-    {
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getView($element)
+    public function getLocation($element, array $token)
     {
         return null;
     }

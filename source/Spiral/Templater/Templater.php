@@ -13,7 +13,7 @@ use Spiral\Templater\Behaviours\BlockBehaviour;
 use Spiral\Templater\Behaviours\ExtendsBehaviour;
 use Spiral\Templater\Exceptions\TemplaterException;
 use Spiral\Templater\Exporters\AttributeExporter;
-use Spiral\Templater\Imports\NativeImport;
+use Spiral\Templater\Imports\StopImport;
 
 /**
  * Templater uses html constructions parsed via HtmlTokenizer and describes them for Node classes.
@@ -137,14 +137,14 @@ abstract class Templater implements SupervisorInterface
 
         //We now have to decide if element points to external view (source) to be imported
         foreach ($this->imports as $import) {
-            if ($import->isImported($name)) {
-                if ($import instanceof NativeImport) {
+            if ($import->isImported($name, $token)) {
+                if ($import instanceof StopImport) {
                     //Native importer tells us to treat this element as simple html
                     break;
                 }
 
                 //Let's include!
-                return new IncludeBehaviour($this, $import->getLocation($name), $content, $token);
+                return new IncludeBehaviour($this, $import->getLocation($name, $token), $content, $token);
             }
         }
 
@@ -183,6 +183,7 @@ abstract class Templater implements SupervisorInterface
      * @param string $name     If not specified unique name will be used.
      * @param array  $token    Token used only to clarify location at exceptions.
      * @return Node
+     * @throws TemplaterException
      */
     public function createNode($location, $name = '', array $token = [])
     {
@@ -197,6 +198,7 @@ abstract class Templater implements SupervisorInterface
      * @param string $name Resolved (no prefix) element name.
      * @param array  $token
      * @return mixed
+     * @throws TemplaterException
      */
     abstract public function fetchLocation($name, array $token = []);
 
@@ -217,6 +219,7 @@ abstract class Templater implements SupervisorInterface
      * @see addImport()
      * @param array $name
      * @param array $token
+     * @throws TemplaterException
      */
     abstract protected function registerImport($name, array $token);
 

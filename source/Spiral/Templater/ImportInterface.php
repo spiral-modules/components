@@ -26,15 +26,17 @@ interface ImportInterface
      * Check if element (tag) has to be imported.
      *
      * @param string $element Element name.
+     * @param array  $token   Context token.
      * @return bool
      */
-    public function isImported($element);
+    public function isImported($element, array $token);
 
     /**
      * Get imported element location. Must be supported by Templater implementation.
      *
      * @param string $element
+     * @param array  $token Context token.
      * @return mixed
      */
-    public function getLocation($element);
+    public function getLocation($element, array $token);
 }

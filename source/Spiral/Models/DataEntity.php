@@ -8,20 +8,17 @@
  */
 namespace Spiral\Models;
 
-use Doctrine\Common\Inflector\Inflector;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\MissingContainerException;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
-use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
 use Spiral\Validation\ValidatesInterface;
 
 /**
- * DataEntity in spiral used to represent basic data set with validation rules, filters and accessors. Most of spiral
- * models (ORM and ODM, HttpFilters) will extend data entity. In addition it creates magic set of getters and setters for
- * every field name (see validator trait) in model.
+ * DataEntity in spiral used to represent basic data set with validation rules, filters and
+ * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity.
  */
 abstract class DataEntity extends Component implements
     \JsonSerializable,
@@ -94,39 +91,6 @@ abstract class DataEntity extends Component implements
      * @var array
      */
     protected $accessors = [];
-
-    /**
-     * Routes user function in format of (get|set)FieldName into (get|set)Field(fieldName, value).
-     *
-     * @see getFeld()
-     * @see setField()
-     * @param string $method
-     * @param array  $arguments
-     * @return $this|mixed|null|AccessorInterface
-     * @throws EntityException
-     */
-    public function __call($method, array $arguments)
-    {
-        if (count($arguments) <= 1 && strlen($method) <= 3) {
-            //Get/set needs exactly 1 argument
-            throw new EntityException("Undefined method {$method}.");
-        }
-
-        //get/set
-        $operation = substr($method, 0, 3);
-        if ($operation === 'get' && count($arguments) === 0) {
-            return $this->getField(Inflector::camelize(substr($method, 3)));
-        }
-
-        if ($operation === 'set' && count($arguments) === 1) {
-            $this->setField(Inflector::camelize(substr($method, 3)), $arguments[0]);
-
-            //setFieldA($a)->setFieldB($b)
-            return $this;
-        }
-
-        throw new EntityException("Undefined method {$method}.");
-    }
 
     /**
      * {@inheritdoc}

@@ -9,6 +9,7 @@
 namespace Spiral\Templater\Behaviours;
 
 use Spiral\Templater\Exceptions\TemplaterException;
+use Spiral\Templater\HtmlTokenizer;
 use Spiral\Templater\ImportInterface;
 use Spiral\Templater\Node;
 use Spiral\Templater\Templater;
@@ -34,12 +35,12 @@ class ExtendsBehaviour implements ExtendsBehaviourInterface
 
     /**
      * @param Node  $parent
-     * @param array $attributes
+     * @param array $token
      */
-    public function __construct(Node $parent, array $attributes)
+    public function __construct(Node $parent, array $token)
     {
         $this->parent = $parent;
-        $this->attributes = $attributes;
+        $this->attributes = $token[HtmlTokenizer::TOKEN_ATTRIBUTES];
     }
 
     /**

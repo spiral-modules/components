@@ -73,7 +73,8 @@ abstract class AbstractIndex implements IndexInterface
     {
         $name = $this->name;
         if (empty($this->name)) {
-            $name = $this->table->getName() . '_index_' . join('_', $this->columns) . '_' . uniqid();
+            $name = $this->table->getName() . '_index_' . join('_',
+                    $this->columns) . '_' . uniqid();
         }
 
         if (strlen($name) > 64) {

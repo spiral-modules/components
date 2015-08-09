@@ -67,7 +67,8 @@ class ExtendsBehaviour implements ExtendsBehaviourInterface
         $supervisor = $this->parent->getSupervisor();
 
         if (!$supervisor instanceof Templater) {
-            throw new TemplaterException("ExtendsBehaviour must be executed using Templater.", $this->token);
+            throw new TemplaterException("ExtendsBehaviour must be executed using Templater.",
+                $this->token);
         }
 
         return $supervisor->getImports();

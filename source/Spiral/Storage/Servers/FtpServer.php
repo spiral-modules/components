@@ -101,7 +101,9 @@ class FtpServer extends StorageServer
         //File should be removed after processing
         $tempFilename = $this->files->tempFilename($this->files->extension($name));
 
-        if (!ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY)) {
+        if (!ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name),
+            FTP_BINARY)
+        ) {
             throw new ServerException("Unable to create local filename for '{$name}'.");
         }
 

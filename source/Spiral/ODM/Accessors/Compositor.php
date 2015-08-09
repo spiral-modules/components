@@ -425,7 +425,8 @@ class Compositor extends Component implements
         $class = !empty($class) ? $class : $this->class;
 
         $this->changedDirectly = true;
-        $this->documents[] = $document = call_user_func([$class, 'create'], $fields, $this->odm)->embed($this);
+        $this->documents[] = $document = call_user_func([$class, 'create'], $fields,
+            $this->odm)->embed($this);
 
         return $document;
     }

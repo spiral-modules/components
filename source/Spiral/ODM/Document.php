@@ -505,7 +505,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             $this->fire('updating');
 
             //Update existed document
-            $this->odmCollection($this->odm)->update(['_id' => $this->primaryKey()], $this->buildAtomics());
+            $this->odmCollection($this->odm)->update(['_id' => $this->primaryKey()],
+                $this->buildAtomics());
 
             $this->fire('updated');
         }
@@ -684,7 +685,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             $query = array_merge($query, $arguments[0]);
         }
 
-        $collection = new Collection($this->odm, $aggregation[ODM::AGR_DB], $aggregation[ODM::AGR_COLLECTION], $query);
+        $collection = new Collection($this->odm, $aggregation[ODM::AGR_DB],
+            $aggregation[ODM::AGR_COLLECTION], $query);
         if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
             return $collection->findOne();
         }

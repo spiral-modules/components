@@ -200,7 +200,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
                 $this->reconnect();
                 $this->delete($bucket, $name);
             } elseif ($exception->getCode() != 404) {
-                throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+                throw new ServerException($exception->getMessage(), $exception->getCode(),
+                    $exception);
             }
         }
     }

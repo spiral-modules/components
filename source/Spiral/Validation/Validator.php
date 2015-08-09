@@ -234,7 +234,9 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                 //Condition either rule itself or first array element
                 $condition = is_string($rule) ? $rule : $rule[0];
 
-                if (empty($this->field($field)) && !in_array($condition, $this->options['emptyConditions'])) {
+                if (empty($this->field($field)) && !in_array($condition,
+                        $this->options['emptyConditions'])
+                ) {
                     //There is no need to validate empty field except for special conditions
                     break;
                 }
@@ -250,7 +252,6 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                     //No errors
                     continue;
                 }
-
 
                 if ($result === self::STOP_VALIDATION) {
                     //Validation has to be stopped per rule request

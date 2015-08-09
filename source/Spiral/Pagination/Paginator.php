@@ -62,8 +62,10 @@ class Paginator implements PaginatorInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(ServerRequestInterface $request, $pageParameter = self::DEFAULT_PARAMETER)
-    {
+    public function __construct(
+        ServerRequestInterface $request,
+        $pageParameter = self::DEFAULT_PARAMETER
+    ) {
         $this->setRequest($request);
         $this->setParameter($pageParameter);
     }

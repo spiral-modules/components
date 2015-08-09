@@ -19,6 +19,13 @@ use Spiral\Http\Responses\JsonResponse;
 class MiddlewarePipeline
 {
     /**
+     * Keep buffered output as part of response.
+     *
+     * @var bool
+     */
+    private $keepOutput = false;
+
+    /**
      * @invisible
      * @var ContainerInterface
      */
@@ -41,11 +48,16 @@ class MiddlewarePipeline
     /**
      * @param ContainerInterface               $container
      * @param callable[]|MiddlewareInterface[] $middleware
+     * @param bool                             $keepOutput
      */
-    public function __construct(ContainerInterface $container, array $middleware = [])
-    {
+    public function __construct(
+        ContainerInterface $container,
+        array $middleware = [],
+        $keepOutput = false
+    ) {
         $this->container = $container;
         $this->middlewares = $middleware;
+        $this->keepOutput = $keepOutput;
     }
 
     /**
@@ -75,8 +87,7 @@ class MiddlewarePipeline
     }
 
     /**
-     * Pass request and response though every middleware to target and return generated and filtered
-     * response.
+     * Pass request and response though every middleware to target and return generated and wrapped response.
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
@@ -125,26 +136,38 @@ class MiddlewarePipeline
         //Request scope
         $outerRequest = $this->container->replace(ServerRequestInterface::class, $request);
 
+        $outputLevel = ob_get_level();
         ob_start();
-        if ($this->target instanceof \Closure) {
-            $reflection = new \ReflectionFunction($this->target);
-            $response = $reflection->invokeArgs(
-                $this->container->resolveArguments($reflection, ['request' => $request])
-            );
-        } else {
-            $response = call_user_func($this->target, $request);
+
+        try {
+            if ($this->target instanceof \Closure) {
+                $reflection = new \ReflectionFunction($this->target);
+                $response = $reflection->invokeArgs(
+                    $this->container->resolveArguments($reflection, ['request' => $request])
+                );
+            } else {
+                $response = call_user_func($this->target, $request);
+            }
+        } finally {
+            while (ob_get_level() > $outputLevel) {
+                ob_end_clean();
+            }
         }
-        $output = ob_get_clean();
 
         //Closing request scope
         $this->container->restore($outerRequest);
+
+        $output = ob_get_clean();
+        if (!$this->keepOutput) {
+            $output = '';
+        }
 
         return $this->wrapResponse($response, $output);
     }
 
     /**
-     * Convert target response into valid instance of ResponseInterface. Can understand string and
-     * array/JsonSerializable response values.
+     * Convert target response into valid instance of ResponseInterface. Can understand string and array/JsonSerializable
+     * response values.
      *
      * @param mixed  $response
      * @param string $output Buffer output.

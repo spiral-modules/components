@@ -393,7 +393,9 @@ class CookieManager extends Component implements MiddlewareInterface
 
         //Merging cookies
         foreach ($this->scheduled as $cookie) {
-            if (in_array($cookie->getName(), $this->exclude) || $this->config['method'] == self::NONE) {
+            if (in_array($cookie->getName(),
+                    $this->exclude) || $this->config['method'] == self::NONE
+            ) {
                 $cookies[] = $cookie->packHeader();
                 continue;
             }

@@ -9,7 +9,6 @@
 namespace Spiral\Database\Builders\Prototypes;
 
 use Psr\Log\LoggerAwareInterface;
-use Spiral\Database\Builders\Traits\JoinsTrait;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Debug\Traits\LoggerTrait;

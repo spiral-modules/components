@@ -73,8 +73,14 @@ class DocumentCursor implements \Iterator, \JsonSerializable
      * @param int          $limit
      * @param int          $offset
      */
-    public function __construct(\MongoCursor $cursor, ODM $odm, $class, array $sort = [], $limit = null, $offset = null)
-    {
+    public function __construct(
+        \MongoCursor $cursor,
+        ODM $odm,
+        $class,
+        array $sort = [],
+        $limit = null,
+        $offset = null
+    ) {
         $this->cursor = $cursor;
         $this->odm = $odm;
         $this->class = $class;

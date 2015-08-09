@@ -311,7 +311,8 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
         $offset = 0;
 
         while ($offset + $limit <= $count) {
-            $result = call_user_func($callback, $this->offset($offset)->getIterator(), $offset, $count);
+            $result = call_user_func($callback, $this->offset($offset)->getIterator(), $offset,
+                $count);
             if ($result === false) {
                 //Stop iteration
                 return;

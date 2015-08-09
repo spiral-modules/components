@@ -314,7 +314,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
             }
         } catch (\PDOException $exception) {
             $this->logger()->error(
-                !empty($queryString) ? $queryString : QueryCompiler::interpolate($query, $parameters),
+                !empty($queryString) ? $queryString : QueryCompiler::interpolate($query,
+                    $parameters),
                 compact('query', 'parameters')
             );
 

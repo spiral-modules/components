@@ -542,7 +542,8 @@ class DocumentSchema extends ReflectionEntity
      */
     private function isAggregation($type)
     {
-        return is_array($type) && (array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
+        return is_array($type) && (array_key_exists(Document::MANY,
+                $type) || array_key_exists(Document::ONE, $type));
     }
 
     /**

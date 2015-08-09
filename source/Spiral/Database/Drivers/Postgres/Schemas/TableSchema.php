@@ -41,7 +41,8 @@ class TableSchema extends AbstractTable
     protected function loadColumns()
     {
         //Required for constraints fetch
-        $tableOID = $this->driver->query("SELECT oid FROM pg_class WHERE relname = ?", [$this->name])
+        $tableOID = $this->driver->query("SELECT oid FROM pg_class WHERE relname = ?",
+            [$this->name])
             ->fetchColumn();
 
         //Collecting all candidates

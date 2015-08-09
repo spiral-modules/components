@@ -243,7 +243,8 @@ class Container extends Component implements ContainerInterface
         try {
             $reflector = new \ReflectionClass($class);
         } catch (\ReflectionException $exception) {
-            throw new InstanceException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new InstanceException($exception->getMessage(), $exception->getCode(),
+                $exception);
         }
 
         if (!empty($context) && $injector = $reflector->getConstant('INJECTOR')) {

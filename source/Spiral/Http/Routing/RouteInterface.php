@@ -16,6 +16,9 @@ use Spiral\Core\Container;
 use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\RouteException;
 
+/**
+ * Declares ability to route.
+ */
 interface RouteInterface
 {
     /**
@@ -56,5 +59,9 @@ interface RouteInterface
      * @return UriInterface
      * @throws RouteException
      */
-    public function createUri(array $parameters = [], $basePath = '/', SlugifyInterface $slugify = null);
+    public function createUri(
+        array $parameters = [],
+        $basePath = '/',
+        SlugifyInterface $slugify = null
+    );
 }

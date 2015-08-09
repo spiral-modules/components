@@ -65,7 +65,8 @@ class TableSchema extends AbstractTable
     protected function loadIndexes()
     {
         $indexes = [];
-        $query = \Spiral\interpolate("SHOW INDEXES FROM {table}", ['table' => $this->getName(true)]);
+        $query = \Spiral\interpolate("SHOW INDEXES FROM {table}",
+            ['table' => $this->getName(true)]);
         foreach ($this->driver->query($query) as $index) {
             if ($index['Key_name'] == 'PRIMARY') {
                 $this->primaryKeys[] = $index['Column_name'];

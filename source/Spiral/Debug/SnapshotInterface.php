@@ -72,4 +72,18 @@ interface SnapshotInterface
      * @return array
      */
     public function describe();
+
+    /**
+     * Render snapshot information into string or html.
+     *
+     * @return string
+     */
+    public function render();
+
+    /**
+     * Must return content of render().
+     *
+     * @return string
+     */
+    public function __toString();
 }

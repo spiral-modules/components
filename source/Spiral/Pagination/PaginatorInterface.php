@@ -28,10 +28,13 @@ interface PaginatorInterface extends \Countable
     const DEFAULT_PARAMETER = 'page';
 
     /**
-     * @param ServerRequestInterface $request       Source of page number.
+     * @param ServerRequestInterface $request Source of page number.
      * @param string                 $pageParameter Page parameter from request query data.
      */
-    public function __construct(ServerRequestInterface $request, $pageParameter = self::DEFAULT_PARAMETER);
+    public function __construct(
+        ServerRequestInterface $request,
+        $pageParameter = self::DEFAULT_PARAMETER
+    );
 
     /**
      * Update associated pagination uri. Uri must not include query string.

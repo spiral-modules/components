@@ -157,7 +157,9 @@ class Loader extends Singleton
             if ($function instanceof \Closure || $function[0] != $this) {
                 call_user_func($function, $class);
 
-                if (class_exists($class, false) || interface_exists($class, false) || trait_exists($class, false)) {
+                if (class_exists($class, false) || interface_exists($class,
+                        false) || trait_exists($class, false)
+                ) {
                     //Class has been successfully found by external loader
                     //External loader are not going to provide us any information about class
                     //location, let's get it via Reflection

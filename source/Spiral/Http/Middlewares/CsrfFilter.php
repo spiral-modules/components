@@ -59,7 +59,8 @@ class CsrfFilter implements MiddlewareInterface
         } else {
             //Making new token
             $token = substr(
-                base64_encode(openssl_random_pseudo_bytes(self::TOKEN_LENGTH)), 0, self::TOKEN_LENGTH
+                base64_encode(openssl_random_pseudo_bytes(self::TOKEN_LENGTH)), 0,
+                self::TOKEN_LENGTH
             );
 
             $setCookie = true;

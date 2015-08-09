@@ -133,8 +133,12 @@ class Database extends Component implements DatabaseInterface
      * @param string             $tablePrefix Default database table prefix, will be used for all
      *                                        table identifiers.
      */
-    public function __construct(ContainerInterface $container, Driver $driver, $name, $tablePrefix = '')
-    {
+    public function __construct(
+        ContainerInterface $container,
+        Driver $driver,
+        $name,
+        $tablePrefix = ''
+    ) {
         $this->driver = $driver;
         $this->name = $name;
         $this->setPrefix($tablePrefix);
@@ -237,8 +241,13 @@ class Database extends Component implements DatabaseInterface
      * @throws DriverException
      * @throws QueryException
      */
-    public function cached($lifetime, $query, array $parameters = [], $key = '', StoreInterface $store = null)
-    {
+    public function cached(
+        $lifetime,
+        $query,
+        array $parameters = [],
+        $key = '',
+        StoreInterface $store = null
+    ) {
         $store = !empty($store) ? $store : $this->container->get(StoreInterface::class);
 
         if (empty($key)) {

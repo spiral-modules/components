@@ -683,7 +683,6 @@ abstract class AbstractTable extends Component implements TableInterface
                 throw new SchemaException("Index '{$index}' removal is not allowed in add() method.");
             }
 
-
             $this->indexes[$index] = $indexSchema;
         }
 
@@ -788,7 +787,8 @@ abstract class AbstractTable extends Component implements TableInterface
                 throw new SchemaException("Foreign key '{$reference}' does not exists in '{$this->getName()}'.");
             }
 
-            $previous = array_search($this->findIndex($foreignSchema->getColumns()), $this->references);
+            $previous = array_search($this->findIndex($foreignSchema->getColumns()),
+                $this->references);
 
             if (!empty($foreignSchema)) {
                 $this->references[$previous] = $foreignSchema;
@@ -905,7 +905,8 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function __call($type, array $arguments)
     {
-        return call_user_func_array([$this->column($arguments[0]), $type], array_slice($arguments, 1));
+        return call_user_func_array([$this->column($arguments[0]), $type],
+            array_slice($arguments, 1));
     }
 
     /**

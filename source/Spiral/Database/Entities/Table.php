@@ -99,7 +99,8 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function schema()
     {
-        return $this->database->driver()->tableSchema($this->getRealName(), $this->database->getPrefix());
+        return $this->database->driver()->tableSchema($this->getRealName(),
+            $this->database->getPrefix());
     }
 
     /**

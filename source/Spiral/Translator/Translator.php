@@ -182,7 +182,8 @@ class Translator extends Singleton implements TranslatorInterface
             return;
         }
 
-        $this->bundles[$bundle] = $this->memory->loadData($bundle, $this->languageOptions['directory']);
+        $this->bundles[$bundle] = $this->memory->loadData($bundle,
+            $this->languageOptions['directory']);
         if (empty($this->bundles[$bundle])) {
             $this->bundles[$bundle] = [];
         }
@@ -199,7 +200,8 @@ class Translator extends Singleton implements TranslatorInterface
             return;
         }
 
-        $this->memory->saveData($bundle, $this->bundles[$bundle], $this->languageOptions['directory']);
+        $this->memory->saveData($bundle, $this->bundles[$bundle],
+            $this->languageOptions['directory']);
     }
 
     /**

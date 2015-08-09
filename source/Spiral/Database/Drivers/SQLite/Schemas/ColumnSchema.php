@@ -125,7 +125,9 @@ class ColumnSchema extends AbstractColumn
             $this->defaultValue = substr($this->defaultValue, 1, -1);
         }
 
-        if (!preg_match('/^(?P<type>[a-z]+) *(?:\((?P<options>[^\)]+)\))?/', $this->type, $matches)) {
+        if (!preg_match('/^(?P<type>[a-z]+) *(?:\((?P<options>[^\)]+)\))?/', $this->type,
+            $matches)
+        ) {
             return;
         }
 
@@ -139,7 +141,8 @@ class ColumnSchema extends AbstractColumn
         if ($this->type == 'enum') {
             $name = $this->getName(true);
             foreach ($schema['tableStatement'] as $column) {
-                if (preg_match("/$name +enum.*?CHECK *\\($name in \\((.*?)\\)\\)/i", trim($column), $matches)) {
+                if (preg_match("/$name +enum.*?CHECK *\\($name in \\((.*?)\\)\\)/i", trim($column),
+                    $matches)) {
                     $enumValues = explode(',', $matches[1]);
                     foreach ($enumValues as &$value) {
                         if (preg_match("/^'?(.*?)'?$/", trim($value), $matches)) {

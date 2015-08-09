@@ -238,18 +238,19 @@ class Isolator extends Component
                 continue;
             }
 
-            $source = preg_replace_callback($pattern['regexp'], function ($tag) use (&$replaces, $pattern) {
-                $tag = $tag[0];
+            $source = preg_replace_callback($pattern['regexp'],
+                function ($tag) use (&$replaces, $pattern) {
+                    $tag = $tag[0];
 
-                if ($key = array_search($tag, $replaces)) {
-                    return $key;
-                }
+                    if ($key = array_search($tag, $replaces)) {
+                        return $key;
+                    }
 
-                $replace = sprintf($pattern['replace'], $this->getPlaceholder());
-                $replaces[$replace] = $tag;
+                    $replace = sprintf($pattern['replace'], $this->getPlaceholder());
+                    $replaces[$replace] = $tag;
 
-                return $replace;
-            }, $source);
+                    return $replace;
+                }, $source);
         }
 
         return $source;

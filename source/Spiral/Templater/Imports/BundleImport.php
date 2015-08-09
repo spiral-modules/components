@@ -33,7 +33,8 @@ class BundleImport implements ImportInterface
     public function __construct(Templater $templater, array $token)
     {
         $attributes = $token[HtmlTokenizer::TOKEN_ATTRIBUTES];
-        $this->fetchImports($templater, $templater->fetchLocation($attributes['bundle'], $token), $token);
+        $this->fetchImports($templater, $templater->fetchLocation($attributes['bundle'], $token),
+            $token);
     }
 
     /**

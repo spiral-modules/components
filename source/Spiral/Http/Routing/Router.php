@@ -62,8 +62,11 @@ class Router implements RouterInterface
      *                                      of DirectRoute.
      * @throws InvalidArgumentException
      */
-    public function __construct(ContainerInterface $container, array $routes = [], array $default = [])
-    {
+    public function __construct(
+        ContainerInterface $container,
+        array $routes = [],
+        array $default = []
+    ) {
         $this->container = $container;
         foreach ($routes as $route) {
             if (!$route instanceof RouteInterface) {
@@ -97,8 +100,11 @@ class Router implements RouterInterface
      *
      * @throws ClientException
      */
-    public function __invoke(ServerRequestInterface $request, \Closure $next = null, $context = null)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        \Closure $next = null,
+        $context = null
+    ) {
         //Open router scope
         $outerRouter = $this->container->replace(self::class, $this);
 

@@ -60,8 +60,11 @@ class MemcacheStore extends CacheStore
      * @param bool            $connect If true, custom driver will be connected.
      * @throws StoreException
      */
-    public function __construct(CacheProvider $cache, DriverInterface $driver = null, $connect = true)
-    {
+    public function __construct(
+        CacheProvider $cache,
+        DriverInterface $driver = null,
+        $connect = true
+    ) {
         parent::__construct($cache);
 
         if (is_object($driver)) {

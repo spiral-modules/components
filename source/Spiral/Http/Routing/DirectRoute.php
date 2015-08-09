@@ -70,14 +70,20 @@ class DirectRoute extends AbstractRoute
      *
      * @param string $name
      * @param string $pattern
-     * @param string $namespace   Default controllers namespace.
-     * @param string $postfix     Default controller postfix.
-     * @param array  $defaults    Default values (including default controller).
+     * @param string $namespace Default controllers namespace.
+     * @param string $postfix Default controller postfix.
+     * @param array  $defaults Default values (including default controller).
      * @param array  $controllers Controllers aliased by their name, namespace and postfix will be
      *                            ignored in this case.
      */
-    public function __construct($name, $pattern, $namespace, $postfix, array $defaults, array $controllers)
-    {
+    public function __construct(
+        $name,
+        $pattern,
+        $namespace,
+        $postfix,
+        array $defaults,
+        array $controllers
+    ) {
         $this->name = $name;
         $this->pattern = $pattern;
         $this->namespace = $namespace;
@@ -129,7 +135,8 @@ class DirectRoute extends AbstractRoute
                 $controller = $route->namespace . '\\' . ucfirst($controller) . $route->postfix;
             }
 
-            return $route->callAction($container, $controller, $route->matches['action'], $route->matches);
+            return $route->callAction($container, $controller, $route->matches['action'],
+                $route->matches);
         };
     }
 }

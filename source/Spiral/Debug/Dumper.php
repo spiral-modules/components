@@ -304,7 +304,9 @@ class Dumper extends Singleton
             }
 
             //Memory loop while reading doc comment for stdClass variables?
-            if (!($object instanceof \stdClass) && strpos($property->getDocComment(), '@invisible')) {
+            if (!($object instanceof \stdClass) && strpos($property->getDocComment(),
+                    '@invisible')
+            ) {
                 continue;
             }
 

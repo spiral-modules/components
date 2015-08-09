@@ -229,7 +229,8 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
                 return (int)$this->defaultValue;
             }
 
-            $datetime = new \DateTime($this->defaultValue, new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE));
+            $datetime = new \DateTime($this->defaultValue,
+                new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE));
 
             return $datetime->getTimestamp();
         }

@@ -266,7 +266,9 @@ class ColumnSchema extends AbstractColumn
         $this->defaultValue = $schema['column_default'];
         $this->nullable = $schema['is_nullable'] == 'YES';
 
-        if (in_array($this->type, ['int', 'bigint', 'integer']) && preg_match("/nextval(.*)/", $this->defaultValue)) {
+        if (in_array($this->type, ['int', 'bigint', 'integer']) && preg_match("/nextval(.*)/",
+                $this->defaultValue)
+        ) {
             $this->type = ($this->type == 'bigint' ? 'bigserial' : 'serial');
             $this->autoIncrement = true;
 

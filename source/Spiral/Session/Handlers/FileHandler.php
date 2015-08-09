@@ -94,7 +94,8 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterlace
      */
     public function write($session_id, $session_data)
     {
-        return $this->files->write($this->getFilename($session_id), $session_data, FilesInterface::RUNTIME, true);
+        return $this->files->write($this->getFilename($session_id), $session_data,
+            FilesInterface::RUNTIME, true);
     }
 
     /**

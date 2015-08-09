@@ -34,13 +34,17 @@ class Status implements StatusInterface
     private $timeExecuted = null;
 
     /**
-     * @param string    $name
-     * @param bool      $state
+     * @param string $name
+     * @param bool $state
      * @param \DateTime $timeCreated
      * @param \DateTime $timeExecuted
      */
-    public function __construct($name, $state, \DateTime $timeCreated, \DateTime $timeExecuted = null)
-    {
+    public function __construct(
+        $name,
+        $state,
+        \DateTime $timeCreated,
+        \DateTime $timeExecuted = null
+    ) {
         $this->name = $name;
         $this->state = $state;
         $this->timeCreated = $timeCreated;

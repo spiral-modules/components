@@ -241,7 +241,8 @@ trait JoinsTrait
     public function onWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->whereWrapper()
+            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            $this->whereWrapper()
         );
 
         return $this;
@@ -262,7 +263,8 @@ trait JoinsTrait
     public function andOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->whereWrapper()
+            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            $this->whereWrapper()
         );
 
         return $this;
@@ -283,7 +285,8 @@ trait JoinsTrait
     public function orOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->whereWrapper()
+            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            $this->whereWrapper()
         );
 
         return $this;
@@ -300,7 +303,12 @@ trait JoinsTrait
      *                                  parameter.
      * @throws BuilderException
      */
-    abstract protected function whereToken($joiner, array $parameters, &$tokens = [], callable $wrapper);
+    abstract protected function whereToken(
+        $joiner,
+        array $parameters,
+        &$tokens = [],
+        callable $wrapper
+    );
 
     /**
      * Convert parameters used in JOIN ON statements into sql expressions.

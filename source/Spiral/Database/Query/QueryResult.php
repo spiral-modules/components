@@ -14,6 +14,8 @@ use Spiral\Database\ResultInterface;
 
 /**
  * Query result iteration class.
+ *
+ * Decorates PDOStatement.
  */
 class QueryResult implements ResultInterface, \JsonSerializable
 {
@@ -225,6 +227,18 @@ class QueryResult implements ResultInterface, \JsonSerializable
     public function close()
     {
         return $this->statement && $this->statement->closeCursor();
+    }
+
+    /**
+     * Bypassing call to PDOStatement.
+     *
+     * @param string $method
+     * @param array  $arguments
+     * @return mixed
+     */
+    public function __call($method, array $arguments)
+    {
+        return call_user_func_array([$this->statement, $method], $arguments);
     }
 
     /**

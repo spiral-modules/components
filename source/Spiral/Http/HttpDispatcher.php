@@ -219,7 +219,8 @@ class HttpDispatcher extends Singleton implements
 
         $pipeline = new MiddlewarePipeline($this->container, $this->middlewares);
 
-        return $pipeline->target($endpoint)->run($request->withAttribute('activePath', $activePath));
+        return $pipeline->target($endpoint)->run($request->withAttribute('activePath',
+            $activePath));
     }
 
     /**

@@ -234,22 +234,23 @@ class QueryCompiler extends Component
         }
 
         if (strpos($identifier, '(') || strpos($identifier, ' ')) {
-            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i', function ($identifier) use (&$table) {
-                $identifier = $identifier[1];
-                if (substr($identifier, -1) == '(') {
-                    //Function name
-                    return $identifier;
-                }
+            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i',
+                function ($identifier) use (&$table) {
+                    $identifier = $identifier[1];
+                    if (substr($identifier, -1) == '(') {
+                        //Function name
+                        return $identifier;
+                    }
 
-                if ($table) {
-                    $table = false;
+                    if ($table) {
+                        $table = false;
 
-                    //Only first table has to be escaped
-                    return $this->quote($identifier, true);
-                }
+                        //Only first table has to be escaped
+                        return $this->quote($identifier, true);
+                    }
 
-                return $this->quote($identifier);
-            }, $identifier);
+                    return $this->quote($identifier);
+                }, $identifier);
         }
 
         if (strpos($identifier, '.') === false) {

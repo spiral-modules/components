@@ -151,7 +151,8 @@ abstract class Templater implements SupervisorInterface
                 }
 
                 //Let's include!
-                return new IncludeBehaviour($this, $import->getLocation($name, $token), $content, $token);
+                return new IncludeBehaviour($this, $import->getLocation($name, $token), $content,
+                    $token);
             }
         }
 

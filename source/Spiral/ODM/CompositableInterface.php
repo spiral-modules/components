@@ -11,7 +11,8 @@ namespace Spiral\ODM;
 use Spiral\Validation\ValidatesInterface;
 
 /**
- * Declares that object can be embedded into Document and control it's updates, public fields and validations.
+ * Declares that object can be embedded into Document as some instance and control it's owm (located in instance) updates,
+ * public fields and validations.
  */
 interface CompositableInterface extends EmbeddableInterface, ValidatesInterface
 {

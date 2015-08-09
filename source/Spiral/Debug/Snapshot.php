@@ -184,6 +184,21 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
             FilesInterface::RUNTIME,
             true
         );
+
+        $snapshots = $this->files->getFiles($this->config['reporting']['directory']);
+        if (count($snapshots) > $this->config['reporting']['maxSnapshots']) {
+            $oldestSnapshot = '';
+            $oldestTimestamp = PHP_INT_MAX;
+            foreach ($snapshots as $snapshot) {
+                $snapshotTimestamp = $this->files->time($snapshot);
+                if ($snapshotTimestamp < $oldestTimestamp) {
+                    $oldestTimestamp = $snapshotTimestamp;
+                    $oldestSnapshot = $snapshot;
+                }
+            }
+
+            $this->files->delete($oldestSnapshot);
+        }
     }
 
     /**

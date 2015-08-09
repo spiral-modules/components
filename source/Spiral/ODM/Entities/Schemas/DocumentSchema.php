@@ -242,7 +242,8 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Get schema of top parent of current document or document schema itself. This method is reverse implementation of getChildren().
+     * Get schema of top parent of current document or document schema itself. This method is reverse implementation of
+     * getChildren().
      *
      * @see getChindren()
      * @param bool $sameCollection Only document with same collection.
@@ -266,7 +267,18 @@ class DocumentSchema extends ReflectionEntity
             $result = $document;
         }
 
-        return $this;
+        return $result;
+    }
+
+    /**
+     * Parent document schema or null. Similar to getParentClass().
+     *
+     * @see parentSchema()
+     * @return DocumentSchema|null
+     */
+    public function getParentDocument()
+    {
+        return $this->parentSchema();
     }
 
     /**

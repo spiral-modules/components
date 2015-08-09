@@ -92,17 +92,15 @@ abstract class ReflectionEntity extends \ReflectionClass
     }
 
     /**
-     * {@inheritdoc}
+     * Get methods declared in current class and exclude methods declared in parents.
      *
-     * @param bool $local Exclude parent methods.
      * @return \ReflectionMethod[]
      */
-    public function getMethods($local = true)
+    public function getLocalMethods()
     {
         $methods = [];
-
         foreach ($this->getMethods() as $method) {
-            if ($local && $method->getDeclaringClass()->getName() != $this->getName()) {
+            if ($method->getDeclaringClass()->getName() != $this->getName()) {
                 continue;
             }
 

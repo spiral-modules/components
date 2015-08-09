@@ -707,7 +707,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         }
 
         return (object)[
-            'collection' => $this->database . '/' . $this->collection,
+            'collection' => $this->schema[ODM::D_DB] . '/' . $this->collection,
             'fields'     => $this->getFields(),
             'atomics'    => $this->hasUpdates() ? $this->buildAtomics() : [],
             'errors'     => $this->getErrors()

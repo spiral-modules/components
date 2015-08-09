@@ -93,7 +93,7 @@ class SchemaBuilder extends Component
         }
 
         if (!isset($this->models[$class])) {
-            throw new SchemaException("Unknown document class '{$class}'.");
+            throw new SchemaException("Unknown model class '{$class}'.");
         }
 
         return $this->models[$class];

@@ -17,7 +17,7 @@ use Spiral\ORM\Model;
 /**
  * Performs analysis and schema building for one specific Model class.
  */
-abstract class ModelSchema extends ReflectionEntity
+class ModelSchema extends ReflectionEntity
 {
     /**
      * Required to validly merge parent and children attributes.

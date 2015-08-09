@@ -21,6 +21,9 @@ use Spiral\Templater\Imports\StopImport;
  * - extend parent view with inherited blocks
  * - declare namespace or alias to import outer view
  * - importing outer view
+ *
+ * P.S. Do not even think to use Templater without caching layer at top of it, templater not just slow, it's SUPER SLOW*.
+ * * per design
  */
 abstract class Templater implements SupervisorInterface
 {

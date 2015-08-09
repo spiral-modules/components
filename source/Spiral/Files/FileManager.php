@@ -280,7 +280,7 @@ class FileManager extends Singleton implements FilesInterface
     {
         $path = str_replace('\\', '/', $path);
 
-        return rtrim(str_replace('//', '/', $path), '/');
+        return rtrim(preg_replace('/\/+/', '/', $path), '/');
     }
 
     /**

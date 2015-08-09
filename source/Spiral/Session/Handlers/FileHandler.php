@@ -56,7 +56,7 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterlace
      */
     public function destroy($session_id)
     {
-        return $this->files->delete($this->location . FilesInterface::SEPARATOR . $session_id);
+        return $this->files->delete($this->getFilename($session_id));
     }
 
     /**
@@ -84,8 +84,8 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterlace
      */
     public function read($session_id)
     {
-        return $this->files->exists($this->location . FilesInterface::SEPARATOR . $session_id)
-            ? $this->files->read($this->location . FilesInterface::SEPARATOR . $session_id)
+        return $this->files->exists($this->getFilename($session_id))
+            ? $this->files->read($this->getFilename($session_id))
             : false;
     }
 
@@ -94,20 +94,17 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterlace
      */
     public function write($session_id, $session_data)
     {
-        try {
-            return $this->files->write(
-                $this->location . FilesInterface::SEPARATOR . $session_id,
-                $session_data
-            );
-        } catch (\ErrorException $exception) {
-            //Possibly that directory doesn't exists, we don't want to force directory by default,
-            //but we can try now.
-            return $this->files->write(
-                $this->location . FilesInterface::SEPARATOR . $session_id,
-                $session_data,
-                FilesInterface::RUNTIME,
-                true
-            );
-        }
+        return $this->files->write($this->getFilename($session_id), $session_data, FilesInterface::RUNTIME, true);
+    }
+
+    /**
+     * Session data filename.
+     *
+     * @param string $session_id
+     * @return string
+     */
+    protected function getFilename($session_id)
+    {
+        return $this->location . FilesInterface::SEPARATOR . $session_id;
     }
 }

@@ -287,32 +287,27 @@ class FileManager extends Singleton implements FilesInterface
      * Get relative location based on absolute path.
      *
      * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
-     * @param string $path      Original file or directory location.
-     * @param string $directory Path will be converted to be relative to this directory.
+     * @param string $path      Original file or directory location (to).
+     * @param string $directory Path will be converted to be relative to this directory (from).
      * @return string
      */
     public function relativePath($path, $directory = null)
     {
-        //Always directory
-        $directory = $this->normalizePath($directory) . '/';
         $path = $this->normalizePath($path);
-
-        if (is_dir($path)) {
-            $path = $path . '/';
-        }
+        $directory = $this->normalizePath($directory);
 
         $directory = explode('/', $directory);
         $path = explode('/', $path);
-
         $relPath = $path;
-        foreach ($directory as $depth => $nested) {
-            //Find first non-matching directory
-            if ($nested === $path[$depth]) {
-                //Ignore this directory
+
+        foreach ($directory as $depth => $dir) {
+            // find first non-matching dir
+            if ($dir === $path[$depth]) {
+                // ignore this directory
                 array_shift($relPath);
             } else {
-                //Get number of remaining dirs to $from
-                $remaining = count($nested) - $depth;
+                // get number of remaining dirs to $from
+                $remaining = count($directory) - $depth;
                 if ($remaining > 1) {
                     // add traversals up to first matching dir
                     $padLength = (count($relPath) + $remaining - 1) * -1;

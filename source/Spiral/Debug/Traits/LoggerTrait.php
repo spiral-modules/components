@@ -42,7 +42,7 @@ trait LoggerTrait
      *
      * @param LoggerInterface $logger
      */
-    public function setGlobalLogger(LoggerInterface $logger)
+    public static function setStaticLogger(LoggerInterface $logger)
     {
         self::$loggers[static::class] = $logger;
     }

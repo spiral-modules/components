@@ -11,6 +11,7 @@ namespace Spiral\Templater;
 use Spiral\Components\View\Compiler\Processors\Templater\Behaviours\IncludeBehaviour;
 use Spiral\Templater\Behaviours\BlockBehaviour;
 use Spiral\Templater\Behaviours\ExtendsBehaviour;
+use Spiral\Templater\Exceptions\TemplaterException;
 use Spiral\Templater\Exporters\AttributeExporter;
 use Spiral\Templater\Imports\NativeImport;
 
@@ -177,12 +178,18 @@ abstract class Templater implements SupervisorInterface
      * Create node using specific location definition.
      *
      * @see fetchLocation()
+     * @see getSource()
      * @param mixed  $location Location compatible with fetchLocation method.
      * @param string $name     If not specified unique name will be used.
      * @param array  $token    Token used only to clarify location at exceptions.
      * @return Node
      */
-    abstract public function createNode($location, $name = '', array $token = []);
+    public function createNode($location, $name = '', array $token = [])
+    {
+        $source = $this->getSource($location, $templater);
+
+        return new Node($templater, !empty($name) ? $name : $this->uniquePlaceholder(), $source);
+    }
 
     /**
      * Fetch implementation specific location of external node source. You can count it as filename.
@@ -212,6 +219,16 @@ abstract class Templater implements SupervisorInterface
      * @param array $token
      */
     abstract protected function registerImport($name, array $token);
+
+    /**
+     * Must fetch source from implementation specific location.
+     *
+     * @param mixed     $location
+     * @param Templater $templater Source specific templater, reference.
+     * @return string
+     * @throws TemplaterException
+     */
+    abstract protected function getSource($location, Templater &$templater = null);
 
     /**
      * Helper method used to define tag type based on defined templater syntax.

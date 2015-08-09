@@ -40,4 +40,16 @@ class TemplaterException extends RuntimeException implements ExceptionInterface
     {
         return $this->token;
     }
+
+    /**
+     * Set exception location.
+     *
+     * @param string $file
+     * @param string $line
+     */
+    public function setLocation($file, $line)
+    {
+        $this->file = $file;
+        $this->line = $line;
+    }
 }

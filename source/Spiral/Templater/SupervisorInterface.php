@@ -12,9 +12,10 @@ namespace Spiral\Templater;
  * SupervisorInterface used by Node to define html syntax for control elements and create valid
  * behaviour for html constructions.
  *
- * @see  BehaviourInterface
- * @see  ExtendsBehaviourInterface
- * @todo add links to behaviours
+ * @see BehaviourInterface
+ * @see ExtendsBehaviourInterface
+ * @see BlockBehaviourInterface
+ * @see IncludeBehaviourInterface
  */
 interface SupervisorInterface
 {

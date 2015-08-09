@@ -58,10 +58,6 @@ abstract class Templater implements SupervisorInterface
             self::TYPE_EXTENDS => ['extends:'],
             self::TYPE_IMPORT  => ['use']
         ],
-        'keywords'   => [
-            'namespace' => ['view:namespace', 'node:namespace'],
-            'view'      => ['view:parent', 'node:parent']
-        ],
         'exporters'  => [
             AttributeExporter::class
         ]
@@ -187,7 +183,7 @@ abstract class Templater implements SupervisorInterface
      */
     public function createNode($location, $name = '', array $token = [])
     {
-        $source = $this->getSource($location, $templater);
+        $source = $this->getSource($location, $templater, $token);
 
         return new Node($templater, !empty($name) ? $name : $this->uniquePlaceholder(), $source);
     }
@@ -228,10 +224,11 @@ abstract class Templater implements SupervisorInterface
      *
      * @param mixed     $location
      * @param Templater $templater Source specific templater, reference.
+     * @param array     $token     Token used only to clarify location at exceptions.
      * @return string
      * @throws TemplaterException
      */
-    abstract protected function getSource($location, Templater &$templater = null);
+    abstract protected function getSource($location, Templater &$templater = null, array $token = []);
 
     /**
      * Helper method used to define tag type based on defined templater syntax.

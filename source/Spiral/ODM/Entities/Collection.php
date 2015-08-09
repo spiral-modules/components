@@ -353,6 +353,7 @@ class Collection extends Component implements
             );
         }
 
+        //This is not the same profiling as one defined in getProfilingLevel().
         if (!$this->mongoDatabase()->isProfiling()) {
             return $cursorReader;
         }
@@ -367,7 +368,7 @@ class Collection extends Component implements
             $queryInfo['offset'] = (int)$this->offset;
         }
 
-        if ($this->mongoDatabase()->getProfilingLevel() == MongoDatabase::PROFILE_EXPLAIN) {
+        if ($this->mongoDatabase()->getProfiling() == MongoDatabase::PROFILE_EXPLAIN) {
             $queryInfo['explained'] = $cursorReader->explain();
         }
 

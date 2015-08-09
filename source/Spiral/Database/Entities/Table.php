@@ -99,10 +99,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function schema()
     {
-        return $this->database->driver()->tableSchema(
-            $this->database->getPrefix() . $this->name,
-            $this->database->getPrefix()
-        );
+        return $this->database->driver()->tableSchema($this->getRealName(), $this->database->getPrefix());
     }
 
     /**
@@ -121,6 +118,16 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Real table name, will include database prefix.
+     *
+     * @return string
+     */
+    public function getRealName()
+    {
+        return $this->database->getPrefix() . $this->name;
     }
 
     /**
@@ -143,7 +150,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function truncate()
     {
-        $this->database->driver()->truncate($this->database->getPrefix() . $this->name);
+        $this->database->driver()->truncate($this->getRealName());
     }
 
 

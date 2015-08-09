@@ -14,15 +14,6 @@ use Spiral\Tests\TestCase;
 
 class EncryptionTest extends TestCase
 {
-    /**
-     * @param array $config
-     * @return Encrypter
-     */
-    protected function encrypter($config = ['key' => '1234567890123456'])
-    {
-        return new Encrypter(new Configurator($config));
-    }
-
     public function testEncryption()
     {
         $encrypter = $this->encrypter();
@@ -75,5 +66,14 @@ class EncryptionTest extends TestCase
 
         $encrypted = base64_encode(json_encode($encrypted));
         $encrypter->decrypt($encrypted);
+    }
+
+    /**
+     * @param array $config
+     * @return Encrypter
+     */
+    protected function encrypter($config = ['key' => '1234567890123456'])
+    {
+        return new Encrypter(new Configurator($config));
     }
 }

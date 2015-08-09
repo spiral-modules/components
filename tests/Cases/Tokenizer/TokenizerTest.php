@@ -28,45 +28,6 @@ class TokenizerTest extends TestCase
      */
     protected $loader = null;
 
-    /**
-     * Configured Tokenizer component.
-     *
-     * @param array $config
-     * @return Tokenizer
-     */
-    protected function tokenizer(array $config = [])
-    {
-        if (empty($config))
-        {
-            $config = [
-                'directories' => [__DIR__],
-                'exclude'     => ['XX']
-            ];
-        }
-
-        $tokenizer = new Tokenizer(
-            new Configurator($config),
-            new RuntimeHippocampus(),
-            new FileManager(),
-            $this->loader
-        );
-
-        $tokenizer->setLogger(new NullLogger());
-
-        return $tokenizer;
-    }
-
-    protected function setUp()
-    {
-        $this->loader = new Loader(new RuntimeHippocampus());
-    }
-
-    protected function tearDown()
-    {
-        $this->loader->disable();
-        $this->loader = null;
-    }
-
     public function testClassesAll()
     {
         $tokenizer = $this->tokenizer();
@@ -171,15 +132,12 @@ class TokenizerTest extends TestCase
         $functionA = null;
         $functionB = null;
 
-        foreach ($functionUsages as $usage)
-        {
-            if ($usage->getName() == 'test_function_a')
-            {
+        foreach ($functionUsages as $usage) {
+            if ($usage->getName() == 'test_function_a') {
                 $functionA = $usage;
             }
 
-            if ($usage->getName() == 'test_function_b')
-            {
+            if ($usage->getName() == 'test_function_b') {
                 $functionB = $usage;
             }
         }
@@ -203,12 +161,46 @@ class TokenizerTest extends TestCase
         $this->assertSame(ReflectionArgument::CONSTANT, $functionB->argument(1)->getType());
         $this->assertSame('123', $functionB->argument(1)->getValue());
 
-        if (false)
-        {
+        if (false) {
             $a = $b = null;
             test_function_a($this, $a + $b);
             test_function_b("string", 123);
         }
+    }
+
+    protected function setUp()
+    {
+        $this->loader = new Loader(new RuntimeHippocampus());
+    }
+
+    protected function tearDown()
+    {
+        $this->loader->disable();
+        $this->loader = null;
+    }
+
+    /**
+     * @param array $config
+     * @return Tokenizer
+     */
+    protected function tokenizer(array $config = [])
+    {
+        if (empty($config)) {
+            $config = [
+                'directories' => [__DIR__],
+                'exclude'     => ['XX']
+            ];
+        }
+
+        $tokenizer = new Tokenizer(
+            new Configurator($config),
+            new RuntimeHippocampus(),
+            new FileManager(),
+            $this->loader);
+
+        $tokenizer->setLogger(new NullLogger());
+
+        return $tokenizer;
     }
 }
 

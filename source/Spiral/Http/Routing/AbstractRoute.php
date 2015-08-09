@@ -156,6 +156,16 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
+     * Declared route pattern.
+     *
+     * @return string
+     */
+    public function getPattern()
+    {
+        return $this->pattern;
+    }
+
+    /**
      * If true (default) route will be matched against path + URI host.
      *
      * @param bool $withHost

@@ -85,14 +85,14 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
 
         $name = $callerID . '|' . $record . '|' . $context;
         if (!isset($this->benchmarks[$name])) {
-            $this->benchmarks[$name] = [$caller, $context, microtime(true)];
+            $this->benchmarks[$name] = [$caller, $record, $context, microtime(true)];
 
             return true;
         }
 
-        $this->benchmarks[$name][3] = microtime(true);
+        $this->benchmarks[$name][4] = microtime(true);
 
-        return $this->benchmarks[$name][3] - $this->benchmarks[$name][2];
+        return $this->benchmarks[$name][4] - $this->benchmarks[$name][3];
     }
 
     /**

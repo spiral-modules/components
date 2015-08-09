@@ -42,7 +42,7 @@ class MongoDatabase extends \MongoDB
      * @var array
      */
     protected $config = [
-        'profiling' => self::PROFILE_SIMPLE
+        'profiling' => self::PROFILE_DISABLED
     ];
 
     /**
@@ -60,7 +60,7 @@ class MongoDatabase extends \MongoDB
     {
         $this->odm = $odm;
         $this->name = $name;
-        $this->config = $this->config + $config;
+        $this->config = $config + $this->config;
 
         //Selecting client
         if (class_exists('MongoClient', false)) {
@@ -101,7 +101,7 @@ class MongoDatabase extends \MongoDB
      */
     public function isProfiling()
     {
-        return !empty($this->config['profiling']);
+        return $this->config['profiling'] != self::PROFILE_DISABLED;
     }
 
     /**

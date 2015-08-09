@@ -220,6 +220,16 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
+     * Every declared Container binding. Must not be used in production code due container format is vary.
+     *
+     * @return array
+     */
+    public function getBindings()
+    {
+        return $this->bindings;
+    }
+
+    /**
      * Create instance of desired class.
      *
      * @param string               $class

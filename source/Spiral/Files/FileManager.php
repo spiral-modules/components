@@ -298,7 +298,7 @@ class FileManager extends Singleton implements FilesInterface
         $path = $this->normalizePath($path);
 
         if (is_dir($path)) {
-            $path = rtrim($path, '/') . '/';
+            $path = $path . '/';
         }
 
         $directory = explode('/', $directory);

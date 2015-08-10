@@ -101,10 +101,7 @@ class AmazonServer extends StorageServer
             'PUT',
             $bucket,
             $name,
-            [
-                'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
-                'Content-Type' => $mimetype
-            ],
+            $this->createHeaders($bucket, $name, $source),
             [
                 'Acl'          => $bucket->getOption('public') ? 'public-read' : 'private',
                 'Content-Type' => $mimetype
@@ -300,5 +297,32 @@ class AmazonServer extends StorageServer
                 hash_hmac('sha1', join("\n", $signature), $this->options['secretKey'], true)
             )
         );
+    }
+
+    /**
+     * Generate object headers.
+     *
+     * @param BucketInterface $bucket
+     * @param string          $name
+     * @param mixed           $source
+     * @return array
+     */
+    private function createHeaders(BucketInterface $bucket, $name, $source)
+    {
+        if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
+            $mimetype = self::DEFAULT_MIMETYPE;
+        };
+
+        $headers = $bucket->getOption('headers', []);
+
+        if (!empty($maxAge = $bucket->getOption('maxAge', 0))) {
+            //Shortcut
+            $headers['Max-Age'] = $bucket->getOption('maxAge', 0);
+        }
+
+        return $headers + [
+            'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
+            'Content-Type' => $mimetype
+        ];
     }
 } 

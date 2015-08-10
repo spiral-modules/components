@@ -162,19 +162,19 @@ class ORM extends Singleton
      * Construct instance of Model or receive it from cache (if enabled). Only models with declared
      * primary key can be cached.
      *
-     * @param string $class
+     * @param string $class Model class name.
      * @param array  $data
      * @param bool   $cache Add model to entity cache if enabled.
      * @return Model
      */
     public function model($class, array $data = [], $cache = true)
     {
-        if (!$this->config['entityCache']['enabled'] || !$cache) {
-            //Entity cache is disabled
-            return new $class($data, !empty($data), $this);
-        }
-
         $schema = $this->getSchema($class);
+
+        if (!$this->config['entityCache']['enabled'] || !$cache) {
+            //Entity cache is disabled, we can create model right now
+            return new $class($data, !empty($data), $this, $schema);
+        }
 
         //We have to find unique object criteria (will work for objects with primary key only)
         $criteria = null;
@@ -182,21 +182,16 @@ class ORM extends Singleton
             $criteria = $class . '.' . $data[$schema[self::M_PRIMARY_KEY]];
         }
 
-        if (empty($criteria) || count($this->entityCache) > $this->config['entityCache']['maxSize']) {
-            //Entity cache is full or model does not have unique criteria
-            return new $class($data, !empty($data), $this, $schema);
-        }
-
         if (isset($this->entityCache[$criteria])) {
-            //Retrieving reconfigured model from the cache
+            //Retrieving model from the cache and updates it's context (relations and pivot data)
             return $this->entityCache[$criteria]->setContext($data);
         }
 
-        return $this->entityCache[$criteria] = new $class($data, !empty($data), $this, $schema);
+        return $this->registerEntity(new $class($data, !empty($data), $this, $schema));
     }
 
     /**
-     * Create model relation instance by given relation type, parent and definition.
+     * Create model relation instance by given relation type, parent and definition (options).
      *
      * @param int   $type
      * @param Model $parent
@@ -218,7 +213,7 @@ class ORM extends Singleton
     }
 
     /**
-     * Get instance of relation/selection Loader associated based on relation type and definition.
+     * Get instance of relation/selection loader based on relation type and definition.
      *
      * @param int             $type       Relation type.
      * @param string          $container  Container related to parent loader.
@@ -252,7 +247,10 @@ class ORM extends Singleton
         $builder->executeSchema();
 
         //Saving
-        $this->memory->saveData('ormSchema', $this->schema = $builder->normalizeSchema());
+        $this->memory->saveData(
+            static::SCHEMA_SECTION,
+            $this->schema = $builder->normalizeSchema()
+        );
 
         //Let's reinitialize models
         DataEntity::resetInitiated();
@@ -274,7 +272,9 @@ class ORM extends Singleton
     }
 
     /**
-     * Create instance of relation schema based on relation type and given definition. Resolved using container.
+     * Create instance of relation schema based on relation type and given definition (declared in
+     * model). Resolve using container to support any possible relation type. You can create your
+     * own relations, loaders and schemas by altering ORM config.
      *
      * @param mixed         $type
      * @param SchemaBuilder $schemaBuilder
@@ -302,6 +302,7 @@ class ORM extends Singleton
     /**
      * Enable or disable entity cache. Disabling cache will not flush it's values.
      *
+     * @see $entityCache
      * @param bool $enabled
      * @param int  $maxSize
      * @return $this
@@ -325,32 +326,38 @@ class ORM extends Singleton
     }
 
     /**
-     * Add Model to entity cache (cache limit will be ignored). Primary key is required for caching.
+     * Add Model to entity cache (only if cache enabled). Primary key is required for caching.
      *
-     * @param Model $record
+     * @param Model $model
+     * @param bool  $ignoreLimit Cache overflow will be ignored.
      * @return Model
      */
-    public function registerEntity(Model $record)
+    public function registerEntity(Model $model, $ignoreLimit = true)
     {
-        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled']) {
-            return $record;
+        if (empty($model->primaryKey()) || !$this->config['entityCache']['enabled']) {
+            return $model;
         }
 
-        return $this->entityCache[get_class($record) . '.' . $record->primaryKey()] = $record;
+        if (!$ignoreLimit && count($this->entityCache) > $this->config['entityCache']['maxSize']) {
+            //We are full
+            return $model;
+        }
+
+        return $this->entityCache[get_class($model) . '.' . $model->primaryKey()] = $model;
     }
 
     /**
      * Remove Model model from entity cache. Primary key is required for caching.
      *
-     * @param Model $record
+     * @param Model $model
      */
-    public function removeEntity(Model $record)
+    public function removeEntity(Model $model)
     {
-        if (empty($record->primaryKey())) {
+        if (empty($model->primaryKey())) {
             return;
         }
 
-        unset($this->entityCache[get_class($record) . '.' . $record->primaryKey()]);
+        unset($this->entityCache[get_class($model) . '.' . $model->primaryKey()]);
     }
 
     /**

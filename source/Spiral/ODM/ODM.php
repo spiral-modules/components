@@ -306,8 +306,10 @@ class ODM extends Singleton implements InjectorInterface
         $builder->createIndexes();
 
         //Saving
-        $this->memory->saveData(static::SCHEMA_SECTION,
-            $this->schema = $builder->normalizeSchema());
+        $this->memory->saveData(
+            static::SCHEMA_SECTION,
+            $this->schema = $builder->normalizeSchema()
+        );
 
         //Let's reinitialize models
         DataEntity::resetInitiated();

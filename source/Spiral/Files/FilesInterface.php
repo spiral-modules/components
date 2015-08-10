@@ -8,6 +8,9 @@
  */
 namespace Spiral\Files;
 
+use Spiral\Files\Exceptions\FileNotFoundException;
+use Spiral\Files\Exceptions\WriteErrorException;
+
 /**
  * Access to hard drive or local store.
  */
@@ -49,6 +52,7 @@ interface FilesInterface
      *
      * @param string $filename
      * @return string
+     * @throws FileNotFoundException
      */
     public function read($filename);
 
@@ -61,6 +65,7 @@ interface FilesInterface
      * @param int    $mode           One of mode constants.
      * @param bool   $ensureLocation Ensure final destination!
      * @return bool
+     * @throws WriteErrorException
      */
     public function write($filename, $data, $mode = null, $ensureLocation = false);
 
@@ -73,6 +78,7 @@ interface FilesInterface
      * @param int    $mode
      * @param bool   $ensureLocation
      * @return bool
+     * @throws WriteErrorException
      */
     public function append($filename, $data, $mode = null, $ensureLocation = false);
 
@@ -89,6 +95,7 @@ interface FilesInterface
      * @param string $filename
      * @param string $destination
      * @return bool
+     * @throws FileNotFoundException
      */
     public function move($filename, $destination);
 
@@ -98,6 +105,7 @@ interface FilesInterface
      * @param string $filename
      * @param string $destination
      * @return bool
+     * @throws FileNotFoundException
      */
     public function copy($filename, $destination);
 
@@ -118,10 +126,11 @@ interface FilesInterface
     public function exists($filename);
 
     /**
-     * Get filesize in bytes if file does exists. False should be returned if file does not exists.
+     * Get filesize in bytes if file does exists.
      *
      * @param string $filename
-     * @return int|bool
+     * @return int
+     * @throws FileNotFoundException
      */
     public function size($filename);
 
@@ -134,18 +143,20 @@ interface FilesInterface
     public function extension($filename);
 
     /**
-     * Get file MD5 hash. False if file does not exists.
+     * Get file MD5 hash.
      *
      * @param string $filename
-     * @return string|bool
+     * @return string
+     * @throws FileNotFoundException
      */
     public function md5($filename);
 
     /**
-     * Timestamp when file being updated/created. False if file does not exists.
+     * Timestamp when file being updated/created.
      *
      * @param string $filename
-     * @return int|bool
+     * @return int
+     * @throws FileNotFoundException
      */
     public function time($filename);
 
@@ -154,6 +165,7 @@ interface FilesInterface
      *
      * @param string $filename
      * @return int|bool
+     * @throws FileNotFoundException
      */
     public function getPermissions($filename);
 
@@ -162,6 +174,7 @@ interface FilesInterface
      *
      * @param string $filename
      * @param int    $mode
+     * @throws FileNotFoundException
      */
     public function setPermissions($filename, $mode);
 

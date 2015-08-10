@@ -9,6 +9,8 @@
 namespace Spiral\Files;
 
 use Spiral\Core\Singleton;
+use Spiral\Files\Exceptions\FileNotFoundException;
+use Spiral\Files\Exceptions\WriteErrorException;
 
 /**
  * Default files storage, points to local hard drive.
@@ -76,6 +78,10 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function read($filename)
     {
+        if (!$this->exists($filename)) {
+            throw new FileNotFoundException($filename);
+        }
+
         return file_get_contents($filename);
     }
 
@@ -86,20 +92,28 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function write($filename, $data, $mode = null, $ensureLocation = false, $append = false)
     {
-        $ensureLocation && $this->ensureLocation(dirname($filename), $mode);
+        try {
+            $ensureLocation && $this->ensureLocation(dirname($filename), $mode);
 
-        if (!empty($mode) && $this->exists($filename)) {
-            //Forcing mode for existed file
-            $this->setPermissions($filename, $mode);
-        }
+            if (!empty($mode) && $this->exists($filename)) {
+                //Forcing mode for existed file
+                $this->setPermissions($filename, $mode);
+            }
 
-        $result = (file_put_contents(
-                $filename, $data, $append ? FILE_APPEND | LOCK_EX : LOCK_EX
-            ) !== false);
+            $result = (file_put_contents(
+                    $filename, $data, $append ? FILE_APPEND | LOCK_EX : LOCK_EX
+                ) !== false);
 
-        if ($result && !empty($mode)) {
-            //Forcing mode after file creation
-            $this->setPermissions($filename, $mode);
+            if ($result && !empty($mode)) {
+                //Forcing mode after file creation
+                $this->setPermissions($filename, $mode);
+            }
+        } catch (\Exception $exception) {
+            throw new WriteErrorException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
 
         return $result;
@@ -130,6 +144,10 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function move($filename, $destination)
     {
+        if (!$this->exists($filename)) {
+            throw new FileNotFoundException($filename);
+        }
+
         return rename($filename, $destination);
     }
 
@@ -138,6 +156,10 @@ class FileManager extends Singleton implements FilesInterface
      */
     public function copy($filename, $destination, $ensureLocation = false)
     {
+        if (!$this->exists($filename)) {
+            throw new FileNotFoundException($filename);
+        }
+
         return copy($filename, $destination);
     }
 
@@ -163,7 +185,7 @@ class FileManager extends Singleton implements FilesInterface
     public function size($filename)
     {
         if (!$this->exists($filename)) {
-            return false;
+            throw new FileNotFoundException($filename);
         }
 
         return filesize($filename);
@@ -183,7 +205,7 @@ class FileManager extends Singleton implements FilesInterface
     public function md5($filename)
     {
         if (!$this->exists($filename)) {
-            return false;
+            throw new FileNotFoundException($filename);
         }
 
         return md5_file($filename);
@@ -195,7 +217,7 @@ class FileManager extends Singleton implements FilesInterface
     public function time($filename)
     {
         if (!$this->exists($filename)) {
-            return false;
+            throw new FileNotFoundException($filename);
         }
 
         return filemtime($filename);
@@ -207,7 +229,7 @@ class FileManager extends Singleton implements FilesInterface
     public function getPermissions($filename)
     {
         if (!$this->exists($filename)) {
-            return false;
+            throw new FileNotFoundException($filename);
         }
 
         return fileperms($filename) & 0777;

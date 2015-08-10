@@ -8,7 +8,6 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\ORM\ORM;
 use Spiral\ORM\Selector;
 
 interface LoaderInterface
@@ -21,9 +20,8 @@ interface LoaderInterface
      * @param string $container  Location in parent loaded where data should be attached.
      * @param array  $definition Definition compiled by relation relation schema and stored in ORM
      *                           cache.
-     * @param Loader $parent     Parent loader if presented.
      */
-    public function __construct(ORM $orm, $container, array $definition = [], Loader $parent = null);
+    public function __construct(ORM $orm, $container, array $definition = []);
 
     /**
      * Is loader represent multiple records or one.

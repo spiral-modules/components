@@ -12,7 +12,7 @@ use Spiral\ODM\Exceptions\AccessorException;
 
 /**
  * Declares requirement for every ODM field accessor to be an instance of EmbeddableInterface and declare it's default
- * value. In addition construction is unified for every accessor. Sad. :(
+ * value. In addition construction is unified for every ODM accessor. Sad. :(
  */
 interface DocumentAccessorInterface extends EmbeddableInterface
 {

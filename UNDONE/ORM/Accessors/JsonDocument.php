@@ -25,7 +25,7 @@ abstract class JsonDocument extends Document implements ModelAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function compileUpdates($field = '')
+    public function compileUpdate($field = '')
     {
         return $this->serializeData();
     }

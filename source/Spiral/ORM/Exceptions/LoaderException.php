@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Exceptions;
 
 /**
- * Loader exceptions.
+ * Loader related exceptions.
  */
 class LoaderException extends SelectorException
 {

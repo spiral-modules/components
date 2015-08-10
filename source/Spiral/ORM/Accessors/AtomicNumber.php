@@ -8,48 +8,60 @@
  */
 namespace Spiral\ORM\Accessors;
 
-use Spiral\Database\Driver;
-use Spiral\Database\SqlExpression;
+use Spiral\Database\Entities\Driver;
+use Spiral\Database\Injections\SQLExpression;
 use Spiral\ORM\Model;
 use Spiral\ORM\ModelAccessorInterface;
 
+/**
+ * Atomic number accessor provides ability to change numeric model field using delta values, this
+ * accessor is very similar by idea to Document->inc() method.
+ *
+ * Accessor will declare expression to sent to update statement in compileUpdate() method. If parent
+ * model is solid (solid state) dynamic expression will be ignored and accessor will return it's
+ * internal numeric value (altered by inc/dec operations and based on original model value).
+ */
 class AtomicNumber implements ModelAccessorInterface
 {
     /**
-     * Parent active record.
-     *
-     * @var Model
-     */
-    protected $parent = null;
-
-    /**
-     * Original value.
+     * Current numeric value.
      *
      * @var float|int
      */
-    protected $original = null;
+    private $value = null;
 
     /**
-     * Numeric value.
-     *
      * @var float|int
      */
-    protected $value = null;
+    private $original = null;
 
     /**
-     * Current value change.
+     * Difference between original and current values.
      *
      * @var float|int
      */
     protected $delta = 0;
 
     /**
+     * @var Model
+     */
+    protected $parent = null;
+
+    /**
      * {@inheritdoc}
      */
-    public function __construct($data = null, $parent = null, $options = null)
+    public function __construct($data, $parent, $options = null)
     {
         $this->original = $this->value = $data;
         $this->parent = $parent;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function defaultValue(Driver $driver)
+    {
+        return $this->serializeData();
     }
 
     /**
@@ -100,36 +112,21 @@ class AtomicNumber implements ModelAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function compileUpdates($field = '')
+    public function compileUpdate($field = '')
     {
-        if ($this->delta === 0)
-        {
+        if ($this->delta === 0) {
+            //Nothing were changed
             return $this->value;
         }
 
         $sign = $this->delta > 0 ? '+' : '-';
 
-        return new SqlExpression("{$field} {$sign} " . abs($this->delta));
+        //"field" = "field" + delta
+        return new SQLExpression("{$field} {$sign} " . abs($this->delta));
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function defaultValue(Driver $driver)
-    {
-        return $this->serializeData();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->serializeData();
-    }
-
-    /**
-     * Increment numeric value (alias for inc).
+     * Increment numeric value (alias for inc) by given delta.
      *
      * @param float|int $delta
      * @return $this
@@ -143,7 +140,7 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Increment numeric value (alias for inc).
+     * Increment numeric value (alias for inc) by given delta.
      *
      * @param float|int $delta
      * @return $this
@@ -157,9 +154,9 @@ class AtomicNumber implements ModelAccessorInterface
     }
 
     /**
-     * Decrement numeric value.
+     * Decrement numeric value by given delta.
      *
-     * @param float|int $delta
+     * @param float|int $delta Delta must be positive to deduct value.
      * @return $this
      */
     public function dec($delta = 1)
@@ -168,6 +165,14 @@ class AtomicNumber implements ModelAccessorInterface
         $this->delta -= $delta;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->serializeData();
     }
 
     /**

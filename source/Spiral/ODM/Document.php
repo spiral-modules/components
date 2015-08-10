@@ -194,7 +194,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * @invisible
-     * @var CompositableInterface|Document
+     * @var CompositableInterface|Document|DataEntity
      */
     protected $parent = null;
 

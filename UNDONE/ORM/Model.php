@@ -592,7 +592,7 @@ abstract class Model extends DataEntity
         {
             if ($field instanceof ModelAccessorInterface && ($this->solidState || $field->hasUpdates()))
             {
-                $updates[$name] = $field->compileUpdates($name);
+                $updates[$name] = $field->compileUpdate($name);
                 continue;
             }
 

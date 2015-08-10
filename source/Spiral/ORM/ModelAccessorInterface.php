@@ -8,9 +8,13 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Database\Driver;
+use Spiral\Database\Entities\Driver;
+use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Models\AccessorInterface;
 
+/**
+ * Declares requirement for every ORM field accessor to declare it's driver depended value.
+ */
 interface ModelAccessorInterface extends AccessorInterface
 {
     /**
@@ -26,15 +30,16 @@ interface ModelAccessorInterface extends AccessorInterface
     public function flushUpdates();
 
     /**
-     * Get new field value to be send to database.
+     * Create update value or statement to be used in DBAL update builder. May return SQLFragments
+     * and expressions.
      *
-     * @param string $field Name of field where model/accessor stored into.
-     * @return mixed
+     * @param string $field Name of field where accessor associated to.
+     * @return mixed|SQLFragmentInterface
      */
-    public function compileUpdates($field = '');
+    public function compileUpdate($field = '');
 
     /**
-     * Accessor default value specific to driver.
+     * Accessor default value (must be specific to driver).
      *
      * @param Driver $driver
      * @return mixed

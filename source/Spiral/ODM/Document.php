@@ -18,21 +18,22 @@ use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * Document is base data model for ODM component, it used to describe Mongo document schema, filters, validations and etc.
- * In addition Document classes used as ActiveRecord pattern to represent Mongo data. ODM component will automatically
- * analyze existed Documents and create cached version of their schema.
+ * Document is base data model for ODM component, it used to describe Mongo document schema, filters,
+ * validations and etc. In addition Document classes used as ActiveRecord pattern to represent Mongo
+ * data. ODM component will automatically analyze existed Documents and create cached version of their
+ * schema.
  */
 class Document extends DataEntity implements CompositableInterface, ActiveEntityInterface
 {
     /**
-     * We are going to inherit parent validation rules, this will let spiral translator know about it and merge i18n
-     * messages.
+     * We are going to inherit parent validation rules, this will let spiral translator know about
+     * it and merge i18n messages.
      */
     const I18N_INHERIT_MESSAGES = true;
 
     /**
-     * Indication that save methods must be validated by default, can be altered by calling save method with user
-     * arguments.
+     * Indication that save methods must be validated by default, can be altered by calling save
+     * method with user arguments.
      */
     const VALIDATE_SAVE = true;
 
@@ -42,8 +43,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     const ATOMIC_SET = '$set';
 
     /**
-     * Tells ODM component that Document class must be resolved using document fields. ODM must match fields to every
-     * child of this documents and find best match. This is default definition behaviour.
+     * Tells ODM component that Document class must be resolved using document fields. ODM must
+     * match fields to every child of this documents and find best match. This is default definition
+     * behaviour.
      *
      * Example:
      * > Class A: _id, name, address
@@ -53,25 +55,26 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     const DEFINITION_FIELDS = 1;
 
     /**
-     * Tells ODM that logical method (defineClass) must be used to define document class. Method will receive document
-     * fields as input and must return document class name.
+     * Tells ODM that logical method (defineClass) must be used to define document class. Method will
+     * receive document fields as input and must return document class name.
      *
      * Example:
      * > Class A: _id, name, type (a)
      * > Class B extends A: _id, name, type (b)
      * > Class C extends B: _id, name, type (c)
-     * < Static method in class A (parent) should return A, B or C based on type field value (as example).
+     * < Static method in class A (parent) should return A, B or C based on type field value (as
+     * example).
      *
-     * Attention, ODM will always ask TOP PARENT (in collection) to define class when you loading documents from
-     * collections.
+     * Attention, ODM will always ask TOP PARENT (in collection) to define class when you loading
+     * documents from collections.
      *
      * @see defineClass($fields)
      */
     const DEFINITION_LOGICAL = 2;
 
     /**
-     * Indication to ODM component of method to resolve Document class using it's fieldset. This constant is required
-     * due Document can inherit another Document.
+     * Indication to ODM component of method to resolve Document class using it's fieldset. This
+     * constant is required due Document can inherit another Document.
      */
     const DEFINITION = self::DEFINITION_FIELDS;
 
@@ -111,8 +114,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $database = null;
 
     /**
-     * Set of indexes to be created for associated collection. Use self::INDEX_OPTIONS or "@options" for additional
-     * parameters.
+     * Set of indexes to be created for associated collection. Use self::INDEX_OPTIONS or "@options"
+     * for additional parameters.
      *
      * Example:
      * protected $indexes = [
@@ -126,15 +129,16 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $indexes = [];
 
     /**
-     * SolidState will force document to be saved as one big data set without any atomic operations (dirty fields).
+     * SolidState will force document to be saved as one big data set without any atomic operations
+     * (dirty fields).
      *
      * @var bool
      */
     protected $solidState = false;
 
     /**
-     * Document fields, accessors and relations. ODM will generate setters and getters for some fields based on their
-     * types.
+     * Document fields, accessors and relations. ODM will generate setters and getters for some fields
+     * based on their types.
      *
      * Example, fields:
      * protected $schema = [
@@ -147,7 +151,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * protected $schema = [
      *     ...,
      *     'child' => Child::class,  //One document are composited, for example user Profile
-     *     'many'  => [Child::class] //Compositor accessor will be applied, allows to composite many document intances
+     *     'many'  => [Child::class] //Compositor accessor will be applied, allows to composite many
+     *                               //document intances
      * ];
      *
      * Attention, every composited class will be validated with it's parent document!
@@ -155,15 +160,16 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * Aggregations:
      * protected $schema = [
      *     ...,
-     *     'outer' => [self::ONE => Outer::class, [   //Reference to outer document using internal outerID value
-     *          '_id' => 'key::outerID'
+     *     'outer' => [self::ONE => Outer::class, [   //Reference to outer document using internal
+     *          '_id' => 'key::outerID'               //outerID value
      *     ]],
-     *     'many' => [self::MANY => Outer::class, [   //Reference to many outer document using document primary key
-     *          'innerID' => 'key::_id'
+     *     'many' => [self::MANY => Outer::class, [   //Reference to many outer document using
+     *          'innerID' => 'key::_id'               //document primary key
      *     ]]
      * ];
      *
-     * Note: key::{name} construction will be replaced with document value in resulted query, even in case of arrays ;)
+     * Note: key::{name} construction will be replaced with document value in resulted query, even
+     * in case of arrays ;)
      *
      * Documents can extend each other, in this case schema will also be inherited.
      *
@@ -241,8 +247,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     }
 
     /**
-     * Change document solid state. SolidState will force document to be saved as one big data set without any atomic
-     * operations (dirty fields).
+     * Change document solid state. SolidState will force document to be saved as one big data set
+     * without any atomic operations (dirty fields).
      *
      * @param bool $solidState
      * @param bool $forceUpdate Mark all fields as changed to force update later.
@@ -330,7 +336,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         parent::setField($name, $value, $filter);
 
         if (!array_key_exists($name, $this->updates)) {
-            $this->updates[$name] = $original instanceof AccessorInterface ? $original->serializeData() : $original;
+            $this->updates[$name] = $original instanceof AccessorInterface
+                ? $original->serializeData()
+                : $original;
         }
     }
 
@@ -356,8 +364,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     }
 
     /**
-     * Alias for atomic operation $set. Attention, this operation is not identical to setField() method, it performs low
-     * level operation and can be used only on simple fields. No filters will be applied to field!
+     * Alias for atomic operation $set. Attention, this operation is not identical to setField()
+     * method, it performs low level operation and can be used only on simple fields. No filters will
+     * be applied to field!
      *
      * @param string $field
      * @param mixed  $value
@@ -367,7 +376,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     public function set($field, $value)
     {
         if ($this->hasUpdates($field, true)) {
-            throw new DocumentException("Unable to apply multiple atomic operation to field '{$field}'.");
+            throw new DocumentException(
+                "Unable to apply multiple atomic operation to field '{$field}'."
+            );
         }
 
         $this->atomics[self::ATOMIC_SET][$field] = $value;
@@ -387,7 +398,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     public function inc($field, $value)
     {
         if ($this->hasUpdates($field, true) && !isset($this->atomics['$inc'][$field])) {
-            throw new DocumentException("Unable to apply multiple atomic operation to field '{$field}'.");
+            throw new DocumentException(
+                "Unable to apply multiple atomic operation to field '{$field}'."
+            );
         }
 
         if (!isset($this->atomics['$inc'][$field])) {
@@ -464,8 +477,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      *
      * Create or update document state in database.
      *
-     * @param bool|null $validate Overwrite default option declared in VALIDATE_SAVE to force or disable validation
-     *                            before saving.
+     * @param bool|null $validate Overwrite default option declared in VALIDATE_SAVE to force or
+     *                            disable validation before saving.
      * @throws DocumentException
      * @event saving()
      * @event saved()
@@ -652,8 +665,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * {@inheritdoc} See DataEntity class.
      *
      * ODM:
-     * Get instance of Collection or Document associated with described aggregation. Use method arguments to specify
-     * additional query.
+     * Get instance of Collection or Document associated with described aggregation. Use method
+     * arguments to specify additional query.
      *
      * Example:
      * $parentGroup = $user->group();

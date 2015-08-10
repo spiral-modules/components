@@ -14,8 +14,8 @@ use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\ODM;
 
 /**
- * Simple ODM accessor with ability to mock access to array field. ScalarArray support atomic operations and performs
- * type normalization.
+ * Simple ODM accessor with ability to mock access to array field. ScalarArray support atomic
+ * operations and performs type normalization.
  */
 class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Countable, \ArrayAccess
 {
@@ -39,8 +39,8 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     protected $data = [];
 
     /**
-     * When solid state is enabled no atomic operations will be pushed to databases and array will be saved as one big
-     * set. Enabled by default.
+     * When solid state is enabled no atomic operations will be pushed to databases and array will
+     * be saved as one big set. Enabled by default.
      *
      * @var bool
      */
@@ -127,8 +127,8 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     }
 
     /**
-     * When solid state is enabled no atomic operations will be pushed to databases and array will be saved as one big
-     * set request.
+     * When solid state is enabled no atomic operations will be pushed to databases and array will be
+     * saved as one big set request.
      *
      * @param bool $solidState
      * @return $this

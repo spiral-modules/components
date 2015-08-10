@@ -41,6 +41,11 @@ class ORM extends Singleton
     const CONFIG = 'orm';
 
     /**
+     * Memory section to store ORM schema.
+     */
+    const SCHEMA_SECTION = 'ormSchema';
+
+    /**
      * Normalized model constants.
      */
     const M_ROLE_NAME   = 0;
@@ -63,7 +68,8 @@ class ORM extends Singleton
     const R_DEFINITION = 2;
 
     /**
-     * Pivot table data location in Model fields.
+     * Pivot table data location in Model fields. Pivot data only provided when model is loaded
+     * using many-to-many relation.
      */
     const PIVOT_DATA = '@pivot';
 
@@ -75,9 +81,9 @@ class ORM extends Singleton
     protected $schema = null;
 
     /**
-     * In cases when ORM cache is enabled every constructed instance will be stored here, cache used mainly to ensure
-     * the same instance of object, even if was accessed from different spots.
-     * Cache usage increases memory consumption.
+     * In cases when ORM cache is enabled every constructed instance will be stored here, cache used
+     * mainly to ensure the same instance of object, even if was accessed from different spots.
+     * Cache usage increases memory consumption and does not decreases amount of queries being made.
      *
      * @var Model[]
      */
@@ -113,7 +119,7 @@ class ORM extends Singleton
         DatabaseProvider $dbal
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
-        $this->schema = $memory->loadData('ormSchema');
+        $this->schema = $memory->loadData(static::SCHEMA_SECTION);
 
         $this->dbal = $dbal;
 
@@ -146,15 +152,15 @@ class ORM extends Singleton
         }
 
         if (!isset($this->schema[$model])) {
-            throw new ORMException("Undefined ORM schema item '{$model}'.");
+            throw new ORMException("Undefined ORM schema item, unknown model '{$model}'.");
         }
 
         return $this->schema[$model];
     }
 
     /**
-     * Construct instance of Model or receive it from cache (if enabled). Only models with declared primary key can be
-     * cached.
+     * Construct instance of Model or receive it from cache (if enabled). Only models with declared
+     * primary key can be cached.
      *
      * @param string $class
      * @param array  $data

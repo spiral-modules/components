@@ -23,7 +23,8 @@ use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * ODM component used to manage state of cached Document's schema, document creation and schema analysis.
+ * ODM component used to manage state of cached Document's schema, document creation and schema
+ * analysis.
  */
 class ODM extends Singleton implements InjectorInterface
 {
@@ -41,6 +42,11 @@ class ODM extends Singleton implements InjectorInterface
      * Configuration section.
      */
     const CONFIG = 'odm';
+
+    /**
+     * Memory section to store ODM schema.
+     */
+    const SCHEMA_SECTION = 'odmSchema';
 
     /**
      * Class definition options.
@@ -116,7 +122,7 @@ class ODM extends Singleton implements InjectorInterface
         ContainerInterface $container
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
-        $this->schema = $memory->loadData('odmSchema');
+        $this->schema = $memory->loadData(static::SCHEMA_SECTION);
 
         $this->memory = $memory;
         $this->container = $container;
@@ -126,7 +132,8 @@ class ODM extends Singleton implements InjectorInterface
      * Create specified or select default instance of MongoDatabase.
      *
      * @param string $database Database name (internal).
-     * @param array  $config   Connection options, only required for databases not listed in ODM config.
+     * @param array  $config   Connection options, only required for databases not listed in ODM
+     *                         config.
      * @return MongoDatabase
      * @throws ODMException
      */
@@ -191,8 +198,8 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
-     * Create instance of document by given class name and set of fields, ODM component must automatically find appropriate
-     * class to be used as ODM support model inheritance.
+     * Create instance of document by given class name and set of fields, ODM component must
+     * automatically find appropriate class to be used as ODM support model inheritance.
      *
      * @param string                $class
      * @param array                 $fields
@@ -273,8 +280,8 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
-     * Get primary document class to be associated with collection. Attention, collection may return parent document
-     * instance even if query was made using children implementation.
+     * Get primary document class to be associated with collection. Attention, collection may return
+     * parent document instance even if query was made using children implementation.
      *
      * @param string $database
      * @param string $collection
@@ -299,7 +306,8 @@ class ODM extends Singleton implements InjectorInterface
         $builder->createIndexes();
 
         //Saving
-        $this->memory->saveData('odmSchema', $this->schema = $builder->normalizeSchema());
+        $this->memory->saveData(static::SCHEMA_SECTION,
+            $this->schema = $builder->normalizeSchema());
 
         //Let's reinitialize models
         DataEntity::resetInitiated();

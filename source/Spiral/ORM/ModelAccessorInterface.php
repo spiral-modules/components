@@ -13,7 +13,8 @@ use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Models\AccessorInterface;
 
 /**
- * Declares requirement for every ORM field accessor to declare it's driver depended value.
+ * Declares requirement for every ORM field accessor to declare it's driver depended value and
+ * control it's updates.
  */
 interface ModelAccessorInterface extends AccessorInterface
 {

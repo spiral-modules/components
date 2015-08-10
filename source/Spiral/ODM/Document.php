@@ -97,13 +97,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     const ONE  = 899;
 
     /**
-     * {@inheritdoc}
-     *
-     * We can make _id to be secured by default.
-     */
-    protected $secured = ['_id'];
-
-    /**
      * Collection name where document should be stored into.
      *
      * @var string

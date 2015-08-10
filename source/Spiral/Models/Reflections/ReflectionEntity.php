@@ -40,6 +40,10 @@ abstract class ReflectionEntity extends \ReflectionClass
      */
     public function getSecured()
     {
+        if ($this->property('secured', true) === '*') {
+            return $this->property('secured', true);
+        }
+
         return array_unique($this->property('secured', true));
     }
 

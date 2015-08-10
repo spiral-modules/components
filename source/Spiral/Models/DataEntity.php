@@ -64,12 +64,13 @@ abstract class DataEntity extends Component implements
     protected $fillable = [];
 
     /**
-     * List of fields not allowed to be filled by setFields() method.
+     * List of fields not allowed to be filled by setFields() method. By default no fields can be
+     * set. Replace with and empty array to allow all fields.
      *
      * @see setFields()
-     * @var array
+     * @var array|string
      */
-    protected $secured = [];
+    protected $secured = '*';
 
     /**
      * @see setField()
@@ -385,6 +386,10 @@ abstract class DataEntity extends Component implements
     {
         if (!empty($this->fillable)) {
             return in_array($field, $this->fillable);
+        }
+
+        if ($this->secured === '*') {
+            return false;
         }
 
         return !in_array($field, $this->secured);

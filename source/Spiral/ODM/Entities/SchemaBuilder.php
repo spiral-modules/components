@@ -19,8 +19,8 @@ use Spiral\ODM\ODM;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
- * Schema builder responsible for static analysis of existed Documents, their schemas, validations, requested indexes
- * and etc.
+ * Schema builder responsible for static analysis of existed Documents, their schemas, validations,
+ * requested indexes and etc.
  */
 class SchemaBuilder extends Component
 {
@@ -126,8 +126,13 @@ class SchemaBuilder extends Component
                 continue;
             }
 
-            //We can safely create odm Collection here, as we not going to use functionality requires finalized schema
-            $odmCollection = $this->odm->db($collection->getDatabase())->odmCollection($collection->getName());
+            //We can safely create odm Collection here, as we not going to use functionality requires
+            //finalized schema
+            $odmCollection = $this->odm->db(
+                $collection->getDatabase()
+            )->odmCollection(
+                $collection->getName()
+            );
 
             foreach ($indexes as $index) {
                 $options = [];
@@ -152,7 +157,8 @@ class SchemaBuilder extends Component
     {
         $result = [];
         foreach ($this->getCollections() as $collection) {
-            $result[$collection->getDatabase() . '/' . $collection->getName()] = $collection->getParent()->getName();
+            $name = $collection->getDatabase() . '/' . $collection->getName();
+            $result[$name] = $collection->getParent()->getName();
         }
 
         foreach ($this->getDocuments() as $document) {

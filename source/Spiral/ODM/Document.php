@@ -743,7 +743,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             //Let's force composition construction
             $composition = $this->getField($field);
             if (!$composition instanceof CompositableInterface) {
-                throw new DocumentException("All compositions must be an instance of CompositableInterface.");
+                throw new DocumentException(
+                    "All compositions must be an instance of CompositableInterface."
+                );
             }
 
             $composition->invalidate();
@@ -908,7 +910,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * Find document using it's primary key.
      *
-     * @param mixed $mongoID Valid MongoId, string value must be automatically converted to MongoId object.
+     * @param mixed $mongoID Valid MongoId, string value must be automatically converted to MongoId
+     *                       object.
      * @return static|null
      * @throws ODMException
      */

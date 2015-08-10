@@ -17,7 +17,8 @@ use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
 /**
- * Mocks MongoCollection to aggregate query, limits and sorting values and product DocumentIterator as result.
+ * Mocks MongoCollection to aggregate query, limits and sorting values and product DocumentIterator
+ * as result.
  *
  * @see  DocumentIterator
  * @link http://docs.mongodb.org/manual/tutorial/query-documents/
@@ -161,7 +162,8 @@ class Collection extends Component implements
     }
 
     /**
-     * Set additional query field, fields will be merged to currently existed request using array_merge. Alias for query.
+     * Set additional query field, fields will be merged to currently existed request using array_merge.
+     * Alias for query.
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      * @param array $query Fields and conditions to query by.
@@ -173,7 +175,8 @@ class Collection extends Component implements
     }
 
     /**
-     * Set additional query field, fields will be merged to currently existed request using array_merge. Alias for query.
+     * Set additional query field, fields will be merged to currently existed request using array_merge.
+     * Alias for query.
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      * @param array $query Fields and conditions to query by.

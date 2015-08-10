@@ -14,7 +14,8 @@ use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
 /**
- * Walks thought query result and creates instances of Document on demand. Class decorates methods of MongoCursor.
+ * Walks thought query result and creates instances of Document on demand. Class decorates methods
+ * of MongoCursor.
  *
  * @see MongoCursor
  *
@@ -91,7 +92,8 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     }
 
     /**
-     * Sets the fields for a query. Query will return arrays instead of Documents if selection fields are set.
+     * Sets the fields for a query. Query will return arrays instead of Documents if selection fields
+     * are set.
      *
      * @link http://www.php.net/manual/en/mongocursor.fields.php
      * @param array $fields Fields to return (or not return).

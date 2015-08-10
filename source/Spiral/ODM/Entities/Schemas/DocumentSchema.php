@@ -242,8 +242,8 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Get schema of top parent of current document or document schema itself. This method is reverse implementation of
-     * getChildren().
+     * Get schema of top parent of current document or document schema itself. This method is reverse
+     * implementation of getChildren().
      *
      * @see getChindren()
      * @param bool $sameCollection Only document with same collection.
@@ -330,7 +330,9 @@ class DocumentSchema extends ReflectionEntity
             }
 
             //Class to be aggregated
-            $class = isset($options[Document::MANY]) ? $options[Document::MANY] : $options[Document::ONE];
+            $class = isset($options[Document::MANY])
+                ? $options[Document::MANY]
+                : $options[Document::ONE];
 
             if (!$this->builder->hasDocument($class)) {
                 throw new SchemaException(
@@ -341,7 +343,8 @@ class DocumentSchema extends ReflectionEntity
             $document = $this->builder->document($class);
             if ($document->isEmbeddable()) {
                 throw new SchemaException(
-                    "Unable to build aggregation {$this}.{$field}, document '{$class}' does not have any collection."
+                    "Unable to build aggregation {$this}.{$field}, "
+                    . "document '{$class}' does not have any collection."
                 );
             }
 
@@ -429,10 +432,10 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Get information required to resolve class instance using given set of fields. Fields based definition will analyze
-     * unique fields in every child model to create association between model class and required set of fields. Only
-     * document from same collection will be involved in definition creation. Definition built only for child of first
-     * order.
+     * Get information required to resolve class instance using given set of fields. Fields based
+     * definition will analyze unique fields in every child model to create association between
+     * model class and required set of fields. Only document from same collection will be involved
+     * in definition creation. Definition built only for child of first order.
      *
      * @return array|string
      * @throws SchemaException
@@ -468,7 +471,9 @@ class DocumentSchema extends ReflectionEntity
         foreach ($children as $document) {
             //Child document fields
             if (empty($fields = $document->getFields())) {
-                throw new DefinitionException("Child document {$document} of {$this} does not have any fields.");
+                throw new DefinitionException(
+                    "Child document {$document} of {$this} does not have any fields."
+                );
             }
 
             $uniqueField = null;
@@ -490,7 +495,9 @@ class DocumentSchema extends ReflectionEntity
             }
 
             if (empty($uniqueField)) {
-                throw new DefinitionException("Child document {$document} of {$this} does not have any unique field.");
+                throw new DefinitionException(
+                    "Child document {$document} of {$this} does not have any unique field."
+                );
             }
 
             $definition['options'][$uniqueField] = $document->getName();
@@ -523,15 +530,16 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Check if both documents belongs to same collection. Documents without declared collection must be counted as
-     * documents from same collection.
+     * Check if both documents belongs to same collection. Documents without declared collection must
+     * be counted as documents from same collection.
      *
      * @param DocumentSchema $document
      * @return bool
      */
     protected function sameCollection(DocumentSchema $document)
     {
-        return $document->getCollection() == $this->getCollection() && $document->getDatabase() == $this->getDatabase();
+        return $document->getCollection() == $this->getCollection()
+        && $document->getDatabase() == $this->getDatabase();
     }
 
     /**
@@ -542,8 +550,8 @@ class DocumentSchema extends ReflectionEntity
      */
     private function isAggregation($type)
     {
-        return is_array($type) && (array_key_exists(Document::MANY,
-                $type) || array_key_exists(Document::ONE, $type));
+        return is_array($type)
+        && (array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
     }
 
     /**

@@ -81,8 +81,9 @@ class MongoDatabase extends \MongoDB
     }
 
     /**
-     * While profiling enabled driver will create query logging and benchmarking events. This is recommended option in
-     * development environments. Profiling will be applied for ODM Collection queries only.
+     * While profiling enabled driver will create query logging and benchmarking events. This is
+     * recommended option in* development environments. Profiling will be applied for ODM Collection
+     * queries only.
      *
      * @param bool|int $profiling Enable or disable driver profiling.
      * @return $this

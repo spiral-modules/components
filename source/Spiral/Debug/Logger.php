@@ -19,7 +19,7 @@ class Logger extends AbstractLogger
     /**
      * Default logging name (channel).
      */
-    const DEFAULT_NAME = 'debug';
+    const DEFAULT_NAME = '@global';
 
     /**
      * Helper constant to associate all log levels with one filename.
@@ -48,20 +48,6 @@ class Logger extends AbstractLogger
     const MESSAGE_CONTEXT   = 4;
 
     /**
-     * When memory logging is enabled every log raised by logger will be stored in global array.
-     *
-     * @var bool
-     */
-    private static $memoryLogging = false;
-
-    /**
-     * Globally recorded messages.
-     *
-     * @var array
-     */
-    private static $logMessages = [];
-
-    /**
      * Logging container name, usually defined by component alias or class name.
      *
      * @var string
@@ -76,6 +62,13 @@ class Logger extends AbstractLogger
     private $handlers = [];
 
     /**
+     * Debugger used for global logging.
+     *
+     * @var Debugger|null
+     */
+    protected $debugger = null;
+
+    /**
      * @param string   $name
      * @param Debugger $debugger Used to automatically configure handlers.
      */
@@ -84,7 +77,10 @@ class Logger extends AbstractLogger
         $this->name = $name;
 
         //Configuring handlers
-        !empty($debugger) && $debugger->configureLogger($this);
+        if (!empty($debugger)) {
+            $this->debugger = $debugger;
+            $debugger->configureLogger($this);
+        }
     }
 
     /**
@@ -114,6 +110,15 @@ class Logger extends AbstractLogger
      */
     public function log($level, $message, array $context = [])
     {
+        if (!empty($this->debugger)) {
+            //Global logging
+            $this->debugger->logGlobal($this->name, $level, $message, $context);
+        }
+
+        if (empty($this->handlers)) {
+            return $this;
+        }
+
         $payload = [
             self::MESSAGE_CHANNEL   => $this->name,
             self::MESSAGE_TIMESTAMP => microtime(true),
@@ -121,10 +126,6 @@ class Logger extends AbstractLogger
             self::MESSAGE_BODY      => \Spiral\interpolate($message, $context),
             self::MESSAGE_CONTEXT   => $context
         ];
-
-        if (self::$memoryLogging) {
-            self::$logMessages[] = $payload;
-        }
 
         //We don't need this information for log handlers
         unset($payload[self::MESSAGE_CHANNEL], $payload[self::MESSAGE_TIMESTAMP]);
@@ -136,25 +137,5 @@ class Logger extends AbstractLogger
         }
 
         return $this;
-    }
-
-    /**
-     * When memory logging is enabled every log raised by logger will be stored in global array.
-     *
-     * @param bool $enabled
-     */
-    public static function memoryLogging($enabled = true)
-    {
-        self::$memoryLogging = $enabled;
-    }
-
-    /**
-     * Get all recorded log messages. MemoryLogging has to be enabled.
-     *
-     * @return array
-     */
-    public static function logMessages()
-    {
-        return self::$logMessages;
     }
 }

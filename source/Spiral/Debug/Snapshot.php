@@ -228,7 +228,8 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
         return $this->renderCache = $this->views->render($this->config['view'], [
             'dumpArguments' => $this->config['dumps'],
             'snapshot'      => $this,
-            'container'     => $this->container
+            'container'     => $this->container,
+            'debugger'      => $this->debugger
         ]);
     }
 

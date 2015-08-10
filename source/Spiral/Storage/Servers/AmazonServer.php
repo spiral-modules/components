@@ -317,7 +317,11 @@ class AmazonServer extends StorageServer
 
         if (!empty($maxAge = $bucket->getOption('maxAge', 0))) {
             //Shortcut
-            $headers['Max-Age'] = $bucket->getOption('maxAge', 0);
+            $headers['Cache-control'] = 'max-age=' . $bucket->getOption('maxAge', 0) . ', public';
+            $headers['Expires'] = gmdate(
+                'D, d M Y H:i:s T',
+                time() + $bucket->getOption('maxAge', 0)
+            );
         }
 
         return $headers + [

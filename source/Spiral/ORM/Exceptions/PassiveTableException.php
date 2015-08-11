@@ -16,7 +16,7 @@ use Spiral\ORM\Entities\Schemas\ModelSchema;
  * constant set to false. Tables like that counted as passive and their schema must not be altered
  * by ORM schema synchronizer.
  */
-class ForbiddenChangeException extends SchemaException
+class PassiveTableException extends SchemaException
 {
     /**
      * @param AbstractTable $table

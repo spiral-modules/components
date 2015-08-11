@@ -12,7 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\ModelSchema;
-use Spiral\ORM\Exceptions\ForbiddenChangeException;
+use Spiral\ORM\Exceptions\PassiveTableException;
 use Spiral\ORM\Exceptions\ModelSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
@@ -226,7 +226,7 @@ class SchemaBuilder extends Component
      * @throws \Spiral\Database\Exceptions\SchemaException
      * @throws \Spiral\Database\Exceptions\QueryException
      * @throws \Spiral\Database\Exceptions\DriverException
-     * @throws ForbiddenChangeException
+     * @throws PassiveTableException
      */
     public function synchronizeSchema()
     {
@@ -247,7 +247,7 @@ class SchemaBuilder extends Component
                     continue;
                 }
 
-                throw new ForbiddenChangeException($table, $model);
+                throw new PassiveTableException($table, $model);
             }
 
             /**

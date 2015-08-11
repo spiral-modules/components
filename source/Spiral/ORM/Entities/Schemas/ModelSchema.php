@@ -94,6 +94,8 @@ class ModelSchema extends ReflectionEntity
      * Returns true if Model states that related table can be altered by ORM. To allow schema altering
      * set model constant ACTIVE_SCHEMA to true.
      *
+     * Tables associated to models with ACTIVE_SCHEMA = false counted as "passive".
+     *
      * @see Model::ACTIVE_SCHEMA
      * @return bool
      */

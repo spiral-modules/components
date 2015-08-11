@@ -359,44 +359,7 @@ abstract class RelationSchema implements RelationSchemaInterface
         return $this->getName();
     }
 
-    //    /**
-    //     * Simplified method to cast column type and options by provided definition.
-    //     *
-    //     * @param AbstractColumn $column
-    //     * @param string         $definition
-    //     */
-    //    protected function castColumn(AbstractColumn $column, $definition)
-    //    {
-    //        $validType = preg_match(
-    //            '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i',
-    //            $definition,
-    //            $matches
-    //        );
-    //
-    //        //Parsing definition
-    //        if (!$validType) {
-    //            throw new ORMException(
-    //                "Unable to parse definition of pivot column {$this->getName()}.'{$column->getName()}'."
-    //            );
-    //        }
-    //
-    //        $column->nullable(false);
-    //        if (!empty($matches['nullable'])) {
-    //            //No need to force NOT NULL as this is default column state
-    //            $column->nullable(true);
-    //        }
-    //
-    //        $type = $matches['type'];
-    //
-    //        $options = [];
-    //        if (!empty($matches['options'])) {
-    //            $options = array_map('trim', explode(',', $matches['options']));
-    //        }
-    //
-    //        call_user_func_array([$column, $type], $options);
-    //    }
-
-    /**
+      /**
      * Normalize schema definition into light cachable form.
      *
      * @return array

@@ -17,9 +17,10 @@ use Spiral\ORM\Model;
  * fields.
  *
  * Example, [User has many Comments], user primary key is "id":
- * relation will create outer key "user_id" in "comments" table (or other table name), nullable by default
- * relation will create index on column "user_id" in "comments" table if allowed
- * relation will create foreign key "comments"."user_id" => "users"."id"
+ * - relation will create outer key "user_id" in "comments" table (or other table name), nullable
+ *   by default
+ * - relation will create index on column "user_id" in "comments" table if allowed
+ * - relation will create foreign key "comments"."user_id" => "users"."id" if allowed
  */
 class HasManySchema extends HasOneSchema
 {

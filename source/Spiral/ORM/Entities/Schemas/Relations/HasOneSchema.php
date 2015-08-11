@@ -16,9 +16,10 @@ use Spiral\ORM\Model;
  * [outer] key linked to value of [inner] key of parent mode.
  *
  * Example, [User has one Profile], user primary key is "id":
- * relation will create outer key "user_id" in "profiles" table (or other table name), nullable by default
- * relation will create index on column "user_id" in "profiles" table if allowed
- * relation will create foreign key "profiles"."user_id" => "users"."id"
+ * - relation will create outer key "user_id" in "profiles" table (or other table name), nullable
+ *   by default
+ * - relation will create index on column "user_id" in "profiles" table if allowed
+ * - relation will create foreign key "profiles"."user_id" => "users"."id" if allowed
  */
 class HasOneSchema extends RelationSchema
 {

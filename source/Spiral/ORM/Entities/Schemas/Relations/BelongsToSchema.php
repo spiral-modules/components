@@ -21,9 +21,10 @@ use Spiral\ORM\Model;
  * HAS_MANY relation in User model under name "posts").
  *
  * Example, [Post has one User, relation name "author"], user primary key is "id":
- * relation will create inner key "author_id" in "posts" table (or other table name), nullable by default
- * relation will create index on column "author_id" in "posts" table if allowed
- * relation will create foreign key "posts"."author_id" => "users"."id"
+ * - relation will create inner key "author_id" in "posts" table (or other table name), nullable by
+ *   default
+ * - relation will create index on column "author_id" in "posts" table if allowed
+ * - relation will create foreign key "posts"."author_id" => "users"."id" if allowed
  */
 class BelongsToSchema extends RelationSchema
 {
@@ -35,7 +36,7 @@ class BelongsToSchema extends RelationSchema
     /**
      * {@inheritdoc}
      *
-     * When relation states that model belogs to interface relation will be switched to
+     * When relation states that model belongs to interface relation will be switched to
      * BelongsToMorphed.
      */
     const EQUIVALENT_RELATION = Model::BELONGS_TO_MORPHED;

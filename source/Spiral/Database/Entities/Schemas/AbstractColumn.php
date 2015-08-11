@@ -612,7 +612,7 @@ abstract class AbstractColumn implements ColumnInterface
      * @return AbstractReference
      * @throws SchemaException
      */
-    public function foreign($table, $column = 'id')
+    public function references($table, $column = 'id')
     {
         if ($this->phpType() != self::INT) {
             throw new SchemaException(

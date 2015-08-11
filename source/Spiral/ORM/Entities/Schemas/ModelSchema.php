@@ -257,6 +257,24 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
+     * Get array of fields which can be set with null value. Model schema must allow setting this
+     * values to null and bypass filters.
+     *
+     * @return array
+     */
+    public function getNullable()
+    {
+        $result = [];
+        foreach ($this->tableSchema->getColumns() as $column) {
+            if ($column->isNullable()) {
+                $result[] = $column->getName();
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Model will utilize it's schema definition to create set of relations to other models and
      * entities (for example ODM).
      *

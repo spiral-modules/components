@@ -27,6 +27,7 @@ interface RelationSchemaInterface
      * @param ModelSchema   $model
      * @param string        $name
      * @param array         $definition
+     * @throws RelationSchemaException
      */
     public function __construct(
         SchemaBuilder $builder,
@@ -59,9 +60,10 @@ interface RelationSchemaInterface
     public function hasEquivalent();
 
     /**
-     * Get definition for equivalent (usually polymorphic relationship) relation.
+     * Get definition for equivalent (usually polymorphic relationship) relation. For example this
+     * method can route to ODM relations if outer model is instance of Document.
      *
-     * @return array
+     * @return RelationSchemaInterface
      * @throws RelationSchemaException
      * @throws ModelSchemaException
      */

@@ -12,7 +12,6 @@ use Spiral\Database\Database;
 use Spiral\Database\Table;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\DataEntity;
-use Spiral\Validation\ValidatorInterface;
 
 abstract class Model extends DataEntity
 {
@@ -242,8 +241,12 @@ abstract class Model extends DataEntity
      * @param bool  $loaded
      * @param ORM   $orm
      */
-    public function __construct(array $data = [], $loaded = false, ORM $orm = null, array $schema = [])
-    {
+    public function __construct(
+        array $data = [],
+        $loaded = false,
+        ORM $orm = null,
+        array $schema = []
+    ) {
         $this->loaded = $loaded;
 
         $this->orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
@@ -251,8 +254,7 @@ abstract class Model extends DataEntity
 
         static::initialize();
 
-        if (isset($data[ORM::PIVOT_DATA]))
-        {
+        if (isset($data[ORM::PIVOT_DATA])) {
             $this->pivotData = $data[ORM::PIVOT_DATA];
             unset($data[ORM::PIVOT_DATA]);
         }
@@ -266,8 +268,7 @@ abstract class Model extends DataEntity
         //Merging with default values
         $this->fields = $data + $this->schema[ORM::M_COLUMNS];
 
-        if (!$this->isLoaded())
-        {
+        if (!$this->isLoaded()) {
             //Non loaded models should be in solid state by default and require initial validation
             $this->solidState(true)->validated = true;
         }
@@ -307,8 +308,7 @@ abstract class Model extends DataEntity
 
         foreach (array_intersect_key($data, $this->schema[ORM::M_RELATIONS]) as $name => $relation)
         {
-            if (!isset($this->relations[$name]) || is_array($this->relations[$name]))
-            {
+            if (!isset($this->relations[$name]) || is_array($this->relations[$name])) {
                 $this->relations[$name] = $relation;
                 continue;
             }
@@ -339,14 +339,10 @@ abstract class Model extends DataEntity
     {
         $this->solidState = $solidState;
 
-        if ($forceUpdate)
-        {
-            if ($this->schema[ORM::M_PRIMARY_KEY])
-            {
+        if ($forceUpdate) {
+            if ($this->schema[ORM::M_PRIMARY_KEY]) {
                 $this->updates = $this->getCriteria();
-            }
-            else
-            {
+            } else {
                 $this->updates = $this->schema[ORM::M_COLUMNS];
             }
         }
@@ -402,8 +398,7 @@ abstract class Model extends DataEntity
      */
     protected function getMutator($field, $mutator)
     {
-        if (isset($this->schema[ORM::M_MUTATORS][$mutator][$field]))
-        {
+        if (isset($this->schema[ORM::M_MUTATORS][$mutator][$field])) {
             return $this->schema[ORM::M_MUTATORS][$mutator][$field];
         }
 
@@ -433,10 +428,8 @@ abstract class Model extends DataEntity
      */
     public function relation($name, $data = null, $loaded = false)
     {
-        if (array_key_exists($name, $this->relations))
-        {
-            if (!is_object($this->relations[$name]))
-            {
+        if (array_key_exists($name, $this->relations)) {
+            if (!is_object($this->relations[$name])) {
                 $data = $this->relations[$name];
                 unset($this->relations[$name]);
 
@@ -448,8 +441,7 @@ abstract class Model extends DataEntity
         }
 
         //Constructing relation
-        if (!isset($this->schema[ORM::M_RELATIONS][$name]))
-        {
+        if (!isset($this->schema[ORM::M_RELATIONS][$name])) {
             throw new ORMException("Undefined relation {$name} in model " . static::class . ".");
         }
 
@@ -469,8 +461,7 @@ abstract class Model extends DataEntity
      */
     public function __get($offset)
     {
-        if (isset($this->schema[ORM::M_RELATIONS][$offset]))
-        {
+        if (isset($this->schema[ORM::M_RELATIONS][$offset])) {
             return $this->relation($offset)->getAssociated();
         }
 
@@ -482,16 +473,14 @@ abstract class Model extends DataEntity
      */
     public function setField($name, $value, $filter = true)
     {
-        if (!array_key_exists($name, $this->fields))
-        {
+        if (!array_key_exists($name, $this->fields)) {
             throw new ORMException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
         $original = $this->fields[$name];
         parent::setField($name, $value, $filter);
 
-        if (!array_key_exists($name, $this->updates))
-        {
+        if (!array_key_exists($name, $this->updates)) {
             $this->updates[$name] = $original instanceof AccessorInterface
                 ? $original->serializeData()
                 : $original;
@@ -503,8 +492,7 @@ abstract class Model extends DataEntity
      */
     public function __set($offset, $value)
     {
-        if (isset($this->schema[ORM::M_RELATIONS][$offset]))
-        {
+        if (isset($this->schema[ORM::M_RELATIONS][$offset])) {
             $this->relation($offset)->associate($value);
 
             return;
@@ -535,17 +523,13 @@ abstract class Model extends DataEntity
      */
     public function hasUpdates($field = null)
     {
-        if (empty($field))
-        {
-            if (!empty($this->updates))
-            {
+        if (empty($field)) {
+            if (!empty($this->updates)) {
                 return true;
             }
 
-            foreach ($this->fields as $field => $value)
-            {
-                if ($value instanceof ModelAccessorInterface && $value->hasUpdates())
-                {
+            foreach ($this->fields as $field => $value) {
+                if ($value instanceof ModelAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -553,8 +537,7 @@ abstract class Model extends DataEntity
             return false;
         }
 
-        if (array_key_exists($field, $this->updates))
-        {
+        if (array_key_exists($field, $this->updates)) {
             return true;
         }
 
@@ -568,10 +551,8 @@ abstract class Model extends DataEntity
     {
         $this->updates = [];
 
-        foreach ($this->fields as $value)
-        {
-            if ($value instanceof ModelAccessorInterface)
-            {
+        foreach ($this->fields as $value) {
+            if ($value instanceof ModelAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -584,27 +565,22 @@ abstract class Model extends DataEntity
      */
     protected function compileUpdates()
     {
-        if (!$this->hasUpdates() && !$this->solidState)
-        {
+        if (!$this->hasUpdates() && !$this->solidState) {
             return [];
         }
 
         $updates = [];
-        foreach ($this->fields as $name => $field)
-        {
-            if ($field instanceof ModelAccessorInterface && ($this->solidState || $field->hasUpdates()))
-            {
+        foreach ($this->fields as $name => $field) {
+            if ($field instanceof ModelAccessorInterface && ($this->solidState || $field->hasUpdates())) {
                 $updates[$name] = $field->compileUpdate($name);
                 continue;
             }
 
-            if (!$this->solidState && !array_key_exists($name, $this->updates))
-            {
+            if (!$this->solidState && !array_key_exists($name, $this->updates)) {
                 continue;
             }
 
-            if ($field instanceof ModelAccessorInterface)
-            {
+            if ($field instanceof ModelAccessorInterface) {
                 $field = $field->serializeData();
             }
 
@@ -623,8 +599,7 @@ abstract class Model extends DataEntity
     public function publicFields()
     {
         $fields = $this->getFields();
-        foreach ($this->schema[ORM::M_HIDDEN] as $secured)
-        {
+        foreach ($this->schema[ORM::M_HIDDEN] as $secured) {
             unset($fields[$secured]);
         }
 
@@ -636,8 +611,7 @@ abstract class Model extends DataEntity
      */
     public function validator(array $validates = [])
     {
-        if (!empty($this->validator))
-        {
+        if (!empty($this->validator)) {
             !empty($validates) && $this->validator->setRules($validates);
 
             //Refreshing data
@@ -690,8 +664,7 @@ abstract class Model extends DataEntity
      */
     public static function ormSelector(ORM $orm = null)
     {
-        if (empty($odm))
-        {
+        if (empty($odm)) {
             //Will work only when global container is set!
             $orm = ORM::instance(self::container());
         }
@@ -718,20 +691,17 @@ abstract class Model extends DataEntity
      */
     public function save($validate = null, $relations = true)
     {
-        if (is_null($validate))
-        {
+        if (is_null($validate)) {
             $validate = static::FORCE_VALIDATION;
         }
 
-        if ($validate && !$this->isValid())
-        {
+        if ($validate && !$this->isValid()) {
             return false;
         }
 
         //Primary key field name
         $primaryKey = $this->schema[ORM::M_PRIMARY_KEY];
-        if (!$this->isLoaded())
-        {
+        if (!$this->isLoaded()) {
             $this->fire('saving');
 
             //We will need to support models with primary keys in future
@@ -741,8 +711,7 @@ abstract class Model extends DataEntity
                 $this->fields = $this->serializeData()
             );
 
-            if (!empty($primaryKey))
-            {
+            if (!empty($primaryKey)) {
                 $this->fields[$primaryKey] = $lastID;
             }
 
@@ -750,9 +719,7 @@ abstract class Model extends DataEntity
             $this->fire('saved');
 
             $this->orm->registerEntity($this);
-        }
-        elseif ($this->solidState || $this->hasUpdates())
-        {
+        } elseif ($this->solidState || $this->hasUpdates()) {
             $this->fire('updating');
 
             static::dbalTable($this->orm)->update(
@@ -765,17 +732,15 @@ abstract class Model extends DataEntity
 
         $this->flushUpdates();
 
-        if ($relations && !empty($this->relations))
-        {
+        if ($relations && !empty($this->relations)) {
             //We would like to save all relations under one transaction, so we can easily revert them
             //all, in future it will be reasonable to save primary model and relations under one
             //transaction
-            $this->orm->getDatabase($this->schema[ORM::M_DB])->transaction(function () use ($validate)
-            {
-                foreach ($this->relations as $name => $relation)
-                {
-                    if ($relation instanceof RelationInterface && !$relation->saveAssociation($validate))
-                    {
+            $this->orm->getDatabase($this->schema[ORM::M_DB])->transaction(function () use (
+                $validate
+            ) {
+                foreach ($this->relations as $name => $relation) {
+                    if ($relation instanceof RelationInterface && !$relation->saveAssociation($validate)) {
                         //Let's record error
                         $this->setError($name, $relation->getErrors());
 
@@ -799,8 +764,7 @@ abstract class Model extends DataEntity
     {
         $this->fire('deleting');
 
-        if ($this->isLoaded())
-        {
+        if ($this->isLoaded()) {
             static::dbalTable($this->orm)->delete($this->getCriteria())->run();
         }
 
@@ -820,8 +784,7 @@ abstract class Model extends DataEntity
      */
     protected function getCriteria()
     {
-        if (!empty($this->schema[ORM::M_PRIMARY_KEY]))
-        {
+        if (!empty($this->schema[ORM::M_PRIMARY_KEY])) {
             return [$this->schema[ORM::M_PRIMARY_KEY] => $this->primaryKey()];
         }
 
@@ -900,8 +863,7 @@ abstract class Model extends DataEntity
     public static function findOne(array $where = [], array $load = [], array $orderBy = [])
     {
         $selector = static::find($where, $load);
-        foreach ($orderBy as $column => $direction)
-        {
+        foreach ($orderBy as $column => $direction) {
             $selector->orderBy($column, $direction);
         }
 
@@ -938,8 +900,7 @@ abstract class Model extends DataEntity
             'errors'    => $this->getErrors()
         ];
 
-        if (empty($this->pivotData))
-        {
+        if (empty($this->pivotData)) {
             unset($info['pivotData']);
         }
 

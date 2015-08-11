@@ -289,7 +289,7 @@ class ORM extends Singleton
      * own relations, loaders and schemas by altering ORM config.
      *
      * @param mixed         $type
-     * @param SchemaBuilder $schemaBuilder
+     * @param SchemaBuilder $builder
      * @param ModelSchema   $model
      * @param string        $name
      * @param array         $definition
@@ -297,7 +297,7 @@ class ORM extends Singleton
      */
     public function relationSchema(
         $type,
-        SchemaBuilder $schemaBuilder,
+        SchemaBuilder $builder,
         ModelSchema $model,
         $name,
         array $definition
@@ -306,9 +306,10 @@ class ORM extends Singleton
             throw new ORMException("Undefined relation schema '{$type}'.");
         }
 
-        $class = $this->config['relations'][$type]['schema'];
-
-        return new $class($schemaBuilder, $model, $name, $definition);
+        return $this->container->get(
+            $this->config['relations'][$type]['schema'],
+            compact('builder', 'model', 'name', 'definition')
+        );
     }
 
     /**

@@ -78,6 +78,14 @@ interface RelationSchemaInterface
     public function isInversable();
 
     /**
+     * Check if it's reasonable to create relation, creation must be skipped if outer model is
+     * abstract or relation under such name already exists.
+     *
+     * @return bool
+     */
+    public function isReasonable();
+
+    /**
      * Must declare inversed (reverted) relation in outer model schema. Relation must not be created
      * if it's name already taken.
      *

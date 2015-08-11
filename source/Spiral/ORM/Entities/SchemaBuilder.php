@@ -12,6 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\ModelSchema;
+use Spiral\ORM\Exceptions\ForbiddenChangeException;
 use Spiral\ORM\Exceptions\ModelSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
@@ -42,6 +43,7 @@ class SchemaBuilder extends Component
     private $tables = [];
 
     /**
+     * @invisible
      * @var ORM
      */
     protected $orm = null;
@@ -224,72 +226,34 @@ class SchemaBuilder extends Component
      * @throws \Spiral\Database\Exceptions\SchemaException
      * @throws \Spiral\Database\Exceptions\QueryException
      * @throws \Spiral\Database\Exceptions\DriverException
+     * @throws ForbiddenChangeException
      */
     public function synchronizeSchema()
     {
         //We need list of declared tables in order of
         foreach ($this->getTables(true) as $name => $table) {
-            //            //Abstract tables know nothing about their parent database... for some reason.
-            //            $database = explode('/', $table)[0];
-            //
-            //            //Let's try to locate model related to this table declaration
-            //            $model = $this->findAssociatedModel($table);
-            //
-            //            //If declared table has no associated model, we are expecting that this is pivot table
-            //            //let's find table parents and ask them about what to do
-            //            if (empty($model) && !$t) {
-            //            }
-            //
-            //            if ($model->isAbstract()) {
-            //                //We are not going to create anything requested by abstract models, ignoring
-            //                continue;
-            //            }
-            //
-            //            if (!$model->isActive()) {
-            //            }
+            //We can only alter table columns if model allows us
+            $model = $this->findRelatedModel($table);
 
-            //            foreach ($this->getTables(true) as $table) {
-            //                foreach ($this->models as $model) {
-            //
-            //
-            //
-            //
-            //                    if ($model->tableSchema() != $table) {
-            //                        continue;
-            //                    }
-            //
-            //                    if ($model->isAbstract()) {
-            //                        //Model is abstract, meaning we are not going to perform any table related
-            //                        //operation
-            //                        continue 2;
-            //                    }
-            //
-            //                    if ($model->isActiveSchema()) {
-            //                        //Model has active schema, we are good
-            //                        break;
-            //                    }
-            //
-            //                    //We have to thrown an exception if model with ACTIVE_SCHEMA = false requested
-            //                    //any column change (for example via external relation)
-            //                    if (!empty($columns = $table->alteredColumns())) {
-            //                        $names = [];
-            //                        foreach ($columns as $column) {
-            //                            $names[] = $column->getName(true);
-            //                        }
-            //
-            //                        $names = join(', ', $names);
-            //
-            //                        throw new ORMException(
-            //                            "Unable to alter '{$table->getName()}' columns ({$names}), "
-            //                            . "associated model stated ACTIVE_SCHEMA = false."
-            //                        );
-            //                    }
-            //
-            //                    continue 2;
-            //                }
-            //
-            //                $table->save();
-            //            }
+            if (!empty($model) && $model->isAbstract()) {
+                //Abstract tables might declare table schema, but we are going to ignore it
+                continue;
+            }
+
+            if (!empty($model) && !$model->isActive()) {
+                if (empty($table->alteredColumns())) {
+                    //Some relations might declare foreign keys and indexes in passive tables,
+                    //we are going to skip them all without any warning
+                    continue;
+                }
+
+                throw new ForbiddenChangeException($table, $model);
+            }
+
+            /**
+             * All ORM magic happens here. Check Database schemas to find more.
+             */
+            $table->save();
         }
     }
 
@@ -356,7 +320,7 @@ class SchemaBuilder extends Component
                 ORM::M_FILLABLE    => $model->getFillable(),
                 ORM::M_MUTATORS    => $model->getMutators(),
                 ORM::M_VALIDATES   => $model->getValidates(),
-                ORM::M_RELATIONS   => []
+                ORM::M_RELATIONS   => $this->packRelations($model)
             ];
 
             ksort($schema);
@@ -436,21 +400,15 @@ class SchemaBuilder extends Component
         }
     }
 
-    private function isAllowed($database, AbstractTable $table)
-    {
-    }
-
-    private function isAllqowed($database, AbstractTable $table)
-    {
-    }
-
     /**
-     * Must find associated model instance or return null if no models counted as associated.
+     * Find model related to given table. This operation is required to catch if some relation/schema
+     * declared values in passive (no altering) table. Might return if no models find (pivot or user
+     * specified tables).
      *
      * @param AbstractTable $table
      * @return ModelSchema|null
      */
-    private function findAssociatedModel(AbstractTable $table)
+    private function findRelatedModel(AbstractTable $table)
     {
         foreach ($this->getModels() as $model) {
             if ($model->tableSchema() === $table) {
@@ -458,16 +416,23 @@ class SchemaBuilder extends Component
             }
         }
 
-        //No associated models found
+        //No associated model were found
         return null;
     }
 
-
+    /**
+     * Normalize and pack every declared model relation schema.
+     *
+     * @param ModelSchema $model
+     * @return array
+     */
     private function packRelations(ModelSchema $model)
     {
-        //TODO: DO!
+        $result = [];
         foreach ($model->getRelations() as $name => $relation) {
-            $schema[ORM::M_RELATIONS][$name] = $relation->normalizeSchema();
+            $result[$name] = $relation->normalizeSchema();
         }
+
+        return $result;
     }
 }

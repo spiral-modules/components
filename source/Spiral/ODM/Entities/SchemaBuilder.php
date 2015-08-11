@@ -40,6 +40,7 @@ class SchemaBuilder extends Component
     private $collections = [];
 
     /**
+     * @invisible
      * @var ODM
      */
     protected $odm = null;

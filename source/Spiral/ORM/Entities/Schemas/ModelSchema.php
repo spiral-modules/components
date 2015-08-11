@@ -324,8 +324,10 @@ class ModelSchema extends ReflectionEntity
 
         $relation = $this->builder->relationSchema($this, $name, $definition);
 
-        //Initiating required columns, foreign keys and indexes
-        $relation->buildSchema();
+        if ($relation->isReasonable()) {
+            //Initiating required columns, foreign keys and indexes
+            $relation->buildSchema();
+        }
 
         $this->relations[$name] = $relation;
     }

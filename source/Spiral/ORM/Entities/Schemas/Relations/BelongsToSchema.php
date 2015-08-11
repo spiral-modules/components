@@ -67,11 +67,6 @@ class BelongsToSchema extends RelationSchema
      */
     public function inverseRelation()
     {
-        if ($this->outerModel()->hasRelation($this->definition[Model::INVERSE])) {
-            //Already implemented by model itself, we may add warning here in future
-            return;
-        }
-
         /**
          * Unfortunately BelongsTo relation can not be inversed without specifying backward relation
          * type which can be either HAS_ONE or HAS_MANY.

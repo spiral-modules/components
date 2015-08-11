@@ -943,6 +943,14 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
+     * @return AbstractColumn|string
+     */
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
      * Driver specific columns information load. Columns must be added using registerColumn method
      *
      * @see registerColumn()

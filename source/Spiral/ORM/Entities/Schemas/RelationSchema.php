@@ -181,7 +181,19 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isInversable()
     {
-        return isset($this->definition[Model::INVERSE]);
+        return !empty($this->definition[Model::INVERSE]) && $this->isReasonable();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isReasonable()
+    {
+        //Relation is only reasonable when outer model is not abstract and does not have relation
+        //under same name
+        return !$this->outerModel()->isAbstract() && !$this->outerModel()->hasRelation(
+            $this->definition[Model::INVERSE]
+        );
     }
 
     /**
@@ -359,7 +371,7 @@ abstract class RelationSchema implements RelationSchemaInterface
         return $this->getName();
     }
 
-      /**
+    /**
      * Normalize schema definition into light cachable form.
      *
      * @return array

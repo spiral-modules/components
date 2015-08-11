@@ -98,11 +98,6 @@ class ManyToManySchema extends RelationSchema
      */
     public function inverseRelation()
     {
-        if ($this->outerModel()->hasRelation($this->definition[Model::INVERSE])) {
-            //Already implemented by model itself, we may add warning here in future
-            return;
-        }
-
         //Many to many relation can be inversed pretty easily, we only have to swap inner keys
         //with outer keys
         $this->outerModel()->addRelation(

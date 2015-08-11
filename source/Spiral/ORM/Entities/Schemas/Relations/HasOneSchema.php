@@ -54,11 +54,6 @@ class HasOneSchema extends RelationSchema
      */
     public function inverseRelation()
     {
-        if ($this->outerModel()->hasRelation($this->definition[Model::INVERSE])) {
-            //Already implemented by model itself, we may add warning here in future
-            return;
-        }
-
         //Inverting definition
         $this->outerModel()->addRelation(
             $this->definition[Model::INVERSE],

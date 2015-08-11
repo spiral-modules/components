@@ -11,7 +11,7 @@ namespace Spiral\ODM;
 use Spiral\Models\AccessorInterface;
 
 /**
- * Declares that object can be embedded into Document and has it's own update operations.
+ * Declares that accessor has it's own update operations.
  */
 interface EmbeddableInterface extends AccessorInterface
 {

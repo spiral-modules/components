@@ -78,7 +78,7 @@ class DatabaseProvider extends Singleton implements InjectorInterface
     public function db($database = null, array $config = [], Driver $driver = null)
     {
         $database = !empty($database) ? $database : $this->config['default'];
-        if (isset($this->config['aliases'][$database])) {
+        while (isset($this->config['aliases'][$database])) {
             $database = $this->config['aliases'][$database];
         }
 

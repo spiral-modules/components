@@ -9,9 +9,9 @@
 namespace Spiral\ODM\Entities\Schemas;
 
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\Accessors\Compositor;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
+use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
@@ -45,16 +45,6 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Collection name associated with document model.
-     *
-     * @return mixed
-     */
-    public function getCollection()
-    {
-        return $this->property('collection');
-    }
-
-    /**
      * Document has not collection and only be embedded.
      *
      * @return bool
@@ -62,6 +52,16 @@ class DocumentSchema extends ReflectionEntity
     public function isEmbeddable()
     {
         return empty($this->getCollection());
+    }
+
+    /**
+     * Collection name associated with document model.
+     *
+     * @return mixed
+     */
+    public function getCollection()
+    {
+        return $this->property('collection');
     }
 
     /**
@@ -201,84 +201,6 @@ class DocumentSchema extends ReflectionEntity
         }
 
         return $indexes;
-    }
-
-    /**
-     * Get every known document children.
-     *
-     * Example:
-     * Class A
-     * Class B extends A
-     * Class D extends A
-     * Class E extends D
-     *
-     * Result: B, D, E
-     *
-     * @see getPrimary()
-     * @param bool $sameCollection Find only children related to same collection as parent.
-     * @param bool $firstOrder     Only child extended directly from current document.
-     * @return DocumentSchema[]
-     */
-    public function getChildren($sameCollection = false, $firstOrder = false)
-    {
-        $result = [];
-        foreach ($this->builder->getDocuments() as $document) {
-            if ($document->isSubclassOf($this)) {
-                if ($sameCollection && !$this->sameCollection($document)) {
-                    //Child changed collection or database
-                    continue;
-                }
-
-                if ($firstOrder && $document->getParentClass()->getName() != $this->getName()) {
-                    //Grandson
-                    continue;
-                }
-
-                $result[] = $document;
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get schema of top parent of current document or document schema itself. This method is reverse
-     * implementation of getChildren().
-     *
-     * @see getChindren()
-     * @param bool $sameCollection Only document with same collection.
-     * @return DocumentSchema
-     */
-    public function getParent($sameCollection = false)
-    {
-        $result = $this;
-        foreach ($this->builder->getDocuments() as $document) {
-            if (!$result->isInstance($document)) {
-                //I'm not your father!
-                continue;
-            }
-
-            if ($sameCollection && !$result->sameCollection($document)) {
-                //Different collection
-                continue;
-            }
-
-            //Level down
-            $result = $document;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Parent document schema or null. Similar to getParentClass().
-     *
-     * @see parentSchema()
-     * @return DocumentSchema|null
-     */
-    public function getParentDocument()
-    {
-        return $this->parentSchema();
     }
 
     /**
@@ -432,7 +354,85 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Get information required to resolve class instance using given set of fields. Fields based
+     * Get Document child classes.
+     *
+     * Example:
+     * Class A
+     * Class B extends A
+     * Class D extends A
+     * Class E extends D
+     *
+     * Result: B, D, E
+     *
+     * @see getPrimary()
+     * @param bool $sameCollection Find only children related to same collection as parent.
+     * @param bool $firstOrder     Only child extended directly from current document.
+     * @return DocumentSchema[]
+     */
+    public function getChildren($sameCollection = false, $firstOrder = false)
+    {
+        $result = [];
+        foreach ($this->builder->getDocuments() as $document) {
+            if ($document->isSubclassOf($this)) {
+                if ($sameCollection && !$this->compareCollection($document)) {
+                    //Child changed collection or database
+                    continue;
+                }
+
+                if ($firstOrder && $document->getParentClass()->getName() != $this->getName()) {
+                    //Grandson
+                    continue;
+                }
+
+                $result[] = $document;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get schema of top parent of current document or document schema itself. This method is reverse
+     * implementation of getChildren().
+     *
+     * @see getChindren()
+     * @param bool $sameCollection Only document with same collection.
+     * @return DocumentSchema
+     */
+    public function getParent($sameCollection = false)
+    {
+        $result = $this;
+        foreach ($this->builder->getDocuments() as $document) {
+            if (!$result->isInstance($document)) {
+                //I'm not your father!
+                continue;
+            }
+
+            if ($sameCollection && !$result->compareCollection($document)) {
+                //Different collection
+                continue;
+            }
+
+            //Level down
+            $result = $document;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parent document schema or null. Similar to getParentClass().
+     *
+     * @see parentSchema()
+     * @return DocumentSchema|null
+     */
+    public function getParentDocument()
+    {
+        return $this->parentSchema();
+    }
+
+    /**
+     * Compile information required to resolve class instance using given set of fields. Fields based
      * definition will analyze unique fields in every child model to create association between
      * model class and required set of fields. Only document from same collection will be involved
      * in definition creation. Definition built only for child of first order.
@@ -507,7 +507,7 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Get document declared schema (merged with parent model(s) values).
+     * Get declared document schema (merged with parent entity(s) values).
      *
      * @return array
      */
@@ -536,7 +536,7 @@ class DocumentSchema extends ReflectionEntity
      * @param DocumentSchema $document
      * @return bool
      */
-    protected function sameCollection(DocumentSchema $document)
+    protected function compareCollection(DocumentSchema $document)
     {
         return $document->getCollection() == $this->getCollection()
         && $document->getDatabase() == $this->getDatabase();

@@ -739,7 +739,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
         //Invalidating all compositions
         foreach ($this->schema[ODM::D_COMPOSITIONS] as $field) {
-
             //Let's force composition construction
             $composition = $this->getField($field);
             if (!$composition instanceof CompositableInterface) {

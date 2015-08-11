@@ -30,6 +30,8 @@ abstract class Model extends DataEntity
      *
      * Attention, orm update will fail if any external model requested changed in table linked to
      * ActiveRecord with ACTIVE_SCHEMA = false.
+     *
+     * ATTENTION SOMETHING IMPORTABT!
      */
     const ACTIVE_SCHEMA = true;
 
@@ -469,7 +471,7 @@ abstract class Model extends DataEntity
     {
         if (isset($this->schema[ORM::M_RELATIONS][$offset]))
         {
-            return $this->relation($offset)->getInstance();
+            return $this->relation($offset)->getAssociated();
         }
 
         return $this->getField($offset, true);
@@ -503,7 +505,7 @@ abstract class Model extends DataEntity
     {
         if (isset($this->schema[ORM::M_RELATIONS][$offset]))
         {
-            $this->relation($offset)->setInstance($value);
+            $this->relation($offset)->associate($value);
 
             return;
         }
@@ -772,7 +774,7 @@ abstract class Model extends DataEntity
             {
                 foreach ($this->relations as $name => $relation)
                 {
-                    if ($relation instanceof RelationInterface && !$relation->saveInstance($validate))
+                    if ($relation instanceof RelationInterface && !$relation->saveAssociation($validate))
                     {
                         //Let's record error
                         $this->setError($name, $relation->getErrors());

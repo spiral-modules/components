@@ -146,7 +146,7 @@ abstract class Relation extends Component implements
      *
      * @return mixed
      */
-    public function getInstance()
+    public function getAssociated()
     {
         if (!empty($this->instance)) {
             if ($this->instance instanceof Model && !empty($this->data)) {
@@ -275,7 +275,7 @@ abstract class Relation extends Component implements
      * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(Model $instance)
+    public function associate(Model $instance)
     {
         if (static::MULTIPLE) {
             throw new ORMException(
@@ -307,9 +307,9 @@ abstract class Relation extends Component implements
      * @param bool $validate
      * @return bool
      */
-    public function saveInstance($validate = true)
+    public function saveAssociation($validate = true)
     {
-        if (empty($instance = $this->getInstance())) {
+        if (empty($instance = $this->getAssociated())) {
             //Nothing to save
             return true;
         }
@@ -371,7 +371,7 @@ abstract class Relation extends Component implements
             return $errors;
         }
 
-        return $this->getInstance()->getErrors($reset);
+        return $this->getAssociated()->getErrors($reset);
     }
 
     /**
@@ -392,6 +392,6 @@ abstract class Relation extends Component implements
      */
     public function jsonSerialize()
     {
-        return $this->getInstance();
+        return $this->getAssociated();
     }
 }

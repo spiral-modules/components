@@ -128,6 +128,14 @@ class ORM extends Singleton
     }
 
     /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    /**
      * Get database by it's name from DatabaseProvider associated with ORM component.
      *
      * @param string $database
@@ -234,7 +242,8 @@ class ORM extends Singleton
     }
 
     /**
-     * Update ORM models schema and return instance of SchemaBuilder.
+     * Update ORM models schema, synchronize declared and database schemas and return instance of
+     * SchemaBuilder.
      *
      * @param SchemaBuilder $builder User specified schema builder.
      * @return SchemaBuilder
@@ -244,7 +253,7 @@ class ORM extends Singleton
         $builder = !empty($builder) ? $builder : $this->schemaBuilder();
 
         //Create all required tables and columns
-        $builder->executeSchema();
+        $builder->synchronizeSchema();
 
         //Saving
         $this->memory->saveData(

@@ -121,8 +121,12 @@ class DirectRoute extends AbstractRoute
                 $controller = $route->namespace . '\\' . ucfirst($controller) . $route->postfix;
             }
 
-            return $route->callAction($container, $controller, $route->matches['action'],
-                $route->matches);
+            return $route->callAction(
+                $container,
+                $controller,
+                $route->matches['action'],
+                $route->matches
+            );
         };
     }
 }

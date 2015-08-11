@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Exceptions\ORMException;
 
 interface RelationInterface
@@ -17,11 +18,11 @@ interface RelationInterface
      * parent active record, relations by itself not used in query building - but they can be used
      * to create valid query selector.
      *
-     * @param ORM          $orm        ORM component.
+     * @param ORM   $orm        ORM component.
      * @param Model $parent     Parent ActiveRecord object.
-     * @param array        $definition Relation definition.
-     * @param mixed        $data       Pre-loaded relation data.
-     * @param bool         $loaded     Indication that relation data has been loaded.
+     * @param array $definition Relation definition.
+     * @param mixed $data       Pre-loaded relation data.
+     * @param bool  $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
@@ -32,7 +33,7 @@ interface RelationInterface
     );
 
     /**
-     * Reset relation pre-loaded data. By default will flush relation data.
+     * Reset relation pre-loaded data. By default it must flush all relation data.
      *
      * @param mixed $data   Pre-loaded relation data.
      * @param bool  $loaded Indication that relation data has been loaded.
@@ -52,7 +53,7 @@ interface RelationInterface
      *
      * @return mixed
      */
-    public function getInstance();
+    public function getAssociated();
 
     /**
      * Set relation instance (called via __set method of parent ActiveRecord).
@@ -60,10 +61,10 @@ interface RelationInterface
      * Example:
      * $user->profile = new Profile();
      *
-     * @param Model $instance
+     * @param ActiveEntityInterface $instance
      * @throws ORMException
      */
-    public function setInstance(Model $instance);
+    public function associate(ActiveEntityInterface $instance);
 
     /**
      * ActiveRecord may ask relation data to be saved, save content will work ONLY for pre-loaded
@@ -72,7 +73,7 @@ interface RelationInterface
      * @param bool $validate
      * @return bool
      */
-    public function saveInstance($validate = true);
+    public function saveAssociation($validate = true);
 
     /**
      * Get relation data errors (if any).

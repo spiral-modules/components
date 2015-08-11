@@ -129,6 +129,14 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    /**
      * Create specified or select default instance of MongoDatabase.
      *
      * @param string $database Database name (internal).
@@ -140,7 +148,7 @@ class ODM extends Singleton implements InjectorInterface
     public function db($database = null, array $config = [])
     {
         $database = !empty($database) ? $database : $this->config['default'];
-        if (isset($this->config['aliases'][$database])) {
+        while (isset($this->config['aliases'][$database])) {
             $database = $this->config['aliases'][$database];
         }
 

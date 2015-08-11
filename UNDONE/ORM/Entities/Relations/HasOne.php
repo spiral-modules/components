@@ -46,9 +46,9 @@ class HasOne extends Relation
     /**
      * {@inheritdoc}
      */
-    public function setInstance(Model $instance = null)
+    public function associate(Model $instance = null)
     {
-        parent::setInstance($instance);
+        parent::associate($instance);
         $this->mountRelation($instance);
     }
 

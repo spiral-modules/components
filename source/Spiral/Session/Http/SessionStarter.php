@@ -118,7 +118,9 @@ class SessionStarter implements MiddlewareInterface
         SessionStore $store,
         array $cookies
     ) {
-        $store->isStarted() && $store->commit();
+        if ($store->isStarted()) {
+            $store->commit();
+        }
 
         if (!isset($cookies[self::COOKIE]) || $cookies[self::COOKIE] != $store->getID()) {
             if ($response instanceof ResponseInterface) {

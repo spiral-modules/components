@@ -36,6 +36,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
     const CONFIG = 'debug';
 
     /**
+     * @invisible
      * @var array
      */
     private $benchmarks = [];

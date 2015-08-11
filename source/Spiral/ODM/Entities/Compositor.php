@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ODM\Accessors;
+namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\ODM\CompositableInterface;

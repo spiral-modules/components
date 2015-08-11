@@ -21,7 +21,7 @@ class BelongsTo extends HasOne
     /**
      * {@inheritdoc}
      */
-    public function setInstance(Model $instance = null)
+    public function associate(Model $instance = null)
     {
         if (is_null($instance))
         {
@@ -30,7 +30,7 @@ class BelongsTo extends HasOne
             return;
         }
 
-        parent::setInstance($instance);
+        parent::associate($instance);
 
         /**
          * @var Model $instance

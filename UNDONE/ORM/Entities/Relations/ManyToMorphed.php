@@ -109,7 +109,7 @@ class ManyToMorphed implements RelationInterface
      *
      * @return $this
      */
-    public function getInstance()
+    public function getAssociated()
     {
         return $this;
     }
@@ -123,7 +123,7 @@ class ManyToMorphed implements RelationInterface
      * @param Model $instance
      * @throws ORMException
      */
-    public function setInstance(Model $instance)
+    public function associate(Model $instance)
     {
         throw new ORMException("Unable to set data for morphed relation.");
     }
@@ -135,11 +135,11 @@ class ManyToMorphed implements RelationInterface
      * @param bool $validate
      * @return bool
      */
-    public function saveInstance($validate = true)
+    public function saveAssociation($validate = true)
     {
         foreach ($this->relations as $relation)
         {
-            if (!$relation->saveInstance($validate))
+            if (!$relation->saveAssociation($validate))
             {
                 return false;
             }
@@ -240,7 +240,7 @@ class ManyToMorphed implements RelationInterface
      */
     public function __get($alias)
     {
-        return $this->nestedRelation($alias)->getInstance();
+        return $this->nestedRelation($alias)->getAssociated();
     }
 
     /**

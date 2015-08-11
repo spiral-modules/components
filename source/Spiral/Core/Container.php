@@ -12,6 +12,7 @@ use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\SaturableInterlace;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\Container\ArgumentException;
+use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 
 /**
@@ -97,6 +98,16 @@ class Container extends Component implements ContainerInterface
         $arguments = [];
         foreach ($reflection->getParameters() as $parameter) {
             $name = $parameter->getName();
+
+            try {
+                $class = $parameter->getClass();
+            } catch (\ReflectionException $exception) {
+                throw new ContainerException(
+                    $exception->getMessage(),
+                    $exception->getCode(),
+                    $exception
+                );
+            }
 
             if (empty($class = $parameter->getClass())) {
                 if (array_key_exists($name, $parameters)) {
@@ -220,7 +231,8 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Every declared Container binding. Must not be used in production code due container format is vary.
+     * Every declared Container binding. Must not be used in production code due container format is
+     * vary.
      *
      * @return array
      */

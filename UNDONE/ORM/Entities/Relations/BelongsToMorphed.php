@@ -54,9 +54,9 @@ class BelongsToMorphed extends BelongsTo
     /**
      * {@inheritdoc}
      */
-    public function setInstance(Model $instance = null)
+    public function associate(Model $instance = null)
     {
-        parent::setInstance($instance);
+        parent::associate($instance);
 
         if (is_null($instance))
         {

@@ -59,6 +59,7 @@ class HttpDispatcher extends Singleton implements
     private $emitter = null;
 
     /**
+     * @invisible
      * @var ContainerInterface
      */
     protected $container = null;

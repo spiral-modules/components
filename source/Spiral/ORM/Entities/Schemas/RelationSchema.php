@@ -142,6 +142,16 @@ abstract class RelationSchema implements RelationSchemaInterface
     }
 
     /**
+     * Get name or target to be related to.
+     *
+     * @return string
+     */
+    public function getTarget()
+    {
+        return $this->target;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function hasEquivalent()
@@ -181,7 +191,12 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isInversable()
     {
-        return !empty($this->definition[Model::INVERSE]) && $this->isReasonable();
+        if (empty($this->definition[Model::INVERSE]) || !$this->isReasonable()) {
+            return false;
+        }
+
+        //We must prevent duplicate relations
+        return !$this->outerModel()->hasRelation($this->definition[Model::INVERSE]);
     }
 
     /**
@@ -191,9 +206,7 @@ abstract class RelationSchema implements RelationSchemaInterface
     {
         //Relation is only reasonable when outer model is not abstract and does not have relation
         //under same name
-        return !$this->outerModel()->isAbstract() && !$this->outerModel()->hasRelation(
-            $this->definition[Model::INVERSE]
-        );
+        return !$this->outerModel()->isAbstract();
     }
 
     /**
@@ -278,7 +291,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isSameDatabase()
     {
-        if ($this->builder->hasModel($this->target)) {
+        if (!$this->builder->hasModel($this->target)) {
             //Usually it tells us that relation relates to many different models (polymorphic)
             //We can't clearly say
             return false;
@@ -495,7 +508,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      * @param AbstractColumn $column
      * @return string
      */
-    private function resolveAbstract(AbstractColumn $column)
+    protected function resolveAbstract(AbstractColumn $column)
     {
         switch ($column->abstractType()) {
             case 'bigPrimary':

@@ -242,7 +242,7 @@ class ManyToManySchema extends RelationSchema
 
         if (!$this->isSameDatabase()) {
             throw new RelationSchemaException(
-                "Many-to-Many relation can create relations only to entities from same database."
+                "Many-to-Many relation can create relations ({$this}) only to entities from same database."
             );
         }
     }

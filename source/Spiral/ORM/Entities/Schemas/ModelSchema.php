@@ -16,13 +16,14 @@ use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
-use Spiral\ORM\Exceptions\IndexDefinitionException;
-use Spiral\ORM\Exceptions\TypeDefinitionException;
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Model;
 use Spiral\ORM\RelationSchemaInterface;
 
 /**
  * Performs analysis, schema building and table declaration for one specific Model class.
+ *
+ * You have to call
  */
 class ModelSchema extends ReflectionEntity
 {
@@ -56,7 +57,7 @@ class ModelSchema extends ReflectionEntity
      * @param SchemaBuilder $builder Parent ORM schema (all other documents).
      * @param string        $class   Class name.
      * @throws \ReflectionException
-     * @throws TypeDefinitionException
+     * @throws DefinitionException
      */
     public function __construct(SchemaBuilder $builder, $class)
     {
@@ -201,10 +202,10 @@ class ModelSchema extends ReflectionEntity
         return $result;
     }
 
-    //---
-
     /**
-     * Get column names associated with their default values.
+     * Get column names associated with their default values. Default values will be fetched from
+     * values declared by model and values declared in associated table schema. Every default value
+     * will be normalized in a cachable form (no objects allowed here).
      *
      * @return array
      */
@@ -213,19 +214,16 @@ class ModelSchema extends ReflectionEntity
         //We have to reiterate columns as schema can be altered while relation creation,
         //plus we always have to keep original columns order (this is very important)
         $defaults = [];
+        $modelDefaults = $this->property('defaults', true);
 
         foreach ($this->tableSchema->getColumns() as $column) {
+            if (isset($modelDefaults[$column->getName()])) {
+                //Let's use value declared in model schema
+                $defaults[$column->getName()] = $modelDefaults[$column->getName()];
+            }
 
-            //
-            //            if (!array_key_exists($column->getName(), $this->columns)) {
-            //                $defaults[$column->getName()] = $this->prepareDefault(
-            //                    $column->getName(),
-            //                    $column->getDefaultValue()
-            //                );
-            //                continue;
-            //            }
-
-            //$defaults[$column->getName()] = $this->columns[$column->getName()];
+            //Due no default value were declared by schema we can try to fetch it from column
+            $defaults[$column->getName()] = $this->exportDefault($column);
         }
 
         //TODO: MOVE TO GET DEFAULTS
@@ -325,7 +323,7 @@ class ModelSchema extends ReflectionEntity
      * going to feed table indexes.
      *
      * @see Model::$schema
-     * @throws TypeDefinitionException
+     * @throws DefinitionException
      * @throws \Spiral\Database\Exceptions\SchemaException
      */
     protected function castSchema()
@@ -388,7 +386,7 @@ class ModelSchema extends ReflectionEntity
      * @param string         $definition
      * @param mixed          $default Default value declared by model schema.
      * @return mixed
-     * @throws TypeDefinitionException
+     * @throws DefinitionException
      * @throws \Spiral\Database\Exceptions\SchemaException
      */
     private function castColumn(AbstractColumn $column, $definition, $default = null)
@@ -397,7 +395,7 @@ class ModelSchema extends ReflectionEntity
         $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i';
 
         if (!preg_match($pattern, $definition, $type)) {
-            throw new TypeDefinitionException(
+            throw new DefinitionException(
                 "Invalid column type definition in '{$this}'.'{$column->getName()}'."
             );
         }
@@ -424,7 +422,7 @@ class ModelSchema extends ReflectionEntity
         }
 
         if (!$column->hasDefaultValue() && !$column->isNullable()) {
-            //Ouch, columns like that will break synchronization!
+            //Ouch, columns like that can break synchronization!
             $column->defaultValue($this->castDefault($column));
         }
 
@@ -432,7 +430,62 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Cast default value based on column type.
+     * Cast (specify) index shema in associated table based on Model index property definition. Only
+     * normal or unique indexes can be casted at this moment.
+     *
+     * Example:
+     * protected $indexes = array(
+     *      [self::UNIQUE, 'email'],
+     *      [self::INDEX, 'status', 'balance'],
+     *      [self::INDEX, 'public_id']
+     * );
+     *
+     * @param array $definition
+     * @return AbstractIndex
+     * @throws DefinitionException
+     * @throws \Spiral\Database\Exceptions\SchemaException
+     */
+    protected function castIndex(array $definition)
+    {
+        //Index type (UNIQUE or INDEX)
+        $type = null;
+
+        //Columns index associated too
+        $columns = [];
+        foreach ($definition as $chunk) {
+            if ($chunk == Model::INDEX || $chunk == Model::UNIQUE) {
+                $type = $chunk;
+                continue;
+            }
+
+            if (!$this->tableSchema->hasColumn($chunk)) {
+                throw new DefinitionException(
+                    "Model '{$this}' has index definition with undefined local column."
+                );
+            }
+
+            $columns[] = $chunk;
+        }
+
+        if (empty($type)) {
+            throw new DefinitionException(
+                "Model '{$this}' has index definition with unspecified index type."
+            );
+        }
+
+        if (empty($columns)) {
+            throw new DefinitionException(
+                "Model '{$this}' has index definition without any column associated to."
+            );
+        }
+
+        //Casting schema
+        return $this->tableSchema->index($columns)->unique($type == Model::UNIQUE);
+    }
+
+    /**
+     * Cast default value based on column type. Required to prevent conflicts when not nullable
+     * column added to existed table with data in.
      *
      * @param AbstractColumn $column
      * @return bool|float|int|mixed|string
@@ -480,59 +533,5 @@ class ModelSchema extends ReflectionEntity
         }
 
         return $defaultValue;
-    }
-
-    /**
-     * Cast (specify) index shema in associated table based on Model index property definition. Only
-     * normal or unique indexes can be casted at this moment.
-     *
-     * Example:
-     * protected $indexes = array(
-     *      [self::UNIQUE, 'email'],
-     *      [self::INDEX, 'status', 'balance'],
-     *      [self::INDEX, 'public_id']
-     * );
-     *
-     * @param array $definition
-     * @return AbstractIndex
-     * @throws IndexDefinitionException
-     * @throws \Spiral\Database\Exceptions\SchemaException
-     */
-    protected function castIndex(array $definition)
-    {
-        //Index type (UNIQUE or INDEX)
-        $type = null;
-
-        //Columns index associated too
-        $columns = [];
-        foreach ($definition as $chunk) {
-            if ($chunk == Model::INDEX || $chunk == Model::UNIQUE) {
-                $type = $chunk;
-                continue;
-            }
-
-            if (!$this->tableSchema->hasColumn($chunk)) {
-                throw new IndexDefinitionException(
-                    "Model '{$this}' has index definition with undefined local column."
-                );
-            }
-
-            $columns[] = $chunk;
-        }
-
-        if (empty($type)) {
-            throw new IndexDefinitionException(
-                "Model '{$this}' has index definition with unspecified index type."
-            );
-        }
-
-        if (empty($columns)) {
-            throw new IndexDefinitionException(
-                "Model '{$this}' has index definition without any column associated to."
-            );
-        }
-
-        //Casting schema
-        return $this->tableSchema->index($columns)->unique($type == Model::UNIQUE);
     }
 }

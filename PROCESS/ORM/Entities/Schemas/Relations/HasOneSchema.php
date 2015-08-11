@@ -43,7 +43,7 @@ class HasOneSchema extends RelationSchema
         $this->outerModel()->addRelation(
             $this->definition[Model::INVERSE],
             [
-                Model::BELONGS_TO        => $this->model->getClass(),
+                Model::BELONGS_TO        => $this->model->getName(),
                 Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
                 Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
                 Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],

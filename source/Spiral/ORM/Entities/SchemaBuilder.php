@@ -12,9 +12,11 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\ModelSchema;
+use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Model;
 use Spiral\ORM\ORM;
+use Spiral\ORM\RelationSchemaInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
@@ -54,7 +56,6 @@ class SchemaBuilder extends Component
         $this->orm = $orm;
 
         $this->locateModels($tokenizer);
-        $this->castRelations();
     }
 
     /**
@@ -121,6 +122,9 @@ class SchemaBuilder extends Component
      * Request table schema. Every non empty table schema will be synchronized with it's databases
      * when executeSchema() method will be called.
      *
+     * Attention, every declared table will be synced with database if their initiator allows such
+     * operation.
+     *
      * @param string $database Table database.
      * @param string $table    Table name without prefix.
      * @return AbstractTable
@@ -134,9 +138,7 @@ class SchemaBuilder extends Component
 
         $schema = $this->orm->dbalDatabase($database)->table($table)->schema();
 
-        return $this->tables[$database . '/' . $table] = $this->orm->dbalDatabase(
-            $database
-        )->table($table)->schema();
+        return $this->tables[$database . '/' . $table] = $schema;
     }
 
     /**
@@ -165,67 +167,40 @@ class SchemaBuilder extends Component
 
 
     /**
-     * Get appropriate relation schema based on provided definition.
+     * SchemaBuilder will request every located ModelSchema to declare it's relations. In addition
+     * this methods will create inversed set of relations.
      *
-     * @param ModelSchema $model
-     * @param string      $name
-     * @param array       $definition
-     * @return RelationSchemaInterface
+     * @throws SchemaException
+     * @throws RelationSchemaException
      */
-    public function relationSchema(ModelSchema $model, $name, array $definition)
+    public function castRelations()
     {
-        if (empty($definition)) {
-            throw new ORMException("Relation definition can not be empty.");
+        $inversedRelations = [];
+        foreach ($this->models as $model) {
+            if ($model->isAbstract()) {
+                //Abstract models can not declare relations or tables
+                continue;
+            }
+
+            $model->castRelations();
+
+            foreach ($model->getRelations() as $relation) {
+                if ($relation->isInversable()) {
+                    //Relation can be automatically inversed
+                    $inversedRelations[] = $relation;
+                }
+            }
         }
 
-        reset($definition);
-        $type = key($definition);
-
-        $relation = $this->orm->relationSchema($type, $this, $model, $name, $definition);
-        if ($relation->hasEquivalent()) {
-            return $relation->createEquivalent();
+        /**
+         * We have to perform inversion after every generic relation was defined. Sometimes models
+         * can define inversed relation by themselves.
+         *
+         * @var RelationSchemaInterface $relation
+         */
+        foreach ($inversedRelations as $relation) {
+            $relation->inverseRelation();
         }
-
-        return $relation;
-    }
-
-    //-----------
-
-    /**
-     * Get all mutators associated with field type.
-     *
-     * @param string $type Field type.
-     * @return array
-     */
-    public function getMutators($type)
-    {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
-    }
-
-    /**
-     * Get mutator alias if presented. Aliases used to simplify schema (accessors) definition.
-     *
-     * @param string $alias
-     * @return string|array
-     */
-    public function mutatorAlias($alias)
-    {
-        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias])) {
-            return $alias;
-        }
-
-        return $this->config['mutatorAliases'][$alias];
-    }
-
-    /**
-     * Resolve real database name using it's alias.
-     *
-     * @param string|null $alias
-     * @return string
-     */
-    public function resolveDatabase($alias)
-    {
-        return $this->orm->dbalDatabase($alias)->getName();
     }
 
     /**
@@ -317,6 +292,44 @@ class SchemaBuilder extends Component
     }
 
     /**
+     * Resolve real database name using it's alias.
+     *
+     * @see DatabaseProvider
+     * @param string|null $alias
+     * @return string
+     */
+    public function resolveDatabase($alias)
+    {
+        return $this->orm->dbalDatabase($alias)->getName();
+    }
+
+    /**
+     * Get all mutators associated with field type.
+     *
+     * @param string $type Field type.
+     * @return array
+     */
+    public function getMutators($type)
+    {
+        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+    }
+
+    /**
+     * Get mutator alias if presented. Aliases used to simplify schema (accessors) definition.
+     *
+     * @param string $alias
+     * @return string|array
+     */
+    public function mutatorAlias($alias)
+    {
+        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias])) {
+            return $alias;
+        }
+
+        return $this->config['mutatorAliases'][$alias];
+    }
+
+    /**
      * Normalize model schema in lighter structure to be saved in ORM component memory.
      *
      * @return array
@@ -349,6 +362,39 @@ class SchemaBuilder extends Component
         }
 
         return $result;
+    }
+
+    /**
+     * Create appropriate instance of RelationSchema based on it's definition provided by ORM Model
+     * or manually. Due internal format first definition key will be stated as definition type and
+     * key value as model/entity definition relates too.
+     *
+     * @param ModelSchema $model
+     * @param string      $name
+     * @param array       $definition
+     * @return RelationSchemaInterface
+     * @throws SchemaException
+     */
+    public function relationSchema(ModelSchema $model, $name, array $definition)
+    {
+        if (empty($definition)) {
+            throw new SchemaException("Relation definition can not be empty.");
+        }
+
+        reset($definition);
+        //Relation type must be provided as first in definition
+        $type = key($definition);
+
+        //We are letting ORM to resolve relation schema using container
+        $relation = $this->orm->relationSchema($type, $this, $model, $name, $definition);
+
+        if ($relation->hasEquivalent()) {
+            //Some relations may declare equivalent relation to be used instead, used for Morphed
+            //relations
+            return $relation->createEquivalent();
+        }
+
+        return $relation;
     }
 
     /**
@@ -386,31 +432,6 @@ class SchemaBuilder extends Component
 
             $sources[$sourceID] = $model;
         }
-    }
-
-
-    protected function castRelations()
-    {
-        //        $inversedRelations = [];
-        //        foreach ($this->models as $model) {
-        //            if (!$model->isAbstract()) {
-        //                $model->castRelations();
-        //                foreach ($model->getRelations() as $relation) {
-        //                    if ($relation->isInversable()) {
-        //                        $inversedRelations[] = $relation;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //
-        //        /**
-        //         * We have to perform inversion after all relations was defined.
-        //         *
-        //         * @var RelationSchemaInterface $relation
-        //         */
-        //        foreach ($inversedRelations as $relation) {
-        //            $relation->inverseRelation();
-        //        }
     }
 
     private function isAllowed($database, AbstractTable $table)

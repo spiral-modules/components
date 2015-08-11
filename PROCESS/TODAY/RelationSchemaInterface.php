@@ -8,9 +8,6 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\ORM\ORMException;
-use Spiral\ORM\SchemaBuilder;
-
 interface RelationSchemaInterface
 {
     /**

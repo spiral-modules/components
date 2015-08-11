@@ -9,9 +9,9 @@
 namespace Spiral\ORM\Exceptions;
 
 /**
- * When column type definition is invalid in model schema.
+ * When model schema defines index, column or relation incorrectly.
  */
-class TypeDefinitionException extends SchemaException
+class DefinitionException extends SchemaException
 {
 
 }

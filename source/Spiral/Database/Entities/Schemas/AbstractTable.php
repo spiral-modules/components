@@ -20,8 +20,8 @@ use Spiral\Debug\Traits\LoggerTrait;
  * Abstract table schema with read (see TableInterface) and write abilities. Must be implemented
  * by driver to support DBMS specific syntax and creation rules.
  *
- * Most of table operation like column, index or foreign key creation/altering will be applied when save() method will be
- * called.
+ * Most of table operation like column, index or foreign key creation/altering will be applied when
+ * save() method will be called.
  *
  * Column configuration shortcuts:
  * @method AbstractColumn primary($column)
@@ -196,6 +196,16 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
+     * Return database specific table prefix.
+     *
+     * @return string
+     */
+    public function getTablePrefix()
+    {
+        return $this->tablePrefix;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getPrimaryKeys()
@@ -272,8 +282,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Set table primary keys. Operation can be applied for newly created tables. Now every database might support
-     * compound indexes.
+     * Set table primary keys. Operation can be applied for newly created tables. Now every database
+     * might support compound indexes.
      *
      * @param array $columns
      * @return $this
@@ -314,7 +324,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Get/create instance of AbstractIndex associated with current table based on list of forming column names.
+     * Get/create instance of AbstractIndex associated with current table based on list of forming
+     * column names.
      *
      * Example:
      * $table->index('key');
@@ -345,8 +356,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Get/create instance of AbstractIndex associated with current table based on list of forming column names. Index
-     * type must be forced as UNIQUE.
+     * Get/create instance of AbstractIndex associated with current table based on list of forming
+     * column names. Index type must be forced as UNIQUE.
      *
      * Example:
      * $table->unique('key');
@@ -364,7 +375,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Get/create instance of AbstractReference associated with current table based on local column name.
+     * Get/create instance of AbstractReference associated with current table based on local column
+     * name.
      *
      * @param string $column Column name.
      * @return AbstractReference|null
@@ -390,8 +402,9 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Rename existed column or change name of scheduled column schema. This operation can be safe to use on recurring
-     * basis as rename will be skipped if target column does not exists or already named so.
+     * Rename existed column or change name of scheduled column schema. This operation can be safe
+     * to use on recurring basis as rename will be skipped if target column does not exists or already
+     * named so.
      *
      * @param string $column
      * @param string $name New column name.
@@ -443,8 +456,9 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Rename existed index or change name of scheduled index schema. Index name must be used. This operation can be
-     * safe to use on recurring basis as rename will be skipped if target index does not exists or already named so.
+     * Rename existed index or change name of scheduled index schema. Index name must be used. This
+     * operation can be safe to use on recurring basis as rename will be skipped if target index does
+     * not exists or already named so.
      *
      * @param string $index Index name or forming columns.
      * @param string $name  New index name.
@@ -640,8 +654,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Add new schema entities into table, method will strictly forbid altering existed columns. Column, index and foreign
-     * key creation must be performed in provided function using table copy.
+     * Add new schema entities into table, method will strictly forbid altering existed columns.
+     * Column, index and foreign key creation must be performed in provided function using table copy.
      *
      * Examples:
      * $table->add(function(AbstractTable $table) {
@@ -664,11 +678,15 @@ abstract class AbstractTable extends Component implements TableInterface
 
         foreach ($table->alteredColumns() as $column => $columnSchema) {
             if ($this->hasColumn($column)) {
-                throw new SchemaException("Column '{$column}' already exists in '{$this->getName()}'.");
+                throw new SchemaException(
+                    "Column '{$column}' already exists in '{$this->getName()}'."
+                );
             }
 
             if (empty($columnSchema)) {
-                throw new SchemaException("Column '{$column}' removal is not allowed in add() method.");
+                throw new SchemaException(
+                    "Column '{$column}' removal is not allowed in add() method."
+                );
             }
 
             $this->columns[$column] = $columnSchema;
@@ -676,11 +694,15 @@ abstract class AbstractTable extends Component implements TableInterface
 
         foreach ($table->alteredIndexes() as $index => $indexSchema) {
             if ($this->hasIndex($indexSchema->getColumns())) {
-                throw new SchemaException("Index '{$index}' already exists in '{$this->getName()}'.");
+                throw new SchemaException(
+                    "Index '{$index}' already exists in '{$this->getName()}'."
+                );
             }
 
             if (empty($indexSchema)) {
-                throw new SchemaException("Index '{$index}' removal is not allowed in add() method.");
+                throw new SchemaException(
+                    "Index '{$index}' removal is not allowed in add() method."
+                );
             }
 
             $this->indexes[$index] = $indexSchema;
@@ -688,11 +710,15 @@ abstract class AbstractTable extends Component implements TableInterface
 
         foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
             if ($this->hasForeign($foreignSchema->getColumns())) {
-                throw new SchemaException("Foreign key '{$reference}' already exists in '{$this->getName()}'.");
+                throw new SchemaException(
+                    "Foreign key '{$reference}' already exists in '{$this->getName()}'."
+                );
             }
 
             if (empty($foreignSchema)) {
-                throw new SchemaException("Foreign key '{$reference}' removal is not allowed in add() method.");
+                throw new SchemaException(
+                    "Foreign key '{$reference}' removal is not allowed in add() method."
+                );
             }
 
             $this->references[$reference] = $foreignSchema;
@@ -704,8 +730,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Perform table creation, function syntax must be compatible with add() method but it will be applied if table
-     * does not exists.
+     * Perform table creation, function syntax must be compatible with add() method but it will be
+     * applied if table does not exists.
      *
      * Examples:
      * $table->create(function(AbstractTable $table) {
@@ -729,8 +755,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Alter schema entities into table, method will strictly forbid adding new columns. Column, index and foreign
-     * key altering must be performed in provided function using table copy.
+     * Alter schema entities into table, method will strictly forbid adding new columns. Column,
+     * index and foreign key altering must be performed in provided function using table copy.
      *
      * Examples:
      * $table->create(function(AbstractTable $table) {
@@ -758,7 +784,9 @@ abstract class AbstractTable extends Component implements TableInterface
 
         foreach ($table->alteredColumns() as $column => $columnSchema) {
             if (!$this->hasColumn($column)) {
-                throw new SchemaException("Column '{$column}' does not exists in '{$this->getName()}'.");
+                throw new SchemaException(
+                    "Column '{$column}' does not exists in '{$this->getName()}'."
+                );
             }
 
             if (!empty($columnSchema)) {
@@ -770,7 +798,9 @@ abstract class AbstractTable extends Component implements TableInterface
 
         foreach ($table->alteredIndexes() as $index => $indexSchema) {
             if (!$this->hasIndex($indexSchema->getColumns())) {
-                throw new SchemaException("Index '{$index}' does not exists in '{$this->getName()}'.");
+                throw new SchemaException(
+                    "Index '{$index}' does not exists in '{$this->getName()}'."
+                );
             }
 
             $previous = array_search($this->findIndex($indexSchema->getColumns()), $this->indexes);
@@ -784,7 +814,9 @@ abstract class AbstractTable extends Component implements TableInterface
 
         foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
             if (!$this->hasForeign($foreignSchema->getColumns())) {
-                throw new SchemaException("Foreign key '{$reference}' does not exists in '{$this->getName()}'.");
+                throw new SchemaException(
+                    "Foreign key '{$reference}' does not exists in '{$this->getName()}'."
+                );
             }
 
             $previous = array_search($this->findIndex($foreignSchema->getColumns()),
@@ -842,8 +874,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Save table schema including every column, index, foreign key creation/altering. If table does not exist it must
-     * be created.
+     * Save table schema including every column, index, foreign key creation/altering. If table does
+     * not exist it must be created.
      */
     public function save()
     {
@@ -893,7 +925,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Column creation/altering shortcut, call chain is identical to: AbstractTable->column($name)->$type($arguments)
+     * Column creation/altering shortcut, call chain is identical to:
+     * AbstractTable->column($name)->$type($arguments)
      *
      * Example:
      * $table->string("name");
@@ -954,7 +987,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Driver specific foreign keys information load. Columns must be added using registerColumn method
+     * Driver specific foreign keys information load. Columns must be added using registerColumn
+     * method.
      *
      * @see registerReference()
      */
@@ -1187,7 +1221,9 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     protected function doColumnAdd(AbstractColumn $column)
     {
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} ADD COLUMN {$column->sqlStatement()}");
+        $this->driver->statement(
+            "ALTER TABLE {$this->getName(true)} ADD COLUMN {$column->sqlStatement()}"
+        );
     }
 
     /**
@@ -1206,7 +1242,9 @@ abstract class AbstractTable extends Component implements TableInterface
             $this->doForeignDrop($this->foreign($column->getName()));
         }
 
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} DROP COLUMN {$column->getName(true)}");
+        $this->driver->statement(
+            "ALTER TABLE {$this->getName(true)} DROP COLUMN {$column->getName(true)}"
+        );
     }
 
     /**
@@ -1256,7 +1294,9 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     protected function doForeignAdd(AbstractReference $foreign)
     {
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} ADD {$foreign->sqlStatement()}");
+        $this->driver->statement(
+            "ALTER TABLE {$this->getName(true)} ADD {$foreign->sqlStatement()}"
+        );
     }
 
     /**
@@ -1266,7 +1306,9 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     protected function doForeignDrop(AbstractReference $foreign)
     {
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} DROP CONSTRAINT {$foreign->getName(true)}");
+        $this->driver->statement(
+            "ALTER TABLE {$this->getName(true)} DROP CONSTRAINT {$foreign->getName(true)}"
+        );
     }
 
     /**
@@ -1277,7 +1319,8 @@ abstract class AbstractTable extends Component implements TableInterface
     protected function doConstraintDrop($constraint)
     {
         $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} DROP CONSTRAINT " . $this->driver->identifier($constraint)
+            "ALTER TABLE {$this->getName(true)} DROP CONSTRAINT "
+            . $this->driver->identifier($constraint)
         );
     }
 

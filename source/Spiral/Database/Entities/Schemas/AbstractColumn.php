@@ -16,8 +16,8 @@ use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Schemas\ColumnInterface;
 
 /**
- * Abstract column schema with read (see ColumnInterface) and write abilities. Must be implemented by driver to support
- * DBMS specific syntax and creation rules.
+ * Abstract column schema with read (see ColumnInterface) and write abilities. Must be implemented
+ * by driver to support DBMS specific syntax and creation rules.
  *
  * Shortcuts for various column types:
  * @method AbstractColumn|$this boolean()
@@ -61,8 +61,8 @@ abstract class AbstractColumn implements ColumnInterface
     ];
 
     /**
-     * Association list between abstract types and native PHP types. Every non listed type will be converted into
-     * string.
+     * Association list between abstract types and native PHP types. Every non listed type will be
+     * converted into string.
      *
      * @invisible
      * @var array
@@ -74,9 +74,10 @@ abstract class AbstractColumn implements ColumnInterface
     ];
 
     /**
-     * Mapping between abstract type and internal database type with it's options. Multiple abstract types can map into
-     * one database type, this implementation allows us to equalize two columns if they have different abstract types
-     * but same database one. Must be declared by DBMS specific implementation.
+     * Mapping between abstract type and internal database type with it's options. Multiple abstract
+     * types can map into one database type, this implementation allows us to equalize two columns
+     * if they have different abstract types but same database one. Must be declared by DBMS
+     * specific implementation.
      *
      * Example:
      * integer => array('type' => 'int', 'size' => 1),
@@ -123,8 +124,8 @@ abstract class AbstractColumn implements ColumnInterface
     ];
 
     /**
-     * Reverse mapping is responsible for generating abstact type based on database type and it's options. Multiple
-     * database types can be mapped into one abstract type.
+     * Reverse mapping is responsible for generating abstact type based on database type and it's
+     * options. Multiple database types can be mapped into one abstract type.
      *
      * @invisible
      * @var array
@@ -176,8 +177,8 @@ abstract class AbstractColumn implements ColumnInterface
     protected $nullable = true;
 
     /**
-     * Default column value, may not be applied to some datatypes (for example to primary keys), should
-     * follow type size and other options.
+     * Default column value, may not be applied to some datatypes (for example to primary keys),
+     * should follow type size and other options.
      *
      * @var mixed
      */
@@ -359,7 +360,8 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * DBMS specific reverse mapping must map database specific type into limited set of abstract types.
+     * DBMS specific reverse mapping must map database specific type into limited set of abstract
+     * types.
      *
      * @return string
      */
@@ -410,11 +412,11 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Give column new abstract type. DBMS specific implementation must map provided type into one of internal database
-     * values.
+     * Give column new abstract type. DBMS specific implementation must map provided type into one
+     * of internal database values.
      *
-     * Attention, changing type of existed columns in some databases has a lot of restrictions like cross type
-     * conversions and etc. Try do not change column type without a reason.
+     * Attention, changing type of existed columns in some databases has a lot of restrictions like
+     * cross type conversions and etc. Try do not change column type without a reason.
      *
      * @param string $abstract Abstract or virtual type declared in mapping.
      * @return $this
@@ -462,8 +464,8 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Change column default value (can be forbidden for some column types). Use Database::TIMESTAMP_NOW to use driver
-     * specific NOW() function.
+     * Change column default value (can be forbidden for some column types).
+     * Use Database::TIMESTAMP_NOW to use driver specific NOW() function.
      *
      * @param mixed $value
      * @return $this
@@ -508,8 +510,8 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Set column as enum type and specify set of allowed values. Most of drivers will emulate enums using column
-     * constraints.
+     * Set column as enum type and specify set of allowed values. Most of drivers will emulate enums
+     * using column constraints.
      *
      * Examples:
      * $table->status->enum(['active', 'disabled']);
@@ -527,11 +529,11 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Set column type as string with limited size. Maximum allowed size is 255 bytes, use "text" abstract types for
-     * longer strings.
+     * Set column type as string with limited size. Maximum allowed size is 255 bytes, use "text"
+     * abstract types for longer strings.
      *
-     * Strings are perfect type to store email addresses as it big enough to store valid address and can
-     * be covered with unique index.
+     * Strings are perfect type to store email addresses as it big enough to store valid address and
+     * can be covered with unique index.
      *
      * @link http://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
      * @param int $size Max string length.
@@ -602,8 +604,8 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Create/get foreign key schema associated with column and referenced foreign table and column. Make sure local and
-     * outer column types are identical.
+     * Create/get foreign key schema associated with column and referenced foreign table and column.
+     * Make sure local and outer column types are identical.
      *
      * @param string $table  Foreign table name.
      * @param string $column Foreign column name (id by default).

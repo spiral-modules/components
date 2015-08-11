@@ -12,7 +12,9 @@ use Spiral\ODM\Exceptions\AccessorException;
 
 /**
  * Declares requirement for every ODM field accessor to be an instance of EmbeddableInterface and
- * declare it's default value. In addition construction is unified for every ODM accessor. Sad. :(
+ * declare it's default value. In addition constructor is unified and no container used to create
+ * accessors, however accessor still can resolve it's dependencies using getContainer() method of
+ * ODM component which must always be provided by parent document.
  */
 interface DocumentAccessorInterface extends EmbeddableInterface
 {

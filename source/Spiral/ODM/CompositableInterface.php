@@ -13,6 +13,8 @@ use Spiral\Validation\ValidatesInterface;
 /**
  * Declares that object can be embedded into Document as some instance and control it's owm (located
  * in instance) updates, public fields and validations.
+ *
+ * Compositable instance is primary entity type for ODM.
  */
 interface CompositableInterface extends EmbeddableInterface, ValidatesInterface
 {

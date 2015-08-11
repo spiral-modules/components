@@ -59,7 +59,7 @@ interface LoaderInterface
      * fetched from there. Additionally this method may be used to create relations to external
      * source of data (ODM, elasticSearch and etc).
      */
-    public function execute();
+    public function loadData();
 
     /**
      * Mount model data to parent loader under specified container, using reference key (inner key)

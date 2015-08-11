@@ -252,6 +252,9 @@ class ORM extends Singleton
     {
         $builder = !empty($builder) ? $builder : $this->schemaBuilder();
 
+        //Casting relations between models
+        $builder->castRelations();
+
         //Create all required tables and columns
         $builder->synchronizeSchema();
 

@@ -12,6 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\ModelSchema;
+use Spiral\ORM\Exceptions\ModelSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Model;
@@ -83,6 +84,7 @@ class SchemaBuilder extends Component
      * @param string $class
      * @return ModelSchema
      * @throws SchemaException
+     * @throws ModelSchemaException
      */
     public function model($class)
     {
@@ -171,6 +173,7 @@ class SchemaBuilder extends Component
      *
      * @throws SchemaException
      * @throws RelationSchemaException
+     * @throws ModelSchemaException
      */
     public function castRelations()
     {

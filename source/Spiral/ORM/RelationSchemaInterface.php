@@ -1,0 +1,102 @@
+<?php
+/**
+ * Spiral Framework.
+ *
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
+ * @copyright ©2009-2015
+ */
+namespace Spiral\ORM;
+
+use Spiral\ORM\Entities\SchemaBuilder;
+use Spiral\ORM\Entities\Schemas\ModelSchema;
+use Spiral\ORM\Exceptions\ModelSchemaException;
+use Spiral\ORM\Exceptions\RelationSchemaException;
+use Spiral\ORM\Exceptions\SchemaException;
+
+/**
+ * RelationSchema is responsible for clarification of inner and outer model schemas (for example it
+ * might declare required columns, indexes and foreign keys). In addition every RelationSchema must
+ * pack it's definition it cachable form which will be later feeded to model Relation and will be
+ * used as set of instructions
+ */
+interface RelationSchemaInterface
+{
+    /**
+     * @param SchemaBuilder $builder
+     * @param ModelSchema   $model
+     * @param string        $name
+     * @param array         $definition
+     */
+    public function __construct(
+        SchemaBuilder $builder,
+        ModelSchema $model,
+        $name,
+        array $definition
+    );
+
+    /**
+     * Relation name.
+     *
+     * @return string
+     */
+    public function getName();
+
+    /**
+     * Relation type. Check ORM config to see where relation types declared.
+     *
+     * @return int
+     */
+    public function getType();
+
+    /**
+     * Check if relation has it's equivalent. For example if relation associated to a specific model
+     * (or, like in case with polymorphic relations to interface) it can declare alternative relation
+     * definition with different relation type.
+     *
+     * @return bool
+     */
+    public function hasEquivalent();
+
+    /**
+     * Get definition for equivalent (usually polymorphic relationship) relation.
+     *
+     * @return array
+     * @throws RelationSchemaException
+     * @throws ModelSchemaException
+     */
+    public function createEquivalent();
+
+    /**
+     * Check if relation definition contains request to be reverted. Inversion used in cases when
+     * inner and outer models wants to have relations to each other.
+     *
+     * @return bool
+     */
+    public function isInversable();
+
+    /**
+     * Must declare inversed (reverted) relation in outer model schema. Relation must not be created
+     * if it's name already taken.
+     *
+     * @throws RelationSchemaException
+     * @throws SchemaException
+     * @throws RelationSchemaException
+     */
+    public function inverseRelation();
+
+    /**
+     * Create all required relation columns, indexes and constraints.
+     *
+     * @throws RelationSchemaException
+     * @throws \Spiral\Database\Exceptions\SchemaException
+     */
+    public function buildSchema();
+
+    /**
+     * Pack relation data into normalized structured to be used in cached ORM schema.
+     *
+     * @return array
+     */
+    public function normalizeSchema();
+}

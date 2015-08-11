@@ -10,6 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\ORM\Selector;
 
+
 interface LoaderInterface
 {
     /**

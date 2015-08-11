@@ -16,6 +16,7 @@ use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\DefinitionException;
+use Spiral\ORM\Exceptions\ModelSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Model;
@@ -60,6 +61,7 @@ class ModelSchema extends ReflectionEntity
      * @param string        $class   Class name.
      * @throws \ReflectionException
      * @throws DefinitionException
+     * @throws ModelSchemaException
      */
     public function __construct(SchemaBuilder $builder, $class)
     {
@@ -292,12 +294,12 @@ class ModelSchema extends ReflectionEntity
      * @see SchemaBuilder::relationSchema()
      * @param string $name
      * @param array  $definition
-     * @throws SchemaException
+     * @throws ModelSchemaException
      */
     public function addRelation($name, array $definition)
     {
         if (isset($this->relations[$name])) {
-            throw  new SchemaException(
+            throw  new ModelSchemaException(
                 "Unable to create relation '{$this}'.'{$name}', relation already exists."
             );
         }

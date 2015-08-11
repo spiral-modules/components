@@ -11,7 +11,7 @@ namespace Spiral\ORM\Entities\Schemas\Relations;
 use Spiral\ORM\Model;
 
 /**
- * Declares simple has many relation. Relations like used when parent model has many child with
+ * Declares simple has many relation. Relations like that used when parent model has many child with
  * [outer] key linked to value of [inner] key of parent mode. Relation allow specifying default
  * WHERE statement. Attention, WHERE statement will not be used in populating newly created model
  * fields.

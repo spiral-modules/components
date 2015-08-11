@@ -12,7 +12,7 @@ use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Model;
 
 /**
- * Declares simple has one relation. Relations like used when parent model has one child with
+ * Declares simple has one relation. Relations like that used when parent model has one child with
  * [outer] key linked to value of [inner] key of parent mode.
  *
  * Example, [User has one Profile], user primary key is "id":
@@ -58,7 +58,7 @@ class HasOneSchema extends RelationSchema
             return;
         }
 
-        //Reverting definition
+        //Inverting definition
         $this->outerModel()->addRelation(
             $this->definition[Model::INVERSE],
             [
@@ -80,12 +80,8 @@ class HasOneSchema extends RelationSchema
         //Outer (related) table schema
         $outerTable = $this->outerModel()->tableSchema();
 
-        /**
-         * Outer key creation, will include type casting and nullable flag.
-         */
-        $outerKey = $outerTable->column($this->getOuterKey());
-
         //Outer key type must much inner key type
+        $outerKey = $outerTable->column($this->getOuterKey());
         $outerKey->type($this->getInnerKeyType());
         $outerKey->nullable($this->isNullable());
 

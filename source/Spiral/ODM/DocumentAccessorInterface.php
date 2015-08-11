@@ -15,6 +15,8 @@ use Spiral\ODM\Exceptions\AccessorException;
  * declare it's default value. In addition constructor is unified and no container used to create
  * accessors, however accessor still can resolve it's dependencies using getContainer() method of
  * ODM component which must always be provided by parent document.
+ *
+ * Parent model will not be supplied to accessor while schema analysis!
  */
 interface DocumentAccessorInterface extends EmbeddableInterface
 {
@@ -23,11 +25,11 @@ interface DocumentAccessorInterface extends EmbeddableInterface
      *
      * Accessor options include field type resolved by DocumentSchema.
      *
-     * @param mixed $options Implementation specific options. In ODM always contain field type.
+     * @param mixed $options Implementation specific options. In ODM will always contain field type.
      * @param ODM   $odm     ODM component.
      * @throws AccessorException
      */
-    public function __construct($data, $parent, $options = null, ODM $odm = null);
+    public function __construct($data, $parent = null, $options = null, ODM $odm = null);
 
     /**
      * Accessor default value.

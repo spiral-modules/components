@@ -20,8 +20,8 @@ use Spiral\ORM\RelationSchemaInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
- * Schema builder responsible for static analysis of existed ORM Models, their schemas, validations, related tables,
- * requested indexes and etc.
+ * Schema builder responsible for static analysis of existed ORM Models, their schemas, validations,
+ * related tables, requested indexes and etc.
  */
 class SchemaBuilder extends Component
 {
@@ -164,7 +164,6 @@ class SchemaBuilder extends Component
 
         return array_reverse($tables);
     }
-
 
     /**
      * SchemaBuilder will request every located ModelSchema to declare it's relations. In addition

@@ -284,6 +284,8 @@ class DocumentSchema extends ReflectionEntity
 
     /**
      * {@inheritdoc}
+     *
+     * Schema can generate accessors and filters based on field type.
      */
     public function getMutators()
     {
@@ -291,6 +293,7 @@ class DocumentSchema extends ReflectionEntity
 
         //Trying to resolve mutators based on field type
         foreach ($this->getFields() as $field => $type) {
+            //Resolved filters
             $resolved = [];
 
             if (
@@ -309,7 +312,7 @@ class DocumentSchema extends ReflectionEntity
             }
 
             if (isset($resolved[self::MUTATOR_ACCESSOR])) {
-                //Accessor options include field type.
+                //Accessor options include field type, this is ODM specific behaviour
                 $resolved[self::MUTATOR_ACCESSOR] = [
                     $resolved[self::MUTATOR_ACCESSOR],
                     is_array($type) ? $type[0] : $type

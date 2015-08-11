@@ -12,12 +12,14 @@ use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\DefinitionException;
+use Spiral\ORM\Exceptions\RelationSchemaException;
+use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Model;
+use Spiral\ORM\ModelAccessorInterface;
 use Spiral\ORM\RelationSchemaInterface;
 
 /**
@@ -216,55 +218,54 @@ class ModelSchema extends ReflectionEntity
         $defaults = [];
         $modelDefaults = $this->property('defaults', true);
 
+        //We must pass all default values thought set of setters and accessor to ensure their value
+        $setters = $this->getSetters();
+        $accessors = $this->getAccessors();
+
         foreach ($this->tableSchema->getColumns() as $column) {
+            //Let's use default value fetched from column first
+            $default = $this->exportDefault($column);
+
             if (isset($modelDefaults[$column->getName()])) {
                 //Let's use value declared in model schema
-                $defaults[$column->getName()] = $modelDefaults[$column->getName()];
+                $default = $modelDefaults[$column->getName()];
             }
 
-            //Due no default value were declared by schema we can try to fetch it from column
-            $defaults[$column->getName()] = $this->exportDefault($column);
-        }
+            if (isset($accessors[$column->getName()])) {
+                $accessor = $accessors[$column->getName()];
+                $accessor = new $accessor($default, null);
+                if ($accessor instanceof ModelAccessorInterface) {
+                    $default = $accessor->defaultValue($this->tableSchema->driver());
+                }
+            }
 
-        //TODO: MOVE TO GET DEFAULTS
-        //
-        //        $setters = $this->getSetters();
-        //        $accessors = $this->getAccessors();
-        //
-        //        //                if (array_key_exists($name, $this->getAccessors())) {
-        //        //                    $accessor = $this->getAccessors()[$name];
-        //        //                    $option = null;
-        //        //                    if (is_array($accessor)) {
-        //        //                        list($accessor, $option) = $accessor;
-        //        //                    }
-        //        //
-        //        //                    /**
-        //        //                     * @var ModelAccessorInterface $accessor
-        //        //                     */
-        //        //                    $accessor = new $accessor($defaultValue, null, $option);
-        //        //
-        //        //                    //We have to pass default value thought accessor
-        //        //                    return $accessor->defaultValue($this->tableSchema->driver());
-        //        //                }
-        //        //
-        //        //                if (array_key_exists($name, $this->getSetters()) && $this->getSetters()[$name]) {
-        //        //                    $setter = $this->getSetters()[$name];
-        //        //
-        //        //                    //We have to pass default value thought accessor
-        //        //                    return call_user_func($setter, $defaultValue);
-        //        //                }
+            if (isset($setters[$column->getName()])) {
+                try {
+                    //Applying filter to default value
+                    $default = call_user_func($setters[$column->getName()], $default);
+                } catch (\ErrorException $exception) {
+                    $default = null;
+                }
+            }
+
+            $defaults[$column->getName()] = $default;
+        }
 
         return $defaults;
     }
 
     /**
-     * TODO: EXPLAIN
+     * Model will utilize it's schema definition to create set of relations to other models and
+     * entities (for example ODM).
+     *
+     * @throws SchemaException
+     * @throws RelationSchemaException
      */
     public function castRelations()
     {
         foreach ($this->property('schema', true) as $name => $definition) {
-            if (is_string($definition)) {
-                //Column definition
+            if (is_scalar($definition)) {
+                //Column definition or something else
                 continue;
             }
 
@@ -274,28 +275,31 @@ class ModelSchema extends ReflectionEntity
         }
     }
 
+    /**
+     * Check if ModelSchema already have declared relation by it's name.
+     *
+     * @param string $name
+     * @return bool
+     */
     public function hasRelation($name)
     {
+        return isset($this->relations[$name]);
     }
 
     /**
-     * Add relation to RecordSchema.
+     * Declare new model relation by it's name and definition. Only unique relations can be added.
      *
+     * @see SchemaBuilder::relationSchema()
      * @param string $name
      * @param array  $definition
+     * @throws SchemaException
      */
     public function addRelation($name, array $definition)
     {
         if (isset($this->relations[$name])) {
-            throw    new SchemaException(
-                "Unable to create relation '{class}'.'{name}', connection already exists.",
-                [
-                    'name'  => $name,
-                    'class' => $this->getClass()
-                ]
+            throw  new SchemaException(
+                "Unable to create relation '{$this}'.'{$name}', relation already exists."
             );
-
-            return;
         }
 
         $relation = $this->builder->relationSchema($this, $name, $definition);
@@ -316,7 +320,53 @@ class ModelSchema extends ReflectionEntity
         return $this->relations;
     }
 
-    //-----
+    /**
+     * {@inheritdoc}
+     *
+     * Schema can generate accessors and filters based on field type.
+     */
+    public function getMutators()
+    {
+        $mutators = parent::getMutators();
+
+        //Trying to resolve mutators based on field type
+        foreach ($this->getFields() as $field => $type) {
+            //Resolved filters
+            $resolved = [];
+
+            if (
+                is_array($type)
+                && is_scalar($type[0])
+                && $filter = $this->builder->getMutators('array::' . $type[0])
+            ) {
+                //Mutator associated to array with specified type
+                $resolved += $filter;
+            } elseif (is_array($type) && $filter = $this->builder->getMutators('array')) {
+                //Default array mutator
+                $resolved += $filter;
+            } elseif (!is_array($type) && $filter = $this->builder->getMutators($type)) {
+                //Mutator associated with type directly
+                $resolved += $filter;
+            }
+
+            //Merging mutators and default mutators
+            foreach ($resolved as $mutator => $filter) {
+                if (!array_key_exists($field, $mutators[$mutator])) {
+                    $mutators[$mutator][$field] = $filter;
+                }
+            }
+        }
+
+        foreach ($mutators as $mutator => &$filters) {
+            foreach ($filters as $field => $filter) {
+                //Some mutators may be described using aliases (for shortness)
+                $filters[$field] = $this->builder->mutatorAlias($filter);
+            }
+            unset($filters);
+        }
+
+        return $mutators;
+    }
 
     /**
      * Method utilizes value of model schema property to generate table columns. Property "indexes"

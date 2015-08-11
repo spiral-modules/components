@@ -15,9 +15,18 @@ use Spiral\Models\AccessorInterface;
 /**
  * Declares requirement for every ORM field accessor to declare it's driver depended value and
  * control it's updates.
+ *
+ * ORM accessors are much more simple by initiation that ODM accessors.
  */
 interface ModelAccessorInterface extends AccessorInterface
 {
+    /**
+     * {@inheritdoc}
+     *
+     * Parent will not be supplied while schema analysis.
+     */
+    public function __construct($data, $parent = null);
+
     /**
      * Check if object has any update.
      *

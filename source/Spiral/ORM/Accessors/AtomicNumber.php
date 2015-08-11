@@ -50,9 +50,9 @@ class AtomicNumber implements ModelAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct($data, $parent, $options = null)
+    public function __construct($number, $parent = null)
     {
-        $this->original = $this->value = $data;
+        $this->original = $this->value = $number;
         $this->parent = $parent;
     }
 

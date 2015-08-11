@@ -88,20 +88,24 @@ class Compositor extends Component implements
      *
      * @param string $class Primary class being composited.
      */
-    public function __construct($data, $parent, $class = null, ODM $odm = null)
+    public function __construct($data, $parent = null, $class = null, ODM $odm = null)
     {
         $this->class = $class;
         $this->parent = $parent;
 
         if (empty($this->class)) {
-            throw new CompositorException("Compositor requires to know it's primary class name.");
+            throw new CompositorException(
+                "Compositor requires to know it's primary class name."
+            );
         }
 
         //Allowed only when global container is set
         $this->odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
 
         if (empty($this->odm)) {
-            throw new CompositorException("ODM instance if required for Compositor to work properly.");
+            throw new CompositorException(
+                "ODM instance if required for Compositor to work properly."
+            );
         }
     }
 
@@ -134,8 +138,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * When solid state is enabled no atomic operations will be pushed to databases and document composition will be
-     * saved as one big set.
+     * When solid state is enabled no atomic operations will be pushed to databases and document
+     * composition will be saved as one big set.
      *
      * @param bool $solidState
      * @return $this
@@ -221,7 +225,9 @@ class Compositor extends Component implements
     {
         $result = [];
         foreach ($this->documents as $document) {
-            $result[] = $document instanceof CompositableInterface ? $document->serializeData() : $document;
+            $result[] = $document instanceof CompositableInterface
+                ? $document->serializeData()
+                : $document;
         }
 
         return $result;
@@ -307,7 +313,8 @@ class Compositor extends Component implements
             $atomics[$operation][$container] = $this->serializeDocuments($items);
         }
 
-        //Document specific atomic operations, make sure it's not colliding with Compositor level atomic operations
+        //Document specific atomic operations, make sure it's not colliding with Compositor level
+        //atomic operations
         foreach ($this->documents as $offset => $document) {
             if ($document instanceof CompositableInterface) {
                 if (in_array($document, $handledDocuments)) {
@@ -365,7 +372,9 @@ class Compositor extends Component implements
         }
 
         if (!$this->solidState) {
-            throw new CompositorException("Direct offset operation can not be applied for compositor in non solid state.");
+            throw new CompositorException(
+                "Direct offset operation can not be applied for compositor in non solid state."
+            );
         }
 
         $this->changedDirectly = true;
@@ -383,7 +392,9 @@ class Compositor extends Component implements
     public function offsetUnset($offset)
     {
         if (!$this->solidState) {
-            throw new CompositorException("Direct offset operation can not be applied for compositor in non solid state.");
+            throw new CompositorException(
+                "Direct offset operation can not be applied for compositor in non solid state."
+            );
         }
 
         $this->changedDirectly = true;
@@ -405,8 +416,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Create Document and add it to composition. Compositor will use it's primary class to construct document. You can
-     * force custom class name to be added using second argument.
+     * Create Document and add it to composition. Compositor will use it's primary class to construct
+     * document. You can* force custom class name to be added using second argument.
      *
      * @param array  $fields
      * @param string $class
@@ -418,7 +429,9 @@ class Compositor extends Component implements
     public function create(array $fields = [], $class = null)
     {
         if (!$this->solidState) {
-            throw new CompositorException("Direct offset operation can not be applied for compositor in non solid state.");
+            throw new CompositorException(
+                "Direct offset operation can not be applied for compositor in non solid state."
+            );
         }
 
         //Locating class to be used
@@ -445,7 +458,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Find documents based on provided field values or document instance. Only simple query support (one level array).
+     * Find documents based on provided field values or document instance. Only simple query support
+     * (one level array).
      *
      * Example:
      * $user->cards->find(['active' => true]);
@@ -475,7 +489,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Find first composited (nested document) by matched query. Only simple query support (one level array).
+     * Find first composited (nested document) by matched query. Only simple query support (one level
+     * array).
      *
      * Example:
      * $user->cards->findOne(['active' => true]);
@@ -493,8 +508,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Push new document to end of set. Set second argument to false to keep Compositor in solid state and save it as
-     * one big array of data.
+     * Push new document to end of set. Set second argument to false to keep Compositor in solid
+     * state and save it as one big array of data.
      *
      * @param Document $document
      * @param bool     $resetState Set to true to reset compositor solid state.
@@ -516,7 +531,9 @@ class Compositor extends Component implements
         }
 
         if (!empty($this->atomics) && !isset($this->atomics['$push'])) {
-            throw new CompositorException("Unable to apply multiple atomic operation to one Compositor.");
+            throw new CompositorException(
+                "Unable to apply multiple atomic operation to one Compositor."
+            );
         }
 
         $this->atomics['$push'][] = $document;
@@ -525,8 +542,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Pulls document(s) from the set, query should represent document object matched fields. Set second argument to
-     * false to keep Compositor in solid state and save it as one big array of data.
+     * Pulls document(s) from the set, query should represent document object matched fields. Set
+     * second argument to false to keep Compositor in solid state and save it as one big array of data.
      *
      * @param array|Document $query
      * @param bool           $resetState Set to true to reset compositor solid state.
@@ -559,7 +576,9 @@ class Compositor extends Component implements
         }
 
         if (!empty($this->atomics) && !isset($this->atomics['$pull'])) {
-            throw new CompositorException("Unable to apply multiple atomic operation to composition.");
+            throw new CompositorException(
+                "Unable to apply multiple atomic operation to composition."
+            );
         }
 
         $this->atomics['$pull'][] = $query;
@@ -568,8 +587,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Add document to set, only one instance of document must be presented. Set second argument to false to keep
-     * Compositor in solid state and save it as one big array of data.
+     * Add document to set, only one instance of document must be presented. Set second argument to
+     * false to keep Compositor in solid state and save it as one big array of data.
      *
      * @param Document $document
      * @param bool     $resetState Set to true to reset compositor solid state.
@@ -593,7 +612,9 @@ class Compositor extends Component implements
         }
 
         if (!empty($this->atomics) && !isset($this->atomics['$addToSet'])) {
-            throw new CompositorException("Unable to apply multiple atomic operation to composition.");
+            throw new CompositorException(
+                "Unable to apply multiple atomic operation to composition."
+            );
         }
 
         $this->atomics['$addToSet'][] = $document;

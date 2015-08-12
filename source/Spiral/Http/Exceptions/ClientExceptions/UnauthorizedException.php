@@ -16,5 +16,8 @@ use Spiral\Http\Response;
  */
 class UnauthorizedException extends ClientException
 {
+    /**
+     * @var int
+     */
     protected $code = Response::UNAUTHORIZED;
 }

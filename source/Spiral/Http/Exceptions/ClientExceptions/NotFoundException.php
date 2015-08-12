@@ -16,5 +16,8 @@ use Spiral\Http\Response;
  */
 class NotFoundException extends ClientException
 {
+    /**
+     * @var int
+     */
     protected $code = Response::NOT_FOUND;
 }

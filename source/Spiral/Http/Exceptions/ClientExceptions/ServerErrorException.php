@@ -16,7 +16,9 @@ use Spiral\Http\Response;
  */
 class ServerErrorException extends ClientException
 {
+    /**
+     * @var int
+     */
     protected $code = Response::SERVER_ERROR;
-
 }
 

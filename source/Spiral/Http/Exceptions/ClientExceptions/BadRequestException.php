@@ -16,6 +16,8 @@ use Spiral\Http\Response;
  */
 class BadRequestException extends ClientException
 {
+    /**
+     * @var int
+     */
     protected $code = Response::BAD_REQUEST;
-
 }

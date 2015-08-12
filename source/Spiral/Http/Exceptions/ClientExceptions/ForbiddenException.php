@@ -16,5 +16,8 @@ use Spiral\Http\Response;
  */
 class ForbiddenException extends ClientException
 {
+    /**
+     * @var int
+     */
     protected $code = Response::FORBIDDEN;
 }

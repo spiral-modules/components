@@ -90,6 +90,7 @@ class ManyToManySchema extends RelationSchema
         //data
         Model::WHERE_PIVOT       => [],
         //WHERE statement to be applied for data in outer data while loading relation data
+        //can not be inversed
         Model::WHERE             => []
     ];
 
@@ -99,7 +100,7 @@ class ManyToManySchema extends RelationSchema
     public function inverseRelation()
     {
         //Many to many relation can be inversed pretty easily, we only have to swap inner keys
-        //with outer keys
+        //with outer keys, however WHERE conditions can not be inversed
         $this->outerModel()->addRelation(
             $this->definition[Model::INVERSE],
             [
@@ -111,8 +112,10 @@ class ManyToManySchema extends RelationSchema
                 Model::THOUGHT_OUTER_KEY => $this->definition[Model::THOUGHT_INNER_KEY],
                 Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],
                 Model::CONSTRAINT_ACTION => $this->definition[Model::CONSTRAINT_ACTION],
+                Model::CREATE_INDEXES    => $this->definition[Model::CREATE_INDEXES],
                 Model::CREATE_PIVOT      => $this->definition[Model::CREATE_PIVOT],
-                Model::PIVOT_COLUMNS     => $this->definition[Model::PIVOT_COLUMNS]
+                Model::PIVOT_COLUMNS     => $this->definition[Model::PIVOT_COLUMNS],
+                Model::WHERE_PIVOT       => $this->definition[Model::WHERE_PIVOT]
             ]
         );
     }

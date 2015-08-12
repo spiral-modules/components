@@ -42,11 +42,11 @@ class HasOneSchema extends RelationSchema
         Model::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
         Model::CONSTRAINT_ACTION => 'CASCADE',
+        //Relation allowed to create indexes in outer table
+        Model::CREATE_INDEXES    => true,
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Model::NULLABLE          => true,
-        //Relation allowed to create indexes in outer table
-        Model::CREATE_INDEXES    => true
+        Model::NULLABLE          => true
     ];
 
     /**
@@ -63,6 +63,7 @@ class HasOneSchema extends RelationSchema
                 Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
                 Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],
                 Model::CONSTRAINT_ACTION => $this->definition[Model::CONSTRAINT_ACTION],
+                Model::CREATE_INDEXES    => $this->definition[Model::CREATE_INDEXES],
                 Model::NULLABLE          => $this->definition[Model::NULLABLE]
             ]
         );

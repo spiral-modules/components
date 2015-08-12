@@ -64,6 +64,8 @@ class BelongsToMorphedSchema extends MorphedSchema
 
     /**
      * {@inheritdoc}
+     *
+     * Relation will be inversed to every associated model.
      */
     public function inverseRelation()
     {

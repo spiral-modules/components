@@ -838,7 +838,7 @@ abstract class Loader implements LoaderInterface
      * @param string $referenceKey
      * @return array
      */
-    public function getAggregatedKeys($referenceKey)
+    public function aggregatedKeys($referenceKey)
     {
         if (!isset($this->references[$referenceKey]))
         {

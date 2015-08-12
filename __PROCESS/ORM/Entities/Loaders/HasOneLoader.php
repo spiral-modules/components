@@ -50,7 +50,7 @@ class HasOneLoader extends Loader
         $this->mountConditions($selector);
 
         //Aggregated keys (example: all parent ids)
-        if (empty($aggregatedKeys = $this->parent->getAggregatedKeys($this->getReferenceKey())))
+        if (empty($aggregatedKeys = $this->parent->aggregatedKeys($this->getReferenceKey())))
         {
             //Nothing to postload, no parents
             return null;

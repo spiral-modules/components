@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
+use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
@@ -15,8 +16,41 @@ use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Model;
 
 /**
+ * ManyToMorphed relation declares relation between parent model and set of outer models joined by
+ * common interface. Relation allow to specify inner key (key in parent model), outer key (key in
+ * outer models), morph key, pivot table name, names of pivot columns to store inner and outer key
+ * values and set of additional columns. Relation DOES NOT to specify WHERE statement for outer
+ * records. However you can specify where conditions for PIVOT table.
  *
+ * You can declare this relation using same syntax as for ManyToMany except your target class
+ * must be an interface.
  *
+ * Attention, be very careful using morphing relations, you must know what you doing!
+ * Attention #2, relation like that can not be preloaded!
+ *
+ * Example [Tag related to many TaggableInterface], relation name "tagged", relation requested to be
+ * inversed using name "tags":
+ * - relation will walk should every model implementing TaggableInterface to collect name and
+ *   type of outer keys, if outer key is not consistent across models implementing this interface
+ *   an exception will be raised, let's say that outer key is "id" in every model
+ * - relation will create pivot table named "tagged_map" (if allowed), where table name generated
+ *   based on relation name (you can change name)
+ * - relation will create pivot key named "tag_ud" related to Tag primary key
+ * - relation will create pivot key named "tagged_id" related to primary key of outer models,
+ *   singular relation name used to generate key like that
+ * - relation will create pivot key named "tagged_type" to store role of outer model
+ * - relation will create unique index on "tag_id", "tagged_id" and "tagged_type" columns if allowed
+ * - relation will create additional columns in pivot table if any requested
+ *
+ * Using in models:
+ * You can use inversed relation as usual ManyToMany, however in Tag model relation access will be
+ * little bit more complex - every linked model will create inner ManyToMany relation:
+ * $tag->tagged->users->count(); //Where "users" is plural form of one outer models
+ *
+ * You can defined your own inner relation names by using MORPHED_ALIASES option when defining
+ * relation.
+ *
+ * @see BelongsToMorhedSchema
  * @see ManyToManySchema
  */
 class ManyToMorphedSchema extends MorphedSchema
@@ -68,10 +102,7 @@ class ManyToMorphedSchema extends MorphedSchema
         Model::PIVOT_COLUMNS     => [],
         //WHERE statement in a form of simplified array definition to be applied to pivot table
         //data
-        Model::WHERE_PIVOT       => [],
-        //WHERE statement to be applied for data in outer data while loading relation data
-        //can not be inversed
-        Model::WHERE             => []
+        Model::WHERE_PIVOT       => []
     ];
 
     /**
@@ -189,7 +220,8 @@ class ManyToMorphedSchema extends MorphedSchema
         foreach ($this->outerModels() as $model) {
             if (!in_array($model->getRole(), $definition[Model::MORPHED_ALIASES])) {
                 //Let's remember associations between tables and roles
-                $definition[Model::MORPHED_ALIASES][$model->getTable()] = $model->getRole();
+                $plural = Inflector::pluralize($model->getRole());
+                $definition[Model::MORPHED_ALIASES][$plural] = $model->getRole();
             }
         }
 

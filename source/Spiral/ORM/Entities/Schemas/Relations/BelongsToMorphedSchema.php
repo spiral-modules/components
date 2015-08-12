@@ -16,12 +16,14 @@ use Spiral\ORM\Model;
  * BelongsToMorphed are almost identical to BelongsTo except it parent Model defined by role value
  * stored in [morph key] and parent key in [inner key].
  *
- * You can defined BelongsToMorphed relation using syntax for BelongsTo but declaring outer class
+ * You can define BelongsToMorphed relation using syntax for BelongsTo but declaring outer class
  * as interface, meaning you should not only declare inversed relation name, but also it's type -
  * HAS_ONE or HAS_MANY.
  *
  * Example: 'parent' => [self::BELONGS_TO => 'Models\CommentableInterface']
- * Attention, be very careful using morphed relations, you must know what you doing!
+ *
+ * Attention, be very careful using morphing relations, you must know what you doing!
+ * Attention #2, relation like that can not be preloaded!
  *
  * Example, [Comment can belong to any CommentableInterface model], relation name "parent", relation
  * requested to be inversed into HAS_MANY "comments":

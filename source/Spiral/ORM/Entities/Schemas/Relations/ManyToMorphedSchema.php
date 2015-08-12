@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ORM\Schemas\Relations;
+namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Entities\Schemas\AbstractTable;
@@ -82,7 +82,7 @@ class ManyToMorphedSchema extends MorphedSchema
         //in every outer model and be consistent
         Model::OUTER_KEY         => '{outer:primaryKey}',
         //Linking pivot table and parent model
-        Model::THOUGHT_INNER_KEY => '{model:roleName}_{definition:innerKet}',
+        Model::THOUGHT_INNER_KEY => '{model:role}_{definition:innerKey}',
         //Linking pivot table and outer models
         Model::THOUGHT_OUTER_KEY => '{name:singular}_{definition:outerKey}',
         //Declares what specific model pivot record linking to
@@ -93,9 +93,6 @@ class ManyToMorphedSchema extends MorphedSchema
         Model::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in pivot table
         Model::CREATE_INDEXES    => true,
-        //Name of pivot table to be declared, default value is not stated as it will be generated
-        //based on roles of inner and outer models
-        Model::PIVOT_TABLE       => null,
         //Relation allowed to create pivot table
         Model::CREATE_PIVOT      => true,
         //Additional set of columns to be added into pivot table, you can use same column definition
@@ -114,23 +111,25 @@ class ManyToMorphedSchema extends MorphedSchema
     public function inverseRelation()
     {
         //WHERE conditions can not be inversed
-        foreach ($this->outerModels() as $record) {
-            $record->addRelation(
-                $this->definition[Model::INVERSE],
-                [
-                    Model::MANY_TO_MANY      => $this->model->getName(),
-                    Model::PIVOT_TABLE       => $this->definition[Model::PIVOT_TABLE],
-                    Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
-                    Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
-                    Model::THOUGHT_INNER_KEY => $this->definition[Model::THOUGHT_OUTER_KEY],
-                    Model::THOUGHT_OUTER_KEY => $this->definition[Model::THOUGHT_INNER_KEY],
-                    Model::MORPH_KEY         => $this->definition[Model::MORPH_KEY],
-                    Model::CREATE_INDEXES    => $this->definition[Model::CREATE_INDEXES],
-                    Model::CREATE_PIVOT      => $this->definition[Model::CREATE_PIVOT],
-                    Model::PIVOT_COLUMNS     => $this->definition[Model::PIVOT_COLUMNS],
-                    Model::WHERE_PIVOT       => $this->definition[Model::WHERE_PIVOT]
-                ]
-            );
+        foreach ($this->outerModels() as $model) {
+            if (!$model->hasRelation($this->definition[Model::INVERSE])) {
+                $model->addRelation(
+                    $this->definition[Model::INVERSE],
+                    [
+                        Model::MANY_TO_MANY      => $this->model->getName(),
+                        Model::PIVOT_TABLE       => $this->definition[Model::PIVOT_TABLE],
+                        Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
+                        Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
+                        Model::THOUGHT_INNER_KEY => $this->definition[Model::THOUGHT_OUTER_KEY],
+                        Model::THOUGHT_OUTER_KEY => $this->definition[Model::THOUGHT_INNER_KEY],
+                        Model::MORPH_KEY         => $this->definition[Model::MORPH_KEY],
+                        Model::CREATE_INDEXES    => $this->definition[Model::CREATE_INDEXES],
+                        Model::CREATE_PIVOT      => $this->definition[Model::CREATE_PIVOT],
+                        Model::PIVOT_COLUMNS     => $this->definition[Model::PIVOT_COLUMNS],
+                        Model::WHERE_PIVOT       => $this->definition[Model::WHERE_PIVOT]
+                    ]
+                );
+            }
         }
     }
 
@@ -171,7 +170,7 @@ class ManyToMorphedSchema extends MorphedSchema
 
         //Inner key points to our parent model
         $innerKey = $pivotTable->column($this->definition[Model::THOUGHT_INNER_KEY]);
-        $innerKey->type($this->getInnerKey());
+        $innerKey->type($this->getInnerKeyType());
 
         if ($this->isIndexed()) {
             $innerKey->index();

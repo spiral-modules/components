@@ -9,6 +9,7 @@
 namespace Spiral\ORM\Entities\Schemas;
 
 use Spiral\ORM\Exceptions\RelationSchemaException;
+use Spiral\ORM\Model;
 
 /**
  * {@inheritdoc}
@@ -21,6 +22,15 @@ use Spiral\ORM\Exceptions\RelationSchemaException;
  */
 abstract class MorphedSchema extends RelationSchema
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function isInversable()
+    {
+        //Morphed relations must control unique relations on lower level
+        return !empty($this->definition[Model::INVERSE]) && $this->isReasonable();
+    }
+
     /**
      * {@inheritdoc}
      */

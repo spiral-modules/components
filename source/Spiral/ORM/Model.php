@@ -271,7 +271,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     ) {
         $this->loaded = $loaded;
         $this->orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
-        $this->schema = !empty($schema) ? $schema : $orm->getSchema(static::class);
+        $this->schema = !empty($schema) ? $schema : $this->orm->getSchema(static::class);
 
         static::initialize();
 
@@ -444,6 +444,28 @@ class Model extends DataEntity implements ActiveEntityInterface
                 ? $original->serializeData()
                 : $original;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Model will skip filtration for nullable fields.
+     */
+    public function getField($name, $default = null, $filter = true)
+    {
+        if (!array_key_exists($name, $this->fields)) {
+            throw new ModelException("Undefined field '{$name}' in '" . static::class . "'.");
+        }
+
+        $value = $this->fields[$name];
+        if ($value === null && in_array($name, $this->schema[ORM::M_NULLABLE])) {
+            if (!isset($this->schema[ORM::M_MUTATORS]['accessor'][$name])) {
+                //We can skip setters for null values, but not accessors
+                return $value;
+            }
+        }
+
+        return parent::getField($name, $default, $filter);
     }
 
     /**

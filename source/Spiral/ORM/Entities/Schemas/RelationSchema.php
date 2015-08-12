@@ -156,7 +156,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function hasEquivalent()
     {
-        if (!static::EQUIVALENT_RELATION) {
+        if (empty(static::EQUIVALENT_RELATION)) {
             //No equivalents
             return false;
         }
@@ -175,6 +175,7 @@ abstract class RelationSchema implements RelationSchemaInterface
                 "Relation '{$this->model}'.'{$this}' does not have equivalents."
             );
         }
+
         //Let's convert to polymorphic
         $definition = [
                 static::EQUIVALENT_RELATION => $this->target
@@ -195,8 +196,14 @@ abstract class RelationSchema implements RelationSchemaInterface
             return false;
         }
 
+        $inversed = $this->definition[Model::INVERSE];
+        if (is_array($inversed)) {
+            //Some relations requires not only inversed relation name but also type
+            $inversed = $inversed[1];
+        }
+
         //We must prevent duplicate relations
-        return !$this->outerModel()->hasRelation($this->definition[Model::INVERSE]);
+        return !$this->outerModel()->hasRelation($inversed);
     }
 
     /**

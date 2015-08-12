@@ -86,7 +86,7 @@ interface TableInterface
 
     /**
      * Get list of table names current schema depends on, must include every table linked using
-     * foreign key or other constraint.
+     * foreign key or other constraint. Table names must not include database prefix.
      *
      * @return array
      */

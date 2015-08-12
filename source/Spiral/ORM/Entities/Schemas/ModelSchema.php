@@ -122,7 +122,7 @@ class ModelSchema extends ReflectionEntity
             return $this->getConstant('MODEL_ROLE');
         }
 
-        return lcfirst($this->getName());
+        return lcfirst($this->getShortName());
     }
 
     /**
@@ -233,6 +233,12 @@ class ModelSchema extends ReflectionEntity
             if (isset($modelDefaults[$column->getName()])) {
                 //Let's use value declared in model schema
                 $default = $modelDefaults[$column->getName()];
+            }
+
+            if (is_null($default) && $column->isNullable()) {
+                //We must keep null values
+                $defaults[$column->getName()] = $default;
+                continue;
             }
 
             if (isset($accessors[$column->getName()])) {
@@ -354,29 +360,22 @@ class ModelSchema extends ReflectionEntity
         $mutators = parent::getMutators();
 
         //Trying to resolve mutators based on field type
-        foreach ($this->getFields() as $field => $type) {
+        foreach ($this->tableSchema->getColumns() as $column) {
             //Resolved filters
             $resolved = [];
 
-            if (
-                is_array($type)
-                && is_scalar($type[0])
-                && $filter = $this->builder->getMutators('array::' . $type[0])
-            ) {
-                //Mutator associated to array with specified type
-                $resolved += $filter;
-            } elseif (is_array($type) && $filter = $this->builder->getMutators('array')) {
-                //Default array mutator
-                $resolved += $filter;
-            } elseif (!is_array($type) && $filter = $this->builder->getMutators($type)) {
+            if (!empty($filter = $this->builder->getMutators($column->abstractType()))) {
                 //Mutator associated with type directly
+                $resolved += $filter;
+            } elseif (!empty($filter = $this->builder->getMutators('php:' . $column->phpType()))) {
+                //Mutator associated with php type
                 $resolved += $filter;
             }
 
             //Merging mutators and default mutators
             foreach ($resolved as $mutator => $filter) {
-                if (!array_key_exists($field, $mutators[$mutator])) {
-                    $mutators[$mutator][$field] = $filter;
+                if (!array_key_exists($column->getName(), $mutators[$mutator])) {
+                    $mutators[$mutator][$column->getName()] = $filter;
                 }
             }
         }
@@ -490,6 +489,11 @@ class ModelSchema extends ReflectionEntity
             !empty($type['options']) ? $type['options'] : []
         );
 
+        if (in_array($column->getName(), $this->tableSchema->getPrimaryKeys())) {
+            //No default value can be set of primary keys
+            return $column;
+        }
+
         if (!is_null($default)) {
             //We have default value stated my model schema
             $column->defaultValue($default);
@@ -558,6 +562,32 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
+     * Export default value from column schema into scalar form (which we can store in cache).
+     *
+     * @param AbstractColumn $column
+     * @return mixed|null
+     */
+    private function exportDefault(AbstractColumn $column)
+    {
+        if (in_array($column->getName(), $this->tableSchema->getPrimaryKeys())) {
+            //Column declared as primary key, nothing to do with default values
+            return null;
+        }
+
+        $defaultValue = $column->getDefaultValue();
+        if ($defaultValue instanceof SQLFragmentInterface) {
+            //We can't cache values like that
+            return null;
+        }
+
+        if (is_null($defaultValue) && !$column->isNullable()) {
+            return $this->castDefault($column);
+        }
+
+        return $defaultValue;
+    }
+
+    /**
      * Cast default value based on column type. Required to prevent conflicts when not nullable
      * column added to existed table with data in.
      *
@@ -585,27 +615,5 @@ class ModelSchema extends ReflectionEntity
         }
 
         return '';
-    }
-
-    /**
-     * Export default value from column schema into scalar form (which we can store in cache).
-     *
-     * @param AbstractColumn $column
-     * @return mixed|null
-     */
-    private function exportDefault(AbstractColumn $column)
-    {
-        if (in_array($column->getName(), $this->tableSchema->getPrimaryKeys())) {
-            //Column declared as primary key, nothing to do with default values
-            return null;
-        }
-
-        $defaultValue = $column->getDefaultValue();
-        if ($defaultValue instanceof SQLFragmentInterface) {
-            //We can't cache values like that
-            return null;
-        }
-
-        return $defaultValue;
     }
 }

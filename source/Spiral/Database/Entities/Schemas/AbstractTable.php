@@ -273,9 +273,8 @@ abstract class AbstractTable extends Component implements TableInterface
     public function getDependencies()
     {
         $tables = [];
-
         foreach ($this->getForeigns() as $foreign) {
-            $tables[] = $foreign->getForeignTable();
+            $tables[] = substr($foreign->getForeignTable(), strlen($this->tablePrefix));
         }
 
         return $tables;

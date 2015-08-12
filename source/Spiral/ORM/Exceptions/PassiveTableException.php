@@ -30,10 +30,11 @@ class PassiveTableException extends SchemaException
         }
 
         parent::__construct(\Spiral\interpolate(
-            'Passive table "{database}"."{table}" ({model}), were altered! Altered columns: {columns}',
+            'Passive table "{database}"."{table}" ({model}), were altered, columns: {columns}',
             [
                 'database' => $model->getDatabase(),
                 'table'    => $table->getName(),
+                'model'    => $model,
                 'columns'  => join(', ', $altered)
             ]
         ));

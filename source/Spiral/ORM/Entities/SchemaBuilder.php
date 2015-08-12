@@ -230,12 +230,14 @@ class SchemaBuilder extends Component
      */
     public function synchronizeSchema()
     {
-        //We need list of declared tables in order of
-        foreach ($this->getTables(true) as $name => $table) {
+        //We must check for errors first
+        $tables = $this->getTables(true);
+
+        foreach ($tables as $table) {
             //We can only alter table columns if model allows us
             $model = $this->findRelatedModel($table);
 
-            if (!empty($model) && $model->isAbstract()) {
+            if (!empty($model) && $model->isAbstract() || empty($table->getColumns())) {
                 //Abstract tables might declare table schema, but we are going to ignore it
                 continue;
             }
@@ -248,6 +250,17 @@ class SchemaBuilder extends Component
                 }
 
                 throw new PassiveTableException($table, $model);
+            }
+        }
+
+        //We need list of declared tables in order of
+        foreach ($tables as $name => $table) {
+            //We can only alter table columns if model allows us
+            $model = $this->findRelatedModel($table);
+
+            if (!empty($model) && $model->isAbstract() || empty($table->getColumns())) {
+                //Abstract tables might declare table schema, but we are going to ignore it
+                continue;
             }
 
             /**

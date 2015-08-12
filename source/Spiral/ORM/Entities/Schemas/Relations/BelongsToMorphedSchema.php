@@ -85,16 +85,18 @@ class BelongsToMorphedSchema extends MorphedSchema
         //We are going to inverse relation to every outer model
         $inversed = $this->definition[Model::INVERSE];
         foreach ($this->outerModels() as $model) {
-            $model->addRelation(
-                $inversed[1],
-                [
-                    $inversed[0]     => $this->model->getName(),
-                    Model::OUTER_KEY => $this->definition[Model::INNER_KEY],
-                    Model::INNER_KEY => $this->definition[Model::OUTER_KEY],
-                    Model::MORPH_KEY => $this->definition[Model::MORPH_KEY],
-                    Model::NULLABLE  => $this->definition[Model::NULLABLE]
-                ]
-            );
+            if (!$model->hasRelation($inversed[1])) {
+                $model->addRelation(
+                    $inversed[1],
+                    [
+                        $inversed[0]     => $this->model->getName(),
+                        Model::OUTER_KEY => $this->definition[Model::INNER_KEY],
+                        Model::INNER_KEY => $this->definition[Model::OUTER_KEY],
+                        Model::MORPH_KEY => $this->definition[Model::MORPH_KEY],
+                        Model::NULLABLE  => $this->definition[Model::NULLABLE]
+                    ]
+                );
+            }
         }
     }
 
@@ -107,7 +109,7 @@ class BelongsToMorphedSchema extends MorphedSchema
         $innerSchema = $this->model->tableSchema();
 
         //Morph key contains parent role name
-        $morphKey = $innerSchema->column($this->hasMorphKey());
+        $morphKey = $innerSchema->column($this->getMorphKey());
 
         //We have predefined morphed key size
         $morphKey->string(static::MORPH_COLUMN_SIZE);

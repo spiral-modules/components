@@ -8,6 +8,7 @@
  */
 namespace Spiral\Events;
 
+use Spiral\Events\Entities\Event;
 use Spiral\Events\Exceptions\InvalidArgumentException;
 
 /**

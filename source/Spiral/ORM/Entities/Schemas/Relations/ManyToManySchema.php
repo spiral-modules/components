@@ -41,7 +41,7 @@ class ManyToManySchema extends RelationSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Model::HAS_ONE;
+    const RELATION_TYPE = Model::MANY_TO_MANY;
 
     /**
      * {@inheritdoc}
@@ -49,7 +49,7 @@ class ManyToManySchema extends RelationSchema
      * When relation states that relation defines connection to interface relation will be switched to
      * ManyToManyMorphed.
      */
-    const EQUIVALENT_RELATION = Model::MANY_TO_MANY;
+    const EQUIVALENT_RELATION = Model::MANY_TO_MORPHED;
 
     /**
      * Default postfix for pivot tables.

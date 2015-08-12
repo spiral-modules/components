@@ -22,12 +22,6 @@ interface DispatcherInterface
     public function start();
 
     /**
-     * @param \Exception $exception
-     * @return mixed
-     */
-    public function handleException(\Exception $exception);
-
-    /**
      * @param SnapshotInterface $snapshot
      * @return mixed
      */

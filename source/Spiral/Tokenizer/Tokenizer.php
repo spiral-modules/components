@@ -14,7 +14,7 @@ use Spiral\Core\HippocampusInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Events\Event;
+use Spiral\Events\Entities\Event;
 use Spiral\Files\FilesInterface;
 use Spiral\Tokenizer\Exceptions\ReflectionException;
 use Spiral\Tokenizer\Exceptions\TokenizerException;

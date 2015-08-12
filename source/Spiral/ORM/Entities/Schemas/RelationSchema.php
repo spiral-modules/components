@@ -239,6 +239,20 @@ abstract class RelationSchema implements RelationSchemaInterface
     }
 
     /**
+     * Name of declared morph key.
+     *
+     * @return string
+     */
+    public function getMorphKey()
+    {
+        if (isset($this->definition[Model::MORPH_KEY])) {
+            return $this->definition[Model::MORPH_KEY];
+        }
+
+        return null;
+    }
+
+    /**
      * Indication that relation allowed to create indexes in outer or inner tables.
      *
      * @return bool

@@ -79,11 +79,21 @@ class HasOneSchema extends RelationSchema
         //Outer key type must much inner key type
         $outerKey = $outerTable->column($this->getOuterKey());
         $outerKey->type($this->getInnerKeyType());
-        $outerKey->nullable($this->isNullable());
+
+        //We are only adding nullable flag if that was declared, if column were already nullable
+        //this behaviour will be kept
+        $outerKey->nullable($outerKey->isNullable() || $this->isNullable());
 
         if ($this->hasMorphKey()) {
-            //We should not create any indexes or constrains as outer model can be related
-            //to multiple parents
+            //Morph key will store outer model role name
+            $morphKey = $outerTable->column($this->getMorphKey());
+
+            //We have predefined morphed key size
+            $morphKey->string(static::MORPH_COLUMN_SIZE);
+            $morphKey->nullable($morphKey->isNullable() || $this->isNullable());
+
+            //No need to perform any other table operations, usually it's done by polymorphic
+            //schemas already
             return;
         }
 

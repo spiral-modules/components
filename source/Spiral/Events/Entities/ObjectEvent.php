@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Events;
+namespace Spiral\Events\Entities;
 
 /**
- * Event which being called by some object. Object
+ * Event which being called by some object. Object will be available using parent() method.
  */
 class ObjectEvent extends Event
 {

@@ -167,7 +167,7 @@ class ManyToManySchema extends RelationSchema
         if ($this->hasMorphKey()) {
             //ManyToManyMorphed relation will cause creation set of ManyToMany relations
             //linking every possible morphed model with parent model
-            $morphKey = $pivotTable->column($this->definition[Model::MORPH_KEY]);
+            $morphKey = $pivotTable->column($this->getMorphKey());
             $morphKey->string(static::MORPH_COLUMN_SIZE);
         }
 

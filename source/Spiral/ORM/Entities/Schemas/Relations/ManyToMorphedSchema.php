@@ -13,7 +13,7 @@ use Spiral\ORM\Model;
 use Spiral\ORM\ORMException;
 use Spiral\ORM\Schemas\MorphedRelationSchema;
 
-class ManyToMorphedSchema extends MorphedRelationSchema
+class ManyTo80-MorphedSchema extends MorphedRelationSchema
 {
     /**
      * Relation type.

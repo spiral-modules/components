@@ -106,7 +106,10 @@ class BelongsToSchema extends RelationSchema
         //Inner key type must match outer key type
         $innerKey = $innerTable->column($this->getInnerKey());
         $innerKey->type($this->getOuterKeyType());
-        $innerKey->nullable($this->isNullable());
+
+        //We are only adding nullable flag if that was declared, if column were already nullable
+        //this behaviour will be kept
+        $innerKey->nullable($innerKey->isNullable() || $this->isNullable());
 
         if ($this->isIndexed()) {
             //We can safely add index, it will not be created if outer model has passive schema

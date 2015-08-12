@@ -11,7 +11,7 @@ namespace Spiral\Events\Traits;
 use Spiral\Core\ContainerInterface;
 use Spiral\Events\Dispatcher;
 use Spiral\Events\DispatcherInterface;
-use Spiral\Events\ObjectEvent;
+use Spiral\Events\Entities\ObjectEvent;
 
 /**
  * Allow class to have statically (class name) based event dispatcher. Will try to use container

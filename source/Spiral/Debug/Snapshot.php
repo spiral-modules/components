@@ -238,6 +238,10 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
      */
     public function __toString()
     {
+        if (php_sapi_name() == 'cli') {
+            return (string)$this->exception;
+        }
+
         return $this->render();
     }
 }

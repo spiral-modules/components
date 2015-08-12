@@ -203,7 +203,7 @@ class HtmlTokenizer
             $attributes[] = $attribute . '="' . $value . '"';
         }
 
-        if ($attributes) {
+        if (!empty($attributes)) {
             $result .= ' ' . join(' ', $attributes);
         }
 
@@ -240,6 +240,7 @@ class HtmlTokenizer
         //Local PHP isolation
         $isolator = new Isolator('-argument-', '-block-', true);
 
+        //No PHP blocks
         $content = $isolator->isolatePHP($content);
 
         //Parsing arguments, due they already checked for open-close quotas we can use regular expression
@@ -262,7 +263,7 @@ class HtmlTokenizer
         }
 
         //Fetching name
-        $name = current(explode(' ', $content));
+        $name = $isolator->repairPHP(current(explode(' ', $content)));
         if ($name{0} == '/') {
             $token[self::TOKEN_TYPE] = self::TAG_CLOSE;
             unset($token[self::TOKEN_ATTRIBUTES]);

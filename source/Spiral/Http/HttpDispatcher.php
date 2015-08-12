@@ -59,19 +59,6 @@ class HttpDispatcher extends Singleton implements
     private $emitter = null;
 
     /**
-     * @invisible
-     * @var ContainerInterface
-     */
-    protected $container = null;
-
-    /**
-     * Required to render error pages.
-     *
-     * @var ViewProviderInterface
-     */
-    protected $views = null;
-
-    /**
      * Initial server request.
      *
      * @var ServerRequestInterface
@@ -93,6 +80,19 @@ class HttpDispatcher extends Singleton implements
      * @var callable[]|MiddlewareInterface[]
      */
     protected $middlewares = [];
+
+    /**
+     * @invisible
+     * @var ContainerInterface
+     */
+    protected $container = null;
+
+    /**
+     * Required to render error pages.
+     *
+     * @var ViewProviderInterface
+     */
+    protected $views = null;
 
     /**
      * @param ConfiguratorInterface $configurator
@@ -225,9 +225,16 @@ class HttpDispatcher extends Singleton implements
             $this->config['keepOutput']
         );
 
-        return $pipeline->target($endpoint)->run(
-            $request->withAttribute('activePath', $activePath)
-        );
+        try {
+            return $pipeline->target($endpoint)->run(
+                $request->withAttribute('activePath', $activePath)
+            );
+        } catch (ClientException $exception) {
+            //Soft client error
+            $this->logError($exception, $request);
+
+            return $this->errorResponse($exception->getCode());
+        }
     }
 
     /**
@@ -247,30 +254,19 @@ class HttpDispatcher extends Singleton implements
     /**
      * {@inheritdoc}
      */
-    public function handleException(\Exception $exception)
-    {
-        if ($exception instanceof ClientException) {
-            $this->logError($exception);
-            $this->dispatch($this->errorResponse($exception->getCode()));
-
-            return;
-        }
-
-        $this->dispatch($this->errorResponse(Response::SERVER_ERROR));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function handleSnapshot(SnapshotInterface $snapshot)
     {
+        //Usually happens on high level, we can use global request
+        $request = $this->request;
+
         if (!$this->config['exposeErrors']) {
-            $this->handleException($snapshot->getException());
+            //Http was not allowed to show any error snapshot to client
+            $this->dispatch($this->errorResponse(Response::SERVER_ERROR, $request));
 
             return;
         }
 
-        if ($this->request->getHeaderLine('Accept') == 'application/json') {
+        if ($request->getHeaderLine('Accept') == 'application/json') {
             $context = ['status' => Response::SERVER_ERROR] + $snapshot->describe();
             $response = new JsonResponse($context, Response::SERVER_ERROR);
         } else {
@@ -338,21 +334,22 @@ class HttpDispatcher extends Singleton implements
     /**
      * Add error to http log.
      *
-     * @param ClientException $exception
+     * @param ClientException        $exception
+     * @param ServerRequestInterface $request
      */
-    private function logError(ClientException $exception)
+    private function logError(ClientException $exception, ServerRequestInterface $request)
     {
         $remoteAddr = '-undefined-';
-        if (!empty($this->request->getServerParams()['REMOTE_ADDR'])) {
-            $remoteAddr = $this->request->getServerParams()['REMOTE_ADDR'];
+        if (!empty($request->getServerParams()['REMOTE_ADDR'])) {
+            $remoteAddr = $request->getServerParams()['REMOTE_ADDR'];
         }
 
         $this->logger()->warning(
             "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.",
             [
-                'scheme'  => $this->request()->getUri()->getScheme(),
-                'host'    => $this->request()->getUri()->getHost(),
-                'path'    => $this->request()->getUri()->getPath(),
+                'scheme'  => $request->getUri()->getScheme(),
+                'host'    => $request->getUri()->getHost(),
+                'path'    => $request->getUri()->getPath(),
                 'code'    => $exception->getCode(),
                 'message' => $exception->getMessage() ?: '-not specified-',
                 'remote'  => $remoteAddr
@@ -363,12 +360,13 @@ class HttpDispatcher extends Singleton implements
     /**
      * Create response for specifier error code, some responses can be have associated view files.
      *
-     * @param int $code
+     * @param int                    $code
+     * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    private function errorResponse($code)
+    private function errorResponse($code, ServerRequestInterface $request = null)
     {
-        if ($this->request->getHeaderLine('Accept') == 'application/json') {
+        if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
             return new JsonResponse(['status' => $code], $code);
         }
 

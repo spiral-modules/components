@@ -114,6 +114,9 @@ class DirectRoute extends AbstractRoute
 
         return function (ServerRequestInterface $request) use ($container, $route) {
             $controller = $route->matches['controller'];
+
+            //Due we are expecting part of class name we can remove some garbage
+            $controller = preg_replace('/[^a-z_0-9]+/i', '', $controller);
             if (isset($route->controllers[$controller])) {
                 //Aliased
                 $controller = $route->controllers[$controller];

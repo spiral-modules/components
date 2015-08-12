@@ -6,7 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Events;
+namespace Spiral\Events\Entities;
+
+use Spiral\Events\EventInterface;
 
 /**
  * {@inheritdoc}

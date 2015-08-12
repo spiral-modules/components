@@ -10,7 +10,10 @@ namespace Spiral\Tests;
 
 use Spiral\Core\HippocampusInterface;
 
-class RuntimeHippocampus implements HippocampusInterface
+/**
+ * Stores information only during script session.
+ */
+class RuntimeMemory implements HippocampusInterface
 {
     /**
      * Data to be stored or loaded.s
@@ -28,8 +31,7 @@ class RuntimeHippocampus implements HippocampusInterface
      */
     public function loadData($name, $location = null)
     {
-        if (!isset($this->data[$location . $name]))
-        {
+        if (!isset($this->data[$location . $name])) {
             return null;
         }
 

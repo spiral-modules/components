@@ -16,7 +16,7 @@ use Spiral\Tests\Cases\Tokenizer\Classes\ClassA;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassB;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassC;
 use Spiral\Tests\Cases\Tokenizer\Classes\Inner\ClassD;
-use Spiral\Tests\RuntimeHippocampus;
+use Spiral\Tests\RuntimeMemory;
 use Spiral\Tests\TestCase;
 use Spiral\Tokenizer\Reflections\ReflectionArgument;
 use Spiral\Tokenizer\Tokenizer;
@@ -170,7 +170,7 @@ class TokenizerTest extends TestCase
 
     protected function setUp()
     {
-        $this->loader = new Loader(new RuntimeHippocampus());
+        $this->loader = new Loader(new RuntimeMemory());
     }
 
     protected function tearDown()
@@ -194,7 +194,7 @@ class TokenizerTest extends TestCase
 
         $tokenizer = new Tokenizer(
             new Configurator($config),
-            new RuntimeHippocampus(),
+            new RuntimeMemory(),
             new FileManager(),
             $this->loader);
 

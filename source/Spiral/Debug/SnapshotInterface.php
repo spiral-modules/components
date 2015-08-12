@@ -81,8 +81,6 @@ interface SnapshotInterface
     public function render();
 
     /**
-     * Must return content of render().
-     *
      * @return string
      */
     public function __toString();

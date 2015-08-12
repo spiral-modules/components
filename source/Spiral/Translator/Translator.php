@@ -200,8 +200,11 @@ class Translator extends Singleton implements TranslatorInterface
             return;
         }
 
-        $this->memory->saveData($bundle, $this->bundles[$bundle],
-            $this->languageOptions['directory']);
+        $this->memory->saveData(
+            $bundle,
+            $this->bundles[$bundle],
+            $this->languageOptions['directory']
+        );
     }
 
     /**

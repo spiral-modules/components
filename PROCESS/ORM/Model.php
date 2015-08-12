@@ -669,7 +669,8 @@ abstract class Model extends DataEntity
             $orm = ORM::instance(self::container());
         }
 
-        return new Selector(static::class, $orm);
+        //I must add selector scopes in future
+        return static::events()->fire('selector', new Selector(static::class, $orm));
     }
 
     /**

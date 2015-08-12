@@ -152,6 +152,17 @@ class Compositor extends Component implements
     }
 
     /**
+     * Is compositor is solid state?
+     *
+     * @see solidState()
+     * @return bool
+     */
+    public function isSolid()
+    {
+        return $this->solidState;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * Invalidates every composited document.

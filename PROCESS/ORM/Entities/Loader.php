@@ -10,6 +10,7 @@ namespace Spiral\ORM\Selector;
 
 use Spiral\Database\Database;
 use Spiral\Database\QueryResult;
+use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\Model;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\ORM;

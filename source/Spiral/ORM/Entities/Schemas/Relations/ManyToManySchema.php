@@ -13,6 +13,7 @@ use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Model;
+use Spiral\ORM\ORM;
 
 /**
  * ManyToMany relation declares that two models related to each other using pivot table data. Relation
@@ -229,6 +230,9 @@ class ManyToManySchema extends RelationSchema
             //Let's include pivot table columns, it will help many to many loaded to map data correctly
             $definition[Model::PIVOT_COLUMNS][] = $column->getName();
         }
+
+        //We must include pivot table database into data for easier access
+        $definition[ORM::R_DATABASE] = $this->outerModel()->getDatabase();
 
         return $definition;
     }

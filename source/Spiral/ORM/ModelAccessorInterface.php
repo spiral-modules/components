@@ -46,7 +46,7 @@ interface ModelAccessorInterface extends AccessorInterface
      * @param string $field Name of field where accessor associated to.
      * @return mixed|SQLFragmentInterface
      */
-    public function compileUpdate($field = '');
+    public function compileUpdates($field = '');
 
     /**
      * Accessor default value (must be specific to driver).

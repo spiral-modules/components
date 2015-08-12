@@ -46,10 +46,10 @@ class HasOne extends Relation
     /**
      * {@inheritdoc}
      */
-    public function associate(Model $instance = null)
+    public function associate(Model $related = null)
     {
-        parent::associate($instance);
-        $this->mountRelation($instance);
+        parent::associate($related);
+        $this->mountRelation($related);
     }
 
     /**

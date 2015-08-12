@@ -14,6 +14,7 @@ use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Model;
+use Spiral\ORM\ORM;
 
 /**
  * ManyToMorphed relation declares relation between parent model and set of outer models joined by
@@ -223,6 +224,9 @@ class ManyToMorphedSchema extends MorphedSchema
                 $plural = Inflector::pluralize($model->getRole());
                 $definition[Model::MORPHED_ALIASES][$plural] = $model->getRole();
             }
+
+            //We must include pivot table database into data for easier access
+            $definition[ORM::R_DATABASE] = $model->getDatabase();
         }
 
         //Let's include pivot table columns

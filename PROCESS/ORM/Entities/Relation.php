@@ -146,7 +146,7 @@ abstract class Relation extends Component implements
      *
      * @return mixed
      */
-    public function getAssociated()
+    public function getRelated()
     {
         if (!empty($this->instance)) {
             if ($this->instance instanceof Model && !empty($this->data)) {
@@ -272,10 +272,10 @@ abstract class Relation extends Component implements
      * Example:
      * $user->profile = new Profile();
      *
-     * @param Model $instance
+     * @param Model $related
      * @throws ORMException
      */
-    public function associate(Model $instance)
+    public function associate(Model $related)
     {
         if (static::MULTIPLE) {
             throw new ORMException(
@@ -287,7 +287,7 @@ abstract class Relation extends Component implements
             $allowed = [$allowed];
         }
 
-        if (!is_object($instance) || !in_array(get_class($instance), $allowed)) {
+        if (!is_object($related) || !in_array(get_class($related), $allowed)) {
             $allowed = join("', '", $allowed);
 
             throw new ORMException(
@@ -296,7 +296,7 @@ abstract class Relation extends Component implements
         }
 
         //Entity caching
-        $this->instance = $instance;
+        $this->instance = $related;
         $this->loaded = true;
     }
 
@@ -309,7 +309,7 @@ abstract class Relation extends Component implements
      */
     public function saveAssociation($validate = true)
     {
-        if (empty($instance = $this->getAssociated())) {
+        if (empty($instance = $this->getRelated())) {
             //Nothing to save
             return true;
         }
@@ -371,7 +371,7 @@ abstract class Relation extends Component implements
             return $errors;
         }
 
-        return $this->getAssociated()->getErrors($reset);
+        return $this->getRelated()->getErrors($reset);
     }
 
     /**
@@ -392,6 +392,6 @@ abstract class Relation extends Component implements
      */
     public function jsonSerialize()
     {
-        return $this->getAssociated();
+        return $this->getRelated();
     }
 }

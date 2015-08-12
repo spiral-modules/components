@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Selector;
 
-use Spiral\Database\Builders\AbstractSelect;
+use Spiral\Database\Builders\Prototypes\AbstractSelect;
 
 class WhereDecorator
 {
@@ -38,8 +38,8 @@ class WhereDecorator
      * WhereDecorator used to trick user functions and route where() calls to specified destination.
      *
      * @param AbstractSelect $query
-     * @param string          $target
-     * @param string          $alias
+     * @param string         $target
+     * @param string         $alias
      */
     public function __construct(AbstractSelect $query, $target = 'where', $alias = '')
     {
@@ -76,25 +76,21 @@ class WhereDecorator
      */
     protected function prepare($where)
     {
-        if (is_string($where))
-        {
+        if (is_string($where)) {
             return str_replace('{@}', $this->alias, $where);
         }
 
-        if (!is_array($where))
-        {
+        if (!is_array($where)) {
             return $where;
         }
 
         $result = [];
-        foreach ($where as $column => $value)
-        {
-            if (is_string($column) && !is_int($column))
-            {
+        foreach ($where as $column => $value) {
+            if (is_string($column) && !is_int($column)) {
                 $column = str_replace('{@}', $this->alias, $column);
             }
 
-            $result[$column] = !is_array($value) ? $value : $this->prepare($value, $this->alias);
+            $result[$column] = !is_array($value) ? $value : $this->prepare($value);
         }
 
         return $result;
@@ -169,8 +165,7 @@ class WhereDecorator
      */
     public function where($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
-        if ($identifier instanceof \Closure)
-        {
+        if ($identifier instanceof \Closure) {
             call_user_func($identifier, $this);
 
             return $this;
@@ -253,8 +248,7 @@ class WhereDecorator
      */
     public function andWhere($identifier, $variousA = null, $variousB = null, $variousC = null)
     {
-        if ($identifier instanceof \Closure)
-        {
+        if ($identifier instanceof \Closure) {
             call_user_func($identifier, $this);
 
             return $this;
@@ -337,8 +331,7 @@ class WhereDecorator
      */
     public function orWhere($identifier, $variousA = [], $variousB = null, $variousC = null)
     {
-        if ($identifier instanceof \Closure)
-        {
+        if ($identifier instanceof \Closure) {
             call_user_func($identifier, $this);
 
             return $this;

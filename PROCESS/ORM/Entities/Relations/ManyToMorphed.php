@@ -109,7 +109,7 @@ class ManyToMorphed implements RelationInterface
      *
      * @return $this
      */
-    public function getAssociated()
+    public function getRelated()
     {
         return $this;
     }
@@ -120,10 +120,10 @@ class ManyToMorphed implements RelationInterface
      * Example:
      * $user->profile = new Profile();
      *
-     * @param Model $instance
+     * @param Model $related
      * @throws ORMException
      */
-    public function associate(Model $instance)
+    public function associate(Model $related)
     {
         throw new ORMException("Unable to set data for morphed relation.");
     }
@@ -240,7 +240,7 @@ class ManyToMorphed implements RelationInterface
      */
     public function __get($alias)
     {
-        return $this->nestedRelation($alias)->getAssociated();
+        return $this->nestedRelation($alias)->getRelated();
     }
 
     /**

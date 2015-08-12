@@ -112,7 +112,7 @@ class AtomicNumber implements ModelAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function compileUpdate($field = '')
+    public function compileUpdates($field = '')
     {
         if ($this->delta === 0) {
             //Nothing were changed

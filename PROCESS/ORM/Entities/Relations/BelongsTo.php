@@ -21,21 +21,21 @@ class BelongsTo extends HasOne
     /**
      * {@inheritdoc}
      */
-    public function associate(Model $instance = null)
+    public function associate(Model $related = null)
     {
-        if (is_null($instance))
+        if (is_null($related))
         {
             $this->dropRelation();
 
             return;
         }
 
-        parent::associate($instance);
+        parent::associate($related);
 
         /**
-         * @var Model $instance
+         * @var Model $related
          */
-        if (!$instance->isLoaded())
+        if (!$related->isLoaded())
         {
             throw new ORMException(
                 "Unable to set 'belongs to' parent, parent has be fetched from database."
@@ -48,10 +48,10 @@ class BelongsTo extends HasOne
         //Key in child model
         $innerKey = $this->definition[Model::INNER_KEY];
 
-        if ($this->parent->getField($innerKey, false) != $instance->getField($outerKey, false))
+        if ($this->parent->getField($innerKey, false) != $related->getField($outerKey, false))
         {
             //We are going to set relation keys right on assertion
-            $this->parent->setField($innerKey, $instance->getField($outerKey, false), false);
+            $this->parent->setField($innerKey, $related->getField($outerKey, false), false);
         }
     }
 

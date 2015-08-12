@@ -12,8 +12,8 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\ModelSchema;
-use Spiral\ORM\Exceptions\PassiveTableException;
 use Spiral\ORM\Exceptions\ModelSchemaException;
+use Spiral\ORM\Exceptions\PassiveTableException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Model;
@@ -318,6 +318,7 @@ class SchemaBuilder extends Component
                 ORM::M_HIDDEN      => $model->getHidden(),
                 ORM::M_SECURED     => $model->getSecured(),
                 ORM::M_FILLABLE    => $model->getFillable(),
+                ORM::M_NULLABLE    => $model->getNullable(),
                 ORM::M_MUTATORS    => $model->getMutators(),
                 ORM::M_VALIDATES   => $model->getValidates(),
                 ORM::M_RELATIONS   => $this->packRelations($model)

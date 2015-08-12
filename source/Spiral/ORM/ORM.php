@@ -55,10 +55,11 @@ class ORM extends Singleton
     const M_HIDDEN      = 4;
     const M_SECURED     = 5;
     const M_FILLABLE    = 6;
-    const M_MUTATORS    = 7;
-    const M_VALIDATES   = 8;
-    const M_RELATIONS   = 9;
-    const M_PRIMARY_KEY = 10;
+    const M_NULLABLE    = 7;
+    const M_MUTATORS    = 8;
+    const M_VALIDATES   = 9;
+    const M_RELATIONS   = 10;
+    const M_PRIMARY_KEY = 11;
 
     /**
      * Normalized relation options.
@@ -66,6 +67,7 @@ class ORM extends Singleton
     const R_TYPE       = 0;
     const R_TABLE      = 1;
     const R_DEFINITION = 2;
+    const R_DATABASE   = 3;
 
     /**
      * Pivot table data location in Model fields. Pivot data only provided when model is loaded

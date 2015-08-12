@@ -50,7 +50,7 @@ abstract class JsonDocument extends Document implements ModelAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function compileUpdate($field = '')
+    public function compileUpdates($field = '')
     {
         //No atomic operations allowed
         return $this->serializeData();

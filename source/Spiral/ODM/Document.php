@@ -28,6 +28,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * We are going to inherit parent validation rules, this will let spiral translator know about
      * it and merge i18n messages.
+     *
+     * @see TranslatorTrait
      */
     const I18N_INHERIT_MESSAGES = true;
 
@@ -51,6 +53,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * > Class A: _id, name, address
      * > Class B extends A: _id, name, address, email
      * < Class B will be used to represent all documents with existed email field.
+     *
+     * @see DocumentSchema
      */
     const DEFINITION_FIELDS = 1;
 
@@ -69,6 +73,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * documents from collections.
      *
      * @see defineClass($fields)
+     * @see DocumentSchema
      */
     const DEFINITION_LOGICAL = 2;
 
@@ -95,9 +100,19 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * 'items' => [self::MANY => 'Models\Database\Item', [
      *      'parentID' => 'key::_id'
      * ]]
+     *
+     * @see Document::$schema
      */
     const MANY = 778;
     const ONE  = 899;
+
+    /**
+     * SolidState will force document to be saved as one big data set without any atomic operations
+     * (dirty fields).
+     *
+     * @var bool
+     */
+    private $solidState = false;
 
     /**
      * Collection name where document should be stored into.
@@ -109,7 +124,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * Database name/id where document related collection located in.
      *
-     * @var string
+     * @var string|null
      */
     protected $database = null;
 
@@ -127,14 +142,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @var array
      */
     protected $indexes = [];
-
-    /**
-     * SolidState will force document to be saved as one big data set without any atomic operations
-     * (dirty fields).
-     *
-     * @var bool
-     */
-    protected $solidState = false;
 
     /**
      * Document fields, accessors and relations. ODM will generate setters and getters for some fields
@@ -185,7 +192,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $defaults = [];
 
     /**
-     * Document field updates.
+     * Document field updates (changed values).
      *
      * @var array
      */
@@ -205,6 +212,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $parent = null;
 
     /**
+     * @invisible
      * @var ODM
      */
     protected $odm = null;
@@ -237,16 +245,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     }
 
     /**
-     * Get associated document schema.
-     *
-     * @return array
-     */
-    public function getSchema()
-    {
-        return $this->schema;
-    }
-
-    /**
      * Change document solid state. SolidState will force document to be saved as one big data set
      * without any atomic operations (dirty fields).
      *
@@ -263,6 +261,17 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         }
 
         return $this;
+    }
+
+    /**
+     * Is document is solid state?
+     *
+     * @see solidState()
+     * @return bool
+     */
+    public function isSolid()
+    {
+        return $this->solidState;
     }
 
     /**
@@ -475,7 +484,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * {@inheritdoc}
      *
-     * Create or update document state in database.
+     * Create or update document data in database.
      *
      * @param bool|null $validate Overwrite default option declared in VALIDATE_SAVE to force or
      *                            disable validation before saving.
@@ -602,11 +611,11 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public function buildAtomics($container = '')
     {
-        if (!$this->hasUpdates() && !$this->solidState) {
+        if (!$this->hasUpdates() && !$this->isSolid()) {
             return [];
         }
 
-        if ($this->solidState) {
+        if ($this->isSolid()) {
             if (!empty($container)) {
                 //Simple nested document in solid state
                 return [self::ATOMIC_SET => [$container => $this->serializeData()]];
@@ -791,6 +800,10 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             return in_array($field, $this->schema[ODM::D_FILLABLE]);
         }
 
+        if ($this->schema[ODM::D_SECURED] === '*') {
+            return false;
+        }
+
         return !in_array($field, $this->schema[ODM::D_SECURED]);
     }
 
@@ -941,6 +954,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @param ODM $odm ODM component, global container will be called if not instance provided.
      * @return Collection
      * @throws ODMException
+     * @event collection(Collection $collection)
      */
     protected static function odmCollection(ODM $odm = null)
     {
@@ -950,6 +964,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         //Ensure traits
         static::initialize();
 
-        return $odm->odmCollection(static::class);
+        return self::events()->fire('collection',$odm->odmCollection(static::class));
     }
 }

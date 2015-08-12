@@ -54,7 +54,6 @@ interface LoaderInterface
      */
     public function getAggregatedKeys($referenceKey);
 
-
     /**
      * Run post selection queries to clarify fetched model data. Usually many conditions will be
      * fetched from there. Additionally this method may be used to create relations to external

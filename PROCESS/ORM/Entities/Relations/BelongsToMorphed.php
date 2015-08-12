@@ -54,18 +54,18 @@ class BelongsToMorphed extends BelongsTo
     /**
      * {@inheritdoc}
      */
-    public function associate(Model $instance = null)
+    public function associate(Model $related = null)
     {
-        parent::associate($instance);
+        parent::associate($related);
 
-        if (is_null($instance))
+        if (is_null($related))
         {
             return;
         }
 
         //Forcing morph key
         $morphKey = $this->definition[Model::MORPH_KEY];
-        $this->parent->setField($morphKey, $instance->getRoleName(), false);
+        $this->parent->setField($morphKey, $related->getRoleName(), false);
     }
 
     /**

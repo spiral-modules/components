@@ -12,7 +12,6 @@ use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\ClientException;
-use Spiral\Http\Exceptions\InvalidArgumentException;
 use Spiral\Http\Exceptions\RouterException;
 
 /**
@@ -68,7 +67,7 @@ class Router implements RouterInterface
      * @param RouteInterface|array $default Default route or options to construct instance
      *                                      of DirectRoute.
      * @param bool                 $keepOutput
-     * @throws InvalidArgumentException
+     * @throws RouterException
      */
     public function __construct(
         ContainerInterface $container,
@@ -81,7 +80,7 @@ class Router implements RouterInterface
         $this->container = $container;
         foreach ($routes as $route) {
             if (!$route instanceof RouteInterface) {
-                throw new InvalidArgumentException("Routes should be array of Route instances.");
+                throw new RouterException("Routes should be array of Route instances.");
             }
 
             //Name aliasing is required to perform URL generation later.

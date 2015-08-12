@@ -8,6 +8,9 @@
  */
 namespace Spiral\Http\Exceptions;
 
+/**
+ * Route configuration exception.
+ */
 class RouteException extends RouterException
 {
 

@@ -8,22 +8,31 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\ORM\Exceptions\ORMException;
+
+/**
+ *
+ */
 class ModelIterator implements \Iterator, \Countable, \JsonSerializable
 {
     /**
-     * ORM component used to create model instances.
+     * Current iterator position.
      *
-     * @invisible
-     * @var ORM
+     * @var int
      */
-    protected $orm = null;
+    private $position = 0;
 
     /**
-     * ActiveRecord class.
-     *
      * @var string
      */
     protected $class = '';
+
+    /**
+     * Indication that entity cache must be used.
+     *
+     * @var bool
+     */
+    protected $cache = true;
 
     /**
      * Data to be iterated.
@@ -40,30 +49,28 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     protected $instances = [];
 
     /**
-     * Current iterator position.
-     *
-     * @var int
+     * @invisible
+     * @var ORM
      */
-    protected $position = 0;
+    protected $orm = null;
 
     /**
-     * Model Iterator used for lazy data iteration.
-     *
      * @param ORM    $orm
      * @param string $class
      * @param array  $data
+     * @param bool   $cache
      */
-    public function __construct(ORM $orm, $class, array $data)
+    public function __construct(ORM $orm, $class, array $data, $cache = true)
     {
-        $this->orm = $orm;
         $this->class = $class;
+        $this->cache = $cache;
+
+        $this->orm = $orm;
         $this->data = $data;
     }
 
     /**
-     * Count records.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function count()
     {
@@ -71,7 +78,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Get all active records as array.
+     * Get all Models as array.
      *
      * @return Model[]
      */
@@ -86,27 +93,31 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Return the current document.
+     * {@inheritdoc}
      *
-     * @link http://www.php.net/manual/en/mongocursor.current.php
-     * @link http://php.net/manual/en/iterator.current.php
-     * @return object
+     * @see ORM::model()
+     * @see Model::setContext()
+     * @throws ORMException
      */
     public function current()
     {
         $data = $this->data[$this->position];
         if (isset($this->instances[$this->position])) {
-            //Update instance context
+            //Due model was pre-constructed we must update it's context to force values for relations
+            //and pivot fields
             return $this->instances[$this->position]->setContext($data);
         }
 
-        return $this->instances[$this->position] = $this->orm->construct($this->class, $data);
+        //Let's ask ORM to create needed model
+        return $this->instances[$this->position] = $this->orm->model(
+            $this->class,
+            $data,
+            $this->cache
+        );
     }
 
     /**
-     * Advances the cursor to the next result.
-     *
-     * @link http://www.php.net/manual/en/mongocursor.next.php
+     * {@inheritdoc}
      */
     public function next()
     {
@@ -114,10 +125,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Returns the current result's _id (as string).
-     *
-     * @link http://www.php.net/manual/en/mongocursor.key.php
-     * @return string
+     * {@inheritdoc}
      */
     public function key()
     {
@@ -125,10 +133,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Checks if the cursor is reading a valid result.
-     *
-     * @link http://www.php.net/manual/en/mongocursor.valid.php
-     * @return bool
+     * {@inheritdoc}
      */
     public function valid()
     {
@@ -136,9 +141,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Returns the cursor to the beginning of the result set.
-     *
-     * @link http://php.net/manual/en/mongocursor.rewind.php
+     * {@inheritdoc}
      */
     public function rewind()
     {
@@ -146,11 +149,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * (PHP 5 > 5.4.0)
-     * Specify data which should be serialized to JSON.
-     *
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed
+     * {@inheritdoc}
      */
     public function jsonSerialize()
     {
@@ -158,8 +157,6 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Simplified way to dump information.
-     *
      * @return Model[]
      */
     public function __debugInfo()

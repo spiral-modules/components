@@ -57,7 +57,8 @@ interface LoaderInterface
 
     /**
      * Must return array of unique values of specified column by it's name (key). In order to optimize
-     * loadings, LoaderInterface must declare such column name in getReferenceKey to it's parent.
+     * loadings, LoaderInterface must declare such column name in getReferenceKey to it's parent before
+     * requesting for aggregation. Keys like that can be used in IN statements for post loaders.
      *
      * @see getReferenceKey()
      * @param string $referenceKey
@@ -92,7 +93,8 @@ interface LoaderInterface
      * @param string $container
      * @param string $key
      * @param mixed  $criteria
-     * @param array  $data
+     * @param array  $data     Data must be referenced to existed set if it was registered
+     *                         previously.
      * @param bool   $multiple If true all mounted records will added to array.
      * @throws LoaderException
      */

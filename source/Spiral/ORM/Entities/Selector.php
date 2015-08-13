@@ -18,6 +18,7 @@ use Spiral\Database\Query\QueryResult;
 use Spiral\Database\QueryBuilder;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\Model;
 use Spiral\ORM\ORM;
@@ -427,7 +428,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $result->close();
 
         //This must force loader to execute all post loaders (including ODM and etc)
-        $this->loader->postload();
+        $this->loader->loadData();
 
         //Not we can request our primary loader for compiled data
         $data = $this->loader->getResult();
@@ -464,7 +465,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             return null;
         }
 
-        return $this->orm->construct($this->class, $data[0]);
+        return $this->orm->model($this->class, $data[0]);
     }
 
     /**

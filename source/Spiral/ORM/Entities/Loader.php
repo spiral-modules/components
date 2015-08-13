@@ -509,6 +509,58 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
+     * Configure provided selector with required joins, columns and conditions, in addition method
+     * must pass configuration to sub loaders.
+     *
+     * Method called by Selector when loader set as primary selection loader.
+     *
+     * @param Selector $selector
+     */
+    public function configureSelector(Selector $selector)
+    {
+        if (!$this->isJoinable()) {
+            //Loader can be used not only for loading but purely for filering
+            if (empty($this->parent)) {
+                foreach ($this->loaders as $loader) {
+                    if ($loader instanceof self) {
+                        $loader->configureSelector($selector);
+                    }
+                }
+
+                foreach ($this->joiners as $joiner) {
+                    //Nested joiners
+                    $joiner->configureSelector($selector);
+                }
+            }
+
+            return;
+        }
+
+        if (!$this->configured) {
+            //We never configured loader columns before
+            $this->configureColumns($selector);
+
+            //Inload conditions and etc
+            if (empty($this->options['using']) && !empty($this->parent)) {
+                $this->clarifySelector($selector);
+            }
+
+            $this->configured = true;
+        }
+
+        foreach ($this->loaders as $loader) {
+            if ($loader instanceof self) {
+                $loader->configureSelector($selector);
+            }
+        }
+
+        foreach ($this->joiners as $joiner) {
+            $joiner->configureSelector($selector);
+        }
+    }
+
+
+    /**
      * Implementation specific selector configuration, must create required joins, conditions and etc.
      *
      * @param Selector $selector
@@ -802,55 +854,6 @@ abstract class Loader implements LoaderInterface
         }
 
         return $data[$this->definition[Model::OUTER_KEY]];
-    }
-
-    /**
-     * Configure provided selector with required joins, columns and conditions, in addition method
-     * must pass configuration to sub loaders.
-     *
-     * @param Selector $selector
-     */
-    private function configureSelector(Selector $selector)
-    {
-        if (!$this->isJoinable()) {
-            //Loader can be used not only for loading but purely for filering
-            if (empty($this->parent)) {
-                foreach ($this->loaders as $loader) {
-                    if ($loader instanceof self) {
-                        $loader->configureSelector($selector);
-                    }
-                }
-
-                foreach ($this->joiners as $joiner) {
-                    //Nested joiners
-                    $joiner->configureSelector($selector);
-                }
-            }
-
-            return;
-        }
-
-        if (!$this->configured) {
-            //We never configured loader columns before
-            $this->configureColumns($selector);
-
-            //Inload conditions and etc
-            if (empty($this->options['using']) && !empty($this->parent)) {
-                $this->clarifySelector($selector);
-            }
-
-            $this->configured = true;
-        }
-
-        foreach ($this->loaders as $loader) {
-            if ($loader instanceof self) {
-                $loader->configureSelector($selector);
-            }
-        }
-
-        foreach ($this->joiners as $joiner) {
-            $joiner->configureSelector($selector);
-        }
     }
 
     /**

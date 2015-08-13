@@ -203,7 +203,10 @@ class SchemaBuilder extends Component
          * @var RelationSchemaInterface $relation
          */
         foreach ($inversedRelations as $relation) {
-            $relation->inverseRelation();
+            if ($relation->isInversable()) {
+                //We have to check inversion again in case if relation name already taken
+                $relation->inverseRelation();
+            }
         }
     }
 

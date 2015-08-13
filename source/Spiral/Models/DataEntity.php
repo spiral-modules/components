@@ -212,7 +212,7 @@ abstract class DataEntity extends Component implements
      */
     public function __isset($offset)
     {
-        return isset($this->fields[$offset]);
+        return $this->hasField($offset);
     }
 
     /**

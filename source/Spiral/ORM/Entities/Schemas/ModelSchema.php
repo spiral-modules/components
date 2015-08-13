@@ -325,7 +325,7 @@ class ModelSchema extends ReflectionEntity
     public function addRelation($name, array $definition)
     {
         if (isset($this->relations[$name])) {
-            throw  new ModelSchemaException(
+            throw new ModelSchemaException(
                 "Unable to create relation '{$this}'.'{$name}', relation already exists."
             );
         }

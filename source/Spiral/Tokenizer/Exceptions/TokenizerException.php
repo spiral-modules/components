@@ -8,12 +8,12 @@
  */
 namespace Spiral\Tokenizer\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
+use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * Generic tokenizer exception.
  */
-class TokenizerException extends LogicException
+class TokenizerException extends RuntimeException
 {
 
 }

@@ -203,7 +203,7 @@ class ColumnSchema extends AbstractColumn
      * @param ColumnSchema $original
      * @return array
      */
-    protected function alterOperations(ColumnSchema $original)
+    public function alterOperations(ColumnSchema $original)
     {
         $operations = [];
 
@@ -238,6 +238,8 @@ class ColumnSchema extends AbstractColumn
 
                 if (!empty($this->size)) {
                     $type .= "($this->size)";
+                } elseif ($this->type == 'varchar' || $this->type == 'varbinary') {
+                    $type .= "(max)";
                 } elseif (!empty($this->precision)) {
                     $type .= "($this->precision, $this->scale)";
                 }

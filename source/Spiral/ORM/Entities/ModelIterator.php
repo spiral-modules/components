@@ -6,12 +6,17 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ORM;
+namespace Spiral\ORM\Entities;
 
+use Spiral\ORM\Exceptions\IteratorException;
 use Spiral\ORM\Exceptions\ORMException;
+use Spiral\ORM\Model;
+use Spiral\ORM\ORM;
 
 /**
- *
+ * Provides iteration over set of specified models data using internal instances cache. In addition,
+ * allows to decorate set of callbacks with association by their name (@see __call()). Keeps model
+ * context.
  */
 class ModelIterator implements \Iterator, \Countable, \JsonSerializable
 {
@@ -21,6 +26,13 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
      * @var int
      */
     private $position = 0;
+
+    /**
+     * Set of "methods" to be decorated.
+     *
+     * @var callable[]
+     */
+    private $callbacks = [];
 
     /**
      * @var string
@@ -42,7 +54,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     protected $data = [];
 
     /**
-     * Constructed model instances.
+     * Constructed model instances. Cache.
      *
      * @var Model[]
      */
@@ -55,18 +67,22 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     protected $orm = null;
 
     /**
-     * @param ORM    $orm
-     * @param string $class
-     * @param array  $data
-     * @param bool   $cache
+     * @param ORM        $orm
+     * @param string     $class
+     * @param array      $data
+     * @param bool       $cache
+     * @param callable[] $callbacks
      */
-    public function __construct(ORM $orm, $class, array $data, $cache = true)
+    public function __construct(ORM $orm, $class, array $data, $cache = true, array $callbacks = [])
     {
         $this->class = $class;
         $this->cache = $cache;
 
         $this->orm = $orm;
         $this->data = $data;
+
+        //Magic functionality provided by outer parent
+        $this->callblacks = $callbacks;
     }
 
     /**
@@ -85,9 +101,17 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     public function all()
     {
         $result = [];
-        foreach ($this as $item) {
-            $result[] = $item;
+
+        /**
+         * @var self|Model[] $iterator
+         */
+        $iterator = clone $this;
+        foreach ($iterator as $nested) {
+            $result[] = $nested;
         }
+
+        //Copying instances just in case
+        $this->instances = $iterator->instances;
 
         return $result;
     }
@@ -146,6 +170,70 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     public function rewind()
     {
         $this->position = 0;
+    }
+
+    /**
+     * Check if model or model with specified id presents in iteration.
+     *
+     * @param Model|string|int $model
+     * @return true
+     */
+    public function has($model)
+    {
+        /**
+         * @var self|Model[] $iterator
+         */
+        $iterator = clone $this;
+        foreach ($iterator as $nested) {
+            if ($nested->primaryKey() == $model || $nested->getFields() == $model->getFields()) {
+                //They all must be iterated already
+                $this->instances = $iterator->instances;
+
+                return true;
+            }
+        }
+
+        //They all must be iterated already
+        $this->instances = $iterator->instances;
+
+        return false;
+    }
+
+    /**
+     * Array or multiple arguments of models or models id to be check if they are presented in
+     * iteration.
+     *
+     * @param array|mixed $models
+     * @return bool
+     */
+    public function hasEach($models)
+    {
+        $models = is_array($models) ? $models : func_get_args();
+
+        foreach ($models as $model) {
+            if (!$this->has($model)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Executes decorated method providing itself as function argument.
+     *
+     * @param string $method
+     * @param array  $arguments
+     * @return mixed
+     * @throws IteratorException
+     */
+    public function __call($method, array $arguments)
+    {
+        if (!isset($this->callbacks[$method])) {
+            throw new IteratorException("Undefined method or callback.");
+        }
+
+        return call_user_func($this->callbacks[$method], $this);
     }
 
     /**

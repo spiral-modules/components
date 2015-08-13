@@ -233,7 +233,7 @@ abstract class AbstractReference implements ReferenceInterface
         $statement[] = "ON DELETE {$this->deleteRule}";
         $statement[] = "ON UPDATE {$this->updateRule}";
 
-        return join(' ', $statement);
+        return join(" ", $statement);
     }
 
     /**

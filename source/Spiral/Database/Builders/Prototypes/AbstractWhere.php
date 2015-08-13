@@ -158,11 +158,11 @@ abstract class AbstractWhere extends QueryBuilder
      * Convert various amount of where function arguments into valid where token.
      *
      * @see AbstractWhere
-     * @param string        $joiner     Boolean joiner (AND | OR).
-     * @param array         $parameters Set of parameters collected from where functions.
-     * @param array         $tokens     Array to aggregate compiled tokens. Reference.
-     * @param \Closure|null $wrapper    Callback or closure used to wrap/collect every potential
-     *                                  parameter.
+     * @param string   $joiner     Boolean joiner (AND | OR).
+     * @param array    $parameters Set of parameters collected from where functions.
+     * @param array    $tokens     Array to aggregate compiled tokens. Reference.
+     * @param callable $wrapper    Callback or closure used to wrap/collect every potential
+     *                             parameter.
      * @throws BuilderException
      */
     protected function whereToken($joiner, array $parameters, &$tokens = [], callable $wrapper)

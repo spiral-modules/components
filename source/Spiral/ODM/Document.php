@@ -898,7 +898,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * Find multiple documents based on provided query.
      *
      * @param mixed $query Fields and conditions to filter by.
-     * @return Collection|static[]
+     * @return Collection
      * @throws ODMException
      */
     public static function find(array $query = [])

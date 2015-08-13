@@ -16,6 +16,14 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 interface EntityInterface extends \ArrayAccess
 {
     /**
+     * Check if entity has field by it's name.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasField($name);
+
+    /**
      * Set entity field value.
      *
      * @param string $name

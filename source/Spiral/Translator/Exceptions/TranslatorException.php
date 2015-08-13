@@ -8,12 +8,12 @@
  */
 namespace Spiral\Translator\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
+use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * Generic translation exception.
  */
-class TranslatorException extends LogicException
+class TranslatorException extends RuntimeException
 {
 
 }

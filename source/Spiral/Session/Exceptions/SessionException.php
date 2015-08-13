@@ -8,9 +8,9 @@
  */
 namespace Spiral\Session\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
+use Spiral\Core\Exceptions\RuntimeException;
 
-class SessionException extends LogicException
+class SessionException extends RuntimeException
 {
 
 }

@@ -8,10 +8,12 @@
  */
 namespace Spiral\Database\Exceptions;
 
+use Spiral\Core\Exceptions\RuntimeException;
+
 /**
  * Driver specific exception.
  */
-class DriverException extends DatabaseException
+class DriverException extends RuntimeException
 {
 
 }

@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Components\Storage\Servers;
+namespace Spiral\Storage\Servers;
 
 use Spiral\Files\FilesInterface;
-use Spiral\ODM\MongoDatabase;
+use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\ODM;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;

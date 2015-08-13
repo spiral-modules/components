@@ -15,6 +15,7 @@ use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
 use Spiral\ODM\CompositableInterface;
+use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ModelException;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RelationException;
@@ -258,6 +259,10 @@ class Model extends DataEntity implements ActiveEntityInterface
     protected $orm = null;
 
     /**
+     * Due setContext() method and entity cache of ORM any custom initiation code in constructor
+     * must not depends on database data.
+     *
+     * @see setContext
      * @param array      $data
      * @param bool|false $loaded
      * @param ORM|null   $orm
@@ -928,13 +933,13 @@ class Model extends DataEntity implements ActiveEntityInterface
      * Example:
      * User::find(['status' => 'active'], ['profile']);
      *
-     * @param array $where Selection WHERE statement.
-     * @param array $load  Array or relations to be pre-loaded.
-     * @return Selector|Model[]
+     * @param array|\Closure $where Selection WHERE statement.
+     * @param array          $load  Array or relations to be pre-loaded.
+     * @return Selector
      */
-    public static function find(array $where = [], array $load = [])
+    public static function find($where = [], array $load = [])
     {
-        return static::ormSelector()->load($load)->find($where);
+        return static::ormSelector()->load($load)->where($where);
     }
 
     /**
@@ -944,12 +949,12 @@ class Model extends DataEntity implements ActiveEntityInterface
      * Example:
      * User::findOne(['name' => 'Wolfy-J'], ['profile'], ['id' => 'DESC']);
      *
-     * @param array $where   Selection WHERE statement.
-     * @param array $load    Array or relations to be pre-loaded.
-     * @param array $orderBy Sort by conditions.
+     * @param array|\Closure $where   Selection WHERE statement.
+     * @param array          $load    Array or relations to be pre-loaded.
+     * @param array          $orderBy Sort by conditions.
      * @return Model|null
      */
-    public static function findOne(array $where = [], array $load = [], array $orderBy = [])
+    public static function findOne($where = [], array $load = [], array $orderBy = [])
     {
         $selector = static::find($where, $load);
         foreach ($orderBy as $column => $direction) {
@@ -990,6 +995,6 @@ class Model extends DataEntity implements ActiveEntityInterface
         //Ensure traits
         static::initialize();
 
-        return static::events()->fire('selector', new Selector(static::class, $orm));
+        return static::events()->fire('selector', new Selector($orm, static::class));
     }
 }

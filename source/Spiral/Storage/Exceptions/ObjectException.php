@@ -8,10 +8,12 @@
  */
 namespace Spiral\Storage\Exceptions;
 
+use Spiral\Core\Exceptions\RuntimeException;
+
 /**
  * Exceptions raised by storage objects.
  */
-class ObjectException extends StorageException
+class ObjectException extends RuntimeException
 {
 
 }

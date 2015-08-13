@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database\Drivers\Postgres\Builders;
+namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Database\Drivers\Postgres\PostgresDriver;
 use Spiral\Database\Drivers\Postgres\QueryCompiler as PostgresCompiler;

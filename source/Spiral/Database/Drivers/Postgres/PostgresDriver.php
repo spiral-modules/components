@@ -11,7 +11,6 @@ namespace Spiral\Database\Drivers\Postgres;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\Postgres\Builders\InsertQuery;
 use Spiral\Database\Drivers\Postgres\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\Postgres\Schemas\IndexSchema;
 use Spiral\Database\Drivers\Postgres\Schemas\ReferenceSchema;

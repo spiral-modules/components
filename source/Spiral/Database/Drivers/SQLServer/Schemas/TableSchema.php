@@ -43,17 +43,17 @@ class TableSchema extends AbstractTable
      */
     protected function loadIndexes()
     {
-        $query = 'SELECT indexes.name AS indexName, cl.name AS columnName, '
-            . 'is_primary_key AS isPrimary, is_unique AS isUnique'
-            . 'FROM sys.indexes AS indexes'
-            . 'INNER JOIN sys.index_columns as columns'
-            . '  ON indexes.object_id = columns.object_id AND indexes.index_id = columns.index_id'
-            . 'INNER JOIN sys.columns AS cl'
-            . '  ON columns.object_id = cl.object_id AND columns.column_id = cl.column_id'
-            . 'INNER JOIN sys.tables AS t'
-            . '  ON indexes.object_id = t.object_id'
-            . 'WHERE t.name = ?'
-            . 'ORDER BY indexes.name, indexes.index_id, columns.index_column_id';
+        $query = 'SELECT indexes.name AS indexName, cl.name AS columnName,
+             is_primary_key AS isPrimary, is_unique AS isUnique
+             FROM sys.indexes AS indexes
+             INNER JOIN sys.index_columns as columns
+               ON indexes.object_id = columns.object_id AND indexes.index_id = columns.index_id
+             INNER JOIN sys.columns AS cl
+               ON columns.object_id = cl.object_id AND columns.column_id = cl.column_id
+             INNER JOIN sys.tables AS t
+               ON indexes.object_id = t.object_id
+             WHERE t.name = ?
+             ORDER BY indexes.name, indexes.index_id, columns.index_column_id';
 
         $indexes = [];
         foreach ($this->driver->query($query, [$this->name]) as $index) {
@@ -106,7 +106,7 @@ class TableSchema extends AbstractTable
                 $column->getName()
             ]);
 
-            $column->setName($dbColumn->getName());
+            $column->name($dbColumn->getName());
         }
 
         //In SQLServer we have to drop ALL related indexes and foreign keys while

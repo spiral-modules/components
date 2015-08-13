@@ -114,6 +114,22 @@ class DatabaseProvider extends Singleton implements InjectorInterface
     }
 
     /**
+     * Get instance of every available database.
+     *
+     * @return Database[]
+     * @throws DatabaseException
+     */
+    public function getDatabases()
+    {
+        $result = [];
+        foreach ($this->config['databases'] as $name => $config) {
+            $result[] = $this->db($name);
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)

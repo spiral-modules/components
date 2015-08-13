@@ -8,12 +8,12 @@
  */
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Models\Exceptions\EntityExceptionInterface;
+use Spiral\Models\Exceptions\EntityException;
 
 /**
  * Model related exception.
  */
-class ModelException extends ORMException implements EntityExceptionInterface
+class ModelException extends EntityException
 {
 
 }

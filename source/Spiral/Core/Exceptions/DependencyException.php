@@ -9,10 +9,9 @@
 namespace Spiral\Core\Exceptions;
 
 /**
- * Null does not mean "not required", in some cases not required constructor argument can be in reality
- * be very required.
+ * Unable to resolve container dependency.
  */
-class DependencyException extends LogicException
+class DependencyException extends RuntimeException
 {
 
 }

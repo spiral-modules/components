@@ -131,6 +131,14 @@ abstract class DataEntity extends Component implements
 
     /**
      * {@inheritdoc}
+     */
+    public function hasField($name)
+    {
+        return array_key_exists($name, $this->fields);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @param bool $filter If false, associated field setter or accessor will be ignored.
      * @throws AccessorExceptionInterface

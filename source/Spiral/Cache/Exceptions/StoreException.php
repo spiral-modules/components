@@ -8,12 +8,10 @@
  */
 namespace Spiral\Cache\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Something happen with/in store.
  */
-class StoreException extends RuntimeException
+class StoreException extends CacheException
 {
 
 }

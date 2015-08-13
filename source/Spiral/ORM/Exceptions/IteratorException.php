@@ -4,16 +4,16 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright Â©2009-2015
+ * @copyright ©2009-2015
  */
-namespace Spiral\Validation\Exceptions;
+namespace Spiral\ORM\Exceptions;
 
 use Spiral\Core\Exceptions\RuntimeException;
 
 /**
- * Generic validation exception.
+ * Error by ModelIterator.
  */
-class ValidationException extends RuntimeException
+class IteratorException extends RuntimeException
 {
 
 }

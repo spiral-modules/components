@@ -10,15 +10,15 @@ namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
- * Declares that parent model belongs to some parent based on value in [inner] key. Basically this
+ * Declares that parent record belongs to some parent based on value in [inner] key. Basically this
  * relation is mirror copy of HasOne relation.
  *
  * BelongsTo relations inversion requires user to specify backward connection type (HAS_ONE or
  * HAS_MANY), inversion may look like (based on example below) ["posts", self::HAS_MANY] (create
- * HAS_MANY relation in User model under name "posts").
+ * HAS_MANY relation in User record under name "posts").
  *
  * Example, [Post has one User, relation name "author"], user primary key is "id":
  * - relation will create inner key "author_id" in "posts" table (or other table name), nullable by
@@ -31,15 +31,15 @@ class BelongsToSchema extends RelationSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Model::BELONGS_TO;
+    const RELATION_TYPE = Record::BELONGS_TO;
 
     /**
      * {@inheritdoc}
      *
-     * When relation states that model belongs to interface relation will be switched to
+     * When relation states that record belongs to interface relation will be switched to
      * BelongsToMorphed.
      */
-    const EQUIVALENT_RELATION = Model::BELONGS_TO_MORPHED;
+    const EQUIVALENT_RELATION = Record::BELONGS_TO_MORPHED;
 
     /**
      * {@inheritdoc}
@@ -47,19 +47,19 @@ class BelongsToSchema extends RelationSchema
      * @invisible
      */
     protected $defaultDefinition = [
-        //Outer key is primary key of related model by default
-        Model::OUTER_KEY         => '{outer:primaryKey}',
+        //Outer key is primary key of related record by default
+        Record::OUTER_KEY         => '{outer:primaryKey}',
         //Inner key will be based on singular name of relation and outer key name
-        Model::INNER_KEY         => '{name:singular}_{definition:outerKey}',
+        Record::INNER_KEY         => '{name:singular}_{definition:outerKey}',
         //Set constraints (foreign keys) by default
-        Model::CONSTRAINT        => true,
+        Record::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
-        Model::CONSTRAINT_ACTION => 'CASCADE',
+        Record::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in inner table
-        Model::CREATE_INDEXES    => true,
+        Record::CREATE_INDEXES    => true,
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Model::NULLABLE          => true
+        Record::NULLABLE          => true
     ];
 
     /**
@@ -72,26 +72,26 @@ class BelongsToSchema extends RelationSchema
          * type which can be either HAS_ONE or HAS_MANY.
          */
         if (
-            !is_array($this->definition[Model::INVERSE])
-            || !isset($this->definition[Model::INVERSE][1])
+            !is_array($this->definition[Record::INVERSE])
+            || !isset($this->definition[Record::INVERSE][1])
         ) {
             throw new RelationSchemaException(
-                "Unable to revert BELONG_TO relation '{$this->model}'.'{$this}', " .
+                "Unable to revert BELONG_TO relation '{$this->record}'.'{$this}', " .
                 "backward relation type is missing or invalid."
             );
         }
 
         //Inverting definition
-        $this->outerModel()->addRelation(
-            $this->definition[Model::INVERSE][1],
+        $this->outerRecord()->addRelation(
+            $this->definition[Record::INVERSE][1],
             [
-                $this->definition[Model::INVERSE][0] => $this->model->getName(),
-                Model::OUTER_KEY                     => $this->definition[Model::INNER_KEY],
-                Model::INNER_KEY                     => $this->definition[Model::OUTER_KEY],
-                Model::CONSTRAINT                    => $this->definition[Model::CONSTRAINT],
-                Model::CONSTRAINT_ACTION             => $this->definition[Model::CONSTRAINT_ACTION],
-                Model::CREATE_INDEXES                => $this->definition[Model::CREATE_INDEXES],
-                Model::NULLABLE                      => $this->definition[Model::NULLABLE]
+                $this->definition[Record::INVERSE][0] => $this->record->getName(),
+                Record::OUTER_KEY                     => $this->definition[Record::INNER_KEY],
+                Record::INNER_KEY                     => $this->definition[Record::OUTER_KEY],
+                Record::CONSTRAINT                    => $this->definition[Record::CONSTRAINT],
+                Record::CONSTRAINT_ACTION             => $this->definition[Record::CONSTRAINT_ACTION],
+                Record::CREATE_INDEXES                => $this->definition[Record::CREATE_INDEXES],
+                Record::NULLABLE                      => $this->definition[Record::NULLABLE]
             ]
         );
     }
@@ -101,8 +101,8 @@ class BelongsToSchema extends RelationSchema
      */
     public function buildSchema()
     {
-        //We are going to modify table related to parent model
-        $innerTable = $this->model->tableSchema();
+        //We are going to modify table related to parent record
+        $innerTable = $this->record->tableSchema();
 
         //Inner key type must match outer key type
         $innerKey = $innerTable->column($this->getInnerKey());
@@ -113,7 +113,7 @@ class BelongsToSchema extends RelationSchema
         $innerKey->nullable($innerKey->isNullable() || $this->isNullable());
 
         if ($this->isIndexed()) {
-            //We can safely add index, it will not be created if outer model has passive schema
+            //We can safely add index, it will not be created if outer record has passive schema
             $innerKey->index();
         }
 
@@ -123,7 +123,7 @@ class BelongsToSchema extends RelationSchema
 
         //We are allowed to add foreign key, it will not be created if outer table has passive schema
         $foreignKey = $innerKey->references(
-            $this->outerModel()->getTable(),
+            $this->outerRecord()->getTable(),
             $this->getOuterKey()
         );
 

@@ -10,18 +10,18 @@ namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\SQLExpression;
-use Spiral\ORM\Model;
-use Spiral\ORM\ModelAccessorInterface;
+use Spiral\ORM\Record;
+use Spiral\ORM\RecordAccessorInterface;
 
 /**
- * Atomic number accessor provides ability to change numeric model field using delta values, this
+ * Atomic number accessor provides ability to change numeric record field using delta values, this
  * accessor is very similar by idea to Document->inc() method.
  *
  * Accessor will declare expression to sent to update statement in compileUpdate() method. If parent
- * model is solid (solid state) dynamic expression will be ignored and accessor will return it's
- * internal numeric value (altered by inc/dec operations and based on original model value).
+ * record is solid (solid state) dynamic expression will be ignored and accessor will return it's
+ * internal numeric value (altered by inc/dec operations and based on original record value).
  */
-class AtomicNumber implements ModelAccessorInterface
+class AtomicNumber implements RecordAccessorInterface
 {
     /**
      * Current numeric value.
@@ -43,7 +43,7 @@ class AtomicNumber implements ModelAccessorInterface
     protected $delta = 0;
 
     /**
-     * @var Model
+     * @var Record
      */
     protected $parent = null;
 

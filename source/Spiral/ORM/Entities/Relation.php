@@ -9,23 +9,23 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RelationInterface;
 
 /**
  * Abstract implementation of ORM Relations, provides access to associated instances, use ORM entity
- * cache and model iterators. In additional can be serialized into json, or iterated when needed.
+ * cache and record iterators. In additional can be serialized into json, or iterated when needed.
  */
 abstract class Relation implements RelationInterface, \Countable, \IteratorAggregate, \JsonSerializable
 {
     /**
-     * Relation type, required to fetch model class from relation definition.
+     * Relation type, required to fetch record class from relation definition.
      */
     const RELATION_TYPE = null;
 
     /**
-     * Indication that relation represent multiple models (HAS_MANY relations).
+     * Indication that relation represent multiple records (HAS_MANY relations).
      */
     const MULTIPLE = false;
 
@@ -37,26 +37,26 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     protected $loaded = false;
 
     /**
-     * Pre-loaded relation data, can be loaded while parent model, or later. Real data instance will
+     * Pre-loaded relation data, can be loaded while parent record, or later. Real data instance will
      * be constructed on demand and will keep it pre-loaded context between calls.
      *
-     * @see Model::setContext()
+     * @see Record::setContext()
      * @var array|null
      */
     protected $data = [];
 
     /**
-     * Instance of constructed ActiveRecord of ModelIterator.
+     * Instance of constructed ActiveRecord of RecordIterator.
      *
      * @invisible
-     * @var Model|ModelIterator
+     * @var Record|RecordIterator
      */
     protected $instance = null;
 
     /**
-     * Parent Model caused relation to be created.
+     * Parent Record caused relation to be created.
      *
-     * @var Model
+     * @var Record
      */
     protected $parent = null;
 
@@ -76,14 +76,14 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
 
     /**
      * @param ORM   $orm
-     * @param Model $parent
+     * @param Record $parent
      * @param array $definition Relation definition, must be normalized by relation schema.
      * @param mixed $data       Pre-loaded relation data.
      * @param bool  $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
-        Model $parent,
+        Record $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -109,12 +109,12 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     public function getRelated()
     {
         if (!empty($this->instance)) {
-            if ($this->instance instanceof Model && !empty($this->data)) {
-                //We have to keep model relation context (pivot data and pre-loaded relations)
+            if ($this->instance instanceof Record && !empty($this->data)) {
+                //We have to keep record relation context (pivot data and pre-loaded relations)
                 $this->instance->setContext($this->data);
             }
 
-            //ModelIterator will update context automatically
+            //RecordIterator will update context automatically
             return $this->instance;
         }
 
@@ -128,7 +128,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
             return static::MULTIPLE ? $this->createIterator() : null;
         }
 
-        return $this->instance = (static::MULTIPLE ? $this->createIterator() : $this->createModel());
+        return $this->instance = (static::MULTIPLE ? $this->createIterator() : $this->createRecord());
     }
 
     /**
@@ -173,26 +173,26 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
 
         if (static::MULTIPLE) {
             /**
-             * @var ModelIterator|Model[] $instance
+             * @var RecordIterator|Record[] $instance
              */
-            foreach ($instance as $model) {
-                if ($model->isDeleted()) {
+            foreach ($instance as $record) {
+                if ($record->isDeleted()) {
                     continue;
                 }
 
                 //Forcing keys and etc
-                if (!$this->mountRelation($model)->save($validate, true)) {
+                if (!$this->mountRelation($record)->save($validate, true)) {
                     return false;
                 }
 
-                $this->orm->registerEntity($model);
+                $this->orm->registerEntity($record);
             }
 
             return true;
         }
 
         /**
-         * @var Model $instance
+         * @var Record $instance
          */
         if ($instance->isDeleted()) {
             //Deleted by user
@@ -219,7 +219,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
             return;
         }
 
-        if (!$loaded || !($this->instance instanceof Model)) {
+        if (!$loaded || !($this->instance instanceof Record)) {
             //Flushing instance
             $this->instance = null;
         }
@@ -235,7 +235,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     {
         $related = $this->getRelated();
         if (!static::MULTIPLE) {
-            if ($related instanceof Model) {
+            if ($related instanceof Record) {
                 return $related->isValid();
             }
 
@@ -243,11 +243,11 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         }
 
         /**
-         * @var ModelIterator|Model[] $data
+         * @var RecordIterator|Record[] $data
          */
         $hasErrors = false;
-        foreach ($related as $model) {
-            if (!$model->isValid()) {
+        foreach ($related as $record) {
+            if (!$record->isValid()) {
                 $hasErrors = true;
             }
         }
@@ -263,7 +263,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         $related = $this->getRelated();
 
         if (!static::MULTIPLE) {
-            if ($related instanceof Model) {
+            if ($related instanceof Record) {
                 return $related->hasErrors();
             }
 
@@ -271,11 +271,11 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         }
 
         /**
-         * @var ModelIterator|Model[] $data
+         * @var RecordIterator|Record[] $data
          */
         $hasErrors = false;
-        foreach ($related as $model) {
-            if (!$model->isValid()) {
+        foreach ($related as $record) {
+            if (!$record->isValid()) {
                 $hasErrors = true;
             }
         }
@@ -294,7 +294,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         $related = $this->getRelated();
 
         if (!static::MULTIPLE) {
-            if ($related instanceof Model) {
+            if ($related instanceof Record) {
                 return $related->getErrors($reset);
             }
 
@@ -302,12 +302,12 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         }
 
         /**
-         * @var ModelIterator|Model[] $data
+         * @var RecordIterator|Record[] $data
          */
         $errors = [];
-        foreach ($related as $position => $model) {
-            if (!$model->isValid()) {
-                $errors[$position] = $model->getErrors($reset);
+        foreach ($related as $position => $record) {
+            if (!$record->isValid()) {
+                $errors[$position] = $record->getErrors($reset);
             }
         }
 
@@ -330,7 +330,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      * Perform iterator on pre-loaded data. Use relation selector to iterate thought custom relation
      * query.
      *
-     * @return Model[]|ModelIterator
+     * @return Record[]|RecordIterator
      */
     public function getIterator()
     {
@@ -368,7 +368,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     }
 
     /**
-     * Class name of outer model.
+     * Class name of outer record.
      *
      * @return string
      */
@@ -378,32 +378,32 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     }
 
     /**
-     * Mount relation keys to parent or children models to ensure their connection. Method called
-     * when model requests relation save.
+     * Mount relation keys to parent or children records to ensure their connection. Method called
+     * when record requests relation save.
      *
-     * @param Model $model
-     * @return Model
+     * @param Record $record
+     * @return Record
      */
-    abstract protected function mountRelation(Model $model);
+    abstract protected function mountRelation(Record $record);
 
     /**
-     * Convert pre-loaded relation data to model iterator model.
+     * Convert pre-loaded relation data to record iterator record.
      *
-     * @return ModelIterator
+     * @return RecordIterator
      */
     protected function createIterator()
     {
-        return new ModelIterator($this->orm, $this->getClass(), $this->data);
+        return new RecordIterator($this->orm, $this->getClass(), $this->data);
     }
 
     /**
-     * Convert pre-loaded relation data to active record model.
+     * Convert pre-loaded relation data to active record record.
      *
-     * @return Model
+     * @return Record
      */
-    protected function createModel()
+    protected function createRecord()
     {
-        return $this->orm->model($this->getClass(), $this->data);
+        return $this->orm->record($this->getClass(), $this->data);
     }
 
     /**

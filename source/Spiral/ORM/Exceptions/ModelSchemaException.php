@@ -9,9 +9,9 @@
 namespace Spiral\ORM\Exceptions;
 
 /**
- * Raised by errors caused by inaccurate manipulations with model schema.
+ * Raised by errors caused by inaccurate manipulations with record schema.
  */
-class ModelSchemaException extends SchemaException
+class RecordSchemaException extends SchemaException
 {
 
 }

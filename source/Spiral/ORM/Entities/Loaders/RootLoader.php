@@ -25,7 +25,7 @@ class RootLoader extends Loader
      * {@inheritdoc}
      *
      * We don't need to initiate parent constructor as root loader is pretty simple and used only
-     * for primary model parsing without any conditions.
+     * for primary record parsing without any conditions.
      */
     public function __construct(
         ORM $orm,

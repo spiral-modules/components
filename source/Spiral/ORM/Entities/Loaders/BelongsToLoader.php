@@ -8,19 +8,19 @@
  */
 namespace Spiral\ORM\Entities\Loaders;
 
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
- * Responsible for loading data related to parent model in belongs to relation. Loading logic is
+ * Responsible for loading data related to parent record in belongs to relation. Loading logic is
  * identical to HasOneLoader however preferred loading methods is POSTLOAD.
  */
 class BelongsToLoader extends HasOneLoader
 {
     /**
-     * Relation type is required to correctly resolve foreign model class based on relation
+     * Relation type is required to correctly resolve foreign record class based on relation
      * definition.
      */
-    const RELATION_TYPE = Model::BELONGS_TO;
+    const RELATION_TYPE = Record::BELONGS_TO;
 
     /**
      * Default load method (inload or postload).

@@ -13,17 +13,17 @@ use Spiral\Database\Query\QueryResult;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
  * loaders can communicate with parent selector by providing it's own set of conditions, columns
  * joins and etc. In some cases loader may create additional selector to load data using information
- * fetched from previous query. Every loaded must be associated with specific model schema and
+ * fetched from previous query. Every loaded must be associated with specific record schema and
  * relation (except RootLoader).
  *
- * Loaders can be used for both - loading and filtering of model data.
+ * Loaders can be used for both - loading and filtering of record data.
  *
  * Reference tree generation logic example:
  * User has many Posts (relation "posts"), user primary is ID, post inner key pointing to user
@@ -45,7 +45,7 @@ abstract class Loader implements LoaderInterface
     const JOIN     = 3;
 
     /**
-     * Relation type is required to correctly resolve foreign model class based on relation
+     * Relation type is required to correctly resolve foreign record class based on relation
      * definition.
      */
     const RELATION_TYPE = null;
@@ -169,7 +169,7 @@ abstract class Loader implements LoaderInterface
     protected $references = [];
 
     /**
-     * Related model schema.
+     * Related record schema.
      *
      * @invisible
      * @var array
@@ -201,7 +201,7 @@ abstract class Loader implements LoaderInterface
     ) {
         $this->orm = $orm;
 
-        //Related model schema
+        //Related record schema
         $this->schema = $orm->getSchema($definition[static::RELATION_TYPE]);
 
         $this->container = $container;
@@ -317,7 +317,7 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * Get primary key name related to associated model.
+     * Get primary key name related to associated record.
      *
      * @return string|null
      */
@@ -481,8 +481,8 @@ abstract class Loader implements LoaderInterface
     public function getReferenceKey()
     {
         //In most of cases reference key is inner key name (parent "ID" field name), don't be confused
-        //by INNER_KEY, remember that we building relation from parent model point of view
-        return $this->definition[Model::INNER_KEY];
+        //by INNER_KEY, remember that we building relation from parent record point of view
+        return $this->definition[Record::INNER_KEY];
     }
 
     /**
@@ -750,7 +750,7 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * Fetch model columns from query row, must use data offset to slice required part of query.
+     * Fetch record columns from query row, must use data offset to slice required part of query.
      *
      * @param array $row
      * @return array
@@ -765,7 +765,7 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * In many cases (for example if you have inload of HAS_MANY relation) model data can be replicated
+     * In many cases (for example if you have inload of HAS_MANY relation) record data can be replicated
      * by many result rows (duplicated). To prevent wrong data linking we have to deduplicate such
      * records. This is only internal loader functionality and required due data tree are built using
      * php references.
@@ -780,10 +780,10 @@ abstract class Loader implements LoaderInterface
     protected function deduplicate(array &$data)
     {
         if (isset($this->schema[ORM::M_PRIMARY_KEY])) {
-            //We can use model id as de-duplication criteria
+            //We can use record id as de-duplication criteria
             $criteria = $data[$this->schema[ORM::M_PRIMARY_KEY]];
         } else {
-            //It is recommended to use primary keys in every model as it will speed up de-duplication.
+            //It is recommended to use primary keys in every record as it will speed up de-duplication.
             $criteria = serialize($data);
         }
 
@@ -810,7 +810,7 @@ abstract class Loader implements LoaderInterface
      * Generate sql identifier using loader alias and value from relation definition.
      *
      * Example:
-     * $this->getKey(Model::OUTER_KEY);
+     * $this->getKey(Record::OUTER_KEY);
      *
      * @param string $key
      * @return string|null
@@ -825,7 +825,7 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * SQL identified to parent model outer key (usually primary key).
+     * SQL identified to parent record outer key (usually primary key).
      *
      * @return string
      * @throws LoaderException
@@ -836,7 +836,7 @@ abstract class Loader implements LoaderInterface
             throw new LoaderException("Unable to get parent key, no parent loader provided.");
         }
 
-        return $this->parent->getAlias() . '.' . $this->definition[Model::INNER_KEY];
+        return $this->parent->getAlias() . '.' . $this->definition[Record::INNER_KEY];
     }
 
     /**
@@ -869,11 +869,11 @@ abstract class Loader implements LoaderInterface
      */
     protected function fetchCriteria(array $data)
     {
-        if (!isset($data[$this->definition[Model::OUTER_KEY]])) {
+        if (!isset($data[$this->definition[Record::OUTER_KEY]])) {
             return null;
         }
 
-        return $data[$this->definition[Model::OUTER_KEY]];
+        return $data[$this->definition[Record::OUTER_KEY]];
     }
 
     /**

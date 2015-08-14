@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
  * Represents simple BELONGS_TO relation with ability to associate and de-associate parent.
@@ -17,16 +17,16 @@ use Spiral\ORM\Model;
 class BelongsTo extends HasOne
 {
     /**
-     * Relation type, required to fetch model class from relation definition.
+     * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Model::BELONGS_TO;
+    const RELATION_TYPE = Record::BELONGS_TO;
 
     /**
      * {@inheritdoc}
      */
     public function isLoaded()
     {
-        if (empty($this->parent->getField($this->definition[Model::INNER_KEY], false))) {
+        if (empty($this->parent->getField($this->definition[Record::INNER_KEY], false))) {
             return true;
         }
 
@@ -36,7 +36,7 @@ class BelongsTo extends HasOne
     /**
      * {@inheritdoc}
      *
-     * Parent model MUST be saved in order to preserve parent association.
+     * Parent record MUST be saved in order to preserve parent association.
      */
     public function associate($related = null)
     {
@@ -47,7 +47,7 @@ class BelongsTo extends HasOne
         }
 
         /**
-         * @var Model $related
+         * @var Record $related
          */
         if (!$related->isLoaded()) {
             throw new RelationException(
@@ -57,11 +57,11 @@ class BelongsTo extends HasOne
 
         parent::associate($related);
 
-        //Key in parent model
-        $outerKey = $this->definition[Model::OUTER_KEY];
+        //Key in parent record
+        $outerKey = $this->definition[Record::OUTER_KEY];
 
-        //Key in child model
-        $innerKey = $this->definition[Model::INNER_KEY];
+        //Key in child record
+        $innerKey = $this->definition[Record::INNER_KEY];
 
         if ($this->parent->getField($innerKey, false) != $related->getField($outerKey, false)) {
             //We are going to set relation keys right on assertion
@@ -72,10 +72,10 @@ class BelongsTo extends HasOne
     /**
      * {@inheritdoc}
      */
-    protected function mountRelation(Model $model)
+    protected function mountRelation(Record $record)
     {
         //Nothing to do, children can not update parent relation
-        return $model;
+        return $record;
     }
 
     /**
@@ -85,10 +85,10 @@ class BelongsTo extends HasOne
      */
     protected function createSelector()
     {
-        if (empty($this->parent->getField($this->definition[Model::INNER_KEY], false))) {
+        if (empty($this->parent->getField($this->definition[Record::INNER_KEY], false))) {
             throw new RelationException(
                 "Belongs-to selector can not be constructed when inner key ("
-                . $this->definition[Model::INNER_KEY]
+                . $this->definition[Record::INNER_KEY]
                 . ") is null."
             );
         }
@@ -97,17 +97,17 @@ class BelongsTo extends HasOne
     }
 
     /**
-     * De associate related model.
+     * De associate related record.
      */
     protected function deassociate()
     {
-        if (!$this->definition[Model::NULLABLE]) {
+        if (!$this->definition[Record::NULLABLE]) {
             throw new RelationException(
                 "Unable to de-associate relation data, relation is not nullable."
             );
         }
 
-        $innerKey = $this->definition[Model::INNER_KEY];
+        $innerKey = $this->definition[Record::INNER_KEY];
         $this->parent->setField($innerKey, null, false);
 
         $this->loaded = true;

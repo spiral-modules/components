@@ -13,38 +13,38 @@ use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Models\Reflections\ReflectionEntity;
+use Spiral\Records\Reflections\ReflectionEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\DefinitionException;
-use Spiral\ORM\Exceptions\ModelSchemaException;
+use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\Model;
-use Spiral\ORM\ModelAccessorInterface;
+use Spiral\ORM\Record;
+use Spiral\ORM\RecordAccessorInterface;
 use Spiral\ORM\RelationSchemaInterface;
 
 /**
- * Performs analysis, schema building and table declaration for one specific Model class.
+ * Performs analysis, schema building and table declaration for one specific Record class.
  *
  * You have to call
  */
-class ModelSchema extends ReflectionEntity
+class RecordSchema extends ReflectionEntity
 {
     /**
      * Required to validly merge parent and children attributes.
      */
-    const BASE_CLASS = Model::class;
+    const BASE_CLASS = Record::class;
 
     /**
-     * Every ORM Model must have associated database table, table will be used to read column names,
-     * default values and write declared model changes.
+     * Every ORM Record must have associated database table, table will be used to read column names,
+     * default values and write declared record changes.
      *
      * @var AbstractTable
      */
     private $tableSchema = null;
 
     /**
-     * Declared and requested model relationships.
+     * Declared and requested record relationships.
      *
      * @var RelationSchemaInterface[]
      */
@@ -61,7 +61,7 @@ class ModelSchema extends ReflectionEntity
      * @param string        $class   Class name.
      * @throws \ReflectionException
      * @throws DefinitionException
-     * @throws ModelSchemaException
+     * @throws RecordSchemaException
      */
     public function __construct(SchemaBuilder $builder, $class)
     {
@@ -76,7 +76,7 @@ class ModelSchema extends ReflectionEntity
         );
 
         /**
-         * Use model schema (property) to declare table indexes, columns and default values.
+         * Use record schema (property) to declare table indexes, columns and default values.
          * No relations has to be declared at this point.
          */
         $this->castSchema();
@@ -91,12 +91,12 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Returns true if Model states that related table can be altered by ORM. To allow schema altering
-     * set model constant ACTIVE_SCHEMA to true.
+     * Returns true if Record states that related table can be altered by ORM. To allow schema altering
+     * set record constant ACTIVE_SCHEMA to true.
      *
-     * Tables associated to models with ACTIVE_SCHEMA = false counted as "passive".
+     * Tables associated to records with ACTIVE_SCHEMA = false counted as "passive".
      *
-     * @see Model::ACTIVE_SCHEMA
+     * @see Record::ACTIVE_SCHEMA
      * @return bool
      */
     public function isActive()
@@ -105,12 +105,12 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Model role named used widely in relations to generate inner and outer keys, define related
+     * Record role named used widely in relations to generate inner and outer keys, define related
      * class and table in morphed relations and etc. You can defined your own role name by defining
-     * model constant MODEL_ROLE.
+     * record constant MODEL_ROLE.
      *
      * Example:
-     * Model: Models\Post with primary key "id"
+     * Record: Records\Post with primary key "id"
      * Relation: HAS_ONE
      * Outer key: post_id
      *
@@ -126,10 +126,10 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Source table. In cases where table name was not specified, ModelSchema will generate need value
+     * Source table. In cases where table name was not specified, RecordSchema will generate need value
      * using class name and Doctrine inflector.
      *
-     * @see Model::$table
+     * @see Record::$table
      * @return mixed
      */
     public function getTable()
@@ -146,9 +146,9 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Get database where model data should be stored in. Database alias must be resolved.
+     * Get database where record data should be stored in. Database alias must be resolved.
      *
-     * @see Model::$database
+     * @see Record::$database
      * @return mixed
      */
     public function getDatabase()
@@ -157,7 +157,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * SourceID must fully describe model source table and database in context of application.
+     * SourceID must fully describe record source table and database in context of application.
      *
      * @return string
      */
@@ -167,7 +167,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Name of first primary key (usually sequence). Might return null for models with no primary key.
+     * Name of first primary key (usually sequence). Might return null for records with no primary key.
      *
      * @return string|null
      */
@@ -183,9 +183,9 @@ class ModelSchema extends ReflectionEntity
 
     /**
      * Get declared indexes. This may not be the same set of indexes as in associated table schema,
-     * use ModelSchema->tableSchema()->getIndexes() method to get real table indexes.
+     * use RecordSchema->tableSchema()->getIndexes() method to get real table indexes.
      *
-     * @see Model::$indexes
+     * @see Record::$indexes
      * @see tableSchema()
      * @return array
      */
@@ -210,7 +210,7 @@ class ModelSchema extends ReflectionEntity
 
     /**
      * Get column names associated with their default values. Default values will be fetched from
-     * values declared by model and values declared in associated table schema. Every default value
+     * values declared by record and values declared in associated table schema. Every default value
      * will be normalized in a cachable form (no objects allowed here).
      *
      * @return array
@@ -220,7 +220,7 @@ class ModelSchema extends ReflectionEntity
         //We have to reiterate columns as schema can be altered while relation creation,
         //plus we always have to keep original columns order (this is very important)
         $defaults = [];
-        $modelDefaults = $this->property('defaults', true);
+        $recordDefaults = $this->property('defaults', true);
 
         //We must pass all default values thought set of setters and accessor to ensure their value
         $setters = $this->getSetters();
@@ -230,9 +230,9 @@ class ModelSchema extends ReflectionEntity
             //Let's use default value fetched from column first
             $default = $this->exportDefault($column);
 
-            if (isset($modelDefaults[$column->getName()])) {
-                //Let's use value declared in model schema
-                $default = $modelDefaults[$column->getName()];
+            if (isset($recordDefaults[$column->getName()])) {
+                //Let's use value declared in record schema
+                $default = $recordDefaults[$column->getName()];
             }
 
             if (is_null($default) && $column->isNullable()) {
@@ -244,7 +244,7 @@ class ModelSchema extends ReflectionEntity
             if (isset($accessors[$column->getName()])) {
                 $accessor = $accessors[$column->getName()];
                 $accessor = new $accessor($default, null);
-                if ($accessor instanceof ModelAccessorInterface) {
+                if ($accessor instanceof RecordAccessorInterface) {
                     $default = $accessor->defaultValue($this->tableSchema->driver());
                 }
             }
@@ -265,7 +265,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Get array of fields which can be set with null value. Model schema must allow setting this
+     * Get array of fields which can be set with null value. Record schema must allow setting this
      * values to null and bypass filters.
      *
      * @return array
@@ -283,7 +283,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Model will utilize it's schema definition to create set of relations to other models and
+     * Record will utilize it's schema definition to create set of relations to other records and
      * entities (for example ODM).
      *
      * @throws SchemaException
@@ -304,7 +304,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Check if ModelSchema already have declared relation by it's name.
+     * Check if RecordSchema already have declared relation by it's name.
      *
      * @param string $name
      * @return bool
@@ -315,17 +315,17 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Declare new model relation by it's name and definition. Only unique relations can be added.
+     * Declare new record relation by it's name and definition. Only unique relations can be added.
      *
      * @see SchemaBuilder::relationSchema()
      * @param string $name
      * @param array  $definition
-     * @throws ModelSchemaException
+     * @throws RecordSchemaException
      */
     public function addRelation($name, array $definition)
     {
         if (isset($this->relations[$name])) {
-            throw new ModelSchemaException(
+            throw new RecordSchemaException(
                 "Unable to create relation '{$this}'.'{$name}', relation already exists."
             );
         }
@@ -341,7 +341,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Get all declared or requested model relation schemas.
+     * Get all declared or requested record relation schemas.
      *
      * @return RelationSchemaInterface[]
      */
@@ -392,16 +392,16 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Method utilizes value of model schema property to generate table columns. Property "indexes"
+     * Method utilizes value of record schema property to generate table columns. Property "indexes"
      * going to feed table indexes.
      *
-     * @see Model::$schema
+     * @see Record::$schema
      * @throws DefinitionException
      * @throws \Spiral\Database\Exceptions\SchemaException
      */
     protected function castSchema()
     {
-        //Default values fetched from model, system will try to use this values as default
+        //Default values fetched from record, system will try to use this values as default
         //values for associated table column
         $defaults = $this->property('defaults', true);
 
@@ -419,7 +419,7 @@ class ModelSchema extends ReflectionEntity
             );
         }
 
-        //Casting declared model indexes
+        //Casting declared record indexes
         foreach ($this->getIndexes() as $definition) {
             $this->castIndex($definition);
         }
@@ -430,11 +430,11 @@ class ModelSchema extends ReflectionEntity
      */
     protected function parentSchema()
     {
-        if (!$this->builder->hasModel($this->getParentClass()->getName())) {
+        if (!$this->builder->hasRecord($this->getParentClass()->getName())) {
             return null;
         }
 
-        return $this->builder->model($this->getParentClass()->getName());
+        return $this->builder->record($this->getParentClass()->getName());
     }
 
     /**
@@ -457,7 +457,7 @@ class ModelSchema extends ReflectionEntity
      * @see AbstractColumn
      * @param AbstractColumn $column
      * @param string         $definition
-     * @param mixed          $default Default value declared by model schema.
+     * @param mixed          $default Default value declared by record schema.
      * @return mixed
      * @throws DefinitionException
      * @throws \Spiral\Database\Exceptions\SchemaException
@@ -495,7 +495,7 @@ class ModelSchema extends ReflectionEntity
         }
 
         if (!is_null($default)) {
-            //We have default value stated my model schema
+            //We have default value stated my record schema
             $column->defaultValue($default);
         }
 
@@ -508,7 +508,7 @@ class ModelSchema extends ReflectionEntity
     }
 
     /**
-     * Cast (specify) index shema in associated table based on Model index property definition. Only
+     * Cast (specify) index shema in associated table based on Record index property definition. Only
      * normal or unique indexes can be casted at this moment.
      *
      * Example:
@@ -531,14 +531,14 @@ class ModelSchema extends ReflectionEntity
         //Columns index associated too
         $columns = [];
         foreach ($definition as $chunk) {
-            if ($chunk == Model::INDEX || $chunk == Model::UNIQUE) {
+            if ($chunk == Record::INDEX || $chunk == Record::UNIQUE) {
                 $type = $chunk;
                 continue;
             }
 
             if (!$this->tableSchema->hasColumn($chunk)) {
                 throw new DefinitionException(
-                    "Model '{$this}' has index definition with undefined local column."
+                    "Record '{$this}' has index definition with undefined local column."
                 );
             }
 
@@ -547,18 +547,18 @@ class ModelSchema extends ReflectionEntity
 
         if (empty($type)) {
             throw new DefinitionException(
-                "Model '{$this}' has index definition with unspecified index type."
+                "Record '{$this}' has index definition with unspecified index type."
             );
         }
 
         if (empty($columns)) {
             throw new DefinitionException(
-                "Model '{$this}' has index definition without any column associated to."
+                "Record '{$this}' has index definition without any column associated to."
             );
         }
 
         //Casting schema
-        return $this->tableSchema->index($columns)->unique($type == Model::UNIQUE);
+        return $this->tableSchema->index($columns)->unique($type == Record::UNIQUE);
     }
 
     /**

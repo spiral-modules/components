@@ -9,16 +9,16 @@
 namespace Spiral\ORM\Entities\Schemas;
 
 use Spiral\ORM\Exceptions\RelationSchemaException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
  * {@inheritdoc}
  *
  * Provides common set of functionality for polymorphic relations. Polymorphic relations declare
- * their relation to interfaces not to model classes. Model role names will be used to resolve
+ * their relation to interfaces not to record classes. Record role names will be used to resolve
  * outer records.
  *
- * @see ModelSchema::getRole()
+ * @see RecordSchema::getRole()
  */
 abstract class MorphedSchema extends RelationSchema
 {
@@ -28,7 +28,7 @@ abstract class MorphedSchema extends RelationSchema
     public function isInversable()
     {
         //Morphed relations must control unique relations on lower level
-        return !empty($this->definition[Model::INVERSE]) && $this->isReasonable();
+        return !empty($this->definition[Record::INVERSE]) && $this->isReasonable();
     }
 
     /**
@@ -36,7 +36,7 @@ abstract class MorphedSchema extends RelationSchema
      */
     public function isReasonable()
     {
-        return !empty($this->outerModels());
+        return !empty($this->outerRecords());
     }
 
     /**
@@ -44,8 +44,8 @@ abstract class MorphedSchema extends RelationSchema
      */
     public function isSameDatabase()
     {
-        foreach ($this->outerModels() as $record) {
-            if ($this->model->getDatabase() != $record->getDatabase()) {
+        foreach ($this->outerRecords() as $record) {
+            if ($this->record->getDatabase() != $record->getDatabase()) {
                 return false;
             }
         }
@@ -56,33 +56,33 @@ abstract class MorphedSchema extends RelationSchema
     /**
      * {@inheritdoc}
      *
-     * Method will ensure that all related models has same key type.
+     * Method will ensure that all related records has same key type.
      *
      * @throws RelationSchemaException
      */
     public function getOuterKeyType()
     {
         $outerKeyType = null;
-        foreach ($this->outerModels() as $model) {
-            if (!$model->tableSchema()->hasColumn($this->getOuterKey())) {
+        foreach ($this->outerRecords() as $record) {
+            if (!$record->tableSchema()->hasColumn($this->getOuterKey())) {
                 throw new RelationSchemaException(
-                    "Morphed relation ($this) requires outer key exists in every model ({$model})."
+                    "Morphed relation ($this) requires outer key exists in every record ({$record})."
                 );
             }
 
-            $modelKeyType = $this->resolveAbstract(
-                $model->tableSchema()->column($this->getOuterKey())
+            $recordKeyType = $this->resolveAbstract(
+                $record->tableSchema()->column($this->getOuterKey())
             );
 
             if (is_null($outerKeyType)) {
-                $outerKeyType = $modelKeyType;
+                $outerKeyType = $recordKeyType;
             }
 
             //Consistency of outer keys is strictly required
-            if ($outerKeyType != $modelKeyType) {
+            if ($outerKeyType != $recordKeyType) {
                 throw new RelationSchemaException(
-                    "Morphed relation ({$this}) requires consistent outer key type ({$model}), "
-                    . "expected '{$outerKeyType}' got '{$modelKeyType}'."
+                    "Morphed relation ({$this}) requires consistent outer key type ({$record}), "
+                    . "expected '{$outerKeyType}' got '{$recordKeyType}'."
                 );
             }
         }
@@ -91,20 +91,20 @@ abstract class MorphedSchema extends RelationSchema
     }
 
     /**
-     * Get every related outer model.
+     * Get every related outer record.
      *
-     * @return ModelSchema[]
+     * @return RecordSchema[]
      */
-    public function outerModels()
+    public function outerRecords()
     {
-        $models = [];
-        foreach ($this->builder->getModels() as $model) {
-            if ($model->isSubclassOf($this->getTarget()) && !$model->isAbstract()) {
-                $models[] = $model;
+        $records = [];
+        foreach ($this->builder->getRecords() as $record) {
+            if ($record->isSubclassOf($this->getTarget()) && !$record->isAbstract()) {
+                $records[] = $record;
             }
         }
 
-        return $models;
+        return $records;
     }
 
     /**
@@ -129,9 +129,9 @@ abstract class MorphedSchema extends RelationSchema
         $definition = parent::normalizeDefinition();
 
         $definition[static::RELATION_TYPE] = [];
-        foreach ($this->outerModels() as $model) {
-            //We must remember how to relate morphed key value to outer model
-            $definition[static::RELATION_TYPE][$model->getRole()] = $model->getName();
+        foreach ($this->outerRecords() as $record) {
+            //We must remember how to relate morphed key value to outer record
+            $definition[static::RELATION_TYPE][$record->getRole()] = $record->getName();
         }
 
         return $definition;
@@ -144,9 +144,9 @@ abstract class MorphedSchema extends RelationSchema
     {
         $options = parent::proposedDefinitions();
 
-        foreach ($this->outerModels() as $model) {
-            //We can use first found model primary key to populate default value
-            $options['outer:primaryKey'] = $model->getPrimaryKey();
+        foreach ($this->outerRecords() as $record) {
+            //We can use first found record primary key to populate default value
+            $options['outer:primaryKey'] = $record->getPrimaryKey();
             break;
         }
 

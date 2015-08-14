@@ -13,24 +13,24 @@ use Spiral\ORM\Exceptions\RelationException;
 use Spiral\Validation\ValidatesInterface;
 
 /**
- * Relations used to represent data related to parent model. Every relation must be embedded into
- * model, be callable and provide related data by model request. In addition, relations must know
+ * Relations used to represent data related to parent record. Every relation must be embedded into
+ * record, be callable and provide related data by record request. In addition, relations must know
  * how to associate data/entity provided by user.
  *
- * @see Model
+ * @see Record
  */
 interface RelationInterface extends ValidatesInterface
 {
     /**
      * @param ORM   $orm        ORM component.
-     * @param Model $parent     Parent Model.
+     * @param Record $parent     Parent Record.
      * @param array $definition Relation definition, crated by RelationSchema.
      * @param mixed $data       Pre-loaded relation data.
      * @param bool  $loaded     Indication that relation data has been loaded from database.
      */
     public function __construct(
         ORM $orm,
-        Model $parent,
+        Record $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -45,22 +45,22 @@ interface RelationInterface extends ValidatesInterface
 
     /**
      * Return data, object or instances handled by relation, resulted type depends of relation
-     * implementation and might be: Model, ModelIterator, itself (ManyToMorphed), Document and etc.
-     * Related data must be loaded if relation was not pre-loaded with model.
+     * implementation and might be: Record, RecordIterator, itself (ManyToMorphed), Document and etc.
+     * Related data must be loaded if relation was not pre-loaded with record.
      *
      * Example:
      * echo $user->profile->facebookUID;
      *
-     * @see Model::__get()
+     * @see Record::__get()
      * @return mixed|object
      * @throws RelationException
      */
     public function getRelated();
 
     /**
-     * Associate relation to new object data. Method will be called by parent model when field
+     * Associate relation to new object data. Method will be called by parent record when field
      * with name = relation name set with some value. Relation must update inner and outer keys
-     * in parent and related models.
+     * in parent and related records.
      *
      * Example:
      * $user->profile = new Profile();
@@ -71,7 +71,7 @@ interface RelationInterface extends ValidatesInterface
      * Example:
      * $post->picture = null;
      *
-     * @see Model::__set()
+     * @see Record::__set()
      * @param mixed|object|null $related
      * @throws RelationException
      * @throws ORMException
@@ -79,9 +79,9 @@ interface RelationInterface extends ValidatesInterface
     public function associate($related);
 
     /**
-     * Must save related data into database by Model request.
+     * Must save related data into database by Record request.
      *
-     * @see Model::save()
+     * @see Record::save()
      * @param bool $validate
      * @return bool
      * @throws RelationException
@@ -94,7 +94,7 @@ interface RelationInterface extends ValidatesInterface
      * Example:
      * $user->posts(['active' => true])->count()
      *
-     * @see Model::__call()
+     * @see Record::__call()
      * @param array $arguments
      * @return mixed
      * @throws RelationException
@@ -102,10 +102,10 @@ interface RelationInterface extends ValidatesInterface
     public function __invoke(array $arguments);
 
     /**
-     * Reset relation state. By default it must flush all relation data. Method used by Model when
+     * Reset relation state. By default it must flush all relation data. Method used by Record when
      * context were changed.
      *
-     * @see Model::setContext()
+     * @see Record::setContext()
      * @param array $data   Set relation data in array form.
      * @param bool  $loaded Indication that relation data has been loaded.
      * @throws RelationException

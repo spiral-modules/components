@@ -20,14 +20,14 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 
 /**
- * Selectors provide QueryBuilder (see Database) like syntax and support for ORM models to be fetched
+ * Selectors provide QueryBuilder (see Database) like syntax and support for ORM records to be fetched
  * from database. In addition, selection uses set of internal data loaders dedicated to every of
- * model relation and used to pre-load (joins) or post-load (separate query) data for this relations,
- * including additional where conditions and using relation data for parent model filtering queries.
+ * record relation and used to pre-load (joins) or post-load (separate query) data for this relations,
+ * including additional where conditions and using relation data for parent record filtering queries.
  *
  * Selector loaders may not only be related to SQL databases, but might load data from external
  * sources.
@@ -61,7 +61,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     ];
 
     /**
-     * Class name of model to be loaded.
+     * Class name of record to be loaded.
      *
      * @var string
      */
@@ -111,7 +111,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         //We aways need primary loader
         if (empty($this->loader = $loader)) {
             //Selector always need primary data loaded to define data structure and perform query
-            //parsing, in most of cases we can easily use RootLoader associated with primary model
+            //parsing, in most of cases we can easily use RootLoader associated with primary record
             //schema
             $this->loader = new RootLoader(
                 $this->orm,
@@ -132,7 +132,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Primary alias points to table related to parent model.
+     * Primary alias points to table related to parent record.
      *
      * @return string
      */
@@ -156,7 +156,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * in cases where data is joined.
      *
      * @param string $table   Source table name or alias.
-     * @param array  $columns Original set of model columns.
+     * @param array  $columns Original set of record columns.
      * @return int
      */
     public function generateColumns($table, array $columns)
@@ -174,7 +174,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * Request primary selector loader to pre-load relation name. Any type of loader can be used for
      * data preloading. ORM loaders by default will select the most efficient way to load related data
      * which might include additional select query or left join. Loaded data will automatically
-     * pre-populate model relations. You can specify nested relations using "." separator.
+     * pre-populate record relations. You can specify nested relations using "." separator.
      *
      * Examples:
      *
@@ -244,7 +244,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     /**
      * With method is very similar to load() one, except it will always include related data to parent
      * query using INNER JOIN, this method can be applied only to ORM loaders and relations using
-     * same database as parent model.
+     * same database as parent record.
      *
      * Method generally used to filter data based on some relation condition.
      * Attention, with() method WILL NOT load relation data, it will only make it accessible in
@@ -347,7 +347,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         if (empty($columns = $this->columns)) {
             //If no user columns were specified we are going to use columns defined by our loaders
-            //in addition it will return ModelIterator instance as result instead of QueryResult
+            //in addition it will return RecordIterator instance as result instead of QueryResult
             $columns = !empty($this->dataColumns) ? $this->dataColumns : ['*'];
         }
 
@@ -370,8 +370,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      *
      * Return type will depend if custom columns set were used.
      *
-     * @param array $callbacks Callbacks to be used in model iterator as magic methods.
-     * @return QueryResult|ModelIterator
+     * @param array $callbacks Callbacks to be used in record iterator as magic methods.
+     * @return QueryResult|RecordIterator
      */
     public function getIterator(array $callbacks = [])
     {
@@ -380,11 +380,11 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             return $this->run();
         }
 
-        return new ModelIterator($this->orm, $this->class, $this->fetchData(), true, $callbacks);
+        return new RecordIterator($this->orm, $this->class, $this->fetchData(), true, $callbacks);
     }
 
     /**
-     * Execute query and every related query to compile models data in tree form - every relation
+     * Execute query and every related query to compile records data in tree form - every relation
      * data will be included as sub key.
      *
      * Attention, Selector will cache compiled data tree and not query itself to keep data integrity
@@ -418,7 +418,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $this->benchmark('parseResult', $statement);
 
         //Here we are feeding selected data to our primary loaded to parse it and and create
-        //data tree for our models
+        //data tree for our records
         $data = $this->loader->parseResult($result, $rowsCount);
 
         $this->benchmark('parseResult', $statement);
@@ -440,7 +440,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $this->loader->clean();
 
         if (!empty($this->cacheLifetime) && !empty($cacheStore) && !empty($cacheKey)) {
-            //We are caching full models tree, not queries
+            //We are caching full records tree, not queries
             $cacheStore->set($cacheKey, $data, $this->cacheLifetime);
         }
 
@@ -448,13 +448,13 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Fetch one model from database. Attention, LIMIT statement will be used, meaning you can not
+     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
      * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
      * loading method.
      *
      * @see findByPK()
      * @param array $where Selection WHERE statement.
-     * @return Model|null
+     * @return Record|null
      */
     public function findOne(array $where = [])
     {
@@ -467,16 +467,16 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             return null;
         }
 
-        return $this->orm->model($this->class, $data[0]);
+        return $this->orm->record($this->class, $data[0]);
     }
 
     /**
-     * Fetch one model from database using it's primary key. You can use INLOAD and JOIN_ONLY loaders
+     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY loaders
      * with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
      *
      * @see findOne()
      * @param mixed $id Primary key value.
-     * @return Model|null
+     * @return Record|null
      * @throws SelectorException
      */
     public function findByPK($id)
@@ -493,12 +493,12 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             return null;
         }
 
-        return $this->orm->model($this->class, $data[0]);
+        return $this->orm->record($this->class, $data[0]);
     }
 
     /**
      * Update all matched records with provided columns set. You are no allowed to use join conditions
-     * or with() method, you can update your models manually in cases like that.
+     * or with() method, you can update your records manually in cases like that.
      *
      * @param array $update Array of columns to be updated, compatible with UpdateQuery.
      * @return int
@@ -549,7 +549,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
     /**
      * Delete all matched records and return count of affected rows. You are no allowed to use join
-     * conditions or with() method, you can delete your models manually in cases like that.
+     * conditions or with() method, you can delete your records manually in cases like that.
      *
      * @return int
      * @throws SelectorException

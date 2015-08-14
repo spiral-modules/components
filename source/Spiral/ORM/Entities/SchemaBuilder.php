@@ -11,18 +11,18 @@ namespace Spiral\ORM\Entities;
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\ORM\Entities\Schemas\ModelSchema;
-use Spiral\ORM\Exceptions\ModelSchemaException;
+use Spiral\ORM\Entities\Schemas\RecordSchema;
+use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\PassiveTableException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RelationSchemaInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
- * Schema builder responsible for static analysis of existed ORM Models, their schemas, validations,
+ * Schema builder responsible for static analysis of existed ORM Records, their schemas, validations,
  * related tables, requested indexes and etc.
  */
 class SchemaBuilder extends Component
@@ -33,9 +33,9 @@ class SchemaBuilder extends Component
     use ConfigurableTrait;
 
     /**
-     * @var ModelSchema[]
+     * @var RecordSchema[]
      */
-    private $models = [];
+    private $records = [];
 
     /**
      * @var AbstractTable[]
@@ -58,7 +58,7 @@ class SchemaBuilder extends Component
         $this->config = $config;
         $this->orm = $orm;
 
-        $this->locateModels($tokenizer);
+        $this->locateRecords($tokenizer);
     }
 
     /**
@@ -70,48 +70,48 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * Check if Model class known to schema builder.
+     * Check if Record class known to schema builder.
      *
      * @param string $class
      * @return bool
      */
-    public function hasModel($class)
+    public function hasRecord($class)
     {
-        return isset($this->models[$class]);
+        return isset($this->records[$class]);
     }
 
     /**
-     * Instance of ModelSchema associated with given class name.
+     * Instance of RecordSchema associated with given class name.
      *
      * @param string $class
-     * @return ModelSchema
+     * @return RecordSchema
      * @throws SchemaException
-     * @throws ModelSchemaException
+     * @throws RecordSchemaException
      */
-    public function model($class)
+    public function record($class)
     {
-        if ($class == Model::class) {
+        if ($class == Record::class) {
             //No need to remember schema for abstract Document
-            return new ModelSchema($this, Model::class);
+            return new RecordSchema($this, Record::class);
         }
 
-        if (!isset($this->models[$class])) {
-            throw new SchemaException("Unknown model class '{$class}'.");
+        if (!isset($this->records[$class])) {
+            throw new SchemaException("Unknown record class '{$class}'.");
         }
 
-        return $this->models[$class];
+        return $this->records[$class];
     }
 
     /**
-     * @return ModelSchema[]
+     * @return RecordSchema[]
      */
-    public function getModels()
+    public function getRecords()
     {
-        return $this->models;
+        return $this->records;
     }
 
     /**
-     * Check if given table was declared by one of model or relation.
+     * Check if given table was declared by one of record or relation.
      *
      * @param string $database Table database.
      * @param string $table    Table name without prefix.
@@ -170,25 +170,25 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * SchemaBuilder will request every located ModelSchema to declare it's relations. In addition
+     * SchemaBuilder will request every located RecordSchema to declare it's relations. In addition
      * this methods will create inversed set of relations.
      *
      * @throws SchemaException
      * @throws RelationSchemaException
-     * @throws ModelSchemaException
+     * @throws RecordSchemaException
      */
     public function castRelations()
     {
         $inversedRelations = [];
-        foreach ($this->models as $model) {
-            if ($model->isAbstract()) {
-                //Abstract models can not declare relations or tables
+        foreach ($this->records as $record) {
+            if ($record->isAbstract()) {
+                //Abstract records can not declare relations or tables
                 continue;
             }
 
-            $model->castRelations();
+            $record->castRelations();
 
-            foreach ($model->getRelations() as $relation) {
+            foreach ($record->getRelations() as $relation) {
                 if ($relation->isInversable()) {
                     //Relation can be automatically inversed
                     $inversedRelations[] = $relation;
@@ -197,7 +197,7 @@ class SchemaBuilder extends Component
         }
 
         /**
-         * We have to perform inversion after every generic relation was defined. Sometimes models
+         * We have to perform inversion after every generic relation was defined. Sometimes records
          * can define inversed relation by themselves.
          *
          * @var RelationSchemaInterface $relation
@@ -212,10 +212,10 @@ class SchemaBuilder extends Component
 
     /**
      * Perform schema reflection to database(s). All declared tables will created or altered. Only
-     * tables linked to non abstract models and model with active schema parameter will be executed.
+     * tables linked to non abstract records and record with active schema parameter will be executed.
      *
      * SchemaBuilder will not allow (SchemaException) to create or alter tables columns declared
-     * by abstract or models with ACTIVE_SCHEMA constant set to false. ActiveSchema still can
+     * by abstract or records with ACTIVE_SCHEMA constant set to false. ActiveSchema still can
      * declare foreign keys and indexes (most of relations automatically request index or foreign
      * key), but they are going to be ignored.
      *
@@ -237,31 +237,31 @@ class SchemaBuilder extends Component
         $tables = $this->getTables(true);
 
         foreach ($tables as $table) {
-            //We can only alter table columns if model allows us
-            $model = $this->findRelatedModel($table);
+            //We can only alter table columns if record allows us
+            $record = $this->findRelatedRecord($table);
 
-            if (!empty($model) && $model->isAbstract() || empty($table->getColumns())) {
+            if (!empty($record) && $record->isAbstract() || empty($table->getColumns())) {
                 //Abstract tables might declare table schema, but we are going to ignore it
                 continue;
             }
 
-            if (!empty($model) && !$model->isActive()) {
+            if (!empty($record) && !$record->isActive()) {
                 if (empty($table->alteredColumns())) {
                     //Some relations might declare foreign keys and indexes in passive tables,
                     //we are going to skip them all without any warning
                     continue;
                 }
 
-                throw new PassiveTableException($table, $model);
+                throw new PassiveTableException($table, $record);
             }
         }
 
         //We need list of declared tables in order of
         foreach ($tables as $name => $table) {
-            //We can only alter table columns if model allows us
-            $model = $this->findRelatedModel($table);
+            //We can only alter table columns if record allows us
+            $record = $this->findRelatedRecord($table);
 
-            if (!empty($model) && $model->isAbstract() || empty($table->getColumns())) {
+            if (!empty($record) && $record->isAbstract() || empty($table->getColumns())) {
                 //Abstract tables might declare table schema, but we are going to ignore it
                 continue;
             }
@@ -312,7 +312,7 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * Normalize model schema in lighter structure to be saved in ORM component memory.
+     * Normalize record schema in lighter structure to be saved in ORM component memory.
      *
      * @return array
      * @throws SchemaException
@@ -320,45 +320,45 @@ class SchemaBuilder extends Component
     public function normalizeSchema()
     {
         $result = [];
-        foreach ($this->models as $model) {
-            if ($model->isAbstract()) {
+        foreach ($this->records as $record) {
+            if ($record->isAbstract()) {
                 continue;
             }
 
             $schema = [
-                ORM::M_ROLE_NAME   => $model->getRole(),
-                ORM::M_TABLE       => $model->getTable(),
-                ORM::M_DB          => $model->getDatabase(),
-                ORM::M_PRIMARY_KEY => $model->getPrimaryKey(),
-                ORM::M_COLUMNS     => $model->getDefaults(),
-                ORM::M_HIDDEN      => $model->getHidden(),
-                ORM::M_SECURED     => $model->getSecured(),
-                ORM::M_FILLABLE    => $model->getFillable(),
-                ORM::M_NULLABLE    => $model->getNullable(),
-                ORM::M_MUTATORS    => $model->getMutators(),
-                ORM::M_VALIDATES   => $model->getValidates(),
-                ORM::M_RELATIONS   => $this->packRelations($model)
+                ORM::M_ROLE_NAME   => $record->getRole(),
+                ORM::M_TABLE       => $record->getTable(),
+                ORM::M_DB          => $record->getDatabase(),
+                ORM::M_PRIMARY_KEY => $record->getPrimaryKey(),
+                ORM::M_COLUMNS     => $record->getDefaults(),
+                ORM::M_HIDDEN      => $record->getHidden(),
+                ORM::M_SECURED     => $record->getSecured(),
+                ORM::M_FILLABLE    => $record->getFillable(),
+                ORM::M_NULLABLE    => $record->getNullable(),
+                ORM::M_MUTATORS    => $record->getMutators(),
+                ORM::M_VALIDATES   => $record->getValidates(),
+                ORM::M_RELATIONS   => $this->packRelations($record)
             ];
 
             ksort($schema);
-            $result[$model->getName()] = $schema;
+            $result[$record->getName()] = $schema;
         }
 
         return $result;
     }
 
     /**
-     * Create appropriate instance of RelationSchema based on it's definition provided by ORM Model
+     * Create appropriate instance of RelationSchema based on it's definition provided by ORM Record
      * or manually. Due internal format first definition key will be stated as definition type and
-     * key value as model/entity definition relates too.
+     * key value as record/entity definition relates too.
      *
-     * @param ModelSchema $model
+     * @param RecordSchema $record
      * @param string      $name
      * @param array       $definition
      * @return RelationSchemaInterface
      * @throws SchemaException
      */
-    public function relationSchema(ModelSchema $model, $name, array $definition)
+    public function relationSchema(RecordSchema $record, $name, array $definition)
     {
         if (empty($definition)) {
             throw new SchemaException("Relation definition can not be empty.");
@@ -369,7 +369,7 @@ class SchemaBuilder extends Component
         $type = key($definition);
 
         //We are letting ORM to resolve relation schema using container
-        $relation = $this->orm->relationSchema($type, $this, $model, $name, $definition);
+        $relation = $this->orm->relationSchema($type, $this, $record, $name, $definition);
 
         if ($relation->hasEquivalent()) {
             //Some relations may declare equivalent relation to be used instead, used for Morphed
@@ -381,72 +381,72 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * Locate every available Model class.
+     * Locate every available Record class.
      *
      * @param TokenizerInterface $tokenizer
      * @throws SchemaException
      */
-    protected function locateModels(TokenizerInterface $tokenizer)
+    protected function locateRecords(TokenizerInterface $tokenizer)
     {
-        //Table names associated with models
+        //Table names associated with records
         $sources = [];
-        foreach ($tokenizer->getClasses(Model::class) as $class => $definition) {
-            if ($class == Model::class) {
+        foreach ($tokenizer->getClasses(Record::class) as $class => $definition) {
+            if ($class == Record::class) {
                 continue;
             }
 
-            $this->models[$class] = $model = new ModelSchema($this, $class);
+            $this->records[$class] = $record = new RecordSchema($this, $class);
 
-            if (!$model->isAbstract()) {
+            if (!$record->isAbstract()) {
                 //See comment near exception
                 continue;
             }
 
-            //Model associated tableID (includes resolved database name)
-            $sourceID = $model->getSourceID();
+            //Record associated tableID (includes resolved database name)
+            $sourceID = $record->getSourceID();
             if (isset($sources[$sourceID])) {
-                //We are not allowing multiple models talk to same database, unless they one of them
+                //We are not allowing multiple records talk to same database, unless they one of them
                 //is abstract
                 throw new SchemaException(
-                    "Model '{$model}' associated with "
+                    "Record '{$record}' associated with "
                     . "same source table '{$sourceID}' as '{$sources[$sourceID]}'."
                 );
             }
 
-            $sources[$sourceID] = $model;
+            $sources[$sourceID] = $record;
         }
     }
 
     /**
-     * Find model related to given table. This operation is required to catch if some relation/schema
-     * declared values in passive (no altering) table. Might return if no models find (pivot or user
+     * Find record related to given table. This operation is required to catch if some relation/schema
+     * declared values in passive (no altering) table. Might return if no records find (pivot or user
      * specified tables).
      *
      * @param AbstractTable $table
-     * @return ModelSchema|null
+     * @return RecordSchema|null
      */
-    private function findRelatedModel(AbstractTable $table)
+    private function findRelatedRecord(AbstractTable $table)
     {
-        foreach ($this->getModels() as $model) {
-            if ($model->tableSchema() === $table) {
-                return $model;
+        foreach ($this->getRecords() as $record) {
+            if ($record->tableSchema() === $table) {
+                return $record;
             }
         }
 
-        //No associated model were found
+        //No associated record were found
         return null;
     }
 
     /**
-     * Normalize and pack every declared model relation schema.
+     * Normalize and pack every declared record relation schema.
      *
-     * @param ModelSchema $model
+     * @param RecordSchema $record
      * @return array
      */
-    private function packRelations(ModelSchema $model)
+    private function packRelations(RecordSchema $record)
     {
         $result = [];
-        foreach ($model->getRelations() as $name => $relation) {
+        foreach ($record->getRelations() as $name => $relation) {
             $result[$name] = $relation->normalizeSchema();
         }
 

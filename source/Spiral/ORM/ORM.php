@@ -15,13 +15,13 @@ use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Entities\Database;
-use Spiral\Models\DataEntity;
+use Spiral\Records\DataEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
-use Spiral\ORM\Entities\Schemas\ModelSchema;
+use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\ORMException;
 
 /**
- * ORM component used to manage state of cached Model's schema, model creation and schema analysis.
+ * ORM component used to manage state of cached Record's schema, record creation and schema analysis.
  */
 class ORM extends Singleton
 {
@@ -46,7 +46,7 @@ class ORM extends Singleton
     const SCHEMA_SECTION = 'ormSchema';
 
     /**
-     * Normalized model constants.
+     * Normalized record constants.
      */
     const M_ROLE_NAME   = 0;
     const M_TABLE       = 1;
@@ -70,7 +70,7 @@ class ORM extends Singleton
     const R_DATABASE   = 3;
 
     /**
-     * Pivot table data location in Model fields. Pivot data only provided when model is loaded
+     * Pivot table data location in Record fields. Pivot data only provided when record is loaded
      * using many-to-many relation.
      */
     const PIVOT_DATA = '@pivot';
@@ -80,12 +80,12 @@ class ORM extends Singleton
      * mainly to ensure the same instance of object, even if was accessed from different spots.
      * Cache usage increases memory consumption and does not decreases amount of queries being made.
      *
-     * @var Model[]
+     * @var Record[]
      */
     private $entityCache = [];
 
     /**
-     * Cached models schema.
+     * Cached records schema.
      *
      * @var array|null
      */
@@ -149,40 +149,40 @@ class ORM extends Singleton
     }
 
     /**
-     * Get cached schema for specified model by it's name.
+     * Get cached schema for specified record by it's name.
      *
-     * @param string $model
+     * @param string $record
      * @return mixed
      * @throws ORMException
      */
-    public function getSchema($model)
+    public function getSchema($record)
     {
-        if (!isset($this->schema[$model])) {
+        if (!isset($this->schema[$record])) {
             $this->updateSchema();
         }
 
-        if (!isset($this->schema[$model])) {
-            throw new ORMException("Undefined ORM schema item, unknown model '{$model}'.");
+        if (!isset($this->schema[$record])) {
+            throw new ORMException("Undefined ORM schema item, unknown record '{$record}'.");
         }
 
-        return $this->schema[$model];
+        return $this->schema[$record];
     }
 
     /**
-     * Construct instance of Model or receive it from cache (if enabled). Only models with declared
+     * Construct instance of Record or receive it from cache (if enabled). Only records with declared
      * primary key can be cached.
      *
-     * @param string $class Model class name.
+     * @param string $class Record class name.
      * @param array  $data
-     * @param bool   $cache Add model to entity cache if enabled.
-     * @return Model
+     * @param bool   $cache Add record to entity cache if enabled.
+     * @return Record
      */
-    public function model($class, array $data = [], $cache = true)
+    public function record($class, array $data = [], $cache = true)
     {
         $schema = $this->getSchema($class);
 
         if (!$this->config['entityCache']['enabled'] || !$cache) {
-            //Entity cache is disabled, we can create model right now
+            //Entity cache is disabled, we can create record right now
             return new $class($data, !empty($data), $this, $schema);
         }
 
@@ -193,7 +193,7 @@ class ORM extends Singleton
         }
 
         if (isset($this->entityCache[$criteria])) {
-            //Retrieving model from the cache and updates it's context (relations and pivot data)
+            //Retrieving record from the cache and updates it's context (relations and pivot data)
             return $this->entityCache[$criteria]->setContext($data);
         }
 
@@ -201,17 +201,17 @@ class ORM extends Singleton
     }
 
     /**
-     * Create model relation instance by given relation type, parent and definition (options).
+     * Create record relation instance by given relation type, parent and definition (options).
      *
      * @param int   $type
-     * @param Model $parent
+     * @param Record $parent
      * @param array $definition Relation definition.
      * @param array $data
      * @param bool  $loaded
      * @return RelationInterface
      * @throws ORMException
      */
-    public function relation($type, Model $parent, $definition, $data = null, $loaded = false)
+    public function relation($type, Record $parent, $definition, $data = null, $loaded = false)
     {
         if (!isset($this->config['relations'][$type]['class'])) {
             throw new ORMException("Undefined relation type '{$type}'.");
@@ -244,7 +244,7 @@ class ORM extends Singleton
     }
 
     /**
-     * Update ORM models schema, synchronize declared and database schemas and return instance of
+     * Update ORM records schema, synchronize declared and database schemas and return instance of
      * SchemaBuilder.
      *
      * @param SchemaBuilder $builder User specified schema builder.
@@ -254,7 +254,7 @@ class ORM extends Singleton
     {
         $builder = !empty($builder) ? $builder : $this->schemaBuilder();
 
-        //Casting relations between models
+        //Casting relations between records
         $builder->castRelations();
 
         //Create all required tables and columns
@@ -266,7 +266,7 @@ class ORM extends Singleton
             $this->schema = $builder->normalizeSchema()
         );
 
-        //Let's reinitialize models
+        //Let's reinitialize records
         DataEntity::resetInitiated();
 
         return $builder;
@@ -287,12 +287,12 @@ class ORM extends Singleton
 
     /**
      * Create instance of relation schema based on relation type and given definition (declared in
-     * model). Resolve using container to support any possible relation type. You can create your
+     * record). Resolve using container to support any possible relation type. You can create your
      * own relations, loaders and schemas by altering ORM config.
      *
      * @param mixed         $type
      * @param SchemaBuilder $builder
-     * @param ModelSchema   $model
+     * @param RecordSchema   $record
      * @param string        $name
      * @param array         $definition
      * @return RelationSchemaInterface
@@ -300,7 +300,7 @@ class ORM extends Singleton
     public function relationSchema(
         $type,
         SchemaBuilder $builder,
-        ModelSchema $model,
+        RecordSchema $record,
         $name,
         array $definition
     ) {
@@ -310,7 +310,7 @@ class ORM extends Singleton
 
         return $this->container->get(
             $this->config['relations'][$type]['schema'],
-            compact('builder', 'model', 'name', 'definition')
+            compact('builder', 'record', 'name', 'definition')
         );
     }
 
@@ -341,38 +341,38 @@ class ORM extends Singleton
     }
 
     /**
-     * Add Model to entity cache (only if cache enabled). Primary key is required for caching.
+     * Add Record to entity cache (only if cache enabled). Primary key is required for caching.
      *
-     * @param Model $model
+     * @param Record $record
      * @param bool  $ignoreLimit Cache overflow will be ignored.
-     * @return Model
+     * @return Record
      */
-    public function registerEntity(Model $model, $ignoreLimit = true)
+    public function registerEntity(Record $record, $ignoreLimit = true)
     {
-        if (empty($model->primaryKey()) || !$this->config['entityCache']['enabled']) {
-            return $model;
+        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled']) {
+            return $record;
         }
 
         if (!$ignoreLimit && count($this->entityCache) > $this->config['entityCache']['maxSize']) {
             //We are full
-            return $model;
+            return $record;
         }
 
-        return $this->entityCache[get_class($model) . '.' . $model->primaryKey()] = $model;
+        return $this->entityCache[get_class($record) . '.' . $record->primaryKey()] = $record;
     }
 
     /**
-     * Remove Model model from entity cache. Primary key is required for caching.
+     * Remove Record record from entity cache. Primary key is required for caching.
      *
-     * @param Model $model
+     * @param Record $record
      */
-    public function removeEntity(Model $model)
+    public function removeEntity(Record $record)
     {
-        if (empty($model->primaryKey())) {
+        if (empty($record->primaryKey())) {
             return;
         }
 
-        unset($this->entityCache[get_class($model) . '.' . $model->primaryKey()]);
+        unset($this->entityCache[get_class($record) . '.' . $record->primaryKey()]);
     }
 
     /**

@@ -14,13 +14,13 @@ use Spiral\ORM\Exceptions\DefinitionException;
 
 /**
  * Trait provides ability for relation to cast columns in specified table using format identical to
- * format used in model schema. Used by relations with pivot tables.
+ * format used in record schema. Used by relations with pivot tables.
  */
 trait ColumnsTrait
 {
     /**
      * Cast (specify) column schema based on provided column definition. Column definition are
-     * compatible with database Migrations, AbstractColumn types and Model schema.
+     * compatible with database Migrations, AbstractColumn types and Record schema.
      *
      * @param AbstractColumn $column
      * @param string         $definition

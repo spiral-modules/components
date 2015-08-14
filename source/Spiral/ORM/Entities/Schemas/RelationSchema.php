@@ -11,10 +11,10 @@ namespace Spiral\ORM\Entities\Schemas;
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\ORM\Entities\SchemaBuilder;
-use Spiral\ORM\Exceptions\ModelSchemaException;
+use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RelationSchemaInterface;
 
@@ -24,7 +24,7 @@ use Spiral\ORM\RelationSchemaInterface;
 abstract class RelationSchema implements RelationSchemaInterface
 {
     /**
-     * Must contain relation type, this constant is required to fetch outer model(s) class name from
+     * Must contain relation type, this constant is required to fetch outer record(s) class name from
      * relation definition.
      */
     const RELATION_TYPE = null;
@@ -40,7 +40,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      * Even simple relations might include morph key (usually such relations created via inversion
      * of polymorphic relation).
      *
-     * @see ModelSchema::getRole()
+     * @see RecordSchema::getRole()
      */
     const MORPH_COLUMN_SIZE = 32;
 
@@ -50,14 +50,14 @@ abstract class RelationSchema implements RelationSchemaInterface
     private $name = '';
 
     /**
-     * Name of target model or interface. Must be fetched from definition.
+     * Name of target record or interface. Must be fetched from definition.
      *
      * @var string
      */
     private $target = '';
 
     /**
-     * Definition specified by model schema or another definition.
+     * Definition specified by record schema or another definition.
      *
      * @var array
      */
@@ -68,14 +68,14 @@ abstract class RelationSchema implements RelationSchemaInterface
      * as key names, pivot table schemas, foreign key request, ability to be nullabe and etc.
      *
      * To simple schema definition in real projects we can fill some of this values automatically
-     * based on some "environment" values such as parent/outer model table, role name, primary key
+     * based on some "environment" values such as parent/outer record table, role name, primary key
      * and etc.
      *
      * Example:
      * ActiveRecord::INNER_KEY => '{outer:role}_{outer:primaryKey}'
      *
      * Result:
-     * Outer Model is User with primary key "id" => "user_id"
+     * Outer Record is User with primary key "id" => "user_id"
      *
      * @invisible
      * @var array
@@ -90,25 +90,25 @@ abstract class RelationSchema implements RelationSchemaInterface
 
     /**
      * @invisible
-     * @var ModelSchema
+     * @var RecordSchema
      */
-    protected $model = null;
+    protected $record = null;
 
     /**
      * {@inheritdoc}
      */
     public function __construct(
         SchemaBuilder $builder,
-        ModelSchema $model,
+        RecordSchema $record,
         $name,
         array $definition
     ) {
         $this->builder = $builder;
-        $this->model = $model;
+        $this->record = $record;
 
         $this->name = $name;
 
-        //We can use definition type to fetch target outer model or interface
+        //We can use definition type to fetch target outer record or interface
         $this->target = $definition[static::RELATION_TYPE];
 
         $this->definition = $definition;
@@ -118,7 +118,7 @@ abstract class RelationSchema implements RelationSchemaInterface
 
         if (!class_exists($this->target) && !interface_exists($this->target)) {
             throw new RelationSchemaException(
-                "Unable to build relation from '{$this->model}' to undefined target '{$this->target}'."
+                "Unable to build relation from '{$this->record}' to undefined target '{$this->target}'."
             );
         }
 
@@ -172,7 +172,7 @@ abstract class RelationSchema implements RelationSchemaInterface
     {
         if (!$this->hasEquivalent()) {
             throw new RelationSchemaException(
-                "Relation '{$this->model}'.'{$this}' does not have equivalents."
+                "Relation '{$this->record}'.'{$this}' does not have equivalents."
             );
         }
 
@@ -184,7 +184,7 @@ abstract class RelationSchema implements RelationSchemaInterface
         unset($definition[static::RELATION_TYPE]);
 
         //Usually when relation declared as polymorphic
-        return $this->builder->relationSchema($this->model, $this->name, $definition);
+        return $this->builder->relationSchema($this->record, $this->name, $definition);
     }
 
     /**
@@ -192,18 +192,18 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isInversable()
     {
-        if (empty($this->definition[Model::INVERSE]) || !$this->isReasonable()) {
+        if (empty($this->definition[Record::INVERSE]) || !$this->isReasonable()) {
             return false;
         }
 
-        $inversed = $this->definition[Model::INVERSE];
+        $inversed = $this->definition[Record::INVERSE];
         if (is_array($inversed)) {
             //Some relations requires not only inversed relation name but also type
             $inversed = $inversed[1];
         }
 
         //We must prevent duplicate relations
-        return !$this->outerModel()->hasRelation($inversed);
+        return !$this->outerRecord()->hasRelation($inversed);
     }
 
     /**
@@ -211,21 +211,21 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isReasonable()
     {
-        //Relation is only reasonable when outer model is not abstract and does not have relation
+        //Relation is only reasonable when outer record is not abstract and does not have relation
         //under same name
-        return !$this->outerModel()->isAbstract();
+        return !$this->outerRecord()->isAbstract();
     }
 
     /**
      * Some relations may not have any associated record, which means that inner/outer key must
-     * support nullable values. Models must allow setting fields like that to null.
+     * support nullable values. Records must allow setting fields like that to null.
      *
      * @return bool
      */
     public function isNullable()
     {
-        if (array_key_exists(Model::NULLABLE, $this->definition)) {
-            return $this->definition[Model::NULLABLE];
+        if (array_key_exists(Record::NULLABLE, $this->definition)) {
+            return $this->definition[Record::NULLABLE];
         }
 
         return false;
@@ -233,16 +233,16 @@ abstract class RelationSchema implements RelationSchemaInterface
 
     /**
      * Indication that relation has declared morph key. This means that request to outer data must
-     * not only include inner key, but it must state value of morph key (usually model role name).
+     * not only include inner key, but it must state value of morph key (usually record role name).
      *
      * Most of relations like that created automatically as inversion of polymorphic relation to
-     * it's related model(s).
+     * it's related record(s).
      *
      * @return bool
      */
     public function hasMorphKey()
     {
-        return !empty($this->definition[Model::MORPH_KEY]);
+        return !empty($this->definition[Record::MORPH_KEY]);
     }
 
     /**
@@ -252,8 +252,8 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getMorphKey()
     {
-        if (isset($this->definition[Model::MORPH_KEY])) {
-            return $this->definition[Model::MORPH_KEY];
+        if (isset($this->definition[Record::MORPH_KEY])) {
+            return $this->definition[Record::MORPH_KEY];
         }
 
         return null;
@@ -266,7 +266,7 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isIndexed()
     {
-        return !empty($this->definition[Model::CREATE_INDEXES]);
+        return !empty($this->definition[Record::CREATE_INDEXES]);
     }
 
     /**
@@ -281,8 +281,8 @@ abstract class RelationSchema implements RelationSchemaInterface
             return false;
         }
 
-        if (array_key_exists(Model::CONSTRAINT, $this->definition)) {
-            return $this->definition[Model::CONSTRAINT];
+        if (array_key_exists(Record::CONSTRAINT, $this->definition)) {
+            return $this->definition[Record::CONSTRAINT];
         }
 
         return false;
@@ -296,15 +296,15 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getConstraintAction()
     {
-        if (array_key_exists(Model::CONSTRAINT_ACTION, $this->definition)) {
-            return $this->definition[Model::CONSTRAINT_ACTION];
+        if (array_key_exists(Record::CONSTRAINT_ACTION, $this->definition)) {
+            return $this->definition[Record::CONSTRAINT_ACTION];
         }
 
         return null;
     }
 
     /**
-     * Check if parent and related models belongs to same database, it will allow ORM to use joins
+     * Check if parent and related records belongs to same database, it will allow ORM to use joins
      * to preload or filter by related data.
      *
      * @return bool
@@ -312,14 +312,14 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function isSameDatabase()
     {
-        if (!$this->builder->hasModel($this->target)) {
-            //Usually it tells us that relation relates to many different models (polymorphic)
+        if (!$this->builder->hasRecord($this->target)) {
+            //Usually it tells us that relation relates to many different records (polymorphic)
             //We can't clearly say
             return false;
         }
 
         //Databases must be the same
-        return $this->model->getDatabase() == $this->outerModel()->getDatabase();
+        return $this->record->getDatabase() == $this->outerRecord()->getDatabase();
     }
 
     /**
@@ -329,8 +329,8 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getInnerKey()
     {
-        if (isset($this->definition[Model::INNER_KEY])) {
-            return $this->definition[Model::INNER_KEY];
+        if (isset($this->definition[Record::INNER_KEY])) {
+            return $this->definition[Record::INNER_KEY];
         }
 
         return null;
@@ -343,8 +343,8 @@ abstract class RelationSchema implements RelationSchemaInterface
      */
     public function getOuterKey()
     {
-        if (isset($this->definition[Model::OUTER_KEY])) {
-            return $this->definition[Model::OUTER_KEY];
+        if (isset($this->definition[Record::OUTER_KEY])) {
+            return $this->definition[Record::OUTER_KEY];
         }
 
         return null;
@@ -364,7 +364,7 @@ abstract class RelationSchema implements RelationSchemaInterface
         }
 
         return $this->resolveAbstract(
-            $this->model->tableSchema()->column($innerKey)
+            $this->record->tableSchema()->column($innerKey)
         );
     }
 
@@ -382,7 +382,7 @@ abstract class RelationSchema implements RelationSchemaInterface
         }
 
         return $this->resolveAbstract(
-            $this->outerModel()->tableSchema()->column($outerKey)
+            $this->outerRecord()->tableSchema()->column($outerKey)
         );
     }
 
@@ -416,11 +416,11 @@ abstract class RelationSchema implements RelationSchemaInterface
 
         //Unnecessary fields.
         unset(
-            $definition[Model::CONSTRAINT],
-            $definition[Model::CONSTRAINT_ACTION],
-            $definition[Model::CREATE_PIVOT],
-            $definition[Model::INVERSE],
-            $definition[Model::CREATE_INDEXES]
+            $definition[Record::CONSTRAINT],
+            $definition[Record::CONSTRAINT_ACTION],
+            $definition[Record::CREATE_PIVOT],
+            $definition[Record::INVERSE],
+            $definition[Record::CREATE_INDEXES]
         );
 
         return $definition;
@@ -428,7 +428,7 @@ abstract class RelationSchema implements RelationSchemaInterface
 
     /**
      * Will specify missing fields in relation definition using default definition options. Such
-     * options are dynamic and populated based on values fetched from related models.
+     * options are dynamic and populated based on values fetched from related records.
      */
     protected function clarifyDefinition()
     {
@@ -466,19 +466,19 @@ abstract class RelationSchema implements RelationSchemaInterface
             'name:plural'      => Inflector::pluralize($this->name),
             //Relation name in singular form
             'name:singular'    => Inflector::singularize($this->name),
-            //Parent model role name
-            'model:role'       => $this->model->getRole(),
-            //Parent model table name
-            'model:table'      => $this->model->getTable(),
-            //Parent model primary key
-            'model:primaryKey' => $this->model->getPrimaryKey()
+            //Parent record role name
+            'record:role'       => $this->record->getRole(),
+            //Parent record table name
+            'record:table'      => $this->record->getTable(),
+            //Parent record primary key
+            'record:primaryKey' => $this->record->getPrimaryKey()
         ];
 
         //Some options may use values declared in other definition fields
         $proposed = [
-            Model::OUTER_KEY   => 'outerKey',
-            Model::INNER_KEY   => 'innerKey',
-            Model::PIVOT_TABLE => 'pivotTable'
+            Record::OUTER_KEY   => 'outerKey',
+            Record::INNER_KEY   => 'innerKey',
+            Record::PIVOT_TABLE => 'pivotTable'
         ];
 
         foreach ($proposed as $property => $alias) {
@@ -488,14 +488,14 @@ abstract class RelationSchema implements RelationSchemaInterface
             }
         }
 
-        if ($this->builder->hasModel($this->target)) {
+        if ($this->builder->hasRecord($this->target)) {
             $options = $options + [
                     //Outer role name
-                    'outer:role'       => $this->outerModel()->getRole(),
-                    //Outer model table
-                    'outer:table'      => $this->outerModel()->getTable(),
-                    //Outer model primary key
-                    'outer:primaryKey' => $this->outerModel()->getPrimaryKey()
+                    'outer:role'       => $this->outerRecord()->getRole(),
+                    //Outer record table
+                    'outer:table'      => $this->outerRecord()->getTable(),
+                    //Outer record primary key
+                    'outer:primaryKey' => $this->outerRecord()->getPrimaryKey()
                 ];
         }
 
@@ -503,23 +503,23 @@ abstract class RelationSchema implements RelationSchemaInterface
     }
 
     /**
-     * Get ModelSchema to be associated with, method must throw an exception if outer model not
+     * Get RecordSchema to be associated with, method must throw an exception if outer record not
      * found.
      *
-     * @return ModelSchema
+     * @return RecordSchema
      * @throws RelationSchemaException
      * @throws SchemaException
-     * @throws ModelSchemaException
+     * @throws RecordSchemaException
      */
-    protected function outerModel()
+    protected function outerRecord()
     {
-        if (!$this->builder->hasModel($this->target)) {
+        if (!$this->builder->hasRecord($this->target)) {
             throw new RelationSchemaException(
-                "Undefined outer model '{$this->target}' in relation '{$this->model}'.'{$this}'."
+                "Undefined outer record '{$this->target}' in relation '{$this->record}'.'{$this}'."
             );
         }
 
-        return $this->builder->model($this->target);
+        return $this->builder->record($this->target);
     }
 
     /**

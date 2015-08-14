@@ -9,29 +9,29 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Entities\SchemaBuilder;
-use Spiral\ORM\Entities\Schemas\ModelSchema;
-use Spiral\ORM\Exceptions\ModelSchemaException;
+use Spiral\ORM\Entities\Schemas\RecordSchema;
+use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 
 /**
- * RelationSchema is responsible for clarification of inner and outer model schemas (for example it
+ * RelationSchema is responsible for clarification of inner and outer record schemas (for example it
  * might declare required columns, indexes and foreign keys). In addition every RelationSchema must
- * pack it's definition it cachable form which will be later feeded to model Relation and will be
+ * pack it's definition it cachable form which will be later feeded to record Relation and will be
  * used as set of instructions
  */
 interface RelationSchemaInterface
 {
     /**
      * @param SchemaBuilder $builder
-     * @param ModelSchema   $model
+     * @param RecordSchema   $record
      * @param string        $name
      * @param array         $definition
      * @throws RelationSchemaException
      */
     public function __construct(
         SchemaBuilder $builder,
-        ModelSchema $model,
+        RecordSchema $record,
         $name,
         array $definition
     );
@@ -51,7 +51,7 @@ interface RelationSchemaInterface
     public function getType();
 
     /**
-     * Check if relation has it's equivalent. For example if relation associated to a specific model
+     * Check if relation has it's equivalent. For example if relation associated to a specific record
      * (or, like in case with polymorphic relations to interface) it can declare alternative relation
      * definition with different relation type.
      *
@@ -61,24 +61,24 @@ interface RelationSchemaInterface
 
     /**
      * Get definition for equivalent (usually polymorphic relationship) relation. For example this
-     * method can route to ODM relations if outer model is instance of Document.
+     * method can route to ODM relations if outer record is instance of Document.
      *
      * @return RelationSchemaInterface
      * @throws RelationSchemaException
-     * @throws ModelSchemaException
+     * @throws RecordSchemaException
      */
     public function createEquivalent();
 
     /**
      * Check if relation definition contains request to be reverted. Inversion used in cases when
-     * inner and outer models wants to have relations to each other.
+     * inner and outer records wants to have relations to each other.
      *
      * @return bool
      */
     public function isInversable();
 
     /**
-     * Check if it's reasonable to create relation, creation must be skipped if outer model is
+     * Check if it's reasonable to create relation, creation must be skipped if outer record is
      * abstract or relation under such name already exists.
      *
      * @return bool
@@ -86,7 +86,7 @@ interface RelationSchemaInterface
     public function isReasonable();
 
     /**
-     * Must declare inversed (reverted) relation in outer model schema. Relation must not be created
+     * Must declare inversed (reverted) relation in outer record schema. Relation must not be created
      * if it's name already taken.
      *
      * @throws RelationSchemaException

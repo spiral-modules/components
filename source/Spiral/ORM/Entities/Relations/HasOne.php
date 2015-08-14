@@ -11,17 +11,17 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Entities\Relation;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
- * Represent simple HAS_ONE relation with ability to associate and de-associate models.
+ * Represent simple HAS_ONE relation with ability to associate and de-associate records.
  */
 class HasOne extends Relation
 {
     /**
-     * Relation type, required to fetch model class from relation definition.
+     * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Model::HAS_ONE;
+    const RELATION_TYPE = Record::HAS_ONE;
 
     /**
      * {@inheritdoc}
@@ -32,23 +32,23 @@ class HasOne extends Relation
     {
         //Removing association
         if (static::MULTIPLE == false && $related === null) {
-            if (!$this->definition[Model::NULLABLE]) {
+            if (!$this->definition[Record::NULLABLE]) {
                 throw new RelationException(
                     "Unable to de-associate relation data, relation is not nullable."
                 );
             }
 
             $related = $this->getRelated();
-            if ($related instanceof Model) {
-                $related->setField($this->definition[Model::OUTER_KEY], null, false);
-                if (isset($this->definition[Model::MORPH_KEY])) {
+            if ($related instanceof Record) {
+                $related->setField($this->definition[Record::OUTER_KEY], null, false);
+                if (isset($this->definition[Record::MORPH_KEY])) {
                     //Dropping morph key value
-                    $related->setField($this->definition[Model::MORPH_KEY], null);
+                    $related->setField($this->definition[Record::MORPH_KEY], null);
                 }
 
                 if (!$related->save()) {
                     throw new RelationException(
-                        "Unable to de-associate existed and already related model, unable to save."
+                        "Unable to de-associate existed and already related record, unable to save."
                     );
                 }
             }
@@ -65,47 +65,47 @@ class HasOne extends Relation
     }
 
     /**
-     * Create model and configure it's fields with relation data. Attention, you have to validate and
+     * Create record and configure it's fields with relation data. Attention, you have to validate and
      * save record by your own. Newly created entity will not be associated automatically!
      * Pre-loaded data will not be altered, unless reset() method are called.
      *
      * @param mixed $fields
-     * @return Model
+     * @return Record
      */
     public function create($fields = [])
     {
-        $model = call_user_func([$this->getClass(), 'create'], $fields, $this->orm);
+        $record = call_user_func([$this->getClass(), 'create'], $fields, $this->orm);
 
-        return $this->mountRelation($model);
+        return $this->mountRelation($record);
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function mountRelation(Model $model)
+    protected function mountRelation(Record $record)
     {
-        //Key in child model
-        $outerKey = $this->definition[Model::OUTER_KEY];
+        //Key in child record
+        $outerKey = $this->definition[Record::OUTER_KEY];
 
-        //Key in parent model
-        $innerKey = $this->definition[Model::INNER_KEY];
+        //Key in parent record
+        $innerKey = $this->definition[Record::INNER_KEY];
 
-        if ($model->getField($outerKey, false) != $this->parent->getField($innerKey, false)) {
-            $model->setField($outerKey, $this->parent->getField($innerKey, false), false);
+        if ($record->getField($outerKey, false) != $this->parent->getField($innerKey, false)) {
+            $record->setField($outerKey, $this->parent->getField($innerKey, false), false);
         }
 
-        if (!isset($this->definition[Model::MORPH_KEY])) {
+        if (!isset($this->definition[Record::MORPH_KEY])) {
             //No morph key presented
-            return $model;
+            return $record;
         }
 
-        $morphKey = $this->definition[Model::MORPH_KEY];
+        $morphKey = $this->definition[Record::MORPH_KEY];
 
-        if ($model->getField($morphKey) != $this->parent->modelRole()) {
-            $model->setField($morphKey, $this->parent->modelRole());
+        if ($record->getField($morphKey) != $this->parent->recordRole()) {
+            $record->setField($morphKey, $this->parent->recordRole());
         }
 
-        return $model;
+        return $record;
     }
 
     /**
@@ -116,16 +116,16 @@ class HasOne extends Relation
         $selector = parent::createSelector();
 
         //We are going to clarify selector manually (without loaders), that's easy relation
-        if (isset($this->definition[Model::MORPH_KEY])) {
+        if (isset($this->definition[Record::MORPH_KEY])) {
             $selector->where(
-                $selector->getPrimaryAlias() . '.' . $this->definition[Model::MORPH_KEY],
-                $this->parent->modelRole()
+                $selector->getPrimaryAlias() . '.' . $this->definition[Record::MORPH_KEY],
+                $this->parent->recordRole()
             );
         }
 
         $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[Model::OUTER_KEY],
-            $this->parent->getField($this->definition[Model::INNER_KEY], false)
+            $selector->getPrimaryAlias() . '.' . $this->definition[Record::OUTER_KEY],
+            $this->parent->getField($this->definition[Record::INNER_KEY], false)
         );
 
         return $selector;

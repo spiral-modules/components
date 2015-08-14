@@ -12,7 +12,7 @@ use Spiral\Database\Entities\Table;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
 use Spiral\ORM\Entities\Relation;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 
 /**
@@ -22,12 +22,12 @@ use Spiral\ORM\ORM;
 class ManyToMany extends Relation
 {
     /**
-     * Relation type, required to fetch model class from relation definition.
+     * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Model::MANY_TO_MANY;
+    const RELATION_TYPE = Record::MANY_TO_MANY;
 
     /**
-     * Indication that relation represent multiple models (HAS_MANY relations).
+     * Indication that relation represent multiple records (HAS_MANY relations).
      */
     const MULTIPLE = true;
 
@@ -62,9 +62,9 @@ class ManyToMany extends Relation
     }
 
     /**
-     * Check if Model(s) associated with this relation. Method can accept one id, array of ids,
+     * Check if Record(s) associated with this relation. Method can accept one id, array of ids,
      * or instance of ActiveRecord. In case of multiple ids provided method will return true only
-     * if every model is linked to relation.
+     * if every record is linked to relation.
      *
      * Attention, WHERE_PIVOT will not be used by default, you must force it.
      *
@@ -74,20 +74,20 @@ class ManyToMany extends Relation
      * $user->tags()->has(1);
      * $user->tags()->has([1, 2, 3, 4]);
      *
-     * @param mixed $modelID
+     * @param mixed $recordID
      * @param bool  $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return bool
      */
-    public function has($modelID, $wherePivot = false)
+    public function has($recordID, $wherePivot = false)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
             $this->parentKey(),
-            $this->prepareIDs($modelID),
+            $this->prepareIDs($recordID),
             $wherePivot
         ));
 
         //We can use hasEach methods there, but this is more optimal way
-        return $selectQuery->count() == count($modelID);
+        return $selectQuery->count() == count($recordID);
     }
 
     /**
@@ -100,24 +100,24 @@ class ManyToMany extends Relation
      * $user->tags()->hasEach(1);
      * $user->tags()->hasEach([1, 2, 3, 4]);
      *
-     * @param mixed $modelIDs
+     * @param mixed $recordIDs
      * @param bool  $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return array
      */
-    public function hasEach($modelIDs, $wherePivot = false)
+    public function hasEach($recordIDs, $wherePivot = false)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
             $this->parentKey(),
-            $this->prepareIDs($modelIDs),
+            $this->prepareIDs($recordIDs),
             $wherePivot
         ));
 
-        $selectQuery->columns($this->definition[Model::THOUGHT_OUTER_KEY]);
+        $selectQuery->columns($this->definition[Record::THOUGHT_OUTER_KEY]);
 
         $result = [];
         foreach ($selectQuery->run() as $row) {
             //Let's return outer key value as result
-            $result[] = $row[$this->definition[Model::THOUGHT_OUTER_KEY]];
+            $result[] = $row[$this->definition[Record::THOUGHT_OUTER_KEY]];
         }
 
         return $result;
@@ -125,7 +125,7 @@ class ManyToMany extends Relation
 
     /**
      * Link or update link for one of multiple related records. You can pass pivotData as additional
-     * argument or associate it with model id.
+     * argument or associate it with record id.
      *
      * Attention!
      * This method will not follow WHERE_PIVOT conditions, you have to specify them manually.
@@ -144,25 +144,25 @@ class ManyToMany extends Relation
      *
      * Method will not affect state of pre-loaded data! Use reset() method to do that.
      *
-     * @param mixed $modelID
+     * @param mixed $recordID
      * @param array $pivotData
      * @param bool  $linkOnly If true no updates will be performed.
      * @return int
      */
-    public function link($modelID, array $pivotData = [], $linkOnly = false)
+    public function link($recordID, array $pivotData = [], $linkOnly = false)
     {
         //I need different method here
-        $modelID = $this->prepareIDs($modelID, $pivotRows, $pivotData);
-        $existedIDs = $this->hasEach($modelID);
+        $recordID = $this->prepareIDs($recordID, $pivotRows, $pivotData);
+        $existedIDs = $this->hasEach($recordID);
 
         $result = 0;
-        foreach ($pivotRows as $modelID => $pivotRow) {
-            if (in_array($modelID, $existedIDs)) {
+        foreach ($pivotRows as $recordID => $pivotRow) {
+            if (in_array($recordID, $existedIDs)) {
                 if (!$linkOnly) {
                     //We can update
                     $result += $this->pivotTable()->update(
                         $pivotRow,
-                        $this->wherePivot($this->parentKey(), $modelID)
+                        $this->wherePivot($this->parentKey(), $recordID)
                     )->run();
                 }
             } else {
@@ -190,14 +190,14 @@ class ManyToMany extends Relation
      *
      * Method will not affect state of pre-loaded data! Use reset() method to do that.
      *
-     * @param mixed $modelID
+     * @param mixed $recordID
      * @return int
      */
-    public function unlink($modelID)
+    public function unlink($recordID)
     {
         return $this->pivotTable()->delete($this->wherePivot(
             $this->parentKey(),
-            $this->prepareIDs($modelID),
+            $this->prepareIDs($recordID),
             false
         ))->run();
     }
@@ -230,7 +230,7 @@ class ManyToMany extends Relation
         $loader = new ManyToManyLoader($this->orm, '', $this->definition);
 
         return $loader->createSelector($this->parentRole())->where(
-            $loader->getPivotAlias() . '.' . $this->definition[Model::THOUGHT_INNER_KEY],
+            $loader->getPivotAlias() . '.' . $this->definition[Record::THOUGHT_INNER_KEY],
             $this->parentKey()
         );
     }
@@ -238,10 +238,10 @@ class ManyToMany extends Relation
     /**
      * {@inheritdoc}
      */
-    protected function mountRelation(Model $model)
+    protected function mountRelation(Record $record)
     {
-        //Nothing to do, every fetched model should be already linked
-        return $model;
+        //Nothing to do, every fetched record should be already linked
+        return $record;
     }
 
     /**
@@ -255,21 +255,21 @@ class ManyToMany extends Relation
     protected function wherePivot($innerKey, $outerKey, $wherePivot = false)
     {
         $query = [];
-        if (!empty($this->definition[Model::MORPH_KEY])) {
-            $query[$this->definition[Model::MORPH_KEY]] = $this->parentRole();
+        if (!empty($this->definition[Record::MORPH_KEY])) {
+            $query[$this->definition[Record::MORPH_KEY]] = $this->parentRole();
         }
 
         if (!empty($innerKey)) {
-            $query[$this->definition[Model::THOUGHT_INNER_KEY]] = $innerKey;
+            $query[$this->definition[Record::THOUGHT_INNER_KEY]] = $innerKey;
         }
 
-        if ($wherePivot && !empty($this->definition[Model::WHERE_PIVOT])) {
+        if ($wherePivot && !empty($this->definition[Record::WHERE_PIVOT])) {
             //Custom where pivot conditions
-            $query = $query + $this->definition[Model::WHERE_PIVOT];
+            $query = $query + $this->definition[Record::WHERE_PIVOT];
         }
 
         if (!empty($outerKey)) {
-            $query[$this->definition[Model::THOUGHT_OUTER_KEY]] = is_array($outerKey)
+            $query[$this->definition[Record::THOUGHT_OUTER_KEY]] = is_array($outerKey)
                 ? ['IN' => $outerKey]
                 : $outerKey;
         }
@@ -280,24 +280,24 @@ class ManyToMany extends Relation
     /**
      * Helper method to fetch outer key value from provided list.
      *
-     * @param mixed $modelID
+     * @param mixed $recordID
      * @param array $pivotRows Automatically constructed pivot rows will be available here for insertion
      *                         or update.
      * @param array $pivotData
      * @return mixed
      * @throws RelationException
      */
-    protected function prepareIDs($modelID, array &$pivotRows = null, array $pivotData = [])
+    protected function prepareIDs($recordID, array &$pivotRows = null, array $pivotData = [])
     {
-        if (is_scalar($modelID)) {
-            $pivotRows = [$modelID => $this->pivotRow($modelID, $pivotData)];
+        if (is_scalar($recordID)) {
+            $pivotRows = [$recordID => $this->pivotRow($recordID, $pivotData)];
 
-            return $modelID;
+            return $recordID;
         }
 
-        if (is_array($modelID)) {
+        if (is_array($recordID)) {
             $result = [];
-            foreach ($modelID as $key => $value) {
+            foreach ($recordID as $key => $value) {
                 if (is_scalar($value)) {
                     $pivotRows[$value] = $this->pivotRow($value, $pivotData);
                     $result[] = $value;
@@ -311,18 +311,18 @@ class ManyToMany extends Relation
             return $result;
         }
 
-        if (is_object($modelID) && get_class($modelID) != $this->getClass()) {
+        if (is_object($recordID) && get_class($recordID) != $this->getClass()) {
             throw new RelationException(
-                "Relation can work only with instances of '{$this->getClass()}' model."
+                "Relation can work only with instances of '{$this->getClass()}' record."
             );
         }
 
-        $modelID = $modelID->getField($this->definition[Model::OUTER_KEY]);
+        $recordID = $recordID->getField($this->definition[Record::OUTER_KEY]);
 
         //To be inserted later
-        $pivotRows = [$modelID => $this->pivotRow($modelID, $pivotData)];
+        $pivotRows = [$recordID => $this->pivotRow($recordID, $pivotData)];
 
-        return $modelID;
+        return $recordID;
     }
 
     /**
@@ -335,12 +335,12 @@ class ManyToMany extends Relation
     protected function pivotRow($outerKey, array $pivotData = [])
     {
         $data = [
-            $this->definition[Model::THOUGHT_INNER_KEY] => $this->parentKey(),
-            $this->definition[Model::THOUGHT_OUTER_KEY] => $outerKey
+            $this->definition[Record::THOUGHT_INNER_KEY] => $this->parentKey(),
+            $this->definition[Record::THOUGHT_OUTER_KEY] => $outerKey
         ];
 
-        if (!empty($this->definition[Model::MORPH_KEY])) {
-            $data[$this->definition[Model::MORPH_KEY]] = $this->parentRole();
+        if (!empty($this->definition[Record::MORPH_KEY])) {
+            $data[$this->definition[Record::MORPH_KEY]] = $this->parentRole();
         }
 
         return $data + $pivotData;
@@ -353,17 +353,17 @@ class ManyToMany extends Relation
      */
     protected function parentRole()
     {
-        return !empty($this->parentRole) ? $this->parentRole : $this->parent->modelRole();
+        return !empty($this->parentRole) ? $this->parentRole : $this->parent->recordRole();
     }
 
     /**
-     * Parent model inner key value.
+     * Parent record inner key value.
      *
      * @return mixed
      */
     protected function parentKey()
     {
-        return $this->parent->getField($this->definition[Model::INNER_KEY]);
+        return $this->parent->getField($this->definition[Record::INNER_KEY]);
     }
 
     /**
@@ -374,7 +374,7 @@ class ManyToMany extends Relation
     protected function pivotTable()
     {
         return $this->orm->dbalDatabase($this->definition[ORM::R_DATABASE])->table(
-            $this->definition[Model::PIVOT_TABLE]
+            $this->definition[Record::PIVOT_TABLE]
         );
     }
 }

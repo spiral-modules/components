@@ -11,22 +11,22 @@ namespace Spiral\ORM;
 use Spiral\Core\ContainerInterface;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Models\AccessorInterface;
-use Spiral\Models\ActiveEntityInterface;
-use Spiral\Models\DataEntity;
+use Spiral\Records\AccessorInterface;
+use Spiral\Records\ActiveEntityInterface;
+use Spiral\Records\DataEntity;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ORM\Entities\Selector;
-use Spiral\ORM\Exceptions\ModelException;
+use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RelationException;
 
 /**
- * Document is base data model for ORM component, it used to describe related table schema, filters,
- * validations and relations to other models. You can count Model class as ActiveRecord pattern.
+ * Document is base data record for ORM component, it used to describe related table schema, filters,
+ * validations and relations to other records. You can count Record class as ActiveRecord pattern.
  * ORM component will automatically analyze existed Documents and create cached version of their
  * schema.
  */
-class Model extends DataEntity implements ActiveEntityInterface
+class Record extends DataEntity implements ActiveEntityInterface
 {
     /**
      * We are going to inherit parent validation rules, this will let spiral translator know about
@@ -43,28 +43,28 @@ class Model extends DataEntity implements ActiveEntityInterface
     const VALIDATE_SAVE = true;
 
     /**
-     * ORM models are be divided by two sections: active and passive models. When model is active
-     * ORM allowed to modify associated model table using declared schema and created relations.
+     * ORM records are be divided by two sections: active and passive records. When record is active
+     * ORM allowed to modify associated record table using declared schema and created relations.
      *
-     * Passive models (ACTIVE_SCHEMA = false) however can only read table schema from database and
-     * forbidden to do any schema modification either by model or by relations.
+     * Passive records (ACTIVE_SCHEMA = false) however can only read table schema from database and
+     * forbidden to do any schema modification either by record or by relations.
      *
      * You can use ACTIVE_SCHEMA = false in cases where you need to create an ActiveRecord for
      * existed table.
      *
-     * @see ModelSchema
+     * @see RecordSchema
      * @see \Spiral\ORM\Entities\SchemaBuilder
      */
     const ACTIVE_SCHEMA = true;
 
     /**
-     * Indication that model were deleted.
+     * Indication that record were deleted.
      */
     const DELETED = 900;
 
     /**
      * Default ORM relation types, see ORM configuration and documentation for more information,
-     * i had to remove 200 lines of comments to make model little bit smaller.
+     * i had to remove 200 lines of comments to make record little bit smaller.
      *
      * @see RelationSchemaInterface
      * @see RelationSchema
@@ -85,7 +85,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     const MANY_TO_MORPHED    = 109;
 
     /**
-     * Constants used to declare relations in model schema, used in normalized relation schema.
+     * Constants used to declare relations in record schema, used in normalized relation schema.
      *
      * @see RelationSchemaInterface
      */
@@ -102,10 +102,10 @@ class Model extends DataEntity implements ActiveEntityInterface
     /**
      * Additional constants used to control relation schema behaviour.
      *
-     * @see Model::$schema
+     * @see Record::$schema
      * @see RelationSchemaInterface
      */
-    const INVERSE           = 1001; //Relation should be inverted to parent model
+    const INVERSE           = 1001; //Relation should be inverted to parent record
     const CONSTRAINT        = 1002; //Relation should create foreign keys (default)
     const CONSTRAINT_ACTION = 1003; //Default relation foreign key delete/update action (CASCADE)
     const CREATE_PIVOT      = 1004; //Many-to-Many should create pivot table automatically (default)
@@ -114,22 +114,22 @@ class Model extends DataEntity implements ActiveEntityInterface
     const MORPHED_ALIASES   = 1007; //Aliases for morphed sub-relations
 
     /**
-     * Constants used to declare indexes in model schema.
+     * Constants used to declare indexes in record schema.
      *
-     * @see Model::$indexes
+     * @see Record::$indexes
      */
     const INDEX  = 1000;            //Default index type
     const UNIQUE = 2000;            //Unique index definition
 
     /**
-     * Indicates that model data were loaded from database (not recently created).
+     * Indicates that record data were loaded from database (not recently created).
      *
      * @var bool
      */
     private $loaded = false;
 
     /**
-     * SolidState will force model data to be saved as one big update set without any generating
+     * SolidState will force record data to be saved as one big update set without any generating
      * separate update statements for changed columns.
      *
      * @var bool
@@ -137,7 +137,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     private $solidState = false;
 
     /**
-     * Populated when model loaded using many-to-many connection. Property will include every
+     * Populated when record loaded using many-to-many connection. Property will include every
      * column of connection row in pivot table.
      *
      * @see setContext()
@@ -147,7 +147,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     private $pivotData = [];
 
     /**
-     * Table name (without database prefix) model associated to, ModelSchema will generate table
+     * Table name (without database prefix) record associated to, RecordSchema will generate table
      * name automatically using class name, however i'm strongly recommend to declare table name
      * manually as it gives more readable code.
      *
@@ -164,7 +164,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     protected $database = null;
 
     /**
-     * Set of indexes to be created for associated model table, indexes only created when model is
+     * Set of indexes to be created for associated record table, indexes only created when record is
      * not abstract and has active schema set to true.
      *
      * Use constants INDEX and UNIQUE to describe indexes, you can also create compound indexes:
@@ -179,7 +179,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     protected $indexes = [];
 
     /**
-     * Model relations and columns can be described in one place - model schema.
+     * Record relations and columns can be described in one place - record schema.
      * Attention: while defining table structure make sure that ACTIVE_SCHEMA constant is set to t
      * rue.
      *
@@ -213,11 +213,11 @@ class Model extends DataEntity implements ActiveEntityInterface
      *
      *      //Relations
      *      'profile'     => [
-     *          self::HAS_ONE => 'Models\Profile',
+     *          self::HAS_ONE => 'Records\Profile',
      *          self::INVERSE => 'user'
      *      ],
      *      'roles'       => [
-     *          self::MANY_TO_MANY => 'Models\Role',
+     *          self::MANY_TO_MANY => 'Records\Role',
      *          self::INVERSE => 'users'
      *      ]
      * ];
@@ -234,14 +234,14 @@ class Model extends DataEntity implements ActiveEntityInterface
     protected $defaults = [];
 
     /**
-     * Model field updates (changed values).
+     * Record field updates (changed values).
      *
      * @var array
      */
     protected $updates = [];
 
     /**
-     * Constructed and pre-cached set of model relations. Relation will be in a form of data array
+     * Constructed and pre-cached set of record relations. Relation will be in a form of data array
      * to be created on demand.
      *
      * @see relation()
@@ -295,14 +295,14 @@ class Model extends DataEntity implements ActiveEntityInterface
         $this->fields = $data + $this->schema[ORM::M_COLUMNS];
 
         if (!$this->isLoaded()) {
-            //Non loaded models should be in solid state by default and require initial validation
+            //Non loaded records should be in solid state by default and require initial validation
             $this->solidState(true)->validated = true;
         }
     }
 
     /**
-     * Model context must be updated in cases where single model instance can be accessed from multiple
-     * places, context will not change model fields but might overwrite pivot data or clarify
+     * Record context must be updated in cases where single record instance can be accessed from multiple
+     * places, context will not change record fields but might overwrite pivot data or clarify
      * loaded relations.
      *
      * @param array $context
@@ -326,18 +326,18 @@ class Model extends DataEntity implements ActiveEntityInterface
         }
 
         /**
-         * We are not going to update model fields.
+         * We are not going to update record fields.
          */
 
         return $this;
     }
 
     /**
-     * Change model solid state. SolidState will force model data to be saved as one big update set
+     * Change record solid state. SolidState will force record data to be saved as one big update set
      * without any generating separate update statements for changed columns.
      *
-     * Attention, you have to carefully use forceUpdate flag with models without primary keys due
-     * update criteria (WHERE condition) can not be easy constructed for models with primary key.
+     * Attention, you have to carefully use forceUpdate flag with records without primary keys due
+     * update criteria (WHERE condition) can not be easy constructed for records with primary key.
      *
      * @param bool $solidState
      * @param bool $forceUpdate Mark all fields as changed to force update later.
@@ -359,7 +359,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Is model is solid state?
+     * Is record is solid state?
      *
      * @see solidState()
      * @return bool
@@ -370,18 +370,18 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Role name used in morphed relations to detect outer model table and class. It usually built
-     * based on model class name, but can be defined using ROLE_NAME constant.
+     * Role name used in morphed relations to detect outer record table and class. It usually built
+     * based on record class name, but can be defined using ROLE_NAME constant.
      *
      * @return string
      */
-    public function modelRole()
+    public function recordRole()
     {
         return $this->schema[ORM::M_ROLE_NAME];
     }
 
     /**
-     * Model primary key value (if any).
+     * Record primary key value (if any).
      *
      * @return mixed
      */
@@ -393,7 +393,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Is model were fetched from databases or recently created?
+     * Is record were fetched from databases or recently created?
      *
      * @return bool
      */
@@ -403,7 +403,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Indication that model data was deleted.
+     * Indication that record data was deleted.
      *
      * @return bool
      */
@@ -413,7 +413,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Pivot data associated with model instance, populated only in cases when model loaded using
+     * Pivot data associated with record instance, populated only in cases when record loaded using
      * Many-to-Many relation.
      *
      * @return array
@@ -426,14 +426,14 @@ class Model extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * Must track field updates. In addition Models will not allow to set unknown field.
+     * Must track field updates. In addition Records will not allow to set unknown field.
      *
-     * @throws ModelException
+     * @throws RecordException
      */
     public function setField($name, $value, $filter = true)
     {
         if (!array_key_exists($name, $this->fields)) {
-            throw new ModelException("Undefined field '{$name}' in '" . static::class . "'.");
+            throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
         $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
@@ -454,12 +454,12 @@ class Model extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * Model will skip filtration for nullable fields.
+     * Record will skip filtration for nullable fields.
      */
     public function getField($name, $default = null, $filter = true)
     {
         if (!array_key_exists($name, $this->fields)) {
-            throw new ModelException("Undefined field '{$name}' in '" . static::class . "'.");
+            throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
         $value = $this->fields[$name];
@@ -474,14 +474,14 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Get or create model relation by it's name and pre-loaded (optional) set of data.
+     * Get or create record relation by it's name and pre-loaded (optional) set of data.
      *
      * @param string $name
      * @param mixed  $data
      * @param bool   $loaded
      * @return RelationInterface
      * @throws RelationException
-     * @throws ModelException
+     * @throws RecordException
      */
     public function relation($name, $data = null, $loaded = false)
     {
@@ -500,8 +500,8 @@ class Model extends DataEntity implements ActiveEntityInterface
 
         //Constructing relation
         if (!isset($this->schema[ORM::M_RELATIONS][$name])) {
-            throw new ModelException(
-                "Undefined relation {$name} in model " . static::class . "."
+            throw new RecordException(
+                "Undefined relation {$name} in record " . static::class . "."
             );
         }
 
@@ -544,16 +544,16 @@ class Model extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * Create or update model data in database.
+     * Create or update record data in database.
      *
      * @see   sourceTable()
      * @see   getCriteria()
      * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
      *                             disable validation before saving.
-     * @param bool      $relations Save data associated to constructed model relations, only first
+     * @param bool      $relations Save data associated to constructed record relations, only first
      *                             layer of relations will be saved to prevent infinite loop.
      * @return bool
-     * @throws ModelException
+     * @throws RecordException
      * @throws QueryException
      * @event saving()
      * @event saved()
@@ -594,20 +594,20 @@ class Model extends DataEntity implements ActiveEntityInterface
         if (!$this->isLoaded()) {
             $this->fire('saving');
 
-            //We will need to support models with multiple primary keys in future
+            //We will need to support records with multiple primary keys in future
             unset($this->fields[$primaryKey]);
 
             //Creating
             $lastID = $this->sourceTable()->insert($this->fields = $this->serializeData());
             if (!empty($primaryKey)) {
-                //Updating model primary key
+                //Updating record primary key
                 $this->fields[$primaryKey] = $lastID;
             }
 
             $this->loaded = true;
             $this->fire('saved');
 
-            //Saving model to entity cache if we have space for that
+            //Saving record to entity cache if we have space for that
             $this->orm->registerEntity($this, false);
         } elseif ($this->solidState || $this->hasUpdates()) {
             $this->fire('updating');
@@ -628,7 +628,7 @@ class Model extends DataEntity implements ActiveEntityInterface
                 }
 
                 if (!$relation->saveAssociation($validate)) {
-                    throw new ModelException("Unable to save relation '{$name}'.");
+                    throw new RecordException("Unable to save relation '{$name}'.");
                 }
             }
         }
@@ -669,7 +669,7 @@ class Model extends DataEntity implements ActiveEntityInterface
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof ModelAccessorInterface && $value->hasUpdates()) {
+                if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -692,7 +692,7 @@ class Model extends DataEntity implements ActiveEntityInterface
         $this->updates = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof ModelAccessorInterface) {
+            if ($value instanceof RecordAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -713,11 +713,11 @@ class Model extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * @throws ModelException
+     * @throws RecordException
      */
     public function __unset($offset)
     {
-        throw new ModelException("Models fields can not be unsetted.");
+        throw new RecordException("Records fields can not be unsetted.");
     }
 
     /**
@@ -805,7 +805,7 @@ class Model extends DataEntity implements ActiveEntityInterface
 
         $updates = [];
         foreach ($this->fields as $name => $field) {
-            if ($field instanceof ModelAccessorInterface && ($this->isSolid() || $field->hasUpdates())) {
+            if ($field instanceof RecordAccessorInterface && ($this->isSolid() || $field->hasUpdates())) {
                 //Update handled by accessor
                 $updates[$name] = $field->compileUpdates($name);
                 continue;
@@ -816,7 +816,7 @@ class Model extends DataEntity implements ActiveEntityInterface
                 continue;
             }
 
-            if ($field instanceof ModelAccessorInterface) {
+            if ($field instanceof RecordAccessorInterface) {
                 $field = $field->serializeData();
             }
 
@@ -846,8 +846,8 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Get WHERE array to be used to perform model data update or deletion. Usually will include
-     * model primary key.
+     * Get WHERE array to be used to perform record data update or deletion. Usually will include
+     * record primary key.
      *
      * @return array
      */
@@ -857,7 +857,7 @@ class Model extends DataEntity implements ActiveEntityInterface
             return [$this->schema[ORM::M_PRIMARY_KEY] => $this->primaryKey()];
         }
 
-        //We have to serialize model data
+        //We have to serialize record data
         return $this->updates + $this->serializeData();
     }
 
@@ -918,7 +918,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * @param array $fields Model fields to set, will be passed thought filters.
+     * @param array $fields Record fields to set, will be passed thought filters.
      * @param ORM   $orm    ORM component, global container will be called if not instance provided.
      * @event created()
      */
@@ -928,19 +928,19 @@ class Model extends DataEntity implements ActiveEntityInterface
         $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
 
         /**
-         * @var Model $model
+         * @var Record $record
          */
-        $model = new static([], false, $orm);
+        $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $model->validated = false;
-        $model->setFields($fields)->fire('created');
+        $record->validated = false;
+        $record->setFields($fields)->fire('created');
 
-        return $model;
+        return $record;
     }
 
     /**
-     * Find multiple models based on provided query.
+     * Find multiple records based on provided query.
      *
      * Example:
      * User::find(['status' => 'active'], ['profile']);
@@ -955,7 +955,7 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Fetch one model based on provided query or return null. Use second argument to specify
+     * Fetch one record based on provided query or return null. Use second argument to specify
      * relations to be loaded.
      *
      * Example:
@@ -964,7 +964,7 @@ class Model extends DataEntity implements ActiveEntityInterface
      * @param array|\Closure $where   Selection WHERE statement.
      * @param array          $load    Array or relations to be pre-loaded.
      * @param array          $orderBy Sort by conditions.
-     * @return Model|null
+     * @return Record|null
      */
     public static function findOne($where = [], array $load = [], array $orderBy = [])
     {
@@ -977,14 +977,14 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Find model using it's primary key. Relation data can be preloaded with found model.
+     * Find record using it's primary key. Relation data can be preloaded with found record.
      *
      * Example:
      * User::findByID(1, ['profile']);
      *
      * @param mixed $id   Primary key.
      * @param array $load Array or relations to be pre-loaded.
-     * @return Model|null
+     * @return Record|null
      */
     public static function findByPK($id = null, array $load = [])
     {

@@ -9,10 +9,10 @@
 namespace Spiral\ORM\Exceptions;
 
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\ORM\Entities\Schemas\ModelSchema;
+use Spiral\ORM\Entities\Schemas\RecordSchema;
 
 /**
- * Raised when user or relation edits/creates columns in table associated to model with ACTIVE_SCHEMA
+ * Raised when user or relation edits/creates columns in table associated to record with ACTIVE_SCHEMA
  * constant set to false. Tables like that counted as passive and their schema must not be altered
  * by ORM schema synchronizer.
  */
@@ -20,9 +20,9 @@ class PassiveTableException extends SchemaException
 {
     /**
      * @param AbstractTable $table
-     * @param ModelSchema   $model
+     * @param RecordSchema   $record
      */
-    public function __construct(AbstractTable $table, ModelSchema $model)
+    public function __construct(AbstractTable $table, RecordSchema $record)
     {
         $altered = [];
         foreach ($table->alteredColumns() as $column) {
@@ -30,11 +30,11 @@ class PassiveTableException extends SchemaException
         }
 
         parent::__construct(\Spiral\interpolate(
-            'Passive table "{database}"."{table}" ({model}), were altered, columns: {columns}',
+            'Passive table "{database}"."{table}" ({record}), were altered, columns: {columns}',
             [
-                'database' => $model->getDatabase(),
+                'database' => $record->getDatabase(),
                 'table'    => $table->getName(),
-                'model'    => $model,
+                'record'    => $record,
                 'columns'  => join(', ', $altered)
             ]
         ));

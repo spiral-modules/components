@@ -10,17 +10,17 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
- * Similar to BelongsTo, however morph key value used to resolve parent model.
+ * Similar to BelongsTo, however morph key value used to resolve parent record.
  */
 class BelongsToMorphed extends BelongsTo
 {
     /**
-     * Relation type, required to fetch model class from relation definition.
+     * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Model::BELONGS_TO_MORPHED;
+    const RELATION_TYPE = Record::BELONGS_TO_MORPHED;
 
     /**
      * {@inheritdoc}
@@ -28,7 +28,7 @@ class BelongsToMorphed extends BelongsTo
     public function associate($related = null)
     {
         parent::associate($related);
-        $morphKey = $this->definition[Model::MORPH_KEY];
+        $morphKey = $this->definition[Record::MORPH_KEY];
         if (is_null($related)) {
             $this->parent->setField($morphKey, null);
 
@@ -36,9 +36,9 @@ class BelongsToMorphed extends BelongsTo
         }
 
         /**
-         * @var Model $related
+         * @var Record $related
          */
-        $this->parent->setField($morphKey, $related->modelRole(), false);
+        $this->parent->setField($morphKey, $related->recordRole(), false);
     }
 
     /**
@@ -50,8 +50,8 @@ class BelongsToMorphed extends BelongsTo
         $selector = new Selector($this->orm, $this->getClass());
 
         return $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[Model::OUTER_KEY],
-            $this->parent->getField($this->definition[Model::INNER_KEY], false)
+            $selector->getPrimaryAlias() . '.' . $this->definition[Record::OUTER_KEY],
+            $this->parent->getField($this->definition[Record::INNER_KEY], false)
         );
     }
 
@@ -62,7 +62,7 @@ class BelongsToMorphed extends BelongsTo
      */
     protected function getClass()
     {
-        $morphKey = $this->definition[Model::MORPH_KEY];
+        $morphKey = $this->definition[Record::MORPH_KEY];
         if (empty($this->parent->getField($morphKey))) {
             throw new RelationException("Unable to resolve parent entity, morph key is empty.");
         }
@@ -78,6 +78,6 @@ class BelongsToMorphed extends BelongsTo
         parent::deassociate();
 
         //Dropping morph key value
-        $this->parent->setField($this->definition[Model::MORPH_KEY], null);
+        $this->parent->setField($this->definition[Record::MORPH_KEY], null);
     }
 }

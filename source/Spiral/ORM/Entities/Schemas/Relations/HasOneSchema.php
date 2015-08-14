@@ -9,10 +9,10 @@
 namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Spiral\ORM\Entities\Schemas\RelationSchema;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
- * Declares simple has one relation. Relations like that used when parent model has one child with
+ * Declares simple has one relation. Relations like that used when parent record has one child with
  * [outer] key linked to value of [inner] key of parent mode.
  *
  * Example, [User has one Profile], user primary key is "id":
@@ -26,7 +26,7 @@ class HasOneSchema extends RelationSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Model::HAS_ONE;
+    const RELATION_TYPE = Record::HAS_ONE;
 
     /**
      * {@inheritdoc}
@@ -34,19 +34,19 @@ class HasOneSchema extends RelationSchema
      * @invisible
      */
     protected $defaultDefinition = [
-        //Let's use parent model primary key as default inner key
-        Model::INNER_KEY         => '{model:primaryKey}',
-        //Outer key will be based on parent model role and inner key name
-        Model::OUTER_KEY         => '{model:role}_{definition:innerKey}',
+        //Let's use parent record primary key as default inner key
+        Record::INNER_KEY         => '{record:primaryKey}',
+        //Outer key will be based on parent record role and inner key name
+        Record::OUTER_KEY         => '{record:role}_{definition:innerKey}',
         //Set constraints (foreign keys) by default
-        Model::CONSTRAINT        => true,
+        Record::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
-        Model::CONSTRAINT_ACTION => 'CASCADE',
+        Record::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in outer table
-        Model::CREATE_INDEXES    => true,
+        Record::CREATE_INDEXES    => true,
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Model::NULLABLE          => true
+        Record::NULLABLE          => true
     ];
 
     /**
@@ -55,16 +55,16 @@ class HasOneSchema extends RelationSchema
     public function inverseRelation()
     {
         //Inverting definition
-        $this->outerModel()->addRelation(
-            $this->definition[Model::INVERSE],
+        $this->outerRecord()->addRelation(
+            $this->definition[Record::INVERSE],
             [
-                Model::BELONGS_TO        => $this->model->getName(),
-                Model::INNER_KEY         => $this->definition[Model::OUTER_KEY],
-                Model::OUTER_KEY         => $this->definition[Model::INNER_KEY],
-                Model::CONSTRAINT        => $this->definition[Model::CONSTRAINT],
-                Model::CONSTRAINT_ACTION => $this->definition[Model::CONSTRAINT_ACTION],
-                Model::CREATE_INDEXES    => $this->definition[Model::CREATE_INDEXES],
-                Model::NULLABLE          => $this->definition[Model::NULLABLE]
+                Record::BELONGS_TO        => $this->record->getName(),
+                Record::INNER_KEY         => $this->definition[Record::OUTER_KEY],
+                Record::OUTER_KEY         => $this->definition[Record::INNER_KEY],
+                Record::CONSTRAINT        => $this->definition[Record::CONSTRAINT],
+                Record::CONSTRAINT_ACTION => $this->definition[Record::CONSTRAINT_ACTION],
+                Record::CREATE_INDEXES    => $this->definition[Record::CREATE_INDEXES],
+                Record::NULLABLE          => $this->definition[Record::NULLABLE]
             ]
         );
     }
@@ -75,7 +75,7 @@ class HasOneSchema extends RelationSchema
     public function buildSchema()
     {
         //Outer (related) table schema
-        $outerTable = $this->outerModel()->tableSchema();
+        $outerTable = $this->outerRecord()->tableSchema();
 
         //Outer key type must much inner key type
         $outerKey = $outerTable->column($this->getOuterKey());
@@ -86,7 +86,7 @@ class HasOneSchema extends RelationSchema
         $outerKey->nullable($outerKey->isNullable() || $this->isNullable());
 
         if ($this->hasMorphKey()) {
-            //Morph key will store outer model role name
+            //Morph key will store outer record role name
             $morphKey = $outerTable->column($this->getMorphKey());
 
             //We have predefined morphed key size
@@ -99,7 +99,7 @@ class HasOneSchema extends RelationSchema
         }
 
         if ($this->isIndexed()) {
-            //We can safely add index, it will not be created if outer model has passive schema
+            //We can safely add index, it will not be created if outer record has passive schema
             $outerKey->index();
         }
 
@@ -109,7 +109,7 @@ class HasOneSchema extends RelationSchema
 
         //We are allowed to add foreign key, it will not be created if outer table has passive schema
         $foreignKey = $outerKey->references(
-            $this->model->getTable(),
+            $this->record->getTable(),
             $this->getInnerKey()
         );
 

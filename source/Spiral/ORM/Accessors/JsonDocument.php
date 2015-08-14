@@ -10,11 +10,11 @@ namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\ODM\Document;
-use Spiral\ORM\ModelAccessorInterface;
+use Spiral\ORM\RecordAccessorInterface;
 
 /**
- * JsonDocument utilizes abilities of ODM Document model and uses it to represent json values stored
- * inside ORM Model field. You can perform full set of Document operations including sub documents,
+ * JsonDocument utilizes abilities of ODM Document record and uses it to represent json values stored
+ * inside ORM Record field. You can perform full set of Document operations including sub documents,
  * compositions (even aggregations!), validations and filtering to simplify work with your
  * denormalized data. If you going to use Postgres document fields can even be used in your queries.
  *
@@ -22,7 +22,7 @@ use Spiral\ORM\ModelAccessorInterface;
  * @see http://www.postgresql.org/docs/9.3/static/datatype-json.html
  * @see http://www.postgresql.org/docs/9.3/static/functions-json.html
  */
-abstract class JsonDocument extends Document implements ModelAccessorInterface
+abstract class JsonDocument extends Document implements RecordAccessorInterface
 {
     /**
      * Let's force solid state... just in case.

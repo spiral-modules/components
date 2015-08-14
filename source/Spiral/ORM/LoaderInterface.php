@@ -46,7 +46,7 @@ interface LoaderInterface
 
     /**
      * Reference key (from parent object) required to speed up data normalization. In most of cases
-     * this is primary key of parent model. Method must return name of field which parent will
+     * this is primary key of parent record. Method must return name of field which parent will
      * pre-aggregate.
      *
      * @return string
@@ -76,7 +76,7 @@ interface LoaderInterface
     public function loadData();
 
     /**
-     * Mount model data into internal data storage under specified container using reference key
+     * Mount record data into internal data storage under specified container using reference key
      * (inner key) and reference criteria (outer key value).
      *
      * Example (default ORM Loaders):
@@ -86,8 +86,8 @@ interface LoaderInterface
      *      ...
      * ]);
      *
-     * In this example "id" argument is inner key of "user" model and it's linked to outer key
-     * "user_id" in "profile" model, which defines reference criteria as 1.
+     * In this example "id" argument is inner key of "user" record and it's linked to outer key
+     * "user_id" in "profile" record, which defines reference criteria as 1.
      *
      * @param string $container
      * @param string $key

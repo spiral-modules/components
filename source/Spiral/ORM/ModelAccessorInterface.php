@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Models\AccessorInterface;
+use Spiral\Records\AccessorInterface;
 
 /**
  * Declares requirement for every ORM field accessor to declare it's driver depended value and
@@ -18,7 +18,7 @@ use Spiral\Models\AccessorInterface;
  *
  * ORM accessors are much more simple by initiation that ODM accessors.
  */
-interface ModelAccessorInterface extends AccessorInterface
+interface RecordAccessorInterface extends AccessorInterface
 {
     /**
      * {@inheritdoc}

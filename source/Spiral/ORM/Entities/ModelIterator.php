@@ -10,15 +10,15 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\Exceptions\IteratorException;
 use Spiral\ORM\Exceptions\ORMException;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 
 /**
- * Provides iteration over set of specified models data using internal instances cache. In addition,
- * allows to decorate set of callbacks with association by their name (@see __call()). Keeps model
+ * Provides iteration over set of specified records data using internal instances cache. In addition,
+ * allows to decorate set of callbacks with association by their name (@see __call()). Keeps record
  * context.
  */
-class ModelIterator implements \Iterator, \Countable, \JsonSerializable
+class RecordIterator implements \Iterator, \Countable, \JsonSerializable
 {
     /**
      * Current iterator position.
@@ -54,9 +54,9 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     protected $data = [];
 
     /**
-     * Constructed model instances. Cache.
+     * Constructed record instances. Cache.
      *
-     * @var Model[]
+     * @var Record[]
      */
     protected $instances = [];
 
@@ -94,16 +94,16 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Get all Models as array.
+     * Get all Records as array.
      *
-     * @return Model[]
+     * @return Record[]
      */
     public function all()
     {
         $result = [];
 
         /**
-         * @var self|Model[] $iterator
+         * @var self|Record[] $iterator
          */
         $iterator = clone $this;
         foreach ($iterator as $nested) {
@@ -119,21 +119,21 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * {@inheritdoc}
      *
-     * @see ORM::model()
-     * @see Model::setContext()
+     * @see ORM::record()
+     * @see Record::setContext()
      * @throws ORMException
      */
     public function current()
     {
         $data = $this->data[$this->position];
         if (isset($this->instances[$this->position])) {
-            //Due model was pre-constructed we must update it's context to force values for relations
+            //Due record was pre-constructed we must update it's context to force values for relations
             //and pivot fields
             return $this->instances[$this->position]->setContext($data);
         }
 
-        //Let's ask ORM to create needed model
-        return $this->instances[$this->position] = $this->orm->model(
+        //Let's ask ORM to create needed record
+        return $this->instances[$this->position] = $this->orm->record(
             $this->class,
             $data,
             $this->cache
@@ -173,31 +173,31 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Check if model or model with specified id presents in iteration.
+     * Check if record or record with specified id presents in iteration.
      *
-     * @param Model|string|int $model
+     * @param Record|string|int $record
      * @return true
      */
-    public function has($model)
+    public function has($record)
     {
         /**
-         * @var self|Model[] $iterator
+         * @var self|Record[] $iterator
          */
         $iterator = clone $this;
         foreach ($iterator as $nested) {
             $found = false;
-            if (is_array($model)) {
-                if (array_intersect_assoc($nested->getFields(), $model) == $model) {
+            if (is_array($record)) {
+                if (array_intersect_assoc($nested->getFields(), $record) == $record) {
                     //Comparing fields intersection
                     $found = true;
                 }
-            } elseif (!$model instanceof Model) {
+            } elseif (!$record instanceof Record) {
 
-                if (!empty($model) && $nested->primaryKey() == $model) {
+                if (!empty($record) && $nested->primaryKey() == $record) {
                     //Comparing using primary keys
                     $found = true;
                 }
-            } elseif ($nested == $model || $nested->getFields() == $model->getFields()) {
+            } elseif ($nested == $record || $nested->getFields() == $record->getFields()) {
                 //Comparing as class
                 $found = true;
             }
@@ -217,18 +217,18 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Array or multiple arguments of models or models id to be check if they are presented in
+     * Array or multiple arguments of records or records id to be check if they are presented in
      * iteration.
      *
-     * @param array|mixed $models
+     * @param array|mixed $records
      * @return bool
      */
-    public function hasEach($models)
+    public function hasEach($records)
     {
-        $models = is_array($models) ? $models : func_get_args();
+        $records = is_array($records) ? $records : func_get_args();
 
-        foreach ($models as $model) {
-            if (!$this->has($model)) {
+        foreach ($records as $record) {
+            if (!$this->has($record)) {
                 return false;
             }
         }
@@ -262,7 +262,7 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * @return Model[]
+     * @return Record[]
      */
     public function __debugInfo()
     {

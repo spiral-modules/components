@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Exceptions;
 
 /**
- * When model schema defines index, column or relation incorrectly.
+ * When record schema defines index, column or relation incorrectly.
  */
 class DefinitionException extends SchemaException
 {

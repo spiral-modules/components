@@ -12,11 +12,11 @@ use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Entities\WhereDecorator;
 use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
 
 /**
- * ManyToMany loader will not only load related data, but will include pivot table data into model
+ * ManyToMany loader will not only load related data, but will include pivot table data into record
  * property "@pivot". Loader support WHERE conditions for both related data and pivot table.
  *
  * It's STRONGLY recommended to load many-to-many data using postload method. However relation still
@@ -25,10 +25,10 @@ use Spiral\ORM\ORM;
 class ManyToManyLoader extends Loader
 {
     /**
-     * Relation type is required to correctly resolve foreign model class based on relation
+     * Relation type is required to correctly resolve foreign record class based on relation
      * definition.
      */
-    const RELATION_TYPE = Model::MANY_TO_MANY;
+    const RELATION_TYPE = Record::MANY_TO_MANY;
 
     /**
      * Default load method (inload or postload).
@@ -43,7 +43,7 @@ class ManyToManyLoader extends Loader
 
     /**
      * We have to redefine default Loader deduplication as many to many dedup data based on pivot
-     * table, not model data itself.
+     * table, not record data itself.
      *
      * @var array
      */
@@ -73,7 +73,7 @@ class ManyToManyLoader extends Loader
         LoaderInterface $parent = null
     ) {
         parent::__construct($orm, $container, $definition, $parent);
-        $this->pivotColumns = $this->definition[Model::PIVOT_COLUMNS];
+        $this->pivotColumns = $this->definition[Record::PIVOT_COLUMNS];
     }
 
     /**
@@ -83,7 +83,7 @@ class ManyToManyLoader extends Loader
      */
     public function getPivotTable()
     {
-        return $this->definition[Model::PIVOT_TABLE];
+        return $this->definition[Record::PIVOT_TABLE];
     }
 
     /**
@@ -103,7 +103,7 @@ class ManyToManyLoader extends Loader
     /**
      * {@inheritdoc}
      *
-     * @param string $parentRole Helps ManyToMany relation to force model role for morphed relations.
+     * @param string $parentRole Helps ManyToMany relation to force record role for morphed relations.
      */
     public function createSelector($parentRole = '')
     {
@@ -112,9 +112,9 @@ class ManyToManyLoader extends Loader
         }
 
         //Pivot table joining (INNER in post selection)
-        $pivotOuterKey = $this->getPivotKey(Model::THOUGHT_OUTER_KEY);
+        $pivotOuterKey = $this->getPivotKey(Record::THOUGHT_OUTER_KEY);
         $selector->innerJoin($this->getPivotTable() . ' AS ' . $this->getPivotAlias(), [
-            $pivotOuterKey => $this->getKey(Model::OUTER_KEY)
+            $pivotOuterKey => $this->getKey(Record::OUTER_KEY)
         ]);
 
         //Pivot table conditions
@@ -139,7 +139,7 @@ class ManyToManyLoader extends Loader
         }
 
         //Adding condition
-        $selector->where($this->getPivotKey(Model::THOUGHT_INNER_KEY), 'IN', $aggregatedKeys);
+        $selector->where($this->getPivotKey(Record::THOUGHT_INNER_KEY), 'IN', $aggregatedKeys);
 
         return $selector;
     }
@@ -153,14 +153,14 @@ class ManyToManyLoader extends Loader
         $selector->join(
             $this->joinType(),
             $this->getPivotTable() . ' AS ' . $this->getPivotAlias(),
-            [$this->getPivotKey(Model::THOUGHT_INNER_KEY) => $this->getParentKey()]
+            [$this->getPivotKey(Record::THOUGHT_INNER_KEY) => $this->getParentKey()]
         );
 
         $this->pivotConditions($selector);
 
-        $pivotOuterKey = $this->getPivotKey(Model::THOUGHT_OUTER_KEY);
+        $pivotOuterKey = $this->getPivotKey(Record::THOUGHT_OUTER_KEY);
         $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
-            $pivotOuterKey => $this->getKey(Model::OUTER_KEY)
+            $pivotOuterKey => $this->getKey(Record::OUTER_KEY)
         ]);
 
         $this->mountConditions($selector);
@@ -216,16 +216,16 @@ class ManyToManyLoader extends Loader
         //We have to route all conditions to ON statement
         $router = new WhereDecorator($selector, 'onWhere', $this->getPivotAlias());
 
-        if (!empty($morphKey = $this->getPivotKey(Model::MORPH_KEY))) {
+        if (!empty($morphKey = $this->getPivotKey(Record::MORPH_KEY))) {
             $router->where(
                 $morphKey,
                 !empty($parentRole) ? $parentRole : $this->parent->schema[ORM::M_ROLE_NAME]
             );
         }
 
-        if (!empty($this->definition[Model::WHERE_PIVOT])) {
+        if (!empty($this->definition[Record::WHERE_PIVOT])) {
             //Relation WHERE conditions
-            $router->where($this->definition[Model::WHERE_PIVOT]);
+            $router->where($this->definition[Record::WHERE_PIVOT]);
         }
 
         //User specified WHERE conditions
@@ -248,9 +248,9 @@ class ManyToManyLoader extends Loader
             $this->getAlias()
         );
 
-        if (!empty($this->definition[Model::WHERE])) {
+        if (!empty($this->definition[Record::WHERE])) {
             //Relation WHERE conditions
-            $router->where($this->definition[Model::WHERE]);
+            $router->where($this->definition[Record::WHERE]);
         }
 
         //User specified WHERE conditions
@@ -277,30 +277,30 @@ class ManyToManyLoader extends Loader
     /**
      * {@inheritdoc}
      *
-     * Parent criteria located in pivot data, not in model itself.
+     * Parent criteria located in pivot data, not in record itself.
      */
     protected function fetchCriteria(array $data)
     {
-        if (!isset($data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_INNER_KEY]])) {
+        if (!isset($data[ORM::PIVOT_DATA][$this->definition[Record::THOUGHT_INNER_KEY]])) {
             return null;
         }
 
-        return $data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_INNER_KEY]];
+        return $data[ORM::PIVOT_DATA][$this->definition[Record::THOUGHT_INNER_KEY]];
     }
 
     /**
      * {@inheritdoc}
      *
      * We have to redefine default Loader deduplication as many to many dedup data based on pivot
-     * table, not model data itself.
+     * table, not record data itself.
      */
     protected function deduplicate(array &$data)
     {
-        $criteria = $data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_INNER_KEY]]
-            . '.' . $data[ORM::PIVOT_DATA][$this->definition[Model::THOUGHT_OUTER_KEY]];
+        $criteria = $data[ORM::PIVOT_DATA][$this->definition[Record::THOUGHT_INNER_KEY]]
+            . '.' . $data[ORM::PIVOT_DATA][$this->definition[Record::THOUGHT_OUTER_KEY]];
 
-        if (!empty($this->definition[Model::MORPH_KEY])) {
-            $criteria .= ':' . $data[ORM::PIVOT_DATA][$this->definition[Model::MORPH_KEY]];
+        if (!empty($this->definition[Record::MORPH_KEY])) {
+            $criteria .= ':' . $data[ORM::PIVOT_DATA][$this->definition[Record::MORPH_KEY]];
         }
 
         if (isset($this->duplicates[$criteria])) {

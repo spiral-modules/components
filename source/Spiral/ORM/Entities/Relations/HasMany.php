@@ -8,23 +8,23 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
-use Spiral\ORM\Model;
+use Spiral\ORM\Record;
 
 /**
  * Represents simple HAS_MANY relation with pre-defined WHERE query for generated selector.
  *
- * You have to pre-populate WHERE conditional field in associated models manually, create() method
+ * You have to pre-populate WHERE conditional field in associated records manually, create() method
  * not filling them.
  */
 class HasMany extends HasOne
 {
     /**
-     * Relation type, required to fetch model class from relation definition.
+     * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Model::HAS_MANY;
+    const RELATION_TYPE = Record::HAS_MANY;
 
     /**
-     * Indication that relation represent multiple models (HAS_MANY relations).
+     * Indication that relation represent multiple records (HAS_MANY relations).
      */
     const MULTIPLE = true;
 
@@ -35,8 +35,8 @@ class HasMany extends HasOne
     {
         $selector = parent::createSelector();
 
-        if (isset($this->definition[Model::WHERE])) {
-            $selector->where($this->definition[Model::WHERE]);
+        if (isset($this->definition[Record::WHERE])) {
+            $selector->where($this->definition[Record::WHERE]);
         }
 
         return $selector;

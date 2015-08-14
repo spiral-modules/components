@@ -51,9 +51,10 @@ class ManyToMany extends Relation
      */
     public function count()
     {
-        return $this->pivotTable()->where(
-            $this->wherePivot($this->parentKey(), null)
-        )->count();
+        return $this->pivotTable()->where($this->wherePivot(
+            $this->parentKey(),
+            null
+        ))->count();
     }
 
     /**
@@ -111,6 +112,7 @@ class ManyToMany extends Relation
 
         $result = [];
         foreach ($selectQuery->run() as $row) {
+            //Let's return outer key value as result
             $result[] = $row[$this->definition[Model::THOUGHT_OUTER_KEY]];
         }
 
@@ -210,8 +212,8 @@ class ManyToMany extends Relation
         return $this->pivotTable()->delete($this->wherePivot(
             $this->parentKey(),
             null,
-            $wherePivot)
-        )->run();
+            $wherePivot
+        ))->run();
     }
 
     /**
@@ -347,7 +349,7 @@ class ManyToMany extends Relation
      */
     protected function parentRole()
     {
-        return !empty($this->parentRole) ? $this->parentRole : $this->parent->getRole();
+        return !empty($this->parentRole) ? $this->parentRole : $this->parent->modelRole();
     }
 
     /**

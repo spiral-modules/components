@@ -101,8 +101,8 @@ class HasOne extends Relation
 
         $morphKey = $this->definition[Model::MORPH_KEY];
 
-        if ($model->getField($morphKey) != $this->parent->getRole()) {
-            $model->setField($morphKey, $this->parent->getRole());
+        if ($model->getField($morphKey) != $this->parent->modelRole()) {
+            $model->setField($morphKey, $this->parent->modelRole());
         }
 
         return $model;
@@ -119,7 +119,7 @@ class HasOne extends Relation
         if (isset($this->definition[Model::MORPH_KEY])) {
             $selector->where(
                 $selector->getPrimaryAlias() . '.' . $this->definition[Model::MORPH_KEY],
-                $this->parent->getRole()
+                $this->parent->modelRole()
             );
         }
 

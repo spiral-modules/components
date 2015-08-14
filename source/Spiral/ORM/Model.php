@@ -375,7 +375,7 @@ class Model extends DataEntity implements ActiveEntityInterface
      *
      * @return string
      */
-    public function getRole()
+    public function modelRole()
     {
         return $this->schema[ORM::M_ROLE_NAME];
     }

@@ -38,7 +38,7 @@ class BelongsToMorphed extends BelongsTo
         /**
          * @var Model $related
          */
-        $this->parent->setField($morphKey, $related->getRole(), false);
+        $this->parent->setField($morphKey, $related->modelRole(), false);
     }
 
     /**

@@ -194,7 +194,7 @@ abstract class ReflectionEntity extends \ReflectionClass
 
         //To let traits apply schema changes
         return $this->cache[$property] = call_user_func(
-            [$this->getName(), 'describeProperty'], $property, $value, $this
+            [$this->getName(), 'describeProperty'], $this, $property, $value
         );
     }
 }

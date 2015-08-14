@@ -485,17 +485,21 @@ abstract class DataEntity extends Component implements
      * Method used while entity static analysis to describe model related property using even dispatcher
      * and associated model traits.
      *
+     * @param ReflectionEntity $schema
      * @param string           $property
      * @param mixed            $value
-     * @param ReflectionEntity $schema
      * @return mixed Returns filtered value.
      * @event describe($property, $value, EntitySchema $schema)
      */
-    public static function describeProperty($property, $value, ReflectionEntity $schema)
+    public static function describeProperty(ReflectionEntity $schema, $property, $value)
     {
         static::initialize(true);
 
-        return static::events()->fire('describe', compact('property', 'value', 'schema'))['value'];
+        //Clarifying property value using traits or other listeners
+        return static::events()->fire(
+            'describe',
+            compact('property', 'value', 'schema')
+        )['value'];
     }
 
     /**
@@ -505,7 +509,7 @@ abstract class DataEntity extends Component implements
      */
     protected static function initialize($analysis = false)
     {
-        if (isset(self::$initiated[$class = static::class]) && empty($options)) {
+        if (isset(self::$initiated[$class = static::class]) && !$analysis) {
             return;
         }
 

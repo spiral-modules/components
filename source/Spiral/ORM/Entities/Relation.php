@@ -74,7 +74,6 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      */
     protected $orm = null;
 
-
     /**
      * @param ORM   $orm
      * @param Model $parent

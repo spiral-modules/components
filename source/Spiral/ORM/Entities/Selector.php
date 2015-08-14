@@ -375,8 +375,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function getIterator(array $callbacks = [])
     {
-        if (!empty($this->columns)) {
-            //QueryResult
+        if (!empty($this->columns) || !empty($this->groupBy)) {
+            //QueryResult for user requests
             return $this->run();
         }
 
@@ -402,7 +402,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             $cacheKey = $this->cacheKey ?: md5(serialize([$statement, $this->getParameters()]));
 
             if ($this->cacheStore->has($cacheKey)) {
-                $this->logger()->debug("Selector result fetched from cache.");
+                $this->logger()->debug("Selector result were fetched from cache.");
 
                 //We are going to store parsed result, not queries
                 return $this->cacheStore->get($cacheKey);
@@ -413,7 +413,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         //parsed data rather that database response
         $result = $this->database->query($statement, $this->getParameters());
 
-        //In many cases (too many inloads, too complex queries) parsing may take significant amount
+        //In many cases (too many inloads, too complex queries) parsing can take significant amount
         //of time, so we better profile it
         $this->benchmark('parseResult', $statement);
 
@@ -426,13 +426,13 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         //To let developer know if his query is not very optimal
         !empty($data) && $this->checkCounts(count($data), $rowsCount);
 
-        //Memory freeing, moved out of benchmark to see memory usage
+        //Memory freeing
         $result->close();
 
         //This must force loader to execute all post loaders (including ODM and etc)
         $this->loader->loadData();
 
-        //Not we can request our primary loader for compiled data
+        //Now we can request our primary loader for compiled data
         $data = $this->loader->getResult();
 
         //Memory free! Attention, it will not reset columns aliases but only make possible to run

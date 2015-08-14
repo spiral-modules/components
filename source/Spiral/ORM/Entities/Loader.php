@@ -62,6 +62,20 @@ abstract class Loader implements LoaderInterface
     const MULTIPLE = false;
 
     /**
+     * Count of Loaders requested data alias.
+     *
+     * @var int
+     */
+    private static $counter = 0;
+
+    /**
+     * Unique loader data alias (only for loaders, not joiners).
+     *
+     * @var string
+     */
+    private $alias = '';
+
+    /**
      * Helper structure used to prevent data duplication when LEFT JOIN multiplies parent records.
      *
      * @invisible
@@ -257,6 +271,17 @@ abstract class Loader implements LoaderInterface
             return $this->options['alias'];
         }
 
+        //We are not really worrying about default loader aliases, joiners more important
+        if ($this->isLoadable()) {
+            if (!empty($this->alias)) {
+                //Alias was already created
+                return $this->alias;
+            }
+
+            //New alias is pretty simple and short
+            return $this->alias = 'd' . decoct(++self::$counter);
+        }
+
         if (empty($this->parent)) {
             $alias = $this->getTable();
         } elseif ($this->parent instanceof RootLoader) {
@@ -265,11 +290,6 @@ abstract class Loader implements LoaderInterface
         } else {
             //Let's use parent alias to continue chain
             $alias = $this->parent->getAlias() . '_' . $this->container;
-        }
-
-        if ($this->options['method'] == self::INLOAD && !empty($this->parent)) {
-            //We have to prefix all INLOADs to prevent collision with joiners
-            $alias .= '_data';
         }
 
         return $alias;

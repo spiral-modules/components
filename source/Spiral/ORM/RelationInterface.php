@@ -9,6 +9,7 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Exceptions\ORMException;
+use Spiral\ORM\Exceptions\RelationException;
 use Spiral\Validation\ValidatesInterface;
 
 /**
@@ -52,6 +53,7 @@ interface RelationInterface extends ValidatesInterface
      *
      * @see Model::__get()
      * @return mixed|object
+     * @throws RelationException
      */
     public function getRelated();
 
@@ -71,6 +73,7 @@ interface RelationInterface extends ValidatesInterface
      *
      * @see Model::__set()
      * @param mixed|object|null $related
+     * @throws RelationException
      * @throws ORMException
      */
     public function associate($related);
@@ -81,6 +84,7 @@ interface RelationInterface extends ValidatesInterface
      * @see Model::save()
      * @param bool $validate
      * @return bool
+     * @throws RelationException
      */
     public function saveAssociation($validate = true);
 
@@ -93,6 +97,7 @@ interface RelationInterface extends ValidatesInterface
      * @see Model::__call()
      * @param array $arguments
      * @return mixed
+     * @throws RelationException
      */
     public function __invoke(array $arguments);
 
@@ -103,6 +108,7 @@ interface RelationInterface extends ValidatesInterface
      * @see Model::setContext()
      * @param array $data   Set relation data in array form.
      * @param bool  $loaded Indication that relation data has been loaded.
+     * @throws RelationException
      */
     public function reset(array $data = [], $loaded = false);
 }

@@ -234,7 +234,7 @@ class ORM extends Singleton
      */
     public function loader($type, $container, array $definition, LoaderInterface $parent = null)
     {
-        if (!isset($this->config['relations'][$type]['schema'])) {
+        if (!isset($this->config['relations'][$type]['loader'])) {
             throw new ORMException("Undefined relation loader '{$type}'.");
         }
 

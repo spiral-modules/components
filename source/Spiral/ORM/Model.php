@@ -700,6 +700,18 @@ class Model extends DataEntity implements ActiveEntityInterface
 
     /**
      * {@inheritdoc}
+     */
+    public function __isset($name)
+    {
+        if (isset($this->schema[ORM::M_RELATIONS][$name])) {
+            return !empty($this->relation($name)->getRelated());
+        }
+
+        return parent::__isset($name);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @throws ModelException
      */

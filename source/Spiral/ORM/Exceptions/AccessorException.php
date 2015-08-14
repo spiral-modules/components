@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Records\Exceptions\AccessorExceptionInterface;
+use Spiral\Models\Exceptions\AccessorExceptionInterface;
 
 /**
  * Generic ORM accessor exception.

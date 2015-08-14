@@ -13,7 +13,7 @@ use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Records\Reflections\ReflectionEntity;
+use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RecordSchemaException;

@@ -15,7 +15,7 @@ use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Entities\Database;
-use Spiral\Records\DataEntity;
+use Spiral\Models\DataEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\ORMException;

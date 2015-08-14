@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Records\Exceptions\EntityException;
+use Spiral\Models\Exceptions\EntityException;
 
 /**
  * Record related exception.

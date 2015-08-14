@@ -10,7 +10,7 @@ namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Records\AccessorInterface;
+use Spiral\Models\AccessorInterface;
 
 /**
  * Declares requirement for every ORM field accessor to declare it's driver depended value and

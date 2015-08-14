@@ -18,12 +18,11 @@ interface ControllerInterface
     /**
      * Execute specific controller action (method).
      *
-     * @param ContainerInterface $container
-     * @param string             $action     Method name.
-     * @param array              $parameters Method parameters.
+     * @param string $action     Method name.
+     * @param array  $parameters Method parameters.
      * @return mixed
      * @throws ControllerException
      * @throws \Exception
      */
-    public function callAction(ContainerInterface $container, $action = '', array $parameters = []);
+    public function callAction($action = '', array $parameters = []);
 }

@@ -12,6 +12,9 @@ use Spiral\ORM\Model;
 
 /**
  * Represents simple HAS_MANY relation with pre-defined WHERE query for generated selector.
+ *
+ * You have to pre-populate WHERE conditional field in associated models manually, create() method
+ * not filling them.
  */
 class HasMany extends HasOne
 {

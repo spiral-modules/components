@@ -15,6 +15,10 @@ use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Model;
 use Spiral\ORM\ORM;
 
+/**
+ * Provides ability to load records related using pivot table, link, unlink and check such records.
+ * Relation support WHERE_PIVOT conditions.
+ */
 class ManyToMany extends Relation
 {
     /**
@@ -124,7 +128,7 @@ class ManyToMany extends Relation
      * argument or associate it with model id.
      *
      * Attention!
-     * This method will not follow WHERE_PIVOT conditions, you WILL have to specify them manually.
+     * This method will not follow WHERE_PIVOT conditions, you have to specify them manually.
      *
      * Examples:
      * $user->tags->link(1);

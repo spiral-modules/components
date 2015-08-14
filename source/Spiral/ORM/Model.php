@@ -542,7 +542,6 @@ class Model extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     *
      * {@inheritdoc}
      *
      * Create or update model data in database.
@@ -551,7 +550,8 @@ class Model extends DataEntity implements ActiveEntityInterface
      * @see   getCriteria()
      * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
      *                             disable validation before saving.
-     * @param bool      $relations Save data associated to constructed model relations.
+     * @param bool      $relations Save data associated to constructed model relations, only first
+     *                             layer of relations will be saved to prevent infinite loop.
      * @return bool
      * @throws ModelException
      * @throws QueryException

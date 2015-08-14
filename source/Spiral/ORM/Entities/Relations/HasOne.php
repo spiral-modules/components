@@ -116,7 +116,6 @@ class HasOne extends Relation
         $selector = parent::createSelector();
 
         //We are going to clarify selector manually (without loaders), that's easy relation
-
         if (isset($this->definition[Model::MORPH_KEY])) {
             $selector->where(
                 $selector->getPrimaryAlias() . '.' . $this->definition[Model::MORPH_KEY],

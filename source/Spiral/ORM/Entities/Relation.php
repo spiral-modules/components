@@ -143,7 +143,8 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
             );
         }
 
-        if (!is_array($allowed = $this->getClass())) {
+        //Simplification for morphed relations
+        if (!is_array($allowed = $this->definition[static::RELATION_TYPE])) {
             $allowed = [$allowed];
         }
 
@@ -158,6 +159,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         //Entity caching
         $this->instance = $related;
         $this->loaded = true;
+        $this->data = [];
     }
 
     /**
@@ -198,7 +200,8 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
             return true;
         }
 
-        if (!$this->mountRelation($instance)->save($validate, true)) {
+        //Saving only first layer
+        if (!$this->mountRelation($instance)->save($validate, false)) {
             return false;
         }
 

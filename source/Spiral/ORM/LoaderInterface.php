@@ -9,7 +9,6 @@
 namespace Spiral\ORM;
 
 use Spiral\ORM\Exceptions\LoaderException;
-use Spiral\ORM\Selector;
 
 /**
  * ORM loaders responsible for loading nested and related data inside parent Selector. Every loader

@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Model;
-use Spiral\ORM\Selector;
 
 /**
  * Responsible for loading data related to parent model in belongs to relation. Loading logic is

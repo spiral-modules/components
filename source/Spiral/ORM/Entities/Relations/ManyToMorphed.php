@@ -277,7 +277,16 @@ class ManyToMorphed implements RelationInterface
     protected function morphed($alias)
     {
         if (isset($this->relations[$alias])) {
+            //Already loaded
             return $this->relations[$alias];
+        }
+
+        if (
+            !isset($this->definition[Model::MORPHED_ALIASES][$alias])
+            && !empty($reversed = array_search($alias, $this->definition[Model::MORPHED_ALIASES]))
+        ) {
+            //Requested by singular form of role name, let's reverse mapping
+            $alias = $reversed;
         }
 
         if (!isset($this->definition[Model::MORPHED_ALIASES][$alias])) {

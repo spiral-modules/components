@@ -318,17 +318,13 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     /**
      * {@inheritdoc}
      *
-     * Count of PRE-LOADED models. Use relation selector to perform query to database.
+     * Use getRelation() method to count pre-loaded data.
      *
      * @return int
      */
     public function count()
     {
-        if (!$this->isLoaded()) {
-            $this->loadData();
-        }
-
-        return count($this->data);
+        return $this->createSelector()->count();
     }
 
     /**

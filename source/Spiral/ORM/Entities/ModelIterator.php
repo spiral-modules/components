@@ -185,7 +185,11 @@ class ModelIterator implements \Iterator, \Countable, \JsonSerializable
          */
         $iterator = clone $this;
         foreach ($iterator as $nested) {
-            if ($nested->primaryKey() == $model || $nested->getFields() == $model->getFields()) {
+            if (
+                $nested->primaryKey() == $model
+                || $nested == $model
+                || $nested->getFields() == $model->getFields()
+            ) {
                 //They all must be iterated already
                 $this->instances = $iterator->instances;
 

@@ -17,6 +17,14 @@ use Spiral\Database\Entities\Database;
 interface MigrationInterface
 {
     /**
+     * Migration can request specific database to be altered. Migrator must supply it, however
+     * migration status will be stored in primary migration database.
+     *
+     * @return null|string
+     */
+    public function requestedDatabase();
+
+    /**
      * Configuring migration. This method will be automatically called after migration created and
      * used to resolve target database.
      *

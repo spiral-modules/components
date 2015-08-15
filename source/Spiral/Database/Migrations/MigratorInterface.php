@@ -8,7 +8,6 @@
  */
 namespace Spiral\Database\Migrations;
 
-use Spiral\Database\Entities\Database;
 use Spiral\Database\Exceptions\MigrationException;
 
 /**
@@ -16,13 +15,6 @@ use Spiral\Database\Exceptions\MigrationException;
  */
 interface MigratorInterface
 {
-    /**
-     * Configuring migrator with specific database to work with.
-     *
-     * @param Database $database
-     */
-    public function setDatabase(Database $database);
-
     /**
      * Check if migrator are set and can be used. Default migrator will check that migrations table
      * exists in associated database.

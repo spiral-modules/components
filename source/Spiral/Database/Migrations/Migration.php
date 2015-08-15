@@ -12,6 +12,7 @@ use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
+use Spiral\Database\Exceptions\SchemaException;
 
 /**
  * Default implementation of MigrationInterface with simplified access to table schemas.
@@ -27,6 +28,14 @@ abstract class Migration extends Component implements MigrationInterface
      * @var Database
      */
     protected $database = null;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function requestedDatabase()
+    {
+        return null;
+    }
 
     /**
      * {@inheritdoc}
@@ -72,6 +81,30 @@ abstract class Migration extends Component implements MigrationInterface
     public function schema($table)
     {
         return $this->table($table)->schema();
+    }
+
+    /**
+     * Create items in table schema or thrown and exception. No altering allowed.
+     *
+     * @param string   $table
+     * @param callable $creator
+     * @throws SchemaException
+     */
+    public function create($table, callable $creator)
+    {
+        $this->schema($table)->create($creator);
+    }
+
+    /**
+     * Alter items in table schema or thrown and exception. No creations allowed.
+     *
+     * @param string   $table
+     * @param callable $creator
+     * @throws SchemaException
+     */
+    public function alter($table, callable $creator)
+    {
+        $this->schema($table)->alter($creator);
     }
 
     /**

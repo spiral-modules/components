@@ -15,7 +15,6 @@ use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseProvider;
-use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\MigrationException;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -50,11 +49,11 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     const TIMESTAMP_FORMAT = 'Ymd_His';
 
     /**
-     * Target migrator database.
+     * DatabaseProvider.
      *
-     * @var Database
+     * @var DatabaseProvider
      */
-    private $database = null;
+    private $databases = null;
 
     /**
      * Used to solve problems when multiple migrations added at one.
@@ -86,26 +85,21 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      * @param ContainerInterface    $container
      * @param TokenizerInterface    $tokenizer
      * @param FilesInterface        $files
+     * @param DatabaseProvider      $databases
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         ContainerInterface $container,
         TokenizerInterface $tokenizer,
-        FilesInterface $files
+        FilesInterface $files,
+        DatabaseProvider $databases
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->container = $container;
         $this->tokenizer = $tokenizer;
         $this->files = $files;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setDatabase(Database $database)
-    {
-        $this->database = $database;
+        $this->databases = $databases;
     }
 
     /**
@@ -164,7 +158,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             $migration->setStatus($this->getStatus($definition));
 
             //Active database
-            $migration->setDatabase($this->database);
+            $migration->setDatabase($this->databases->db($migration->requestedDatabase()));
 
             $migrations[$filename] = $migration;
         }
@@ -254,7 +248,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      */
     protected function migrationsTable()
     {
-        return $this->database->table($this->config['table']);
+        return $this->databases->db($this->config['database'])->table($this->config['table']);
     }
 
     /**

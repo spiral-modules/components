@@ -9,9 +9,11 @@
 namespace Spiral\Database\Migrations;
 
 use Spiral\Core\Component;
+use Spiral\Database\DatabaseProvider;
 use Spiral\Database\DatabaseProviderInterface;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
+use Spiral\Database\Exceptions\MigrationException;
 use Spiral\Database\Exceptions\SchemaException;
 
 /**
@@ -31,9 +33,17 @@ abstract class Migration extends Component implements MigrationInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws MigrationException
      */
-    public function setDatabases(DatabaseProviderInterface $databases)
+    public function setProvider(DatabaseProviderInterface $databases)
     {
+        if (!$databases instanceof DatabaseProvider) {
+            throw new MigrationException(
+                "Spiral Migrations expect to work DatabaseProvider instance."
+            );
+        }
+
         $this->databases = $databases;
     }
 

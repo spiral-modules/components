@@ -21,7 +21,7 @@ interface MigrationInterface
      *
      * @param DatabaseProviderInterface $databases
      */
-    public function setDatabases(DatabaseProviderInterface $databases);
+    public function setProvider(DatabaseProviderInterface $databases);
 
     /**
      * Migration status must be supplied by MigratorInterface and describe migration state.

@@ -131,6 +131,8 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
 
     /**
      * {@inheritdoc}
+     *
+     * @return MigrationInterface[]
      */
     public function getMigrations()
     {
@@ -158,7 +160,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             $migration->setStatus($this->getStatus($definition));
 
             //Database provider
-            $migration->setDatabases($this->databases);
+            $migration->setProvider($this->databases);
 
             $migrations[$filename] = $migration;
         }

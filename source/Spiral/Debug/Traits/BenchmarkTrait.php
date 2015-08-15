@@ -17,6 +17,7 @@ use Spiral\Debug\BenchmarkerInterface;
 trait BenchmarkTrait
 {
     /**
+     * @invisible
      * @var BenchmarkerInterface
      */
     private $benchmarker = null;

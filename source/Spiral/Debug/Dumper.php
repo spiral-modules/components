@@ -106,7 +106,7 @@ class Dumper extends Singleton
     {
         if (php_sapi_name() === 'cli' && $output != self::OUTPUT_LOG) {
             print_r($value);
-            if (is_string($value)) {
+            if (is_scalar($value)) {
                 echo "\n";
             }
 

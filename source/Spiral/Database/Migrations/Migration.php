@@ -9,7 +9,7 @@
 namespace Spiral\Database\Migrations;
 
 use Spiral\Core\Component;
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseProviderInterface;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\SchemaException;
@@ -25,14 +25,14 @@ abstract class Migration extends Component implements MigrationInterface
     private $status = null;
 
     /**
-     * @var DatabaseProvider
+     * @var DatabaseProviderInterface
      */
     protected $databases = null;
 
     /**
      * {@inheritdoc}
      */
-    public function setDatabases(DatabaseProvider $databases)
+    public function setDatabases(DatabaseProviderInterface $databases)
     {
         $this->databases = $databases;
     }
@@ -62,7 +62,7 @@ abstract class Migration extends Component implements MigrationInterface
      */
     public function table($name, $database = null)
     {
-        return $this->databases->db()->table($name);
+        return $this->databases->db($database)->table($name);
     }
 
     /**

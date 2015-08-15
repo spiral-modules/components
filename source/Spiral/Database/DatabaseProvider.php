@@ -20,7 +20,7 @@ use Spiral\Database\Exceptions\DatabaseException;
 /**
  * DatabaseManager responsible for database creation, configuration storage and drivers factory.
  */
-class DatabaseProvider extends Singleton implements InjectorInterface
+class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseProviderInterface
 {
     /**
      * Configuration.
@@ -66,14 +66,12 @@ class DatabaseProvider extends Singleton implements InjectorInterface
     }
 
     /**
-     * Create specified or select default instance of Database with associated Driver instance.
+     * {@inheritdoc}
+     *
      * Use third argument to link multiple databases to one driver.
      *
-     * @param string $database
-     * @param array  $config Custom db configuration.
      * @param Driver $driver Custom driver.
      * @return Database
-     * @throws DatabaseException
      */
     public function db($database = null, array $config = [], Driver $driver = null)
     {

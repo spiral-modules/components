@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Migrations;
 
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseProviderInterface;
 
 /**
  * Migration can be executed and rolled back at any moment, implementation is specific to spiral
@@ -19,9 +19,9 @@ interface MigrationInterface
     /**
      * Provide instance of database provider to migration.
      *
-     * @param DatabaseProvider $databases
+     * @param DatabaseProviderInterface $databases
      */
-    public function setDatabases(DatabaseProvider $databases);
+    public function setDatabases(DatabaseProviderInterface $databases);
 
     /**
      * Migration status must be supplied by MigratorInterface and describe migration state.

@@ -9,6 +9,7 @@
 namespace Spiral\Database\Migrations;
 
 use Spiral\Database\Exceptions\MigrationException;
+use Spiral\Database\Exceptions\MigratorException;
 
 /**
  * Class responsible for migration process, implementation is specific to spiral Database implementation.
@@ -47,7 +48,7 @@ interface MigratorInterface
      * @param string $name  Migration name.
      * @param string $class Class name to represent migration.
      * @return bool
-     * @throws MigrationException
+     * @throws MigratorException
      */
     public function registerMigration($name, $class);
 

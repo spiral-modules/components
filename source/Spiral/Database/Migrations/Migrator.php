@@ -16,7 +16,7 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Entities\Table;
-use Spiral\Database\Exceptions\MigrationException;
+use Spiral\Database\Exceptions\MigratorException;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
@@ -100,6 +100,9 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         $this->tokenizer = $tokenizer;
         $this->files = $files;
         $this->databases = $databases;
+
+        //To generate unique filenames in any scenario
+        $this->chunkID = count($this->files->getFiles($this->config['directory']));
     }
 
     /**
@@ -142,7 +145,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             if (!class_exists($definition['class'], false)) {
                 //Can happen sometimes
                 require_once($filename);
-            } else {
+            } elseif (isset($migrations[$filename])) {
                 $this->logger()->warning(
                     "Migration '{class}' already presented in loaded classes.",
                     $definition
@@ -174,7 +177,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     public function registerMigration($name, $class)
     {
         if (!class_exists($class)) {
-            throw new MigrationException(
+            throw new MigratorException(
                 "Unable to register migration, representing class does not exists."
             );
         }
@@ -189,7 +192,9 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         //Copying
         $this->files->write(
             $filename = $this->createFilename($name),
-            $this->files->read((new \ReflectionClass($class))->getFileName())
+            $this->files->read((new \ReflectionClass($class))->getFileName()),
+            FilesInterface::READONLY,
+            true
         );
 
         return basename($filename);
@@ -233,7 +238,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
 
                 //Flushing DB record
                 $this->migrationsTable()->delete([
-                    'name' => $migration->getStatus()->getName()
+                    'migration' => $migration->getStatus()->getName()
                 ])->run();
 
                 return $migration;
@@ -263,13 +268,15 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         $filenames = [];
 
         foreach ($this->files->getFiles($this->config['directory'], 'php') as $filename) {
-            $reflection = new ReflectionFile($filename, $this->tokenizer);
+            $reflection = new ReflectionFile($this->tokenizer, $filename);
 
-            $definition = explode('_', $filename);
+            $definition = explode('_', basename($filename));
             $filenames[$filename] = [
                 'class'   => $reflection->getClasses()[0],
-                'created' => \DateTime::createFromFormat(self::TIMESTAMP_FORMAT, $definition[0]),
-                'name'    => str_replace('.php', '', join('_', array_slice($definition, 2)))
+                'created' => \DateTime::createFromFormat(
+                    self::TIMESTAMP_FORMAT, $definition[0] . '_' . $definition[1]
+                ),
+                'name'    => str_replace('.php', '', join('_', array_slice($definition, 3)))
             ];
         }
 

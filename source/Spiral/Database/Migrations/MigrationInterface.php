@@ -8,7 +8,7 @@
  */
 namespace Spiral\Database\Migrations;
 
-use Spiral\Database\Entities\Database;
+use Spiral\Database\DatabaseProvider;
 
 /**
  * Migration can be executed and rolled back at any moment, implementation is specific to spiral
@@ -17,20 +17,11 @@ use Spiral\Database\Entities\Database;
 interface MigrationInterface
 {
     /**
-     * Migration can request specific database to be altered. Migrator must supply it, however
-     * migration status will be stored in primary migration database.
+     * Provide instance of database provider to migration.
      *
-     * @return null|string
+     * @param DatabaseProvider $databases
      */
-    public function requestedDatabase();
-
-    /**
-     * Configuring migration. This method will be automatically called after migration created and
-     * used to resolve target database.
-     *
-     * @param Database $database
-     */
-    public function setDatabase(Database $database);
+    public function setDatabases(DatabaseProvider $databases);
 
     /**
      * Migration status must be supplied by MigratorInterface and describe migration state.

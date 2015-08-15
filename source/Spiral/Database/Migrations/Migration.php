@@ -9,7 +9,7 @@
 namespace Spiral\Database\Migrations;
 
 use Spiral\Core\Component;
-use Spiral\Database\Entities\Database;
+use Spiral\Database\DatabaseProvider;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\SchemaException;
@@ -25,24 +25,16 @@ abstract class Migration extends Component implements MigrationInterface
     private $status = null;
 
     /**
-     * @var Database
+     * @var DatabaseProvider
      */
-    protected $database = null;
+    protected $databases = null;
 
     /**
      * {@inheritdoc}
      */
-    public function requestedDatabase()
+    public function setDatabases(DatabaseProvider $databases)
     {
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setDatabase(Database $database)
-    {
-        $this->database = $database;
+        $this->databases = $databases;
     }
 
     /**
@@ -64,23 +56,25 @@ abstract class Migration extends Component implements MigrationInterface
     /**
      * Get Table abstraction from associated database.
      *
-     * @param string $name Table name without prefix.
+     * @param string      $name     Table name without prefix.
+     * @param string|null $database Database to used, keep unfilled for default database.
      * @return Table
      */
-    public function table($name)
+    public function table($name, $database = null)
     {
-        return $this->database->table($name);
+        return $this->databases->db()->table($name);
     }
 
     /**
      * Get instance of TableSchema associated with specific table name and migration database.
      *
-     * @param string $table Table name without prefix.
+     * @param string      $table    Table name without prefix.
+     * @param string|null $database Database to used, keep unfilled for default database.
      * @return AbstractTable
      */
-    public function schema($table)
+    public function schema($table, $database = null)
     {
-        return $this->table($table)->schema();
+        return $this->table($table, $database)->schema();
     }
 
     /**

@@ -16,8 +16,8 @@ use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ORM\Entities\Selector;
-use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\ORMException;
+use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
 
 /**
@@ -127,6 +127,13 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @var bool
      */
     private $loaded = false;
+
+    /**
+     * Schema provided by ORM component.
+     *
+     * @var array
+     */
+    private $ormSchema = [];
 
     /**
      * SolidState will force record data to be saved as one big update set without any generating
@@ -266,17 +273,17 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @param array      $data
      * @param bool|false $loaded
      * @param ORM|null   $orm
-     * @param array      $schema
+     * @param array      $ormSchema
      */
     public function __construct(
         array $data = [],
         $loaded = false,
         ORM $orm = null,
-        array $schema = []
+        array $ormSchema = []
     ) {
         $this->loaded = $loaded;
         $this->orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
-        $this->schema = !empty($schema) ? $schema : $this->orm->getSchema(static::class);
+        $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
 
         static::initialize();
 
@@ -285,14 +292,14 @@ class Record extends DataEntity implements ActiveEntityInterface
             unset($data[ORM::PIVOT_DATA]);
         }
 
-        foreach (array_intersect_key($data, $this->schema[ORM::M_RELATIONS]) as $name => $relation)
+        foreach (array_intersect_key($data, $this->ormSchema[ORM::M_RELATIONS]) as $name => $relation)
         {
             $this->relations[$name] = $relation;
             unset($data[$name]);
         }
 
         //Merging with default values
-        $this->fields = $data + $this->schema[ORM::M_COLUMNS];
+        $this->fields = $data + $this->ormSchema[ORM::M_COLUMNS];
 
         if (!$this->isLoaded()) {
             //Non loaded records should be in solid state by default and require initial validation
@@ -313,7 +320,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         //Mounting context pivot data
         $this->pivotData = isset($context[ORM::PIVOT_DATA]) ? $context[ORM::PIVOT_DATA] : [];
 
-        $relations = array_intersect_key($context, $this->schema[ORM::M_RELATIONS]);
+        $relations = array_intersect_key($context, $this->ormSchema[ORM::M_RELATIONS]);
         foreach ($relations as $name => $relation) {
             if (!isset($this->relations[$name]) || is_array($this->relations[$name])) {
                 //Does not exists and never requested before
@@ -348,10 +355,10 @@ class Record extends DataEntity implements ActiveEntityInterface
         $this->solidState = $solidState;
 
         if ($forceUpdate) {
-            if ($this->schema[ORM::M_PRIMARY_KEY]) {
+            if ($this->ormSchema[ORM::M_PRIMARY_KEY]) {
                 $this->updates = $this->getCriteria();
             } else {
-                $this->updates = $this->schema[ORM::M_COLUMNS];
+                $this->updates = $this->ormSchema[ORM::M_COLUMNS];
             }
         }
 
@@ -377,7 +384,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function recordRole()
     {
-        return $this->schema[ORM::M_ROLE_NAME];
+        return $this->ormSchema[ORM::M_ROLE_NAME];
     }
 
     /**
@@ -387,8 +394,8 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function primaryKey()
     {
-        return isset($this->fields[$this->schema[ORM::M_PRIMARY_KEY]])
-            ? $this->fields[$this->schema[ORM::M_PRIMARY_KEY]]
+        return isset($this->fields[$this->ormSchema[ORM::M_PRIMARY_KEY]])
+            ? $this->fields[$this->ormSchema[ORM::M_PRIMARY_KEY]]
             : null;
     }
 
@@ -437,7 +444,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         }
 
         $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
-        if ($value === null && in_array($name, $this->schema[ORM::M_NULLABLE])) {
+        if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
             //We must bypass setters and accessors when null value assigned to nullable column
             $this->fields[$name] = null;
         } else {
@@ -463,8 +470,8 @@ class Record extends DataEntity implements ActiveEntityInterface
         }
 
         $value = $this->fields[$name];
-        if ($value === null && in_array($name, $this->schema[ORM::M_NULLABLE])) {
-            if (!isset($this->schema[ORM::M_MUTATORS]['accessor'][$name])) {
+        if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
+            if (!isset($this->ormSchema[ORM::M_MUTATORS]['accessor'][$name])) {
                 //We can skip setters for null values, but not accessors
                 return $value;
             }
@@ -499,13 +506,13 @@ class Record extends DataEntity implements ActiveEntityInterface
         }
 
         //Constructing relation
-        if (!isset($this->schema[ORM::M_RELATIONS][$name])) {
+        if (!isset($this->ormSchema[ORM::M_RELATIONS][$name])) {
             throw new RecordException(
                 "Undefined relation {$name} in record " . static::class . "."
             );
         }
 
-        $relation = $this->schema[ORM::M_RELATIONS][$name];
+        $relation = $this->ormSchema[ORM::M_RELATIONS][$name];
 
         return $this->relations[$name] = $this->orm->relation(
             $relation[ORM::R_TYPE],
@@ -522,7 +529,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     public function publicFields()
     {
         $fields = $this->getFields();
-        foreach ($this->schema[ORM::M_HIDDEN] as $secured) {
+        foreach ($this->ormSchema[ORM::M_HIDDEN] as $secured) {
             unset($fields[$secured]);
         }
 
@@ -536,7 +543,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     {
         //Initiate validation using rules declared in schema
         return parent::validator(
-            !empty($rules) ? $rules : $this->schema[ORM::M_VALIDATES],
+            !empty($rules) ? $rules : $this->ormSchema[ORM::M_VALIDATES],
             $container
         );
     }
@@ -590,7 +597,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         }
 
         //Primary key field name
-        $primaryKey = $this->schema[ORM::M_PRIMARY_KEY];
+        $primaryKey = $this->ormSchema[ORM::M_PRIMARY_KEY];
         if (!$this->isLoaded()) {
             $this->fire('saving');
 
@@ -650,7 +657,7 @@ class Record extends DataEntity implements ActiveEntityInterface
             $this->sourceTable()->delete($this->getCriteria())->run();
         }
 
-        $this->fields = $this->schema[ORM::M_COLUMNS];
+        $this->fields = $this->ormSchema[ORM::M_COLUMNS];
         $this->loaded = self::DELETED;
 
         $this->fire('deleted');
@@ -703,7 +710,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function __isset($name)
     {
-        if (isset($this->schema[ORM::M_RELATIONS][$name])) {
+        if (isset($this->ormSchema[ORM::M_RELATIONS][$name])) {
             return !empty($this->relation($name)->getRelated());
         }
 
@@ -727,7 +734,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function __get($offset)
     {
-        if (isset($this->schema[ORM::M_RELATIONS][$offset])) {
+        if (isset($this->ormSchema[ORM::M_RELATIONS][$offset])) {
             //Bypassing call to relation
             return $this->relation($offset)->getRelated();
         }
@@ -742,7 +749,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function __set($offset, $value)
     {
-        if (isset($this->schema[ORM::M_RELATIONS][$offset])) {
+        if (isset($this->ormSchema[ORM::M_RELATIONS][$offset])) {
             //Bypassing call to relation
             $this->relation($offset)->associate($value);
 
@@ -763,7 +770,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function __call($method, array $arguments)
     {
-        if (isset($this->schema[ORM::M_RELATIONS][$method])) {
+        if (isset($this->ormSchema[ORM::M_RELATIONS][$method])) {
             $relation = $this->relation($method);
 
             return empty($arguments) ? $relation : call_user_func_array($relation, $arguments);
@@ -778,7 +785,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     public function __debugInfo()
     {
         $info = [
-            'table'     => $this->schema[ORM::M_DB] . '/' . $this->schema[ORM::M_TABLE],
+            'table'     => $this->ormSchema[ORM::M_DB] . '/' . $this->ormSchema[ORM::M_TABLE],
             'pivotData' => $this->pivotData,
             'fields'    => $this->getFields(),
             'errors'    => $this->getErrors()
@@ -824,7 +831,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         }
 
         //Primary key should not present in update set
-        unset($updates[$this->schema[ORM::M_PRIMARY_KEY]]);
+        unset($updates[$this->ormSchema[ORM::M_PRIMARY_KEY]]);
 
         return $updates;
     }
@@ -839,9 +846,9 @@ class Record extends DataEntity implements ActiveEntityInterface
     protected function sourceTable()
     {
         return $this->orm->dbalDatabase(
-            $this->schema[ORM::M_DB]
+            $this->ormSchema[ORM::M_DB]
         )->table(
-            $this->schema[ORM::M_TABLE]
+            $this->ormSchema[ORM::M_TABLE]
         );
     }
 
@@ -853,8 +860,8 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     protected function getCriteria()
     {
-        if (!empty($this->schema[ORM::M_PRIMARY_KEY])) {
-            return [$this->schema[ORM::M_PRIMARY_KEY] => $this->primaryKey()];
+        if (!empty($this->ormSchema[ORM::M_PRIMARY_KEY])) {
+            return [$this->ormSchema[ORM::M_PRIMARY_KEY] => $this->primaryKey()];
         }
 
         //We have to serialize record data
@@ -892,15 +899,15 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     protected function isFillable($field)
     {
-        if (!empty($this->schema[ORM::M_FILLABLE])) {
-            return in_array($field, $this->schema[ORM::M_FILLABLE]);
+        if (!empty($this->ormSchema[ORM::M_FILLABLE])) {
+            return in_array($field, $this->ormSchema[ORM::M_FILLABLE]);
         }
 
-        if ($this->schema[ORM::M_SECURED] === '*') {
+        if ($this->ormSchema[ORM::M_SECURED] === '*') {
             return false;
         }
 
-        return !in_array($field, $this->schema[ORM::M_SECURED]);
+        return !in_array($field, $this->ormSchema[ORM::M_SECURED]);
     }
 
     /**
@@ -908,8 +915,8 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     protected function getMutator($field, $mutator)
     {
-        if (isset($this->schema[ORM::M_MUTATORS][$mutator][$field])) {
-            return $this->schema[ORM::M_MUTATORS][$mutator][$field];
+        if (isset($this->ormSchema[ORM::M_MUTATORS][$mutator][$field])) {
+            return $this->ormSchema[ORM::M_MUTATORS][$mutator][$field];
         }
 
         return null;

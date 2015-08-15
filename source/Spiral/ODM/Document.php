@@ -107,6 +107,13 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     const ONE  = 899;
 
     /**
+     * Model schema provided by ODM compoent.
+     *
+     * @var array
+     */
+    private $odmSchema = [];
+
+    /**
      * SolidState will force document to be saved as one big data set without any atomic operations
      * (dirty fields).
      *
@@ -221,21 +228,21 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @param array                 $fields
      * @param CompositableInterface $parent
      * @param ODM                   $odm
-     * @param array                 $schema
+     * @param array                 $odmSchema
      */
-    public function __construct($fields = [], $parent = null, ODM $odm = null, $schema = null)
+    public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
     {
         $this->parent = $parent;
 
         //Only when global container is set
         $this->odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
-        $this->schema = !empty($schema) ? $schema : $this->odm->getSchema(static::class);
+        $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->getSchema(static::class);
 
         static::initialize();
 
         $this->fields = is_array($fields) ? $fields : [];
-        if (!empty($this->schema[ODM::D_DEFAULTS])) {
-            $this->fields = array_replace_recursive($this->schema[ODM::D_DEFAULTS], $fields);
+        if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
+            $this->fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
         }
 
         if ((!$this->isLoaded() && !$this->isEmbedded()) || empty($fields)) {
@@ -257,7 +264,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         $this->solidState = $solidState;
 
         if ($forceUpdate) {
-            $this->updates = $this->schema[ODM::D_DEFAULTS];
+            $this->updates = $this->odmSchema[ODM::D_DEFAULTS];
         }
 
         return $this;
@@ -321,7 +328,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         /**
          * @var Document $document
          */
-        $document = new static($this->serializeData(), $parent, $this->odm, $this->schema);
+        $document = new static($this->serializeData(), $parent, $this->odm, $this->odmSchema);
 
         return $document->solidState(true, true)->invalidate(true);
     }
@@ -360,15 +367,15 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     {
         if (!array_key_exists($offset, $this->updates)) {
             //Let document know that field value changed, but without overwriting previous change
-            $this->updates[$offset] = isset($this->schema[ODM::D_DEFAULTS][$offset])
-                ? $this->schema[ODM::D_DEFAULTS][$offset]
+            $this->updates[$offset] = isset($this->odmSchema[ODM::D_DEFAULTS][$offset])
+                ? $this->odmSchema[ODM::D_DEFAULTS][$offset]
                 : null;
         }
 
         $this->fields[$offset] = null;
-        if (isset($this->schema[ODM::D_DEFAULTS][$offset])) {
+        if (isset($this->odmSchema[ODM::D_DEFAULTS][$offset])) {
             //Restoring default value if presented (required for typecasting)
-            $this->fields[$offset] = $this->schema[ODM::D_DEFAULTS][$offset];
+            $this->fields[$offset] = $this->odmSchema[ODM::D_DEFAULTS][$offset];
         }
     }
 
@@ -432,7 +439,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         $result = [];
 
         foreach ($this->fields as $field => $value) {
-            if (in_array($field, $this->schema[ODM::D_HIDDEN])) {
+            if (in_array($field, $this->odmSchema[ODM::D_HIDDEN])) {
                 //We might need to use isset in future, for performance
                 continue;
             }
@@ -474,9 +481,9 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public function validator(array $rules = [], ContainerInterface $container = null)
     {
-        //Initiate validation using rules declared in schema
+        //Initiate validation using rules declared in odmSchema
         return parent::validator(
-            !empty($rules) ? $rules : $this->schema[ODM::D_VALIDATES],
+            !empty($rules) ? $rules : $this->odmSchema[ODM::D_VALIDATES],
             $container
         );
     }
@@ -548,7 +555,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
         $this->fire('deleting');
         $this->isLoaded() && $this->odmCollection($this->odm)->remove(['_id' => $this->primaryKey()]);
-        $this->fields = $this->schema[ODM::D_DEFAULTS];
+        $this->fields = $this->odmSchema[ODM::D_DEFAULTS];
         $this->fire('deleted');
     }
 
@@ -686,11 +693,11 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public function __call($offset, array $arguments)
     {
-        if (!isset($this->schema[ODM::D_AGGREGATIONS][$offset])) {
+        if (!isset($this->odmSchema[ODM::D_AGGREGATIONS][$offset])) {
             return parent::__call($offset, $arguments);
         }
 
-        $aggregation = $this->schema[ODM::D_AGGREGATIONS][$offset];
+        $aggregation = $this->odmSchema[ODM::D_AGGREGATIONS][$offset];
 
         //Query preparations
         $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
@@ -723,7 +730,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         }
 
         return (object)[
-            'collection' => $this->schema[ODM::D_DB] . '/' . $this->collection,
+            'collection' => $this->odmSchema[ODM::D_DB] . '/' . $this->collection,
             'fields'     => $this->getFields(),
             'atomics'    => $this->hasUpdates() ? $this->buildAtomics() : [],
             'errors'     => $this->getErrors()
@@ -747,7 +754,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         }
 
         //Invalidating all compositions
-        foreach ($this->schema[ODM::D_COMPOSITIONS] as $field) {
+        foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
             //Let's force composition construction
             $composition = $this->getField($field);
             if (!$composition instanceof CompositableInterface) {
@@ -773,7 +780,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     {
         $errors = [];
         //Validating all compositions
-        foreach ($this->schema[ODM::D_COMPOSITIONS] as $field) {
+        foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
             $composition = $this->getField($field);
             if (!$composition instanceof CompositableInterface) {
                 //Something weird.
@@ -796,15 +803,15 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     protected function isFillable($field)
     {
-        if (!empty($this->schema[ODM::D_FILLABLE])) {
-            return in_array($field, $this->schema[ODM::D_FILLABLE]);
+        if (!empty($this->odmSchema[ODM::D_FILLABLE])) {
+            return in_array($field, $this->odmSchema[ODM::D_FILLABLE]);
         }
 
-        if ($this->schema[ODM::D_SECURED] === '*') {
+        if ($this->odmSchema[ODM::D_SECURED] === '*') {
             return false;
         }
 
-        return !in_array($field, $this->schema[ODM::D_SECURED]);
+        return !in_array($field, $this->odmSchema[ODM::D_SECURED]);
     }
 
     /**
@@ -812,8 +819,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     protected function getMutator($field, $mutator)
     {
-        if (isset($this->schema[ODM::D_MUTATORS][$mutator][$field])) {
-            return $this->schema[ODM::D_MUTATORS][$mutator][$field];
+        if (isset($this->odmSchema[ODM::D_MUTATORS][$mutator][$field])) {
+            return $this->odmSchema[ODM::D_MUTATORS][$mutator][$field];
         }
 
         return null;
@@ -964,6 +971,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         //Ensure traits
         static::initialize();
 
-        return self::events()->fire('collection',$odm->odmCollection(static::class));
+        return self::events()->fire('collection', $odm->odmCollection(static::class));
     }
 }

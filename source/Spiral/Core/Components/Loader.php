@@ -139,7 +139,7 @@ class Loader extends Singleton
         if (isset($this->loadmap[$class])) {
             try {
                 //We already know route to class declaration
-                include_once($this->classes[$class] = $this->loadmap[$class]);
+                require_once($this->classes[$class] = $this->loadmap[$class]);
             } catch (\ErrorException $exception) {
                 //File was replaced or removed
                 unset($this->loadmap[$class]);

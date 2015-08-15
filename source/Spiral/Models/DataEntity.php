@@ -306,7 +306,7 @@ abstract class DataEntity extends Component implements
         }
 
         foreach ($this->fire('setFields', $fields) as $name => $field) {
-            $this->isFillable($field) && $this->setField($name, $field, true);
+            $this->isFillable($name) && $this->setField($name, $field, true);
         }
 
         return $this;

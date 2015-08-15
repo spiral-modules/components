@@ -8,22 +8,10 @@
  */
 namespace Spiral\Core\Container;
 
-use Spiral\Core\ContainerInterface;
-use Spiral\Core\Exceptions\MissingContainerException;
-
 /**
  * Class treated as singleton MAY be saved as reference in IoC bindings - this is spiral Container
  * specific class. Must declare SINGLETON constant.
  */
 interface SingletonInterface
 {
-    /**
-     * Singletons will work as desired only under Spiral Container which can understand SINGLETON
-     * constant. You can consider this functionality as "helper".
-     *
-     * @param ContainerInterface $container
-     * @return static
-     * @throws MissingContainerException
-     */
-    public static function instance(ContainerInterface $container = null);
 }

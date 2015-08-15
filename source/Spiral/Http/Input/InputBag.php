@@ -8,6 +8,7 @@
  */
 namespace Spiral\Http\Input;
 
+use Spiral\Http\Exceptions\DotNotFoundException;
 use Spiral\Http\Exceptions\InputException;
 
 /**
@@ -53,16 +54,24 @@ class InputBag implements \Countable, \IteratorAggregate, \ArrayAccess
     }
 
     /**
+     * Check if field presented (can be empty) by it's name. Dot notation allowed.
+     *
      * @param string $name
      * @return bool
      */
     public function has($name)
     {
-        return array_key_exists($name, $this->data);
+        try {
+            $this->dotGet($name);
+        } catch (DotNotFoundException $exception) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Get property or return default value.
+     * Get property or return default value. Dot notation allowed.
      *
      * @param string $name
      * @param mixed  $default
@@ -70,15 +79,16 @@ class InputBag implements \Countable, \IteratorAggregate, \ArrayAccess
      */
     public function get($name, $default = null)
     {
-        if (!$this->has($name)) {
+        try {
+            return $this->dotGet($name);
+        } catch (DotNotFoundException $exception) {
             return $default;
         }
-
-        return $this->data[$name];
     }
 
     /**
      * Fetch only specified keys from property values. Missed values can be filled with defined filler.
+     * Only one variable layer can be fetched (no dot notation).
      *
      * @param array $keys
      * @param bool  $fill Fill missing key with filler value.
@@ -138,5 +148,26 @@ class InputBag implements \Countable, \IteratorAggregate, \ArrayAccess
     public function __debugInfo()
     {
         return $this->all();
+    }
+
+    /**
+     * Get element using dot notation.
+     *
+     * @param string $name
+     * @return mixed|null
+     */
+    private function dotGet($name)
+    {
+        $data = $this->data;
+
+        $path = explode('.', $name);
+        foreach ($path as $step) {
+            if (!is_array($data) || !array_key_exists($step, $data)) {
+                throw new DotNotFoundException("Unable to find requested element '{$name}'.");
+            }
+            $data = &$data[$step];
+        }
+
+        return $data;
     }
 }

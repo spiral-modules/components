@@ -8,14 +8,14 @@
  */
 namespace Spiral\Debug\Logger\Handlers;
 
-use Spiral\Core\Container\SaturableInterlace;
+use Spiral\Core\Container\SaturableInterface;
 use Spiral\Debug\Logger\HandlerInterface;
 use Spiral\Files\FilesInterface;
 
 /**
  * Write log message to specified file and rotates this file with prefix when max size exceed.
  */
-class FileHandler implements HandlerInterface, SaturableInterlace
+class FileHandler implements HandlerInterface, SaturableInterface
 {
     /**
      * @var array
@@ -45,7 +45,7 @@ class FileHandler implements HandlerInterface, SaturableInterlace
     /**
      * @param FilesInterface $files
      */
-    public function saturate(FilesInterface $files)
+    public function init(FilesInterface $files)
     {
         $this->files = $files;
     }

@@ -10,7 +10,7 @@ namespace Spiral\Validation;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Container\SaturableInterlace;
+use Spiral\Core\Container\SaturableInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -43,7 +43,7 @@ use Spiral\Validation\Exceptions\ValidationException;
  * rule syntax:
  * "flag" => ["notEmpty", "boolean"]
  */
-class Validator extends Component implements LoggerAwareInterface, SaturableInterlace
+class Validator extends Component implements LoggerAwareInterface, SaturableInterface
 {
     /**
      * Validator will translate default errors and throw log messages when validation rule fails.
@@ -129,7 +129,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      * @param ContainerInterface $container
      * @param ValidationProvider $configurator
      */
-    public function saturate(ContainerInterface $container, ValidationProvider $configurator)
+    public function init(ContainerInterface $container, ValidationProvider $configurator)
     {
         $this->container = $container;
         $this->options = $configurator->config() + $this->options;

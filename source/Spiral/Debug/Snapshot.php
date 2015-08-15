@@ -10,7 +10,7 @@ namespace Spiral\Debug;
 
 use Exception;
 use Spiral\Core\Component;
-use Spiral\Core\Container\SaturableInterlace;
+use Spiral\Core\Container\SaturableInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewInterface;
@@ -19,7 +19,7 @@ use Spiral\Views\ViewProviderInterface;
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using views.
  */
-class Snapshot extends Component implements SnapshotInterface, SaturableInterlace, ViewInterface
+class Snapshot extends Component implements SnapshotInterface, SaturableInterface, ViewInterface
 {
     /**
      * Message format.
@@ -83,7 +83,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterlac
      * @param FilesInterface        $files
      * @param ViewProviderInterface $views
      */
-    public function saturate(
+    public function init(
         ContainerInterface $container,
         Debugger $debugger,
         FilesInterface $files,

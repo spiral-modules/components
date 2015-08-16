@@ -199,7 +199,8 @@ abstract class DataEntity extends Component implements
             try {
                 return call_user_func($getter, $value);
             } catch (\ErrorException $exception) {
-                return null;
+                //Trying to filter null value, every filter must support it
+                return call_user_func($getter, null);
             }
         }
 

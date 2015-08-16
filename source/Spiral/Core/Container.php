@@ -109,7 +109,7 @@ class Container extends Component implements ContainerInterface
                 );
             }
 
-            if (empty($class = $parameter->getClass())) {
+            if (empty($class)) {
                 if (array_key_exists($name, $parameters)) {
                     //Scalar value supplied by user
                     $arguments[] = $parameters[$name];
@@ -266,8 +266,9 @@ class Container extends Component implements ContainerInterface
         try {
             $reflector = new \ReflectionClass($class);
         } catch (\ReflectionException $exception) {
-            throw new InstanceException($exception->getMessage(), $exception->getCode(),
-                $exception);
+            throw new InstanceException(
+                $exception->getMessage(), $exception->getCode(), $exception
+            );
         }
 
         if (!empty($context) && $injector = $reflector->getConstant('INJECTOR')) {
@@ -283,6 +284,7 @@ class Container extends Component implements ContainerInterface
         }
 
         if (!empty($constructor = $reflector->getConstructor())) {
+            //Using constructor with resolved arguments
             $instance = $reflector->newInstanceArgs(
                 $this->resolveArguments($constructor, $parameters)
             );

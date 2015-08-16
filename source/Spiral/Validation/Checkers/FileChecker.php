@@ -105,7 +105,7 @@ class FileChecker extends Checker
      */
     protected function filename($filename, $onlyUploaded = true)
     {
-        if ($onlyUploaded && !$this->isUploaded($filename)) {
+        if (empty($filename) || ($onlyUploaded && !$this->isUploaded($filename))) {
             return false;
         }
 

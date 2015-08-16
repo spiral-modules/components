@@ -79,7 +79,7 @@ abstract class Checker extends Component
 
         //Looking for message in parent realization
         $reflection = $reflection ?: new \ReflectionClass($this);
-        if ($reflection->getParentClass()) {
+        if ($reflection->getParentClass() && $reflection->getParentClass()->isSubclassOf(self::class)) {
             return $this->getMessage($method, $reflection->getParentClass());
         }
 

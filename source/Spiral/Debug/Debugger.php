@@ -96,11 +96,10 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
         if (is_array($record)) {
             $benchmarkID = $record[0];
         } elseif (!isset($this->benchmarks[$benchmarkID])) {
-            $callerID = is_object($caller) ? spl_object_hash($caller) : $caller;
             $this->benchmarks[$benchmarkID] = [$caller, $record, $context, microtime(true)];
 
             //Payload
-            return [$callerID];
+            return [$benchmarkID];
         }
 
         if (!isset($this->benchmarks[$benchmarkID])) {

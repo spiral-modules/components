@@ -13,6 +13,7 @@ use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Debug\Exceptions\BenchmarkException;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
@@ -86,20 +87,24 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
 
     /**
      * {@inheritdoc}
+     *
+     * @throws BenchmarkException
      */
     public function benchmark($caller, $record, $context = '')
     {
         $benchmarkID = count($this->benchmarks);
         if (is_array($record)) {
             $benchmarkID = $record[0];
-        }
-
-        if (!isset($this->benchmarks[$benchmarkID])) {
+        } elseif (!isset($this->benchmarks[$benchmarkID])) {
             $callerID = is_object($caller) ? spl_object_hash($caller) : $caller;
             $this->benchmarks[$benchmarkID] = [$caller, $record, $context, microtime(true)];
 
             //Payload
             return [$callerID];
+        }
+
+        if (!isset($this->benchmarks[$benchmarkID])) {
+            throw new BenchmarkException("Unpaired benchmark record '{$benchmarkID}'.");
         }
 
         $this->benchmarks[$benchmarkID][4] = microtime(true);

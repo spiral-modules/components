@@ -30,8 +30,8 @@ use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
 /**
- * Basic spiral Http Dispatcher implementation. Used for web based applications and can route requests
- * to controllers or custom endpoints.
+ * Basic spiral Http Dispatcher implementation. Used for web based applications and can route
+ * requests to controllers or custom endpoints.
  */
 class HttpDispatcher extends Singleton implements
     DispatcherInterface,
@@ -225,15 +225,30 @@ class HttpDispatcher extends Singleton implements
             $this->config['keepOutput']
         );
 
+        $response = null;
+
         try {
-            return $pipeline->target($endpoint)->run(
+            $response = $pipeline->target($endpoint)->run(
                 $request->withAttribute('activePath', $activePath)
             );
         } catch (ClientException $exception) {
             //Soft client error
             $this->logError($exception, $request);
 
-            return $this->errorResponse($exception->getCode());
+            $response = $this->errorResponse($exception->getCode());
+        } catch (\Exception $exception) {
+            /**
+             * @var SnapshotInterface $snapshot
+             */
+            $snapshot = $this->container->get(SnapshotInterface::class, compact('exception'));
+
+            //Snapshot must report about itself
+            $snapshot->report();
+
+            //Generate exception based on snapshot data
+            $response = $this->handleSnapshot($snapshot, false, $request);
+        } finally {
+            return $response;
         }
     }
 
@@ -241,6 +256,7 @@ class HttpDispatcher extends Singleton implements
      * Dispatch response to client.
      *
      * @param ResponseInterface $response
+     * @return null Specifically.
      */
     public function dispatch(ResponseInterface $response)
     {
@@ -249,21 +265,32 @@ class HttpDispatcher extends Singleton implements
         }
 
         $this->emitter->emit($response, ob_get_level());
+
+        return null;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @param bool                     $dispatch Snapshot will be automatically dispatched.
+     * @param   ServerRequestInterface $request  Request caused snapshot.
+     * @return ResponseInterface|null Depends of dispatching were requested.
      */
-    public function handleSnapshot(SnapshotInterface $snapshot)
-    {
-        //Usually happens on high level, we can use global request
-        $request = $this->request;
+    public function handleSnapshot(
+        SnapshotInterface $snapshot,
+        $dispatch = true,
+        ServerRequestInterface $request = null
+    ) {
+        if (empty($request)) {
+            //Somewhere outside of dispatcher
+            $request = $this->request();
+        }
 
         if (!$this->config['exposeErrors']) {
             //Http was not allowed to show any error snapshot to client
-            $this->dispatch($this->errorResponse(Response::SERVER_ERROR, $request));
+            $response = $this->errorResponse(Response::SERVER_ERROR, $request);
 
-            return;
+            return $dispatch ? $this->dispatch($response) : $response;
         }
 
         if ($request->getHeaderLine('Accept') == 'application/json') {
@@ -273,21 +300,7 @@ class HttpDispatcher extends Singleton implements
             $response = new HtmlResponse($snapshot->render(), Response::SERVER_ERROR);
         }
 
-        $this->dispatch($response);
-    }
-
-    /**
-     * Get associated views component or fetch it from container.
-     *
-     * @return ViewProviderInterface
-     */
-    protected function views()
-    {
-        if (!empty($this->views)) {
-            return $this->views;
-        }
-
-        return $this->views = $this->container->get(ViewProviderInterface::class);
+        return $dispatch ? $this->dispatch($response) : $response;
     }
 
     /**
@@ -373,11 +386,27 @@ class HttpDispatcher extends Singleton implements
         if (isset($this->config['httpErrors'][$code])) {
             //We can show custom error page
             return new HtmlResponse(
-                $this->views()->render($this->config['httpErrors'][$code], ['http' => $this]),
+                $this->viewProvider()->render($this->config['httpErrors'][$code],
+                    ['http' => $this]),
                 $code
             );
         }
 
         return new EmptyResponse($code);
+    }
+
+
+    /**
+     * Get associated views component or fetch it from container.
+     *
+     * @return ViewProviderInterface
+     */
+    private function viewProvider()
+    {
+        if (!empty($this->views)) {
+            return $this->views;
+        }
+
+        return $this->views = $this->container->get(ViewProviderInterface::class);
     }
 }

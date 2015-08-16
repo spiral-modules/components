@@ -22,6 +22,8 @@ interface DispatcherInterface
     public function start();
 
     /**
+     * Core or application can provide snapshot about error happen outside of dispatcher scope.
+     *
      * @param SnapshotInterface $snapshot
      * @return mixed
      */

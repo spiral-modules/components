@@ -166,13 +166,13 @@ class ODM extends Singleton implements InjectorInterface
             $config = $this->config['databases'][$database];
         }
 
-        $this->benchmark('database', $database);
+        $benchmark = $this->benchmark('database', $database);
         $this->databases[$database] = $this->container->get(MongoDatabase::class, [
             'name'   => $database,
             'config' => $config,
             'odm'    => $this
         ]);
-        $this->benchmark('database', $database);
+        $this->benchmark($benchmark);
 
         return $this->databases[$database];
     }

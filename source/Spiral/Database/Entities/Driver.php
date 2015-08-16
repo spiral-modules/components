@@ -256,9 +256,9 @@ abstract class Driver extends Component implements LoggerAwareInterface
             return $this->pdo;
         }
 
-        $this->benchmark('connect', $this->config['connection']);
+        $benchmark = $this->benchmark('connect', $this->config['connection']);
         $this->pdo = $this->createPDO();
-        $this->benchmark('connect', $this->config['connection']);
+        $this->benchmark($benchmark);
 
         return $this->pdo;
     }
@@ -300,7 +300,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         try {
             if ($this->isProfiling()) {
                 $queryString = QueryCompiler::interpolate($query, $parameters);
-                $this->benchmark($this->source, $queryString);
+                $benchmark = $this->benchmark($this->source, $queryString);
             }
 
             $pdoStatement = $this->getPDO()->prepare($query);
@@ -308,8 +308,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
             //Configuring statement binded parameters
             $pdoStatement->execute($parameters);
 
-            if ($this->isProfiling() && isset($queryString)) {
-                $this->benchmark($this->source, $queryString);
+            if (!empty($benchmark) && !empty($queryString)) {
+                $this->benchmark($benchmark);
                 $this->logger()->debug($queryString, compact('query', 'parameters'));
             }
         } catch (\PDOException $exception) {

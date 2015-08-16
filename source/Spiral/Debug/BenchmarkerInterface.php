@@ -14,11 +14,17 @@ namespace Spiral\Debug;
 interface BenchmarkerInterface
 {
     /**
-     * Benchmarks used to record long or important operations inside spiral components. Method should
-     * return elapsed time when record are be closed (same set of arguments has to be provided).
+     * Benchmarks used to record long or important operations inside spiral components. Method must
+     * return benchmark payload on first call and elapsed time on second. Benchmark payload must be
+     * provided on first method call and be accepted instead on "record" argument on second.
+     *
+     * Example:
+     * $payload = $benchmarker->benchmark($this, 'record');
+     * ...
+     * $elapsed = $benchmarker->benchmark($this, $payload);
      *
      * @param object $caller  Call initiator (used to de-group events).
-     * @param string $record  Benchmark record name.
+     * @param string $record  Benchmark record name or payload.
      * @param string $context Record context (if any).
      * @return bool|float
      */

@@ -134,21 +134,21 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
             if ($defaultHandler != self::NATIVE_HANDLER) {
                 $config = $this->config['handlers'][$this->config['handler']];
 
-                $this->benchmark('handler', $this->config['handler']);
+                $benchmark = $this->benchmark('handler', $this->config['handler']);
                 $handler = $this->handler = $this->container->get($config['class'], [
                     'options'  => $config,
                     'lifetime' => $this->config['lifetime']
                 ]);
-                $this->benchmark('handler', $this->config['handler']);
+                $this->benchmark($benchmark);
             }
         }
 
         !empty($handler) && session_set_save_handler($handler, true);
 
         try {
-            $this->benchmark('start');
+            $benchmark = $this->benchmark('start');
             session_start();
-            $this->benchmark('start');
+            $this->benchmark($benchmark);
 
             $this->id = session_id();
             $this->started = true;
@@ -183,9 +183,9 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
      */
     public function regenerateID($destruct = false)
     {
-        $this->benchmark('regenerateID');
+        $benchmark = $this->benchmark('regenerateID');
         session_regenerate_id($destruct);
-        $this->benchmark('regenerateID');
+        $this->benchmark($benchmark);
 
         $this->id = session_id();
     }
@@ -195,9 +195,9 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
      */
     public function commit()
     {
-        $this->benchmark('commit');
+        $benchmark = $this->benchmark('commit');
         $this->started && session_write_close();
-        $this->benchmark('commit');
+        $this->benchmark($benchmark);
 
         $this->started = false;
     }
@@ -211,9 +211,9 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
             return;
         }
 
-        $this->benchmark('destroy');
+        $benchmark = $this->benchmark('destroy');
         $this->started && session_destroy();
-        $this->benchmark('destroy');
+        $this->benchmark($benchmark);
 
         $this->id = '';
         $this->destroyed = true;

@@ -197,9 +197,12 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             "Allocate filename of '{$this->buildAddress($name)}' at '{$this->getServerID()}' server."
         );
 
-        $this->benchmark($this->getServerID(), "filename::{$this->buildAddress($name)}");
+        $benchmark = $this->benchmark(
+            $this->getServerID(), "filename::{$this->buildAddress($name)}"
+        );
+
         $filename = $this->server()->allocateFilename($this, $name);
-        $this->benchmark($this->getServerID(), "filename::{$this->buildAddress($name)}");
+        $this->benchmark($benchmark);
 
         return $filename;
     }
@@ -213,9 +216,11 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             "Get stream for '{$this->buildAddress($name)}' at '{$this->server}' server."
         );
 
-        $this->benchmark($this->getServerID(), "stream::{$this->buildAddress($name)}");
+        $benchmark = $this->benchmark(
+            $this->getServerID(), "stream::{$this->buildAddress($name)}"
+        );
         $stream = $this->server()->allocateStream($this, $name);
-        $this->benchmark($this->getServerID(), "stream::{$this->buildAddress($name)}");
+        $this->benchmark($benchmark);
 
         return $stream;
     }
@@ -229,9 +234,11 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             "Delete '{$this->buildAddress($name)}' at '{$this->server}' server."
         );
 
-        $this->benchmark($this->getServerID(), "delete::{$this->buildAddress($name)}");
+        $benchmark = $this->benchmark(
+            $this->getServerID(), "delete::{$this->buildAddress($name)}"
+        );
         $this->server()->delete($this, $name);
-        $this->benchmark($this->getServerID(), "delete::{$this->buildAddress($name)}");
+        $this->benchmark($benchmark);
     }
 
     /**
@@ -248,9 +255,11 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
             . "at '{$this->server}' server."
         );
 
-        $this->benchmark($this->getServerID(), "rename::{$this->buildAddress($oldname)}");
+        $benchmark = $this->benchmark(
+            $this->getServerID(), "rename::{$this->buildAddress($oldname)}"
+        );
         $this->server()->rename($this, $oldname, $newname);
-        $this->benchmark($this->getServerID(), "rename::{$this->buildAddress($oldname)}");
+        $this->benchmark($benchmark);
 
         return $this->buildAddress($newname);
     }
@@ -271,9 +280,11 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
                 . "to '{$destination->buildAddress($name)}' at '{$this->server}' server."
             );
 
-            $this->benchmark($this->getServerID(), "copy::{$this->buildAddress($name)}");
+            $benchmark = $this->benchmark(
+                $this->getServerID(), "copy::{$this->buildAddress($name)}"
+            );
             $this->server()->copy($this, $destination, $name);
-            $this->benchmark($this->getServerID(), "copy::{$this->buildAddress($name)}");
+            $this->benchmark($benchmark);
         } else {
             $this->logger()->info(
                 "External copy of '{$this->getServerID()}'.'{$this->buildAddress($name)}' "
@@ -302,9 +313,11 @@ class StorageBucket extends Component implements BucketInterface, LoggerAwareInt
                 . "to '{$destination->buildAddress($name)}' at '{$this->getServerID()}' server."
             );
 
-            $this->benchmark($this->getServerID(), "replace::{$this->buildAddress($name)}");
+            $benchmark = $this->benchmark(
+                $this->getServerID(), "replace::{$this->buildAddress($name)}"
+            );
             $this->server()->replace($this, $destination, $name);
-            $this->benchmark($this->getServerID(), "replace::{$this->buildAddress($name)}");
+            $this->benchmark($benchmark);
         } else {
             $this->logger()->info(
                 "External move '{$this->getServerID()}'.'{$this->buildAddress($name)}'"

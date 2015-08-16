@@ -415,13 +415,13 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         //In many cases (too many inloads, too complex queries) parsing can take significant amount
         //of time, so we better profile it
-        $this->benchmark('parseResult', $statement);
+        $benchmark= $this->benchmark('parseResult', $statement);
 
         //Here we are feeding selected data to our primary loaded to parse it and and create
         //data tree for our records
         $data = $this->loader->parseResult($result, $rowsCount);
 
-        $this->benchmark('parseResult', $statement);
+        $this->benchmark($benchmark);
 
         //To let developer know if his query is not very optimal
         !empty($data) && $this->checkCounts(count($data), $rowsCount);

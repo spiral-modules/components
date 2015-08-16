@@ -754,7 +754,7 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Alter schema entities into table, method will strictly forbid adding new columns. Column,
+     * Alter schema entities into table, method will strictly forbid for adding new columns. Column,
      * index and foreign key altering must be performed in provided function using table copy.
      *
      * Examples:

@@ -784,7 +784,7 @@ abstract class AbstractTable extends Component implements TableInterface
         foreach ($table->alteredColumns() as $column => $columnSchema) {
             if (!$this->hasColumn($column)) {
                 throw new SchemaException(
-                    "Column '{$column}' does not exists in '{$this->getName()}'."
+                    "Unable to alter, column '{$column}' does not exists in '{$this->getName()}'."
                 );
             }
 
@@ -798,7 +798,7 @@ abstract class AbstractTable extends Component implements TableInterface
         foreach ($table->alteredIndexes() as $index => $indexSchema) {
             if (!$this->hasIndex($indexSchema->getColumns())) {
                 throw new SchemaException(
-                    "Index '{$index}' does not exists in '{$this->getName()}'."
+                    "Unable to alter, index '{$index}' does not exists in '{$this->getName()}'."
                 );
             }
 
@@ -814,7 +814,7 @@ abstract class AbstractTable extends Component implements TableInterface
         foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
             if (!$this->hasForeign($foreignSchema->getColumns())) {
                 throw new SchemaException(
-                    "Foreign key '{$reference}' does not exists in '{$this->getName()}'."
+                    "Unable to alter, foreign key '{$reference}' does not exists in '{$this->getName()}'."
                 );
             }
 

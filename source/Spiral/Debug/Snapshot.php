@@ -17,7 +17,8 @@ use Spiral\Views\ViewInterface;
 use Spiral\Views\ViewProviderInterface;
 
 /**
- * Spiral implementation of SnapshotInterface with ability to render exception explanation using views.
+ * Spiral implementation of SnapshotInterface with ability to render exception explanation using
+ * views.
  */
 class Snapshot extends Component implements SnapshotInterface, SaturableInterface, ViewInterface
 {
@@ -226,10 +227,9 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterfac
         }
 
         return $this->renderCache = $this->views->render($this->config['view'], [
-            'dumpArguments' => $this->config['dumps'],
-            'snapshot'      => $this,
-            'container'     => $this->container,
-            'debugger'      => $this->debugger
+            'snapshot'  => $this,
+            'container' => $this->container,
+            'debugger'  => $this->debugger
         ]);
     }
 

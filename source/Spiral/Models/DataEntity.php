@@ -174,6 +174,8 @@ abstract class DataEntity extends Component implements
             } catch (\ErrorException $exception) {
                 $this->fields[$name] = call_user_func($setter, null);
             }
+        } else {
+            $this->fields[$name] = $value;
         }
     }
 
@@ -185,7 +187,7 @@ abstract class DataEntity extends Component implements
      */
     public function getField($name, $default = null, $filter = true)
     {
-        $value = isset($this->fields[$name]) ? $this->fields[$name] : $default;
+        $value = $this->hasField($name) ? $this->fields[$name] : $default;
 
         if ($value instanceof AccessorInterface) {
             return $value;
@@ -325,7 +327,7 @@ abstract class DataEntity extends Component implements
     {
         $result = [];
         foreach ($this->fields as $name => $field) {
-            $result[$name] = $this->getField($name, $filter);
+            $result[$name] = $this->getField($name, null, $filter);
         }
 
         return $result;

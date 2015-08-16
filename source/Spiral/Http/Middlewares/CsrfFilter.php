@@ -46,6 +46,11 @@ class CsrfFilter implements MiddlewareInterface
     const PARAMETER = 'csrf-token';
 
     /**
+     * Request attribute value.
+     */
+    const ATTRIBUTE = 'csrfToken';
+
+    /**
      * {@inheritdoc}
      */
     public function __invoke(ServerRequestInterface $request, \Closure $next = null)
@@ -73,7 +78,7 @@ class CsrfFilter implements MiddlewareInterface
             }
         }
 
-        $response = $next($request->withAttribute('csrfToken', $token));
+        $response = $next($request->withAttribute(static::ATTRIBUTE, $token));
         if ($setCookie && $response instanceof ResponseInterface) {
             //Will work even with non spiral responses
             $response = $response->withAddedHeader(

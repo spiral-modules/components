@@ -17,7 +17,7 @@ use Spiral\Debug\SnapshotInterface;
 interface DispatcherInterface
 {
     /**
-     * Start dispatcher.
+     * Start execution from beginning.
      */
     public function start();
 

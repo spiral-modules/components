@@ -32,11 +32,11 @@ abstract class Migration extends Component implements MigrationInterface
     protected $databases = null;
 
     /**
-     * {@inheritdoc}
+     * Provide instance of database provider to migration.
      *
-     * @throws MigrationException
+     * @param DatabaseProvider $databases
      */
-    public function setProvider(DatabaseProviderInterface $databases)
+    public function setProvider(DatabaseProvider $databases)
     {
         if (!$databases instanceof DatabaseProvider) {
             throw new MigrationException(

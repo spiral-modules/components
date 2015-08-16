@@ -163,7 +163,9 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             $migration->setStatus($this->getStatus($definition));
 
             //Database provider
-            $migration->setProvider($this->databases);
+            if ($migration instanceof Migration) {
+                $migration->setProvider($this->databases);
+            }
 
             $migrations[$filename] = $migration;
         }

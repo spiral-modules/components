@@ -18,6 +18,7 @@ use Spiral\Core\DispatcherInterface;
 use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\SnapshotInterface;
+use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Responses\EmptyResponse;
@@ -41,7 +42,7 @@ class HttpDispatcher extends Singleton implements
     /**
      * HttpDispatcher has embedded router and log it's errors.
      */
-    use ConfigurableTrait, RouterTrait, LoggerTrait;
+    use ConfigurableTrait, RouterTrait, LoggerTrait, BenchmarkTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -226,8 +227,9 @@ class HttpDispatcher extends Singleton implements
         );
 
         $response = null;
-
+        $benchmark = $this->benchmark('request', $request->getUri());
         try {
+            //Must handle exceptions
             $response = $pipeline->target($endpoint)->run(
                 $request->withAttribute('activePath', $activePath)
             );
@@ -236,18 +238,9 @@ class HttpDispatcher extends Singleton implements
             $this->logError($exception, $request);
 
             $response = $this->errorResponse($exception->getCode());
-        } catch (\Exception $exception) {
-            /**
-             * @var SnapshotInterface $snapshot
-             */
-            $snapshot = $this->container->get(SnapshotInterface::class, compact('exception'));
-
-            //Snapshot must report about itself
-            $snapshot->report();
-
-            //Generate exception based on snapshot data
-            $response = $this->handleSnapshot($snapshot, false, $request);
         } finally {
+            $this->benchmark($benchmark);
+
             return $response;
         }
     }

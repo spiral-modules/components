@@ -11,6 +11,7 @@ namespace Spiral\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Debug\SnapshotInterface;
 use Spiral\Http\Responses\JsonResponse;
 
 /**
@@ -87,7 +88,8 @@ class MiddlewarePipeline
     }
 
     /**
-     * Pass request and response though every middleware to target and return generated and wrapped response.
+     * Pass request and response though every middleware to target and return generated and wrapped
+     * response.
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
@@ -98,7 +100,7 @@ class MiddlewarePipeline
     }
 
     /**
-     * Get next chain to be called.
+     * Get next chain to be called. Exceptions will be converted to responses.
      *
      * @param int                    $position
      * @param ServerRequestInterface $outerRequest
@@ -111,7 +113,29 @@ class MiddlewarePipeline
         };
 
         if (!isset($this->middlewares[$position])) {
-            return $this->createResponse($outerRequest);
+            $response = null;
+            try {
+                $response = $this->createResponse($outerRequest);
+            } catch (\Exception $exception) {
+                /**
+                 * @var SnapshotInterface $snapshot
+                 */
+                $snapshot = $this->container->get(SnapshotInterface::class, compact('exception'));
+
+                //Snapshot must report about itself
+                $snapshot->report();
+
+                /**
+                 * We need HttpDispatcher to convert snapshot into response.
+                 *
+                 * @var HttpDispatcher $http
+                 */
+                $http = $this->container->get(HttpDispatcher::class);
+
+                $response = $http->handleSnapshot($snapshot, false, $outerRequest);
+            } finally {
+                return $response;
+            }
         }
 
         /**
@@ -165,8 +189,8 @@ class MiddlewarePipeline
     }
 
     /**
-     * Convert target response into valid instance of ResponseInterface. Can understand string and array/JsonSerializable
-     * response values.
+     * Convert target response into valid instance of ResponseInterface. Can understand string and
+     * array/JsonSerializable response values.
      *
      * @param mixed  $response
      * @param string $output Buffer output.

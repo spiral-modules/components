@@ -291,7 +291,7 @@ abstract class AbstractRoute implements RouteInterface
         }
 
         $parameters = array_map(
-            [!empty($slugify) ? $slugify : new Slugify(), 'slug'],
+            [!empty($slugify) ? $slugify : new Slugify(), 'slugify'],
             $parameters + $this->defaults + $this->compiled['options']
         );
 

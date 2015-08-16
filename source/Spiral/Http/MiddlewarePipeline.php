@@ -109,12 +109,14 @@ class MiddlewarePipeline
     protected function next($position, ServerRequestInterface $outerRequest)
     {
         $next = function ($request = null) use ($position, $outerRequest) {
+            //This function will be provided to next (deeper) middleware
             return $this->next(++$position, $request ?: $outerRequest);
         };
 
         if (!isset($this->middlewares[$position])) {
             $response = null;
             try {
+                //Middleware target endpoint to be called and converted into response
                 $response = $this->createResponse($outerRequest);
             } catch (\Exception $exception) {
                 /**
@@ -146,6 +148,7 @@ class MiddlewarePipeline
         //Middleware specified as class name
         $middleware = is_string($middleware) ? $this->container->get($middleware) : $middleware;
 
+        //Executing next middleware
         return $middleware($outerRequest, $next);
     }
 
@@ -170,6 +173,7 @@ class MiddlewarePipeline
                     $this->container->resolveArguments($reflection, ['request' => $request])
                 );
             } else {
+                //Calling pipeline target
                 $response = call_user_func($this->target, $request);
             }
         } finally {

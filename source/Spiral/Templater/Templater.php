@@ -59,7 +59,7 @@ abstract class Templater implements SupervisorInterface
         'prefixes'   => [
             self::TYPE_BLOCK   => ['block:', 'section:', 'yield:', 'define:'],
             self::TYPE_EXTENDS => ['extends:'],
-            self::TYPE_IMPORT  => ['use']
+            self::TYPE_IMPORT  => ['use', 'node:use', 'templater:use']
         ],
         'exporters'  => [
             AttributeExporter::class

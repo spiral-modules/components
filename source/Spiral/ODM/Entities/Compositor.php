@@ -18,8 +18,8 @@ use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
 /**
- * Compositor is responsible for managing set (array) of classes nested to parent Document. Compositor can manage class
- * and all it's children.
+ * Compositor is responsible for managing set (array) of classes nested to parent Document.
+ * Compositor can manage class and all it's children.
  */
 class Compositor extends Component implements
     CompositableInterface,
@@ -43,16 +43,17 @@ class Compositor extends Component implements
     protected $documents = [];
 
     /**
-     * When solid state is enabled no atomic operations will be pushed to databases and document composition will be
-     * saved as one big set. Enabled by default.
+     * When solid state is enabled no atomic operations will be pushed to databases and document
+     * composition will be saved as one big set. Enabled by default.
      *
      * @var bool
      */
     protected $solidState = true;
 
     /**
-     * Indication that composition data were changed without using atomic operations, this flag will be set to true if
-     * any document added or removed via array operations. Atomic operation will be forbidden what this flag is set.
+     * Indication that composition data were changed without using atomic operations, this flag
+     * will be set to true if any document added or removed via array operations. Atomic operation
+     * will be forbidden what this flag is set.
      *
      * @var bool
      */
@@ -92,6 +93,9 @@ class Compositor extends Component implements
     {
         $this->class = $class;
         $this->parent = $parent;
+        if (!empty($data)) {
+            $this->documents = $data;
+        }
 
         if (empty($this->class)) {
             throw new CompositorException(
@@ -427,8 +431,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Create Document and add it to composition. Compositor will use it's primary class to construct
-     * document. You can* force custom class name to be added using second argument.
+     * Create Document and add it to composition. Compositor will use it's primary class to
+     * construct document. You can* force custom class name to be added using second argument.
      *
      * @param array  $fields
      * @param string $class
@@ -469,7 +473,6 @@ class Compositor extends Component implements
     }
 
 
-
     /**
      * Find documents based on provided field values or document instance. Only simple query support
      * (one level array).
@@ -502,8 +505,8 @@ class Compositor extends Component implements
     }
 
     /**
-     * Find first composited (nested document) by matched query. Only simple query support (one level
-     * array).
+     * Find first composited (nested document) by matched query. Only simple query support (one
+     * level array).
      *
      * Example:
      * $user->cards->findOne(['active' => true]);
@@ -556,7 +559,8 @@ class Compositor extends Component implements
 
     /**
      * Pulls document(s) from the set, query should represent document object matched fields. Set
-     * second argument to false to keep Compositor in solid state and save it as one big array of data.
+     * second argument to false to keep Compositor in solid state and save it as one big array of
+     * data.
      *
      * @param array|Document $query
      * @param bool           $resetState Set to true to reset compositor solid state.

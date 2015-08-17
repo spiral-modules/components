@@ -528,8 +528,10 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             $this->fire('updating');
 
             //Update existed document
-            $this->odmCollection($this->odm)->update(['_id' => $this->primaryKey()],
-                $this->buildAtomics());
+            $this->odmCollection($this->odm)->update(
+                ['_id' => $this->primaryKey()],
+                $this->buildAtomics()
+            );
 
             $this->fire('updated');
         }

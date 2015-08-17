@@ -103,21 +103,14 @@ abstract class DataEntity extends Component implements
      * @see setField()
      * @param string $method
      * @param array  $arguments
-     * @param bool   $tableize Convert to tableize instead of camelize.
      * @return $this|mixed|null|AccessorInterface
      * @throws EntityException
      */
-    public function __call($method, array $arguments, $tableize = false)
+    public function __call($method, array $arguments)
     {
         if (count($arguments) <= 1 && strlen($method) <= 3) {
             //Get/set needs exactly 1 argument
             throw new EntityException("Undefined method {$method}.");
-        }
-
-        if ($tableize) {
-            $field = Inflector::camelize(substr($method, 3));
-        } else {
-            $field = Inflector::tableize(substr($method, 3));
         }
 
         //get/set

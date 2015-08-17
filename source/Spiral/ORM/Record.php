@@ -8,12 +8,14 @@
  */
 namespace Spiral\ORM;
 
+use Doctrine\Common\Inflector\Inflector;
 use Spiral\Core\ContainerInterface;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
+use Spiral\Models\Exceptions\EntityException;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
@@ -776,7 +778,25 @@ class Record extends DataEntity implements ActiveEntityInterface
             return empty($arguments) ? $relation : call_user_func_array($relation, $arguments);
         }
 
-        return parent::__call($method, $arguments, true);
+        if (count($arguments) <= 1 && strlen($method) <= 3) {
+            //Get/set needs exactly 1 argument
+            throw new EntityException("Undefined method {$method}.");
+        }
+
+        //get/set
+        $operation = substr($method, 0, 3);
+        if ($operation === 'get' && count($arguments) === 0) {
+            return $this->getField(Inflector::tableize(substr($method, 3)));
+        }
+
+        if ($operation === 'set' && count($arguments) === 1) {
+            $this->setField(Inflector::tableize(substr($method, 3)), $arguments[0]);
+
+            //setFieldA($a)->setFieldB($b)
+            return $this;
+        }
+
+        throw new EntityException("Undefined method {$method}.");
     }
 
     /**

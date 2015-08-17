@@ -1009,13 +1009,13 @@ class Record extends DataEntity implements ActiveEntityInterface
      * Example:
      * User::findByID(1, ['profile']);
      *
-     * @param mixed $id   Primary key.
-     * @param array $load Array or relations to be pre-loaded.
+     * @param mixed $primaryKey Primary key.
+     * @param array $load       Array or relations to be pre-loaded.
      * @return Record|null
      */
-    public static function findByPK($id = null, array $load = [])
+    public static function findByPK($primaryKey, array $load = [])
     {
-        return static::ormSelector()->load($load)->findByPK($id);
+        return static::ormSelector()->load($load)->findByPK($primaryKey);
     }
 
     /**

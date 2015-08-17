@@ -18,10 +18,10 @@ use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * Document is base data model for ODM component, it used to describe Mongo document schema, filters,
- * validations and etc. In addition Document classes used as ActiveRecord pattern to represent Mongo
- * data. ODM component will automatically analyze existed Documents and create cached version of their
- * schema.
+ * Document is base data model for ODM component, it used to describe Mongo document schema,
+ * filters, validations and etc. In addition Document classes used as ActiveRecord pattern to
+ * represent Mongo data. ODM component will automatically analyze existed Documents and create
+ * cached version of their schema.
  */
 class Document extends DataEntity implements CompositableInterface, ActiveEntityInterface
 {
@@ -59,8 +59,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     const DEFINITION_FIELDS = 1;
 
     /**
-     * Tells ODM that logical method (defineClass) must be used to define document class. Method will
-     * receive document fields as input and must return document class name.
+     * Tells ODM that logical method (defineClass) must be used to define document class. Method
+     * will receive document fields as input and must return document class name.
      *
      * Example:
      * > Class A: _id, name, type (a)
@@ -104,7 +104,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @see Document::$schema
      */
     const MANY = 778;
-    const ONE  = 899;
+    const ONE = 899;
 
     /**
      * Model schema provided by ODM compoent.
@@ -151,8 +151,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $indexes = [];
 
     /**
-     * Document fields, accessors and relations. ODM will generate setters and getters for some fields
-     * based on their types.
+     * Document fields, accessors and relations. ODM will generate setters and getters for some
+     * fields based on their types.
      *
      * Example, fields:
      * protected $schema = [
@@ -165,7 +165,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * protected $schema = [
      *     ...,
      *     'child' => Child::class,  //One document are composited, for example user Profile
-     *     'many'  => [Child::class] //Compositor accessor will be applied, allows to composite many
+     *     'many'  => [Child::class] //Compositor accessor will be applied, allows to composite
+     *     many
      *                               //document intances
      * ];
      *
@@ -381,8 +382,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * Alias for atomic operation $set. Attention, this operation is not identical to setField()
-     * method, it performs low level operation and can be used only on simple fields. No filters will
-     * be applied to field!
+     * method, it performs low level operation and can be used only on simple fields. No filters
+     * will be applied to field!
      *
      * @param string $field
      * @param mixed  $value
@@ -934,7 +935,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @return static|null
      * @throws ODMException
      */
-    public static function findByPK($mongoID = null)
+    public static function findByPK($mongoID)
     {
         if (!$mongoID = ODM::mongoID($mongoID)) {
             return null;

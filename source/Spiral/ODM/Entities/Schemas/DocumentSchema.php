@@ -103,7 +103,7 @@ class DocumentSchema extends ReflectionEntity
                 throw new SchemaException("Type definition of {$this}.{$field} is invalid.");
             }
 
-            $fields[$field] = $type;
+            $fields[$field] = is_array($type) ? $type[0] . '[]' : $type;
         }
 
         return $fields;
@@ -395,8 +395,8 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Get schema of top parent of current document or document schema itself. This method is reverse
-     * implementation of getChildren().
+     * Get schema of top parent of current document or document schema itself. This method is
+     * reverse implementation of getChildren().
      *
      * @see getChindren()
      * @param bool $sameCollection Only document with same collection.
@@ -435,10 +435,10 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Compile information required to resolve class instance using given set of fields. Fields based
-     * definition will analyze unique fields in every child model to create association between
-     * model class and required set of fields. Only document from same collection will be involved
-     * in definition creation. Definition built only for child of first order.
+     * Compile information required to resolve class instance using given set of fields. Fields
+     * based definition will analyze unique fields in every child model to create association
+     * between model class and required set of fields. Only document from same collection will be
+     * involved in definition creation. Definition built only for child of first order.
      *
      * @return array|string
      * @throws SchemaException
@@ -533,8 +533,8 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
-     * Check if both documents belongs to same collection. Documents without declared collection must
-     * be counted as documents from same collection.
+     * Check if both documents belongs to same collection. Documents without declared collection
+     * must be counted as documents from same collection.
      *
      * @param DocumentSchema $document
      * @return bool

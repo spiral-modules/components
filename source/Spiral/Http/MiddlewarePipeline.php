@@ -12,6 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\SnapshotInterface;
+use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Responses\JsonResponse;
 
 /**
@@ -176,6 +177,14 @@ class MiddlewarePipeline
                 //Calling pipeline target
                 $response = call_user_func($this->target, $request);
             }
+        } catch (ClientException $exception) {
+            /**
+             * We need HttpDispatcher to get valid error exception.
+             *
+             * @var HttpDispatcher $http
+             */
+            $http = $this->container->get(HttpDispatcher::class);
+            $response = $http->errorResponse($exception->getCode(), $request);
         } finally {
             while (ob_get_level() > $outputLevel + 1) {
                 ob_end_clean();

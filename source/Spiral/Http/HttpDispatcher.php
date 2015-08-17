@@ -370,7 +370,7 @@ class HttpDispatcher extends Singleton implements
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    private function errorResponse($code, ServerRequestInterface $request = null)
+    public function errorResponse($code, ServerRequestInterface $request = null)
     {
         if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
             return new JsonResponse(['status' => $code], $code);
@@ -387,7 +387,6 @@ class HttpDispatcher extends Singleton implements
 
         return new EmptyResponse($code);
     }
-
 
     /**
      * Get associated views component or fetch it from container.

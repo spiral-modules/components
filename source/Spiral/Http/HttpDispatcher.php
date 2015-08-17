@@ -233,11 +233,6 @@ class HttpDispatcher extends Singleton implements
             $response = $pipeline->target($endpoint)->run(
                 $request->withAttribute('activePath', $activePath)
             );
-        } catch (ClientException $exception) {
-            //Soft client error
-            $this->logError($exception, $request);
-
-            $response = $this->errorResponse($exception->getCode());
         } finally {
             $this->benchmark($benchmark);
 
@@ -343,7 +338,7 @@ class HttpDispatcher extends Singleton implements
      * @param ClientException        $exception
      * @param ServerRequestInterface $request
      */
-    private function logError(ClientException $exception, ServerRequestInterface $request)
+    public function logError(ClientException $exception, ServerRequestInterface $request)
     {
         $remoteAddr = '-undefined-';
         if (!empty($request->getServerParams()['REMOTE_ADDR'])) {

@@ -167,6 +167,7 @@ class MiddlewarePipeline
         $outputLevel = ob_get_level();
         ob_start();
 
+        $response = null;
         try {
             if ($this->target instanceof \Closure) {
                 $reflection = new \ReflectionFunction($this->target);
@@ -184,6 +185,9 @@ class MiddlewarePipeline
              * @var HttpDispatcher $http
              */
             $http = $this->container->get(HttpDispatcher::class);
+
+            //Logging error
+            $http->logError($exception, $request);
             $response = $http->errorResponse($exception->getCode(), $request);
         } finally {
             while (ob_get_level() > $outputLevel + 1) {

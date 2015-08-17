@@ -36,8 +36,8 @@ abstract class DataEntity extends Component implements
     use ValidatorTrait;
 
     /**
-     * Every entity might have set of traits which can be initiated manually or at moment of construction
-     * model instance. Array will store already initiated model names.
+     * Every entity might have set of traits which can be initiated manually or at moment of
+     * construction model instance. Array will store already initiated model names.
      *
      * @var array
      */
@@ -103,14 +103,21 @@ abstract class DataEntity extends Component implements
      * @see setField()
      * @param string $method
      * @param array  $arguments
+     * @param bool   $tableize Convert to tableize instead of camelize.
      * @return $this|mixed|null|AccessorInterface
      * @throws EntityException
      */
-    public function __call($method, array $arguments)
+    public function __call($method, array $arguments, $tableize = false)
     {
         if (count($arguments) <= 1 && strlen($method) <= 3) {
             //Get/set needs exactly 1 argument
             throw new EntityException("Undefined method {$method}.");
+        }
+
+        if ($tableize) {
+            $field = Inflector::camelize(substr($method, 3));
+        } else {
+            $field = Inflector::tableize(substr($method, 3));
         }
 
         //get/set
@@ -485,8 +492,8 @@ abstract class DataEntity extends Component implements
     }
 
     /**
-     * Method used while entity static analysis to describe model related property using even dispatcher
-     * and associated model traits.
+     * Method used while entity static analysis to describe model related property using even
+     * dispatcher and associated model traits.
      *
      * @param ReflectionEntity $schema
      * @param string           $property

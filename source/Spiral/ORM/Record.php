@@ -21,10 +21,10 @@ use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
 
 /**
- * Document is base data record for ORM component, it used to describe related table schema, filters,
- * validations and relations to other records. You can count Record class as ActiveRecord pattern.
- * ORM component will automatically analyze existed Documents and create cached version of their
- * schema.
+ * Document is base data record for ORM component, it used to describe related table schema,
+ * filters, validations and relations to other records. You can count Record class as ActiveRecord
+ * pattern. ORM component will automatically analyze existed Documents and create cached version of
+ * their schema.
  */
 class Record extends DataEntity implements ActiveEntityInterface
 {
@@ -69,35 +69,36 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see RelationSchemaInterface
      * @see RelationSchema
      */
-    const HAS_ONE      = 101;
-    const HAS_MANY     = 102;
-    const BELONGS_TO   = 103;
+    const HAS_ONE = 101;
+    const HAS_MANY = 102;
+    const BELONGS_TO = 103;
     const MANY_TO_MANY = 104;
 
     /**
-     * Morphed relation types are usually created by inversion or equivalent of primary relation types.
+     * Morphed relation types are usually created by inversion or equivalent of primary relation
+     * types.
      *
      * @see RelationSchemaInterface
      * @see RelationSchema
      * @see MorphedRelation
      */
     const BELONGS_TO_MORPHED = 108;
-    const MANY_TO_MORPHED    = 109;
+    const MANY_TO_MORPHED = 109;
 
     /**
      * Constants used to declare relations in record schema, used in normalized relation schema.
      *
      * @see RelationSchemaInterface
      */
-    const OUTER_KEY         = 901; //Outer key name
-    const INNER_KEY         = 902; //Inner key name
-    const MORPH_KEY         = 903; //Morph key name
-    const PIVOT_TABLE       = 904; //Pivot table name
-    const PIVOT_COLUMNS     = 905; //Pre-defined pivot table columns
+    const OUTER_KEY = 901; //Outer key name
+    const INNER_KEY = 902; //Inner key name
+    const MORPH_KEY = 903; //Morph key name
+    const PIVOT_TABLE = 904; //Pivot table name
+    const PIVOT_COLUMNS = 905; //Pre-defined pivot table columns
     const THOUGHT_INNER_KEY = 906; //Pivot table options
     const THOUGHT_OUTER_KEY = 907; //Pivot table options
-    const WHERE             = 908; //Where conditions
-    const WHERE_PIVOT       = 909; //Where pivot conditions
+    const WHERE = 908; //Where conditions
+    const WHERE_PIVOT = 909; //Where pivot conditions
 
     /**
      * Additional constants used to control relation schema behaviour.
@@ -105,20 +106,20 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see Record::$schema
      * @see RelationSchemaInterface
      */
-    const INVERSE           = 1001; //Relation should be inverted to parent record
-    const CONSTRAINT        = 1002; //Relation should create foreign keys (default)
+    const INVERSE = 1001; //Relation should be inverted to parent record
+    const CONSTRAINT = 1002; //Relation should create foreign keys (default)
     const CONSTRAINT_ACTION = 1003; //Default relation foreign key delete/update action (CASCADE)
-    const CREATE_PIVOT      = 1004; //Many-to-Many should create pivot table automatically (default)
-    const NULLABLE          = 1005; //Relation can be nullable (default)
-    const CREATE_INDEXES    = 1006; //Indication that relation is allowed to create required indexes
-    const MORPHED_ALIASES   = 1007; //Aliases for morphed sub-relations
+    const CREATE_PIVOT = 1004; //Many-to-Many should create pivot table automatically (default)
+    const NULLABLE = 1005; //Relation can be nullable (default)
+    const CREATE_INDEXES = 1006; //Indication that relation is allowed to create required indexes
+    const MORPHED_ALIASES = 1007; //Aliases for morphed sub-relations
 
     /**
      * Constants used to declare indexes in record schema.
      *
      * @see Record::$indexes
      */
-    const INDEX  = 1000;            //Default index type
+    const INDEX = 1000;            //Default index type
     const UNIQUE = 2000;            //Unique index definition
 
     /**
@@ -204,9 +205,8 @@ class Record extends DataEntity implements ActiveEntityInterface
      *      'balance' => 'decimal(10, 2)'       //Decimal size and precision
      * ];
      *
-     * Every created column will be stated as NOT NULL with forced default value, if you want to have
-     * nullable columns, specify special data key:
-     * protected $schema = [
+     * Every created column will be stated as NOT NULL with forced default value, if you want to
+     * have nullable columns, specify special data key: protected $schema = [
      *      'name'      => 'string, nullable'
      * ];
      *
@@ -292,8 +292,8 @@ class Record extends DataEntity implements ActiveEntityInterface
             unset($data[ORM::PIVOT_DATA]);
         }
 
-        foreach (array_intersect_key($data, $this->ormSchema[ORM::M_RELATIONS]) as $name => $relation)
-        {
+        foreach (array_intersect_key($data,
+            $this->ormSchema[ORM::M_RELATIONS]) as $name => $relation) {
             $this->relations[$name] = $relation;
             unset($data[$name]);
         }
@@ -308,9 +308,9 @@ class Record extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Record context must be updated in cases where single record instance can be accessed from multiple
-     * places, context will not change record fields but might overwrite pivot data or clarify
-     * loaded relations.
+     * Record context must be updated in cases where single record instance can be accessed from
+     * multiple places, context will not change record fields but might overwrite pivot data or
+     * clarify loaded relations.
      *
      * @param array $context
      * @return $this
@@ -340,8 +340,8 @@ class Record extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Change record solid state. SolidState will force record data to be saved as one big update set
-     * without any generating separate update statements for changed columns.
+     * Change record solid state. SolidState will force record data to be saved as one big update
+     * set without any generating separate update statements for changed columns.
      *
      * Attention, you have to carefully use forceUpdate flag with records without primary keys due
      * update criteria (WHERE condition) can not be easy constructed for records with primary key.
@@ -776,7 +776,7 @@ class Record extends DataEntity implements ActiveEntityInterface
             return empty($arguments) ? $relation : call_user_func_array($relation, $arguments);
         }
 
-        return parent::__call($method, $arguments);
+        return parent::__call($method, $arguments, true);
     }
 
     /**

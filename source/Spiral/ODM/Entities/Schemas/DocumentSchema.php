@@ -103,7 +103,7 @@ class DocumentSchema extends ReflectionEntity
                 throw new SchemaException("Type definition of {$this}.{$field} is invalid.");
             }
 
-            $fields[$field] = is_array($type) ? $type[0] . '[]' : $type;
+            $fields[$field] = $type;
         }
 
         return $fields;

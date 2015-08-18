@@ -44,9 +44,8 @@ class HasOneSchema extends RelationSchema
         Record::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in outer table
         Record::CREATE_INDEXES    => true,
-        //We are going to make all relations nullable by default, so we can add fields to existed
-        //tables without raising an exceptions
-        Record::NULLABLE          => true
+        //Has one counted as not nullable by default
+        Record::NULLABLE          => false
     ];
 
     /**

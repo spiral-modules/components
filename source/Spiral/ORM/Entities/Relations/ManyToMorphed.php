@@ -200,7 +200,7 @@ class ManyToMorphed implements RelationInterface
      *
      * Example:
      * $tag->tagged->users()->count();
-     * foreach($tag->tagged->users(["status" => "active"]) as $user)
+     * foreach($tag->tagged->users()->find(["status" => "active"]) as $user)
      * {
      * }
      *

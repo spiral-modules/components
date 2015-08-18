@@ -14,8 +14,8 @@ use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 use Spiral\ORM\RelationSchemaInterface;
 
 /**
@@ -24,10 +24,15 @@ use Spiral\ORM\RelationSchemaInterface;
 abstract class RelationSchema implements RelationSchemaInterface
 {
     /**
-     * Must contain relation type, this constant is required to fetch outer record(s) class name from
-     * relation definition.
+     * Must contain relation type, this constant is required to fetch outer record(s) class name
+     * from relation definition.
      */
     const RELATION_TYPE = null;
+
+    /**
+     * Relation represent multiple records.
+     */
+    const MULTIPLE = false;
 
     /**
      * Some relations may declare that polymorphic must be used instead, polymorphic relation type
@@ -149,6 +154,16 @@ abstract class RelationSchema implements RelationSchemaInterface
     public function getTarget()
     {
         return $this->target;
+    }
+
+    /**
+     * Relation represent multiple records.
+     *
+     * @return bool
+     */
+    public function isMultiple()
+    {
+        return static::MULTIPLE;
     }
 
     /**
@@ -461,11 +476,11 @@ abstract class RelationSchema implements RelationSchemaInterface
     {
         $options = [
             //Relation name
-            'name'             => $this->name,
+            'name'              => $this->name,
             //Relation name in plural form
-            'name:plural'      => Inflector::pluralize($this->name),
+            'name:plural'       => Inflector::pluralize($this->name),
             //Relation name in singular form
-            'name:singular'    => Inflector::singularize($this->name),
+            'name:singular'     => Inflector::singularize($this->name),
             //Parent record role name
             'record:role'       => $this->record->getRole(),
             //Parent record table name
@@ -523,8 +538,8 @@ abstract class RelationSchema implements RelationSchemaInterface
     }
 
     /**
-     * Resolve correct abstract type to represent inner or outer key. Primary types will be converted
-     * to appropriate sized integers.
+     * Resolve correct abstract type to represent inner or outer key. Primary types will be
+     * converted to appropriate sized integers.
      *
      * @param AbstractColumn $column
      * @return string

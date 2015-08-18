@@ -44,6 +44,11 @@ class ManyToManySchema extends RelationSchema
     const RELATION_TYPE = Record::MANY_TO_MANY;
 
     /**
+     * Relation represent multiple records.
+     */
+    const MULTIPLE = true;
+
+    /**
      * {@inheritdoc}
      *
      * When relation states that relation defines connection to interface relation will be switched to

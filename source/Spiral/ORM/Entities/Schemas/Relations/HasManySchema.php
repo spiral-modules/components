@@ -30,6 +30,11 @@ class HasManySchema extends HasOneSchema
     const RELATION_TYPE = Record::HAS_MANY;
 
     /**
+     * Relation represent multiple records.
+     */
+    const MULTIPLE = true;
+
+    /**
      * {@inheritdoc}
      *
      * @invisible

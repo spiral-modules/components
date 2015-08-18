@@ -10,13 +10,13 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\Exceptions\IteratorException;
 use Spiral\ORM\Exceptions\ORMException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
- * Provides iteration over set of specified records data using internal instances cache. In addition,
- * allows to decorate set of callbacks with association by their name (@see __call()). Keeps record
- * context.
+ * Provides iteration over set of specified records data using internal instances cache. In
+ * addition, allows to decorate set of callbacks with association by their name (@see __call()).
+ * Keeps record context.
  */
 class RecordIterator implements \Iterator, \Countable, \JsonSerializable
 {
@@ -119,6 +119,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * {@inheritdoc}
      *
+     * @return Record
      * @see ORM::record()
      * @see Record::setContext()
      * @throws ORMException

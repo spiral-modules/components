@@ -67,6 +67,11 @@ class ManyToMorphedSchema extends MorphedSchema
     const RELATION_TYPE = Record::MANY_TO_MORPHED;
 
     /**
+     * Relation represent multiple records.
+     */
+    const MULTIPLE = true;
+
+    /**
      * {@inheritdoc}
      *
      * @invisible

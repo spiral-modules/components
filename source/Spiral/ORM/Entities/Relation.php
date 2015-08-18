@@ -133,7 +133,11 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         }
 
         if (empty($this->data)) {
-            if (!$this->definition[Record::NULLABLE] && !static::MULTIPLE) {
+            if (
+                array_key_exists(Record::NULLABLE, $this->definition)
+                && !$this->definition[Record::NULLABLE]
+                && !static::MULTIPLE
+            ) {
                 //Not nullable relations must always return requested instance
                 return $this->instance = $this->emptyRecord();
             }

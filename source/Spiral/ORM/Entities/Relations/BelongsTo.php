@@ -97,6 +97,16 @@ class BelongsTo extends HasOne
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * Belongs-to can not automatically create parent.
+     */
+    protected function emptyRecord()
+    {
+        return null;
+    }
+
+    /**
      * De associate related record.
      */
     protected function deassociate()

@@ -105,6 +105,9 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
 
     /**
      * {@inheritdoc}
+     *
+     * Relation will automatically create related record if relation is not nullable. Usually
+     * applied for has one relations ($user->profile).
      */
     public function getRelated()
     {
@@ -124,6 +127,11 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
         }
 
         if (empty($this->data)) {
+            if (!$this->definition[Record::NULLABLE] && !static::MULTIPLE) {
+                //Not nullable relations must always return requested instance
+                return $this->instance = $this->emptyRecord();
+            }
+
             //Can not be loaded, let's use empty iterator
             return static::MULTIPLE ? $this->createIterator() : null;
         }
@@ -405,6 +413,19 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     protected function createRecord()
     {
         return $this->orm->record($this->getClass(), $this->data);
+    }
+
+    /**
+     * Create empty record to be associated with non nullable relation.
+     *
+     * @return Record
+     */
+    protected function emptyRecord()
+    {
+        $record = $this->orm->record($this->getClass(), []);
+        $this->associate($record);
+
+        return $record;
     }
 
     /**

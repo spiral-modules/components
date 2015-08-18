@@ -210,7 +210,7 @@ class ManyToMorphed implements RelationInterface
      */
     public function __call($alias, array $arguments)
     {
-        return call_user_func_array($this->morphed($alias), $arguments);
+        return $this->morphed($alias);
     }
 
     /**

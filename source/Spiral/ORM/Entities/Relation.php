@@ -353,7 +353,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      * Perform iterator on pre-loaded data. Use relation selector to iterate thought custom relation
      * query.
      *
-     * @return Record[]|RecordIterator
+     * @return Record|Record[]|RecordIterator
      */
     public function getIterator()
     {

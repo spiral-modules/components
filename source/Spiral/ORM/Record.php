@@ -72,9 +72,9 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see RelationSchemaInterface
      * @see RelationSchema
      */
-    const HAS_ONE = 101;
-    const HAS_MANY = 102;
-    const BELONGS_TO = 103;
+    const HAS_ONE      = 101;
+    const HAS_MANY     = 102;
+    const BELONGS_TO   = 103;
     const MANY_TO_MANY = 104;
 
     /**
@@ -86,22 +86,22 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see MorphedRelation
      */
     const BELONGS_TO_MORPHED = 108;
-    const MANY_TO_MORPHED = 109;
+    const MANY_TO_MORPHED    = 109;
 
     /**
      * Constants used to declare relations in record schema, used in normalized relation schema.
      *
      * @see RelationSchemaInterface
      */
-    const OUTER_KEY = 901; //Outer key name
-    const INNER_KEY = 902; //Inner key name
-    const MORPH_KEY = 903; //Morph key name
-    const PIVOT_TABLE = 904; //Pivot table name
-    const PIVOT_COLUMNS = 905; //Pre-defined pivot table columns
+    const OUTER_KEY         = 901; //Outer key name
+    const INNER_KEY         = 902; //Inner key name
+    const MORPH_KEY         = 903; //Morph key name
+    const PIVOT_TABLE       = 904; //Pivot table name
+    const PIVOT_COLUMNS     = 905; //Pre-defined pivot table columns
     const THOUGHT_INNER_KEY = 906; //Pivot table options
     const THOUGHT_OUTER_KEY = 907; //Pivot table options
-    const WHERE = 908; //Where conditions
-    const WHERE_PIVOT = 909; //Where pivot conditions
+    const WHERE             = 908; //Where conditions
+    const WHERE_PIVOT       = 909; //Where pivot conditions
 
     /**
      * Additional constants used to control relation schema behaviour.
@@ -109,20 +109,20 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see Record::$schema
      * @see RelationSchemaInterface
      */
-    const INVERSE = 1001; //Relation should be inverted to parent record
-    const CONSTRAINT = 1002; //Relation should create foreign keys (default)
+    const INVERSE           = 1001; //Relation should be inverted to parent record
+    const CONSTRAINT        = 1002; //Relation should create foreign keys (default)
     const CONSTRAINT_ACTION = 1003; //Default relation foreign key delete/update action (CASCADE)
-    const CREATE_PIVOT = 1004; //Many-to-Many should create pivot table automatically (default)
-    const NULLABLE = 1005; //Relation can be nullable (default)
-    const CREATE_INDEXES = 1006; //Indication that relation is allowed to create required indexes
-    const MORPHED_ALIASES = 1007; //Aliases for morphed sub-relations
+    const CREATE_PIVOT      = 1004; //Many-to-Many should create pivot table automatically (default)
+    const NULLABLE          = 1005; //Relation can be nullable (default)
+    const CREATE_INDEXES    = 1006; //Indication that relation is allowed to create required indexes
+    const MORPHED_ALIASES   = 1007; //Aliases for morphed sub-relations
 
     /**
      * Constants used to declare indexes in record schema.
      *
      * @see Record::$indexes
      */
-    const INDEX = 1000;            //Default index type
+    const INDEX  = 1000;            //Default index type
     const UNIQUE = 2000;            //Unique index definition
 
     /**

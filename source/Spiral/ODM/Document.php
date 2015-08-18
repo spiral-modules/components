@@ -104,7 +104,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @see Document::$schema
      */
     const MANY = 778;
-    const ONE = 899;
+    const ONE  = 899;
 
     /**
      * Model schema provided by ODM compoent.

@@ -43,7 +43,7 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
     /**
      * Sort directions.
      */
-    const SORT_ASC  = 'ASC';
+    const SORT_ASC = 'ASC';
     const SORT_DESC = 'DESC';
 
     /**

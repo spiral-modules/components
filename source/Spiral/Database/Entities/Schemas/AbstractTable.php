@@ -402,8 +402,8 @@ abstract class AbstractTable extends Component implements TableInterface
 
     /**
      * Rename existed column or change name of scheduled column schema. This operation can be safe
-     * to use on recurring basis as rename will be skipped if target column does not exists or already
-     * named so.
+     * to use on recurring basis as rename will be skipped if target column does not exists or
+     * already named so.
      *
      * @param string $column
      * @param string $name New column name.
@@ -456,8 +456,8 @@ abstract class AbstractTable extends Component implements TableInterface
 
     /**
      * Rename existed index or change name of scheduled index schema. Index name must be used. This
-     * operation can be safe to use on recurring basis as rename will be skipped if target index does
-     * not exists or already named so.
+     * operation can be safe to use on recurring basis as rename will be skipped if target index
+     * does not exists or already named so.
      *
      * @param string $index Index name or forming columns.
      * @param string $name  New index name.
@@ -654,7 +654,8 @@ abstract class AbstractTable extends Component implements TableInterface
 
     /**
      * Add new schema entities into table, method will strictly forbid altering existed columns.
-     * Column, index and foreign key creation must be performed in provided function using table copy.
+     * Column, index and foreign key creation must be performed in provided function using table
+     * copy.
      *
      * Examples:
      * $table->add(function(AbstractTable $table) {
@@ -1057,6 +1058,10 @@ abstract class AbstractTable extends Component implements TableInterface
 
         try {
             if ($execute) {
+                $this->logger()->info(
+                    "Creating new table {table}.", ['table' => $this->getName(true)]
+                );
+
                 $this->driver->statement($statement);
 
                 //Not all databases support adding index while table creation, so we can do it after

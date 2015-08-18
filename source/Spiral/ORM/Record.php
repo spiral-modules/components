@@ -762,8 +762,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Direct access to relation by it's name. No __invoke method of relation will be called if no
-     * arguments were provided, which makes __call synonym of relation() method.
+     * Direct access to relation by it's name.
      *
      * @see relation()
      * @param string $method
@@ -773,9 +772,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     public function __call($method, array $arguments)
     {
         if (isset($this->ormSchema[ORM::M_RELATIONS][$method])) {
-            $relation = $this->relation($method);
-
-            return empty($arguments) ? $relation : call_user_func_array($relation, $arguments);
+            return $this->relation($method);
         }
 
         if (count($arguments) <= 1 && strlen($method) <= 3) {

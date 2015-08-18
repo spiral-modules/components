@@ -22,11 +22,11 @@ use Spiral\Validation\ValidatesInterface;
 interface RelationInterface extends ValidatesInterface
 {
     /**
-     * @param ORM   $orm        ORM component.
+     * @param ORM    $orm        ORM component.
      * @param Record $parent     Parent Record.
-     * @param array $definition Relation definition, crated by RelationSchema.
-     * @param mixed $data       Pre-loaded relation data.
-     * @param bool  $loaded     Indication that relation data has been loaded from database.
+     * @param array  $definition Relation definition, crated by RelationSchema.
+     * @param mixed  $data       Pre-loaded relation data.
+     * @param bool   $loaded     Indication that relation data has been loaded from database.
      */
     public function __construct(
         ORM $orm,
@@ -45,8 +45,8 @@ interface RelationInterface extends ValidatesInterface
 
     /**
      * Return data, object or instances handled by relation, resulted type depends of relation
-     * implementation and might be: Record, RecordIterator, itself (ManyToMorphed), Document and etc.
-     * Related data must be loaded if relation was not pre-loaded with record.
+     * implementation and might be: Record, RecordIterator, itself (ManyToMorphed), Document and
+     * etc. Related data must be loaded if relation was not pre-loaded with record.
      *
      * Example:
      * echo $user->profile->facebookUID;
@@ -87,19 +87,6 @@ interface RelationInterface extends ValidatesInterface
      * @throws RelationException
      */
     public function saveAssociation($validate = true);
-
-    /**
-     * Invoke relation with custom arguments. Result may vary based on relation logic.
-     *
-     * Example:
-     * $user->posts(['active' => true])->count()
-     *
-     * @see Record::__call()
-     * @param array $arguments
-     * @return mixed
-     * @throws RelationException
-     */
-    public function __invoke(array $arguments);
 
     /**
      * Reset relation state. By default it must flush all relation data. Method used by Record when

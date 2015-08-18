@@ -11,13 +11,14 @@ namespace Spiral\ORM\Entities\Relations;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 use Spiral\ORM\RelationInterface;
 
 /**
  * ManyToMorphed relation used to aggregate multiple ManyToMany relations based on their role type.
- * In addition it can route some function to specified nested ManyToMany relation based on record role.
+ * In addition it can route some function to specified nested ManyToMany relation based on record
+ * role.
  *
  * @see ManyToMany
  */
@@ -106,17 +107,6 @@ class ManyToMorphed implements RelationInterface
         }
 
         return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * We can return self:
-     * $tag->tagged()->users->count();
-     */
-    public function __invoke(array $arguments)
-    {
-        return $this;
     }
 
     /**
@@ -227,7 +217,7 @@ class ManyToMorphed implements RelationInterface
      * Link morphed record to relation. Method will bypass request to appropriate nested relation.
      *
      * @param Record $record
-     * @param array $pivotData Custom pivot data.
+     * @param array  $pivotData Custom pivot data.
      * @return int
      */
     public function link(Record $record, array $pivotData = [])
@@ -247,8 +237,9 @@ class ManyToMorphed implements RelationInterface
     }
 
     /**
-     * Unlink every associated record, method will return amount of affected rows. Method will unlink
-     * only records matched WHERE_PIVOT by default. Set wherePivot to false to unlink every record.
+     * Unlink every associated record, method will return amount of affected rows. Method will
+     * unlink only records matched WHERE_PIVOT by default. Set wherePivot to false to unlink every
+     * record.
      *
      * @param bool $wherePivot Use conditions specified by WHERE_PIVOT, enabled by default.
      * @return int

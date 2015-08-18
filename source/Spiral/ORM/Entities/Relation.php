@@ -9,8 +9,8 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 use Spiral\ORM\RelationInterface;
 
 /**
@@ -37,8 +37,8 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     protected $loaded = false;
 
     /**
-     * Pre-loaded relation data, can be loaded while parent record, or later. Real data instance will
-     * be constructed on demand and will keep it pre-loaded context between calls.
+     * Pre-loaded relation data, can be loaded while parent record, or later. Real data instance
+     * will be constructed on demand and will keep it pre-loaded context between calls.
      *
      * @see Record::setContext()
      * @var array|null
@@ -75,11 +75,11 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     protected $orm = null;
 
     /**
-     * @param ORM   $orm
+     * @param ORM    $orm
      * @param Record $parent
-     * @param array $definition Relation definition, must be normalized by relation schema.
-     * @param mixed $data       Pre-loaded relation data.
-     * @param bool  $loaded     Indication that relation data has been loaded.
+     * @param array  $definition Relation definition, must be normalized by relation schema.
+     * @param mixed  $data       Pre-loaded relation data.
+     * @param bool   $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
@@ -347,16 +347,6 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     public function __call($method, array $arguments)
     {
         return call_user_func_array([$this->createSelector(), $method], $arguments);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return Selector
-     */
-    public function __invoke(array $arguments)
-    {
-        return $this->createSelector()->where($arguments);
     }
 
     /**

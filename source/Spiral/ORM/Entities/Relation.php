@@ -315,6 +315,17 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     }
 
     /**
+     * Get selector associated with relation.
+     *
+     * @param array $where
+     * @return Selector
+     */
+    public function find(array $where = [])
+    {
+        return $this->createSelector()->where($where);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * Use getRelation() method to count pre-loaded data.

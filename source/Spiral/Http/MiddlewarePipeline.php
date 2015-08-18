@@ -167,6 +167,7 @@ class MiddlewarePipeline
         $outputLevel = ob_get_level();
         ob_start();
 
+        $output = '';
         $response = null;
         try {
             if ($this->target instanceof \Closure) {
@@ -191,13 +192,13 @@ class MiddlewarePipeline
             $response = $http->errorResponse($exception->getCode(), $request);
         } finally {
             while (ob_get_level() > $outputLevel + 1) {
-                ob_end_clean();
+                $output = ob_get_clean() . $output;
             }
         }
 
         //Closing request scope
         $this->container->restore($outerRequest);
-        $output = ob_get_clean();
+        $output = ob_get_clean() . $output;
         if (!$this->keepOutput) {
             $output = '';
         }

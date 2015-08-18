@@ -25,17 +25,19 @@ use Spiral\ORM\Record;
  * Attention, be very careful using morphing relations, you must know what you doing!
  * Attention #2, relation like that can not be preloaded!
  *
- * Example, [Comment can belong to any CommentableInterface record], relation name "parent", relation
- * requested to be inversed into HAS_MANY "comments":
+ * Example, [Comment can belong to any CommentableInterface record], relation name "parent",
+ * relation requested to be inversed into HAS_MANY "comments":
  * - relation will walk should every record implementing CommentableInterface to collect name and
  *   type of outer keys, if outer key is not consistent across records implementing this interface
  *   an exception will be raised, let's say that outer key is "id" in every record
  * - relation will create inner key "parent_id" in "comments" table (or other table name), nullable
  *   by default
  * - relation will create "parent_type" morph key in "comments" table, nullable by default
- * - relation will create complex index index on columns "parent_id" and "parent_type" in "comments"
+ * - relation will create complex index index on columns "parent_id" and "parent_type" in
+ * "comments"
  *   table if allowed
- * - due relation is inversable every record implementing CommentableInterface will receive HAS_MANY
+ * - due relation is inversable every record implementing CommentableInterface will receive
+ * HAS_MANY
  *   relation "comments" pointing to Comment record using record role value
  *
  * @see BelongsToSchema
@@ -55,13 +57,15 @@ class BelongsToMorphedSchema extends MorphedSchema
     protected $defaultDefinition = [
         //By default, we are looking for primary key in our outer records, outer key must present
         //in every outer record and be consistent
-        Record::OUTER_KEY => '{outer:primaryKey}',
+        Record::OUTER_KEY      => '{outer:primaryKey}',
         //Inner key name will be created based on singular relation name and outer key name
-        Record::INNER_KEY => '{name:singular}_{definition:outerKey}',
+        Record::INNER_KEY      => '{name:singular}_{definition:outerKey}',
         //Morph key created based on singular relation name and postfix _type
-        Record::MORPH_KEY => '{name:singular}_type',
+        Record::MORPH_KEY      => '{name:singular}_type',
+        //Relation allowed to create indexes in pivot table
+        Record::CREATE_INDEXES => true,
         //Relation is nullable by default
-        Record::NULLABLE  => true
+        Record::NULLABLE       => true
     ];
 
     /**
@@ -89,7 +93,7 @@ class BelongsToMorphedSchema extends MorphedSchema
                 $record->addRelation(
                     $inversed[1],
                     [
-                        $inversed[0]     => $this->record->getName(),
+                        $inversed[0]      => $this->record->getName(),
                         Record::OUTER_KEY => $this->definition[Record::INNER_KEY],
                         Record::INNER_KEY => $this->definition[Record::OUTER_KEY],
                         Record::MORPH_KEY => $this->definition[Record::MORPH_KEY],

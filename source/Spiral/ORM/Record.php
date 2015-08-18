@@ -16,11 +16,12 @@ use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
 use Spiral\Models\Exceptions\EntityException;
-use Spiral\ODM\CompositableInterface;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
+use Spiral\Translator\Translator;
+use Spiral\Validation\ValidatesInterface;
 
 /**
  * Document is base data record for ORM component, it used to describe related table schema,
@@ -305,7 +306,7 @@ class Record extends DataEntity implements ActiveEntityInterface
 
         if (!$this->isLoaded()) {
             //Non loaded records should be in solid state by default and require initial validation
-            $this->solidState(true)->validated = true;
+            $this->solidState(true)->validated = false;
         }
     }
 
@@ -559,8 +560,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see   getCriteria()
      * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
      *                             disable validation before saving.
-     * @param bool      $relations Save data associated to constructed record relations, only first
-     *                             layer of relations will be saved to prevent infinite loop.
+     * @param bool      $relations Save data associated to constructed record relations.
      * @return bool
      * @throws RecordException
      * @throws QueryException
@@ -575,27 +575,8 @@ class Record extends DataEntity implements ActiveEntityInterface
             $validate = static::VALIDATE_SAVE;
         }
 
-        if ($validate && !$this->isValid()) {
+        if ($validate && !$this->isValid($relations)) {
             return false;
-        }
-
-        if ($validate && $relations) {
-            //We have to validate relations before saving them
-            foreach ($this->relations as $name => $relation) {
-                if (!$relation instanceof RelationInterface) {
-                    //Was never constructed
-                    continue;
-                }
-
-                if (!$relation->isValid()) {
-                    $this->setError($name, $relation->getErrors());
-                }
-            }
-
-            if (!empty($this->errors)) {
-                //Some relations are invalid and can not be saved
-                return false;
-            }
         }
 
         //Primary key field name
@@ -886,22 +867,94 @@ class Record extends DataEntity implements ActiveEntityInterface
     }
 
     /**
+     * Check if context data is valid.
+     *
+     * @param bool $relations Validate pre-loaded relations.
+     * @return bool
+     */
+    public function isValid($relations = true)
+    {
+        $this->validate($relations);
+
+        return empty($this->errors);
+    }
+
+    /**
+     * Check if context data has errors.
+     *
+     * @param bool $relations Validate pre-loaded relations.
+     * @return bool
+     */
+    public function hasErrors($relations = true)
+    {
+        return !$this->isValid($relations);
+    }
+
+    /**
+     * List of errors associated with parent field, every field should have only one error assigned.
+     *
+     * @param bool $reset     Clean errors after receiving every message.
+     * @param bool $relations Validate pre-loaded relations.
+     * @return array
+     */
+    public function getErrors($reset = false, $relations = true)
+    {
+        $this->validate($relations);
+
+        $errors = [];
+        foreach ($this->errors as $field => $error) {
+            if (
+                is_string($error)
+                && substr($error, 0, 2) == Translator::I18N_PREFIX
+                && substr($error, -2) == Translator::I18N_POSTFIX
+            ) {
+                //We will localize only messages embraced with [[ and ]]
+                $error = $this->translate($error);
+            }
+
+            $errors[$field] = $error;
+        }
+
+        if ($reset) {
+            $this->errors = [];
+        }
+
+        return $errors;
+    }
+
+    /**
      * {@inheritdoc}
      *
-     * Will validate every CompositableInterface instance. Used for JsonDocuments.
+     * @param bool $relations Validate pre-loaded relations.
+     *
+     * Will validate every ValidatesInterface instance. Used for JsonDocuments.
      */
-    protected function validate()
+    protected function validate($relations = true)
     {
         $errors = [];
         //Validating all compositions
         foreach ($this->fields as $field => $value) {
-            if (!$value instanceof CompositableInterface) {
+            if (!$value instanceof ValidatesInterface) {
                 //Something weird.
                 continue;
             }
 
             if (!$value->isValid()) {
                 $errors[$field] = $value->getErrors();
+            }
+        }
+
+        if ($relations) {
+            //We have to validate relations before saving them
+            foreach ($this->relations as $name => $relation) {
+                if (!$relation instanceof ValidatesInterface) {
+                    //Was never constructed
+                    continue;
+                }
+
+                if (!$relation->isValid()) {
+                    $errors[$name] = $relation->getErrors();
+                }
             }
         }
 

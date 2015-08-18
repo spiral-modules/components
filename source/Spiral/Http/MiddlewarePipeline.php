@@ -114,43 +114,43 @@ class MiddlewarePipeline
             return $this->next(++$position, $request ?: $outerRequest);
         };
 
-        if (!isset($this->middlewares[$position])) {
-            $response = null;
-            try {
+        $response = null;
+        try {
+            if (!isset($this->middlewares[$position])) {
                 //Middleware target endpoint to be called and converted into response
                 $response = $this->createResponse($outerRequest);
-            } catch (\Exception $exception) {
+            } else {
                 /**
-                 * @var SnapshotInterface $snapshot
+                 * @var callable $middleware
                  */
-                $snapshot = $this->container->get(SnapshotInterface::class, compact('exception'));
+                $middleware = $this->middlewares[$position];
 
-                //Snapshot must report about itself
-                $snapshot->report();
+                //Middleware specified as class name
+                $middleware = is_string($middleware) ? $this->container->get($middleware) : $middleware;
 
-                /**
-                 * We need HttpDispatcher to convert snapshot into response.
-                 *
-                 * @var HttpDispatcher $http
-                 */
-                $http = $this->container->get(HttpDispatcher::class);
-
-                $response = $http->handleSnapshot($snapshot, false, $outerRequest);
-            } finally {
-                return $response;
+                //Executing next middleware
+                $response = $middleware($outerRequest, $next);
             }
+        } catch (\Exception $exception) {
+            /**
+             * @var SnapshotInterface $snapshot
+             */
+            $snapshot = $this->container->get(SnapshotInterface::class, compact('exception'));
+
+            //Snapshot must report about itself
+            $snapshot->report();
+
+            /**
+             * We need HttpDispatcher to convert snapshot into response.
+             *
+             * @var HttpDispatcher $http
+             */
+            $http = $this->container->get(HttpDispatcher::class);
+
+            $response = $http->handleSnapshot($snapshot, false, $outerRequest);
+        } finally {
+            return $response;
         }
-
-        /**
-         * @var callable $middleware
-         */
-        $middleware = $this->middlewares[$position];
-
-        //Middleware specified as class name
-        $middleware = is_string($middleware) ? $this->container->get($middleware) : $middleware;
-
-        //Executing next middleware
-        return $middleware($outerRequest, $next);
     }
 
     /**

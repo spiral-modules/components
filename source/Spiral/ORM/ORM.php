@@ -366,7 +366,7 @@ class ORM extends Singleton
      *
      * @param Record $record
      */
-    public function removeEntity(Record $record)
+    public function unregisterEntity(Record $record)
     {
         if (empty($record->primaryKey())) {
             return;

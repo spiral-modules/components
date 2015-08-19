@@ -69,7 +69,7 @@ class MySQLDriver extends Driver
         $query = 'SELECT COUNT(*) FROM information_schema.tables '
             . 'WHERE table_schema = ? AND table_name = ?';
 
-        return (bool)$this->query($query, [$this->source, $name])->fetchColumn();
+        return (bool)$this->query($query, [$this->name, $name])->fetchColumn();
     }
 
     /**

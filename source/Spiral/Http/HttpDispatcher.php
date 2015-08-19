@@ -185,8 +185,10 @@ class HttpDispatcher extends Singleton implements
             $this->endpoints[$this->basePath()] = $this->router();
         }
 
-        //Become alive and die right after that
-        $this->dispatch($this->perform($this->request()));
+        if (!empty($response = $this->perform($this->request()))) {
+            //Become alive and die right after that
+            $this->dispatch($response);
+        }
     }
 
     /**
@@ -200,9 +202,12 @@ class HttpDispatcher extends Singleton implements
             return $this->request;
         }
 
+        //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose error
         return $this->request = ServerRequestFactory::fromGlobals(
             $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
-        )->withAttribute('basePath', $this->basePath());
+        )->withAttribute('basePath', $this->basePath())->withAttribute(
+            'isolate', $this->config['isolate']
+        );
     }
 
     /**
@@ -235,9 +240,9 @@ class HttpDispatcher extends Singleton implements
             );
         } finally {
             $this->benchmark($benchmark);
-
-            return $response;
         }
+
+        return $response;
     }
 
     /**

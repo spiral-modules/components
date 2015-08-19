@@ -106,6 +106,7 @@ class MiddlewarePipeline
      * @param int                    $position
      * @param ServerRequestInterface $outerRequest
      * @return callable
+     * @throw \Exception
      */
     protected function next($position, ServerRequestInterface $outerRequest)
     {
@@ -132,6 +133,11 @@ class MiddlewarePipeline
                 $response = $middleware($outerRequest, $next);
             }
         } catch (\Exception $exception) {
+            if (!$outerRequest->getAttribute('isolate', false)) {
+                //No isolation
+                throw $exception;
+            }
+
             /**
              * @var SnapshotInterface $snapshot
              */
@@ -148,9 +154,9 @@ class MiddlewarePipeline
             $http = $this->container->get(HttpDispatcher::class);
 
             $response = $http->handleSnapshot($snapshot, false, $outerRequest);
-        } finally {
-            return $response;
         }
+
+        return $response;
     }
 
     /**

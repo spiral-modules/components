@@ -94,11 +94,11 @@ abstract class Driver extends Component implements LoggerAwareInterface
     private $transactionLevel = 0;
 
     /**
-     * Database/source name (fetched from connection string).
+     * Driver name.
      *
      * @var string
      */
-    protected $source = '';
+    private $name = '';
 
     /**
      * Connection configuration described in DBAL config file. Any driver can be used as data source
@@ -132,18 +132,16 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
     /**
      * @param ContainerInterface $container
+     * @param string             $name
      * @param array              $config
      */
-    public function __construct(ContainerInterface $container, array $config)
+    public function __construct(ContainerInterface $container, $name, array $config)
     {
         $this->container = $container;
+        $this->name = $name;
 
         $this->config = $config + $this->config;
         $this->options = $config['options'] + $this->options;
-
-        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches)) {
-            $this->source = $matches[1];
-        }
     }
 
     /**
@@ -151,9 +149,9 @@ abstract class Driver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    public function getSource()
+    public function getName()
     {
-        return $this->source;
+        return $this->name;
     }
 
     /**
@@ -629,7 +627,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         return (object)[
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
-            'database'   => $this->getSource(),
+            'database'   => $this->getName(),
             'options'    => $this->options
         ];
     }

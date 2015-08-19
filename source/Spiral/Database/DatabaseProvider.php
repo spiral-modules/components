@@ -50,6 +50,11 @@ class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseP
     private $databases = [];
 
     /**
+     * @var Driver[]
+     */
+    private $drivers = [];
+
+    /**
      * @invisible
      * @var ContainerInterface
      */
@@ -95,10 +100,7 @@ class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseP
         }
 
         if (empty($driver)) {
-            //Driver identifier can be fetched from connection string
-            $driver = substr($config['connection'], 0, strpos($config['connection'], ':'));
-
-            $driver = $this->container->get($this->config['drivers'][$driver], compact('config'));
+            $driver = $this->driver($config['connection']);
         }
 
         //No need to benchmark here, due connection will happen later
@@ -109,6 +111,37 @@ class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseP
         ]);
 
         return $this->databases[$database];
+    }
+
+    /**
+     * Get driver by it's name.
+     *
+     * @param string $name
+     * @param array  $config Custom driver options and class.
+     * @return Driver
+     * @throws DatabaseException
+     */
+    public function driver($name, array $config = [])
+    {
+        if (isset($this->drivers[$name])) {
+            return $this->drivers[$name];
+        }
+
+        if (empty($config)) {
+            if (!isset($this->config['connections'][$name])) {
+                throw new DatabaseException(
+                    "Unable to create Driver, no presets for '{$name}' found."
+                );
+            }
+
+            $config = $this->config['connections'][$name];
+        }
+
+        $this->drivers[$name] = $this->container->get(
+            $config['driver'], compact('name', 'config')
+        );
+
+        return $this->drivers[$name];
     }
 
     /**

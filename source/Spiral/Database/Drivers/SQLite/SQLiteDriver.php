@@ -47,17 +47,6 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function __construct(ContainerInterface $container, array $config)
-    {
-        parent::__construct($container, $config);
-
-        //Remove "sqlite:"
-        $this->source = substr($this->config['connection'], 7);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function hasTable($name)
     {
         $query = 'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?';

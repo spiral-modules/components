@@ -161,6 +161,22 @@ class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseP
     }
 
     /**
+     * Get instance of every available driver.
+     *
+     * @return Database[]
+     * @throws DatabaseException
+     */
+    public function getDrivers()
+    {
+        $result = [];
+        foreach ($this->config['connections'] as $name => $config) {
+            $result[] = $this->driver($name);
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)

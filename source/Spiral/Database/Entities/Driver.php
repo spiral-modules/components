@@ -22,6 +22,7 @@ use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractReference;
 use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\QueryResult;
@@ -152,6 +153,21 @@ abstract class Driver extends Component implements LoggerAwareInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Get driver source database or file name.
+     *
+     * @return string
+     * @throws DriverException
+     */
+    public function getSource()
+    {
+        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches)) {
+            return $matches[1];
+        }
+
+        throw new DriverException("Unable to locate source name.");
     }
 
     /**
@@ -627,7 +643,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         return (object)[
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
-            'database'   => $this->getName(),
+            'database'   => $this->getSource(),
             'options'    => $this->options
         ];
     }

@@ -8,13 +8,13 @@
  */
 namespace Spiral\Database\Drivers\SQLite;
 
-use Spiral\Core\ContainerInterface;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\SQLite\Schemas\ColumnSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\IndexSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\ReferenceSchema;
 use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Exceptions\DriverException;
 
 /**
  * Talks to sqlite databases.
@@ -43,6 +43,18 @@ class SQLiteDriver extends Driver
      * Default timestamp expression.
      */
     const TIMESTAMP_NOW = 'CURRENT_TIMESTAMP';
+
+    /**
+     * Get driver source database or file name.
+     *
+     * @return string
+     * @throws DriverException
+     */
+    public function getSource()
+    {
+        //Remove "sqlite:"
+        return substr($this->config['connection'], 7);
+    }
 
     /**
      * {@inheritdoc}

@@ -80,10 +80,14 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
         $this->optionsPull[] = $options + $this->config['stores'][$store];
 
         $benchmark = $this->benchmark('store', $store);
-        $this->stores[$store] = $this->container->get($this->config['stores'][$store]['class'], [
-            'cache' => $this
-        ]);
-        $this->benchmark($benchmark);
+        try {
+            $this->stores[$store] = $this->container->get(
+                $this->config['stores'][$store]['class'],
+                ['cache' => $this]
+            );
+        } finally {
+            $this->benchmark($benchmark);
+        }
 
         if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
             throw new CacheException(

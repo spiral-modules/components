@@ -29,8 +29,8 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
- * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to hide
- * implementation specific functionality.
+ * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to
+ * hide implementation specific functionality.
  */
 abstract class Driver extends Component implements LoggerAwareInterface
 {
@@ -86,7 +86,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
     private $pdo = null;
 
     /**
-     * Transaction level (count of nested transactions). Not all drives can support nested transactions.
+     * Transaction level (count of nested transactions). Not all drives can support nested
+     * transactions.
      *
      * @var int
      */
@@ -257,8 +258,11 @@ abstract class Driver extends Component implements LoggerAwareInterface
         }
 
         $benchmark = $this->benchmark('connect', $this->config['connection']);
-        $this->pdo = $this->createPDO();
-        $this->benchmark($benchmark);
+        try {
+            $this->pdo = $this->createPDO();
+        } finally {
+            $this->benchmark($benchmark);
+        }
 
         return $this->pdo;
     }
@@ -305,20 +309,23 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
             $pdoStatement = $this->getPDO()->prepare($query);
 
-            //Configuring statement binded parameters
-            $pdoStatement->execute($parameters);
+            try {
+                //Configuring statement binded parameters
+                $pdoStatement->execute($parameters);
+            } finally {
+                !empty($benchmark) && $this->benchmark($benchmark);
+            }
 
-            if (!empty($benchmark) && !empty($queryString)) {
-                $this->benchmark($benchmark);
+            if (!empty($queryString)) {
                 $this->logger()->debug($queryString, compact('query', 'parameters'));
             }
         } catch (\PDOException $exception) {
-            $this->logger()->error(
-                !empty($queryString) ? $queryString : QueryCompiler::interpolate($query,
-                    $parameters),
-                compact('query', 'parameters')
-            );
 
+            if (empty($queryString)) {
+                $queryString = QueryCompiler::interpolate($query, $parameters);
+            }
+
+            $this->logger()->error($queryString, compact('query', 'parameters'));
             throw new QueryException($exception);
         }
 
@@ -347,7 +354,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * Get id of last inserted row, this method must be called after insert query. Attention,
      * such functionality may not work in some DBMS property (Postgres).
      *
-     * @param string|null $sequence Name of the sequence object from which the ID should be returned.
+     * @param string|null $sequence Name of the sequence object from which the ID should be
+     *                              returned.
      * @return mixed
      */
     public function lastInsertID($sequence = null)
@@ -358,8 +366,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Prepare set of query builder/user parameters to be send to PDO. Must convert DateTime instances
-     * into valid database timestamps and resolve values of ParameterInterface.
+     * Prepare set of query builder/user parameters to be send to PDO. Must convert DateTime
+     * instances into valid database timestamps and resolve values of ParameterInterface.
      *
      * @param array $parameters
      * @return array
@@ -601,8 +609,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
     /**
      * Get instance of Driver specific QueryCompiler.
      *
-     * @param string $tablePrefix Database specific table prefix, used to quote table names and build
-     *                            aliases.
+     * @param string $tablePrefix Database specific table prefix, used to quote table names and
+     *                            build aliases.
      * @return QueryCompiler
      */
     public function queryCompiler($tablePrefix = '')
@@ -642,7 +650,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Set transaction isolation level, this feature may not be supported by specific database driver.
+     * Set transaction isolation level, this feature may not be supported by specific database
+     * driver.
      *
      * @param string $level
      */
@@ -656,7 +665,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * Create nested transaction save point.
      *
      * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
      */
     protected function savepointCreate($name)
     {
@@ -668,7 +678,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * Commit/release savepoint.
      *
      * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
      */
     protected function savepointRelease($name)
     {
@@ -680,7 +691,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      * Rollback savepoint.
      *
      * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database identifier.
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
      */
     protected function savepointRollback($name)
     {

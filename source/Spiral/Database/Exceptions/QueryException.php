@@ -25,4 +25,11 @@ class QueryException extends RuntimeException
         parent::__construct($exception->getMessage(), (int)$exception->getCode(), $exception);
     }
 
+    /**
+     * @return \PDOException
+     */
+    public function getPDOException()
+    {
+        return $this->getPrevious();
+    }
 }

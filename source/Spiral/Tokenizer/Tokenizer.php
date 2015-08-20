@@ -235,7 +235,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
 
                 if (!empty($parent)) {
                     if ($parent->isTrait()) {
-                        if (!in_array($parent->getName(), self::getTraits($class))) {
+                        if (!in_array($parent->getName(), $this->getTraits($class))) {
                             continue;
                         }
                     } else {

@@ -18,9 +18,9 @@ use Spiral\Validation\Exceptions\InvalidArgumentException;
 use Spiral\Validation\Exceptions\ValidationException;
 
 /**
- * Validation is default implementation of ValidatorInterface. Class support functional rules with
+ * Validator is default implementation of ValidatorInterface. Class support functional rules with
  * user parameters. In addition part of validation rules moved into validation checkers used to
- * simplify adding new rules, checker are resolved using container and can be rebinded in application.
+ * simplify adding new rules, checkers are resolved using container and can be rebinded in application.
  *
  * Examples:
  *
@@ -260,6 +260,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
                 }
 
                 if ($result instanceof Checker) {
+                    //Failed inside checker, this is implementation agreement
                     if ($message = $result->getMessage($condition[1])) {
                         //Checker provides it's own message for condition
                         $this->addMessage(

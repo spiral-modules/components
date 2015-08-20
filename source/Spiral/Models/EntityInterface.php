@@ -9,11 +9,12 @@
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityExceptionInterface;
+use Spiral\Validation\ValidatesInterface;
 
 /**
  * Generic data entity instance.
  */
-interface EntityInterface extends \ArrayAccess
+interface EntityInterface extends \ArrayAccess, ValidatesInterface
 {
     /**
      * Check if entity has field by it's name.

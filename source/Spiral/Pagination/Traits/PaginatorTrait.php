@@ -102,10 +102,11 @@ trait PaginatorTrait
      * Paginate current selection.
      *
      * @param int                    $limit         Pagination limit.
-     * @param string                 $pageParameter Name of parameter in request query which is used to
-     *                                              store the current page number. "page" by default.
-     * @param int                    $count         Forced count value, if 0 paginator will try to fetch
-     *                                              count from associated object.
+     * @param string                 $pageParameter Name of parameter in request query which is
+     *                                              used to store the current page number. "page"
+     *                                              by default.
+     * @param int                    $count         Forced count value, if 0 paginator will try to
+     *                                              fetch count from associated object.
      * @param ServerRequestInterface $request       Has to be specified if no global container set.
      * @return $this
      * @throws PaginationException
@@ -147,7 +148,7 @@ trait PaginatorTrait
      */
     public function getPaginator()
     {
-        if (!$this->paginator) {
+        if (empty($this->paginator)) {
             throw new PaginationException(
                 "Selection has to be paginated before requesting Paginator."
             );
@@ -157,7 +158,18 @@ trait PaginatorTrait
     }
 
     /**
-     * Apply pagination to current object. Will be applied only if internal paginator already constructed.
+     * Indication that object was paginated.
+     *
+     * @return bool
+     */
+    public function isPaginated()
+    {
+        return !empty($this->paginator);
+    }
+
+    /**
+     * Apply pagination to current object. Will be applied only if internal paginator already
+     * constructed.
      *
      * @return $this
      */

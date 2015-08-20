@@ -86,7 +86,7 @@ class Tokenizer extends Singleton implements TokenizerInterface
         $this->loader = $loader;
 
         foreach ($this->config['directories'] as &$directory) {
-            $directory = $files->normalizePath($directory, true);
+            $directory = $files->normalizePath($directory);
             unset($directory);
         }
 
@@ -169,8 +169,9 @@ class Tokenizer extends Singleton implements TokenizerInterface
     }
 
     /**
-     * Get ReflectionFile instance associated with given filename, reflection can be used to retrieve
-     * list of declared classes, interfaces, traits and functions, plus it can locate function usages.
+     * Get ReflectionFile instance associated with given filename, reflection can be used to
+     * retrieve list of declared classes, interfaces, traits and functions, plus it can locate
+     * function usages.
      *
      * @param string $filename
      * @return ReflectionFile

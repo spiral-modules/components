@@ -59,7 +59,7 @@ class CachedResult extends QueryResult
 
     /**
      * @param StoreInterface $store
-     * @param array          $cacheID
+     * @param string         $cacheID
      * @param string         $queryString
      * @param array          $parameters
      * @param array          $data

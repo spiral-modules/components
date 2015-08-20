@@ -22,7 +22,7 @@ interface StatusInterface
     /**
      * Get migration given name.
      *
-     * @return bool
+     * @return string
      */
     public function getName();
 

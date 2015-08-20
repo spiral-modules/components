@@ -23,9 +23,9 @@ interface ResultInterface extends \Countable, \Iterator
     public function countColumns();
 
     /**
-     * Fetch one result row as array.
+     * Fetch one result row as array or return false.
      *
-     * @return array
+     * @return array|bool
      */
     public function fetch();
 

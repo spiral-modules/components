@@ -128,15 +128,26 @@ class Translator extends Singleton implements TranslatorInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param PluralizerInterface $pluralizer Custom pluralizer to be used.
      */
-    public function pluralize($phrase, $number, $format = true)
-    {
+    public function pluralize(
+        $phrase,
+        $number,
+        $format = true,
+        PluralizerInterface $pluralizer = null
+    ) {
         $this->loadBundle($bundle = $this->config['plurals']);
+
+        if (empty($pluralizer)) {
+            //Active pluralizer
+            $pluralizer = $this->pluralizer();
+        }
 
         if (!isset($this->bundles[$bundle][$phrase = $this->normalize($phrase)])) {
             $this->bundles[$bundle][$phrase] = array_pad(
                 [],
-                $this->pluralizer()->countForms(),
+                $pluralizer->countForms(),
                 func_get_arg(0)
             );
 
@@ -148,7 +159,7 @@ class Translator extends Singleton implements TranslatorInterface
         }
 
         return \Spiral\interpolate(
-            $this->pluralizer()->getForm($number, $this->bundles[$bundle][$phrase]),
+            $pluralizer->getForm($number, $this->bundles[$bundle][$phrase]),
             ['n' => $format ? number_format($number) : $number]
         );
     }
@@ -215,7 +226,7 @@ class Translator extends Singleton implements TranslatorInterface
      */
     protected function normalize($string)
     {
-        return preg_replace('/[ \t\n\r]+/', ' ', trim($string));
+        return preg_replace('/\s+/', ' ', trim($string));
     }
 
     /**

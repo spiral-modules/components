@@ -14,20 +14,20 @@ namespace Spiral\Core;
 interface HippocampusInterface
 {
     /**
-     * Read data from long memory cache. Will return null if no data presented.
+     * Read data from long memory cache. Must return exacts same value as saved or null.
      *
      * @param string $name
      * @param string $location Specific memory location.
-     * @return mixed|null
+     * @return string|array|null
      */
     public function loadData($name, $location = null);
 
     /**
-     * Put data to long memory cache.
+     * Put data to long memory cache. No inner references or closures are allowed.
      *
-     * @param string $name
-     * @param mixed  $data
-     * @param string $location Specific memory location.
+     * @param string       $name
+     * @param string|array $data
+     * @param string       $location Specific memory location.
      */
     public function saveData($name, $data, $location = null);
 }

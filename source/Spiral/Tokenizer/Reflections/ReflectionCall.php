@@ -168,6 +168,16 @@ class ReflectionCall
     }
 
     /**
+     * Count of arguments in call.
+     *
+     * @return int
+     */
+    public function countArguments()
+    {
+        return count($this->arguments);
+    }
+
+    /**
      * Get call argument by it's position.
      *
      * @param int $index

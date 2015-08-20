@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Database;
+namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Database;
@@ -59,8 +59,9 @@ abstract class QueryBuilder extends Component
     abstract public function sqlStatement(QueryCompiler $compiler = null);
 
     /**
-     * Run built statement against parent database.
+     * Run built statement against parent database. Might return different values based on context.
      *
+     * @return mixed
      * @throws QueryException
      */
     public function run()

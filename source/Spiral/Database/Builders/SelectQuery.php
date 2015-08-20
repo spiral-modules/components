@@ -12,7 +12,7 @@ use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION

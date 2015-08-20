@@ -14,7 +14,7 @@ use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Update statement builder.

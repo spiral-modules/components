@@ -13,7 +13,7 @@ use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLExpression;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Provides ability to generate QueryCompiler JOIN tokens including ON conditions and table/column

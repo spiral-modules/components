@@ -11,7 +11,7 @@ namespace Spiral\Database\Builders;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\Parameter;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Insert statement query builder, support singular and batch inserts.

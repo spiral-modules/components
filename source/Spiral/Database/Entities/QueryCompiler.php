@@ -13,11 +13,10 @@ use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLExpression;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\QueryBuilder;
 
 /**
- * Responsible for conversion of set of query parameters (where tokens, table names and etc) into sql
- * to be send into specific Driver.
+ * Responsible for conversion of set of query parameters (where tokens, table names and etc) into
+ * sql to be send into specific Driver.
  */
 class QueryCompiler extends Component
 {
@@ -61,8 +60,8 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Create insert query using table names, columns and rowsets. Must support both - single and batch
-     * inserts.
+     * Create insert query using table names, columns and rowsets. Must support both - single and
+     * batch inserts.
      *
      * @param string $table
      * @param array  $columns
@@ -199,8 +198,10 @@ class QueryCompiler extends Component
      * Query query identifier, if identified stated as table - table prefix must be added.
      *
      * @param string $identifier  Identifier can include simple column operations and functions,
-     *                            having "." in it will automatically force table prefix to first value.
-     * @param bool   $table       Set to true to let quote method know that identified is related to
+     *                            having "." in it will automatically force table prefix to first
+     *                            value.
+     * @param bool   $table       Set to true to let quote method know that identified is related
+     *                            to
      *                            table name.
      * @param bool   $forceTable  In some cases we have to force prefix.
      * @return mixed|string

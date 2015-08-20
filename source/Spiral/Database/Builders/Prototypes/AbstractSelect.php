@@ -18,7 +18,7 @@ use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
 

@@ -12,7 +12,7 @@ use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Abstract query with WHERE conditions generation support. Provides simplified way to generate WHERE

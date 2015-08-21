@@ -240,15 +240,13 @@ class HttpDispatcher extends Singleton implements
         $response = null;
         $benchmark = $this->benchmark('request', $request->getUri());
         try {
-            //Must handle exceptions
-            $response = $pipeline->target($endpoint)->run(
-                $request->withAttribute('activePath', $activePath)
-            );
+            //Configuring endpoint
+            $pipeline = $pipeline->target($endpoint);
+
+            return $pipeline->run($request->withAttribute('activePath', $activePath));
         } finally {
             $this->benchmark($benchmark);
         }
-
-        return $response;
     }
 
     /**

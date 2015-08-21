@@ -1,8 +1,8 @@
 <?php
 /**
  * Validation configuration includes:
- * - set of empty conditions, you must include at least one condition like that into field validation
- *   to ensure that field value will be set
+ * - set of empty conditions, you must include at least one condition like that into field
+ * validation to ensure that field value will be set
  * - validation checker classes
  * - validation rule aliases for convenience
  */
@@ -59,6 +59,7 @@ return [
         "real"       => "is_real",
         "resource"   => "is_resource",
         "scalar"     => "is_scalar",
-        "string"     => "is_string"
+        "string"     => "is_string",
+        "match"      => "mixed::match"
     ]
 ];

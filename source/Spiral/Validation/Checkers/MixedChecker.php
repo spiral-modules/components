@@ -50,4 +50,21 @@ class MixedChecker extends Checker
         // Check validity.
         return ($result % 10 == 0) ? true : false;
     }
+
+    /**
+     * Check if value matches value from another field.
+     *
+     * @param string $value
+     * @param string $field
+     * @param bool   $strict
+     * @return bool
+     */
+    public function match($value, $field, $strict = false)
+    {
+        if ($strict) {
+            return $value === $this->validator->field($field, null);
+        }
+
+        return $value == $this->validator->field($field, null);
+    }
 }

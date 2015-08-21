@@ -56,8 +56,7 @@ class ManyToMany extends Relation
     public function count()
     {
         return $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(),
-            null
+            $this->parentKey(), null
         ))->count();
     }
 
@@ -81,9 +80,7 @@ class ManyToMany extends Relation
     public function has($recordID, $wherePivot = false)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(),
-            $this->prepareIDs($recordID),
-            $wherePivot
+            $this->parentKey(), $this->prepareIDs($recordID), $wherePivot
         ));
 
         //We can use hasEach methods there, but this is more optimal way
@@ -196,9 +193,7 @@ class ManyToMany extends Relation
     public function unlink($recordID)
     {
         return $this->pivotTable()->delete($this->wherePivot(
-            $this->parentKey(),
-            $this->prepareIDs($recordID),
-            false
+            $this->parentKey(), $this->prepareIDs($recordID), false
         ))->run();
     }
 
@@ -215,9 +210,7 @@ class ManyToMany extends Relation
     public function unlinkAll($wherePivot = true)
     {
         return $this->pivotTable()->delete($this->wherePivot(
-            $this->parentKey(),
-            null,
-            $wherePivot
+            $this->parentKey(), null, $wherePivot
         ))->run();
     }
 

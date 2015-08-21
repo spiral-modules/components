@@ -131,6 +131,51 @@ abstract class DataEntity extends Component implements
 
     /**
      * {@inheritdoc}
+     *
+     * @see   $fillable
+     * @see   $secured
+     * @see   isFillable()
+     * @param array|\Traversable $fields
+     * @param bool               $all Fill all fields including non fillable.
+     * @return $this
+     * @throws AccessorExceptionInterface
+     * @event setFields($fields)
+     */
+    public function setFields($fields = [], $all = false)
+    {
+        if (!is_array($fields) && !$fields instanceof \Traversable) {
+            return $this;
+        }
+
+        foreach ($this->fire('setFields', $fields) as $name => $field) {
+            if ($all || $this->isFillable($name)) {
+                $this->setField($name, $field, true);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Every getter and accessor will be applied/constructed if filter argument set to true.
+     *
+     * @param bool $filter
+     * @throws AccessorExceptionInterface
+     */
+    public function getFields($filter = true)
+    {
+        $result = [];
+        foreach ($this->fields as $name => $field) {
+            $result[$name] = $this->getField($name, null, $filter);
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function hasField($name)
     {
@@ -289,48 +334,6 @@ abstract class DataEntity extends Component implements
     public function getIterator()
     {
         return new \ArrayIterator($this->getFields());
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see   $fillable
-     * @see   $secured
-     * @see   isFillable()
-     * @param array|\Traversable $fields
-     * @return $this
-     * @throws AccessorExceptionInterface
-     * @event setFields($fields)
-     */
-    public function setFields($fields = [])
-    {
-        if (!is_array($fields) && !$fields instanceof \Traversable) {
-            return $this;
-        }
-
-        foreach ($this->fire('setFields', $fields) as $name => $field) {
-            $this->isFillable($name) && $this->setField($name, $field, true);
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Every getter and accessor will be applied/constructed if filter argument set to true.
-     *
-     * @param bool $filter
-     * @throws AccessorExceptionInterface
-     */
-    public function getFields($filter = true)
-    {
-        $result = [];
-        foreach ($this->fields as $name => $field) {
-            $result[$name] = $this->getField($name, null, $filter);
-        }
-
-        return $result;
     }
 
     /**

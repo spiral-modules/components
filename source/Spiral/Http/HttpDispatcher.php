@@ -185,8 +185,14 @@ class HttpDispatcher extends Singleton implements
             $this->endpoints[$this->basePath()] = $this->router();
         }
 
-        if (!empty($response = $this->perform($this->request()))) {
-            //Become alive and die right after that
+        //We need request to start, let's cast it
+        $request = $this->request();
+
+        //Now we can generate response using request
+        $response = $this->perform($request);
+
+        if (!empty($response)) {
+            //Sending to client
             $this->dispatch($response);
         }
     }

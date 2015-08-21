@@ -320,6 +320,19 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
 
                     return $result;
                 }
+            } elseif (is_array($condition)) {
+                //We are going to resolve class using container
+                $condition[0] = is_object($condition[0])
+                    ? $condition[0]
+                    : $this->container->get($condition[0]);
+
+                //Class requests first argument as Validator
+                if ($condition[0] instanceof CheckProviderInterface) {
+                    array_unshift($arguments, $value);
+                    array_unshift($arguments, $this);
+
+                    return call_user_func_array($condition, $arguments);
+                }
             }
 
             if (is_string($condition) || is_array($condition)) {

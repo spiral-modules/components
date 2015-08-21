@@ -172,7 +172,8 @@ interface PaginatorInterface extends \Countable
     public function paginateObject(PaginableInterface $object, $fetchCount = true);
 
     /**
-     * Create page URL using specific page number.
+     * Create page URL using specific page number. No domain or schema information included by
+     * default, starts with path.
      *
      * @param int $pageNumber
      * @return string

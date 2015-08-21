@@ -12,8 +12,8 @@ use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\ReferenceInterface;
 
 /**
- * Abstract foreign schema with read (see ReferenceInterface) and write abilities. Must be implemented
- * by driver to support DBMS specific syntax and creation rules.
+ * Abstract foreign schema with read (see ReferenceInterface) and write abilities. Must be
+ * implemented by driver to support DBMS specific syntax and creation rules.
  */
 abstract class AbstractReference implements ReferenceInterface
 {
@@ -156,7 +156,8 @@ abstract class AbstractReference implements ReferenceInterface
      * Set foreign table name and key local column must reference to. Make sure local and foreign
      * column types are identical.
      *
-     * @param string $table  Foreign table name without database prefix (will be added automatically).
+     * @param string $table  Foreign table name without database prefix (will be added
+     *                       automatically).
      * @param string $column Foreign key name (id by default).
      * @return $this
      */

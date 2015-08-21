@@ -8,15 +8,16 @@
  */
 namespace Spiral\Database\Builders\Prototypes;
 
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\Entities\QueryBuilder;
 
 /**
- * Abstract query with WHERE conditions generation support. Provides simplified way to generate WHERE
- * tokens using set of where methods. Class support different where conditions, simplified definitions
+ * Abstract query with WHERE conditions generation support. Provides simplified way to generate
+ * WHERE tokens using set of where methods. Class support different where conditions, simplified
+ * definitions
  * (using arrays) and closures to describe nested conditions:
  *
  * 1) Simple token/nested query or expression

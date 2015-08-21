@@ -12,7 +12,8 @@ use Spiral\Database\Exceptions\MigrationException;
 use Spiral\Database\Exceptions\MigratorException;
 
 /**
- * Class responsible for migration process, implementation is specific to spiral Database implementation.
+ * Class responsible for migration process, implementation is specific to spiral Database
+ * implementation.
  */
 interface MigratorInterface
 {

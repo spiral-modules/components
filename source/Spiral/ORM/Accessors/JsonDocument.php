@@ -13,10 +13,11 @@ use Spiral\ODM\Document;
 use Spiral\ORM\RecordAccessorInterface;
 
 /**
- * JsonDocument utilizes abilities of ODM Document record and uses it to represent json values stored
- * inside ORM Record field. You can perform full set of Document operations including sub documents,
- * compositions (even aggregations!), validations and filtering to simplify work with your
- * denormalized data. If you going to use Postgres document fields can even be used in your queries.
+ * JsonDocument utilizes abilities of ODM Document record and uses it to represent json values
+ * stored inside ORM Record field. You can perform full set of Document operations including sub
+ * documents, compositions (even aggregations!), validations and filtering to simplify work with
+ * your denormalized data. If you going to use Postgres document fields can even be used in your
+ * queries.
  *
  * @see PostgresDriver
  * @see http://www.postgresql.org/docs/9.3/static/datatype-json.html

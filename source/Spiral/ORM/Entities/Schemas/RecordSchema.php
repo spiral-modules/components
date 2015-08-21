@@ -36,8 +36,8 @@ class RecordSchema extends ReflectionEntity
     const BASE_CLASS = Record::class;
 
     /**
-     * Every ORM Record must have associated database table, table will be used to read column names,
-     * default values and write declared record changes.
+     * Every ORM Record must have associated database table, table will be used to read column
+     * names, default values and write declared record changes.
      *
      * @var AbstractTable
      */
@@ -91,8 +91,8 @@ class RecordSchema extends ReflectionEntity
     }
 
     /**
-     * Returns true if Record states that related table can be altered by ORM. To allow schema altering
-     * set record constant ACTIVE_SCHEMA to true.
+     * Returns true if Record states that related table can be altered by ORM. To allow schema
+     * altering set record constant ACTIVE_SCHEMA to true.
      *
      * Tables associated to records with ACTIVE_SCHEMA = false counted as "passive".
      *
@@ -126,8 +126,8 @@ class RecordSchema extends ReflectionEntity
     }
 
     /**
-     * Source table. In cases where table name was not specified, RecordSchema will generate need value
-     * using class name and Doctrine inflector.
+     * Source table. In cases where table name was not specified, RecordSchema will generate need
+     * value using class name and Doctrine inflector.
      *
      * @see Record::$table
      * @return mixed
@@ -167,7 +167,8 @@ class RecordSchema extends ReflectionEntity
     }
 
     /**
-     * Name of first primary key (usually sequence). Might return null for records with no primary key.
+     * Name of first primary key (usually sequence). Might return null for records with no primary
+     * key.
      *
      * @return string|null
      */
@@ -508,8 +509,8 @@ class RecordSchema extends ReflectionEntity
     }
 
     /**
-     * Cast (specify) index shema in associated table based on Record index property definition. Only
-     * normal or unique indexes can be casted at this moment.
+     * Cast (specify) index shema in associated table based on Record index property definition.
+     * Only normal or unique indexes can be casted at this moment.
      *
      * Example:
      * protected $indexes = array(

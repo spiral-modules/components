@@ -55,9 +55,10 @@ interface LoaderInterface
     public function getReferenceKey();
 
     /**
-     * Must return array of unique values of specified column by it's name (key). In order to optimize
-     * loadings, LoaderInterface must declare such column name in getReferenceKey to it's parent before
-     * requesting for aggregation. Keys like that can be used in IN statements for post loaders.
+     * Must return array of unique values of specified column by it's name (key). In order to
+     * optimize loadings, LoaderInterface must declare such column name in getReferenceKey to it's
+     * parent before requesting for aggregation. Keys like that can be used in IN statements for
+     * post loaders.
      *
      * @see getReferenceKey()
      * @param string $referenceKey

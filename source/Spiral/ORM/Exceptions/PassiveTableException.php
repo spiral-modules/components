@@ -12,15 +12,15 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 
 /**
- * Raised when user or relation edits/creates columns in table associated to record with ACTIVE_SCHEMA
- * constant set to false. Tables like that counted as passive and their schema must not be altered
- * by ORM schema synchronizer.
+ * Raised when user or relation edits/creates columns in table associated to record with
+ * ACTIVE_SCHEMA constant set to false. Tables like that counted as passive and their schema must
+ * not be altered by ORM schema synchronizer.
  */
 class PassiveTableException extends SchemaException
 {
     /**
      * @param AbstractTable $table
-     * @param RecordSchema   $record
+     * @param RecordSchema  $record
      */
     public function __construct(AbstractTable $table, RecordSchema $record)
     {
@@ -34,7 +34,7 @@ class PassiveTableException extends SchemaException
             [
                 'database' => $record->getDatabase(),
                 'table'    => $table->getName(),
-                'record'    => $record,
+                'record'   => $record,
                 'columns'  => join(', ', $altered)
             ]
         ));

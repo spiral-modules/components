@@ -20,7 +20,8 @@ namespace Spiral\Templater;
 interface SupervisorInterface
 {
     /**
-     * In strict mode every unpaired close tag or other html error will raise an StrictModeException.
+     * In strict mode every unpaired close tag or other html error will raise an
+     * StrictModeException.
      *
      * @return bool
      */

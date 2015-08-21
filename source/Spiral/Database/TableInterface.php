@@ -11,8 +11,8 @@ namespace Spiral\Database;
 use Spiral\Database\Exceptions\QueryException;
 
 /**
- * TableInterface is table level abstraction linked to existed or not existed database table. You can
- * check if table really exist or not exist using "exists" method of table schema.
+ * TableInterface is table level abstraction linked to existed or not existed database table. You
+ * can check if table really exist or not exist using "exists" method of table schema.
  */
 interface TableInterface extends \Countable
 {

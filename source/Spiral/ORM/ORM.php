@@ -21,7 +21,8 @@ use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\ORMException;
 
 /**
- * ORM component used to manage state of cached Record's schema, record creation and schema analysis.
+ * ORM component used to manage state of cached Record's schema, record creation and schema
+ * analysis.
  */
 class ORM extends Singleton
 {
@@ -169,8 +170,8 @@ class ORM extends Singleton
     }
 
     /**
-     * Construct instance of Record or receive it from cache (if enabled). Only records with declared
-     * primary key can be cached.
+     * Construct instance of Record or receive it from cache (if enabled). Only records with
+     * declared primary key can be cached.
      *
      * @param string $class Record class name.
      * @param array  $data
@@ -203,11 +204,11 @@ class ORM extends Singleton
     /**
      * Create record relation instance by given relation type, parent and definition (options).
      *
-     * @param int   $type
+     * @param int    $type
      * @param Record $parent
-     * @param array $definition Relation definition.
-     * @param array $data
-     * @param bool  $loaded
+     * @param array  $definition Relation definition.
+     * @param array  $data
+     * @param bool   $loaded
      * @return RelationInterface
      * @throws ORMException
      */
@@ -292,7 +293,7 @@ class ORM extends Singleton
      *
      * @param mixed         $type
      * @param SchemaBuilder $builder
-     * @param RecordSchema   $record
+     * @param RecordSchema  $record
      * @param string        $name
      * @param array         $definition
      * @return RelationSchemaInterface
@@ -344,7 +345,7 @@ class ORM extends Singleton
      * Add Record to entity cache (only if cache enabled). Primary key is required for caching.
      *
      * @param Record $record
-     * @param bool  $ignoreLimit Cache overflow will be ignored.
+     * @param bool   $ignoreLimit Cache overflow will be ignored.
      * @return Record
      */
     public function registerEntity(Record $record, $ignoreLimit = true)

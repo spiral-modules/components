@@ -9,7 +9,8 @@
 namespace Spiral\Events;
 
 /**
- * Event carry information about some context and will be passed though the chain of listeners (if any).
+ * Event carry information about some context and will be passed though the chain of listeners (if
+ * any).
  */
 interface EventInterface
 {

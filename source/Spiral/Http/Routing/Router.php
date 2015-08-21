@@ -20,8 +20,8 @@ use Spiral\Http\Exceptions\RouterException;
 class Router implements RouterInterface
 {
     /**
-     * Internal name for primary (default) route. Primary route used to resolve url and perform controller
-     * based routing in cases where no other route found.
+     * Internal name for primary (default) route. Primary route used to resolve url and perform
+     * controller based routing in cases where no other route found.
      *
      * Primary route should support <controller> and <action> parameters. Basically this is multi
      * controller route. Primary route should be instance of spiral DirectRoute or compatible.

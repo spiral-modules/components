@@ -12,7 +12,8 @@ use Spiral\Core\Exceptions\ExceptionInterface;
 use Spiral\Core\Exceptions\RuntimeException;
 
 /**
- * TemplaterException has ability to specify context token which will can used to define location of html code caused error.
+ * TemplaterException has ability to specify context token which will can used to define location
+ * of html code caused error.
  */
 class TemplaterException extends RuntimeException implements ExceptionInterface
 {

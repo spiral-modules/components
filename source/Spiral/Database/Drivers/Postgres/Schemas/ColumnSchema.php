@@ -190,8 +190,8 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Generate set of altering operations should be applied to column to change it's type, size, default value or null
-     * flag.
+     * Generate set of altering operations should be applied to column to change it's type, size,
+     * default value or null flag.
      *
      * @param ColumnSchema $original
      * @return array

@@ -15,8 +15,8 @@ use Spiral\Templater\Templater;
 /**
  * {@inheritdoc}
  *
- * Uses extend token attributes as additional blocks. Every element and tag declared inside html token will go into
- * context block of included node.
+ * Uses extend token attributes as additional blocks. Every element and tag declared inside html
+ * token will go into context block of included node.
  */
 class IncludeBehaviour implements IncludeBehaviourInterface
 {
@@ -47,8 +47,8 @@ class IncludeBehaviour implements IncludeBehaviourInterface
     protected $token = [];
 
     /**
-     * User able to define custom attributes while importing element, this attributes will be treated
-     * as node blocks.
+     * User able to define custom attributes while importing element, this attributes will be
+     * treated as node blocks.
      *
      * @var array
      */

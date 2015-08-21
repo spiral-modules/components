@@ -24,7 +24,7 @@ interface RelationSchemaInterface
 {
     /**
      * @param SchemaBuilder $builder
-     * @param RecordSchema   $record
+     * @param RecordSchema  $record
      * @param string        $name
      * @param array         $definition
      * @throws RelationSchemaException
@@ -51,9 +51,10 @@ interface RelationSchemaInterface
     public function getType();
 
     /**
-     * Check if relation has it's equivalent. For example if relation associated to a specific record
-     * (or, like in case with polymorphic relations to interface) it can declare alternative relation
-     * definition with different relation type.
+     * Check if relation has it's equivalent. For example if relation associated to a specific
+     * record
+     * (or, like in case with polymorphic relations to interface) it can declare alternative
+     * relation definition with different relation type.
      *
      * @return bool
      */
@@ -86,8 +87,8 @@ interface RelationSchemaInterface
     public function isReasonable();
 
     /**
-     * Must declare inversed (reverted) relation in outer record schema. Relation must not be created
-     * if it's name already taken.
+     * Must declare inversed (reverted) relation in outer record schema. Relation must not be
+     * created if it's name already taken.
      *
      * @throws RelationSchemaException
      * @throws SchemaException

@@ -10,11 +10,11 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractAffect;
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Update statement builder.

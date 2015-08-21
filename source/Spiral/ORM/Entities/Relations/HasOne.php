@@ -65,8 +65,8 @@ class HasOne extends Relation
     }
 
     /**
-     * Create record and configure it's fields with relation data. Attention, you have to validate and
-     * save record by your own. Newly created entity will not be associated automatically!
+     * Create record and configure it's fields with relation data. Attention, you have to validate
+     * and save record by your own. Newly created entity will not be associated automatically!
      * Pre-loaded data will not be altered, unless reset() method are called.
      *
      * @param mixed $fields

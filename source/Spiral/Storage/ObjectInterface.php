@@ -67,8 +67,9 @@ interface ObjectInterface extends StreamableInterface
     public function getSize();
 
     /**
-     * Must return filename which is valid in associated FilesInterface instance. Must trow an exception
-     * if object does not exists. Filename can be temporary and should not be used between sessions.
+     * Must return filename which is valid in associated FilesInterface instance. Must trow an
+     * exception if object does not exists. Filename can be temporary and should not be used
+     * between sessions.
      *
      * @return string
      * @throws ServerException

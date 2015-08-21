@@ -12,8 +12,8 @@ use Spiral\Database\Entities\Table;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
 use Spiral\ORM\Entities\Relation;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
  * Provides ability to load records related using pivot table, link, unlink and check such records.
@@ -203,8 +203,9 @@ class ManyToMany extends Relation
     }
 
     /**
-     * Unlink every associated record, method will return amount of affected rows. Method will unlink
-     * only records matched WHERE_PIVOT by default. Set wherePivot to false to unlink every record.
+     * Unlink every associated record, method will return amount of affected rows. Method will
+     * unlink only records matched WHERE_PIVOT by default. Set wherePivot to false to unlink every
+     * record.
      *
      * Method will not affect state of pre-loaded data! Use reset() method to do that.
      *
@@ -281,8 +282,8 @@ class ManyToMany extends Relation
      * Helper method to fetch outer key value from provided list.
      *
      * @param mixed $recordID
-     * @param array $pivotRows Automatically constructed pivot rows will be available here for insertion
-     *                         or update.
+     * @param array $pivotRows Automatically constructed pivot rows will be available here for
+     *                         insertion or update.
      * @param array $pivotData
      * @return mixed
      * @throws RelationException

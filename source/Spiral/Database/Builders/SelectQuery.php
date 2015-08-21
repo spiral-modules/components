@@ -10,9 +10,9 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION
@@ -56,10 +56,11 @@ class SelectQuery extends AbstractSelect
     }
 
     /**
-     * Set table names SELECT query should be performed for. Table names can be provided with specified
-     * alias (AS construction).
+     * Set table names SELECT query should be performed for. Table names can be provided with
+     * specified alias (AS construction).
      *
-     * @param array|string|mixed $tables Array of names, comma separated string or set of parameters.
+     * @param array|string|mixed $tables Array of names, comma separated string or set of
+     *                                   parameters.
      * @return $this
      */
     public function from($tables)
@@ -70,10 +71,11 @@ class SelectQuery extends AbstractSelect
     }
 
     /**
-     * Set columns should be fetched as result of SELECT query. Columns can be provided with specified
-     * alias (AS construction).
+     * Set columns should be fetched as result of SELECT query. Columns can be provided with
+     * specified alias (AS construction).
      *
-     * @param array|string|mixed $columns Array of names, comma separated string or set of parameters.
+     * @param array|string|mixed $columns Array of names, comma separated string or set of
+     *                                    parameters.
      * @return $this
      */
     public function columns($columns)
@@ -86,7 +88,8 @@ class SelectQuery extends AbstractSelect
     /**
      * Alias for columns() method.
      *
-     * @param array|string|mixed $columns Array of names, comma separated string or set of parameters.
+     * @param array|string|mixed $columns Array of names, comma separated string or set of
+     *                                    parameters.
      * @return $this
      */
     public function select($columns)

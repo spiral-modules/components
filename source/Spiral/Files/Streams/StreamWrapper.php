@@ -266,7 +266,8 @@ class StreamWrapper
     }
 
     /**
-     * Free uri dedicated to specified StreamInterface. Method is useful for long living applications.
+     * Free uri dedicated to specified StreamInterface. Method is useful for long living
+     * applications.
      *
      * @param string|StreamInterface $uri String uri or StreamInterface.
      */

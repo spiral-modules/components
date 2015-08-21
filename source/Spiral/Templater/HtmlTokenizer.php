@@ -18,8 +18,8 @@ use Spiral\Tokenizer\Isolator;
 class HtmlTokenizer
 {
     /**
-     * Current tokenizer position. Tokenizer is a linear processor (no regular expression is involved).
-     * This slows it down, but the results are much more reliable.
+     * Current tokenizer position. Tokenizer is a linear processor (no regular expression is
+     * involved). This slows it down, but the results are much more reliable.
      */
     const POSITION_PLAIN_TEXT = 0x001;
     const POSITION_IN_TAG     = 0x002;

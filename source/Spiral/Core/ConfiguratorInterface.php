@@ -16,8 +16,8 @@ use Spiral\Core\Exceptions\ConfiguratorException;
 interface ConfiguratorInterface
 {
     /**
-     * Return config for one specified section. Config has to be returned in component specific array
-     * form.
+     * Return config for one specified section. Config has to be returned in component specific
+     * array form.
      *
      * @param string $section
      * @return array

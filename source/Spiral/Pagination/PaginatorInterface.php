@@ -28,7 +28,7 @@ interface PaginatorInterface extends \Countable
     const DEFAULT_PARAMETER = 'page';
 
     /**
-     * @param ServerRequestInterface $request Source of page number.
+     * @param ServerRequestInterface $request       Source of page number.
      * @param string                 $pageParameter Page parameter from request query data.
      */
     public function __construct(
@@ -122,7 +122,8 @@ interface PaginatorInterface extends \Countable
     public function countDisplayed();
 
     /**
-     * Does paginator needed to be applied? Should return false if all records can be shown on one page.
+     * Does paginator needed to be applied? Should return false if all records can be shown on one
+     * page.
      *
      * @return bool
      */

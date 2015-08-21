@@ -12,18 +12,18 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
-use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\PassiveTableException;
+use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 use Spiral\ORM\RelationSchemaInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
- * Schema builder responsible for static analysis of existed ORM Records, their schemas, validations,
- * related tables, requested indexes and etc.
+ * Schema builder responsible for static analysis of existed ORM Records, their schemas,
+ * validations, related tables, requested indexes and etc.
  */
 class SchemaBuilder extends Component
 {
@@ -212,7 +212,8 @@ class SchemaBuilder extends Component
 
     /**
      * Perform schema reflection to database(s). All declared tables will created or altered. Only
-     * tables linked to non abstract records and record with active schema parameter will be executed.
+     * tables linked to non abstract records and record with active schema parameter will be
+     * executed.
      *
      * SchemaBuilder will not allow (SchemaException) to create or alter tables columns declared
      * by abstract or records with ACTIVE_SCHEMA constant set to false. ActiveSchema still can
@@ -222,8 +223,8 @@ class SchemaBuilder extends Component
      * Due principals of database schemas and ORM component logic no data or columns will ever be
      * removed from database. In addition column renaming will cause creation of another column.
      *
-     * Use database migrations to solve more complex database questions. Or disable ACTIVE_SCHEMA and
-     * live like normal people.
+     * Use database migrations to solve more complex database questions. Or disable ACTIVE_SCHEMA
+     * and live like normal people.
      *
      * @throws SchemaException
      * @throws \Spiral\Database\Exceptions\SchemaException
@@ -353,8 +354,8 @@ class SchemaBuilder extends Component
      * key value as record/entity definition relates too.
      *
      * @param RecordSchema $record
-     * @param string      $name
-     * @param array       $definition
+     * @param string       $name
+     * @param array        $definition
      * @return RelationSchemaInterface
      * @throws SchemaException
      */
@@ -418,9 +419,9 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * Find record related to given table. This operation is required to catch if some relation/schema
-     * declared values in passive (no altering) table. Might return if no records find (pivot or user
-     * specified tables).
+     * Find record related to given table. This operation is required to catch if some
+     * relation/schema declared values in passive (no altering) table. Might return if no records
+     * find (pivot or user specified tables).
      *
      * @param AbstractTable $table
      * @return RecordSchema|null

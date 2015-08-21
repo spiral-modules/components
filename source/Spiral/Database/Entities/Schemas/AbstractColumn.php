@@ -399,7 +399,8 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Set column name. It's recommended to use AbstractTable->renameColumn() to safely rename columns.
+     * Set column name. It's recommended to use AbstractTable->renameColumn() to safely rename
+     * columns.
      *
      * @param string $name New column name.
      * @return $this
@@ -532,7 +533,8 @@ abstract class AbstractColumn implements ColumnInterface
      * Set column type as string with limited size. Maximum allowed size is 255 bytes, use "text"
      * abstract types for longer strings.
      *
-     * Strings are perfect type to store email addresses as it big enough to store valid address and
+     * Strings are perfect type to store email addresses as it big enough to store valid address
+     * and
      * can be covered with unique index.
      *
      * @link http://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address

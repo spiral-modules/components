@@ -10,6 +10,7 @@ namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Cache\StoreInterface;
 use Spiral\Database\Builders\Traits\JoinsTrait;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
@@ -18,7 +19,6 @@ use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
-use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
@@ -43,7 +43,7 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
     /**
      * Sort directions.
      */
-    const SORT_ASC = 'ASC';
+    const SORT_ASC  = 'ASC';
     const SORT_DESC = 'DESC';
 
     /**

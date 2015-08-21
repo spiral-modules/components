@@ -22,8 +22,8 @@ interface TokenizerInterface
     const LINE = 2;
 
     /**
-     * Fetch PHP tokens for specified filename. Usually links to token_get_all() function. Every token
-     * MUST be converted into array.
+     * Fetch PHP tokens for specified filename. Usually links to token_get_all() function. Every
+     * token MUST be converted into array.
      *
      * @param string $filename
      * @return array
@@ -43,7 +43,8 @@ interface TokenizerInterface
      * ]
      *
      * @param mixed  $parent    Class, interface or trait parent. By default - null (all classes).
-     *                          Parent (class) will also be included to classes list as one of results.
+     *                          Parent (class) will also be included to classes list as one of
+     *                          results.
      * @param string $namespace Only classes in this namespace will be retrieved, empty by default
      *                          (all namespaces).
      * @param string $postfix   Only classes with such postfix will be analyzed, empty by default.

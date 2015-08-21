@@ -20,7 +20,8 @@ use Spiral\Validation\Exceptions\ValidationException;
 /**
  * Validator is default implementation of ValidatorInterface. Class support functional rules with
  * user parameters. In addition part of validation rules moved into validation checkers used to
- * simplify adding new rules, checkers are resolved using container and can be rebinded in application.
+ * simplify adding new rules, checkers are resolved using container and can be rebinded in
+ * application.
  *
  * Examples:
  *
@@ -404,7 +405,8 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     }
 
     /**
-     * Register error message for specified field. Rule definition will be interpolated into message.
+     * Register error message for specified field. Rule definition will be interpolated into
+     * message.
      *
      * @param string $field
      * @param string $message

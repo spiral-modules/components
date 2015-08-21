@@ -38,8 +38,9 @@ trait BenchmarkTrait
     }
 
     /**
-     * Benchmarks used to record long or important operations inside spiral components. Method should
-     * return elapsed time when record are be closed (same set of arguments has to be provided).
+     * Benchmarks used to record long or important operations inside spiral components. Method
+     * should return elapsed time when record are be closed (same set of arguments has to be
+     * provided).
      *
      * @param string $record  Benchmark record name.
      * @param string $context Record context (if any).

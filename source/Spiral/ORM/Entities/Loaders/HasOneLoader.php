@@ -10,8 +10,8 @@ namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\Selector;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.

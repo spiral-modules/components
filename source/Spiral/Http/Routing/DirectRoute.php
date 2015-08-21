@@ -19,7 +19,8 @@ use Spiral\Core\ContainerInterface;
  *
  * Usually DirectRoute used to create "general" routing without definition of route for every
  * controller action and etc. Having DirectRoute attached to Router as default route will allow
- * user to generate urls based on controller action name ($router->createUri("controller::action") or
+ * user to generate urls based on controller action name ($router->createUri("controller::action")
+ * or
  * $router->createUri("controller/action")).
  *
  * Examples:

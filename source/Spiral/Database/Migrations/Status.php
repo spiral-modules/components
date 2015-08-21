@@ -34,8 +34,8 @@ class Status implements StatusInterface
     private $timeExecuted = null;
 
     /**
-     * @param string $name
-     * @param bool $state
+     * @param string    $name
+     * @param bool      $state
      * @param \DateTime $timeCreated
      * @param \DateTime $timeExecuted
      */

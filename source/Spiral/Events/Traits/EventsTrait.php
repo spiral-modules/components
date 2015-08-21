@@ -17,8 +17,8 @@ use Spiral\Events\Entities\ObjectEvent;
  * Allow class to have statically (class name) based event dispatcher. Will try to use container
  * to resolve dispatcher instance or create one default.
  *
- * Trait requires static (!) implementation of container() method to automatically resolve dispatcher
- * instance (allowed to return null).
+ * Trait requires static (!) implementation of container() method to automatically resolve
+ * dispatcher instance (allowed to return null).
  */
 trait EventsTrait
 {

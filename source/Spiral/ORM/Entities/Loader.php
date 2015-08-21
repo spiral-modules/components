@@ -13,8 +13,8 @@ use Spiral\Database\Query\QueryResult;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -153,16 +153,16 @@ abstract class Loader implements LoaderInterface
     protected $joiners = [];
 
     /**
-     * Set of keys requested by inner loaders to be pre-aggregated while query parsing. This structure
-     * if populated when new sub loaded registered.
+     * Set of keys requested by inner loaders to be pre-aggregated while query parsing. This
+     * structure if populated when new sub loaded registered.
      *
      * @var array
      */
     protected $referenceKeys = [];
 
     /**
-     * Chunks of parsed data associated with their reference key name and it's value. Used to compile
-     * data tree via php references.
+     * Chunks of parsed data associated with their reference key name and it's value. Used to
+     * compile data tree via php references.
      *
      * @var array
      */
@@ -254,9 +254,9 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * Every loader declares an unique alias for it's source table based on options or based on position
-     * in loaders chain. In addition, every loader responsible for data loading will add "_data"
-     * postfix to it's alias.
+     * Every loader declares an unique alias for it's source table based on options or based on
+     * position in loaders chain. In addition, every loader responsible for data loading will add
+     * "_data" postfix to it's alias.
      *
      * @return string
      */
@@ -581,7 +581,8 @@ abstract class Loader implements LoaderInterface
 
 
     /**
-     * Implementation specific selector configuration, must create required joins, conditions and etc.
+     * Implementation specific selector configuration, must create required joins, conditions and
+     * etc.
      *
      * @param Selector $selector
      */
@@ -672,8 +673,8 @@ abstract class Loader implements LoaderInterface
     /**
      * {@inheritdoc}
      *
-     * @param bool $reconfigure Use this option to reset configured flag to force query clarification
-     *                          on next query creation.
+     * @param bool $reconfigure Use this option to reset configured flag to force query
+     *                          clarification on next query creation.
      */
     public function clean($reconfigure = false)
     {
@@ -734,8 +735,8 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * If loader is joinable we can calculate join type based on way loader going to be used (loading
-     * or filtering).
+     * If loader is joinable we can calculate join type based on way loader going to be used
+     * (loading or filtering).
      *
      * @return string
      * @throws LoaderException
@@ -765,12 +766,13 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * In many cases (for example if you have inload of HAS_MANY relation) record data can be replicated
-     * by many result rows (duplicated). To prevent wrong data linking we have to deduplicate such
-     * records. This is only internal loader functionality and required due data tree are built using
-     * php references.
+     * In many cases (for example if you have inload of HAS_MANY relation) record data can be
+     * replicated by many result rows (duplicated). To prevent wrong data linking we have to
+     * deduplicate such records. This is only internal loader functionality and required due data
+     * tree are built using php references.
      *
-     * Method will return true if data is unique handled before and false in opposite case. Provided
+     * Method will return true if data is unique handled before and false in opposite case.
+     * Provided
      * data array will be automatically linked with it's unique state using references.
      *
      * @param array $data Reference to parsed record data, reference will be pointed to valid and

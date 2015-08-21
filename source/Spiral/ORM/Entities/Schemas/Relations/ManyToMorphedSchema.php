@@ -13,8 +13,8 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Exceptions\RelationSchemaException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
  * ManyToMorphed relation declares relation between parent record and set of outer records joined by

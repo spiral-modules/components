@@ -127,8 +127,8 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     }
 
     /**
-     * When solid state is enabled no atomic operations will be pushed to databases and array will be
-     * saved as one big set request.
+     * When solid state is enabled no atomic operations will be pushed to databases and array will
+     * be saved as one big set request.
      *
      * @param bool $solidState
      * @return $this

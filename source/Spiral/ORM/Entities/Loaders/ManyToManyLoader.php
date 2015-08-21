@@ -12,8 +12,8 @@ use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Entities\WhereDecorator;
 use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
  * ManyToMany loader will not only load related data, but will include pivot table data into record
@@ -103,7 +103,8 @@ class ManyToManyLoader extends Loader
     /**
      * {@inheritdoc}
      *
-     * @param string $parentRole Helps ManyToMany relation to force record role for morphed relations.
+     * @param string $parentRole Helps ManyToMany relation to force record role for morphed
+     *                           relations.
      */
     public function createSelector($parentRole = '')
     {

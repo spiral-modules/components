@@ -46,7 +46,8 @@ interface ResultInterface extends \Countable, \Iterator
     public function bind($columnID, &$variable);
 
     /**
-     * Returns an array containing all of the result set rows, do not use this method on big datasets.
+     * Returns an array containing all of the result set rows, do not use this method on big
+     * datasets.
      *
      * @return array
      */

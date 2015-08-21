@@ -179,7 +179,8 @@ class Node
     /**
      * Compile node data (inner nodes) into string.
      *
-     * @param array $outerBlocks All outer blocks will be aggregated in this array (in compiled form).
+     * @param array $outerBlocks All outer blocks will be aggregated in this array (in compiled
+     *                           form).
      * @param array $compiled    Internal complication memory (method called recursively)
      * @return string
      */
@@ -266,8 +267,8 @@ class Node
     }
 
     /**
-     * Parse set of tokens provided by html Tokenizer and create blocks and other control constructions.
-     * Basically it will try to created html tree.
+     * Parse set of tokens provided by html Tokenizer and create blocks and other control
+     * constructions. Basically it will try to created html tree.
      *
      * @param array $tokens
      * @throws StrictModeException

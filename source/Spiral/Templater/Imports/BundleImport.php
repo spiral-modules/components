@@ -14,9 +14,9 @@ use Spiral\Templater\ImportInterface;
 use Spiral\Templater\Templater;
 
 /**
- * Bundle import can import imports declared in outer view (bundle). This import is very useful when module or component
- * declared many different view sources using multiple imports. We excepting bundle location in "bundle" attribute of
- * token caused import creation.
+ * Bundle import can import imports declared in outer view (bundle). This import is very useful
+ * when module or component declared many different view sources using multiple imports. We
+ * excepting bundle location in "bundle" attribute of token caused import creation.
  */
 class BundleImport implements ImportInterface
 {

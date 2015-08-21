@@ -9,8 +9,6 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
-use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 
@@ -112,10 +110,11 @@ abstract class QueryBuilder extends Component
     }
 
     /**
-     * Helper methods used to correctly fetch and split identifiers provided by function parameters.
+     * Helper methods used to correctly fetch and split identifiers provided by function
+     * parameters.
      * It support array list, string or comma separated list. Attention, this method will not work
-     * with complex parameters (such as functions) provided as one comma separated string, please use
-     * arrays in this case.
+     * with complex parameters (such as functions) provided as one comma separated string, please
+     * use arrays in this case.
      *
      * @param array $identifiers
      * @return array

@@ -8,12 +8,12 @@
  */
 namespace Spiral\Database\Builders\Traits;
 
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLExpression;
 use Spiral\Database\Injections\SQLFragmentInterface;
-use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Provides ability to generate QueryCompiler JOIN tokens including ON conditions and table/column
@@ -76,8 +76,8 @@ trait JoinsTrait
     protected $onParameters = [];
 
     /**
-     * Register new JOIN with specified type with set of on conditions (linking one table to another,
-     * no parametric on conditions allowed here).
+     * Register new JOIN with specified type with set of on conditions (linking one table to
+     * another, no parametric on conditions allowed here).
      *
      * @param string $type  Join type. Allowed values, LEFT, RIGHT, INNER and etc.
      * @param string $table Joined table name (without prefix), may include AS statement.
@@ -94,8 +94,8 @@ trait JoinsTrait
     }
 
     /**
-     * Register new INNER JOIN with set of on conditions (linking one table to another, no parametric
-     * on conditions allowed here).
+     * Register new INNER JOIN with set of on conditions (linking one table to another, no
+     * parametric on conditions allowed here).
      *
      * @link http://www.w3schools.com/sql/sql_join_inner.asp
      * @see  join()
@@ -113,8 +113,8 @@ trait JoinsTrait
     }
 
     /**
-     * Register new RIGHT JOIN with set of on conditions (linking one table to another, no parametric
-     * on conditions allowed here).
+     * Register new RIGHT JOIN with set of on conditions (linking one table to another, no
+     * parametric on conditions allowed here).
      *
      * @link http://www.w3schools.com/sql/sql_join_right.asp
      * @see  join()

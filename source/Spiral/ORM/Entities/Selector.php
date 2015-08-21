@@ -20,14 +20,15 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
- * Selectors provide QueryBuilder (see Database) like syntax and support for ORM records to be fetched
- * from database. In addition, selection uses set of internal data loaders dedicated to every of
- * record relation and used to pre-load (joins) or post-load (separate query) data for this relations,
- * including additional where conditions and using relation data for parent record filtering queries.
+ * Selectors provide QueryBuilder (see Database) like syntax and support for ORM records to be
+ * fetched from database. In addition, selection uses set of internal data loaders dedicated to
+ * every of record relation and used to pre-load (joins) or post-load (separate query) data for
+ * this relations, including additional where conditions and using relation data for parent record
+ * filtering queries.
  *
  * Selector loaders may not only be related to SQL databases, but might load data from external
  * sources.
@@ -68,9 +69,9 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     protected $class = '';
 
     /**
-     * Data columns are set of columns automatically created by inner loaders using generateColumns()
-     * method, this is not the same column set as one provided by user using columns() method. Do
-     * not define columns using generateColumns() method outside of loaders.
+     * Data columns are set of columns automatically created by inner loaders using
+     * generateColumns() method, this is not the same column set as one provided by user using
+     * columns() method. Do not define columns using generateColumns() method outside of loaders.
      *
      * @see generateColumns()
      * @var array
@@ -171,10 +172,12 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Request primary selector loader to pre-load relation name. Any type of loader can be used for
-     * data preloading. ORM loaders by default will select the most efficient way to load related data
-     * which might include additional select query or left join. Loaded data will automatically
-     * pre-populate record relations. You can specify nested relations using "." separator.
+     * Request primary selector loader to pre-load relation name. Any type of loader can be used
+     * for
+     * data preloading. ORM loaders by default will select the most efficient way to load related
+     * data which might include additional select query or left join. Loaded data will
+     * automatically pre-populate record relations. You can specify nested relations using "."
+     * separator.
      *
      * Examples:
      *
@@ -185,29 +188,32 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * //comment
      * User::find()->with('comments.post');
      *
-     * //We can also specify custom where conditions on data loading, let's load only public comments.
-     * User::find()->load('comments', [
+     * //We can also specify custom where conditions on data loading, let's load only public
+     * comments. User::find()->load('comments', [
      *      'where' => ['{@}.status' => 'public']
      * ]);
      *
-     * Please note using "{@}" column name, this placeholder is required to prevent collisions and it
-     * will be automatically replaced with valid table alias of pre-loaded comments table.
+     * Please note using "{@}" column name, this placeholder is required to prevent collisions and
+     * it will be automatically replaced with valid table alias of pre-loaded comments table.
      *
-     * //In case where your loaded relation is MANY_TO_MANY you can also specify pivot table conditions,
+     * //In case where your loaded relation is MANY_TO_MANY you can also specify pivot table
+     * conditions,
      * //let's pre-load all approved user tags, we can use same placeholder for pivot table alias
      * User::find()->load('tags', [
      *      'wherePivot' => ['{@}.approved' => true]
      * ]);
      *
-     * //In most of cases you don't need to worry about how data was loaded, using external query or
-     * //left join, however if you want to change such behaviour you can force load method to INLOAD
+     * //In most of cases you don't need to worry about how data was loaded, using external query
+     * or
+     * //left join, however if you want to change such behaviour you can force load method to
+     * INLOAD
      * User::find()->load('tags', [
      *      'method'     => Loader::INLOAD,
      *      'wherePivot' => ['{@}.approved' => true]
      * ]);
      *
-     * Attention, you will not be able to correctly paginate in this case and only ORM loaders support
-     * different loading types.
+     * Attention, you will not be able to correctly paginate in this case and only ORM loaders
+     * support different loading types.
      *
      * You can specify multiple loaders using array as first argument.
      *
@@ -242,9 +248,9 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * With method is very similar to load() one, except it will always include related data to parent
-     * query using INNER JOIN, this method can be applied only to ORM loaders and relations using
-     * same database as parent record.
+     * With method is very similar to load() one, except it will always include related data to
+     * parent query using INNER JOIN, this method can be applied only to ORM loaders and relations
+     * using same database as parent record.
      *
      * Method generally used to filter data based on some relation condition.
      * Attention, with() method WILL NOT load relation data, it will only make it accessible in
@@ -273,7 +279,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      *      'alias' => 'comments'
      * ])->where('comments.approved', true);
      *
-     * //If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation name
+     * //If you joining MANY_TO_MANY relation you will be able to use pivot table used as relation
+     * name
      * //plus "_pivot" postfix. Let's load all users with approved tags.
      * $user->with('tags')->where('tags_pivot.approved', true);
      *
@@ -289,7 +296,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * User::find()->with('comments')->where('comments.approved', true)
      *             ->load('comments');
      *
-     * //You can also use custom conditions in this case, let's find all users with approved comments
+     * //You can also use custom conditions in this case, let's find all users with approved
+     * comments
      * //and pre-load such approved comments
      * User::find()->with('comments')->where('comments.approved', true)
      *             ->load('comments', [
@@ -415,7 +423,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         //In many cases (too many inloads, too complex queries) parsing can take significant amount
         //of time, so we better profile it
-        $benchmark= $this->benchmark('parseResult', $statement);
+        $benchmark = $this->benchmark('parseResult', $statement);
 
         //Here we are feeding selected data to our primary loaded to parse it and and create
         //data tree for our records
@@ -471,8 +479,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY loaders
-     * with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
+     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
+     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
      *
      * @see findOne()
      * @param mixed $id Primary key value.
@@ -497,8 +505,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Update all matched records with provided columns set. You are no allowed to use join conditions
-     * or with() method, you can update your records manually in cases like that.
+     * Update all matched records with provided columns set. You are no allowed to use join
+     * conditions or with() method, you can update your records manually in cases like that.
      *
      * @param array $update Array of columns to be updated, compatible with UpdateQuery.
      * @return int
@@ -614,8 +622,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
     /**
      * Helper method used to verify that spiral performed optimal processing on fetched result set.
-     * If query is too complex or has a lot of inload queries system may spend much more time building
-     * valid data tree.
+     * If query is too complex or has a lot of inload queries system may spend much more time
+     * building valid data tree.
      *
      * @param int $dataCount
      * @param int $rowsCount

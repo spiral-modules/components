@@ -31,8 +31,8 @@ abstract class AbstractIndex implements IndexInterface
     protected $name = '';
 
     /**
-     * Index type, by default NORMAL and UNIQUE indexes supported, additional types can be implemented
-     * on database driver level.
+     * Index type, by default NORMAL and UNIQUE indexes supported, additional types can be
+     * implemented on database driver level.
      *
      * @var int
      */
@@ -102,7 +102,8 @@ abstract class AbstractIndex implements IndexInterface
     }
 
     /**
-     * Set index name. It's recommended to use AbstractTable->renameIndex() to safely rename indexes.
+     * Set index name. It's recommended to use AbstractTable->renameIndex() to safely rename
+     * indexes.
      *
      * @param string $name New index name.
      * @return $this
@@ -171,7 +172,8 @@ abstract class AbstractIndex implements IndexInterface
     /**
      * Index sql creation syntax.
      *
-     * @param bool $includeTable Include table ON statement (not required for inline index creation).
+     * @param bool $includeTable Include table ON statement (not required for inline index
+     *                           creation).
      * @return string
      */
     public function sqlStatement($includeTable = true)

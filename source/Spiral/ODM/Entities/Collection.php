@@ -32,7 +32,8 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method array validate($validate)
  * @method bool|array insert($array_of_fields_OR_object, $options = [])
  * @method mixed batchInsert($documents, $options = [])
- * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options = [])
+ * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options =
+ *         [])
  * @method bool|array remove($array_of_fields_OR_object, $options = [])
  * @method bool ensureIndex($key_OR_array_of_keys, $options = [])
  * @method array deleteIndex($string_OR_array_of_keys)
@@ -162,8 +163,8 @@ class Collection extends Component implements
     }
 
     /**
-     * Set additional query field, fields will be merged to currently existed request using array_merge.
-     * Alias for query.
+     * Set additional query field, fields will be merged to currently existed request using
+     * array_merge. Alias for query.
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      * @param array $query Fields and conditions to query by.
@@ -175,8 +176,8 @@ class Collection extends Component implements
     }
 
     /**
-     * Set additional query field, fields will be merged to currently existed request using array_merge.
-     * Alias for query.
+     * Set additional query field, fields will be merged to currently existed request using
+     * array_merge. Alias for query.
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      * @param array $query Fields and conditions to query by.

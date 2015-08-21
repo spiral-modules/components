@@ -12,14 +12,15 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
-use Spiral\ORM\Record;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 
 /**
- * ManyToMany relation declares that two records related to each other using pivot table data. Relation
- * allow to specify inner key (key in parent record), outer key (key in outer record), pivot table name,
- * names of pivot columns to store inner and outer key values and set of additional columns.
- * Relation allow specifying default WHERE statement for outer records and pivot table separately.
+ * ManyToMany relation declares that two records related to each other using pivot table data.
+ * Relation allow to specify inner key (key in parent record), outer key (key in outer record),
+ * pivot table name, names of pivot columns to store inner and outer key values and set of
+ * additional columns. Relation allow specifying default WHERE statement for outer records and
+ * pivot table separately.
  *
  * Example (User related to many Tag records):
  * - relation will create pivot table named "tag_user_map" (if allowed), where table name generated
@@ -51,8 +52,8 @@ class ManyToManySchema extends RelationSchema
     /**
      * {@inheritdoc}
      *
-     * When relation states that relation defines connection to interface relation will be switched to
-     * ManyToManyMorphed.
+     * When relation states that relation defines connection to interface relation will be switched
+     * to ManyToManyMorphed.
      */
     const EQUIVALENT_RELATION = Record::MANY_TO_MORPHED;
 

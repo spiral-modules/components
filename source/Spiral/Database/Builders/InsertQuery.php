@@ -9,9 +9,9 @@
 namespace Spiral\Database\Builders;
 
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\Parameter;
-use Spiral\Database\Entities\QueryBuilder;
 
 /**
  * Insert statement query builder, support singular and batch inserts.
@@ -62,8 +62,8 @@ class InsertQuery extends QueryBuilder
     }
 
     /**
-     * Set insertion column names. Names can be provided as array, set of parameters or comma separated
-     * string.
+     * Set insertion column names. Names can be provided as array, set of parameters or comma
+     * separated string.
      *
      * Examples:
      * $insert->columns(["name", "email"]);

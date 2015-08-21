@@ -379,7 +379,8 @@ class ColumnSchema extends AbstractColumn
      * Get name of enum constraint.
      *
      * @param bool $quote     True to quote identifier.
-     * @param bool $temporary If true enumConstraint identifier will be generated only for visual purposes.
+     * @param bool $temporary If true enumConstraint identifier will be generated only for visual
+     *                        purposes.
      * @return string
      */
     protected function enumConstraint($quote = false, $temporary = false)

@@ -20,7 +20,8 @@ use Spiral\Database\TableInterface;
 use Spiral\Pagination\PaginableInterface;
 
 /**
- * Represent table level abstraction with simplified access to SelectQuery associated with such table.
+ * Represent table level abstraction with simplified access to SelectQuery associated with such
+ * table.
  *
  * @method SelectQuery columns($columns)
  * @method SelectQuery union(SQLFragmentInterface $query)
@@ -48,7 +49,8 @@ use Spiral\Pagination\PaginableInterface;
  * @method SelectQuery offset($offset = 0)
  * @method int getOffset()
  *
- * @method SelectQuery paginate($limit = 25, $count = null, $pageParameter = 'page', ServerRequestInterface $request = null)
+ * @method SelectQuery paginate($limit = 25, $count = null, $pageParameter = 'page',
+ *         ServerRequestInterface $request = null)
  * @method PaginableInterface getPaginator()
  *
  * @method SelectQuery join($type, $table, $on = null)

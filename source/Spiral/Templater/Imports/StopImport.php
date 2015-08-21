@@ -13,7 +13,8 @@ use Spiral\Templater\ImportInterface;
 use Spiral\Templater\Templater;
 
 /**
- * Declares to templater that element must be treated as html tag, not Node include. Stop keyword must be located in
+ * Declares to templater that element must be treated as html tag, not Node include. Stop keyword
+ * must be located in
  * "stop" attribute of tag caused import.
  */
 class StopImport implements ImportInterface

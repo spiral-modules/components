@@ -15,8 +15,10 @@ use Spiral\Templater\Templater;
 /**
  * {@inheritdoc}
  *
- * Simple aliased based import, declared relation between tag name and it's location. Element alias must be located in
- * "as" attribute caused import, location in "path" attribute (will be passed thought Templater->fetchLocation()).
+ * Simple aliased based import, declared relation between tag name and it's location. Element alias
+ * must be located in
+ * "as" attribute caused import, location in "path" attribute (will be passed thought
+ * Templater->fetchLocation()).
  */
 class AliasImport implements ImportInterface
 {

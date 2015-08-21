@@ -12,8 +12,8 @@ use Spiral\Templater\BehaviourInterface;
 use Spiral\Templater\Node;
 
 /**
- * Declares to node that it's blocks should extend parent node. Parent imports will be merged with node
- * content.
+ * Declares to node that it's blocks should extend parent node. Parent imports will be merged with
+ * node content.
  */
 interface ExtendsBehaviourInterface extends BehaviourInterface
 {

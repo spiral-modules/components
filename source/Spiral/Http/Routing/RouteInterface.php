@@ -22,7 +22,8 @@ use Spiral\Http\Exceptions\RouteException;
 interface RouteInterface
 {
     /**
-     * Controller and action in route targets and createURL route name has to be separated like that.
+     * Controller and action in route targets and createURL route name has to be separated like
+     * that.
      */
     const SEPARATOR = '::';
 

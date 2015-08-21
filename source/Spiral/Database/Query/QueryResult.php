@@ -109,8 +109,10 @@ class QueryResult implements ResultInterface, \JsonSerializable
     }
 
     /**
-     * Change fetching mode, use PDO::FETCH_ constants to specify required mode. If you want to keep
-     * compatibility with CachedQuery do not use other modes than PDO::FETCH_ASSOC and PDO::FETCH_NUM.
+     * Change fetching mode, use PDO::FETCH_ constants to specify required mode. If you want to
+     * keep
+     * compatibility with CachedQuery do not use other modes than PDO::FETCH_ASSOC and
+     * PDO::FETCH_NUM.
      *
      * @link http://php.net/manual/en/pdostatement.setfetchmode.php
      * @param int $mode The fetch mode must be one of the PDO::FETCH_* constants.

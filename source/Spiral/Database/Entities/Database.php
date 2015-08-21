@@ -44,10 +44,11 @@ class Database extends Component implements DatabaseInterface
     /**
      * Transaction isolation level 'SERIALIZABLE'.
      *
-     * This is the highest isolation level. With a lock-based concurrency control DBMS implementation,
-     * serializability requires read and write locks (acquired on selected data) to be released at
-     * the end of the transaction. Also range-locks must be acquired when a SELECT query uses a ranged
-     * WHERE clause, especially to avoid the phantom reads phenomenon (see below).
+     * This is the highest isolation level. With a lock-based concurrency control DBMS
+     * implementation, serializability requires read and write locks (acquired on selected data) to
+     * be released at the end of the transaction. Also range-locks must be acquired when a SELECT
+     * query uses a ranged WHERE clause, especially to avoid the phantom reads phenomenon (see
+     * below).
      *
      * When using non-lock based concurrency control, no locks are acquired; however, if the system
      * detects a write collision among several concurrent transactions, only one of them is allowed
@@ -61,8 +62,8 @@ class Database extends Component implements DatabaseInterface
      * Transaction isolation level 'REPEATABLE READ'.
      *
      * In this isolation level, a lock-based concurrency control DBMS implementation keeps read and
-     * write locks (acquired on selected data) until the end of the transaction. However, range-locks
-     * are not managed, so phantom reads can occur.
+     * write locks (acquired on selected data) until the end of the transaction. However,
+     * range-locks are not managed, so phantom reads can occur.
      *
      * @link http://en.wikipedia.org/wiki/Isolation_(database_systems)
      */
@@ -71,15 +72,18 @@ class Database extends Component implements DatabaseInterface
     /**
      * Transaction isolation level 'READ COMMITTED'.
      *
-     * In this isolation level, a lock-based concurrency control DBMS implementation keeps write locks
+     * In this isolation level, a lock-based concurrency control DBMS implementation keeps write
+     * locks
      * (acquired on selected data) until the end of the transaction, but read locks are released as
-     * soon as the SELECT operation is performed (so the non-repeatable reads phenomenon can occur in
-     * this isolation level, as discussed below). As in the previous level, range-locks are not managed.
+     * soon as the SELECT operation is performed (so the non-repeatable reads phenomenon can occur
+     * in this isolation level, as discussed below). As in the previous level, range-locks are not
+     * managed.
      *
-     * Putting it in simpler words, read committed is an isolation level that guarantees that any data
-     * read is committed at the moment it is read. It simply restricts the reader from seeing any
-     * intermediate, uncommitted, 'dirty' read. It makes no promise whatsoever that if the transaction
-     * re-issues the read, it will find the same data; data is free to change after it is read.
+     * Putting it in simpler words, read committed is an isolation level that guarantees that any
+     * data read is committed at the moment it is read. It simply restricts the reader from seeing
+     * any intermediate, uncommitted, 'dirty' read. It makes no promise whatsoever that if the
+     * transaction re-issues the read, it will find the same data; data is free to change after it
+     * is read.
      *
      * @link http://en.wikipedia.org/wiki/Isolation_(database_systems)
      */
@@ -88,8 +92,8 @@ class Database extends Component implements DatabaseInterface
     /**
      * Transaction isolation level 'READ UNCOMMITTED'.
      *
-     * This is the lowest isolation level. In this level, dirty reads are allowed, so one transaction
-     * may see not-yet-committed changes made by other transactions.
+     * This is the lowest isolation level. In this level, dirty reads are allowed, so one
+     * transaction may see not-yet-committed changes made by other transactions.
      *
      * Since each isolation level is stronger than those below, in that no higher isolation level
      * allows an action forbidden by a lower one, the standard permits a DBMS to run a transaction

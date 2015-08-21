@@ -28,7 +28,7 @@ class ArgumentException extends ContainerException
     protected $context = null;
 
     /**
-     * @param \ReflectionParameter $parameter
+     * @param \ReflectionParameter        $parameter
      * @param \ReflectionFunctionAbstract $context
      */
     public function __construct(

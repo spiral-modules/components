@@ -28,8 +28,8 @@ interface TableInterface
     public function getName();
 
     /**
-     * Array of columns dedicated to primary index. Attention, this methods will ALWAYS return array,
-     * even if there is only one primary key.
+     * Array of columns dedicated to primary index. Attention, this methods will ALWAYS return
+     * array, even if there is only one primary key.
      *
      * @return array
      */

@@ -12,7 +12,8 @@ use Psr\Http\Message\StreamInterface;
 use Spiral\Storage\Exceptions\ServerException;
 
 /**
- * Server provide storage specific abstraction level. Must implement every low level storage operations.
+ * Server provide storage specific abstraction level. Must implement every low level storage
+ * operations.
  *
  * Server can only work with buckets which are configured specifically for that adapter.
  */
@@ -51,8 +52,9 @@ interface ServerInterface
     public function put(BucketInterface $bucket, $name, $source);
 
     /**
-     * Must return filename which is valid in associated FilesInterface instance. Must trow an exception
-     * if object does not exists. Filename can be temporary and should not be used between sessions.
+     * Must return filename which is valid in associated FilesInterface instance. Must trow an
+     * exception if object does not exists. Filename can be temporary and should not be used
+     * between sessions.
      *
      * @param BucketInterface $bucket
      * @param string          $name

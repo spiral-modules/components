@@ -53,8 +53,8 @@ interface StoreInterface
     public function isDestroyed();
 
     /**
-     * Commit all session data to session handler, this will close session before script ends. Session
-     * will be restarted on next call.
+     * Commit all session data to session handler, this will close session before script ends.
+     * Session will be restarted on next call.
      *
      * @throws SessionException
      */

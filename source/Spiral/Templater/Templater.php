@@ -22,7 +22,8 @@ use Spiral\Templater\Imports\StopImport;
  * - declare namespace or alias to import outer view
  * - importing outer view
  *
- * P.S. Do not even think to use Templater without caching layer at top of it, templater not just slow, it's SUPER SLOW*.
+ * P.S. Do not even think to use Templater without caching layer at top of it, templater not just
+ * slow, it's SUPER SLOW*.
  * * per design
  */
 abstract class Templater implements SupervisorInterface
@@ -160,8 +161,9 @@ abstract class Templater implements SupervisorInterface
     }
 
     /**
-     * Outer blocks (usually user attributes) can be exported to template using non default rendering technique, for
-     * example every "extra" attribute can be passed to specific template location.
+     * Outer blocks (usually user attributes) can be exported to template using non default
+     * rendering technique, for example every "extra" attribute can be passed to specific template
+     * location.
      *
      * @param string $content
      * @param array  $blocks

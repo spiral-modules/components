@@ -67,15 +67,6 @@ class HttpDispatcher extends Singleton implements
     protected $request = null;
 
     /**
-     * Endpoint is callable class or closure used to handle part of application logic. Router
-     * middleware automatically assigned to base path of application if nothing else was specified.
-     *
-     * @see endpoint()
-     * @var callable[]|MiddlewareInterface[]
-     */
-    protected $endpoints = [];
-
-    /**
      * Set of middlewares to be applied for every request.
      *
      * @var callable[]|MiddlewareInterface[]
@@ -104,7 +95,6 @@ class HttpDispatcher extends Singleton implements
         $this->config = $configurator->getConfig(static::CONFIG);
         $this->container = $container;
 
-        $this->endpoints = $this->config['endpoints'];
         $this->middlewares = $this->config['middlewares'];
     }
 
@@ -141,25 +131,6 @@ class HttpDispatcher extends Singleton implements
     }
 
     /**
-     * Associate new endpoint to specific path.
-     *
-     * Example (in bootstrap):
-     * $this->http->add('/forum', 'Vendor\Forum\Forum');
-     * $this->http->add('/blog', new Vendor\Module\Blog());
-     *
-     * @see $endpoints
-     * @param string                       $path Http Uri path with / and in lower case.
-     * @param callable|MiddlewareInterface $endpoint
-     * @return $this
-     */
-    public function endpoint($path, $endpoint)
-    {
-        $this->endpoints[$path] = $endpoint;
-
-        return $this;
-    }
-
-    /**
      * Add new middleware into chain.
      *
      * Example (in bootstrap):
@@ -180,11 +151,6 @@ class HttpDispatcher extends Singleton implements
      */
     public function start()
     {
-        if (empty($this->endpoints[$this->basePath()])) {
-            //Base path wasn't handled, let's attach our router
-            $this->endpoints[$this->basePath()] = $this->router();
-        }
-
         //We need request to start, let's cast it
         $request = $this->request();
 
@@ -212,7 +178,7 @@ class HttpDispatcher extends Singleton implements
         return $this->request = ServerRequestFactory::fromGlobals(
             $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
         )->withAttribute('basePath', $this->basePath())->withAttribute(
-            'isolate', $this->config['isolate']
+            'isolated', $this->config['isolate']
         );
     }
 
@@ -221,14 +187,15 @@ class HttpDispatcher extends Singleton implements
      * on path). "activePath" argument will be added to request passed into middlewares.
      *
      * @param ServerRequestInterface $request
+     * @param callable               $endpoint User specified endpoint.
      * @return ResponseInterface
      * @throws ClientException
      */
-    public function perform(ServerRequestInterface $request)
+    public function perform(ServerRequestInterface $request, callable $endpoint = null)
     {
-        if (!$endpoint = $this->findEndpoint($request->getUri(), $activePath)) {
-            //This should never happen as request should be handled at least by Router middleware
-            throw new ClientException(Response::SERVER_ERROR, 'Unable to select endpoint.');
+        if (empty($endpoint)) {
+            //We are going to use default endpoint
+            $endpoint = $this->router();
         }
 
         $pipeline = new MiddlewarePipeline(
@@ -243,7 +210,7 @@ class HttpDispatcher extends Singleton implements
             //Configuring endpoint
             $pipeline = $pipeline->target($endpoint);
 
-            return $pipeline->run($request->withAttribute('activePath', $activePath));
+            return $pipeline->run($request);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -309,36 +276,6 @@ class HttpDispatcher extends Singleton implements
                 'routes'     => $this->routes,
                 'keepOutput' => $this->config['keepOutput']
             ] + $this->config['router']);
-    }
-
-    /**
-     * Find endpoint to be executed using uri.
-     *
-     * @param UriInterface $uri
-     * @param string       $uriPath Selected path, runtime.
-     * @return null|callable
-     */
-    protected function findEndpoint(UriInterface $uri, &$uriPath = null)
-    {
-        if (empty($uriPath = strtolower($uri->getPath()))) {
-            $uriPath = '/';
-        } elseif ($uriPath[0] !== '/') {
-            $uriPath = '/' . $uriPath;
-        }
-
-        if (isset($this->endpoints[$uriPath])) {
-            return $this->endpoints[$uriPath];
-        } else {
-            foreach ($this->endpoints as $path => $middleware) {
-                if (strpos($uriPath, $path) === 0) {
-                    $uriPath = $path;
-
-                    return $middleware;
-                }
-            }
-        }
-
-        return null;
     }
 
     /**

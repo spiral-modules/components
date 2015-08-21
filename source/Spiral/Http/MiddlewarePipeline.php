@@ -133,7 +133,7 @@ class MiddlewarePipeline
                 $response = $middleware($outerRequest, $next);
             }
         } catch (\Exception $exception) {
-            if (!$outerRequest->getAttribute('isolate', false)) {
+            if (!$outerRequest->getAttribute('isolated', false)) {
                 //No isolation
                 throw $exception;
             }

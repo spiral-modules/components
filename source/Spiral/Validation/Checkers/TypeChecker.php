@@ -29,10 +29,15 @@ class TypeChecker extends Checker
      * Value should not be empty.
      *
      * @param mixed $value
+     * @param bool  $trim
      * @return bool
      */
-    public function notEmpty($value)
+    public function notEmpty($value, $trim = true)
     {
+        if ($trim && is_string($value) && strlen(trim($value)) == 0) {
+            return false;
+        }
+
         return !empty($value);
     }
 

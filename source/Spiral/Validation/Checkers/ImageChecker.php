@@ -24,10 +24,10 @@ class ImageChecker extends FileChecker
      * {@inheritdoc}
      */
     protected $messages = [
-        "type"    => "[[The file '{field}' is not a supported image type.]]",
-        "valid"   => "[[The file '{field}' should be a valid image (JPEG, PNG or GIF).]]",
-        "smaller" => "[[The image dimensions of '{field}' should not exceed {0}x{1}px.]]",
-        "bigger"  => "[[The image dimensions of '{field}' should be at least {0}x{1}px.]]"
+        "type"    => "[[Image does not supported.]]",
+        "valid"   => "[[Image does not supported (allowed JPEG, PNG or GIF).]]",
+        "smaller" => "[[Image size should not exceed {0}x{1}px.]]",
+        "bigger"  => "[[The image dimensions should be at least {0}x{1}px.]]"
     ];
 
     /**

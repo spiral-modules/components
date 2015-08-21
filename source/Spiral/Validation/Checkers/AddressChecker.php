@@ -19,9 +19,8 @@ class AddressChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "email"     => "[[Field '{field}' is not a valid email address.]]",
-        "fullEmail" => "[[Field '{field}' is not a valid email address.]]",
-        "url"       => "[[Field '{field}' is not a valid URL.]]"
+        "email" => "[[Must be a valid email address.]]",
+        "url"   => "[[Must be a valid URL address.]]",
     ];
 
     /**
@@ -37,7 +36,7 @@ class AddressChecker extends Checker
     }
 
     /**
-     *C heck if URL is valid.
+     * Check if URL is valid.
      *
      * @link http://www.faqs.org/rfcs/rfc2396.html
      * @param string $url

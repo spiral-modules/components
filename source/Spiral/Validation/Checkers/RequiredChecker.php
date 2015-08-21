@@ -20,10 +20,10 @@ class RequiredChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "with"       => "[[Field '{field}' should not be empty.]]",
-        "withAll"    => "[[Field '{field}' should not be empty.]]",
-        "without"    => "[[Field '{field}' should not be empty.]]",
-        "withoutAll" => "[[Field '{field}' should not be empty.]]",
+        "with"       => "[[This field is required.]]",
+        "withAll"    => "[[This field is required.]]",
+        "without"    => "[[This field is required.]]",
+        "withoutAll" => "[[This field is required.]]",
     ];
 
     /**

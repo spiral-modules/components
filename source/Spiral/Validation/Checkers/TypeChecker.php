@@ -19,10 +19,10 @@ class TypeChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "notEmpty" => "[[Field '{field}' should not be empty.]]",
-        "boolean"  => "[[Field '{field}' is not valid boolean.]]",
-        "datetime" => "[[Field '{field}' is not valid datetime.]]",
-        "timezone" => "[[Field '{field}' is not valid timezone.]]"
+        "notEmpty" => "[[This field is required.]]",
+        "boolean"  => "[[Not valid boolean.]]",
+        "datetime" => "[[Not valid datetime.]]",
+        "timezone" => "[[Not valid timezone.]]"
     ];
 
     /**

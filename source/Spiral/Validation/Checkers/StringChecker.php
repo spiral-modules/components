@@ -19,11 +19,11 @@ class StringChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "regexp"  => "[[Field '{field}' does not match required pattern.]]",
-        "shorter" => "[[Field length '{field}' should be shorter or equal to {0}.]]",
-        "longer"  => "[[Field length '{field}' should be longer or equal to {0}.]]",
-        "exactly" => "[[Field length '{field}' should be exactly equal to {0}.]]",
-        "range"   => "[[Field length '{field}' should be in range of {0}-{1}.]]"
+        "regexp"  => "[[Your value does not match required pattern.]]",
+        "shorter" => "[[Enter text shorter or equal to {0}.]]",
+        "longer"  => "[[Your text must be longer or equal to {0}.]]",
+        "exactly" => "[[Your text length must be exactly equal to {0}.]]",
+        "range"   => "[[Text length should be in range of {0}-{1}.]]"
     ];
 
     /**

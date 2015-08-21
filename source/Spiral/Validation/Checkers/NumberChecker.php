@@ -19,9 +19,9 @@ class NumberChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "range"  => "[[Field '{field}' should be in range of {0}-{1}.]]",
-        "higher" => "[[Field '{field}' should be higher than {0}.]]",
-        "lower"  => "[[Field '{field}' should be lower than {0}.]]"
+        "range"  => "[[Your value should be in range of {0}-{1}.]]",
+        "higher" => "[[Your value should be higher than {0}.]]",
+        "lower"  => "[[Your value should be lower than {0}.]]"
     ];
 
     /**

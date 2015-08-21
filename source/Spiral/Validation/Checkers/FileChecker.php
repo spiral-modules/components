@@ -20,10 +20,10 @@ class FileChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "exists"    => "[[There was an error while uploading '{field}' file.]]",
-        "uploaded"  => "[[There was an error while uploading '{field}' file.]]",
-        "size"      => "[[File '{field}' exceeds the maximum file size of {1}KB.]]",
-        "extension" => "[[File '{field}' has an invalid file format.]]"
+        "exists"    => "[[File does not exists.]]",
+        "uploaded"  => "[[File not received, please try again.]]",
+        "size"      => "[[File exceeds the maximum file size of {1}KB.]]",
+        "extension" => "[[File has an invalid file format.]]"
     ];
 
     /**

@@ -19,7 +19,7 @@ class MixedChecker extends Checker
      * {@inheritdoc}
      */
     protected $messages = [
-        "cardNumber" => "[[Field '{field}' is not valid card number.]]"
+        "cardNumber" => "[[Please enter valid card number.]]"
     ];
 
     /**

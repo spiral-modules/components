@@ -12,7 +12,7 @@ use Psr\Http\Message\StreamInterface;
 use Spiral\Files\Exceptions\WrapperException;
 
 /**
- * Spiral converter of PSR-7 streams to virtual filenames.
+ * Spiral converter of PSR-7 streams to virtual filenames. Static as hell.
  */
 class StreamWrapper
 {

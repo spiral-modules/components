@@ -280,7 +280,7 @@ class ORM extends Singleton
      */
     public function schemaBuilder()
     {
-        return $this->container->get(SchemaBuilder::class, [
+        return $this->container->construct(SchemaBuilder::class, [
             'config' => $this->config,
             'orm'    => $this,
         ]);
@@ -309,7 +309,7 @@ class ORM extends Singleton
             throw new ORMException("Undefined relation schema '{$type}'.");
         }
 
-        return $this->container->get(
+        return $this->container->construct(
             $this->config['relations'][$type]['schema'],
             compact('builder', 'record', 'name', 'definition')
         );

@@ -79,7 +79,7 @@ class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInt
         }
 
         foreach ($this->config['loggers'][$logger->getName()] as $logLevel => $handler) {
-            $logger->setHandler($logLevel, $this->container->get($handler['class'], [
+            $logger->setHandler($logLevel, $this->container->construct($handler['class'], [
                 'options' => $handler
             ]));
         }

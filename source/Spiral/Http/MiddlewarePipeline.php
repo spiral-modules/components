@@ -127,7 +127,7 @@ class MiddlewarePipeline
                 $middleware = $this->middlewares[$position];
 
                 //Middleware specified as class name
-                $middleware = is_string($middleware) ? $this->container->get($middleware) : $middleware;
+                $middleware = is_string($middleware) ? $this->container->construct($middleware) : $middleware;
 
                 //Executing next middleware
                 $response = $middleware($outerRequest, $next);
@@ -141,7 +141,7 @@ class MiddlewarePipeline
             /**
              * @var SnapshotInterface $snapshot
              */
-            $snapshot = $this->container->get(SnapshotInterface::class, compact('exception'));
+            $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
 
             //Snapshot must report about itself
             $snapshot->report();

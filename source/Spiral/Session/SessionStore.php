@@ -135,7 +135,7 @@ class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \I
                 $config = $this->config['handlers'][$this->config['handler']];
 
                 $benchmark = $this->benchmark('handler', $this->config['handler']);
-                $handler = $this->handler = $this->container->get($config['class'], [
+                $handler = $this->handler = $this->container->construct($config['class'], [
                     'options'  => $config,
                     'lifetime' => $this->config['lifetime']
                 ]);

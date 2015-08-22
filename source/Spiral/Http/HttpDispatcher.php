@@ -272,7 +272,7 @@ class HttpDispatcher extends Singleton implements
      */
     protected function createRouter()
     {
-        return $this->container->get($this->config['router']['class'], [
+        return $this->container->construct($this->config['router']['class'], [
                 'routes'     => $this->routes,
                 'keepOutput' => $this->config['keepOutput']
             ] + $this->config['router']);

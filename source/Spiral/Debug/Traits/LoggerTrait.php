@@ -62,12 +62,12 @@ trait LoggerTrait
             return self::$loggers[static::class];
         }
 
-        if (empty($container = $this->container()) || !$container->hasBinding(LoggerInterface::class)) {
+        if (empty($container = $this->container()) || !$container->has(LoggerInterface::class)) {
             //That's easy
             return new NullLogger();
         }
 
-        return self::$loggers[static::class] = $container->get(LoggerInterface::class, [
+        return self::$loggers[static::class] = $container->construct(LoggerInterface::class, [
             'name' => static::class
         ]);
     }

@@ -124,11 +124,11 @@ trait PaginatorTrait
         //If no request provided we can try to fetch it from container
         $request = !empty($request) ? $request : $container->get(ServerRequestInterface::class);
 
-        if (empty($container) || !$container->hasBinding(PaginatorInterface::class)) {
+        if (empty($container) || !$container->has(PaginatorInterface::class)) {
             //Let's use default paginator
             $this->paginator = new Paginator($request, $pageParameter);
         } else {
-            $this->paginator = $container->get(PaginatorInterface::class, compact(
+            $this->paginator = $container->construct(PaginatorInterface::class, compact(
                 'request', 'pageParameter'
             ));
         }

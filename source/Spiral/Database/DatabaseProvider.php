@@ -104,7 +104,7 @@ class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseP
         }
 
         //No need to benchmark here, due connection will happen later
-        $this->databases[$database] = $this->container->get(Database::class, [
+        $this->databases[$database] = $this->container->construct(Database::class, [
             'name'        => $database,
             'driver'      => $driver,
             'tablePrefix' => isset($config['tablePrefix']) ? $config['tablePrefix'] : ''
@@ -137,7 +137,7 @@ class DatabaseProvider extends Singleton implements InjectorInterface, DatabaseP
             $config = $this->config['connections'][$name];
         }
 
-        $this->drivers[$name] = $this->container->get(
+        $this->drivers[$name] = $this->container->construct(
             $config['driver'], compact('name', 'config')
         );
 

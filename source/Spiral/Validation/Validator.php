@@ -372,7 +372,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
             );
         }
 
-        return self::$checkers[$name] = $this->container->get($this->options['checkers'][$name]);
+        return self::$checkers[$name] = $this->container->construct($this->options['checkers'][$name]);
     }
 
     /**

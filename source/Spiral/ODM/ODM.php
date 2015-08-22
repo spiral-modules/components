@@ -167,7 +167,7 @@ class ODM extends Singleton implements InjectorInterface
         }
 
         $benchmark = $this->benchmark('database', $database);
-        $this->databases[$database] = $this->container->get(MongoDatabase::class, [
+        $this->databases[$database] = $this->container->construct(MongoDatabase::class, [
             'name'   => $database,
             'config' => $config,
             'odm'    => $this
@@ -332,7 +332,7 @@ class ODM extends Singleton implements InjectorInterface
      */
     public function schemaBuilder()
     {
-        return $this->container->get(SchemaBuilder::class, [
+        return $this->container->construct(SchemaBuilder::class, [
             'odm'    => $this,
             'config' => $this->config['schemas']
         ]);

@@ -79,14 +79,14 @@ trait ValidatorTrait
         }
 
         $container = !empty($container) ? $container : $this->container();
-        if (empty($container) || !$container->hasBinding(ValidatorInterface::class)) {
+        if (empty($container) || !$container->has(ValidatorInterface::class)) {
             //We can't create default validation without any rule, this is not secure
             throw new MissingContainerException(
                 "Unable to create Validator instance, no global container set or binding is missing."
             );
         }
 
-        return $this->validator = $container->get(ValidatorInterface::class, [
+        return $this->validator = $container->construct(ValidatorInterface::class, [
             'data'  => $this->fields,
             'rules' => !empty($rules) ? $rules : $this->validates
         ]);

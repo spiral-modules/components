@@ -65,7 +65,7 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
         //Loading buckets
         foreach ($this->config['buckets'] as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->container->get(StorageBucket::class, [
+            $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
                     'storage' => $this
                 ] + $bucket
             );
@@ -82,7 +82,7 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
         }
 
         //Controllable injection implemented
-        return $this->buckets[$name] = $this->container->get(StorageBucket::class, [
+        return $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
                 'storage' => $this
             ] + compact('prefix', 'server', 'options')
         );
@@ -152,7 +152,7 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
 
         $config = $this->config['servers'][$server];
 
-        return $this->servers[$server] = $this->container->get($config['class'], $config);
+        return $this->servers[$server] = $this->container->construct($config['class'], $config);
     }
 
     /**

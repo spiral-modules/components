@@ -45,7 +45,7 @@ trait TranslatorTrait
         }
 
         $container = self::container();
-        if (empty($container) || !$container->hasBinding(TranslatorInterface::class)) {
+        if (empty($container) || !$container->has(TranslatorInterface::class)) {
             //Unable to localize
             return $string;
         }

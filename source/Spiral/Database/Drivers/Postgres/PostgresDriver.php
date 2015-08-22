@@ -163,7 +163,7 @@ class PostgresDriver extends Driver
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->get(InsertQuery::class, [
+        return $this->container->construct(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);

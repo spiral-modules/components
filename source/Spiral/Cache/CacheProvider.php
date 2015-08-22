@@ -81,7 +81,7 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
 
         $benchmark = $this->benchmark('store', $store);
         try {
-            $this->stores[$store] = $this->container->get(
+            $this->stores[$store] = $this->container->construct(
                 $this->config['stores'][$store]['class'],
                 ['cache' => $this]
             );
@@ -125,7 +125,7 @@ class CacheProvider extends Singleton implements CacheProviderInterface, Injecto
             return $this->store();
         }
 
-        $store = $this->container->get($class->getName(), ['cache' => $this]);
+        $store = $this->container->construct($class->getName(), ['cache' => $this]);
         if (!$store->isAvailable()) {
             throw new CacheException(
                 "Unable to use store '" . get_class($store) . "', driver is unavailable."

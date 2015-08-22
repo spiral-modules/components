@@ -23,15 +23,34 @@ use Spiral\Core\Exceptions\Container\InstanceException;
 interface ContainerInterface
 {
     /**
-     * Resolve alias into it value. In most of cases value will become some object.
+     * @param string $alias
+     * @return bool
+     */
+    public function has($alias);
+
+    /**
+     * Resolve alias into it value. I value pointing to class resolver or singleto an object will
+     * be returned.
      *
      * @param string $alias
+     * @return mixed|null|object
+     * @throws InstanceException
+     * @throws ArgumentException
+     */
+    public function get($alias);
+
+    /**
+     * Create instance of requested class using binding class aliases and set of parameters provided
+     * by user, rest of constructor parameters must be filled by container. Method might return
+     * pre-constructed singleton.
+     *
+     * @param string $class
      * @param array  $parameters Parameters to construct new class.
      * @return mixed|null|object
      * @throws InstanceException
      * @throws ArgumentException
      */
-    public function get($alias, $parameters = []);
+    public function construct($class, $parameters = []);
 
     /**
      * Get list of arguments with resolved dependencies for specified function or method.
@@ -45,7 +64,8 @@ interface ContainerInterface
 
     /**
      * Bind value resolver to container alias. Resolver can be class name (will be constructed every
-     * method call), function array or Closure (executed every call).
+     * method call), function array or Closure (executed every call). Only object resolvers supported
+     * by this method.
      *
      * @param string                $alias
      * @param string|array|callable $resolver
@@ -81,12 +101,6 @@ interface ContainerInterface
      * @throws ContainerException
      */
     public function restore($replacePayload);
-
-    /**
-     * @param string $alias
-     * @return bool
-     */
-    public function hasBinding($alias);
 
     /**
      * Check if alias points to constructed instance (singleton).

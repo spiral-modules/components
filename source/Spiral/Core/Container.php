@@ -18,6 +18,8 @@ use Spiral\Core\Exceptions\Container\InstanceException;
 /**
  * Default implementation of IoC container, support controllable injections and post controller
  * dependencies.
+ *
+ * There is no way to bind values at this moment.
  */
 class Container extends Component implements ContainerInterface
 {
@@ -42,25 +44,42 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function get($alias, $parameters = [], \ReflectionParameter $context = null)
+    public function has($alias)
     {
-        if ($alias == ContainerInterface::class) {
+        return isset($this->bindings[$alias]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function get($alias)
+    {
+        //Direct bypass to classes
+        return $this->construct($alias);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function construct($class, $parameters = [], \ReflectionParameter $context = null)
+    {
+        if ($class == ContainerInterface::class) {
             //Shortcut
             return $this;
         }
 
-        if (!isset($this->bindings[$alias])) {
-            return $this->createInstance($alias, $parameters, $context);
+        if (!isset($this->bindings[$class])) {
+            return $this->createInstance($class, $parameters, $context);
         }
 
-        if (is_object($binding = $this->bindings[$alias])) {
+        if (is_object($binding = $this->bindings[$class])) {
             //Singleton
             return $binding;
         }
 
         if (is_string($binding)) {
             //Binding is pointing to something else
-            $instance = $this->get($binding, $parameters, $context);
+            $instance = $this->construct($binding, $parameters, $context);
 
             if ($instance instanceof SingletonInterface) {
                 //To prevent double binding
@@ -73,7 +92,7 @@ class Container extends Component implements ContainerInterface
         if (is_array($binding)) {
             if (is_string($binding[0])) {
                 //Class name with singleton flag
-                $instance = $this->get($binding[0], $parameters, $context);
+                $instance = $this->construct($binding[0], $parameters, $context);
             } else {
                 //Closure with singleton flag
                 $instance = call_user_func_array($binding[0], $parameters);
@@ -81,7 +100,7 @@ class Container extends Component implements ContainerInterface
 
             if ($binding[1]) {
                 //Singleton
-                $this->bindings[$alias] = $instance;
+                $this->bindings[$class] = $instance;
             }
 
             return $instance;
@@ -134,7 +153,7 @@ class Container extends Component implements ContainerInterface
 
             try {
                 //Trying to resolve dependency
-                $arguments[] = $this->get($class->getName(), [], $parameter);
+                $arguments[] = $this->construct($class->getName(), [], $parameter);
 
                 continue;
             } catch (InstanceException $exception) {
@@ -205,17 +224,9 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function hasBinding($alias)
-    {
-        return isset($this->bindings[$alias]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function hasInstance($alias)
     {
-        if (!$this->hasBinding($alias)) {
+        if (!$this->has($alias)) {
             return false;
         }
 
@@ -274,7 +285,7 @@ class Container extends Component implements ContainerInterface
         if (!empty($context) && $injector = $reflector->getConstant('INJECTOR')) {
             //We have to construct class using external injector. Remember about this magick constant?
             return call_user_func(
-                [$this->get($injector), 'createInjection'],
+                [$this->construct($injector), 'createInjection'],
                 $reflector, $context, $this
             );
         }

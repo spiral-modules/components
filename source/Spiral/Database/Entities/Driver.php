@@ -358,7 +358,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function query($query, array $parameters = [], &$preparedParameters = null)
     {
-        return $this->container->get(static::QUERY_RESULT, [
+        return $this->container->construct(static::QUERY_RESULT, [
             'statement'  => $this->statement($query, $parameters, $preparedParameters),
             'parameters' => $preparedParameters
         ]);
@@ -514,7 +514,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function tableSchema($table, $tablePrefix = '')
     {
-        return $this->container->get(static::SCHEMA_TABLE, [
+        return $this->container->construct(static::SCHEMA_TABLE, [
             'driver'      => $this,
             'name'        => $table,
             'tablePrefix' => $tablePrefix
@@ -531,7 +531,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function columnSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->get(static::SCHEMA_COLUMN, compact('table', 'name', 'schema'));
+        return $this->container->construct(static::SCHEMA_COLUMN, compact('table', 'name', 'schema'));
     }
 
     /**
@@ -544,7 +544,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function indexSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->get(static::SCHEMA_INDEX, compact('table', 'name', 'schema'));
+        return $this->container->construct(static::SCHEMA_INDEX, compact('table', 'name', 'schema'));
     }
 
     /**
@@ -557,7 +557,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function referenceSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->get(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
+        return $this->container->construct(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
     }
 
     /**
@@ -569,7 +569,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->get(InsertQuery::class, [
+        return $this->container->construct(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -584,7 +584,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function selectBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->get(SelectQuery::class, [
+        return $this->container->construct(SelectQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -599,7 +599,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function deleteBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->get(DeleteQuery::class, [
+        return $this->container->construct(DeleteQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -614,7 +614,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function updateBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->get(UpdateQuery::class, [
+        return $this->container->construct(UpdateQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -629,7 +629,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function queryCompiler($tablePrefix = '')
     {
-        return $this->container->get(static::QUERY_COMPILER, [
+        return $this->container->construct(static::QUERY_COMPILER, [
             'driver'      => $this,
             'tablePrefix' => $tablePrefix
         ]);

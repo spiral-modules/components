@@ -157,7 +157,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             /**
              * @var MigrationInterface $migration
              */
-            $migration = $this->container->get($definition['class']);
+            $migration = $this->container->construct($definition['class']);
 
             //Status
             $migration->setStatus($this->getStatus($definition));

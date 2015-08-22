@@ -9,7 +9,6 @@
 
 namespace Spiral\Debug\Traits;
 
-use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Spiral\Core\ContainerInterface;
@@ -20,11 +19,6 @@ use Spiral\Core\ContainerInterface;
 trait LoggerTrait
 {
     /**
-     * To incorporate parent functionality.
-     */
-    use LoggerAwareTrait;
-
-    /**
      * Loggers associated to classes not instances.
      *
      * @var LoggerInterface[]
@@ -32,19 +26,33 @@ trait LoggerTrait
     private static $loggers = [];
 
     /**
+     * The logger instance.
+     *
+     * @var LoggerInterface
+     */
+    private $logger = null;
+
+    /**
      * @return ContainerInterface
      */
     abstract public function container();
 
     /**
-     * Sets logger for every class instance, instance based loggers will be in priority compared to
-     * global logger.
+     * Sets a logger. Static loggers has less priority over loggers associated with specific object.
      *
      * @param LoggerInterface $logger
+     * @param bool            $static Associate logger to set of classes, not one object.
+     * @return $this
      */
-    public static function setStaticLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger, $static = false)
     {
-        self::$loggers[static::class] = $logger;
+        if ($static) {
+            self::$loggers[static::class] = $logger;
+        } else {
+            $this->logger = $logger;
+        }
+
+        return $this;
     }
 
     /**

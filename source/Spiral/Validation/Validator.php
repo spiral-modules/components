@@ -62,13 +62,6 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     const STOP_VALIDATION = -99;
 
     /**
-     * Validator will share checker instances for performance reasons.
-     *
-     * @var array
-     */
-    private static $checkers = [];
-
-    /**
      * @var array|\ArrayAccess
      */
     private $data = [];
@@ -362,17 +355,13 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     protected function checker($name)
     {
-        if (isset(self::$checkers[$name])) {
-            return self::$checkers[$name];
-        }
-
         if (!isset($this->options['checkers'][$name])) {
             throw new ValidationException(
                 "Unable to create validation checker defined by '{$name}' name."
             );
         }
 
-        return self::$checkers[$name] = $this->container->construct($this->options['checkers'][$name]);
+        return $this->container->get($this->options['checkers'][$name]);
     }
 
     /**

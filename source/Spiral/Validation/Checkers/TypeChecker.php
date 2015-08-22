@@ -8,13 +8,19 @@
  */
 namespace Spiral\Validation\Checkers;
 
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Validation\Checker;
 
 /**
  * Variable type checks.
  */
-class TypeChecker extends Checker
+class TypeChecker extends Checker implements SingletonInterface
 {
+    /**
+     * Declaring to IoC to construct class only once.
+     */
+    const SINGLETON = self::class;
+
     /**
      * {@inheritdoc}
      */

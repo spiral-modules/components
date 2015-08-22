@@ -8,14 +8,20 @@
  */
 namespace Spiral\Validation\Checkers;
 
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Validation\Checker;
 use Spiral\Validation\Validator;
 
 /**
  * Validations based dependencies between fields.
  */
-class RequiredChecker extends Checker
+class RequiredChecker extends Checker implements SingletonInterface
 {
+    /**
+     * Declaring to IoC to construct class only once.
+     */
+    const SINGLETON = self::class;
+
     /**
      * {@inheritdoc}
      */

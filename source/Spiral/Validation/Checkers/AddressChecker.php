@@ -8,13 +8,19 @@
  */
 namespace Spiral\Validation\Checkers;
 
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Validation\Checker;
 
 /**
  * Validate different addresses: email, url and etc.
  */
-class AddressChecker extends Checker
+class AddressChecker extends Checker implements SingletonInterface
 {
+    /**
+     * Declaring to IoC to construct class only once.
+     */
+    const SINGLETON = self::class;
+
     /**
      * {@inheritdoc}
      */

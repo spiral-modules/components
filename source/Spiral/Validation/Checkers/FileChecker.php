@@ -9,13 +9,19 @@
 namespace Spiral\Validation\Checkers;
 
 use Psr\Http\Message\UploadedFileInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Validation\Checker;
 
-class FileChecker extends Checker
+class FileChecker extends Checker implements SingletonInterface
 {
+    /**
+     * Declaring to IoC to construct class only once.
+     */
+    const SINGLETON = self::class;
+
     /**
      * {@inheritdoc}
      */

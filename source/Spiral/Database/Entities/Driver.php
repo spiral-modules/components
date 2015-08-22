@@ -317,7 +317,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
 
         try {
             if ($this->isProfiling()) {
-                $queryString = QueryCompiler::interpolate($query, $parameters);
+                $queryString = $this->queryCompiler()->interpolate($query, $parameters);
                 $benchmark = $this->benchmark($this->name, $queryString);
             }
 
@@ -336,7 +336,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
         } catch (\PDOException $exception) {
 
             if (empty($queryString)) {
-                $queryString = QueryCompiler::interpolate($query, $parameters);
+                $queryString = $this->queryCompiler()->interpolate($query, $parameters);
             }
 
             $this->logger()->error($queryString, compact('query', 'parameters'));

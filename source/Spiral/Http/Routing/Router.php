@@ -9,6 +9,7 @@
 namespace Spiral\Http\Routing;
 
 use Cocur\Slugify\SlugifyInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\ClientException;
@@ -114,7 +115,7 @@ class Router implements RouterInterface
         $outerRouter = $this->container->replace(self::class, $this);
 
         $this->activePath = $request->getAttribute('activePath', $this->activePath);
-        if (!$this->activeRoute = $this->findRoute($request, $this->activePath)) {
+        if (empty($this->activeRoute = $this->findRoute($request, $this->activePath))) {
             throw new ClientException(ClientException::NOT_FOUND);
         }
 
@@ -126,7 +127,6 @@ class Router implements RouterInterface
                 $this->keepOutput
             );
         } else {
-
             $response = $this->activeRoute->perform(
                 $request->withAttribute('route', $this->activeRoute),
                 $this->container
@@ -135,6 +135,10 @@ class Router implements RouterInterface
 
         //Close router scope
         $this->container->restore($outerRouter);
+
+        /**
+         * @var ResponseInterface $response
+         */
 
         return $response;
     }

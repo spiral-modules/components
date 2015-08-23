@@ -22,12 +22,6 @@ class BelongsTo extends HasOne
     const RELATION_TYPE = Record::BELONGS_TO;
 
     /**
-     * Indication if nested relation save is allowed. When set to false no validations or auto
-     * saves will be performed.
-     */
-    const NESTABLE = false;
-
-    /**
      * {@inheritdoc}
      */
     public function isLoaded()

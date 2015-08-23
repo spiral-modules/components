@@ -45,7 +45,10 @@ class HasOneSchema extends RelationSchema
         //Relation allowed to create indexes in outer table
         Record::CREATE_INDEXES    => true,
         //Has one counted as not nullable by default
-        Record::NULLABLE          => false
+        Record::NULLABLE          => false,
+        //Embedded relations are validated and saved with parent model and can accept values using
+        //setFields
+        Record::EMBEDDED_RELATION => true
     ];
 
     /**

@@ -30,12 +30,6 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     const MULTIPLE = false;
 
     /**
-     * Indication if nested relation save is allowed. When set to false no validations or auto
-     * saves will be performed.
-     */
-    const NESTABLE = true;
-
-    /**
      * Indication that relation data has been loaded from databases.
      *
      * @var bool
@@ -184,11 +178,6 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      */
     public function saveAssociation($validate = true)
     {
-        if (!self::NESTABLE) {
-            //Forbidden to be saved
-            return true;
-        }
-
         if (empty($instance = $this->getRelated())) {
             //Nothing to save
             return true;
@@ -204,7 +193,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
                 }
 
                 //Forcing keys and etc
-                if (!$this->mountRelation($record)->save($validate, true)) {
+                if (!$this->mountRelation($record)->save($validate)) {
                     return false;
                 }
 
@@ -222,7 +211,7 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
             return true;
         }
 
-        if (!$this->mountRelation($instance)->save($validate, true)) {
+        if (!$this->mountRelation($instance)->save($validate)) {
             return false;
         }
 
@@ -255,11 +244,6 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      */
     public function isValid()
     {
-        if (!self::NESTABLE) {
-            //Always valid
-            return true;
-        }
-
         $related = $this->getRelated();
         if (!static::MULTIPLE) {
             if ($related instanceof Record) {
@@ -298,11 +282,6 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
      */
     public function getErrors($reset = false)
     {
-        if (!self::NESTABLE) {
-            //Always valid
-            return [];
-        }
-
         $related = $this->getRelated();
 
         if (!static::MULTIPLE) {

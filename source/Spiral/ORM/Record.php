@@ -15,6 +15,8 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
+use Spiral\Models\EntityInterface;
+use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
@@ -116,6 +118,16 @@ class Record extends DataEntity implements ActiveEntityInterface
     const NULLABLE          = 1005; //Relation can be nullable (default)
     const CREATE_INDEXES    = 1006; //Indication that relation is allowed to create required indexes
     const MORPHED_ALIASES   = 1007; //Aliases for morphed sub-relations
+
+    /**
+     * Relations marked as embedded will be automatically saved/validated with parent model. In
+     * addition such models data can be set using setFields method (only for ONE relations).
+     *
+     * @see setFields()
+     * @see save()
+     * @see validate()
+     */
+    const EMBEDDED_RELATION = 1008;
 
     /**
      * Constants used to declare indexes in record schema.
@@ -436,6 +448,39 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
+     * @see   $fillable
+     * @see   $secured
+     * @see   isFillable()
+     * @param array|\Traversable $fields
+     * @param bool               $all Fill all fields including non fillable.
+     * @return $this
+     * @throws AccessorExceptionInterface
+     * @event setFields($fields)
+     */
+    public function setFields($fields = [], $all = false)
+    {
+        parent::setFields($fields, $all);
+
+        foreach ($fields as $name => $nested) {
+            //We can fill data of embedded of relations (usually HAS ONE)
+            if (!empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])) {
+                //Getting relation instance
+                $relation = $this->relation($name);
+
+                //Getting related object
+                $related = $relation->getRelated();
+                if ($related instanceof EntityInterface) {
+                    $related->setFields($nested);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * Must track field updates. In addition Records will not allow to set unknown field.
      *
      * @throws RecordException
@@ -554,13 +599,13 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * Create or update record data in database.
+     * Create or update record data in database. Record will validate all EMBEDDED and loaded
+     * relations.
      *
      * @see   sourceTable()
      * @see   getCriteria()
      * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
      *                             disable validation before saving.
-     * @param bool      $relations Save data associated to constructed record relations.
      * @return bool
      * @throws RecordException
      * @throws QueryException
@@ -569,13 +614,13 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @event updating()
      * @event updated()
      */
-    public function save($validate = null, $relations = true)
+    public function save($validate = null)
     {
         if (is_null($validate)) {
             $validate = static::VALIDATE_SAVE;
         }
 
-        if ($validate && !$this->isValid($relations)) {
+        if ($validate && !$this->isValid()) {
             return false;
         }
 
@@ -610,16 +655,17 @@ class Record extends DataEntity implements ActiveEntityInterface
 
         $this->flushUpdates();
 
-        if ($relations) {
-            foreach ($this->relations as $name => $relation) {
-                if (!$relation instanceof RelationInterface) {
-                    //Was never constructed
-                    continue;
-                }
+        foreach ($this->relations as $name => $relation) {
+            if (!$relation instanceof RelationInterface) {
+                //Was never constructed
+                continue;
+            }
 
-                if (!$relation->saveAssociation($validate)) {
-                    throw new RecordException("Unable to save relation '{$name}'.");
-                }
+            if (
+                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
+                && !$relation->saveAssociation($validate)
+            ) {
+                throw new RecordException("Unable to save relation '{$name}'.");
             }
         }
 
@@ -867,39 +913,29 @@ class Record extends DataEntity implements ActiveEntityInterface
     }
 
     /**
-     * Check if context data is valid.
-     *
-     * @param bool $relations Validate pre-loaded relations.
-     * @return bool
+     * {@inheritdoc}
      */
-    public function isValid($relations = true)
+    public function isValid()
     {
-        $this->validate($relations);
+        $this->validate();
 
         return empty($this->errors);
     }
 
     /**
-     * Check if context data has errors.
-     *
-     * @param bool $relations Validate pre-loaded relations.
-     * @return bool
+     * {@inheritdoc}
      */
-    public function hasErrors($relations = true)
+    public function hasErrors()
     {
-        return !$this->isValid($relations);
+        return !$this->isValid();
     }
 
     /**
-     * List of errors associated with parent field, every field should have only one error assigned.
-     *
-     * @param bool $reset     Clean errors after receiving every message.
-     * @param bool $relations Validate pre-loaded relations.
-     * @return array
+     * {@inheritdoc}
      */
-    public function getErrors($reset = false, $relations = true)
+    public function getErrors($reset = false)
     {
-        $this->validate($relations);
+        $this->validate();
 
         $errors = [];
         foreach ($this->errors as $field => $error) {
@@ -925,11 +961,9 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * @param bool $relations Validate pre-loaded relations.
-     *
-     * Will validate every ValidatesInterface instance. Used for JsonDocuments.
+     * Will validate every loaded and embedded relation.
      */
-    protected function validate($relations = true)
+    protected function validate()
     {
         $errors = [];
         //Validating all compositions
@@ -944,19 +978,22 @@ class Record extends DataEntity implements ActiveEntityInterface
             }
         }
 
-        if ($relations) {
-            //We have to validate relations before saving them
-            foreach ($this->relations as $name => $relation) {
-                if (!$relation instanceof ValidatesInterface) {
-                    //Was never constructed
-                    continue;
-                }
 
-                if (!$relation->isValid()) {
-                    $errors[$name] = $relation->getErrors();
-                }
+        //We have to validate relations before saving them
+        foreach ($this->relations as $name => $relation) {
+            if (!$relation instanceof ValidatesInterface) {
+                //Was never constructed
+                continue;
+            }
+
+            if (
+                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
+                && !$relation->isValid()
+            ) {
+                $errors[$name] = $relation->getErrors();
             }
         }
+
 
         parent::validate();
         $this->errors = $this->errors + $errors;

@@ -98,7 +98,10 @@ class ManyToManySchema extends RelationSchema
         Record::WHERE_PIVOT       => [],
         //WHERE statement to be applied for data in outer data while loading relation data
         //can not be inversed
-        Record::WHERE             => []
+        Record::WHERE             => [],
+        //Embedded relations are validated and saved with parent model and can accept values using
+        //setFields
+        Record::EMBEDDED_RELATION => false
     ];
 
     /**

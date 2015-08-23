@@ -55,6 +55,9 @@ class HasManySchema extends HasOneSchema
         //Relation allowed to create indexes in outer table
         Record::CREATE_INDEXES    => true,
         //HasMany allow us to define default WHERE statement for relation in a simplified array form
-        Record::WHERE             => []
+        Record::WHERE             => [],
+        //Embedded relations are validated and saved with parent model and can accept values using
+        //setFields
+        Record::EMBEDDED_RELATION => false
     ];
 }

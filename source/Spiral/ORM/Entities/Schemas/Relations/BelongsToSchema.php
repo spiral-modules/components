@@ -59,7 +59,10 @@ class BelongsToSchema extends RelationSchema
         Record::CREATE_INDEXES    => true,
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Record::NULLABLE          => true
+        Record::NULLABLE          => true,
+        //Embedded relations are validated and saved with parent model and can accept values using
+        //setFields
+        Record::EMBEDDED_RELATION => false
     ];
 
     /**

@@ -105,7 +105,10 @@ class ManyToMorphedSchema extends MorphedSchema
         Record::PIVOT_COLUMNS     => [],
         //WHERE statement in a form of simplified array definition to be applied to pivot table
         //data
-        Record::WHERE_PIVOT       => []
+        Record::WHERE_PIVOT       => [],
+        //Embedded relations are validated and saved with parent model and can accept values using
+        //setFields
+        Record::EMBEDDED_RELATION => false
     ];
 
     /**

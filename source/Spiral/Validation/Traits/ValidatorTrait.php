@@ -115,17 +115,6 @@ trait ValidatorTrait
     }
 
     /**
-     * Attach error to data field.
-     *
-     * @param string $field
-     * @param string $message
-     */
-    public function setError($field, $message)
-    {
-        $this->errors[$field] = $message;
-    }
-
-    /**
      * List of errors associated with parent field, every field should have only one error assigned.
      *
      * @param bool $reset Clean errors after receiving every message.
@@ -171,5 +160,16 @@ trait ValidatorTrait
         $this->validator->setData([]);
 
         return empty($this->errors = $this->fire('validated', $this->errors));
+    }
+
+    /**
+     * Attach error to data field. Internal method to be used in validations.
+     *
+     * @param string $field
+     * @param string $message
+     */
+    protected function setError($field, $message)
+    {
+        $this->errors[$field] = $message;
     }
 }

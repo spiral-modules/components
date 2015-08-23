@@ -236,7 +236,7 @@ class RecordSchema extends ReflectionEntity
                 $default = $recordDefaults[$column->getName()];
             }
 
-            if (is_null($default) && $column->isNullable()) {
+            if (is_null($default) && in_array($column->getName(), $this->getNullable())) {
                 //We must keep null values
                 $defaults[$column->getName()] = $default;
                 continue;
@@ -280,7 +280,8 @@ class RecordSchema extends ReflectionEntity
             }
         }
 
-        return $result;
+        //Let's include primary keys to nullable fields
+        return array_unique(array_merge($result, $this->tableSchema->getPrimaryKeys()));
     }
 
     /**

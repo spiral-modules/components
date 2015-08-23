@@ -107,8 +107,6 @@ class Router implements RouterInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @throws ClientException
      */
     public function __invoke(ServerRequestInterface $request)
     {

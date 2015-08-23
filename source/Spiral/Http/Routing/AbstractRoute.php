@@ -275,7 +275,9 @@ abstract class AbstractRoute implements RouteInterface
     ) {
         $pipeline = new MiddlewarePipeline($container, $this->middlewares, $keepOutput);
 
-        return $pipeline->target($this->createEndpoint($container))->run($request);
+        return $pipeline->target(
+            $this->createEndpoint($container)
+        )->run($request);
     }
 
     /**

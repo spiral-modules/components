@@ -110,11 +110,8 @@ class Router implements RouterInterface
      *
      * @throws ClientException
      */
-    public function __invoke(
-        ServerRequestInterface $request,
-        \Closure $next = null,
-        $context = null
-    ) {
+    public function __invoke(ServerRequestInterface $request)
+    {
         //Open router scope
         $outerRouter = $this->container->replace(self::class, $this);
 

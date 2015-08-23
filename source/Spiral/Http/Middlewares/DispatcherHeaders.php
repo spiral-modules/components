@@ -34,7 +34,7 @@ class DispatcherHeaders implements MiddlewareInterface
     /**
      * {@inheritdoc}
      */
-    public function __invoke(ServerRequestInterface $request, \Closure $next = null)
+    public function __invoke(ServerRequestInterface $request, \Closure $next)
     {
         /**
          * @var ResponseInterface $response

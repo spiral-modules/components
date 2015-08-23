@@ -9,22 +9,34 @@
 namespace Spiral\Http\Routing;
 
 use Cocur\Slugify\SlugifyInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\RouteException;
 use Spiral\Http\Exceptions\RouterException;
 use Spiral\Http\MiddlewareInterface;
 
 /**
- * Routers used by HttpDispatcher and endpoints for logical routing to controller actions.
+ * Routers used by HttpDispatcher and other components for logical routing to controller actions.
  */
-interface RouterInterface extends MiddlewareInterface
+interface RouterInterface
 {
     /**
      * @param ContainerInterface $container
      * @param RouteInterface[]   $routes Pre-defined array of routes (if were collected externally).
      */
     public function __construct(ContainerInterface $container, array $routes = []);
+
+    /**
+     * Valid endpoint for MiddlewarePipeline.
+     *
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws ClientException
+     */
+    public function __invoke(ServerRequestInterface $request);
 
     /**
      * @param RouteInterface $route

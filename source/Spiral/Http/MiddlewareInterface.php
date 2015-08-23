@@ -20,8 +20,8 @@ interface MiddlewareInterface
      * Pass request thought middleware and receive resulted response.
      *
      * @param ServerRequestInterface $request
-     * @param \Closure               $next Next middleware/target. Always return ResponseInterface.
+     * @param \Closure               $next Next middleware/target. Always returns ResponseInterface.
      * @return ResponseInterface
      */
-    public function __invoke(ServerRequestInterface $request, \Closure $next = null);
+    public function __invoke(ServerRequestInterface $request, \Closure $next);
 }

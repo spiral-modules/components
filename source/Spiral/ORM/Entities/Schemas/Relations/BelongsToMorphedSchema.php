@@ -65,10 +65,7 @@ class BelongsToMorphedSchema extends MorphedSchema
         //Relation allowed to create indexes in pivot table
         Record::CREATE_INDEXES => true,
         //Relation is nullable by default
-        Record::NULLABLE       => true,
-        //Embedded relations are validated and saved with parent model and can accept values using
-        //setFields
-        Record::EMBEDDED_RELATION => false
+        Record::NULLABLE       => true
     ];
 
     /**

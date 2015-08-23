@@ -26,7 +26,7 @@ interface BenchmarkerInterface
      * @param object $caller  Call initiator (used to de-group events).
      * @param string $record  Benchmark record name or payload.
      * @param string $context Record context (if any).
-     * @return bool|float
+     * @return bool|float|mixed
      */
     public function benchmark($caller, $record, $context = '');
 }

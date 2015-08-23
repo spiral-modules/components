@@ -44,7 +44,7 @@ trait BenchmarkTrait
      *
      * @param string $record  Benchmark record name.
      * @param string $context Record context (if any).
-     * @return bool|float
+     * @return bool|float|mixed
      */
     public function benchmark($record, $context = '')
     {

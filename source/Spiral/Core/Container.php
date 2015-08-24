@@ -95,7 +95,7 @@ class Container extends Component implements ContainerInterface
                 $instance = $this->construct($binding[0], $parameters, $context);
             } else {
                 //Closure with singleton flag
-                $instance = call_user_func_array($binding[0], $parameters);
+                $instance = call_user_func($binding[0], $this);
             }
 
             if ($binding[1]) {

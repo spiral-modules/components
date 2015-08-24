@@ -23,7 +23,7 @@ return [
     'exposeErrors' => true,
     'keepOutput'   => true,
     'cookies'      => [
-        'domain' => '.%s',
+        'domain' => '.{host}',
         'method' => 'encrypt'
     ],
     'headers'      => [

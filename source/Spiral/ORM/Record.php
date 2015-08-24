@@ -963,7 +963,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      *
      * Will validate every loaded and embedded relation.
      */
-    protected function validate()
+    protected function validate($reset = false)
     {
         $errors = [];
         //Validating all compositions
@@ -974,10 +974,9 @@ class Record extends DataEntity implements ActiveEntityInterface
             }
 
             if (!$value->isValid()) {
-                $errors[$field] = $value->getErrors();
+                $errors[$field] = $value->getErrors($reset);
             }
         }
-
 
         //We have to validate relations before saving them
         foreach ($this->relations as $name => $relation) {
@@ -990,10 +989,9 @@ class Record extends DataEntity implements ActiveEntityInterface
                 !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
                 && !$relation->isValid()
             ) {
-                $errors[$name] = $relation->getErrors();
+                $errors[$name] = $relation->getErrors($reset);
             }
         }
-
 
         parent::validate();
         $this->errors = $this->errors + $errors;

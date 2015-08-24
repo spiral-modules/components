@@ -117,12 +117,12 @@ trait ValidatorTrait
     /**
      * List of errors associated with parent field, every field should have only one error assigned.
      *
-     * @param bool $reset Clean errors after receiving every message.
+     * @param bool $reset Clean errors after receiving every message and invalidate target.
      * @return array
      */
     public function getErrors($reset = false)
     {
-        $this->validate();
+        $this->validate($reset);
         $errors = [];
         foreach ($this->errors as $field => $error) {
             if (
@@ -147,13 +147,14 @@ trait ValidatorTrait
     /**
      * Validate data using associated validator.
      *
+     * @param bool $reset
      * @return bool
      * @throws ValidationException
      * @throws MissingContainerException
      * @event validation()
      * @event validated($errors)
      */
-    protected function validate()
+    protected function validate($reset = false)
     {
         $this->fire('validation');
         $this->errors = $this->validator()->getErrors();

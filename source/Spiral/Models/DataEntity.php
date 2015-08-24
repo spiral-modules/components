@@ -398,21 +398,24 @@ abstract class DataEntity extends Component implements
     /**
      * Validate model fields.
      *
+     * @param bool $reset
      * @return bool
      * @throws ValidationException
      * @throws MissingContainerException
      * @event validation()
      * @event validated($errors)
      */
-    protected function validate()
+    protected function validate($reset = false)
     {
         if (empty($this->validates)) {
             $this->validated = true;
-        } elseif (!$this->validated) {
+        } elseif (!$this->validated || $reset) {
             $this->fire('validation');
 
             $this->errors = $this->validator()->getErrors();
-            $this->validated = empty($this->errors);
+
+            //We just validated our model
+            $this->validated = true;
 
             //Cleaning memory
             $this->validator->setData([]);

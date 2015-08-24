@@ -19,7 +19,7 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 /**
  * Default implementation of CacheInterface. Better fit for spiral.
  */
-class CacheProvider extends Singleton implements CacheProviderInterface, InjectorInterface
+class CacheProvider extends Singleton implements CacheInterface, InjectorInterface
 {
     /**
      * Some operations can be slow.

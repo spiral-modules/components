@@ -14,7 +14,7 @@ use Spiral\Core\Container\SaturableInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewInterface;
-use Spiral\Views\ViewProviderInterface;
+use Spiral\Views\ViewsInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using
@@ -66,7 +66,7 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterfac
     protected $files = null;
 
     /**
-     * @var ViewProviderInterface
+     * @var ViewsInterface
      */
     protected $views = null;
 
@@ -82,13 +82,13 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterfac
      * @param ContainerInterface    $container
      * @param Debugger              $debugger
      * @param FilesInterface        $files
-     * @param ViewProviderInterface $views
+     * @param ViewsInterface $views
      */
     public function init(
         ContainerInterface $container,
         Debugger $debugger,
         FilesInterface $files,
-        ViewProviderInterface $views
+        ViewsInterface $views
     ) {
         $this->config = $debugger->config()[static::CONFIG];
 

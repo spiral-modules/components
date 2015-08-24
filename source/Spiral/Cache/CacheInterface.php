@@ -13,7 +13,7 @@ use Spiral\Cache\Exceptions\CacheException;
 /**
  * StoreInterface provider.
  */
-interface CacheProviderInterface
+interface CacheInterface
 {
     /**
      * Create specified or default cache adapter. This function will load cache adapter if it

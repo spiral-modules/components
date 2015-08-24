@@ -14,7 +14,7 @@ use Spiral\Storage\Exceptions\BucketException;
 use Spiral\Storage\Exceptions\ObjectException;
 
 /**
- * Representation of single storage object.
+ * Representation of a single storage object.
  */
 interface ObjectInterface extends StreamableInterface
 {

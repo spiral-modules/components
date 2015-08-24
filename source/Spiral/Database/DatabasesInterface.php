@@ -10,7 +10,7 @@ namespace Spiral\Database;
 
 use Spiral\Database\Exceptions\DatabaseException;
 
-interface DatabaseProviderInterface
+interface DatabasesInterface
 {
     /**
      * Create specified or select default instance of DatabaseInterface.

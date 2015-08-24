@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 
 /**
- * Only instances like that can be automatically paginated.
+ * Declares ability to be paginated and store associated paginator.
  */
 interface PaginableInterface extends \Countable
 {

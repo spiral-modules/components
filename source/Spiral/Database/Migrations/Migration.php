@@ -10,7 +10,7 @@ namespace Spiral\Database\Migrations;
 
 use Spiral\Core\Component;
 use Spiral\Database\DatabaseProvider;
-use Spiral\Database\DatabaseProviderInterface;
+use Spiral\Database\DatabasesInterface;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\MigrationException;
@@ -27,7 +27,7 @@ abstract class Migration extends Component implements MigrationInterface
     private $status = null;
 
     /**
-     * @var DatabaseProviderInterface
+     * @var DatabasesInterface
      */
     protected $databases = null;
 

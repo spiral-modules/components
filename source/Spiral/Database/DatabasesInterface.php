@@ -10,6 +10,9 @@ namespace Spiral\Database;
 
 use Spiral\Database\Exceptions\DatabaseException;
 
+/**
+ * Databases factory.
+ */
 interface DatabasesInterface
 {
     /**

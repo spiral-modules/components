@@ -215,13 +215,18 @@ abstract class AbstractRoute implements RouteInterface
      * Example:
      * $route->with(new CacheMiddleware(100));
      * $route->with(ProxyMiddleware::class);
+     * $route->with([ProxyMiddleware::class, OtherMiddleware::class]);
      *
-     * @param callable|MiddlewareInterface $middleware
+     * @param callable|MiddlewareInterface|array $middleware
      * @return $this
      */
     public function with($middleware)
     {
-        $this->middlewares[] = $middleware;
+        if (is_array($middleware)) {
+            $this->middlewares = array_merge($this->middlewares, $middleware);
+        } else {
+            $this->middlewares[] = $middleware;
+        }
 
         return $this;
     }

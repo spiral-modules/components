@@ -32,16 +32,6 @@ class Container extends Component implements ContainerInterface
     protected $bindings = [];
 
     /**
-     * First constructed container will become global container by default.
-     */
-    public function __construct()
-    {
-        if (empty(self::container())) {
-            self::setContainer($this);
-        }
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function has($alias)

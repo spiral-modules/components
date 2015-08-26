@@ -70,7 +70,6 @@ class Router implements RouterInterface
      *
      * @param RouteInterface|array $default Default route or options to construct instance of
      *                                      DirectRoute.
-     * @param string               $basePath
      * @param bool                 $keepOutput
      * @throws RouterException
      */

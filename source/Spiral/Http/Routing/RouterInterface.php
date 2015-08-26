@@ -16,7 +16,6 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\RouteException;
 use Spiral\Http\Exceptions\RouterException;
-use Spiral\Http\MiddlewareInterface;
 
 /**
  * Routers used by HttpDispatcher and other components for logical routing to controller actions.
@@ -26,8 +25,9 @@ interface RouterInterface
     /**
      * @param ContainerInterface $container
      * @param RouteInterface[]   $routes Pre-defined array of routes (if were collected externally).
+     * @param string             $basePath
      */
-    public function __construct(ContainerInterface $container, array $routes = []);
+    public function __construct(ContainerInterface $container, array $routes = [], $basePath = '/');
 
     /**
      * Valid endpoint for MiddlewarePipeline.

@@ -8,10 +8,12 @@
  */
 namespace Spiral\Events\Entities;
 
+use Spiral\Events\ObjectEventInterface;
+
 /**
  * Event which being called by some object. Object will be available using parent() method.
  */
-class ObjectEvent extends Event
+class ObjectEvent extends Event implements ObjectEventInterface
 {
     /**
      * @var object
@@ -31,9 +33,7 @@ class ObjectEvent extends Event
     }
 
     /**
-     * Object which raised an event.
-     *
-     * @return object
+     * {@inheritdoc}
      */
     public function parent()
     {

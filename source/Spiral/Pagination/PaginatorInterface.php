@@ -52,22 +52,6 @@ interface PaginatorInterface extends \Countable
     public function getUri();
 
     /**
-     * Update page parameter name from request query. Page number should be fetched from queryParams
-     * of provided request instance.
-     *
-     * @param string $pageParameter
-     * @return self
-     */
-    public function setParameter($pageParameter);
-
-    /**
-     * Get page query parameter name.
-     *
-     * @return string
-     */
-    public function getParameter();
-
-    /**
      * Total records to be paginated.
      *
      * @param int $count Total records count.
@@ -105,50 +89,6 @@ interface PaginatorInterface extends \Countable
      * @return int
      */
     public function getOffset();
-
-    /**
-     * The count of pages required to represent all records using a specified limit value.
-     *
-     * @return int
-     */
-    public function countPages();
-
-    /**
-     * The count or records displayed on current page can vary from 0 to any limit value. Only the
-     * last page can have less records than is specified in the limit.
-     *
-     * @return int
-     */
-    public function countDisplayed();
-
-    /**
-     * Does paginator needed to be applied? Should return false if all records can be shown on one
-     * page.
-     *
-     * @return bool
-     */
-    public function isRequired();
-
-    /**
-     * The current page number.
-     *
-     * @return int
-     */
-    public function currentPage();
-
-    /**
-     * Next page number. Should return will be false if the current page is the last page.
-     *
-     * @return bool|int
-     */
-    public function nextPage();
-
-    /**
-     * Previous page number. Should return false if the current page is first page.
-     *
-     * @return bool|int
-     */
-    public function previousPage();
 
     /**
      * Apply pagination to a simple array, should fetch count from target array and return sliced

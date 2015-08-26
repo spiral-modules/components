@@ -117,7 +117,11 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Update page parameter name from request query. Page number should be fetched from queryParams
+     * of provided request instance.
+     *
+     * @param string $pageParameter
+     * @return self
      */
     public function setParameter($pageParameter)
     {
@@ -131,7 +135,9 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get page query parameter name.
+     *
+     * @return string
      */
     public function getParameter()
     {
@@ -204,7 +210,9 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * The count of pages required to represent all records using a specified limit value.
+     *
+     * @return int
      */
     public function countPages()
     {
@@ -212,7 +220,10 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * The count or records displayed on current page can vary from 0 to any limit value. Only the
+     * last page can have less records than is specified in the limit.
+     *
+     * @return int
      */
     public function countDisplayed()
     {
@@ -224,7 +235,10 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Does paginator needed to be applied? Should return false if all records can be shown on one
+     * page.
+     *
+     * @return bool
      */
     public function isRequired()
     {
@@ -232,7 +246,9 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * The current page number.
+     *
+     * @return int
      */
     public function currentPage()
     {
@@ -248,7 +264,9 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Next page number. Should return will be false if the current page is the last page.
+     *
+     * @return bool|int
      */
     public function nextPage()
     {
@@ -260,7 +278,9 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Previous page number. Should return false if the current page is first page.
+     *
+     * @return bool|int
      */
     public function previousPage()
     {

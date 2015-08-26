@@ -64,7 +64,7 @@ trait ValidatorTrait
      * Get associated instance of ValidatorInterface or create new using Container.
      *
      * @param array              $rules
-     * @param ContainerInterface $container
+     * @param ContainerInterface $container Will fall back to global container.
      * @return ValidatorInterface
      * @throws MissingContainerException
      */

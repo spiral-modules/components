@@ -93,11 +93,11 @@ class Router implements RouterInterface
             }
 
             //Name aliasing is required to perform URL generation later.
-            $this->routes[$route->getName()] = $route;
+            $this->routes[] = $route;
         }
 
         if ($default instanceof RouteInterface) {
-            $this->routes[self::DEFAULT_ROUTE] = $default;
+            $this->defaultRoute = $default;
 
             return;
         }
@@ -192,13 +192,15 @@ class Router implements RouterInterface
     /**
      * {@inheritdoc}
      */
-    public function getRoute($route)
+    public function getRoute($name)
     {
-        if (!isset($this->routes[$route])) {
-            throw new RouterException("Undefined route '{$route}'.");
+        foreach ($this->routes as $route) {
+            if ($route->getName() == $name) {
+                return $route;
+            }
         }
 
-        return $this->routes[$route];
+        throw new RouterException("Undefined route '{$name}'.");
     }
 
     /**

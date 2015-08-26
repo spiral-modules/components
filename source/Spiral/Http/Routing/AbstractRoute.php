@@ -26,7 +26,6 @@ use Spiral\Http\Uri;
  *
  * Static routes.
  *      $this->http->route('profile-<id>', 'Controllers\UserController::showProfile');
- *      $this->http->route('profile-<id>', 'Controllers\UserController::showProfile');
  *
  * Dynamic actions:
  *      $this->http->route('account/<action>', 'Controllers\AccountController::<action>');

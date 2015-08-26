@@ -58,7 +58,7 @@ class Route extends AbstractRoute
         }
 
         if (is_string($this->target) && strpos($this->target, self::SEPARATOR) === false) {
-            //Middleware
+            //Endpoint
             return $container->get($this->target);
         }
 

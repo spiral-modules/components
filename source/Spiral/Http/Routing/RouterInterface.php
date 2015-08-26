@@ -46,11 +46,11 @@ interface RouterInterface
     /**
      * Fetch route by it's name.
      *
-     * @param string $route
+     * @param string $name
      * @return RouteInterface
      * @throws RouterException
      */
-    public function getRoute($route);
+    public function getRoute($name);
 
     /**
      * @return RouteInterface[]

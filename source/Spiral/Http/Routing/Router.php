@@ -21,18 +21,21 @@ use Spiral\Http\Exceptions\RouterException;
 class Router implements RouterInterface
 {
     /**
-     * Internal name for primary (default) route. Primary route used to resolve url and perform
-     * controller based routing in cases where no other route found.
-     *
-     * Primary route should support <controller> and <action> parameters. Basically this is multi
-     * controller route. Primary route should be instance of spiral DirectRoute or compatible.
+     * Default name for primary route.
      */
-    const DEFAULT_ROUTE = 'default';
+    const DEFAULT_ROUTE = 'primary';
 
     /**
      * @var RouteInterface[]
      */
     private $routes = [];
+
+    /**
+     * Primary route (fallback if no routes work).
+     *
+     * @var RouteInterface
+     */
+    private $defaultRoute = null;
 
     /**
      * Every route should be executed in a context of active path.
@@ -84,6 +87,11 @@ class Router implements RouterInterface
                 throw new RouterException("Routes should be array of Route instances.");
             }
 
+            if ($route->getName() == self::DEFAULT_ROUTE) {
+                $default = $route;
+                continue;
+            }
+
             //Name aliasing is required to perform URL generation later.
             $this->routes[$route->getName()] = $route;
         }
@@ -94,8 +102,8 @@ class Router implements RouterInterface
             return;
         }
 
-        if (!isset($this->routes[self::DEFAULT_ROUTE]) && !empty($default)) {
-            $this->routes[self::DEFAULT_ROUTE] = new DirectRoute(
+        if (!empty($default) && is_array($default)) {
+            $this->defaultRoute = new DirectRoute(
                 self::DEFAULT_ROUTE,
                 $default['pattern'],
                 $default['namespace'],
@@ -104,6 +112,14 @@ class Router implements RouterInterface
                 $default['controllers']
             );
         }
+    }
+
+    /**
+     * @param RouteInterface $route
+     */
+    public function setDefaultRoute(RouteInterface $route)
+    {
+        $this->defaultRoute = $route;
     }
 
     /**
@@ -156,6 +172,10 @@ class Router implements RouterInterface
             if ($route->match($request, $basePath)) {
                 return $route;
             }
+        }
+
+        if ($this->defaultRoute->match($request, $basePath)) {
+            return $this->defaultRoute;
         }
 
         return null;
@@ -218,7 +238,7 @@ class Router implements RouterInterface
             RouteInterface::SEPARATOR, str_replace('/', RouteInterface::SEPARATOR, $route)
         );
 
-        return $this->routes[self::DEFAULT_ROUTE]->createUri(
+        return $this->defaultRoute->createUri(
             compact('controller', 'action') + $parameters,
             $this->activePath,
             $slugify

@@ -50,28 +50,35 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param \ReflectionParameter $context
      */
-    public function construct($class, $parameters = [], \ReflectionParameter $context = null)
-    {
+    public function construct(
+        $class,
+        $parameters = [],
+        $direct = false,
+        \ReflectionParameter $context = null
+    ) {
         if ($class == ContainerInterface::class) {
             //Shortcut
             return $this;
         }
 
-        if (!isset($this->bindings[$class])) {
-            return $this->createInstance($class, $parameters, $context);
+        if (!isset($this->bindings[$class]) || ($direct && is_object($this->bindings[$class]))) {
+            return $this->createInstance($class, $parameters, $direct, $context);
         }
 
-        if (is_object($binding = $this->bindings[$class])) {
+        $binding = $this->bindings[$class];
+        if (is_object($binding) && !$direct) {
             //Singleton
             return $binding;
         }
 
         if (is_string($binding)) {
             //Binding is pointing to something else
-            $instance = $this->construct($binding, $parameters, $context);
+            $instance = $this->construct($binding, $parameters, $direct, $context);
 
-            if ($instance instanceof SingletonInterface) {
+            if (!$direct && $instance instanceof SingletonInterface) {
                 //To prevent double binding
                 $this->bindings[$binding] = $this->bindings[get_class($instance)] = $instance;
             }
@@ -82,7 +89,7 @@ class Container extends Component implements ContainerInterface
         if (is_array($binding)) {
             if (is_string($binding[0])) {
                 //Class name with singleton flag
-                $instance = $this->construct($binding[0], $parameters, $context);
+                $instance = $this->construct($binding[0], $parameters, $direct, $context);
             } else {
                 //Closure with singleton flag
                 $instance = call_user_func($binding[0], $this);
@@ -102,8 +109,11 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function resolveArguments(ContextFunction $reflection, array $parameters = [])
-    {
+    public function resolveArguments(
+        ContextFunction $reflection,
+        array $parameters = [],
+        $direct = false
+    ) {
         $arguments = [];
         foreach ($reflection->getParameters() as $parameter) {
             $name = $parameter->getName();
@@ -143,7 +153,7 @@ class Container extends Component implements ContainerInterface
 
             try {
                 //Trying to resolve dependency
-                $arguments[] = $this->construct($class->getName(), [], $parameter);
+                $arguments[] = $this->construct($class->getName(), [], $direct, $parameter);
 
                 continue;
             } catch (InstanceException $exception) {
@@ -264,12 +274,17 @@ class Container extends Component implements ContainerInterface
      *
      * @param string               $class
      * @param array                $parameters Constructor parameters.
+     * @param bool                 $direct     Singletons and instance bindings will be ignored.
      * @param \ReflectionParameter $context
      * @return object
      * @throws InstanceException
      */
-    private function createInstance($class, array $parameters, \ReflectionParameter $context = null)
-    {
+    private function createInstance(
+        $class,
+        array $parameters,
+        $direct = false,
+        \ReflectionParameter $context = null
+    ) {
         try {
             $reflector = new \ReflectionClass($class);
         } catch (\ReflectionException $exception) {
@@ -300,7 +315,11 @@ class Container extends Component implements ContainerInterface
             $instance = $reflector->newInstance();
         }
 
-        if (!empty($singleton = $reflector->getConstant('SINGLETON'))) {
+        if (
+            !$direct
+            && $reflector->isSubclassOf(SingletonInterface::class)
+            && !empty($singleton = $reflector->getConstant('SINGLETON'))
+        ) {
             //Component declared SINGLETON constant, binding as constant value and class name.
             $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
         }

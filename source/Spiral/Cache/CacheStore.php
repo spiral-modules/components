@@ -8,10 +8,12 @@
  */
 namespace Spiral\Cache;
 
+use Spiral\Core\Container\InjectableInterface;
+
 /**
  * AbstractStore named like that for convenience and mapping.
  */
-abstract class CacheStore implements StoreInterface
+abstract class CacheStore implements StoreInterface, InjectableInterface
 {
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable

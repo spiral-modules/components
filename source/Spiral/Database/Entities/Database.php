@@ -10,6 +10,7 @@ namespace Spiral\Database\Entities;
 
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
+use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
@@ -28,7 +29,7 @@ use Spiral\Events\Traits\EventsTrait;
  * and use different by table prefix. Databases usually linked to real database or logical portion
  * of database (filtered by prefix).
  */
-class Database extends Component implements DatabaseInterface
+class Database extends Component implements DatabaseInterface, InjectableInterface
 {
     /**
      * Query and statement events.

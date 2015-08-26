@@ -11,6 +11,7 @@ namespace Spiral\Storage\Entities;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
+use Spiral\Core\Container\InjectableInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
@@ -22,7 +23,11 @@ use Spiral\Storage\StorageManager;
 /**
  * Default implementation of storage bucket.
  */
-class StorageBucket extends Component implements BucketInterface, LoggerAwareInterface
+class StorageBucket extends Component
+    implements
+    BucketInterface,
+    LoggerAwareInterface,
+    InjectableInterface
 {
     /**
      * Most of storage operations are pretty slow, we might record and explain all of them.

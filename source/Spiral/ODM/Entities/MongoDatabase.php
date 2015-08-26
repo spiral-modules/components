@@ -8,12 +8,13 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Spiral\Core\Container\InjectableInterface;
 use Spiral\ODM\ODM;
 
 /**
  * Simple spiral ODM wrapper at top of MongoDB.
  */
-class MongoDatabase extends \MongoDB
+class MongoDatabase extends \MongoDB implements InjectableInterface
 {
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable

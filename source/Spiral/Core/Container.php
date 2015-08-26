@@ -50,8 +50,6 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param \ReflectionParameter $context
      */
     public function construct($class, $parameters = [], \ReflectionParameter $context = null)
     {
@@ -64,8 +62,7 @@ class Container extends Component implements ContainerInterface
             return $this->createInstance($class, $parameters, $context);
         }
 
-        $binding = $this->bindings[$class];
-        if (is_object($binding)) {
+        if (is_object($binding = $this->bindings[$class])) {
             //Singleton
             return $binding;
         }
@@ -271,11 +268,8 @@ class Container extends Component implements ContainerInterface
      * @return object
      * @throws InstanceException
      */
-    private function createInstance(
-        $class,
-        array $parameters,
-        \ReflectionParameter $context = null
-    ) {
+    private function createInstance($class, array $parameters, \ReflectionParameter $context = null)
+    {
         try {
             $reflector = new \ReflectionClass($class);
         } catch (\ReflectionException $exception) {
@@ -306,10 +300,7 @@ class Container extends Component implements ContainerInterface
             $instance = $reflector->newInstance();
         }
 
-        if (
-            $reflector->isSubclassOf(SingletonInterface::class)
-            && !empty($singleton = $reflector->getConstant('SINGLETON'))
-        ) {
+        if (!empty($singleton = $reflector->getConstant('SINGLETON'))) {
             //Component declared SINGLETON constant, binding as constant value and class name.
             $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
         }

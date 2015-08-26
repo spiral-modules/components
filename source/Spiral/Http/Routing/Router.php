@@ -70,15 +70,18 @@ class Router implements RouterInterface
      *
      * @param RouteInterface|array $default Default route or options to construct instance of
      *                                      DirectRoute.
+     * @param string               $basePath
      * @param bool                 $keepOutput
      * @throws RouterException
      */
     public function __construct(
         ContainerInterface $container,
         array $routes = [],
+        $basePath = '/',
         $default = [],
         $keepOutput = false
     ) {
+        $this->basePath = $basePath;
         $this->keepOutput = $keepOutput;
 
         $this->container = $container;
@@ -130,7 +133,6 @@ class Router implements RouterInterface
         //Open router scope
         $outerRouter = $this->container->replace(self::class, $this);
 
-        $this->basePath = $request->getAttribute('basePath', $this->basePath);
         if (empty($this->activeRoute = $this->findRoute($request, $this->basePath))) {
             throw new ClientException(ClientException::NOT_FOUND);
         }

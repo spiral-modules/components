@@ -10,7 +10,6 @@ namespace Spiral\Http;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
@@ -274,6 +273,7 @@ class HttpDispatcher extends Singleton implements
     {
         return $this->container->construct($this->config['router']['class'], [
                 'routes'     => $this->routes,
+                'basePath'   => $this->basePath(),
                 'keepOutput' => $this->config['keepOutput']
             ] + $this->config['router']);
     }

@@ -88,13 +88,6 @@ abstract class AbstractRoute implements RouteInterface
     protected $pattern = '';
 
     /**
-     * List of methods route should react to, by default all methods are allowed.
-     *
-     * @var array
-     */
-    protected $methods = [];
-
-    /**
      * Default set of values to fill route matches and target pattern (if specified as pattern).
      *
      * @var array
@@ -179,23 +172,6 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * List of methods route should react to, by default all methods are passed.
-     *
-     * Example:
-     * $route->only('GET');
-     * $route->only(['POST', 'PUT']);
-     *
-     * @param array|string $method
-     * @return $this
-     */
-    public function only($method)
-    {
-        $this->methods = is_array($method) ? $method : func_get_args();
-
-        return $this;
-    }
-
-    /**
      * Update route defaults (new values will be merged with existed data).
      *
      * @param array $defaults
@@ -235,10 +211,6 @@ abstract class AbstractRoute implements RouteInterface
      */
     public function match(ServerRequestInterface $request, $basePath = '/')
     {
-        if (!empty($this->methods) && !in_array($request->getMethod(), $this->methods)) {
-            return false;
-        }
-
         if (empty($this->compiled)) {
             $this->compile();
         }

@@ -68,15 +68,15 @@ class Router implements RouterInterface
     /**
      * {@inheritdoc}
      *
-     * @param RouteInterface|array $default Default route or options to construct instance
-     *                                      of DirectRoute.
+     * @param RouteInterface|array $default Default route or options to construct instance of
+     *                                      DirectRoute.
      * @param bool                 $keepOutput
      * @throws RouterException
      */
     public function __construct(
         ContainerInterface $container,
         array $routes = [],
-        array $default = [],
+        $default = [],
         $keepOutput = false
     ) {
         $this->keepOutput = $keepOutput;

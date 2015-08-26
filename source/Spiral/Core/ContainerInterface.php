@@ -46,27 +46,21 @@ interface ContainerInterface
      *
      * @param string $class
      * @param array  $parameters Parameters to construct new class.
-     * @param bool   $direct     Singletons and instance bindings must be ignored.
      * @return mixed|null|object
      * @throws InstanceException
      * @throws ArgumentException
      */
-    public function construct($class, $parameters = [], $direct = false);
+    public function construct($class, $parameters = []);
 
     /**
      * Get list of arguments with resolved dependencies for specified function or method.
      *
      * @param ContextFunction $reflection Target function or method.
      * @param array           $parameters User specified parameters.
-     * @param bool            $direct     Singletons and instance bindings must be ignored.
      * @return array
      * @throws ArgumentException
      */
-    public function resolveArguments(
-        ContextFunction $reflection,
-        array $parameters = [],
-        $direct = false
-    );
+    public function resolveArguments(ContextFunction $reflection, array $parameters = []);
 
     /**
      * Bind value resolver to container alias. Resolver can be class name (will be constructed

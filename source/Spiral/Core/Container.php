@@ -53,32 +53,28 @@ class Container extends Component implements ContainerInterface
      *
      * @param \ReflectionParameter $context
      */
-    public function construct(
-        $class,
-        $parameters = [],
-        $direct = false,
-        \ReflectionParameter $context = null
-    ) {
+    public function construct($class, $parameters = [], \ReflectionParameter $context = null)
+    {
         if ($class == ContainerInterface::class) {
             //Shortcut
             return $this;
         }
 
-        if (!isset($this->bindings[$class]) || ($direct && is_object($this->bindings[$class]))) {
-            return $this->createInstance($class, $parameters, $direct, $context);
+        if (!isset($this->bindings[$class])) {
+            return $this->createInstance($class, $parameters, $context);
         }
 
         $binding = $this->bindings[$class];
-        if (is_object($binding) && !$direct) {
+        if (is_object($binding)) {
             //Singleton
             return $binding;
         }
 
         if (is_string($binding)) {
             //Binding is pointing to something else
-            $instance = $this->construct($binding, $parameters, $direct, $context);
+            $instance = $this->construct($binding, $parameters, $context);
 
-            if (!$direct && $instance instanceof SingletonInterface) {
+            if ($instance instanceof SingletonInterface) {
                 //To prevent double binding
                 $this->bindings[$binding] = $this->bindings[get_class($instance)] = $instance;
             }
@@ -89,7 +85,7 @@ class Container extends Component implements ContainerInterface
         if (is_array($binding)) {
             if (is_string($binding[0])) {
                 //Class name with singleton flag
-                $instance = $this->construct($binding[0], $parameters, $direct, $context);
+                $instance = $this->construct($binding[0], $parameters, $context);
             } else {
                 //Closure with singleton flag
                 $instance = call_user_func($binding[0], $this);
@@ -109,11 +105,8 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      */
-    public function resolveArguments(
-        ContextFunction $reflection,
-        array $parameters = [],
-        $direct = false
-    ) {
+    public function resolveArguments(ContextFunction $reflection, array $parameters = [])
+    {
         $arguments = [];
         foreach ($reflection->getParameters() as $parameter) {
             $name = $parameter->getName();
@@ -153,7 +146,7 @@ class Container extends Component implements ContainerInterface
 
             try {
                 //Trying to resolve dependency
-                $arguments[] = $this->construct($class->getName(), [], $direct, $parameter);
+                $arguments[] = $this->construct($class->getName(), [], $parameter);
 
                 continue;
             } catch (InstanceException $exception) {
@@ -274,7 +267,6 @@ class Container extends Component implements ContainerInterface
      *
      * @param string               $class
      * @param array                $parameters Constructor parameters.
-     * @param bool                 $direct     Singletons and instance bindings will be ignored.
      * @param \ReflectionParameter $context
      * @return object
      * @throws InstanceException
@@ -282,7 +274,6 @@ class Container extends Component implements ContainerInterface
     private function createInstance(
         $class,
         array $parameters,
-        $direct = false,
         \ReflectionParameter $context = null
     ) {
         try {
@@ -316,8 +307,7 @@ class Container extends Component implements ContainerInterface
         }
 
         if (
-            !$direct
-            && $reflector->isSubclassOf(SingletonInterface::class)
+            $reflector->isSubclassOf(SingletonInterface::class)
             && !empty($singleton = $reflector->getConstant('SINGLETON'))
         ) {
             //Component declared SINGLETON constant, binding as constant value and class name.

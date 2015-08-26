@@ -38,11 +38,11 @@ class Router implements RouterInterface
     private $defaultRoute = null;
 
     /**
-     * Every route should be executed in a context of active path.
+     * Every route should be executed in a context of base path.
      *
      * @var string
      */
-    private $activePath = '/';
+    private $basePath = '/';
 
     /**
      * Keep buffered output (MiddlewarePipeline option).
@@ -130,8 +130,8 @@ class Router implements RouterInterface
         //Open router scope
         $outerRouter = $this->container->replace(self::class, $this);
 
-        $this->activePath = $request->getAttribute('activePath', $this->activePath);
-        if (empty($this->activeRoute = $this->findRoute($request, $this->activePath))) {
+        $this->basePath = $request->getAttribute('basePath', $this->basePath);
+        if (empty($this->activeRoute = $this->findRoute($request, $this->basePath))) {
             throw new ClientException(ClientException::NOT_FOUND);
         }
 
@@ -225,7 +225,7 @@ class Router implements RouterInterface
     public function createUri($route, array $parameters = [], SlugifyInterface $slugify = null)
     {
         if (isset($this->routes[$route])) {
-            return $this->routes[$route]->createUri($parameters, $this->activePath, $slugify);
+            return $this->routes[$route]->createUri($parameters, $this->basePath, $slugify);
         }
 
         //Will be handled via default route where route name is specified as controller::action
@@ -242,7 +242,7 @@ class Router implements RouterInterface
 
         return $this->defaultRoute->createUri(
             compact('controller', 'action') + $parameters,
-            $this->activePath,
+            $this->basePath,
             $slugify
         );
     }

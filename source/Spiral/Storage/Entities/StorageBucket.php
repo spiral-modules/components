@@ -23,8 +23,7 @@ use Spiral\Storage\StorageManager;
 /**
  * Default implementation of storage bucket.
  */
-class StorageBucket extends Component
-    implements
+class StorageBucket extends Component implements
     BucketInterface,
     LoggerAwareInterface,
     InjectableInterface

@@ -59,7 +59,19 @@ class FileStore extends CacheStore
      */
     public function has($name)
     {
-        return $this->files->exists($this->makeFilename($name));
+        if (!$this->files->exists($filename = $this->makeFilename($name))) {
+            return false;
+        }
+
+        $cacheData = unserialize($this->files->read($filename));
+        if (!empty($cacheData[0]) && $cacheData[0] < time()) {
+            $this->delete($name);
+
+            //Expired
+            return false;
+        }
+
+        return true;
     }
 
     /**

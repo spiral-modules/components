@@ -54,14 +54,14 @@ interface RouteInterface
     /**
      * Generate valid route URL using route name and set of parameters.
      *
-     * @param array            $parameters
+     * @param array            $parameters Accepts only arrays at this moment.
      * @param string           $basePath
      * @param SlugifyInterface $slugify
      * @return UriInterface
      * @throws RouteException
      */
     public function createUri(
-        array $parameters = [],
+        $parameters = [],
         $basePath = '/',
         SlugifyInterface $slugify = null
     );

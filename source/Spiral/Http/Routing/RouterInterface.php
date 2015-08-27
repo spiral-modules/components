@@ -70,12 +70,12 @@ interface RouterInterface
      * and action name separated by ":" - in this case router should find appropriate route and
      * create url using it.
      *
-     * @param string           $route Route name.
-     * @param array            $parameters
+     * @param string           $route      Route name.
+     * @param array            $parameters Accepts only arrays at this moment.
      * @param SlugifyInterface $slugify
      * @return UriInterface
      * @throws RouterException
      * @throws RouteException
      */
-    public function createUri($route, array $parameters = [], SlugifyInterface $slugify = null);
+    public function createUri($route, $parameters = [], SlugifyInterface $slugify = null);
 }

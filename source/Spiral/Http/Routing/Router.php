@@ -223,7 +223,7 @@ class Router implements RouterInterface
     /**
      * {@inheritdoc}
      */
-    public function createUri($route, array $parameters = [], SlugifyInterface $slugify = null)
+    public function createUri($route, $parameters = [], SlugifyInterface $slugify = null)
     {
         if (isset($this->routes[$route])) {
             return $this->routes[$route]->createUri($parameters, $this->basePath, $slugify);

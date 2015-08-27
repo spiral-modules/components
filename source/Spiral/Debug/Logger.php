@@ -19,7 +19,7 @@ class Logger extends AbstractLogger
     /**
      * Default logging name (channel).
      */
-    const DEFAULT_NAME = '@global';
+    const GLOBAL_CHANNEL = '@global';
 
     /**
      * Helper constant to associate all log levels with one filename.
@@ -72,7 +72,7 @@ class Logger extends AbstractLogger
      * @param string   $name
      * @param Debugger $debugger Used to automatically configure handlers.
      */
-    public function __construct($name = self::DEFAULT_NAME, Debugger $debugger = null)
+    public function __construct($name = self::GLOBAL_CHANNEL, Debugger $debugger = null)
     {
         $this->name = $name;
 

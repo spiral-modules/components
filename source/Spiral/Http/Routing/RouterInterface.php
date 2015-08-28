@@ -73,7 +73,7 @@ interface RouterInterface
      * @param string           $route      Route name.
      * @param array            $parameters Accepts only arrays at this moment.
      * @param SlugifyInterface $slugify
-     * @return UriInterface
+     * @return string
      * @throws RouterException
      * @throws RouteException
      */

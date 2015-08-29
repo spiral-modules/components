@@ -34,7 +34,7 @@ interface EncrypterInterface
     public function getKey();
 
     /**
-     * Generate random string.
+     * Generate random set of bytes with specified length.
      *
      * @param int $length
      * @return string

@@ -154,7 +154,7 @@ class FileManager extends Singleton implements FilesInterface
     /**
      * {@inheritdoc}
      */
-    public function copy($filename, $destination, $ensureLocation = false)
+    public function copy($filename, $destination)
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -287,7 +287,7 @@ class FileManager extends Singleton implements FilesInterface
         $filename = tempnam($location, 'spiral');
 
         if ($extension) {
-            //I should probably find more original way of doing that
+            //I should find more original way of doing that
             rename($filename, $filename = $filename . '.' . $extension);
             $this->destruct[] = $filename;
         }

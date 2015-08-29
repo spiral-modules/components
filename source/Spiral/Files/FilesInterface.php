@@ -17,12 +17,12 @@ use Spiral\Files\Exceptions\WriteErrorException;
 interface FilesInterface
 {
     /**
-     * Fully writable and readable files.
+     * Permission mode: fully writable and readable files.
      */
     const RUNTIME = 0777;
 
     /**
-     * Only locked to parent (one environment).
+     * Permission mode: only locked to parent (one environment).
      */
     const READONLY = 0666;
 
@@ -34,7 +34,7 @@ interface FilesInterface
     const GB = 1073741824;
 
     /**
-     * Accepted location separator.
+     * Default location (directory) separator.
      */
     const SEPARATOR = '/';
 

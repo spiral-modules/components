@@ -17,6 +17,7 @@ use Spiral\Core\Exceptions\ControllerException;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\MiddlewareInterface;
 use Spiral\Http\MiddlewarePipeline;
+use Spiral\Http\Uri;
 
 /**
  * Base for all spiral routes.
@@ -278,11 +279,11 @@ abstract class AbstractRoute implements RouteInterface
             ['[]' => '', '[/]' => '', '[' => '', ']' => '', '//' => '/']
         );
 
-        $uri = ($this->withHost ? '' : $basePath) . $uri;
+        $uri = new Uri(($this->withHost ? '' : $basePath) . $uri);
 
         //Getting additional query parameters
         if (!empty($queryParameters = array_diff_key($parameters, $this->compiled['options']))) {
-            $uri .= '?' . (http_build_query($queryParameters));
+            $uri = $uri->withQuery(http_build_query($queryParameters));
         }
 
         return $uri;

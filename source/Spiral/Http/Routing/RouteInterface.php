@@ -57,7 +57,7 @@ interface RouteInterface
      * @param array            $parameters Accepts only arrays at this moment.
      * @param string           $basePath
      * @param SlugifyInterface $slugify
-     * @return string
+     * @return UriInterface
      * @throws RouteException
      */
     public function createUri(

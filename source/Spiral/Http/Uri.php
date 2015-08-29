@@ -11,6 +11,13 @@ namespace Spiral\Http;
 /**
  * {@inheritdoc}
  */
-class Uri extends \Zend\Diactoros\Uri
+class Uri extends \Zend\Diactoros\Uri implements \JsonSerializable
 {
+    /**
+     * {@inheritdoc}
+     */
+    function jsonSerialize()
+    {
+        return $this->__toString();
+    }
 }

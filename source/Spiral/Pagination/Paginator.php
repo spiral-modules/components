@@ -317,17 +317,10 @@ class Paginator implements PaginatorInterface
     /**
      * {@inheritdoc}
      */
-    public function createURL($pageNumber)
+    public function createUri($pageNumber)
     {
-        $path = $this->uri->getPath();
-        if (!$path) {
-            $path = '/';
-        } elseif ($path[0] != '/') {
-            $path = '/' . $path;
-        }
-
-        return $path . '?' . http_build_query($this->getQuery() + [
-                $this->pageParameter => $pageNumber
-            ]) . ($this->uri->getFragment() ? '#' . $this->uri->getFragment() : '');
+        return $this->uri->withQuery(http_build_query(
+            $this->getQuery() + [$this->pageParameter => $pageNumber]
+        ));
     }
 }

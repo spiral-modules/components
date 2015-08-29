@@ -116,7 +116,7 @@ interface PaginatorInterface extends \Countable
      * default, starts with path.
      *
      * @param int $pageNumber
-     * @return string
+     * @return UriInterface
      */
-    public function createURL($pageNumber);
+    public function createUri($pageNumber);
 }

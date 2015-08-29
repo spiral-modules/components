@@ -16,7 +16,7 @@ class Uri extends \Zend\Diactoros\Uri implements \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    function jsonSerialize()
+    public function jsonSerialize()
     {
         return $this->__toString();
     }
@@ -24,7 +24,7 @@ class Uri extends \Zend\Diactoros\Uri implements \JsonSerializable
     /**
      * @return object
      */
-    function __debugInfo()
+    public function __debugInfo()
     {
         return (object)[
             'uri' => (string)$this

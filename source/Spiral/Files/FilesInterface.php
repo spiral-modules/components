@@ -204,4 +204,13 @@ interface FilesInterface
      * @return string
      */
     public function normalizePath($path);
+
+    /**
+     * Get relative location based on absolute path.
+     *
+     * @param string $path      Original file or directory location (to).
+     * @param string $directory Path will be converted to be relative to this directory (from).
+     * @return string
+     */
+    public function relativePath($path, $directory);
 }

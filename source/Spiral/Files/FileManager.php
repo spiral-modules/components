@@ -306,14 +306,11 @@ class FileManager extends Singleton implements FilesInterface
     }
 
     /**
-     * Get relative location based on absolute path.
+     * {@inheritdoc}
      *
      * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
-     * @param string $path      Original file or directory location (to).
-     * @param string $directory Path will be converted to be relative to this directory (from).
-     * @return string
      */
-    public function relativePath($path, $directory = null)
+    public function relativePath($path, $directory)
     {
         $path = $this->normalizePath($path);
         $directory = $this->normalizePath($directory);

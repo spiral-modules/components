@@ -274,7 +274,7 @@ class StorageBucket extends Component implements
     public function copy(BucketInterface $destination, $name)
     {
         if ($destination == $this) {
-            return $this->storage->open($this->buildAddress($name));
+            return $this->buildAddress($name);
         }
 
         //Internal copying
@@ -298,7 +298,7 @@ class StorageBucket extends Component implements
             $destination->put($name, $this->allocateStream($name));
         }
 
-        return $this->storage->open($destination->buildAddress($name));
+        return $destination->buildAddress($name);
     }
 
     /**

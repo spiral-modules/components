@@ -170,7 +170,7 @@ class StorageObject implements ObjectInterface
             $destination = $this->storage->bucket($destination);
         }
 
-        return $this->bucket->copy($destination, $this->name);
+        return $this->storage->open($this->bucket->copy($destination, $this->name));
     }
 
     /**

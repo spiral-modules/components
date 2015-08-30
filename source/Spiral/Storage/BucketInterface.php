@@ -160,12 +160,12 @@ interface BucketInterface
     public function rename($oldname, $newname);
 
     /**
-     * Copy storage object to another bucket. Method must return ObjectInterface which points to
+     * Copy storage object to another bucket. Method must return address which points to
      * new storage object.
      *
      * @param BucketInterface $destination
      * @param string          $name
-     * @return ObjectInterface
+     * @return string
      * @throws ServerException
      * @throws BucketException
      */

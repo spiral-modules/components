@@ -8,10 +8,10 @@
  */
 namespace Spiral\Storage;
 
-use GuzzleHttp\Exception\ServerException;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\Exceptions\BucketException;
 use Spiral\Storage\Exceptions\ObjectException;
+use Spiral\Storage\Exceptions\ServerException;
 
 /**
  * Representation of a single storage object.

@@ -32,9 +32,10 @@ trait TranslatorTrait
      * Example: User::translate("User account is invalid.");
      *
      * @param string $string
+     * @param array  $options Interpolation options.
      * @return string
      */
-    public static function translate($string)
+    public static function translate($string, array $options = [])
     {
         if (
             substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
@@ -50,6 +51,8 @@ trait TranslatorTrait
             return $string;
         }
 
-        return $container->get(TranslatorInterface::class)->translate(static::class, $string);
+        return $container->get(TranslatorInterface::class)->translate(
+            static::class, $string, $options
+        );
     }
 }

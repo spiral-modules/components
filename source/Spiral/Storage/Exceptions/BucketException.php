@@ -8,12 +8,10 @@
  */
 namespace Spiral\Storage\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Exceptions raised by buckets.
  */
-class BucketException extends RuntimeException
+class BucketException extends StorageException
 {
 
 }

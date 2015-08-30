@@ -8,12 +8,10 @@
  */
 namespace Spiral\Storage\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Runtime server exception - connection is down, bad location and etc, bad configuration.
  */
-class ServerException extends RuntimeException
+class ServerException extends StorageException
 {
 
 }

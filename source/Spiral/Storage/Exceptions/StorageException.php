@@ -8,12 +8,12 @@
  */
 namespace Spiral\Storage\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
+use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * Generic storage exception.
  */
-class StorageException extends LogicException
+class StorageException extends RuntimeException
 {
 
 }

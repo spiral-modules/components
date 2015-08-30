@@ -107,6 +107,13 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     const ONE  = 899;
 
     /**
+     * Errors in nested documents and acessors.
+     *
+     * @var array
+     */
+    private $nestedErrors = [];
+
+    /**
      * Model schema provided by ODM compoent.
      *
      * @var array
@@ -774,6 +781,14 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * {@inheritdoc}
+     */
+    public function getErrors($reset = false)
+    {
+        return parent::getErrors($reset) + $this->nestedErrors;
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * Will validate every CompositableInterface instance.
      *
@@ -782,7 +797,8 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     protected function validate($reset = false)
     {
-        $errors = [];
+        $this->nestedErrors = [];
+
         //Validating all compositions
         foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
             $composition = $this->getField($field);
@@ -792,14 +808,13 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             }
 
             if (!$composition->isValid()) {
-                $errors[$field] = $composition->getErrors($reset);
+                $this->nestedErrors[$field] = $composition->getErrors($reset);
             }
         }
 
         parent::validate($reset);
-        $this->errors = $this->errors + $errors;
 
-        return empty($this->errors);
+        return empty($this->errors + $this->nestedErrors);
     }
 
     /**

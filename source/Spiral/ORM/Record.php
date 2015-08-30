@@ -22,7 +22,6 @@ use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\Translator\Translator;
 use Spiral\Validation\ValidatesInterface;
 
 /**
@@ -136,6 +135,13 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     const INDEX  = 1000;            //Default index type
     const UNIQUE = 2000;            //Unique index definition
+
+    /**
+     * Errors in relations and acessors.
+     *
+     * @var array
+     */
+    private $nestedErrors = [];
 
     /**
      * Indicates that record data were loaded from database (not recently created).
@@ -935,27 +941,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public function getErrors($reset = false)
     {
-        $this->validate();
-
-        $errors = [];
-        foreach ($this->errors as $field => $error) {
-            if (
-                is_string($error)
-                && substr($error, 0, 2) == Translator::I18N_PREFIX
-                && substr($error, -2) == Translator::I18N_POSTFIX
-            ) {
-                //We will localize only messages embraced with [[ and ]]
-                $error = $this->translate($error);
-            }
-
-            $errors[$field] = $error;
-        }
-
-        if ($reset) {
-            $this->errors = [];
-        }
-
-        return $errors;
+        return parent::getErrors($reset) + $this->nestedErrors;
     }
 
     /**
@@ -965,7 +951,8 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     protected function validate($reset = false)
     {
-        $errors = [];
+        $this->nestedErrors = [];
+
         //Validating all compositions
         foreach ($this->fields as $field => $value) {
             if (!$value instanceof ValidatesInterface) {
@@ -974,7 +961,7 @@ class Record extends DataEntity implements ActiveEntityInterface
             }
 
             if (!$value->isValid()) {
-                $errors[$field] = $value->getErrors($reset);
+                $this->nestedErrors[$field] = $value->getErrors($reset);
             }
         }
 
@@ -989,14 +976,13 @@ class Record extends DataEntity implements ActiveEntityInterface
                 !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
                 && !$relation->isValid()
             ) {
-                $errors[$name] = $relation->getErrors($reset);
+                $this->nestedErrors[$name] = $relation->getErrors($reset);
             }
         }
 
         parent::validate($reset);
-        $this->errors = $this->errors + $errors;
 
-        return empty($this->errors);
+        return empty($this->errors + $this->nestedErrors);
     }
 
     /**

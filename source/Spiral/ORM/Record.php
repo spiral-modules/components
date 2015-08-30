@@ -993,7 +993,7 @@ class Record extends DataEntity implements ActiveEntityInterface
             }
         }
 
-        parent::validate();
+        parent::validate($reset);
         $this->errors = $this->errors + $errors;
 
         return empty($this->errors);

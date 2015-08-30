@@ -777,9 +777,10 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      *
      * Will validate every CompositableInterface instance.
      *
+     * @param bool $reset
      * @throws DocumentException
      */
-    protected function validate()
+    protected function validate($reset = false)
     {
         $errors = [];
         //Validating all compositions
@@ -791,11 +792,11 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             }
 
             if (!$composition->isValid()) {
-                $errors[$field] = $composition->getErrors();
+                $errors[$field] = $composition->getErrors($reset);
             }
         }
 
-        parent::validate();
+        parent::validate($reset);
         $this->errors = $this->errors + $errors;
 
         return empty($this->errors);

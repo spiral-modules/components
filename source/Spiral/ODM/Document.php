@@ -782,6 +782,16 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * {@inheritdoc}
      */
+    public function isValid()
+    {
+        $this->validate();
+
+        return empty($this->errors) && empty($this->nestedErrors);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getErrors($reset = false)
     {
         return parent::getErrors($reset) + $this->nestedErrors;

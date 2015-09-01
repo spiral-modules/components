@@ -925,15 +925,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     {
         $this->validate();
 
-        return empty($this->errors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasErrors()
-    {
-        return !$this->isValid();
+        return empty($this->errors) && empty($this->nestedErrors);
     }
 
     /**

@@ -320,8 +320,10 @@ class HttpDispatcher extends Singleton implements
         if (isset($this->config['httpErrors'][$code])) {
             //We can show custom error page
             return new HtmlResponse(
-                $this->viewProvider()->render($this->config['httpErrors'][$code],
-                    ['http' => $this]),
+                $this->viewProvider()->render($this->config['httpErrors'][$code], [
+                    'http'    => $this,
+                    'request' => !empty($request) ? $request : $this->request()
+                ]),
                 $code
             );
         }

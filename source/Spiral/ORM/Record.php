@@ -956,7 +956,6 @@ class Record extends DataEntity implements ActiveEntityInterface
         //Validating all compositions
         foreach ($this->fields as $field => $value) {
             if (!$value instanceof ValidatesInterface) {
-                //Something weird.
                 continue;
             }
 
@@ -968,7 +967,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         //We have to validate relations before saving them
         foreach ($this->relations as $name => $relation) {
             if (!$relation instanceof ValidatesInterface) {
-                //Was never constructed
+                //Never constructed
                 continue;
             }
 

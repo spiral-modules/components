@@ -117,7 +117,7 @@ trait ValidatorTrait
     /**
      * List of errors associated with parent field, every field should have only one error assigned.
      *
-     * @param bool $reset Clean errors after receiving every message and invalidate target.
+     * @param bool $reset Re-validate object.
      * @return array
      */
     public function getErrors($reset = false)
@@ -135,10 +135,6 @@ trait ValidatorTrait
             }
 
             $errors[$field] = $error;
-        }
-
-        if ($reset) {
-            $this->errors = [];
         }
 
         return $errors;

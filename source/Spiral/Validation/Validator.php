@@ -159,7 +159,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     {
         $this->validate();
 
-        return !(bool)$this->errors;
+        return empty($this->errors);
     }
 
     /**

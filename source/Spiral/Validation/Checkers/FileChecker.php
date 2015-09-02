@@ -68,7 +68,7 @@ class FileChecker extends Checker implements SingletonInterface
     }
 
     /**
-     * Check if file size less that specified value.
+     * Check if file size less that specified value in KB.
      *
      * @param mixed $filename Local file or uploaded file array.
      * @param int   $size     Size in KBytes.

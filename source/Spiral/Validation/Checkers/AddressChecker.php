@@ -46,12 +46,12 @@ class AddressChecker extends Checker implements SingletonInterface
      *
      * @link http://www.faqs.org/rfcs/rfc2396.html
      * @param string $url
-     * @param bool   $requireProtocol If true, this will require having a protocol definition.
+     * @param bool   $requireScheme If true, this will require having a protocol definition.
      * @return bool
      */
-    public function url($url, $requireProtocol = true)
+    public function url($url, $requireScheme = true)
     {
-        if (!$requireProtocol && stripos($url, 'http://') === false && stripos($url,
+        if (!$requireScheme && stripos($url, 'http://') === false && stripos($url,
                 'https://') === false
         ) {
             $url = 'http://' . $url;

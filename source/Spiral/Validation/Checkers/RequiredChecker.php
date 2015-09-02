@@ -78,7 +78,7 @@ class RequiredChecker extends Checker implements SingletonInterface
     }
 
     /**
-     * Check if field not empty but only if any of listed fields missing or empty.
+     * Check if field not empty but only if one of listed fields missing or empty.
      *
      * @param mixed $value
      * @param array $without
@@ -91,7 +91,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($without as $field) {
-            if (!$this->validator->field($field)) {
+            if (empty($this->validator->field($field))) {
                 //Some value presented
                 return false;
             }

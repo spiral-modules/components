@@ -303,6 +303,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             }
 
             if (is_string($condition) || is_array($condition)) {
+                //Value always coming first
                 array_unshift($arguments, $value);
 
                 return call_user_func_array($condition, $arguments);

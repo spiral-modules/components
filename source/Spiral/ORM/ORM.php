@@ -18,6 +18,7 @@ use Spiral\Database\Entities\Database;
 use Spiral\Models\DataEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
+use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
 
 /**
@@ -199,6 +200,18 @@ class ORM extends Singleton
         }
 
         return $this->registerEntity(new $class($data, !empty($data), $this, $schema));
+    }
+
+    /**
+     * Get ORM Selector for given record.
+     *
+     * @param string $class
+     * @return Selector
+     * @throws ORMException
+     */
+    public function ormSelector($class)
+    {
+        return new Selector($this, $class);
     }
 
     /**

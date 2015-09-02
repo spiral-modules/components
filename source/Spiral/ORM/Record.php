@@ -1096,6 +1096,6 @@ class Record extends DataEntity implements ActiveEntityInterface
         //Ensure traits
         static::initialize();
 
-        return static::events()->fire('selector', new Selector($orm, static::class));
+        return static::events()->fire('selector', $orm->ormSelector(static::class));
     }
 }

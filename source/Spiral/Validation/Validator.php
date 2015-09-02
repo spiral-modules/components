@@ -44,7 +44,7 @@ use Spiral\Validation\Exceptions\ValidationException;
  * rule syntax:
  * "flag" => ["notEmpty", "boolean"]
  */
-class Validator extends Component implements LoggerAwareInterface, SaturableInterface
+class Validator extends Component implements ValidatorInterface, LoggerAwareInterface, SaturableInterface
 {
     /**
      * Validator will translate default errors and throw log messages when validation rule fails.
@@ -106,7 +106,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     /**
      * {@inheritdoc}
      */
-    public function __construct($data, array $rules)
+    public function __construct($data = [], array $rules = [])
     {
         $this->data = $data;
         $this->rules = $rules;

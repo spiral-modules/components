@@ -85,7 +85,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      *
      * @var string
      */
-    protected $defaultMessage = "[[Condition '{condition}' does not meet for field '{field}'.]]";
+    protected $defaultMessage = "[[Condition '{condition}' does not meet.]]";
 
     /**
      * @invisible
@@ -295,19 +295,19 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
 
                     return $result;
                 }
-            } elseif (is_array($condition)) {
+            }
+
+            if (is_array($condition)) {
                 //We are going to resolve class using container
                 $condition[0] = is_object($condition[0])
                     ? $condition[0]
                     : $this->container->get($condition[0]);
             }
 
-            if (is_string($condition) || is_array($condition)) {
-                //Value always coming first
-                array_unshift($arguments, $value);
+            //Value always coming first
+            array_unshift($arguments, $value);
 
-                return call_user_func_array($condition, $arguments);
-            }
+            return call_user_func_array($condition, $arguments);
         } catch (\ErrorException $exception) {
             $condition = func_get_arg(2);
             if (is_array($condition)) {
@@ -325,8 +325,6 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
 
             return false;
         }
-
-        return true;
     }
 
     /**

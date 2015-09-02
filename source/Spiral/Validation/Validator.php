@@ -104,13 +104,6 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     ];
 
     /**
-     * To prevent double validations.
-     *
-     * @var bool
-     */
-    protected $validated = false;
-
-    /**
      * {@inheritdoc}
      */
     public function __construct($data, array $rules)
@@ -155,7 +148,6 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
             return $this;
         }
 
-        $this->validated = false;
         $this->rules = $rules;
         $this->errors = [];
 
@@ -167,7 +159,7 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
      */
     public function isValid()
     {
-        !$this->validated && $this->validate();
+        $this->validate();
 
         return !(bool)$this->errors;
     }
@@ -183,17 +175,9 @@ class Validator extends Component implements LoggerAwareInterface, SaturableInte
     /**
      * {@inheritdoc}
      */
-    public function addError($field, $message)
-    {
-        $this->addMessage($field, $message, static::FORCED_ERROR, []);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getErrors()
     {
-        !$this->validated && $this->validate();
+        $this->validate();
 
         return $this->errors;
     }

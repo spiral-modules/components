@@ -56,14 +56,6 @@ interface ValidatorInterface
     public function hasErrors();
 
     /**
-     * Attach error to data field.
-     *
-     * @param string $field
-     * @param string $message
-     */
-    public function setError($field, $message);
-
-    /**
      * List of errors associated with parent field, every field should have only one error assigned.
      *
      * @return array

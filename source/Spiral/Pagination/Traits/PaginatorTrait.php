@@ -21,7 +21,7 @@ use Spiral\Pagination\PaginatorInterface;
 trait PaginatorTrait
 {
     /**
-     * @var Paginator
+     * @var PaginatorInterface
      */
     private $paginator = null;
 

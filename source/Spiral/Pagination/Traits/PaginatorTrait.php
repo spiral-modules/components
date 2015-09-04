@@ -105,8 +105,8 @@ trait PaginatorTrait
      * @param string                 $pageParameter Name of parameter in request query which is
      *                                              used to store the current page number. "page"
      *                                              by default.
-     * @param int                    $count         Forced count value, if 0 paginator will try to
-     *                                              fetch count from associated object.
+     * @param int                    $count         Forced count value, if 0/null paginator will
+     *                                              try to fetch count from associated object.
      * @param ServerRequestInterface $request       Has to be specified if no global container set.
      * @return $this
      * @throws PaginationException
@@ -134,6 +134,22 @@ trait PaginatorTrait
         }
 
         $this->paginator->setLimit($limit);
+        $this->paginationCount = $count;
+
+        return $this;
+    }
+
+    /**
+     * Manually set paginator instance for specific object.
+     *
+     * @param PaginatorInterface $paginator
+     * @param int                $count             Forced count value, if 0/null paginator will
+     *                                              try to fetch count from associated object.
+     * @return $this
+     */
+    public function setPaginator(PaginatorInterface $paginator, $count = null)
+    {
+        $this->paginator = $paginator;
         $this->paginationCount = $count;
 
         return $this;

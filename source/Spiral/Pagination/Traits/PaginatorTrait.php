@@ -159,7 +159,7 @@ trait PaginatorTrait
      * Get paginator for the current selection. Paginate method should be already called.
      *
      * @see paginate()
-     * @return Paginator
+     * @return PaginatorInterface
      * @throws PaginationException
      */
     public function getPaginator()

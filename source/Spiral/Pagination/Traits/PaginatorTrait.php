@@ -143,8 +143,8 @@ trait PaginatorTrait
      * Manually set paginator instance for specific object.
      *
      * @param PaginatorInterface $paginator
-     * @param int                $count             Forced count value, if 0/null paginator will
-     *                                              try to fetch count from associated object.
+     * @param int                $count Forced count value, if 0/null paginator will try to fetch
+     *                                  count from associated object.
      * @return $this
      */
     public function setPaginator(PaginatorInterface $paginator, $count = null)

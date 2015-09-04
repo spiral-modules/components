@@ -13,7 +13,10 @@ use Psr\Http\Message\UriInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 
 /**
- * Paginates objects and arrays.
+ * Paginates objects and arrays. Theoretically i should create another interface
+ * SimplePaginatorInterface without count related methods and extend this interface from simple
+ * one. Right now you can simply set count manually, in any scenario it's up to view how to render
+ * it.
  */
 interface PaginatorInterface extends \Countable
 {

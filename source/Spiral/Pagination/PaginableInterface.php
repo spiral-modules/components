@@ -53,6 +53,16 @@ interface PaginableInterface extends \Countable
     );
 
     /**
+     * Manually set paginator instance for specific object.
+     *
+     * @param PaginatorInterface $paginator
+     * @param int                $count Forced count value, if 0/null paginator will try to fetch
+     *                                  count from associated object.
+     * @return $this
+     */
+    public function setPaginator(PaginatorInterface $paginator, $count = null);
+
+    /**
      * Get paginator for the current selection. Paginate method should be already called.
      *
      * @see paginate()

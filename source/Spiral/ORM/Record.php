@@ -29,6 +29,8 @@ use Spiral\Validation\ValidatesInterface;
  * filters, validations and relations to other records. You can count Record class as ActiveRecord
  * pattern. ORM component will automatically analyze existed Documents and create cached version of
  * their schema.
+ *
+ * @TODO: Add ability to set primary key manually, for example fpr uuid like fields.
  */
 class Record extends DataEntity implements ActiveEntityInterface
 {

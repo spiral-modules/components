@@ -265,7 +265,7 @@ abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregat
         $backup = [$this->limit, $this->offset];
 
         if ($paginate) {
-            $this->runPagination();
+            $this->apllyPagination();
         } else {
             //We have to flush limit and offset values when pagination is not required.
             $this->limit = $this->offset = 0;

@@ -15,7 +15,7 @@ use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\QueryResult;
-use Spiral\Database\QueryBuilder;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
@@ -403,7 +403,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     public function fetchData()
     {
         //Pagination!
-        $this->runPagination();
+        $this->apllyPagination();
         $statement = $this->sqlStatement();
 
         if (!empty($this->cacheLifetime)) {

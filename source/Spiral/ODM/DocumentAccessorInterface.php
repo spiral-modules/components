@@ -25,11 +25,11 @@ interface DocumentAccessorInterface extends EmbeddableInterface
      *
      * Accessor options include field type resolved by DocumentSchema.
      *
-     * @param mixed $options Implementation specific options. In ODM will always contain field type.
      * @param ODM   $odm     ODM component.
+     * @param mixed $options Implementation specific options. In ODM will always contain field type.
      * @throws AccessorException
      */
-    public function __construct($data, $parent = null, $options = null, ODM $odm = null);
+    public function __construct($data, $parent = null, ODM $odm = null, $options = null);
 
     /**
      * Accessor default value.

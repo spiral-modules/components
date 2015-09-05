@@ -1090,7 +1090,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @throws ORMException
      * @event selector(Selector $collection)
      */
-    protected static function ormSelector(ORM $orm = null)
+    public static function ormSelector(ORM $orm = null)
     {
         //Only when global container is set
         $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);

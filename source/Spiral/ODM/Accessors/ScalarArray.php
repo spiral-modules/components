@@ -84,7 +84,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      *
      * @param mixed $type Type to be filtered by. Set to null or mixed to allow any type.
      */
-    public function __construct($data, $parent = null, $type = self::MIXED_TYPE, ODM $odm = null)
+    public function __construct($data, $parent = null, ODM $odm = null, $type = self::MIXED_TYPE)
     {
         $this->parent = $parent;
         if (!is_array($data) && $data !== null) {

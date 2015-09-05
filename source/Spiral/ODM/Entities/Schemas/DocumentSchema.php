@@ -141,41 +141,12 @@ class DocumentSchema extends ReflectionEntity
             }
 
             if (isset($accessors[$field])) {
-                $accessor = $accessors[$field];
-
-                $options = is_array($type) ? $type[0] : $type;
-                if (is_array($accessor)) {
-                    list($accessor, $options) = $accessor;
-                }
-
-                if ($accessor != ODM::CMP_ONE) {
-                    //Not an accessor but composited class
-                    $accessor = new $accessor($default, null, $options, $this->builder->getODM());
-
-                    if ($accessor instanceof DocumentAccessorInterface) {
-                        $default = $accessor->defaultValue();
-                    }
-                }
+                $default = $this->accessorDefaults($accessors[$field], $type, $default);
             }
 
             //Using composition to resolve default value
             if (!empty($this->getCompositions()[$field])) {
-                $composition = $this->getCompositions()[$field];
-                if ($composition['type'] == ODM::CMP_MANY) {
-                    if (array_key_exists($field, $defaults) && $defaults[$field] !== array()) {
-                        throw new SchemaException(
-                            "Default value of {$this}.{$field} is not compatible with document composition."
-                        );
-                    }
-
-                    $default = [];
-                } else {
-                    if (!array_key_exists($field, $defaults)) {
-                        $default = $this->builder->document($composition['class'])->getDefaults();
-                    } else {
-                        //Do we need to validate default value?
-                    }
-                }
+                $default = $this->compositionDefaults($field, $default);
             }
 
             $defaults[$field] = $default;
@@ -567,5 +538,59 @@ class DocumentSchema extends ReflectionEntity
     private function sortChildren(DocumentSchema $childA, DocumentSchema $childB)
     {
         return count($childA->getFields()) > count($childB->getFields());
+    }
+
+    /**
+     * Cast default value using accessor.
+     *
+     * @param string $accessor
+     * @param mixed  $type
+     * @param mixed  $default
+     * @return mixed
+     */
+    private function accessorDefaults($accessor, $type, $default)
+    {
+        $options = is_array($type) ? $type[0] : $type;
+        if (is_array($accessor)) {
+            list($accessor, $options) = $accessor;
+        }
+
+        if ($accessor != ODM::CMP_ONE) {
+            //Not an accessor but composited class
+            $accessor = new $accessor($default, null, $this->builder->getODM(), $options);
+
+            if ($accessor instanceof DocumentAccessorInterface) {
+                return $accessor->defaultValue();
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * Get default value for composition.
+     *
+     * @param string $field
+     * @param mixed  $default Casted default value.
+     * @return mixed
+     */
+    private function compositionDefaults($field, $default)
+    {
+        $composition = $this->getCompositions()[$field];
+        if ($composition['type'] == ODM::CMP_MANY) {
+            if (!empty($default) && $default !== []) {
+                throw new SchemaException(
+                    "Default value of {$this}.{$field} is not compatible with document composition."
+                );
+            }
+
+            return [];
+        }
+
+        if (empty($default)) {
+            return $this->builder->document($composition['class'])->getDefaults();
+        }
+
+        return $default;
     }
 }

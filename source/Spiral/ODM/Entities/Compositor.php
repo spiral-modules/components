@@ -89,7 +89,7 @@ class Compositor extends Component implements
      *
      * @param string $class Primary class being composited.
      */
-    public function __construct($data, $parent = null, $class = null, ODM $odm = null)
+    public function __construct($data, $parent = null, ODM $odm = null, $class = null)
     {
         $this->class = $class;
         $this->parent = $parent;

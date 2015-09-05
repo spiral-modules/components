@@ -8,7 +8,6 @@
  */
 namespace Spiral\Pagination;
 
-use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 
 /**
@@ -33,43 +32,13 @@ interface PaginableInterface extends \Countable
     public function offset($offset = 0);
 
     /**
-     * Paginate current selection.
-     *
-     * @param int                    $limit         Pagination limit.
-     * @param string                 $pageParameter Name of parameter in request query which is
-     *                                              used to store the current page number. "page"
-     *                                              by default.
-     * @param int                    $count         Forced count value, if 0 paginator will try to
-     *                                              fetch count from associated object.
-     * @param ServerRequestInterface $request       Has to be specified if no global container set.
-     * @return mixed
-     * @throws PaginationException
-     */
-    public function paginate(
-        $limit = 50,
-        $pageParameter = PaginatorInterface::DEFAULT_PARAMETER,
-        $count = 0,
-        ServerRequestInterface $request = null
-    );
-
-    /**
      * Manually set paginator instance for specific object.
      *
      * @param PaginatorInterface $paginator
-     * @param int                $count Forced count value, if 0/null paginator will try to fetch
-     *                                  count from associated object.
      * @return $this
      */
-    public function setPaginator(PaginatorInterface $paginator, $count = null);
+    public function setPaginator(PaginatorInterface $paginator);
 
-    /**
-     * Get paginator for the current selection. Paginate method should be already called.
-     *
-     * @see paginate()
-     * @return Paginator
-     * @throws PaginationException
-     */
-    public function getPaginator();
 
     /**
      * Indication that object was paginated.
@@ -77,4 +46,13 @@ interface PaginableInterface extends \Countable
      * @return bool
      */
     public function isPaginated();
+
+    /**
+     * Get paginator for the current selection. Paginate method should be already called.
+     *
+     * @see paginate()
+     * @return PaginatorInterface
+     * @throws PaginationException
+     */
+    public function getPaginator();
 }

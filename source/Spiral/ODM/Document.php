@@ -874,7 +874,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
             //Pointing to document instance
             $accessor = $this->odm->document($options, $value, $this);
         } else {
-            $accessor = new $accessor($value, $this, $options, $this->odm);
+            $accessor = new $accessor($value, $this, $this->odm, $options);
         }
 
         if ($accessor instanceof CompositableInterface && !$this->isLoaded() && !$this->isEmbedded()) {
@@ -992,7 +992,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @throws ODMException
      * @event collection(Collection $collection)
      */
-    protected static function odmCollection(ODM $odm = null)
+    public static function odmCollection(ODM $odm = null)
     {
         //Only when global container is set
         $odm = !empty($odm) ? $odm : self::container()->get(ODM::class);

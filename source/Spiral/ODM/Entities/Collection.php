@@ -340,7 +340,7 @@ class Collection extends Component implements
     protected function createCursor($query = [], $fields = [], $limit = null)
     {
         $this->query($query);
-        $this->runPagination();
+        $this->apllyPagination();
         $cursorReader = new DocumentCursor(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,

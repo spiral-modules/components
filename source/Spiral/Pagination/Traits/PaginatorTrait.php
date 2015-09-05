@@ -11,6 +11,7 @@ namespace Spiral\Pagination\Traits;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
+use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
 
@@ -24,14 +25,6 @@ trait PaginatorTrait
      * @var PaginatorInterface
      */
     private $paginator = null;
-
-    /**
-     * Forced pagination count. If 0 PaginatorTrait will try to fetch value from associated object
-     * (this).
-     *
-     * @var int
-     */
-    private $paginationCount = 0;
 
     /**
      * @var int
@@ -99,22 +92,19 @@ trait PaginatorTrait
     }
 
     /**
-     * Paginate current selection.
+     * Paginate current selection using Paginator class.
      *
      * @param int                    $limit         Pagination limit.
      * @param string                 $pageParameter Name of parameter in request query which is
      *                                              used to store the current page number. "page"
      *                                              by default.
-     * @param int                    $count         Forced count value, if 0/null paginator will
-     *                                              try to fetch count from associated object.
      * @param ServerRequestInterface $request       Has to be specified if no global container set.
      * @return $this
      * @throws PaginationException
      */
     public function paginate(
-        $limit = PaginatorInterface::DEFAULT_LIMIT,
-        $count = null,
-        $pageParameter = PaginatorInterface::DEFAULT_PARAMETER,
+        $limit = Paginator::DEFAULT_LIMIT,
+        $pageParameter = Paginator::DEFAULT_PARAMETER,
         ServerRequestInterface $request = null
     ) {
         if (empty($container = $this->container()) && empty($request)) {
@@ -128,13 +118,13 @@ trait PaginatorTrait
             //Let's use default paginator
             $this->paginator = new Paginator($request, $pageParameter);
         } else {
-            $this->paginator = $container->construct(PaginatorInterface::class, compact(
+            //We can also create paginator using container
+            $this->paginator = $container->construct(Paginator::class, compact(
                 'request', 'pageParameter'
             ));
         }
 
         $this->paginator->setLimit($limit);
-        $this->paginationCount = $count;
 
         return $this;
     }
@@ -143,34 +133,13 @@ trait PaginatorTrait
      * Manually set paginator instance for specific object.
      *
      * @param PaginatorInterface $paginator
-     * @param int                $count Forced count value, if 0/null paginator will try to fetch
-     *                                  count from associated object.
      * @return $this
      */
-    public function setPaginator(PaginatorInterface $paginator, $count = null)
+    public function setPaginator(PaginatorInterface $paginator)
     {
         $this->paginator = $paginator;
-        $this->paginationCount = $count;
 
         return $this;
-    }
-
-    /**
-     * Get paginator for the current selection. Paginate method should be already called.
-     *
-     * @see paginate()
-     * @return PaginatorInterface
-     * @throws PaginationException
-     */
-    public function getPaginator()
-    {
-        if (empty($this->paginator)) {
-            throw new PaginationException(
-                "Selection has to be paginated before requesting Paginator."
-            );
-        }
-
-        return $this->paginator;
     }
 
     /**
@@ -184,21 +153,33 @@ trait PaginatorTrait
     }
 
     /**
+     * Get paginator for the current selection. Paginate method should be already called.
+     *
+     * @see isPaginated()
+     * @see paginate()
+     * @return PaginatorInterface|null
+     */
+    public function getPaginator()
+    {
+        return $this->paginator;
+    }
+
+    /**
      * Apply pagination to current object. Will be applied only if internal paginator already
      * constructed.
      *
      * @return $this
      */
-    protected function runPagination()
+    protected function apllyPagination()
     {
         if (empty($this->paginator)) {
             return $this;
         }
 
-        if (!empty($this->paginationCount)) {
-            $this->paginator->setCount($this->paginationCount);
-        }
+        /**
+         * @var PaginableInterface $this
+         */
 
-        return $this->paginator->paginateObject($this, empty($this->paginationCount));
+        return $this->paginator->paginateObject($this);
     }
 }

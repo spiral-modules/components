@@ -33,7 +33,10 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-abstract class AbstractSelect extends AbstractWhere implements \IteratorAggregate, PaginableInterface
+abstract class AbstractSelect extends AbstractWhere implements
+    \IteratorAggregate,
+    PaginableInterface,
+    \JsonSerializable
 {
     /**
      * Abstract select query must fully support joins and be paginable.

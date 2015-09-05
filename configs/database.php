@@ -2,17 +2,21 @@
 /**
  * Configuration of spiral DatabaseProvider.
  * - default database alias/name
+ * - list of database name aliases used for injections and other operations
  * - list of databases associated with their source connection
  * - list of connections associated with their driver and connection options
- * - list of database name aliases used for injections and other operations
- * - list of drivers associated with PDO connection string scheme
  */
 use Spiral\Database\Drivers;
 
 return [
     'default'     => 'default',
+    'aliases'     => [
+        'default'  => 'primary',
+        'database' => 'primary',
+        'db'       => 'primary'
+    ],
     'databases'   => [
-        'primary'     => [
+        'primary'   => [
             'connection'  => 'mysql',
             'tablePrefix' => 'primary_'
         ],
@@ -54,10 +58,5 @@ return [
             'password'   => null,
             'options'    => []
         ]
-    ],
-    'aliases'     => [
-        'default'  => 'primary',
-        'database' => 'primary',
-        'db'       => 'primary'
     ]
 ];

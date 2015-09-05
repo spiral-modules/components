@@ -299,22 +299,7 @@ class DocumentSchema extends ReflectionEntity
         }
 
         //Some mutators may be described using aliases (for shortness)
-        foreach ($mutators as $mutator => &$filters) {
-            foreach ($filters as $field => $filter) {
-                $filters[$field] = $this->builder->mutatorAlias($filter);
-
-                if ($mutator == self::MUTATOR_ACCESSOR && is_string($filters[$field])) {
-
-                    $type = null;
-                    if (!empty($this->getFields()[$field])) {
-                        $type = $this->getFields()[$field];
-                    }
-
-                    $filters[$field] = [$filters[$field], is_array($type) ? $type[0] : $type];
-                }
-            }
-            unset($filters);
-        }
+        $mutators = $this->normalizeMutators($mutators);
 
         //Every composition is counted as field accessor :)
         foreach ($this->getCompositions() as $field => $composition) {
@@ -592,5 +577,33 @@ class DocumentSchema extends ReflectionEntity
         }
 
         return $default;
+    }
+
+    /**
+     * Resolve mutator aliases and normalize accessor definitions.
+     *
+     * @param array $mutators
+     * @return array
+     */
+    private function normalizeMutators(array $mutators)
+    {
+        foreach ($mutators as $mutator => &$filters) {
+            foreach ($filters as $field => $filter) {
+                $filters[$field] = $this->builder->mutatorAlias($filter);
+
+                if ($mutator == self::MUTATOR_ACCESSOR && is_string($filters[$field])) {
+
+                    $type = null;
+                    if (!empty($this->getFields()[$field])) {
+                        $type = $this->getFields()[$field];
+                    }
+
+                    $filters[$field] = [$filters[$field], is_array($type) ? $type[0] : $type];
+                }
+            }
+            unset($filters);
+        }
+
+        return $mutators;
     }
 }

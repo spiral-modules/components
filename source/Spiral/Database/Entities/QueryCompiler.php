@@ -158,17 +158,30 @@ class QueryCompiler extends Component
     ) {
         //This statement parts should be processed first to define set of table and column aliases
         $from = $this->tables($from);
-        $joins = $joins ? $this->joins($joins) . ' ' : '';
 
-        $distinct = $distinct ? ' ' . $this->distinct($distinct) . ' ' : '';
+        if (!empty($joins)) {
+            $joins = $this->joins($joins) . ' ';
+        }
+
+        if (!empty($distinct)) {
+            $distinct = ' ' . $this->distinct($distinct) . ' ';
+        }
+
         $columns = $this->columns($columns);
 
         //Conditions
-        $where = $where ? "\nWHERE " . $this->where($where) . ' ' : '';
-        $having = $having ? "\nHAVING " . $this->where($having) . ' ' : '';
+        if (!empty($where)) {
+            $where = "\nWHERE " . $this->where($where) . ' ';
+        }
+
+        if (!empty($having)) {
+            $having = "\nHAVING " . $this->where($having) . ' ';
+        }
 
         //Sortings and grouping
-        $groupBy = $groupBy ? "\nGROUP BY " . $this->groupBy($groupBy) . ' ' : '';
+        if (!empty($groupBy)) {
+            $groupBy = "\nGROUP BY " . $this->groupBy($groupBy) . ' ';
+        }
 
         //Initial statement have predictable order
         $statement = rtrim(

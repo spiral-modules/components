@@ -157,7 +157,7 @@ trait PaginatorTrait
      *
      * @see isPaginated()
      * @see paginate()
-     * @return PaginatorInterface|null
+     * @return PaginatorInterface|Paginator|null
      */
     public function getPaginator()
     {

@@ -1093,131 +1093,9 @@ abstract class AbstractTable extends Component implements TableInterface
 
         $this->driver->beginTransaction();
         try {
-            foreach ($this->alteredColumns() as $name => $schema) {
-                $dbColumn = isset($this->dbColumns[$name]) ? $this->dbColumns[$name] : null;
-
-                if (empty($schema)) {
-                    $this->logger()->info(
-                        "Dropping column [{statement}] from table {table}.",
-                        [
-                            'statement' => $dbColumn->sqlStatement(),
-                            'table'     => $this->getName(true)
-                        ]
-                    );
-
-                    $this->doColumnDrop($dbColumn);
-                    continue;
-                }
-
-                if (empty($dbColumn)) {
-                    $this->logger()->info(
-                        "Adding column [{statement}] into table {table}.",
-                        [
-                            'statement' => $schema->sqlStatement(),
-                            'table'     => $this->getName(true)
-                        ]
-                    );
-
-                    $this->doColumnAdd($schema);
-                    continue;
-                }
-
-                //Altering
-                $this->logger()->info(
-                    "Altering column [{statement}] to [{new}] in table {table}.",
-                    [
-                        'statement' => $dbColumn->sqlStatement(),
-                        'new'       => $schema->sqlStatement(),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doColumnChange($schema, $dbColumn);
-            }
-
-            foreach ($this->alteredIndexes() as $name => $schema) {
-                $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
-
-                if (empty($schema)) {
-                    $this->logger()->info(
-                        "Dropping index [{statement}] from table {table}.",
-                        [
-                            'statement' => $dbIndex->sqlStatement(true),
-                            'table'     => $this->getName(true)
-                        ]
-                    );
-
-                    $this->doIndexDrop($dbIndex);
-                    continue;
-                }
-
-                if (empty($dbIndex)) {
-                    $this->logger()->info(
-                        "Adding index [{statement}] into table {table}.",
-                        [
-                            'statement' => $schema->sqlStatement(false),
-                            'table'     => $this->getName(true)
-                        ]
-                    );
-
-                    $this->doIndexAdd($schema);
-                    continue;
-                }
-
-                //Altering
-                $this->logger()->info(
-                    "Altering index [{statement}] to [{new}] in table {table}.",
-                    [
-                        'statement' => $dbIndex->sqlStatement(false),
-                        'new'       => $schema->sqlStatement(false),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doIndexChange($schema, $dbIndex);
-            }
-
-            foreach ($this->alteredReferences() as $name => $schema) {
-                $dbForeign = isset($this->dbReferences[$name]) ? $this->dbReferences[$name] : null;
-
-                if (empty($schema)) {
-                    $this->logger()->info(
-                        "Dropping foreign key [{statement}] in table {table}.",
-                        [
-                            'statement' => $dbForeign->sqlStatement(),
-                            'table'     => $this->getName(true)
-                        ]
-                    );
-
-                    $this->doForeignDrop($this->dbReferences[$name]);
-                    continue;
-                }
-
-                if (empty($dbForeign)) {
-                    $this->logger()->info(
-                        "Adding foreign key [{statement}] into table {table}.",
-                        [
-                            'statement' => $schema->sqlStatement(),
-                            'table'     => $this->getName(true)
-                        ]
-                    );
-
-                    $this->doForeignAdd($schema);
-                    continue;
-                }
-
-                //Altering
-                $this->logger()->info(
-                    "Altering foreign key [{statement}] to [{new}] in table {table}.",
-                    [
-                        'statement' => $dbForeign->sqlStatement(),
-                        'new'       => $schema->sqlStatement(),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doForeignChange($schema, $dbForeign);
-            }
+            $this->updateColumns();
+            $this->updateIndexes();
+            $this->updateForeigns();
         } catch (\Exception $exception) {
             $this->driver->rollbackTransaction();
             throw $exception;
@@ -1380,5 +1258,149 @@ abstract class AbstractTable extends Component implements TableInterface
         }
 
         return null;
+    }
+
+    /**
+     * Perform column updates.
+     */
+    private function updateColumns()
+    {
+        foreach ($this->alteredColumns() as $name => $schema) {
+            $dbColumn = isset($this->dbColumns[$name]) ? $this->dbColumns[$name] : null;
+
+            if (empty($schema)) {
+                $this->logger()->info(
+                    "Dropping column [{statement}] from table {table}.",
+                    [
+                        'statement' => $dbColumn->sqlStatement(),
+                        'table'     => $this->getName(true)
+                    ]
+                );
+
+                $this->doColumnDrop($dbColumn);
+                continue;
+            }
+
+            if (empty($dbColumn)) {
+                $this->logger()->info(
+                    "Adding column [{statement}] into table {table}.",
+                    [
+                        'statement' => $schema->sqlStatement(),
+                        'table'     => $this->getName(true)
+                    ]
+                );
+
+                $this->doColumnAdd($schema);
+                continue;
+            }
+
+            //Altering
+            $this->logger()->info(
+                "Altering column [{statement}] to [{new}] in table {table}.",
+                [
+                    'statement' => $dbColumn->sqlStatement(),
+                    'new'       => $schema->sqlStatement(),
+                    'table'     => $this->getName(true)
+                ]
+            );
+
+            $this->doColumnChange($schema, $dbColumn);
+        }
+    }
+
+    /**
+     * Update index changes.
+     */
+    private function updateIndexes()
+    {
+        foreach ($this->alteredIndexes() as $name => $schema) {
+            $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
+
+            if (empty($schema)) {
+                $this->logger()->info(
+                    "Dropping index [{statement}] from table {table}.",
+                    [
+                        'statement' => $dbIndex->sqlStatement(true),
+                        'table'     => $this->getName(true)
+                    ]
+                );
+
+                $this->doIndexDrop($dbIndex);
+                continue;
+            }
+
+            if (empty($dbIndex)) {
+                $this->logger()->info(
+                    "Adding index [{statement}] into table {table}.",
+                    [
+                        'statement' => $schema->sqlStatement(false),
+                        'table'     => $this->getName(true)
+                    ]
+                );
+
+                $this->doIndexAdd($schema);
+                continue;
+            }
+
+            //Altering
+            $this->logger()->info(
+                "Altering index [{statement}] to [{new}] in table {table}.",
+                [
+                    'statement' => $dbIndex->sqlStatement(false),
+                    'new'       => $schema->sqlStatement(false),
+                    'table'     => $this->getName(true)
+                ]
+            );
+
+            $this->doIndexChange($schema, $dbIndex);
+        }
+    }
+
+    /**
+     * Update foreign changes.
+     */
+    private function updateForeigns()
+    {
+        foreach ($this->alteredReferences() as $name => $schema) {
+            $dbForeign = isset($this->dbReferences[$name]) ? $this->dbReferences[$name] : null;
+
+            if (empty($schema)) {
+                $this->logger()->info(
+                    "Dropping foreign key [{statement}] in table {table}.",
+                    [
+                        'statement' => $dbForeign->sqlStatement(),
+                        'table'     => $this->getName(true)
+                    ]
+                );
+
+                $this->doForeignDrop($this->dbReferences[$name]);
+                continue;
+            }
+
+            if (empty($dbForeign)) {
+                $this->logger()->info(
+                    "Adding foreign key [{statement}] into table {table}.",
+                    [
+                        'statement' => $schema->sqlStatement(),
+                        'table'     => $this->getName(true)
+                    ]
+                );
+
+                $this->doForeignAdd($schema);
+                continue;
+            }
+
+            //Altering
+            $this->logger()->info(
+                "Altering foreign key [{statement}] to [{new}] in table {table}.",
+                [
+                    'statement' => $dbForeign->sqlStatement(),
+                    'new'       => $schema->sqlStatement(),
+                    'table'     => $this->getName(true)
+                ]
+            );
+
+            $this->doForeignChange($schema, $dbForeign);
+        }
     }
 }

@@ -451,20 +451,18 @@ class QueryCompiler extends Component
                 continue;
             }
 
-            if ($context instanceof SQLFragmentInterface) {
+            if ($context instanceof SQLExpression) {
                 //( ?? )
                 $statement .= $joiner . ' ' . $context->sqlStatement($this) . ' ';
+                continue;
+            } elseif ($context instanceof SQLFragmentInterface) {
+                //( ?? )
+                $statement .= $joiner . ' ' . $context->sqlStatement() . ' ';
                 continue;
             }
 
             list($identifier, $operator, $value) = $context;
-            if ($identifier instanceof QueryBuilder) {
-                $identifier = '(' . $identifier->sqlStatement($this) . ')';
-            } elseif ($identifier instanceof SQLFragmentInterface) {
-                $identifier = $identifier->sqlStatement($this);
-            } else {
-                $identifier = $this->quote($identifier);
-            }
+            $identifier = $this->normalizeIdentifier($identifier);
 
             if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN') {
                 $statement .= "{$joiner} {$identifier} " . "{$operator} "
@@ -473,19 +471,8 @@ class QueryCompiler extends Component
                 continue;
             }
 
-            if ($value === null || ($value instanceof ParameterInterface && $value->getValue() === null)) {
-                $operator = $operator == '=' ? 'IS' : 'IS NOT';
-            }
-
-            if (
-                $operator == '='
-                && (
-                    is_array($value)
-                    || ($value instanceof ParameterInterface && is_array($value->getValue()))
-                )
-            ) {
-                $operator = 'IN';
-            }
+            //Resolve operator value for various types
+            $operator = $this->resolveOperator($value, $operator);
 
             if ($value instanceof QueryBuilder) {
                 $value = ' (' . $value . ') ';
@@ -511,8 +498,11 @@ class QueryCompiler extends Component
      */
     protected function getPlaceholder($value)
     {
-        if ($value instanceof SQLFragmentInterface) {
+        if ($value instanceof SQLExpression) {
             return $value->sqlStatement($this);
+        }
+        if ($value instanceof SQLFragmentInterface) {
+            return $value->sqlStatement();
         }
 
         return '?';
@@ -633,5 +623,63 @@ class QueryCompiler extends Component
         }
 
         return $query;
+    }
+
+    /**
+     * Normalize identifier value.
+     *
+     * @param mixed $identifier
+     * @return mixed|string
+     */
+    private function normalizeIdentifier($identifier)
+    {
+        if ($identifier instanceof QueryBuilder) {
+            $identifier = '(' . $identifier->sqlStatement($this) . ')';
+
+            return $identifier;
+        } elseif ($identifier instanceof SQLExpression) {
+            $identifier = $identifier->sqlStatement($this);
+
+            return $identifier;
+        } elseif ($identifier instanceof SQLFragmentInterface) {
+            $identifier = $identifier->sqlStatement();
+
+            return $identifier;
+        } else {
+            $identifier = $this->quote($identifier);
+
+            return $identifier;
+        }
+    }
+
+    /**
+     * Resolve operator value based on value value. ;)
+     *
+     * @param mixed  $value
+     * @param string $operator
+     * @return string
+     */
+    private function resolveOperator($value, $operator)
+    {
+        if (
+            $value === null
+            || ($value instanceof ParameterInterface && $value->getValue() === null)
+        ) {
+            $operator = $operator == '=' ? 'IS' : 'IS NOT';
+        }
+
+        if (
+            $operator == '='
+            && (
+                is_array($value)
+                || ($value instanceof ParameterInterface && is_array($value->getValue()))
+            )
+        ) {
+            $operator = 'IN';
+
+            return $operator;
+        }
+
+        return $operator;
     }
 }

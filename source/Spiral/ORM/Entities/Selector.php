@@ -403,7 +403,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     public function fetchData()
     {
         //Pagination!
-        $this->apllyPagination();
+        $this->applyPagination();
         $statement = $this->sqlStatement();
 
         if (!empty($this->cacheLifetime)) {

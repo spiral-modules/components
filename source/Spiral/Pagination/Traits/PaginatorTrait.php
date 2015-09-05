@@ -170,15 +170,15 @@ trait PaginatorTrait
      *
      * @return $this
      */
-    protected function apllyPagination()
+    protected function applyPagination()
     {
         if (empty($this->paginator)) {
             return $this;
         }
 
-        /**
-         * @var PaginableInterface $this
-         */
+        if (!$this instanceof PaginableInterface) {
+            throw new PaginationException("Unable to paginate, PaginableInterface not implemented.");
+        }
 
         return $this->paginator->paginateObject($this);
     }

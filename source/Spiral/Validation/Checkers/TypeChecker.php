@@ -26,9 +26,9 @@ class TypeChecker extends Checker implements SingletonInterface
      */
     protected $messages = [
         "notEmpty" => "[[This field is required.]]",
-        "boolean"  => "[[Not valid boolean.]]",
-        "datetime" => "[[Not valid datetime.]]",
-        "timezone" => "[[Not valid timezone.]]"
+        "boolean"  => "[[Not a valid boolean.]]",
+        "datetime" => "[[Not a valid datetime.]]",
+        "timezone" => "[[Not a valid timezone.]]"
     ];
 
     /**

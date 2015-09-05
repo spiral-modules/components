@@ -160,6 +160,8 @@ class QueryCompiler extends Component
 
         if (!empty($joins)) {
             $joins = $this->joins($joins) . ' ';
+        } else {
+            $joins = '';
         }
 
         if (!empty($distinct)) {
@@ -171,15 +173,21 @@ class QueryCompiler extends Component
         //Conditions
         if (!empty($where)) {
             $where = "\nWHERE " . $this->where($where) . ' ';
+        } else {
+            $where = '';
         }
 
         if (!empty($having)) {
             $having = "\nHAVING " . $this->where($having) . ' ';
+        } else {
+            $having = '';
         }
 
         //Sortings and grouping
         if (!empty($groupBy)) {
             $groupBy = "\nGROUP BY " . $this->groupBy($groupBy) . ' ';
+        } else {
+            $groupBy = '';
         }
 
         //Initial statement have predictable order

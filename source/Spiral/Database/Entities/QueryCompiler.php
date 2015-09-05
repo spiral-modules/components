@@ -586,7 +586,7 @@ class QueryCompiler extends Component
      * @param array  $parameters Parameters to be binded into query.
      * @return mixed
      */
-    public function interpolate($query, array $parameters = [])
+    public static function interpolate($query, array $parameters = [])
     {
         if (empty($parameters)) {
             return $query;

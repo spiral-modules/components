@@ -37,7 +37,6 @@ interface PaginableInterface extends \Countable
      */
     public function setPaginator(PaginatorInterface $paginator);
 
-
     /**
      * Indication that object was paginated.
      *

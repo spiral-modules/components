@@ -8,6 +8,7 @@
  */
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 
 /**
@@ -301,21 +302,8 @@ class ColumnSchema extends AbstractColumn
             $this->scale = (int)$schema['NUMERIC_SCALE'];
         }
 
-        //Processing default value
-        if ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')') {
-            $this->defaultValue = substr($this->defaultValue, 1, -1);
-        }
-
-        if (preg_match('/^[\'""].*?[\'"]$/', $this->defaultValue)) {
-            $this->defaultValue = substr($this->defaultValue, 1, -1);
-        }
-
-        if (
-            $this->phpType() != 'string'
-            && ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')')
-        ) {
-            $this->defaultValue = substr($this->defaultValue, 1, -1);
-        }
+        //Normalizing default value
+        $this->normalizeDefault();
 
         /**
          * We have to fetch all column constrains cos default and enum check will be included into
@@ -332,33 +320,7 @@ class ColumnSchema extends AbstractColumn
 
         //Potential enum
         if ($this->type == 'varchar' && !empty($this->size)) {
-            $query = "SELECT object_definition(o.object_id) AS [definition],
-                             OBJECT_NAME(o.OBJECT_ID) AS [name]
-                      FROM sys.objects AS o
-                      JOIN sys.sysconstraints AS [c]
-                        ON o.object_id = [c].constid
-                      WHERE type_desc = 'CHECK_CONSTRAINT' AND parent_object_id = ? AND [c].colid = ?";
-
-            $constraints = $tableDriver->query($query, [
-                $schema['object_id'],
-                $schema['column_id']
-            ]);
-
-            foreach ($constraints as $checkConstraint) {
-                $this->enumConstraint = $checkConstraint['name'];
-
-                $name = preg_quote($this->getName(true));
-
-                //We made some assumptions here...
-                if (preg_match_all(
-                    '/' . $name . '=[\']?([^\']+)[\']?/i',
-                    $checkConstraint['definition'],
-                    $matches
-                )) {
-                    $this->enumValues = $matches[1];
-                    sort($this->enumValues);
-                }
-            }
+            $this->resolveEnum($schema, $tableDriver);
         }
     }
 
@@ -397,5 +359,63 @@ class ColumnSchema extends AbstractColumn
         return $quote
             ? $this->table->driver()->identifier($this->enumConstraint)
             : $this->enumConstraint;
+    }
+
+    /**
+     * Normalizing default value.
+     */
+    private function normalizeDefault()
+    {
+        if ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')') {
+            $this->defaultValue = substr($this->defaultValue, 1, -1);
+        }
+
+        if (preg_match('/^[\'""].*?[\'"]$/', $this->defaultValue)) {
+            $this->defaultValue = substr($this->defaultValue, 1, -1);
+        }
+
+        if (
+            $this->phpType() != 'string'
+            && ($this->defaultValue[0] == '(' && $this->defaultValue[strlen($this->defaultValue) - 1] == ')')
+        ) {
+            $this->defaultValue = substr($this->defaultValue, 1, -1);
+        }
+    }
+
+    /**
+     * Check if column is enum.
+     *
+     * @param array  $schema
+     * @param Driver $tableDriver
+     */
+    private function resolveEnum(array $schema, $tableDriver)
+    {
+        $query = "SELECT object_definition(o.object_id) AS [definition],
+                             OBJECT_NAME(o.OBJECT_ID) AS [name]
+                      FROM sys.objects AS o
+                      JOIN sys.sysconstraints AS [c]
+                        ON o.object_id = [c].constid
+                      WHERE type_desc = 'CHECK_CONSTRAINT' AND parent_object_id = ? AND [c].colid = ?";
+
+        $constraints = $tableDriver->query($query, [
+            $schema['object_id'],
+            $schema['column_id']
+        ]);
+
+        foreach ($constraints as $checkConstraint) {
+            $this->enumConstraint = $checkConstraint['name'];
+
+            $name = preg_quote($this->getName(true));
+
+            //We made some assumptions here...
+            if (preg_match_all(
+                '/' . $name . '=[\']?([^\']+)[\']?/i',
+                $checkConstraint['definition'],
+                $matches
+            )) {
+                $this->enumValues = $matches[1];
+                sort($this->enumValues);
+            }
+        }
     }
 }

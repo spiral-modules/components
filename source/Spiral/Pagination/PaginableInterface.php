@@ -8,8 +8,6 @@
  */
 namespace Spiral\Pagination;
 
-use Spiral\Pagination\Exceptions\PaginationException;
-
 /**
  * Declares ability to be paginated and store associated paginator.
  */
@@ -52,7 +50,6 @@ interface PaginableInterface extends \Countable
      *
      * @see paginate()
      * @return PaginatorInterface
-     * @throws PaginationException
      */
     public function getPaginator();
 }

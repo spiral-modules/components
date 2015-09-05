@@ -85,7 +85,6 @@ class QueryCompiler extends Component
         . "VALUES " . join(",\n", $rowsets);
     }
 
-
     /**
      * Create update statement.
      *

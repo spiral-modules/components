@@ -1268,7 +1268,7 @@ abstract class AbstractTable extends Component implements TableInterface
         foreach ($this->alteredColumns() as $name => $schema) {
             $dbColumn = isset($this->dbColumns[$name]) ? $this->dbColumns[$name] : null;
 
-            if (empty($schema)) {
+            if (empty($schema) && !empty($dbColumn)) {
                 $this->logger()->info(
                     "Dropping column [{statement}] from table {table}.",
                     [
@@ -1316,7 +1316,7 @@ abstract class AbstractTable extends Component implements TableInterface
         foreach ($this->alteredIndexes() as $name => $schema) {
             $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
 
-            if (empty($schema)) {
+            if (empty($schema) && !empty($dbIndex)) {
                 $this->logger()->info(
                     "Dropping index [{statement}] from table {table}.",
                     [
@@ -1364,7 +1364,7 @@ abstract class AbstractTable extends Component implements TableInterface
         foreach ($this->alteredReferences() as $name => $schema) {
             $dbForeign = isset($this->dbReferences[$name]) ? $this->dbReferences[$name] : null;
 
-            if (empty($schema)) {
+            if (empty($schema) && !empty($dbForeign)) {
                 $this->logger()->info(
                     "Dropping foreign key [{statement}] in table {table}.",
                     [

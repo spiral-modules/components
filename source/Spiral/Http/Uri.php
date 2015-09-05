@@ -27,7 +27,16 @@ class Uri extends \Zend\Diactoros\Uri implements \JsonSerializable
     public function __debugInfo()
     {
         return (object)[
-            'uri' => (string)$this
+            'uri'    => (string)$this,
+            'chunks' => [
+                'scheme'    => $this->getScheme(),
+                'authority' => $this->getAuthority(),
+                'host'      => $this->getHost(),
+                'port'      => $this->getPort(),
+                'path'      => $this->getPath(),
+                'query'     => $this->getQuery(),
+                'fragment'  => $this->getFragment()
+            ]
         ];
     }
 }

@@ -14,7 +14,7 @@ use Psr\Http\Message\UriInterface;
 /**
  * Default paginator implementation, uses active server request Uri to generate page urls.
  */
-class Paginator implements PaginatorInterface
+class Paginator implements PaginatorInterface, \Countable
 {
     /**
      * Default limit value.
@@ -208,7 +208,25 @@ class Paginator implements PaginatorInterface
         $this->pageNumber = abs(intval($number));
 
         //Real page number
-        return $this->currentPage();
+        return $this->getPage();
+    }
+
+    /**
+     * The current page number.
+     *
+     * @return int
+     */
+    public function getPage()
+    {
+        if ($this->pageNumber < 1) {
+            return 1;
+        }
+
+        if ($this->pageNumber > $this->countPages) {
+            return $this->countPages;
+        }
+
+        return $this->pageNumber;
     }
 
     /**
@@ -216,7 +234,7 @@ class Paginator implements PaginatorInterface
      */
     public function getOffset()
     {
-        return ($this->currentPage() - 1) * $this->limit;
+        return ($this->getPage() - 1) * $this->limit;
     }
 
     /**
@@ -237,7 +255,7 @@ class Paginator implements PaginatorInterface
      */
     public function countDisplayed()
     {
-        if ($this->currentPage() == $this->countPages) {
+        if ($this->getPage() == $this->countPages) {
             return $this->count - $this->getOffset();
         }
 
@@ -256,32 +274,14 @@ class Paginator implements PaginatorInterface
     }
 
     /**
-     * The current page number.
-     *
-     * @return int
-     */
-    public function currentPage()
-    {
-        if ($this->pageNumber < 1) {
-            return 1;
-        }
-
-        if ($this->pageNumber > $this->countPages) {
-            return $this->countPages;
-        }
-
-        return $this->pageNumber;
-    }
-
-    /**
      * Next page number. Should return will be false if the current page is the last page.
      *
      * @return bool|int
      */
     public function nextPage()
     {
-        if ($this->currentPage() != $this->countPages) {
-            return $this->currentPage() + 1;
+        if ($this->getPage() != $this->countPages) {
+            return $this->getPage() + 1;
         }
 
         return false;
@@ -294,8 +294,8 @@ class Paginator implements PaginatorInterface
      */
     public function previousPage()
     {
-        if ($this->currentPage() > 1) {
-            return $this->currentPage() - 1;
+        if ($this->getPage() > 1) {
+            return $this->getPage() - 1;
         }
 
         return false;

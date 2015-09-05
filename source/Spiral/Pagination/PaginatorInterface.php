@@ -17,23 +17,8 @@ use Spiral\Pagination\Exceptions\PaginationException;
  * one. Right now you can simply set count manually, in any scenario it's up to view how to render
  * it.
  */
-interface PaginatorInterface extends \Countable
+interface PaginatorInterface
 {
-    /**
-     * Update associated pagination uri. Uri must not include query string.
-     *
-     * @param UriInterface $uri
-     * @return self
-     */
-    public function setUri(UriInterface $uri);
-
-    /**
-     * Get associated pagination Uri, by default identical to request uri.
-     *
-     * @return UriInterface
-     */
-    public function getUri();
-
     /**
      * Set page number.
      *
@@ -41,6 +26,13 @@ interface PaginatorInterface extends \Countable
      * @return int
      */
     public function setPage($number);
+
+    /**
+     * Get current page number.
+     *
+     * @return int
+     */
+    public function getPage();
 
     /**
      * Apply pagination to a simple array, should fetch count from target array and return sliced

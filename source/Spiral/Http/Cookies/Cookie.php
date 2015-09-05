@@ -62,7 +62,7 @@ class Cookie
      * connection
      * (e.g. with respect to $_SERVER["HTTPS"]).
      *
-     * @var string|null
+     * @var bool|null
      */
     private $secure = null;
 

@@ -31,7 +31,8 @@ abstract class Singleton extends Component implements SingletonInterface
      */
     public static function instance(ContainerInterface $container = null)
     {
-        if (empty($container = self::container()) && empty($container)) {
+        $container = !empty($container) ?: self::container();
+        if (empty($container)) {
             throw new MissingContainerException(
                 "Singleton instance can be constructed only using valid Container."
             );

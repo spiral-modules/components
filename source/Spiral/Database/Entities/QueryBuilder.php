@@ -57,7 +57,8 @@ abstract class QueryBuilder extends Component
     abstract public function sqlStatement(QueryCompiler $compiler = null);
 
     /**
-     * Run built statement against parent database. Might return different values based on context.
+     * Run built statement against parent database. Might return different values based on specific
+     * builder implementation.
      *
      * @return mixed
      * @throws QueryException

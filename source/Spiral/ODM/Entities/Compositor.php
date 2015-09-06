@@ -104,7 +104,7 @@ class Compositor extends Component implements
         }
 
         //Allowed only when global container is set
-        $this->odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
+        $this->odm = !empty($odm) ? $odm : ODM::instance();
 
         if (empty($this->odm)) {
             throw new CompositorException(

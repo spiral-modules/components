@@ -37,11 +37,6 @@ trait PaginatorTrait
     protected $offset = 0;
 
     /**
-     * @return ContainerInterface
-     */
-    abstract public function container();
-
-    /**
      * Count elements of an object.
      *
      * @link http://php.net/manual/en/countable.count.php
@@ -182,4 +177,9 @@ trait PaginatorTrait
 
         return $this->paginator->paginateObject($this);
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

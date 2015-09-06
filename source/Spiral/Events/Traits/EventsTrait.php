@@ -8,17 +8,12 @@
  */
 namespace Spiral\Events\Traits;
 
-use Spiral\Core\ContainerInterface;
 use Spiral\Events\Dispatcher;
 use Spiral\Events\DispatcherInterface;
 use Spiral\Events\Entities\ObjectEvent;
 
 /**
- * Allow class to have statically (class name) based event dispatcher. Will try to use container
- * to resolve dispatcher instance or create one default.
- *
- * Trait requires static (!) implementation of container() method to automatically resolve
- * dispatcher instance (allowed to return null).
+ * Allow class to have statically (class name) based event dispatcher.
  */
 trait EventsTrait
 {
@@ -28,11 +23,6 @@ trait EventsTrait
      * @var DispatcherInterface[]
      */
     private static $dispatchers = [];
-
-    /**
-     * @return ContainerInterface|null
-     */
-    abstract public function container();
 
     /**
      * Set event dispatchers manually for current class. Can erase existed dispatcher by providing
@@ -56,12 +46,7 @@ trait EventsTrait
             return self::$dispatchers[static::class];
         }
 
-        if (empty($container = self::container()) || !$container->has(DispatcherInterface::class)) {
-            //Let's use default Dispatcher, no one will be harmed
-            return self::$dispatchers[static::class] = new Dispatcher();
-        }
-
-        return self::$dispatchers[static::class] = $container->get(DispatcherInterface::class);
+        return self::$dispatchers[static::class] = new Dispatcher();
     }
 
     /**

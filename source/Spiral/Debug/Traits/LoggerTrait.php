@@ -33,11 +33,6 @@ trait LoggerTrait
     private $logger = null;
 
     /**
-     * @return ContainerInterface
-     */
-    abstract public function container();
-
-    /**
      * Sets a logger. Static loggers has less priority over loggers associated with specific object.
      *
      * @param LoggerInterface $logger
@@ -79,4 +74,9 @@ trait LoggerTrait
             'name' => static::class
         ]);
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

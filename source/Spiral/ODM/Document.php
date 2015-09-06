@@ -233,6 +233,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     protected $odm = null;
 
     /**
+     * @see Component::staticContainer()
      * @param array                 $fields
      * @param CompositableInterface $parent
      * @param ODM                   $odm
@@ -242,8 +243,12 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     {
         $this->parent = $parent;
 
-        //Only when global container is set
-        $this->odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
+        if (empty($odm)) {
+            //Only when global container is set
+            $odm = ODM::instance();
+        }
+
+        $this->odm = $odm;
         $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->getSchema(static::class);
 
         static::initialize();
@@ -799,6 +804,14 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * {@inheritdoc}
+     */
+    protected function container()
+    {
+        return $this->odm->container();
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * Will validate every CompositableInterface instance.
      *
@@ -909,14 +922,17 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * {@inheritdoc}
      *
+     * @see Component::staticContainer()
      * @param array $fields Model fields to set, will be passed thought filters.
      * @param ODM   $odm    ODM component, global container will be called if not instance provided.
      * @event created()
      */
     public static function create($fields = [], ODM $odm = null)
     {
-        //Only when global container is set
-        $odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
+        if (empty($odm)) {
+            //Only when global container is set
+            $odm = ODM::instance();
+        }
 
         /**
          * @var Document $document
@@ -987,6 +1003,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * Instance of ODM Collection associated with specific document.
      *
+     * @see Component::staticContainer()
      * @param ODM $odm ODM component, global container will be called if not instance provided.
      * @return Collection
      * @throws ODMException
@@ -994,8 +1011,10 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public static function odmCollection(ODM $odm = null)
     {
-        //Only when global container is set
-        $odm = !empty($odm) ? $odm : self::container()->get(ODM::class);
+        if (empty($odm)) {
+            //Only when global container is set
+            $odm = ODM::instance();
+        }
 
         //Ensure traits
         static::initialize();

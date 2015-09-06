@@ -78,7 +78,10 @@ trait ValidatorTrait
             return $validator;
         }
 
-        $container = !empty($container) ? $container : $this->container();
+        if (empty($container)) {
+            $container = $this->container();
+        }
+
         if (empty($container) || !$container->has(ValidatorInterface::class)) {
             //We can't create default validation without any rule, this is not secure
             throw new MissingContainerException(
@@ -169,4 +172,9 @@ trait ValidatorTrait
     {
         $this->errors[$field] = $message;
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

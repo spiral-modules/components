@@ -292,6 +292,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      * Due setContext() method and entity cache of ORM any custom initiation code in constructor
      * must not depends on database data.
      *
+     * @see Component::staticContainer()
      * @see setContext
      * @param array      $data
      * @param bool|false $loaded
@@ -305,7 +306,13 @@ class Record extends DataEntity implements ActiveEntityInterface
         array $ormSchema = []
     ) {
         $this->loaded = $loaded;
-        $this->orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
+
+        if (empty($orm)) {
+            //Only when global container is set
+            $orm = ORM::instance();
+        }
+
+        $this->orm = $orm;
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
 
         static::initialize();
@@ -851,6 +858,14 @@ class Record extends DataEntity implements ActiveEntityInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    protected function container()
+    {
+        return $this->orm->container();
+    }
+
+    /**
      * Create set of fields to be sent to UPDATE statement.
      *
      * @see save()
@@ -897,9 +912,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     protected function sourceTable()
     {
-        return $this->orm->dbalDatabase(
-            $this->ormSchema[ORM::M_DB]
-        )->table(
+        return $this->orm->dbalDatabase($this->ormSchema[ORM::M_DB])->table(
             $this->ormSchema[ORM::M_TABLE]
         );
     }
@@ -1009,14 +1022,17 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
+     * @see Component::staticContainer()
      * @param array $fields Record fields to set, will be passed thought filters.
      * @param ORM   $orm    ORM component, global container will be called if not instance provided.
      * @event created()
      */
     public static function create($fields = [], ORM $orm = null)
     {
-        //Only when global container is set
-        $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
+        if (empty($orm)) {
+            //Only when global container is set
+            $orm = ORM::instance();
+        }
 
         /**
          * @var Record $record
@@ -1085,6 +1101,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * Instance of ORM Selector associated with specific document.
      *
+     * @see Component::staticContainer()
      * @param ORM $orm ORM component, global container will be called if not instance provided.
      * @return Selector
      * @throws ORMException
@@ -1092,8 +1109,10 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public static function ormSelector(ORM $orm = null)
     {
-        //Only when global container is set
-        $orm = !empty($orm) ? $orm : self::container()->get(ORM::class);
+        if (empty($orm)) {
+            //Only when global container is set
+            $orm = ORM::instance();
+        }
 
         //Ensure traits
         static::initialize();

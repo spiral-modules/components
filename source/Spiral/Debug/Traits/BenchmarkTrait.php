@@ -23,11 +23,6 @@ trait BenchmarkTrait
     private $benchmarker = null;
 
     /**
-     * @return ContainerInterface
-     */
-    abstract public function container();
-
-    /**
      * Set custom benchmarker.
      *
      * @param BenchmarkerInterface $benchmarker
@@ -49,7 +44,11 @@ trait BenchmarkTrait
     public function benchmark($record, $context = '')
     {
         if (empty($this->benchmarker)) {
-            if (empty($container = $this->container()) || !$container->has(BenchmarkerInterface::class)) {
+
+            if (
+                empty($container = $this->container())
+                || !$container->has(BenchmarkerInterface::class)
+            ) {
                 //Nothing to do
                 return false;
             }
@@ -59,4 +58,9 @@ trait BenchmarkTrait
 
         return $this->benchmarker->benchmark($this, $record, $context);
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

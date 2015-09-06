@@ -120,16 +120,6 @@ class HttpDispatcher extends Singleton implements
     }
 
     /**
-     * Application base path.
-     *
-     * @return string
-     */
-    public function basePath()
-    {
-        return $this->config['basePath'];
-    }
-
-    /**
      * Add new middleware into chain.
      *
      * Example (in bootstrap):
@@ -138,11 +128,21 @@ class HttpDispatcher extends Singleton implements
      * @param callable|MiddlewareInterface $middleware
      * @return $this
      */
-    public function middleware($middleware)
+    public function addMiddleware($middleware)
     {
         $this->middlewares[] = $middleware;
 
         return $this;
+    }
+
+    /**
+     * Application base path.
+     *
+     * @return string
+     */
+    public function basePath()
+    {
+        return $this->config['basePath'];
     }
 
     /**
@@ -173,7 +173,8 @@ class HttpDispatcher extends Singleton implements
             return $this->request;
         }
 
-        //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose error
+        //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose
+        //error
         return $this->request = ServerRequestFactory::fromGlobals(
             $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
         )->withAttribute('basePath', $this->basePath())->withAttribute(

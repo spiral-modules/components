@@ -57,6 +57,7 @@ class Translator extends Singleton implements TranslatorInterface
     private $bundles = [];
 
     /**
+     * @invisible
      * @var HippocampusInterface
      */
     protected $memory = null;

@@ -134,7 +134,7 @@ class ORM extends Singleton
     /**
      * @return ContainerInterface
      */
-    public function getContainer()
+    public function container()
     {
         return $this->container;
     }

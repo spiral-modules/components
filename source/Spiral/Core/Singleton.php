@@ -25,13 +25,15 @@ abstract class Singleton extends Component implements SingletonInterface
      * Singletons will work as desired only under Spiral Container which can understand SINGLETON
      * constant. You can consider this functionality as "helper".
      *
+     * Global/static container used as fallback to receive class instance.
+     *
      * @param ContainerInterface $container
      * @return static
      * @throws MissingContainerException
      */
     public static function instance(ContainerInterface $container = null)
     {
-        $container = !empty($container) ? $container : self::container();
+        $container = !empty($container) ? $container : self::staticContainer();
         if (empty($container)) {
             throw new MissingContainerException(
                 "Singleton instance can be constructed only using valid Container."

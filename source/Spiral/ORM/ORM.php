@@ -96,7 +96,7 @@ class ORM extends Singleton
     /**
      * @var DatabaseProvider
      */
-    protected $dbal = null;
+    protected $databases = null;
 
     /**
      * @invisible
@@ -114,18 +114,18 @@ class ORM extends Singleton
      * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
      * @param HippocampusInterface  $memory
-     * @param DatabaseProvider      $dbal
+     * @param DatabaseProvider      $databases
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         ContainerInterface $container,
         HippocampusInterface $memory,
-        DatabaseProvider $dbal
+        DatabaseProvider $databases
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
-        $this->schema = $memory->loadData(static::SCHEMA_SECTION);
+        $this->schema = (array)$memory->loadData(static::SCHEMA_SECTION);
 
-        $this->dbal = $dbal;
+        $this->databases = $databases;
 
         $this->memory = $memory;
         $this->container = $container;
@@ -147,7 +147,7 @@ class ORM extends Singleton
      */
     public function dbalDatabase($database)
     {
-        return $this->dbal->db($database);
+        return $this->databases->db($database);
     }
 
     /**

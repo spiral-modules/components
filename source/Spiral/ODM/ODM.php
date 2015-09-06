@@ -122,7 +122,7 @@ class ODM extends Singleton implements InjectorInterface
         ContainerInterface $container
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
-        $this->schema = $memory->loadData(static::SCHEMA_SECTION);
+        $this->schema = (array)$memory->loadData(static::SCHEMA_SECTION);
 
         $this->memory = $memory;
         $this->container = $container;

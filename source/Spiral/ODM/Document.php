@@ -234,10 +234,10 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
     /**
      * @see Component::staticContainer()
-     * @param array                 $fields
-     * @param CompositableInterface $parent
-     * @param ODM                   $odm
-     * @param array                 $odmSchema
+     * @param array                                     $fields
+     * @param CompositableInterface|Document|DataEntity $parent
+     * @param ODM                                       $odm
+     * @param array                                     $odmSchema
      */
     public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
     {
@@ -922,7 +922,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * {@inheritdoc}
      *
-     * @see Component::staticContainer()
+     * @see   Component::staticContainer()
      * @param array $fields Model fields to set, will be passed thought filters.
      * @param ODM   $odm    ODM component, global container will be called if not instance provided.
      * @event created()
@@ -1003,7 +1003,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     /**
      * Instance of ODM Collection associated with specific document.
      *
-     * @see Component::staticContainer()
+     * @see   Component::staticContainer()
      * @param ODM $odm ODM component, global container will be called if not instance provided.
      * @return Collection
      * @throws ODMException

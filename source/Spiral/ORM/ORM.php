@@ -154,7 +154,7 @@ class ORM extends Singleton
      * Get cached schema for specified record by it's name.
      *
      * @param string $record
-     * @return mixed
+     * @return array
      * @throws ORMException
      */
     public function getSchema($record)

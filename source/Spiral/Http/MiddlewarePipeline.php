@@ -195,7 +195,7 @@ class MiddlewarePipeline
 
             //Logging error
             $http->logError($exception, $request);
-            $response = $http->errorResponse($exception->getCode(), $request);
+            $response = $http->exceptionResponse($exception, $request);
         } finally {
             while (ob_get_level() > $outputLevel + 1) {
                 $output = ob_get_clean() . $output;
@@ -204,6 +204,7 @@ class MiddlewarePipeline
 
         //Closing request scope
         $this->container->restore($outerRequest);
+
         $output = ob_get_clean() . $output;
         if (!$this->keepOutput) {
             $output = '';

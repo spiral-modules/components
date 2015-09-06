@@ -20,4 +20,12 @@ class NotFoundException extends ClientException
      * @var int
      */
     protected $code = Response::NOT_FOUND;
+
+    /**
+     * @param string $message
+     */
+    public function __construct($message = "")
+    {
+        parent::__construct($this->code, $message);
+    }
 }

@@ -20,4 +20,12 @@ class UnauthorizedException extends ClientException
      * @var int
      */
     protected $code = Response::UNAUTHORIZED;
+
+    /**
+     * @param string $message
+     */
+    public function __construct($message = "")
+    {
+        parent::__construct($this->code, $message);
+    }
 }

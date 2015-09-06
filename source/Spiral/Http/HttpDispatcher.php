@@ -20,7 +20,8 @@ use Spiral\Debug\SnapshotInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Http\Exceptions\ClientException;
-use Spiral\Http\Responses\EmptyResponse;
+use Spiral\Http\Exceptions\ClientExceptions\ServerErrorException;
+use Spiral\Http\Responses\ExceptionResponse;
 use Spiral\Http\Responses\HtmlResponse;
 use Spiral\Http\Responses\JsonResponse;
 use Spiral\Http\Routing\Traits\RouterTrait;
@@ -210,27 +211,11 @@ class HttpDispatcher extends Singleton implements
             //Configuring endpoint
             $pipeline = $pipeline->target($endpoint);
 
+            //Exceptions (including client one) must be handled by pipeline
             return $pipeline->run($request);
         } finally {
             $this->benchmark($benchmark);
         }
-    }
-
-    /**
-     * Dispatch response to client.
-     *
-     * @param ResponseInterface $response
-     * @return null Specifically.
-     */
-    public function dispatch(ResponseInterface $response)
-    {
-        if (empty($this->emitter)) {
-            $this->emitter = new SapiEmitter();
-        }
-
-        $this->emitter->emit($response, ob_get_level());
-
-        return null;
     }
 
     /**
@@ -252,7 +237,10 @@ class HttpDispatcher extends Singleton implements
 
         if (!$this->config['exposeErrors']) {
             //Http was not allowed to show any error snapshot to client
-            $response = $this->errorResponse(Response::SERVER_ERROR, $request);
+            $response = $this->exceptionResponse(
+                new ServerErrorException(),
+                $request
+            );
 
             return $dispatch ? $this->dispatch($response) : $response;
         }
@@ -265,6 +253,23 @@ class HttpDispatcher extends Singleton implements
         }
 
         return $dispatch ? $this->dispatch($response) : $response;
+    }
+
+    /**
+     * Dispatch response to client.
+     *
+     * @param ResponseInterface $response
+     * @return null Specifically.
+     */
+    public function dispatch(ResponseInterface $response)
+    {
+        if (empty($this->emitter)) {
+            $this->emitter = new SapiEmitter();
+        }
+
+        $this->emitter->emit($response, ob_get_level());
+
+        return null;
     }
 
     /**
@@ -308,28 +313,33 @@ class HttpDispatcher extends Singleton implements
     /**
      * Create response for specifier error code, some responses can be have associated view files.
      *
-     * @param int                    $code
+     * @param ClientException        $exception
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    public function errorResponse($code, ServerRequestInterface $request = null)
-    {
+    public function exceptionResponse(
+        ClientException $exception,
+        ServerRequestInterface $request = null
+    ) {
         if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
-            return new JsonResponse(['status' => $code], $code);
+            return new JsonResponse(['status' => $exception->getCode()], $exception->getCode());
         }
 
-        if (isset($this->config['httpErrors'][$code])) {
-            //We can show custom error page
-            return new HtmlResponse(
-                $this->viewProvider()->render($this->config['httpErrors'][$code], [
+        if (isset($this->config['httpErrors'][$exception->getCode()])) {
+            /**
+             * Exception response will render html content on demand, it gives us ability to handle
+             * response "as exception" somewhere in middleware and do something crazy.
+             */
+            return new ExceptionResponse(
+                $exception,
+                $this->viewProvider()->get($this->config['httpErrors'][$exception->getCode()], [
                     'http'    => $this,
                     'request' => !empty($request) ? $request : $this->request()
-                ]),
-                $code
+                ])
             );
         }
 
-        return new EmptyResponse($code);
+        return new ExceptionResponse($exception);
     }
 
     /**

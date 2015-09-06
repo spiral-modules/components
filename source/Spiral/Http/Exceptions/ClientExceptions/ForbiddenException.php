@@ -20,4 +20,12 @@ class ForbiddenException extends ClientException
      * @var int
      */
     protected $code = Response::FORBIDDEN;
+
+    /**
+     * @param string $message
+     */
+    public function __construct($message = "")
+    {
+        parent::__construct($this->code, $message);
+    }
 }

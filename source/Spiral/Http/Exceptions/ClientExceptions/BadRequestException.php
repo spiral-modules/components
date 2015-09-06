@@ -20,4 +20,12 @@ class BadRequestException extends ClientException
      * @var int
      */
     protected $code = Response::BAD_REQUEST;
+
+    /**
+     * @param string $message
+     */
+    public function __construct($message = "")
+    {
+        parent::__construct($this->code, $message);
+    }
 }

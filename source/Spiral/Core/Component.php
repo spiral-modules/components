@@ -29,7 +29,11 @@ abstract class Component
      */
     protected function container()
     {
-        if (isset($this->container) && $this->container instanceof ContainerInterface) {
+        if (
+            property_exists($this, 'container')
+            && !empty($this->container)
+            && $this->container instanceof ContainerInterface
+        ) {
             return $this->container;
         }
 

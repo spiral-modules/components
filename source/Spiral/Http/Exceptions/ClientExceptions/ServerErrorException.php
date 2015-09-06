@@ -20,5 +20,12 @@ class ServerErrorException extends ClientException
      * @var int
      */
     protected $code = Response::SERVER_ERROR;
-}
 
+    /**
+     * @param string $message
+     */
+    public function __construct($message = "")
+    {
+        parent::__construct($this->code, $message);
+    }
+}

@@ -189,7 +189,7 @@ class ODM extends Singleton implements InjectorInterface
      * Get cached schema data by it's item name (document name, collection name).
      *
      * @param string $item
-     * @return array
+     * @return array|string
      * @throws ODMException
      */
     public function getSchema($item)

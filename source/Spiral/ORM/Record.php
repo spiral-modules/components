@@ -178,6 +178,25 @@ class Record extends DataEntity implements ActiveEntityInterface
     private $pivotData = [];
 
     /**
+     * Record field updates (changed values).
+     *
+     * @var array
+     */
+    private $updates = [];
+
+    /**
+     * Constructed and pre-cached set of record relations. Relation will be in a form of data array
+     * to be created on demand.
+     *
+     * @see relation()
+     * @see __call()
+     * @see __set()
+     * @see __get()
+     * @var RelationInterface[]|array
+     */
+    private $relations = [];
+
+    /**
      * Table name (without database prefix) record associated to, RecordSchema will generate table
      * name automatically using class name, however i'm strongly recommend to declare table name
      * manually as it gives more readable code.
@@ -262,25 +281,6 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @var array
      */
     protected $defaults = [];
-
-    /**
-     * Record field updates (changed values).
-     *
-     * @var array
-     */
-    protected $updates = [];
-
-    /**
-     * Constructed and pre-cached set of record relations. Relation will be in a form of data array
-     * to be created on demand.
-     *
-     * @see relation()
-     * @see __call()
-     * @see __set()
-     * @see __get()
-     * @var RelationInterface[]|array
-     */
-    protected $relations = [];
 
     /**
      * @invisible

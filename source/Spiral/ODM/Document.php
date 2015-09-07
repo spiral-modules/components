@@ -129,6 +129,20 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     private $solidState = false;
 
     /**
+     * Document field updates (changed values).
+     *
+     * @var array
+     */
+    private $updates = [];
+
+    /**
+     * User specified set of atomic operation to be applied to document on save() call.
+     *
+     * @var array
+     */
+    private $atomics = [];
+
+    /**
      * Collection name where document should be stored into.
      *
      * @var string
@@ -205,20 +219,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * @var array
      */
     protected $defaults = [];
-
-    /**
-     * Document field updates (changed values).
-     *
-     * @var array
-     */
-    protected $updates = [];
-
-    /**
-     * User specified set of atomic operation to be applied to document on save() call.
-     *
-     * @var array
-     */
-    protected $atomics = [];
 
     /**
      * @invisible

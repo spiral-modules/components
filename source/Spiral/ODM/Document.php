@@ -703,7 +703,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      * $parentGroup = $user->group();
      * echo $user->posts(['published' => true])->count();
      *
-     * @return Collection|Document[]|Document
+     * @return mixed|AccessorInterface|Collection|Document[]|Document
      * @throws DocumentException
      */
     public function __call($offset, array $arguments)

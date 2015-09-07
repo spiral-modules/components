@@ -105,8 +105,8 @@ class MiddlewarePipeline
      *
      * @param int                    $position
      * @param ServerRequestInterface $outerRequest
-     * @return callable
-     * @throw \Exception
+     * @return null|ResponseInterface
+     * @throws \Exception
      */
     protected function next($position, ServerRequestInterface $outerRequest)
     {

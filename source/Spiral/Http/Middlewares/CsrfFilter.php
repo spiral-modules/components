@@ -55,7 +55,6 @@ class CsrfFilter implements MiddlewareInterface
      */
     public function __invoke(ServerRequestInterface $request, \Closure $next)
     {
-        $token = null;
         $setCookie = false;
 
         $cookies = $request->getCookieParams();

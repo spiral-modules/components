@@ -43,7 +43,7 @@ class ArgumentException extends ContainerException
             $name = $context->class . '::' . $name;
         }
 
-        parent::__construct("Unable to resolve '{$parameter->getName()}' argument in '{$name}'.");
+        parent::__construct("Unable to resolve '{$parameter->name}' argument in '{$name}'.");
     }
 
     /**

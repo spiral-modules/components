@@ -113,8 +113,8 @@ abstract class DataEntity extends Component implements
             );
         }
 
-        if (count($arguments) <= 1 || strlen($method) <= 3) {
-            //Get/set needs exactly 1 argument
+        if (strlen($method) <= 3) {
+            //Get/set needs exactly 0-1 argument
             throw new EntityException("Undefined method {$method}.");
         }
 
@@ -123,10 +123,12 @@ abstract class DataEntity extends Component implements
             case 'get':
                 return $this->getField($field);
             case 'set':
-                $this->setField($field, $arguments[0]);
+                if (count($arguments) === 1) {
+                    $this->setField($field, $arguments[0]);
 
-                //setFieldA($a)->setFieldB($b)
-                return $this;
+                    //setFieldA($a)->setFieldB($b)
+                    return $this;
+                }
         }
 
         throw new EntityException("Undefined method {$method}.");

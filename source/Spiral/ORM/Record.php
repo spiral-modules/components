@@ -809,7 +809,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @see relation()
      * @param string $method
      * @param array  $arguments
-     * @return RelationInterface
+     * @return RelationInterface|mixed|AccessorInterface
      */
     public function __call($method, array $arguments)
     {

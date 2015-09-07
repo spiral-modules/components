@@ -205,7 +205,6 @@ class HttpDispatcher extends Singleton implements
             $this->config['keepOutput']
         );
 
-        $response = null;
         $benchmark = $this->benchmark('request', $request->getUri());
         try {
             //Configuring endpoint

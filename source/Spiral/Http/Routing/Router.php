@@ -230,7 +230,7 @@ class Router implements RouterInterface
         }
 
         //Will be handled via default route where route name is specified as controller::action
-        if (strpos($route, RouteInterface::SEPARATOR) == false && strpos($route, '/') === false) {
+        if (strpos($route, RouteInterface::SEPARATOR) === false && strpos($route, '/') === false) {
             throw new RouterException(
                 "Unable to locate route or use default route with controller::action pattern."
             );

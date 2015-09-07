@@ -333,7 +333,7 @@ class Record extends DataEntity implements ActiveEntityInterface
 
         if (!$this->isLoaded()) {
             //Non loaded records should be in solid state by default and require initial validation
-            $this->solidState(true)->validated = false;
+            $this->solidState(true)->invalidate();
         }
     }
 
@@ -1040,8 +1040,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $record->validated = false;
-        $record->setFields($fields)->fire('created');
+        $record->invalidate()->setFields($fields)->fire('created');
 
         return $record;
     }

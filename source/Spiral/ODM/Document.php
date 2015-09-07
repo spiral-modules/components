@@ -260,7 +260,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
 
         if ((!$this->isLoaded() && !$this->isEmbedded()) || empty($fields)) {
             //Document is newly created instance
-            $this->solidState(true)->validated = false;
+            $this->solidState(true)->invalidate();
         }
     }
 
@@ -762,7 +762,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
      */
     public function invalidate($soft = true)
     {
-        $this->validated = false;
+        parent::invalidate();
 
         if ($soft) {
             return $this;
@@ -940,8 +940,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         $document = new static([], null, $odm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $document->validated = false;
-        $document->setFields($fields)->fire('created');
+        $document->invalidate()->setFields($fields)->fire('created');
 
         return $document;
     }

@@ -454,6 +454,7 @@ abstract class DataEntity extends Component implements
      * @param string $field
      * @param string $mutator Mutator type (setter, getter, accessor).
      * @return mixed|null
+     * @throws EntityException
      */
     protected function getMutator($field, $mutator)
     {

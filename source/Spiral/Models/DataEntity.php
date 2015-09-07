@@ -113,7 +113,7 @@ abstract class DataEntity extends Component implements
             );
         }
 
-        if (count($arguments) <= 1 && strlen($method) <= 3) {
+        if (count($arguments) <= 1 || strlen($method) <= 3) {
             //Get/set needs exactly 1 argument
             throw new EntityException("Undefined method {$method}.");
         }

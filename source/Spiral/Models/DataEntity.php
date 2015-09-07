@@ -107,6 +107,12 @@ abstract class DataEntity extends Component implements
      */
     public function __call($method, array $arguments)
     {
+        if (method_exists($this, $method)) {
+            throw new EntityException(
+                "Method name '{$method}' is ambiguous and can not be used as magic setter."
+            );
+        }
+
         if (count($arguments) <= 1 && strlen($method) <= 3) {
             //Get/set needs exactly 1 argument
             throw new EntityException("Undefined method {$method}.");

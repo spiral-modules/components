@@ -14,6 +14,13 @@ namespace Spiral\Validation;
 interface ValidatesInterface
 {
     /**
+     * Attach custom validator to model.
+     *
+     * @param ValidatorInterface $validator
+     */
+    public function setValidator(ValidatorInterface $validator);
+
+    /**
      * Check if context data is valid.
      *
      * @return bool
@@ -30,7 +37,7 @@ interface ValidatesInterface
     /**
      * List of errors associated with parent field, every field must have only one error assigned.
      *
-     * @param bool $reset Clean errors after receiving every message.
+     * @param bool $reset Force re-validation.
      * @return array
      */
     public function getErrors($reset = false);

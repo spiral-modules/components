@@ -136,7 +136,7 @@ class Encrypter extends Singleton implements EncrypterInterface
             );
         }
 
-        if (!$passWeak && !$cryptoStrong) {
+        if (!$passWeak && !(bool)$cryptoStrong) {
             throw new EncrypterException("Weak random result received.");
         }
 

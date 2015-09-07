@@ -988,18 +988,6 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
     }
 
     /**
-     * Called by ODM with set of loaded fields. Must return name of appropriate class.
-     *
-     * @param array $fields
-     * @return string
-     * @throws DefinitionException
-     */
-    public static function defineClass(array $fields)
-    {
-        throw new DefinitionException("Class definition methods was not implemented.");
-    }
-
-    /**
      * Instance of ODM Collection associated with specific document.
      *
      * @see   Component::staticContainer()
@@ -1019,5 +1007,17 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         static::initialize();
 
         return self::events()->fire('collection', $odm->odmCollection(static::class));
+    }
+
+    /**
+     * Called by ODM with set of loaded fields. Must return name of appropriate class.
+     *
+     * @param array $fields
+     * @return string
+     * @throws DefinitionException
+     */
+    public static function defineClass(array $fields)
+    {
+        throw new DefinitionException("Class definition methods was not implemented.");
     }
 }

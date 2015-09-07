@@ -17,22 +17,29 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 class TableSchema extends AbstractTable
 {
     /**
-     * Sequence object name usually defined only for primary keys and required by ORM to correctly
-     * resolve inserted row id.
+     * Found table sequences.
      *
-     * @var string|null
+     * @var array
      */
-    private $sequenceName = null;
+    private $sequences = [];
 
     /**
      * Sequence object name usually defined only for primary keys and required by ORM to correctly
      * resolve inserted row id.
      *
-     * @return string
+     * @var string|null
+     */
+    private $primarySequence = null;
+
+    /**
+     * Sequence object name usually defined only for primary keys and required by ORM to correctly
+     * resolve inserted row id.
+     *
+     * @return string|null
      */
     public function getSequence()
     {
-        return $this->sequenceName;
+        return $this->primarySequence;
     }
 
     /**
@@ -46,7 +53,6 @@ class TableSchema extends AbstractTable
             ->fetchColumn();
 
         //Collecting all candidates
-        $this->sequenceName = [];
         $query = "SELECT * FROM information_schema.columns "
             . "JOIN pg_type ON (pg_type.typname = columns.udt_name) "
             . "WHERE table_name = ?";
@@ -59,7 +65,7 @@ class TableSchema extends AbstractTable
                 $column['column_default'],
                 $matches
             )) {
-                $this->sequenceName[$columnName] = $matches[1];
+                $this->sequences[$columnName] = $matches[1];
             }
 
             $this->registerColumn($columnName, $column + ['tableOID' => $tableOID]);
@@ -83,19 +89,14 @@ class TableSchema extends AbstractTable
                 $this->primaryKeys = $this->dbPrimaryKeys = $index->getColumns();
                 unset($this->indexes[$index->getName()], $this->dbIndexes[$index->getName()]);
 
-                if (is_array($this->sequenceName) && count($index->getColumns()) === 1) {
+                if (is_array($this->primarySequence) && count($index->getColumns()) === 1) {
                     $column = $index->getColumns()[0];
-                    if (isset($this->sequenceName[$column])) {
+                    if (isset($this->sequences[$column])) {
                         //We found our primary sequence
-                        $this->sequenceName = $this->sequenceName[$column];
+                        $this->primarySequence = $this->sequences[$column];
                     }
                 }
             }
-        }
-
-        if (is_array($this->sequenceName)) {
-            //Unable to resolve
-            $this->sequenceName = null;
         }
     }
 

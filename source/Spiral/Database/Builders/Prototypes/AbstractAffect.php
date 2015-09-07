@@ -58,7 +58,7 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
      */
     public function run()
     {
-        if (empty($this->whereTokens) && empty($this->joinTokens)) {
+        if (empty($this->whereTokens)) {
             $this->logger()->warning("Affect query performed without any limiting condition.");
         }
 

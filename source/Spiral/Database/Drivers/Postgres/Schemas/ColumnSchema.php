@@ -193,10 +193,10 @@ class ColumnSchema extends AbstractColumn
      * Generate set of altering operations should be applied to column to change it's type, size,
      * default value or null flag.
      *
-     * @param ColumnSchema $original
+     * @param AbstractColumn $original
      * @return array
      */
-    public function alterOperations(ColumnSchema $original)
+    public function alterOperations(AbstractColumn $original)
     {
         $operations = [];
 

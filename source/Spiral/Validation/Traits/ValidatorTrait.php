@@ -39,16 +39,16 @@ trait ValidatorTrait
     protected $fields = [];
 
     /**
-     * @var array
-     */
-    protected $errors = [];
-
-    /**
      * Validation rules defined in validator format. Named like that for convenience.
      *
      * @var array
      */
     protected $validates = [];
+
+    /**
+     * @var array
+     */
+    protected $errors = [];
 
     /**
      * Attach custom validator to model.
@@ -171,6 +171,17 @@ trait ValidatorTrait
     protected function setError($field, $message)
     {
         $this->errors[$field] = $message;
+    }
+
+    /**
+     * Check if desired field caused some validation error.
+     *
+     * @param string $field
+     * @return bool
+     */
+    protected function hasError($field)
+    {
+        return !empty($this->errors[$field]);
     }
 
     /**

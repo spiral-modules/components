@@ -252,8 +252,10 @@ class RecordSchema extends ReflectionEntity
 
             if (isset($setters[$column->getName()])) {
                 try {
+                    $setter = $setters[$column->getName()];
+
                     //Applying filter to default value
-                    $default = call_user_func($setters[$column->getName()], $default);
+                    $default = call_user_func($setter, $default);
                 } catch (\ErrorException $exception) {
                     $default = null;
                 }

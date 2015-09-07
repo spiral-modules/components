@@ -1022,7 +1022,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * @see Component::staticContainer()
+     * @see   Component::staticContainer()
      * @param array $fields Record fields to set, will be passed thought filters.
      * @param ORM   $orm    ORM component, global container will be called if not instance provided.
      * @event created()
@@ -1101,7 +1101,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     /**
      * Instance of ORM Selector associated with specific document.
      *
-     * @see Component::staticContainer()
+     * @see   Component::staticContainer()
      * @param ORM $orm ORM component, global container will be called if not instance provided.
      * @return Selector
      * @throws ORMException

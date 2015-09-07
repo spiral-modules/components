@@ -48,7 +48,7 @@ abstract class DataEntity extends Component implements
      *
      * @var bool
      */
-    protected $validated = true;
+    private $validated = true;
 
     /**
      * List of fields must be hidden from publicFields() method.

@@ -133,8 +133,10 @@ class DocumentSchema extends ReflectionEntity
 
             if (isset($setters[$field])) {
                 try {
+                    $setter = $setters[$field];
+
                     //Applying filter to default value
-                    $default = call_user_func($setters[$field], $default);
+                    $default = call_user_func($setter, $default);
                 } catch (\ErrorException $exception) {
                     $default = null;
                 }

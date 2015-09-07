@@ -80,7 +80,7 @@ class Loader extends Singleton
     public function enable()
     {
         if (!$this->enabled) {
-            if ((!$this->loadmap = $this->memory->loadData($this->name)) || !is_array($this->loadmap)) {
+            if (empty($this->loadmap = (array)$this->memory->loadData($this->name))) {
                 $this->loadmap = [];
             }
 
@@ -120,7 +120,7 @@ class Loader extends Singleton
     public function setName($name)
     {
         if ($this->name != $name) {
-            if (empty($this->loadmap = $this->memory->loadData($name)) || !is_array($this->loadmap)) {
+            if (empty($this->loadmap = (array)$this->memory->loadData($name))) {
                 $this->loadmap = [];
             }
         }

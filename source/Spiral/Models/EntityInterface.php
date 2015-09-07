@@ -14,7 +14,7 @@ use Spiral\Validation\ValidatesInterface;
 /**
  * Generic data entity instance.
  */
-interface EntityInterface extends \ArrayAccess, ValidatesInterface
+interface EntityInterface extends ValidatesInterface
 {
     /**
      * Check if entity has field by it's name.

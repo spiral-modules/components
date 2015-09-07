@@ -16,7 +16,6 @@ use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
-use Spiral\Validation\ValidatesInterface;
 
 /**
  * DataEntity in spiral used to represent basic data set with validation rules, filters and
@@ -24,10 +23,10 @@ use Spiral\Validation\ValidatesInterface;
  * it creates magic set of getters and setters for every field name (see validator trait) in model.
  */
 abstract class DataEntity extends Component implements
+    EntityInterface,
     \JsonSerializable,
     \IteratorAggregate,
-    \ArrayAccess,
-    ValidatesInterface
+    \ArrayAccess
 {
     /**
      * Every entity can be validated, in addition validation trait will load Translator and Event

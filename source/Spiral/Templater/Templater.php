@@ -116,11 +116,11 @@ abstract class Templater implements SupervisorInterface
      */
     public function getBehaviour(array $token, array $content, Node $node)
     {
-        switch ($type = $this->tokenType($token, $name)) {
+        switch ($this->tokenType($token, $name)) {
             case self::TYPE_BLOCK:
                 //Tag declares block (section)
                 return new BlockBehaviour($name);
-                break;
+
             case self::TYPE_EXTENDS:
                 //Declares parent extending
                 $extends = new ExtendsBehaviour(
@@ -133,14 +133,13 @@ abstract class Templater implements SupervisorInterface
 
                 //Sending command to extend parent
                 return $extends;
-                break;
+
             case self::TYPE_IMPORT:
                 //Implementation specific
                 $this->registerImport($name, $token);
 
                 //No need to include import tag into source
                 return BehaviourInterface::SKIP_TOKEN;
-                break;
         }
 
         //We now have to decide if element points to external view (source) to be imported

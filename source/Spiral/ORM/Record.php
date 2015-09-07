@@ -828,17 +828,15 @@ class Record extends DataEntity implements ActiveEntityInterface
             throw new EntityException("Undefined method {$method}.");
         }
 
-        //get/set
-        $operation = substr($method, 0, 3);
-        if ($operation === 'get' && count($arguments) === 0) {
-            return $this->getField(Inflector::tableize(substr($method, 3)));
-        }
+        $field = Inflector::tableize(substr($method, 3));
+        switch (substr($method, 0, 3)) {
+            case 'get':
+                return $this->getField($field);
+            case 'set':
+                $this->setField($field, $arguments[0]);
 
-        if ($operation === 'set' && count($arguments) === 1) {
-            $this->setField(Inflector::tableize(substr($method, 3)), $arguments[0]);
-
-            //setFieldA($a)->setFieldB($b)
-            return $this;
+                //setFieldA($a)->setFieldB($b)
+                return $this;
         }
 
         throw new EntityException("Undefined method {$method}.");

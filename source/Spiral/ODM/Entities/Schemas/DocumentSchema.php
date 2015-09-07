@@ -138,7 +138,7 @@ class DocumentSchema extends ReflectionEntity
                     //Applying filter to default value
                     $default = call_user_func($setter, $default);
                 } catch (\ErrorException $exception) {
-                    $default = null;
+                    //Ignoring
                 }
             }
 

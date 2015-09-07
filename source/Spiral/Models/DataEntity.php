@@ -425,7 +425,7 @@ abstract class DataEntity extends Component implements
             //Cleaning memory
             $this->validator->setData([]);
 
-            $this->errors = $this->fire('validated', $this->errors);
+            $this->errors = (array)$this->fire('validated', $this->errors);
         }
 
         return empty($this->errors);

@@ -966,6 +966,8 @@ class Record extends DataEntity implements ActiveEntityInterface
 
         //Validating all compositions
         foreach ($this->fields as $field => $value) {
+            //Ensuring value state
+            $value = $this->getField($field);
             if (!$value instanceof ValidatesInterface) {
                 continue;
             }

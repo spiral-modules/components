@@ -16,7 +16,8 @@ use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\Exceptions\StorageException;
 
 /**
- * Abstraction level to work with local and remote files represented via storage objects.
+ * Abstraction level to work with local and remote files represented using storage objects and
+ * buckets.
  */
 interface StorageInterface
 {

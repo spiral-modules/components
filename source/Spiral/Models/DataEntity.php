@@ -403,6 +403,17 @@ abstract class DataEntity extends Component implements
     }
 
     /**
+     * @return Object
+     */
+    public function __debugInfo()
+    {
+        return (object)[
+            'fields' => $this->getFields(),
+            'errors' => $this->getErrors()
+        ];
+    }
+
+    /**
      * Validate model fields.
      *
      * @param bool $reset

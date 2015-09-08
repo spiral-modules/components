@@ -152,9 +152,9 @@ abstract class DataEntity extends Component implements
             return $this;
         }
 
-        foreach ($this->fire('setFields', $fields) as $name => $field) {
+        foreach ($this->fire('setFields', $fields) as $name => $value) {
             if ($all || $this->isFillable($name)) {
-                $this->setField($name, $field, true);
+                $this->setField($name, $value, true);
             }
         }
 
@@ -209,16 +209,18 @@ abstract class DataEntity extends Component implements
             return;
         }
 
-        if ($accessor = $this->getMutator($name, 'accessor')) {
+        if (!empty($accessor = $this->getMutator($name, 'accessor'))) {
             $field = $this->fields[$name];
             if (empty($field) || !($field instanceof AccessorInterface)) {
                 $this->fields[$name] = $field = $this->createAccessor($accessor, $field);
             }
 
             $field->setData($value);
+
+            return;
         }
 
-        if ($setter = $this->getMutator($name, 'setter')) {
+        if (!empty($setter = $this->getMutator($name, 'setter'))) {
             try {
                 $this->fields[$name] = call_user_func($setter, $value);
             } catch (\ErrorException $exception) {
@@ -243,11 +245,11 @@ abstract class DataEntity extends Component implements
             return $value;
         }
 
-        if ($accessor = $this->getMutator($name, 'accessor')) {
+        if (!empty($accessor = $this->getMutator($name, 'accessor'))) {
             return $this->fields[$name] = $this->createAccessor($accessor, $value);
         }
 
-        if ($filter && $getter = $this->getMutator($name, 'getter')) {
+        if ($filter && !empty($getter = $this->getMutator($name, 'getter'))) {
             try {
                 return call_user_func($getter, $value);
             } catch (\ErrorException $exception) {
@@ -518,6 +520,14 @@ abstract class DataEntity extends Component implements
     }
 
     /**
+     * Clear initiated objects list.
+     */
+    public static function resetInitiated()
+    {
+        self::$initiated = [];
+    }
+
+    /**
      * Initiate associated model traits. System will look for static method with "init" prefix.
      *
      * @param bool $analysis Must be set to true while static analysis.
@@ -535,13 +545,5 @@ abstract class DataEntity extends Component implements
         }
 
         self::$initiated[$class] = true;
-    }
-
-    /**
-     * Clear initiated objects list.
-     */
-    public static function resetInitiated()
-    {
-        self::$initiated = [];
     }
 }

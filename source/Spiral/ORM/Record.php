@@ -964,7 +964,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     {
         $this->nestedErrors = [];
 
-        //Validating all compositions
+        //Validating all compositions/accessors
         foreach ($this->fields as $field => $value) {
             //Ensuring value state
             $value = $this->getField($field);

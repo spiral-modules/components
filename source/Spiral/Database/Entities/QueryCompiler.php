@@ -300,7 +300,9 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Sort list of parameters in sql specific order, query type must be provided.
+     * Sort list of parameters in dbms query specific order, query type must be provided. This
+     * method was used at times when delete and update queries supported joins, we might drop it
+     * now.
      *
      * @param int   $type
      * @param array $where
@@ -332,7 +334,7 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Prepare columns to be used in UPDATE statement.
+     * Prepare column values to be used in UPDATE statement.
      *
      * @param array  $columns
      * @param string $tableAlias Forced table alias for updated columns.
@@ -366,7 +368,7 @@ class QueryCompiler extends Component
     /**
      * Compile DISTINCT statement.
      *
-     * @param mixed $distinct
+     * @param mixed $distinct Not every DBMS support distinct expression, only Postgres does.
      * @return string
      */
     protected function distinct($distinct)

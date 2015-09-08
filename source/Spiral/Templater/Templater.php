@@ -18,7 +18,7 @@ use Spiral\Templater\Imports\StopImport;
 /**
  * Templater uses html constructions parsed via HtmlTokenizer and describes them for Node classes.
  * Class support following functionality:
- * - extend parent view with inherited blocks
+ * - extend parent view/node with inherited blocks
  * - declare namespace or alias to import outer view
  * - importing outer view
  *

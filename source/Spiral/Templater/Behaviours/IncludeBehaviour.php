@@ -147,6 +147,7 @@ class IncludeBehaviour implements IncludeBehaviourInterface
     {
         $blockID = $name . '-' . $this->templater->uniquePlaceholder();
 
+        //Short block declaration syntax
         return '${' . $blockID . '}';
     }
 }

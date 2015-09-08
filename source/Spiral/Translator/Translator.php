@@ -130,6 +130,10 @@ class Translator extends Singleton implements TranslatorInterface
     /**
      * {@inheritdoc}
      *
+     * You can use custom pluralizer to create more complex word forms, for example day postfix and
+     * etc. The only problem will be that system will not be able to index such things
+     * automatically.
+     *
      * @param PluralizerInterface $pluralizer Custom pluralizer to be used.
      */
     public function pluralize(

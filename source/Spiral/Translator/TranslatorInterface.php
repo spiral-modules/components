@@ -44,7 +44,7 @@ interface TranslatorInterface
 
     /**
      * Translate value using active language. Method must support message interpolation using
-     * interpolate method or sptrinf.
+     * interpolate method and sptrinf.
      *
      * Examples:
      * $translator->translate('bundle', 'Some Message');

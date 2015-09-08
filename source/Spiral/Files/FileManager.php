@@ -258,10 +258,9 @@ class FileManager extends Singleton implements FilesInterface
 
         $location = $this->normalizePath($location) . static::SEPARATOR;
 
-        $glob = glob($location . '*');
-        foreach ($glob as $item) {
+        foreach (glob($location . '*') as $item) {
             if (is_dir($item)) {
-                $this->getFiles($item . '/', $extension, $result);
+                $this->getFiles($item . static::SEPARATOR, $extension, $result);
                 continue;
             }
 
@@ -302,6 +301,7 @@ class FileManager extends Singleton implements FilesInterface
     {
         $path = str_replace('\\', '/', $path);
 
+        //Potentially open links and ../ type directories?
         return rtrim(preg_replace('/\/+/', '/', $path), '/');
     }
 
@@ -317,28 +317,28 @@ class FileManager extends Singleton implements FilesInterface
 
         $directory = explode('/', $directory);
         $path = explode('/', $path);
-        $relPath = $path;
+        $relative = $path;
 
         foreach ($directory as $depth => $dir) {
-            // find first non-matching dir
+            //Find first non-matching dir
             if ($dir === $path[$depth]) {
-                // ignore this directory
-                array_shift($relPath);
+                //Ignore this directory
+                array_shift($relative);
             } else {
-                // get number of remaining dirs to $from
+                //Get number of remaining dirs to $from
                 $remaining = count($directory) - $depth;
                 if ($remaining > 1) {
-                    // add traversals up to first matching dir
-                    $padLength = (count($relPath) + $remaining - 1) * -1;
-                    $relPath = array_pad($relPath, $padLength, '..');
+                    //Add traversals up to first matching dir
+                    $padLength = (count($relative) + $remaining - 1) * -1;
+                    $relative = array_pad($relative, $padLength, '..');
                     break;
                 } else {
-                    $relPath[0] = './' . $relPath[0];
+                    $relative[0] = './' . $relative[0];
                 }
             }
         }
 
-        return implode('/', $relPath);
+        return implode('/', $relative);
     }
 
     /**

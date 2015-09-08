@@ -8,6 +8,7 @@
  */
 namespace Spiral\Translator\Traits;
 
+use Spiral\Core\Container;
 use Spiral\Translator\Translator;
 
 /**
@@ -15,7 +16,8 @@ use Spiral\Translator\Translator;
  * In addition every default string message declared in class using [[]] braces can be indexed by
  * spiral application. Use translate() method statically to make it indexable by spiral.
  *
- * Trait uses global container and default Translator implementation.
+ * Trait uses global container and default Translator implementation (for now, i'm currently
+ * thinking how to use static container without violating anything).
  */
 trait TranslatorTrait
 {

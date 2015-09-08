@@ -10,6 +10,8 @@ namespace Spiral\Database\Schemas;
 
 /**
  * Must represent table schema column abstraction.
+ *
+ * TODO: I might want to include abstractType here.
  */
 interface ColumnInterface
 {

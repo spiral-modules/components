@@ -1046,7 +1046,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $record->invalidate()->setFields($fields)->fire('created');
+        $record->setFields($fields)->fire('created');
 
         return $record;
     }

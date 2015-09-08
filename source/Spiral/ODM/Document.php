@@ -940,7 +940,7 @@ class Document extends DataEntity implements CompositableInterface, ActiveEntity
         $document = new static([], null, $odm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $document->invalidate()->setFields($fields)->fire('created');
+        $document->setFields($fields)->fire('created');
 
         return $document;
     }

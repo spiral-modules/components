@@ -26,6 +26,7 @@ use Spiral\ORM\Exceptions\ORMException;
  * analysis.
  *
  * @todo Think about using views for complex queries?
+ * @todo ability to merge multiple tables into one object?
  */
 class ORM extends Singleton
 {

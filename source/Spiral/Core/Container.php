@@ -162,6 +162,8 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @todo: add Parameters
      */
     public function bind($alias, $resolver)
     {
@@ -176,6 +178,8 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @todo: add Parameters
      */
     public function bindSingleton($alias, $resolver)
     {
@@ -190,6 +194,8 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @todo: add Parameters
      */
     public function replace($alias, $resolver)
     {
@@ -279,7 +285,8 @@ class Container extends Component implements ContainerInterface
         }
 
         if (!empty($context) && $injector = $reflector->getConstant('INJECTOR')) {
-            //We have to construct class using external injector. Remember about this magick constant?
+            //We have to construct class using external injector.
+            //Remember about this magick constant?
             return call_user_func(
                 [$this->construct($injector), 'createInjection'],
                 $reflector, $context, $this

@@ -55,6 +55,13 @@ class HttpDispatcher extends Singleton implements
     const CONFIG = 'http';
 
     /**
+     * Dispatcher endpoint.
+     *
+     * @var string|callable|null
+     */
+    private $endpoint = null;
+
+    /**
      * @var EmitterInterface
      */
     private $emitter = null;
@@ -96,6 +103,9 @@ class HttpDispatcher extends Singleton implements
         $this->container = $container;
 
         $this->middlewares = $this->config['middlewares'];
+
+        //Lazy to alter old configs, in any case we better hide this part a little
+        $this->endpoint = !empty($this->config['endpoint']) ? $this->config['endpoint'] : null;
     }
 
     /**
@@ -132,6 +142,19 @@ class HttpDispatcher extends Singleton implements
     public function addMiddleware($middleware)
     {
         $this->middlewares[] = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * Set endpoint as callable function or invokable class name (will be resolved using container).
+     *
+     * @param callable $endpoint
+     * @return $this
+     */
+    public function setEndpoint(callable $endpoint)
+    {
+        $this->endpoint = $endpoint;
 
         return $this;
     }
@@ -194,10 +217,7 @@ class HttpDispatcher extends Singleton implements
      */
     public function perform(ServerRequestInterface $request, callable $endpoint = null)
     {
-        if (empty($endpoint)) {
-            //We are going to use default endpoint
-            $endpoint = $this->router();
-        }
+        $endpoint = !empty($endpoint) ? $endpoint : $this->defaultEndpoint();
 
         $pipeline = new MiddlewarePipeline(
             $this->container,
@@ -353,5 +373,27 @@ class HttpDispatcher extends Singleton implements
         }
 
         return $this->views = $this->container->get(ViewsInterface::class);
+    }
+
+    /**
+     * Default endpoint.
+     *
+     * @return callable
+     */
+    private function defaultEndpoint()
+    {
+        if (empty($this->endpoint)) {
+            //Router class
+            return $this->router();
+        }
+
+        if (!is_string($this->endpoint)) {
+            //Presumably callable
+            return $this->endpoint;
+
+        }
+
+        //Specified as class name
+        return $this->container->get($this->endpoint);
     }
 }

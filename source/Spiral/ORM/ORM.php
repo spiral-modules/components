@@ -24,6 +24,8 @@ use Spiral\ORM\Exceptions\ORMException;
 /**
  * ORM component used to manage state of cached Record's schema, record creation and schema
  * analysis.
+ *
+ * @todo Think about using views for complex queries?
  */
 class ORM extends Singleton
 {

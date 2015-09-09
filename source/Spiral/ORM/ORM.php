@@ -25,8 +25,8 @@ use Spiral\ORM\Exceptions\ORMException;
  * ORM component used to manage state of cached Record's schema, record creation and schema
  * analysis.
  *
- * @todo Think about using views for complex queries?
- * @todo ability to merge multiple tables into one entity - like SearchEntity?
+ * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
+ * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
  */
 class ORM extends Singleton
 {

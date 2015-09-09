@@ -14,7 +14,7 @@ use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\MigratorException;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -51,7 +51,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     /**
      * DatabaseProvider.
      *
-     * @var DatabaseProvider
+     * @var DatabaseManager
      */
     private $databases = null;
 
@@ -85,14 +85,14 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      * @param ContainerInterface    $container
      * @param TokenizerInterface    $tokenizer
      * @param FilesInterface        $files
-     * @param DatabaseProvider      $databases
+     * @param DatabaseManager      $databases
      */
     public function __construct(
         ConfiguratorInterface $configurator,
         ContainerInterface $container,
         TokenizerInterface $tokenizer,
         FilesInterface $files,
-        DatabaseProvider $databases
+        DatabaseManager $databases
     ) {
         $this->config = $configurator->getConfig(static::CONFIG);
 
@@ -313,7 +313,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             $definition['created'],
             new \DateTime(
                 $migration['timePerformed'],
-                new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE)
+                new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
             )
         );
     }

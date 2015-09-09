@@ -9,7 +9,7 @@
 namespace Spiral\Database\Migrations;
 
 use Spiral\Core\Component;
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseManager;
 use Spiral\Database\DatabasesInterface;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
@@ -34,11 +34,11 @@ abstract class Migration extends Component implements MigrationInterface
     /**
      * Provide instance of database provider to migration.
      *
-     * @param DatabaseProvider $databases
+     * @param DatabaseManager $databases
      */
-    public function setProvider(DatabaseProvider $databases)
+    public function setProvider(DatabaseManager $databases)
     {
-        if (!$databases instanceof DatabaseProvider) {
+        if (!$databases instanceof DatabaseManager) {
             throw new MigrationException(
                 "Spiral Migrations expect to work DatabaseProvider instance."
             );

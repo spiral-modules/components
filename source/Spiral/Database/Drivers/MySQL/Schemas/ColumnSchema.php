@@ -10,7 +10,7 @@ namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseManager;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Injections\SQLFragment;
@@ -230,7 +230,7 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
             }
 
             $datetime = new \DateTime($this->defaultValue,
-                new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE));
+                new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE));
 
             return $datetime->getTimestamp();
         }

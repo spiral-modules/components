@@ -17,7 +17,7 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractReference;
@@ -397,7 +397,7 @@ abstract class Driver extends Component implements LoggerAwareInterface
             if ($parameter instanceof \DateTime) {
                 //We are going to convert all timestamps to database timezone which is UTC by default
                 $parameter = $parameter->setTimezone(
-                    new \DateTimeZone(DatabaseProvider::DEFAULT_TIMEZONE)
+                    new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
                 )->format(static::DATETIME);
             }
 

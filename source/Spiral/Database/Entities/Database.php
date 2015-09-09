@@ -17,7 +17,7 @@ use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\DatabaseProvider;
+use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
@@ -40,7 +40,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
      * injections.
      */
-    const INJECTOR = DatabaseProvider::class;
+    const INJECTOR = DatabaseManager::class;
 
     /**
      * Transaction isolation level 'SERIALIZABLE'.

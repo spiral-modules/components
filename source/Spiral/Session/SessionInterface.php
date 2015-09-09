@@ -11,9 +11,9 @@ namespace Spiral\Session;
 use Spiral\Session\Exceptions\SessionException;
 
 /**
- * Session store inteface.
+ * Session store interface.
  */
-interface StoreInterface
+interface SessionInterface
 {
     /**
      * Set session id, if session already started data has to be committed to permanent storage.

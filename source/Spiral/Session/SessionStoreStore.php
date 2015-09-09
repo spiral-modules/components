@@ -18,7 +18,7 @@ use Spiral\Session\Exceptions\SessionException;
 /**
  * Default implementation of StoreInterface, can map session data to specified SessionHandler.
  */
-class SessionStore extends Singleton implements StoreInterface, \ArrayAccess, \IteratorAggregate
+class SessionStore extends Singleton implements SessionInterface, \ArrayAccess, \IteratorAggregate
 {
     /**
      * Handler creation can be slow, we can benchmark it.

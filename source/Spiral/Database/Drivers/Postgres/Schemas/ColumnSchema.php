@@ -311,10 +311,17 @@ class ColumnSchema extends AbstractColumn
 
         //Potential enum with manually created constraint (check in)
         if (($this->type == 'character' || $this->type == 'character varying') && !empty($this->size)) {
-            $query = "SELECT conname, consrc FROM pg_constraint WHERE conrelid = ? AND contype = 'c' AND consrc LIKE ?";
+
+            $query = "SELECT conname, consrc FROM pg_constraint WHERE "
+                . "conrelid = ? AND contype = 'c' AND (consrc LIKE ? OR consrc LIKE ?)";
+
             $constraints = $this->table->driver()->query(
                 $query,
-                [$schema['tableOID'], '(' . $this->name . '%']
+                [
+                    $schema['tableOID'],
+                    '(' . $this->name . '%',
+                    '("' . $this->name . '%',
+                ]
             );
 
             foreach ($constraints as $constraint) {

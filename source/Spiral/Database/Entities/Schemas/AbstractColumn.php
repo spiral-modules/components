@@ -192,14 +192,14 @@ abstract class AbstractColumn implements ColumnInterface
     protected $size = 0;
 
     /**
-     * Precision of column, applied only for "numeric" type.
+     * Precision of column, applied only for "decimal" type.
      *
      * @var int
      */
     protected $precision = 0;
 
     /**
-     * Scale of column, applied only for "numeric" type.
+     * Scale of column, applied only for "decimal" type.
      *
      * @var int
      */

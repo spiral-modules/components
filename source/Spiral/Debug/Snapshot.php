@@ -20,7 +20,7 @@ use Spiral\Views\ViewsInterface;
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using
  * views.
  */
-class Snapshot extends Component implements SnapshotInterface, SaturableInterface, ViewInterface
+class Snapshot extends Component implements SnapshotInterface, ViewInterface
 {
     /**
      * Message format.
@@ -71,31 +71,28 @@ class Snapshot extends Component implements SnapshotInterface, SaturableInterfac
     protected $views = null;
 
     /**
-     * [@inheritdoc}
+     * @param Exception          $exception
+     * @param ContainerInterface $container
+     * @param Debugger           $debugger
+     * @param FilesInterface     $files
+     * @param ViewsInterface     $views
      */
-    public function __construct(Exception $exception)
-    {
-        $this->exception = $exception;
-    }
-
-    /**
-     * @param ContainerInterface    $container
-     * @param Debugger              $debugger
-     * @param FilesInterface        $files
-     * @param ViewsInterface $views
-     */
-    public function init(
-        ContainerInterface $container,
-        Debugger $debugger,
-        FilesInterface $files,
-        ViewsInterface $views
+    public function __construct(
+        Exception $exception,
+        ContainerInterface $container = null,
+        Debugger $debugger = null,
+        FilesInterface $files = null,
+        ViewsInterface $views = null
     ) {
+        $this->exception = $exception;
+
         $this->config = $debugger->config()[static::CONFIG];
 
-        $this->container = $container;
-        $this->debugger = $debugger;
-        $this->files = $files;
-        $this->views = $views;
+        //We can use global container as fallback if no default values were provided
+        $this->container = self::saturate($container, ContainerInterface::class);
+        $this->debugger = self::saturate($debugger, Debugger::class);
+        $this->files = self::saturate($files, FilesInterface::class);
+        $this->views = self::saturate($views, ViewsInterface::class);
     }
 
     /**

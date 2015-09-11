@@ -51,7 +51,7 @@ class Encrypter extends Singleton implements EncrypterInterface
      *
      * @var string
      */
-    private $method = 'aes-256-cbc';
+    private $cipher = 'aes-256-cbc';
 
     /**
      * @param ConfiguratorInterface $configurator
@@ -61,8 +61,8 @@ class Encrypter extends Singleton implements EncrypterInterface
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->setKey($this->config['key']);
-        if (!empty($this->config['method'])) {
-            $this->method = $this->config['method'];
+        if (!empty($this->config['cipher'])) {
+            $this->cipher = $this->config['cipher'];
         }
     }
 
@@ -87,12 +87,12 @@ class Encrypter extends Singleton implements EncrypterInterface
     /**
      * Change encryption method. One of MCRYPT_CIPERNAME constants.
      *
-     * @param  string $method
+     * @param  string $cipher
      * @return $this
      */
-    public function setMethod($method)
+    public function setCipher($cipher)
     {
-        $this->method = $method;
+        $this->cipher = $cipher;
 
         return $this;
     }
@@ -100,9 +100,9 @@ class Encrypter extends Singleton implements EncrypterInterface
     /**
      * @return string
      */
-    public function getMethod()
+    public function getCipher()
     {
-        return $this->method;
+        return $this->cipher;
     }
 
     /**
@@ -114,7 +114,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     public function restoreDefaults()
     {
         $this->setKey($this->config['key']);
-        $this->setMethod($this->config['cipher']);
+        $this->setCipher($this->config['cipher']);
 
         return $this;
     }
@@ -153,11 +153,11 @@ class Encrypter extends Singleton implements EncrypterInterface
             throw new EncrypterException("Encryption key should not be empty.");
         }
 
-        $vector = $this->createIV(openssl_cipher_iv_length($this->method));
+        $vector = $this->createIV(openssl_cipher_iv_length($this->cipher));
 
         $encrypted = openssl_encrypt(
             serialize($data),
-            $this->method,
+            $this->cipher,
             $this->key,
             false,
             $vector
@@ -199,7 +199,7 @@ class Encrypter extends Singleton implements EncrypterInterface
         try {
             $decrypted = openssl_decrypt(
                 base64_decode($payload[self::DATA]),
-                $this->method,
+                $this->cipher,
                 $this->key,
                 true,
                 hex2bin($payload[self::IV])

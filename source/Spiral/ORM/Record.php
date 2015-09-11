@@ -307,12 +307,8 @@ class Record extends DataEntity implements ActiveEntityInterface
     ) {
         $this->loaded = $loaded;
 
-        if (empty($orm)) {
-            //Only when global container is set
-            $orm = ORM::instance();
-        }
-
-        $this->orm = $orm;
+        //We can use global container as fallback if no default values were provided
+        $this->orm = self::saturate($orm, ORM::class);
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
 
         static::initialize();
@@ -1036,15 +1032,10 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public static function create($fields = [], ORM $orm = null)
     {
-        if (empty($orm)) {
-            //Only when global container is set
-            $orm = ORM::instance();
-        }
-
         /**
          * @var Record $record
          */
-        $record = new static([], false, $orm);
+        $record = new static([], false, self::saturate(ORM::class, $orm));
 
         //Forcing validation (empty set of fields is not valid set of fields)
         $record->setFields($fields)->fire('created');
@@ -1115,13 +1106,11 @@ class Record extends DataEntity implements ActiveEntityInterface
      */
     public static function ormSelector(ORM $orm = null)
     {
-        if (empty($orm)) {
-            //Only when global container is set
-            $orm = ORM::instance();
-        }
-
         //Ensure traits
         static::initialize();
+
+        //Using global container as fallback
+        $orm = self::saturate(ORM::class, $orm);
 
         return static::events()->fire('selector', $orm->ormSelector(static::class));
     }

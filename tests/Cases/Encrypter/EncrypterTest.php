@@ -27,7 +27,7 @@ class EncryptionTest extends TestCase
         $this->assertNotEquals('test string', $encrypted);
         $this->assertEquals('test string', $encrypter->decrypt($encrypted));
 
-        $encrypter->setMethod('aes-128-cbc');
+        $encrypter->setCipher('aes-128-cbc');
         $encrypted = $encrypter->encrypt('test string');
         $this->assertNotEquals('test string', $encrypted);
         $this->assertEquals('test string', $encrypter->decrypt($encrypted));

@@ -8,13 +8,13 @@
  */
 namespace Spiral\Session\Handlers;
 
-use Spiral\Core\Container\SaturableInterface;
+use Spiral\Core\Component;
 use Spiral\Files\FilesInterface;
 
 /**
  * Stores session data in filename.
  */
-class FileHandler implements \SessionHandlerInterface, SaturableInterface
+class FileHandler extends Component implements \SessionHandlerInterface
 {
     /**
      * @var string
@@ -27,12 +27,19 @@ class FileHandler implements \SessionHandlerInterface, SaturableInterface
     protected $files = null;
 
     /**
-     * @param array $options  Session handler options.
-     * @param int   $lifetime Default session lifetime.
+     * @param array          $options  Session handler options.
+     * @param int            $lifetime Default session lifetime.
+     * @param FilesInterface $files
      */
-    public function __construct(array $options, $lifetime = 0)
-    {
+    public function __construct(
+        array $options,
+        $lifetime = 0,
+        FilesInterface $files = null
+    ) {
         $this->location = $options['directory'];
+
+        //Global container as fallback
+        $this->files = self::saturate($files, FilesInterface::class);
     }
 
     /**

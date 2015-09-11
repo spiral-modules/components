@@ -10,7 +10,6 @@ namespace Spiral\Validation;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Container\SaturableInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -44,7 +43,7 @@ use Spiral\Validation\Exceptions\ValidationException;
  * rule syntax:
  * "flag" => ["notEmpty", "boolean"]
  */
-class Validator extends Component implements ValidatorInterface, LoggerAwareInterface, SaturableInterface
+class Validator extends Component implements ValidatorInterface, LoggerAwareInterface
 {
     /**
      * Validator will translate default errors and throw log messages when validation rule fails.
@@ -105,20 +104,23 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
 
     /**
      * {@inheritdoc}
-     */
-    public function __construct($data = [], array $rules = [])
-    {
-        $this->data = $data;
-        $this->rules = $rules;
-    }
-
-    /**
+     *
      * @param ContainerInterface $container
      * @param ValidationProvider $configurator
      */
-    public function init(ContainerInterface $container, ValidationProvider $configurator)
-    {
-        $this->container = $container;
+    public function __construct(
+        $data = [],
+        array $rules = [],
+        ContainerInterface $container = null,
+        ValidationProvider $configurator = null
+    ) {
+        $this->data = $data;
+        $this->rules = $rules;
+
+        //We can use global container as fallback if no default values were provided
+        $this->container = self::saturate($container, ContainerInterface::class);
+
+        $configurator = self::saturate($configurator, ValidationProvider::class);
         $this->options = $configurator->config() + $this->options;
     }
 

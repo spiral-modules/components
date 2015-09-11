@@ -10,12 +10,12 @@ namespace Spiral\Session\Handlers;
 
 use Spiral\Cache\CacheInterface;
 use Spiral\Cache\StoreInterface;
-use Spiral\Core\Container\SaturableInterface;
+use Spiral\Core\Component;
 
 /**
  * Stores session data in specified cache store.
  */
-class CacheHandler implements \SessionHandlerInterface, SaturableInterface
+class CacheHandler extends Component implements \SessionHandlerInterface
 {
     /**
      * @var array
@@ -33,21 +33,21 @@ class CacheHandler implements \SessionHandlerInterface, SaturableInterface
     protected $lifetime = 0;
 
     /**
-     * @param array $options  Session handler options.
-     * @param int   $lifetime Default session lifetime.
-     */
-    public function __construct(array $options, $lifetime = 0)
-    {
-        $this->lifetime = $lifetime;
-        $this->options = $options;
-    }
-
-    /**
+     * @param array          $options  Session handler options.
+     * @param int            $lifetime Default session lifetime.
      * @param CacheInterface $cache
      */
-    public function init(CacheInterface $cache)
-    {
-        $this->cacheStore = $cache->store($this->options['store']);
+    public function __construct(
+        array $options,
+        $lifetime = 0,
+        CacheInterface $cache = null
+    ) {
+        $this->lifetime = $lifetime;
+        $this->options = $options;
+
+        $this->cacheStore = self::saturate($cache, CacheInterface::class)->store(
+            $this->options['store']
+        );
     }
 
     /**

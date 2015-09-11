@@ -8,6 +8,8 @@
  */
 namespace Spiral\Core;
 
+use Spiral\Core\Exceptions\MissingContainerException;
+
 /**
  * Basic spiral cell. Automatically detects if "container" property are presented in class or uses
  * global container as fallback.
@@ -56,5 +58,29 @@ abstract class Component
         }
 
         return self::$staticContainer;
+    }
+
+    /**
+     * Must be used only to resolve optional constructor arguments. Use only for classes which are
+     * generally resolved using Container.
+     *
+     * @param mixed  $default Default value.
+     * @param string $class   Requested class.
+     * @return mixed|null|object
+     */
+    final protected static function saturate($default, $class)
+    {
+        if (!empty($default)) {
+            return $default;
+        }
+
+        if (empty(self::$staticContainer)) {
+            throw new MissingContainerException(
+                "Unable to saturate '{$class}', global container were not set."
+            );
+        }
+
+        //Only when global container is set
+        return self::staticContainer()->get($class);
     }
 }

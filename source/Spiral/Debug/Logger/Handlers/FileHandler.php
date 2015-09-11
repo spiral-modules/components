@@ -8,6 +8,7 @@
  */
 namespace Spiral\Debug\Logger\Handlers;
 
+use Spiral\Core\Component;
 use Spiral\Core\Container\SaturableInterface;
 use Spiral\Debug\Logger\HandlerInterface;
 use Spiral\Files\FilesInterface;
@@ -15,7 +16,7 @@ use Spiral\Files\FilesInterface;
 /**
  * Write log message to specified file and rotates this file with prefix when max size exceed.
  */
-class FileHandler implements HandlerInterface, SaturableInterface
+class FileHandler extends Component implements HandlerInterface
 {
     /**
      * @var array
@@ -37,17 +38,12 @@ class FileHandler implements HandlerInterface, SaturableInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(array $options)
+    public function __construct(array $options, FilesInterface $files = null)
     {
         $this->options = $options + $this->options;
-    }
 
-    /**
-     * @param FilesInterface $files
-     */
-    public function init(FilesInterface $files)
-    {
-        $this->files = $files;
+        //We can use global container as fallback if no default values were provided
+        $this->files = self::saturate($files, FilesInterface::class);
     }
 
     /**

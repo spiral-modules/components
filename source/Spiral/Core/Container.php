@@ -9,7 +9,6 @@
 namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
-use Spiral\Core\Container\SaturableInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\ContainerException;
@@ -310,19 +309,6 @@ class Container extends Component implements ContainerInterface
         if (!empty($singleton = $reflector->getConstant('SINGLETON'))) {
             //Component declared SINGLETON constant, binding as constant value and class name.
             $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
-        }
-
-        if ($instance instanceof SaturableInterface) {
-
-            if (!$reflector->hasMethod(SaturableInterface::SATURATE_METHOD)) {
-                throw new InstanceException(
-                    "{$class} violated SaturableInterface agreement."
-                );
-            }
-
-            //Saturating object with required dependencies
-            $saturate = $reflector->getMethod(SaturableInterface::SATURATE_METHOD);
-            $saturate->invokeArgs($instance, $this->resolveArguments($saturate, $parameters));
         }
 
         return $instance;

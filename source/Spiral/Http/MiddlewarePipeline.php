@@ -319,10 +319,8 @@ class MiddlewarePipeline
             }
         }
 
-        $headers = $response->getHeaders();
-        unset($headers['Content-Type']);
+        $response->getBody()->write(json_encode($result));
 
-        //We are ignoring existed response body and content type
-        return new JsonResponse($result, $code, $headers);
+        return $response->withStatus($code)->withHeader('Content-Type', 'application/json');
     }
 }

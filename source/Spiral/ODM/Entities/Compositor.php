@@ -93,7 +93,7 @@ class Compositor extends Component implements
     {
         $this->class = $class;
         $this->parent = $parent;
-        if (!empty($data)) {
+        if (!empty($data) && is_array($data)) {
             $this->documents = $data;
         }
 

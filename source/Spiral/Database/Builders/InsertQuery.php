@@ -153,7 +153,8 @@ class InsertQuery extends QueryBuilder
      */
     public function run()
     {
-        parent::run();
+        //This must execute our query
+        $this->pdoStatement();
 
         return $this->database->driver()->lastInsertID();
     }

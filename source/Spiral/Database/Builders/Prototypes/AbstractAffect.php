@@ -62,6 +62,6 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
             $this->logger()->warning("Affect query performed without any limiting condition.");
         }
 
-        return parent::run()->rowCount();
+        return $this->pdoStatement()->rowCount();
     }
 }

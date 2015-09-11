@@ -150,4 +150,14 @@ abstract class QueryBuilder extends Component
 
         return $result;
     }
+
+    /**
+     * Generate PDO statement based on generated sql and parameters.
+     *
+     * @return \PDOStatement
+     */
+    protected function pdoStatement()
+    {
+        return $this->database->statement($this->sqlStatement(), $this->getParameters());
+    }
 }

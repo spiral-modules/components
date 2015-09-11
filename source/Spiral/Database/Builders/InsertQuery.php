@@ -115,7 +115,10 @@ class InsertQuery extends QueryBuilder
         reset($rowsets);
 
         if (!is_array($rowsets[key($rowsets)])) {
-            $this->columns = array_keys($rowsets);
+            if (empty($this->columns)) {
+                $this->columns = array_keys($rowsets);
+            }
+
             $this->rowsets[] = new Parameter(array_values($rowsets));
         } else {
             foreach ($rowsets as $rowset) {

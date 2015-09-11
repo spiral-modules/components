@@ -197,12 +197,11 @@ class MiddlewarePipeline
                 }
             }
 
-            //We are ignoring existed response body
-            return new JsonResponse(
-                $response,
-                $code,
-                $response->getHeaders()
-            );
+            $headers = $response->getHeaders();
+            unset($headers['Content-Type']);
+
+            //We are ignoring existed response body and content type
+            return new JsonResponse($response, $code, $headers);
         }
 
         $response->getBody()->write($result . $output);

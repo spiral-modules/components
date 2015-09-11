@@ -82,7 +82,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
 
         if ($this->options['cache']) {
             $this->authToken = $this->store->get($this->options['username'] . '@rackspace-token');
-            $this->regions = $this->store->get($this->options['username'] . '@rackspace-regions');
+            $this->regions = (array)$this->store->get($this->options['username'] . '@rackspace-regions');
         }
 
         //Some options can be passed directly for guzzle client

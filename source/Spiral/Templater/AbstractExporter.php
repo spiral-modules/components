@@ -25,9 +25,9 @@ abstract class AbstractExporter implements ExporterInterface
     /**
      * Blocks to be injected.
      *
-     * @var string
+     * @var array
      */
-    private $blocks = '';
+    private $blocks = [];
 
     /**
      * Content where outer blocks should be injected into.

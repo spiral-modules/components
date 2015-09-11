@@ -82,7 +82,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
         $this->data = $data;
 
         //Magic functionality provided by outer parent
-        $this->callblacks = $callbacks;
+        $this->callbacks = $callbacks;
     }
 
     /**

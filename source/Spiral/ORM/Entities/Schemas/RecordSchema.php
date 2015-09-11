@@ -485,7 +485,7 @@ class RecordSchema extends ReflectionEntity
         //We are forcing every column to be NOT NULL by default, DEFAULT value should fix potential
         //problems, nullable flag must be applied before type was set (some types do not want
         //null values to be allowed)
-        $column->nullable(!empty($matches['nullable']));
+        $column->nullable(!empty($type['nullable']));
 
         //Bypassing call to AbstractColumn->__call method (or specialized column method)
         call_user_func_array(

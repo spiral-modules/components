@@ -59,7 +59,7 @@ class SessionStarter implements MiddlewareInterface
      */
     protected function store()
     {
-        if (!empty($this->encrypter)) {
+        if (!empty($this->store)) {
             return $this->store;
         }
 

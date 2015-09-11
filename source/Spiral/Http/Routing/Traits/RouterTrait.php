@@ -29,7 +29,7 @@ trait RouterTrait
     private $routes = [];
 
     /**
-     * @var Router|null
+     * @var RouterInterface|null
      */
     private $router = null;
 
@@ -83,7 +83,7 @@ trait RouterTrait
      * @param array           $defaults
      * @return Route
      */
-    public function route($pattern, $target = null, array $defaults = [])
+    public function route($pattern, $target, array $defaults = [])
     {
         $name = is_string($target) ? $target : uniqid('route', true);
         $this->addRoute($route = new Route($name, $pattern, $target, $defaults));

@@ -88,7 +88,7 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if ($class == AbstractDocument::class) {
+        if ($class == AbstractDocument::class || $class == Document::class) {
             //No need to remember schema for abstract Document
             return new DocumentSchema($this, AbstractDocument::class);
         }
@@ -225,8 +225,8 @@ class SchemaBuilder extends Component
      */
     protected function locateDocuments(TokenizerInterface $tokenizer)
     {
-        foreach ($tokenizer->getClasses(Document::class) as $class => $definition) {
-            if ($class == Document::class) {
+        foreach ($tokenizer->getClasses(AbstractDocument::class) as $class => $definition) {
+            if ($class == AbstractDocument::class || $class == Document::class) {
                 continue;
             }
 

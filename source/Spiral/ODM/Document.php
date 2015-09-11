@@ -255,7 +255,7 @@ class Document extends AbstractDocument implements ActiveEntityInterface
         static::initialize();
 
         //Using global container as fallback
-        self::saturate($odm, ODM::class);
+        $odm = self::saturate($odm, ODM::class);
 
         return self::events()->fire('collection', $odm->odmCollection(static::class));
     }

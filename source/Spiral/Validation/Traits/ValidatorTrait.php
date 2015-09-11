@@ -159,7 +159,7 @@ trait ValidatorTrait
         $this->errors = $this->validator()->getErrors();
         $this->validator->setData([]);
 
-        return empty($this->errors = $this->fire('validated', $this->errors));
+        return empty($this->errors = (array)$this->fire('validated', $this->errors));
     }
 
     /**

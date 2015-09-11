@@ -18,20 +18,14 @@ use Spiral\Http\Exceptions\ClientException;
 interface HttpInterface
 {
     /**
-     * Get initial request instance or create new one.
-     *
-     * @return ServerRequestInterface
-     */
-    public function request();
-
-    /**
      * Execute request using internal http logic.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @return ResponseInterface
      * @throws ClientException
      */
-    public function perform(ServerRequestInterface $request);
+    public function perform(ServerRequestInterface $request, ResponseInterface $response = null);
 
     /**
      * Dispatch response to client.

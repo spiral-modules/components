@@ -46,10 +46,15 @@ interface RouteInterface
      * Execute route on given request. Has to be called after match method.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @param ContainerInterface     $container
      * @return ResponseInterface
      */
-    public function perform(ServerRequestInterface $request, ContainerInterface $container);
+    public function perform(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        ContainerInterface $container
+    );
 
     /**
      * Generate valid route URL using route name and set of parameters.

@@ -12,7 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Http\Cookies\Cookie;
 use Spiral\Http\MiddlewareInterface;
-use Spiral\Http\Responses\EmptyResponse;
 
 /**
  * Provides generic CSRF protection using cookie as token storage. Set "csrfToken" attribute to
@@ -53,13 +52,13 @@ class CsrfFilter implements MiddlewareInterface
     /**
      * {@inheritdoc}
      */
-    public function __invoke(ServerRequestInterface $request, \Closure $next)
-    {
-        $setCookie = false;
-
-        $cookies = $request->getCookieParams();
-        if (isset($cookies[self::COOKIE])) {
-            $token = $cookies[self::COOKIE];
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        \Closure $next
+    ) {
+        if (isset($request->getCookieParams()[self::COOKIE])) {
+            $token = $request->getCookieParams()[self::COOKIE];
         } else {
             //Making new token
             $token = substr(
@@ -67,19 +66,7 @@ class CsrfFilter implements MiddlewareInterface
                 self::TOKEN_LENGTH
             );
 
-            $setCookie = true;
-        }
-
-        if ($this->isRequired($request)) {
-            if (!$this->compare($token, $this->fetchToken($request))) {
-                //Let's return response directly
-                return (new EmptyResponse(412))->withStatus(412, 'Bad CSRF Token');
-            }
-        }
-
-        $response = $next($request->withAttribute(static::ATTRIBUTE, $token));
-        if ($setCookie && $response instanceof ResponseInterface) {
-            //Will work even with non spiral responses
+            //We can alter response cookies
             $response = $response->withAddedHeader(
                 'Set-Cookie',
                 Cookie::create(
@@ -92,7 +79,15 @@ class CsrfFilter implements MiddlewareInterface
             );
         }
 
-        return $response;
+        if ($this->isRequired($request) && !$this->compare($token, $this->fetchToken($request))) {
+            //Invalid CSRF token
+            return $response->withStatus(412, 'Bad CSRF Token');
+        }
+
+        return $next(
+            $request->withAttribute(static::ATTRIBUTE, $token),
+            $response
+        );
     }
 
     /**

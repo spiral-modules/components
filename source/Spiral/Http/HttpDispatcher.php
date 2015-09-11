@@ -174,11 +174,12 @@ class HttpDispatcher extends Singleton implements
      */
     public function start()
     {
-        //We need request to start, let's cast it
-        $request = $this->request();
-
         //Now we can generate response using request
-        $response = $this->perform($request);
+        $response = $this->perform(
+            $this->request(),
+            $this->response(),
+            $this->endpoint()
+        );
 
         if (!empty($response)) {
             //Sending to client
@@ -187,51 +188,33 @@ class HttpDispatcher extends Singleton implements
     }
 
     /**
-     * Get initial request instance or create new one.
-     *
-     * @return ServerRequestInterface
-     */
-    public function request()
-    {
-        if (!empty($this->request)) {
-            return $this->request;
-        }
-
-        //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose
-        //error
-        return $this->request = ServerRequestFactory::fromGlobals(
-            $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
-        )->withAttribute('basePath', $this->basePath())->withAttribute(
-            'isolated', $this->config['isolate']
-        );
-    }
-
-    /**
      * Pass request thought all http middlewares to appropriate endpoint (will be selected based
      * on path). "activePath" argument will be added to request passed into middlewares.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @param callable               $endpoint User specified endpoint.
      * @return ResponseInterface
      * @throws ClientException
      */
-    public function perform(ServerRequestInterface $request, callable $endpoint = null)
-    {
-        $endpoint = !empty($endpoint) ? $endpoint : $this->defaultEndpoint();
+    public function perform(
+        ServerRequestInterface $request,
+        ResponseInterface $response = null,
+        callable $endpoint = null
+    ) {
+        $endpoint = !empty($endpoint) ? $endpoint : $this->endpoint();
+        $response = !empty($response) ? $response : $this->response();
 
-        $pipeline = new MiddlewarePipeline(
-            $this->container,
-            $this->middlewares,
-            $this->config['keepOutput']
-        );
+        $pipeline = new MiddlewarePipeline($this->container, $this->middlewares);
 
-        $benchmark = $this->benchmark('request', $request->getUri());
         try {
             //Configuring endpoint
             $pipeline = $pipeline->target($endpoint);
 
+            $benchmark = $this->benchmark('request', $request->getUri());
+
             //Exceptions (including client one) must be handled by pipeline
-            return $pipeline->run($request);
+            return $pipeline->run($request, $response);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -240,8 +223,8 @@ class HttpDispatcher extends Singleton implements
     /**
      * {@inheritdoc}
      *
-     * @param bool                     $dispatch Snapshot will be automatically dispatched.
-     * @param   ServerRequestInterface $request  Request caused snapshot.
+     * @param bool                   $dispatch Snapshot will be automatically dispatched.
+     * @param ServerRequestInterface $request  Request caused snapshot.
      * @return ResponseInterface|null Depends of dispatching were requested.
      */
     public function handleSnapshot(
@@ -260,18 +243,26 @@ class HttpDispatcher extends Singleton implements
                 new ServerErrorException(),
                 $request
             );
-
-            return $dispatch ? $this->dispatch($response) : $response;
-        }
-
-        if ($request->getHeaderLine('Accept') == 'application/json') {
-            $context = ['status' => Response::SERVER_ERROR] + $snapshot->describe();
-            $response = new JsonResponse($context, Response::SERVER_ERROR);
         } else {
-            $response = new HtmlResponse($snapshot->render(), Response::SERVER_ERROR);
+            if ($request->getHeaderLine('Accept') == 'application/json') {
+                $context = ['status' => Response::SERVER_ERROR] + $snapshot->describe();
+                $response = new JsonResponse(
+                    $context,
+                    Response::SERVER_ERROR
+                );
+            } else {
+                $response = new HtmlResponse(
+                    $snapshot->render(),
+                    Response::SERVER_ERROR
+                );
+            }
         }
 
-        return $dispatch ? $this->dispatch($response) : $response;
+        if (!$dispatch) {
+            return $response;
+        }
+
+        return $this->dispatch($response);
     }
 
     /**
@@ -292,18 +283,6 @@ class HttpDispatcher extends Singleton implements
     }
 
     /**
-     * {@inheritdoc}
-     */
-    protected function createRouter()
-    {
-        return $this->container->construct($this->config['router']['class'], [
-                'routes'     => $this->routes,
-                'basePath'   => $this->basePath(),
-                'keepOutput' => $this->config['keepOutput']
-            ] + $this->config['router']);
-    }
-
-    /**
      * Add error to http log.
      *
      * @param ClientException        $exception
@@ -311,9 +290,9 @@ class HttpDispatcher extends Singleton implements
      */
     public function logError(ClientException $exception, ServerRequestInterface $request)
     {
-        $remoteAddr = '-undefined-';
+        $remoteAddress = '-undefined-';
         if (!empty($request->getServerParams()['REMOTE_ADDR'])) {
-            $remoteAddr = $request->getServerParams()['REMOTE_ADDR'];
+            $remoteAddress = $request->getServerParams()['REMOTE_ADDR'];
         }
 
         $this->logger()->warning(
@@ -324,7 +303,7 @@ class HttpDispatcher extends Singleton implements
                 'path'    => $request->getUri()->getPath(),
                 'code'    => $exception->getCode(),
                 'message' => $exception->getMessage() ?: '-not specified-',
-                'remote'  => $remoteAddr
+                'remote'  => $remoteAddress
             ]
         );
     }
@@ -338,10 +317,13 @@ class HttpDispatcher extends Singleton implements
      */
     public function exceptionResponse(
         ClientException $exception,
-        ServerRequestInterface $request = null
+        ServerRequestInterface $request
     ) {
         if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
-            return new JsonResponse(['status' => $exception->getCode()], $exception->getCode());
+            return new JsonResponse(
+                ['status' => $exception->getCode()],
+                $exception->getCode()
+            );
         }
 
         if (isset($this->config['httpErrors'][$exception->getCode()])) {
@@ -351,9 +333,9 @@ class HttpDispatcher extends Singleton implements
              */
             return new ExceptionResponse(
                 $exception,
-                $this->viewProvider()->get($this->config['httpErrors'][$exception->getCode()], [
+                $this->viewsProvider()->get($this->config['httpErrors'][$exception->getCode()], [
                     'http'    => $this,
-                    'request' => !empty($request) ? $request : $this->request()
+                    'request' => $request
                 ])
             );
         }
@@ -362,17 +344,33 @@ class HttpDispatcher extends Singleton implements
     }
 
     /**
-     * Get associated views component or fetch it from container.
+     * Get initial request instance or create new one.
      *
-     * @return ViewsInterface
+     * @return ServerRequestInterface
      */
-    private function viewProvider()
+    protected function request()
     {
-        if (!empty($this->views)) {
-            return $this->views;
+        if (!empty($this->request)) {
+            return $this->request;
         }
 
-        return $this->views = $this->container->get(ViewsInterface::class);
+        //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose
+        //error
+        return $this->request = ServerRequestFactory::fromGlobals(
+            $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
+        )->withAttribute('basePath', $this->basePath())->withAttribute(
+            'isolated', $this->config['isolate']
+        );
+    }
+
+    /**
+     * Create instance of initial response.
+     *
+     * @return ResponseInterface
+     */
+    protected function response()
+    {
+        return new Response('php://memory', Response::SUCCESS, $this->config['headers']);
     }
 
     /**
@@ -380,7 +378,7 @@ class HttpDispatcher extends Singleton implements
      *
      * @return callable
      */
-    private function defaultEndpoint()
+    protected function endpoint()
     {
         if (empty($this->endpoint)) {
             //Router class
@@ -395,5 +393,30 @@ class HttpDispatcher extends Singleton implements
 
         //Specified as class name
         return $this->container->get($this->endpoint);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createRouter()
+    {
+        return $this->container->construct($this->config['router']['class'], [
+                'routes'   => $this->routes,
+                'basePath' => $this->basePath()
+            ] + $this->config['router']);
+    }
+
+    /**
+     * Get associated views component or fetch it from container.
+     *
+     * @return ViewsInterface
+     */
+    private function viewsProvider()
+    {
+        if (!empty($this->views)) {
+            return $this->views;
+        }
+
+        return $this->views = $this->container->get(ViewsInterface::class);
     }
 }

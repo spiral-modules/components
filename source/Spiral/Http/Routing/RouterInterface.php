@@ -33,10 +33,11 @@ interface RouterInterface
      * Valid endpoint for MiddlewarePipeline.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @return ResponseInterface
      * @throws ClientException
      */
-    public function __invoke(ServerRequestInterface $request);
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response);
 
     /**
      * @param RouteInterface $route

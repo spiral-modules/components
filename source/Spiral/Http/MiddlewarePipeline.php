@@ -21,13 +21,6 @@ use Spiral\Http\Responses\JsonResponse;
 class MiddlewarePipeline
 {
     /**
-     * Keep buffered output as part of response.
-     *
-     * @var bool
-     */
-    private $keepOutput = false;
-
-    /**
      * @invisible
      * @var ContainerInterface
      */
@@ -50,16 +43,11 @@ class MiddlewarePipeline
     /**
      * @param ContainerInterface               $container
      * @param callable[]|MiddlewareInterface[] $middleware
-     * @param bool                             $keepOutput
      */
-    public function __construct(
-        ContainerInterface $container,
-        array $middleware = [],
-        $keepOutput = false
-    ) {
+    public function __construct(ContainerInterface $container, array $middleware = [])
+    {
         $this->container = $container;
         $this->middlewares = $middleware;
-        $this->keepOutput = $keepOutput;
     }
 
     /**
@@ -93,162 +81,230 @@ class MiddlewarePipeline
      * response.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @return ResponseInterface
      */
-    public function run(ServerRequestInterface $request)
+    public function run(ServerRequestInterface $request, ResponseInterface $response)
     {
-        return $this->next(0, $request);
+        return $this->next(0, $request, $response);
     }
 
     /**
      * Get next chain to be called. Exceptions will be converted to responses.
      *
      * @param int                    $position
-     * @param ServerRequestInterface $outerRequest
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @return null|ResponseInterface
      * @throws \Exception
      */
-    protected function next($position, ServerRequestInterface $outerRequest)
-    {
-        $next = function ($request = null) use ($position, $outerRequest) {
-            //This function will be provided to next (deeper) middleware
-            return $this->next(++$position, $request ?: $outerRequest);
-        };
+    protected function next(
+        $position,
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ) {
 
-        $response = null;
         try {
             if (!isset($this->middlewares[$position])) {
                 //Middleware target endpoint to be called and converted into response
-                $response = $this->createResponse($outerRequest);
-            } else {
-                /**
-                 * @var callable $middleware
-                 */
-                $middleware = $this->middlewares[$position];
-
-                //Middleware specified as class name
-                $middleware = is_string($middleware) ? $this->container->construct($middleware) : $middleware;
-
-                //Executing next middleware
-                $response = $middleware($outerRequest, $next);
+                return $this->createResponse($request, $response);
             }
+
+            /**
+             * @var callable $middleware
+             */
+            $middleware = $this->middlewares[$position];
+            $middleware = is_string($middleware)
+                ? $this->container->construct($middleware)
+                : $middleware;
+
+            //Executing next middleware
+            return $middleware(
+                $request, $response, $this->getNext($position, $request, $response)
+            );
         } catch (\Exception $exception) {
-            if (!$outerRequest->getAttribute('isolated', false)) {
+            if (!$request->getAttribute('isolated', false)) {
                 //No isolation
                 throw $exception;
             }
 
-            /**
-             * @var SnapshotInterface $snapshot
-             */
-            $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
-
-            //Snapshot must report about itself
-            $snapshot->report();
-
-            /**
-             * We need HttpDispatcher to convert snapshot into response.
-             *
-             * @var HttpDispatcher $http
-             */
-            $http = $this->container->get(HttpDispatcher::class);
-
-            $response = $http->handleSnapshot($snapshot, false, $outerRequest);
+            return $this->handleException($request, $exception);
         }
-
-        return $response;
     }
 
     /**
      * Run pipeline target and return generated response.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @return ResponseInterface
      */
-    protected function createResponse(ServerRequestInterface $request)
+    protected function createResponse(ServerRequestInterface $request, ResponseInterface $response)
     {
         //Request scope
         $outerRequest = $this->container->replace(ServerRequestInterface::class, $request);
+        $outerResponse = $this->container->replace(ResponseInterface::class, $response);
 
         $outputLevel = ob_get_level();
-        ob_start();
-
         $output = '';
-        $response = null;
-        try {
-            if ($this->target instanceof \Closure) {
-                $reflection = new \ReflectionFunction($this->target);
-                $response = $reflection->invokeArgs(
-                    $this->container->resolveArguments($reflection, ['request' => $request])
-                );
-            } else {
-                //Calling pipeline target
-                $response = call_user_func($this->target, $request);
-            }
-        } catch (ClientException $exception) {
-            /**
-             * We need HttpDispatcher to get valid error exception.
-             *
-             * @var HttpDispatcher $http
-             */
-            $http = $this->container->get(HttpDispatcher::class);
+        $result = null;
 
-            //Logging error
-            $http->logError($exception, $request);
-            $response = $http->exceptionResponse($exception, $request);
+        try {
+            ob_start();
+            $result = $this->execute($request, $response);
+        } catch (ClientException $exception) {
+            $response = $this->clientException($request, $exception);
         } finally {
             while (ob_get_level() > $outputLevel + 1) {
                 $output = ob_get_clean() . $output;
             }
+
+            //Closing request/response scope
+            $this->container->restore($outerRequest);
+            $this->container->restore($outerResponse);
         }
 
-        //Closing request scope
-        $this->container->restore($outerRequest);
-
-        $output = ob_get_clean() . $output;
-        if (!$this->keepOutput) {
-            $output = '';
-        }
-
-        return $this->wrapResponse($response, $output);
+        return $this->wrapResult($response, $result, ob_get_clean() . $output);
     }
 
     /**
-     * Convert target response into valid instance of ResponseInterface. Can understand string and
-     * array/JsonSerializable response values.
+     * Wrap endpoint result into valid response.
      *
-     * @param mixed  $response
-     * @param string $output Buffer output.
+     * @param ResponseInterface $response Initial pipeline response.
+     * @param mixed             $result   Generated endpoint output.
+     * @param string            $output   Buffer output.
      * @return ResponseInterface
      */
-    private function wrapResponse($response, $output = '')
+    private function wrapResult(ResponseInterface $response, $result = null, $output = '')
     {
-        if ($response instanceof ResponseInterface) {
-            if (!empty($output)) {
-                $response->getBody()->write($output);
+        if ($result instanceof ResponseInterface) {
+            if (!empty($output) && $result->getBody()->isWritable()) {
+                $result->getBody()->write($output);
             }
 
-            return $response;
+            return $result;
         }
 
-        if (is_array($response) || $response instanceof \JsonSerializable) {
-            $code = 200;
-            if (is_array($response)) {
-                if (!empty($output)) {
-                    $response['output'] = $output;
+        if (is_array($result) || $result instanceof \JsonSerializable) {
+            $code = Response::SUCCESS;
+
+            if (is_array($result)) {
+                if (!empty($output) && empty($result['output'])) {
+                    $result['output'] = $output;
                 }
 
-                if (isset($response['status'])) {
-                    $code = $response['status'];
+                if (isset($result['status'])) {
+                    $code = $result['status'];
                 }
             }
 
-            return new JsonResponse($response, $code);
+            //We are ignoring existed response body
+            return new JsonResponse($response, $code, $response->getHeaders());
         }
 
-        $psrResponse = new Response();
-        $psrResponse->getBody()->write($response . $output);
+        $response->getBody()->write($result . $output);
 
-        return $psrResponse;
+        return $response;
+    }
+
+    /**
+     * Get next callable element.
+     *
+     * @param int                    $position
+     * @param ServerRequestInterface $outerRequest
+     * @param ResponseInterface      $outerResponse
+     * @return \Closure
+     */
+    private function getNext(
+        $position,
+        ServerRequestInterface $outerRequest,
+        ResponseInterface $outerResponse
+    ) {
+        $next = function ($request = null, $response = null) use (
+            $position,
+            $outerRequest,
+            $outerResponse
+        ) {
+            //This function will be provided to next (deeper) middleware
+            return $this->next(
+                ++$position,
+                !empty($request) ? $request : $outerRequest,
+                !empty($response) ? $response : $outerResponse
+            );
+        };
+
+        return $next;
+    }
+
+    /**
+     * Execute endpoint and return it's result.
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
+     * @return mixed
+     */
+    protected function execute(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        if ($this->target instanceof \Closure) {
+            $reflection = new \ReflectionFunction($this->target);
+
+            return $reflection->invokeArgs(
+                $this->container->resolveArguments($reflection, compact('request', 'response'))
+            );
+        }
+
+        //Calling pipeline target (do we need reflection here?)
+        return call_user_func($this->target, $request, $response);
+    }
+
+    /**
+     * Handle application exception.
+     *
+     * @param ServerRequestInterface $request
+     * @param \Exception             $exception
+     * @return null|ResponseInterface
+     */
+    protected function handleException(ServerRequestInterface $request, \Exception $exception)
+    {
+        /**
+         * @var SnapshotInterface $snapshot
+         */
+        $snapshot = $this->container->construct(
+            SnapshotInterface::class,
+            compact('exception')
+        );
+
+        //Snapshot must report about itself
+        $snapshot->report();
+
+        /**
+         * We need HttpDispatcher to convert snapshot into response.
+         */
+
+        return $this->container->get(HttpDispatcher::class)->handleSnapshot(
+            $snapshot,
+            false,
+            $request
+        );
+    }
+
+    /**
+     * Handle ClientException.
+     *
+     * @param ServerRequestInterface $request
+     * @param ClientException        $exception
+     * @return ResponseInterface
+     */
+    private function clientException(ServerRequestInterface $request, ClientException $exception)
+    {
+        /**
+         * @var HttpDispatcher $http
+         */
+        $http = $this->container->get(HttpDispatcher::class);
+
+        //Logging client error
+        $http->logError($exception, $request);
+
+        return $http->exceptionResponse($exception, $request);
     }
 }

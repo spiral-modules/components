@@ -10,6 +10,7 @@ namespace Spiral\Http\Routing;
 
 use Cocur\Slugify\Slugify;
 use Cocur\Slugify\SlugifyInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\CoreInterface;
@@ -246,14 +247,14 @@ abstract class AbstractRoute implements RouteInterface
      */
     public function perform(
         ServerRequestInterface $request,
-        ContainerInterface $container,
-        $keepOutput = false
+        ResponseInterface $response,
+        ContainerInterface $container
     ) {
-        $pipeline = new MiddlewarePipeline($container, $this->middlewares, $keepOutput);
+        $pipeline = new MiddlewarePipeline($container, $this->middlewares);
 
         return $pipeline->target(
             $this->createEndpoint($container)
-        )->run($request);
+        )->run($request, $response);
     }
 
     /**
@@ -320,10 +321,9 @@ abstract class AbstractRoute implements RouteInterface
         try {
             return $this->core->callAction($controller, $action, $parameters);
         } catch (ControllerException $exception) {
-            if (
-                $exception->getCode() == ControllerException::BAD_ACTION
-                || $exception->getCode() == ControllerException::NOT_FOUND
-            ) {
+            $code = $exception->getCode();
+
+            if ($code == ControllerException::BAD_ACTION || $code == ControllerException::NOT_FOUND) {
                 throw new ClientException(ClientException::NOT_FOUND, $exception->getMessage());
             }
 
@@ -339,8 +339,10 @@ abstract class AbstractRoute implements RouteInterface
         $replaces = ['/' => '\\/', '[' => '(?:', ']' => ')?', '.' => '\.'];
 
         $options = [];
+
         if (preg_match_all('/<(\w+):?(.*?)?>/', $this->pattern, $matches)) {
             $variables = array_combine($matches[1], $matches[2]);
+
             foreach ($variables as $name => $segment) {
                 $segment = $segment ?: self::DEFAULT_SEGMENT;
                 $replaces["<$name>"] = "(?P<$name>$segment)";
@@ -349,6 +351,7 @@ abstract class AbstractRoute implements RouteInterface
         }
 
         $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
+
         $this->compiled = [
             'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
             'template' => stripslashes(str_replace('?', '', $template)),

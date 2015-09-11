@@ -45,13 +45,6 @@ class Router implements RouterInterface
     private $basePath = '/';
 
     /**
-     * Keep buffered output (MiddlewarePipeline option).
-     *
-     * @var bool
-     */
-    private $keepOutput = false;
-
-    /**
      * Active route instance, this value will be populated only after router successfully handled
      * incoming request.
      *
@@ -77,11 +70,9 @@ class Router implements RouterInterface
         ContainerInterface $container,
         array $routes = [],
         $basePath = '/',
-        $default = [],
-        $keepOutput = false
+        $default = []
     ) {
         $this->basePath = $basePath;
-        $this->keepOutput = $keepOutput;
 
         $this->container = $container;
         foreach ($routes as $route) {
@@ -127,7 +118,7 @@ class Router implements RouterInterface
     /**
      * {@inheritdoc}
      */
-    public function __invoke(ServerRequestInterface $request)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
     {
         //Open router scope
         $outerRouter = $this->container->replace(self::class, $this);
@@ -137,25 +128,14 @@ class Router implements RouterInterface
         }
 
         //Default routes will understand about keepOutput
-        if ($this->activeRoute instanceof AbstractRoute) {
-            $response = $this->activeRoute->perform(
-                $request->withAttribute('route', $this->activeRoute),
-                $this->container,
-                $this->keepOutput
-            );
-        } else {
-            $response = $this->activeRoute->perform(
-                $request->withAttribute('route', $this->activeRoute),
-                $this->container
-            );
-        }
+        $response = $this->activeRoute->perform(
+            $request->withAttribute('route', $this->activeRoute),
+            $response,
+            $this->container
+        );
 
         //Close router scope
         $this->container->restore($outerRouter);
-
-        /**
-         * @var ResponseInterface $response
-         */
 
         return $response;
     }

@@ -69,8 +69,11 @@ class SessionStarter implements MiddlewareInterface
     /**
      * {@inheritdoc}
      */
-    public function __invoke(ServerRequestInterface $request, \Closure $next)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        \Closure $next
+    ) {
         $cookies = $request->getCookieParams();
 
         $outerID = null;
@@ -83,10 +86,7 @@ class SessionStarter implements MiddlewareInterface
             $this->store()->setID($cookies[self::COOKIE]);
         }
 
-        /**
-         * @var ResponseInterface $response
-         */
-        $response = $next($request);
+        $response = $next();
 
         if (empty($this->store) && $this->container->hasInstance(SessionStore::class)) {
             //Store were started by itself
@@ -98,7 +98,9 @@ class SessionStarter implements MiddlewareInterface
         }
 
         //Restoring original session, not super efficient operation
-        !empty($outerID) && $this->store->setID($outerID);
+        if (!empty($outerID)) {
+            $this->store->setID($outerID);
+        }
 
         return $response;
     }

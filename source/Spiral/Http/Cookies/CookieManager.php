@@ -118,22 +118,24 @@ class CookieManager extends Component implements MiddlewareInterface
     /**
      * {@inheritdoc}
      */
-    public function __invoke(ServerRequestInterface $request, \Closure $next = null)
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        \Closure $next = null
+    ) {
         //Opening cookie scope
-        $outerManager = $this->container->replace(self::class, $this);
-        $this->request = $request;
+        $outerCookies = $this->container->replace(self::class, $this);
+        $this->request = $this->decodeCookies($request);
 
-        $request = $this->decodeCookies($request);
+        $response = $next(
+            $this->request->withAttribute('cookieDomain', $this->cookieDomain())
+        );
 
-        /**
-         * @var ResponseInterface $response
-         */
-        $response = $next($request->withAttribute('cookieDomain', $this->cookieDomain()));
+        //New cookies
         $response = $this->mountCookies($response);
 
         //Restoring scope
-        $this->container->restore($outerManager);
+        $this->container->restore($outerCookies);
 
         return $response;
     }

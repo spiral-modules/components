@@ -7,9 +7,8 @@
  *   using default exception handler, when isolation is turned off some middlewares may not
  *   finish their work
  * - exposeErrors flag, if true snapshots will be rendered to client
- * - keepOutput allows MiddlewarePipeline to include echoed content at the end of response
  * - CookieManager middleware settings, default domain and protection method
- * - headers to be used by DispatcherHeaders middleware to clarify request
+ * - headers for initial http response
  * - set of default middlewares to to applied to every request and response
  * - default router class and settings
  * - association between http errors and view name to be used to render them to client
@@ -30,7 +29,6 @@ return [
         'Content-Type' => 'text/html; charset=UTF-8'
     ],
     'middlewares'  => [
-        Middlewares\DispatcherHeaders::class,
         Http\Cookies\CookieManager::class,
         Middlewares\CsrfFilter::class,
         Middlewares\JsonParser::class,

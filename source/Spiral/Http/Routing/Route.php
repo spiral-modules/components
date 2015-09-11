@@ -8,7 +8,6 @@
  */
 namespace Spiral\Http\Routing;
 
-use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 
 /**
@@ -64,7 +63,7 @@ class Route extends AbstractRoute
 
         $route = $this;
 
-        return function (ServerRequestInterface $request) use ($container, $route) {
+        return function () use ($container, $route) {
             list($controller, $action) = explode(self::SEPARATOR, $route->target);
 
             if ($action == self::DYNAMIC_ACTION) {

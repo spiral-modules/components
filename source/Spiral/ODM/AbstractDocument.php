@@ -23,7 +23,7 @@ use Spiral\ODM\Exceptions\ODMException;
  *
  * Can create set of mongo atomic operations and be embedded into other documents.
  */
-abstract class EmbeddableDocument extends DataEntity implements CompositableInterface
+abstract class AbstractDocument extends DataEntity implements CompositableInterface
 {
     /**
      * We are going to inherit parent validation rules, this will let spiral translator know about

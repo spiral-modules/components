@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Entities\Driver;
-use Spiral\ODM\EmbeddableDocument;
+use Spiral\ODM\AbstractDocument;
 use Spiral\ORM\RecordAccessorInterface;
 
 /**
@@ -23,7 +23,7 @@ use Spiral\ORM\RecordAccessorInterface;
  * @see http://www.postgresql.org/docs/9.3/static/datatype-json.html
  * @see http://www.postgresql.org/docs/9.3/static/functions-json.html
  */
-abstract class JsonDocument extends EmbeddableDocument implements RecordAccessorInterface
+abstract class JsonDocument extends AbstractDocument implements RecordAccessorInterface
 {
     /**
      * Let's force solid state... just in case.

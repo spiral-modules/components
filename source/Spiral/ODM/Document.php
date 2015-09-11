@@ -18,7 +18,7 @@ use Spiral\ODM\Exceptions\ODMException;
 /**
  * AbstractDocument with added ActiveRecord methods and association with collection.
  */
-class Document extends EmbeddableDocument implements ActiveEntityInterface
+class Document extends AbstractDocument implements ActiveEntityInterface
 {
     /**
      * Collection name where document should be stored into.

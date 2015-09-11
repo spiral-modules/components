@@ -63,10 +63,7 @@ abstract class QueryBuilder extends Component
      * @return mixed
      * @throws QueryException
      */
-    public function run()
-    {
-        return $this->database->statement($this->sqlStatement(), $this->getParameters());
-    }
+    abstract public function run();
 
     /**
      * Get interpolated (populated with parameters) SQL which will be run against database, please

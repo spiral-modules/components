@@ -167,78 +167,6 @@ class MiddlewarePipeline
     }
 
     /**
-     * Convert endpoint result into valid response.
-     *
-     * @param ResponseInterface $response Initial pipeline response.
-     * @param mixed             $result   Generated endpoint output.
-     * @param string            $output   Buffer output.
-     * @return ResponseInterface
-     */
-    private function wrapResponse(ResponseInterface $response, $result = null, $output = '')
-    {
-        if ($result instanceof ResponseInterface) {
-            if (!empty($output) && $result->getBody()->isWritable()) {
-                $result->getBody()->write($output);
-            }
-
-            return $result;
-        }
-
-        if (is_array($result) || $result instanceof \JsonSerializable) {
-            $code = Response::SUCCESS;
-
-            if (is_array($result)) {
-                if (!empty($output) && empty($result['output'])) {
-                    $result['output'] = $output;
-                }
-
-                if (isset($result['status'])) {
-                    $code = $result['status'];
-                }
-            }
-
-            $headers = $response->getHeaders();
-            unset($headers['Content-Type']);
-
-            //We are ignoring existed response body and content type
-            return new JsonResponse($result, $code, $headers);
-        }
-
-        $response->getBody()->write($result . $output);
-
-        return $response;
-    }
-
-    /**
-     * Get next callable element.
-     *
-     * @param int                    $position
-     * @param ServerRequestInterface $outerRequest
-     * @param ResponseInterface      $outerResponse
-     * @return \Closure
-     */
-    private function getNext(
-        $position,
-        ServerRequestInterface $outerRequest,
-        ResponseInterface $outerResponse
-    ) {
-        $next = function ($request = null, $response = null) use (
-            $position,
-            $outerRequest,
-            $outerResponse
-        ) {
-            //This function will be provided to next (deeper) middleware
-            return $this->next(
-                ++$position,
-                !empty($request) ? $request : $outerRequest,
-                !empty($response) ? $response : $outerResponse
-            );
-        };
-
-        return $next;
-    }
-
-    /**
      * Execute endpoint and return it's result.
      *
      * @param ServerRequestInterface $request
@@ -291,6 +219,62 @@ class MiddlewarePipeline
     }
 
     /**
+     * Convert endpoint result into valid response.
+     *
+     * @param ResponseInterface $response Initial pipeline response.
+     * @param mixed             $result   Generated endpoint output.
+     * @param string            $output   Buffer output.
+     * @return ResponseInterface
+     */
+    private function wrapResponse(ResponseInterface $response, $result = null, $output = '')
+    {
+        if ($result instanceof ResponseInterface) {
+            if (!empty($output) && $result->getBody()->isWritable()) {
+                $result->getBody()->write($output);
+            }
+
+            return $result;
+        }
+
+        if (is_array($result) || $result instanceof \JsonSerializable) {
+            return $this->jsonResponse($response, $result, $output, Response::SUCCESS);
+        }
+
+        $response->getBody()->write($result . $output);
+
+        return $response;
+    }
+
+    /**
+     * Get next callable element.
+     *
+     * @param int                    $position
+     * @param ServerRequestInterface $outerRequest
+     * @param ResponseInterface      $outerResponse
+     * @return \Closure
+     */
+    private function getNext(
+        $position,
+        ServerRequestInterface $outerRequest,
+        ResponseInterface $outerResponse
+    ) {
+        $next = function ($request = null, $response = null) use (
+            $position,
+            $outerRequest,
+            $outerResponse
+        ) {
+            //This function will be provided to next (deeper) middleware
+            return $this->next(
+                ++$position,
+                !empty($request) ? $request : $outerRequest,
+                !empty($response) ? $response : $outerResponse
+            );
+        };
+
+        return $next;
+    }
+
+    /**
      * Handle ClientException.
      *
      * @param ServerRequestInterface $request
@@ -308,5 +292,37 @@ class MiddlewarePipeline
         $http->logError($exception, $request);
 
         return $http->exceptionResponse($exception, $request);
+    }
+
+    /**
+     * Generate JSON response.
+     *
+     * @param ResponseInterface $response
+     * @param mixed             $result
+     * @param string            $output
+     * @param int               $code
+     * @return JsonResponse
+     */
+    private function jsonResponse(
+        ResponseInterface $response,
+        $result,
+        $output,
+        $code = Response::SUCCESS
+    ) {
+        if (is_array($result)) {
+            if (!empty($output) && empty($result['output'])) {
+                $result['output'] = $output;
+            }
+
+            if (isset($result['status'])) {
+                $code = $result['status'];
+            }
+        }
+
+        $headers = $response->getHeaders();
+        unset($headers['Content-Type']);
+
+        //We are ignoring existed response body and content type
+        return new JsonResponse($result, $code, $headers);
     }
 }

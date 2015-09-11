@@ -163,18 +163,18 @@ class MiddlewarePipeline
             $this->container->restore($outerResponse);
         }
 
-        return $this->wrapResult($response, $result, ob_get_clean() . $output);
+        return $this->wrapResponse($response, $result, ob_get_clean() . $output);
     }
 
     /**
-     * Wrap endpoint result into valid response.
+     * Convert endpoint result into valid response.
      *
      * @param ResponseInterface $response Initial pipeline response.
      * @param mixed             $result   Generated endpoint output.
      * @param string            $output   Buffer output.
      * @return ResponseInterface
      */
-    private function wrapResult(ResponseInterface $response, $result = null, $output = '')
+    private function wrapResponse(ResponseInterface $response, $result = null, $output = '')
     {
         if ($result instanceof ResponseInterface) {
             if (!empty($output) && $result->getBody()->isWritable()) {
@@ -198,7 +198,11 @@ class MiddlewarePipeline
             }
 
             //We are ignoring existed response body
-            return new JsonResponse($response, $code, $response->getHeaders());
+            return new JsonResponse(
+                $response,
+                $code,
+                $response->getHeaders()
+            );
         }
 
         $response->getBody()->write($result . $output);

@@ -35,6 +35,21 @@ class Document extends AbstractDocument implements ActiveEntityInterface
     protected $database = null;
 
     /**
+     * Set of indexes to be created for associated collection. Use self::INDEX_OPTIONS or "@options"
+     * for additional parameters.
+     *
+     * Example:
+     * protected $indexes = [
+     *      ['email' => 1, '@options' => ['unique' => true]],
+     *      ['name' => 1]
+     * ];
+     *
+     * @link http://php.net/manual/en/mongocollection.ensureindex.php
+     * @var array
+     */
+    protected $indexes = [];
+
+    /**
      * @see Component::staticContainer()
      * @param array                                     $fields
      * @param CompositableInterface|Document|DataEntity $parent

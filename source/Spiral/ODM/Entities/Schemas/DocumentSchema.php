@@ -8,6 +8,7 @@
  */
 namespace Spiral\ODM\Entities\Schemas;
 
+use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
@@ -51,17 +52,24 @@ class DocumentSchema extends ReflectionEntity
      */
     public function isEmbeddable()
     {
-        return empty($this->getCollection());
+        return !$this->isSubclassOf(Document::class);
     }
 
     /**
-     * Collection name associated with document model.
+     * Collection name associated with document model. Can automatically generate collection name
+     * based on model class.
      *
      * @return mixed
      */
     public function getCollection()
     {
-        return $this->property('collection');
+        $collection = $this->property('collection');
+
+        if (empty($collection)) {
+            $collection = Inflector::classify($this->getShortName());
+        }
+
+        return $collection;
     }
 
     /**
@@ -164,7 +172,7 @@ class DocumentSchema extends ReflectionEntity
      */
     public function getIndexes()
     {
-        if (!$this->getCollection()) {
+        if ($this->isEmbeddable()) {
             return [];
         }
 
@@ -511,8 +519,10 @@ class DocumentSchema extends ReflectionEntity
      */
     private function isAggregation($type)
     {
-        return is_array($type)
-        && (array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
+        return is_array($type) && (
+            array_key_exists(Document::MANY, $type)
+            || array_key_exists(Document::ONE, $type)
+        );
     }
 
     /**

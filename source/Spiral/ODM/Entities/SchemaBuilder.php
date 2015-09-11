@@ -10,6 +10,7 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\ODM\AbstractDocument;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
@@ -87,9 +88,9 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if ($class == Document::class) {
+        if ($class == AbstractDocument::class) {
             //No need to remember schema for abstract Document
-            return new DocumentSchema($this, Document::class);
+            return new DocumentSchema($this, AbstractDocument::class);
         }
 
         if (!isset($this->documents[$class])) {

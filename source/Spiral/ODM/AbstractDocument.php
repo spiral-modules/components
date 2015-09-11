@@ -143,21 +143,6 @@ abstract class AbstractDocument extends DataEntity implements CompositableInterf
     private $atomics = [];
 
     /**
-     * Set of indexes to be created for associated collection. Use self::INDEX_OPTIONS or "@options"
-     * for additional parameters.
-     *
-     * Example:
-     * protected $indexes = [
-     *      ['email' => 1, '@options' => ['unique' => true]],
-     *      ['name' => 1]
-     * ];
-     *
-     * @link http://php.net/manual/en/mongocollection.ensureindex.php
-     * @var array
-     */
-    protected $indexes = [];
-
-    /**
      * Document fields, accessors and relations. ODM will generate setters and getters for some
      * fields based on their types.
      *

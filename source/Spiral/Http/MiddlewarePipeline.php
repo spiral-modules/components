@@ -201,7 +201,7 @@ class MiddlewarePipeline
             unset($headers['Content-Type']);
 
             //We are ignoring existed response body and content type
-            return new JsonResponse($response, $code, $headers);
+            return new JsonResponse($result, $code, $headers);
         }
 
         $response->getBody()->write($result . $output);

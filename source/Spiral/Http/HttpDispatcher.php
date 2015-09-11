@@ -207,14 +207,10 @@ class HttpDispatcher extends Singleton implements
 
         $pipeline = new MiddlewarePipeline($this->container, $this->middlewares);
 
+        $benchmark = $this->benchmark('request', $request->getUri());
         try {
-            //Configuring endpoint
-            $pipeline = $pipeline->target($endpoint);
-
-            $benchmark = $this->benchmark('request', $request->getUri());
-
             //Exceptions (including client one) must be handled by pipeline
-            return $pipeline->run($request, $response);
+            return $pipeline->target($endpoint)->run($request, $response);
         } finally {
             $this->benchmark($benchmark);
         }

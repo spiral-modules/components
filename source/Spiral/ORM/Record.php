@@ -1035,7 +1035,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         /**
          * @var Record $record
          */
-        $record = new static([], false, self::saturate(ORM::class, $orm));
+        $record = new static([], false, self::saturate($orm, ORM::class));
 
         //Forcing validation (empty set of fields is not valid set of fields)
         $record->setFields($fields)->fire('created');
@@ -1110,7 +1110,7 @@ class Record extends DataEntity implements ActiveEntityInterface
         static::initialize();
 
         //Using global container as fallback
-        $orm = self::saturate(ORM::class, $orm);
+        $orm = self::saturate($orm, ORM::class);
 
         return static::events()->fire('selector', $orm->ormSelector(static::class));
     }

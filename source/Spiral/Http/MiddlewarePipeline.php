@@ -103,7 +103,6 @@ class MiddlewarePipeline
         ServerRequestInterface $request,
         ResponseInterface $response
     ) {
-
         try {
             if (!isset($this->middlewares[$position])) {
                 //Middleware target endpoint to be called and converted into response

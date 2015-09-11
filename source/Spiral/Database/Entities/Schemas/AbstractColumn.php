@@ -492,7 +492,9 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function primary()
     {
-        $this->table->setPrimaryKeys([$this->name]);
+        if (!in_array($this->name, $this->table->getPrimaryKeys())) {
+            $this->table->setPrimaryKeys([$this->name]);
+        }
 
         return $this->type('primary');
     }
@@ -505,7 +507,9 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function bigPrimary()
     {
-        $this->table->setPrimaryKeys([$this->name]);
+        if (!in_array($this->name, $this->table->getPrimaryKeys())) {
+            $this->table->setPrimaryKeys([$this->name]);
+        }
 
         return $this->type('bigPrimary');
     }

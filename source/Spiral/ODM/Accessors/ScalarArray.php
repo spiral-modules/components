@@ -49,7 +49,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     /**
      * Indication that were updated.
      *
-     * @var array
+     * @var bool
      */
     protected $updated = false;
 

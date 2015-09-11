@@ -67,6 +67,8 @@ class DocumentSchema extends ReflectionEntity
 
         if (empty($collection)) {
             $collection = Inflector::classify($this->getShortName());
+
+            $collection = Inflector::pluralize($collection);
         }
 
         return $collection;

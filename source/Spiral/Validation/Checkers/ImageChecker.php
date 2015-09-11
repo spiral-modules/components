@@ -111,7 +111,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
             return false;
         }
 
-        if ($height && $image[self::HEIGHT] >= $height) {
+        if (!empty($height) && $image[self::HEIGHT] >= $height) {
             return false;
         }
 
@@ -136,7 +136,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
             return false;
         }
 
-        if ($height && $image[self::HEIGHT] < $height) {
+        if (!empty($height) && $image[self::HEIGHT] < $height) {
             return false;
         }
 

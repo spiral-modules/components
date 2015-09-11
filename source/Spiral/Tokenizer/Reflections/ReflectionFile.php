@@ -321,7 +321,7 @@ class ReflectionFile extends Component
      */
     private function importSchema(array $cache)
     {
-        list($this->includes, $this->declarations, $this->functions, $this->namespaces) = $cache;
+        list($this->hasIncludes, $this->declarations, $this->functions, $this->namespaces) = $cache;
     }
 
     /**

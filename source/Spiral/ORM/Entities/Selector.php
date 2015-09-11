@@ -11,11 +11,11 @@ namespace Spiral\ORM\Entities;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LogLevel;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
+use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\QueryResult;
-use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
@@ -447,9 +447,9 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         //query again
         $this->loader->clean();
 
-        if (!empty($this->cacheLifetime) && !empty($cacheStore) && !empty($cacheKey)) {
+        if (!empty($this->cacheLifetime) && !empty($cacheKey)) {
             //We are caching full records tree, not queries
-            $cacheStore->set($cacheKey, $data, $this->cacheLifetime);
+            $this->cacheStore->set($cacheKey, $data, $this->cacheLifetime);
         }
 
         return $data;

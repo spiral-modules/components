@@ -86,13 +86,13 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
     ) {
         $this->exception = $exception;
 
-        $this->config = $debugger->config()[static::CONFIG];
-
         //We can use global container as fallback if no default values were provided
         $this->container = self::saturate($container, ContainerInterface::class);
         $this->debugger = self::saturate($debugger, Debugger::class);
         $this->files = self::saturate($files, FilesInterface::class);
         $this->views = self::saturate($views, ViewsInterface::class);
+
+        $this->config = $this->debugger->config()[static::CONFIG];
     }
 
     /**

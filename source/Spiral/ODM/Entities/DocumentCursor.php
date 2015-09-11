@@ -62,7 +62,7 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     /**
      * Document class being iterated.
      *
-     * @var string
+     * @var string|null
      */
     protected $class = '';
 
@@ -103,7 +103,7 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     public function fields(array $fields)
     {
         $this->cursor->fields($fields);
-        $this->class = [];
+        $this->class = null;
 
         return $this;
     }

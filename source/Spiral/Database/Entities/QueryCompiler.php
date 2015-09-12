@@ -528,12 +528,12 @@ class QueryCompiler extends Component
      */
     protected function orderBy(array $orderBy)
     {
-        $statement = '';
+        $result = [];
         foreach ($orderBy as $item) {
-            $statement .= $this->quote($item[0]) . ' ' . strtoupper($item[1]);
+            $result[] = $this->quote($item[0]) . ' ' . strtoupper($item[1]);
         }
 
-        return $statement;
+        return join(', ', $result);
     }
 
     /**

@@ -17,6 +17,8 @@ use Spiral\Database\Injections\SQLFragmentInterface;
 /**
  * Responsible for conversion of set of query parameters (where tokens, table names and etc) into
  * sql to be send into specific Driver.
+ *
+ * Source of Compiler must be optimized in nearest future.
  */
 class QueryCompiler extends Component
 {

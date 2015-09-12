@@ -177,7 +177,7 @@ abstract class AbstractWhere extends QueryBuilder
 
         if (is_array($identifier)) {
             $tokens[] = [$joiner, '('];
-            $this->parseSimplified(self::TOKEN_AND, $identifier, $tokens, $wrapper);
+            $this->arrayWhere(self::TOKEN_AND, $identifier, $tokens, $wrapper);
             $tokens[] = ['', ')'];
 
             return;
@@ -230,78 +230,99 @@ abstract class AbstractWhere extends QueryBuilder
      * @param string   $grouper         Grouper type (see self::TOKEN_AND, self::TOKEN_OR).
      * @param array    $where           Simplified where definition.
      * @param array    $tokens          Array to aggregate compiled tokens. Reference.
-     * @param \Closure $wrapper         Callback or closure used to wrap/collect every potential
+     * @param callable $wrapper         Callback or closure used to wrap/collect every potential
      *                                  parameter.
      * @throws BuilderException
      */
-    private function parseSimplified($grouper, array $where, &$tokens, callable $wrapper)
+    private function arrayWhere($grouper, array $where, &$tokens, callable $wrapper)
     {
-        $joiner = $grouper == self::TOKEN_AND ? 'AND' : 'OR';
-        foreach ($where as $name => $value) {
-            $token = strtoupper($name);
+        $joiner = ($grouper == self::TOKEN_AND ? 'AND' : 'OR');
+
+        foreach ($where as $key => $value) {
+            $token = strtoupper($key);
 
             //Grouping identifier (@OR, @AND), MongoDB like style
             if ($token == self::TOKEN_AND || $token == self::TOKEN_OR) {
-                //Open group
                 $tokens[] = [$joiner, '('];
 
-                foreach ($value as $nestedWhere) {
-                    $this->parseSimplified($token, $nestedWhere, $tokens, $wrapper);
+                foreach ($value as $nested) {
+                    if (count($nested) == 1) {
+                        $this->arrayWhere($token, $nested, $tokens, $wrapper);
+                        continue;
+                    }
+
+                    $tokens[] = [$token == self::TOKEN_AND ? 'AND' : 'OR', '('];
+                    $this->arrayWhere(self::TOKEN_AND, $nested, $tokens, $wrapper);
+                    $tokens[] = ['', ')'];
                 }
 
                 $tokens[] = ['', ')'];
+
                 continue;
             }
 
+            //AND|OR [name] = [value]
             if (!is_array($value)) {
-                //AND|OR [name] = [value]
-                $tokens[] = [$joiner, [$name, '=', $wrapper($value)]];
+                $tokens[] = [$joiner, [$key, '=', $wrapper($value)]];
                 continue;
             }
 
-            $innerJoiner = $joiner;
             if (count($value) > 1) {
-                $tokens[] = [$joiner, '('];
-
                 //Multiple values to be joined by AND condition (x = 1, x != 5)
-                $innerJoiner = 'AND';
-            }
-
-            foreach ($value as $key => $nestedValue) {
-                if (is_numeric($key)) {
-                    throw new BuilderException("Nested conditions should have defined operator.");
-                }
-
-                $operation = strtoupper($key);
-                if (!in_array($operation, ['BETWEEN', 'NOT BETWEEN'])) {
-                    //AND|OR [name] [OPERATION] [nestedValue]
-                    $tokens[] = [$innerJoiner, [$name, $operation, $wrapper($nestedValue)]];
-                    continue;
-                }
-
-                /**
-                 * Between and not between condition described using array of [left, right] syntax.
-                 */
-
-                if (!is_array($nestedValue) || count($nestedValue) != 2) {
-                    throw new BuilderException(
-                        "Exactly 2 array values are required for between statement."
-                    );
-                }
-
-                $tokens[] = [
-                    //AND|OR [name] [BETWEEN|NOT BETWEEN] [value 1] [value 2]
-                    $innerJoiner,
-                    [$name, $operation, $wrapper($nestedValue[0]), $wrapper($nestedValue[1])]
-                ];
-            }
-
-            if (count($value) > 1) {
+                $tokens[] = [$joiner, '('];
+                $this->builtConditions('AND', $key, $value, $tokens, $wrapper);
                 $tokens[] = ['', ')'];
+            } else {
+                $this->builtConditions($joiner, $key, $value, $tokens, $wrapper);
             }
         }
 
         return;
+    }
+
+    /**
+     * Build set of conditions for specified identifier.
+     *
+     * @param string   $innerJoiner     Inner boolean joiner.
+     * @param string   $key             Column identifier.
+     * @param array    $where           Operations associated with identifier.
+     * @param array    $tokens          Array to aggregate compiled tokens. Reference.
+     * @param callable $wrapper         Callback or closure used to wrap/collect every potential
+     *                                  parameter.
+     * @return array
+     */
+    private function builtConditions($innerJoiner, $key, $where, &$tokens, callable $wrapper)
+    {
+        foreach ($where as $operation => $value) {
+            if (is_numeric($operation)) {
+                throw new BuilderException("Nested conditions should have defined operator.");
+            }
+
+            $operation = strtoupper($operation);
+            if (!in_array($operation, ['BETWEEN', 'NOT BETWEEN'])) {
+                //AND|OR [name] [OPERATION] [nestedValue]
+                $tokens[] = [$innerJoiner, [$key, $operation, $wrapper($value)]];
+                continue;
+            }
+
+            /**
+             * Between and not between condition described using array of [left, right] syntax.
+             */
+
+            if (!is_array($value) || count($value) != 2) {
+                throw new BuilderException(
+                    "Exactly 2 array values are required for between statement."
+                );
+            }
+
+            $tokens[] = [
+                //AND|OR [name] [BETWEEN|NOT BETWEEN] [value 1] [value 2]
+                $innerJoiner,
+                [$key, $operation, $wrapper($value[0]), $wrapper($value[1])]
+            ];
+        }
+
+        return $tokens;
     }
 
     /**

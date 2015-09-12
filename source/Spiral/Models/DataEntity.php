@@ -35,6 +35,12 @@ abstract class DataEntity extends Component implements
     use ValidatorTrait;
 
     /**
+     * Field format declares how entity must process magic setters and getters. Available values:
+     * camelCase, tableize.
+     */
+    const FIELD_FORMAT = 'camelCase';
+
+    /**
      * Every entity might have set of traits which can be initiated manually or at moment of
      * construction model instance. Array will store already initiated model names.
      *
@@ -118,7 +124,21 @@ abstract class DataEntity extends Component implements
             throw new EntityException("Undefined method {$method}.");
         }
 
-        $field = Inflector::camelize(substr($method, 3));
+        $field = substr($method, 3);
+
+        switch (static::FIELD_FORMAT) {
+            case 'camelCase':
+                $field = Inflector::camelize($field);
+                break;
+            case 'tableize':
+                $field = Inflector::tableize($field);
+                break;
+            default:
+                throw new EntityException(
+                    "Undefined field format '" . static::FIELD_FORMAT . "'."
+                );
+        }
+
         switch (substr($method, 0, 3)) {
             case 'get':
                 return $this->getField($field);

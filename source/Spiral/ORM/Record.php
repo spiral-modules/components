@@ -8,7 +8,6 @@
  */
 namespace Spiral\ORM;
 
-use Doctrine\Common\Inflector\Inflector;
 use Spiral\Core\ContainerInterface;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
@@ -17,7 +16,6 @@ use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
-use Spiral\Models\Exceptions\EntityException;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RecordException;
@@ -34,6 +32,12 @@ use Spiral\Validation\ValidatesInterface;
  */
 class Record extends DataEntity implements ActiveEntityInterface
 {
+    /**
+     * Field format declares how entity must process magic setters and getters. Available values:
+     * camelCase, tableize.
+     */
+    const FIELD_FORMAT = 'tableize';
+
     /**
      * We are going to inherit parent validation rules, this will let spiral translator know about
      * it and merge i18n messages.
@@ -813,29 +817,8 @@ class Record extends DataEntity implements ActiveEntityInterface
             return $this->relation($method);
         }
 
-        if (method_exists($this, $method)) {
-            throw new EntityException(
-                "Method name '{$method}' is ambiguous and can not be used as magic setter."
-            );
-        }
-
-        if (count($arguments) <= 1 && strlen($method) <= 3) {
-            //Get/set needs exactly 1 argument
-            throw new EntityException("Undefined method {$method}.");
-        }
-
-        $field = Inflector::tableize(substr($method, 3));
-        switch (substr($method, 0, 3)) {
-            case 'get':
-                return $this->getField($field);
-            case 'set':
-                $this->setField($field, $arguments[0]);
-
-                //setFieldA($a)->setFieldB($b)
-                return $this;
-        }
-
-        throw new EntityException("Undefined method {$method}.");
+        //See FIELD_FORMAT constant
+        return parent::__call($method, $arguments);
     }
 
     /**

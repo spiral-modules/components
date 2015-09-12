@@ -44,9 +44,8 @@ abstract class Component
 
     /**
      * Get/set instance of global/static container, due this method must be used as few times as
-     * possible both getter and setter methods joined into one. If your code relays on this method
-     * you either doing something very interesting or something very wrong (this method is for
-     * fallback purposes only).
+     * possible both getter and setter methods joined into one. Please use this method only as
+     * fallback.
      *
      * @param ContainerInterface $container
      * @return ContainerInterface

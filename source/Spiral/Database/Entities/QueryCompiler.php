@@ -98,8 +98,8 @@ class QueryCompiler extends Component
      */
     public function update($table, array $columns, array $where = [])
     {
-        $statement = "UPDATE {$this->quote($table, true, true)}"
-            . "\nSET" . $this->prepareColumns($columns)
+        $statement = "UPDATE {$this->quote($table, true, true)}\nSET "
+            . $this->prepareColumns($columns)
             . $this->mountExpression("\nWHERE", $this->where($where));
 
         return rtrim($statement);
@@ -335,7 +335,7 @@ class QueryCompiler extends Component
             unset($value);
         }
 
-        return join(", ", $columns);
+        return trim(join(", ", $columns));
     }
 
     /**

@@ -176,6 +176,17 @@ abstract class AbstractWhere extends QueryBuilder
         }
 
         if (is_array($identifier)) {
+            if (count($identifier) == 1) {
+                $this->arrayWhere(
+                    $joiner == 'AND' ? self::TOKEN_AND : self::TOKEN_OR,
+                    $identifier,
+                    $tokens,
+                    $wrapper
+                );
+
+                return;
+            }
+
             $tokens[] = [$joiner, '('];
             $this->arrayWhere(self::TOKEN_AND, $identifier, $tokens, $wrapper);
             $tokens[] = ['', ')'];

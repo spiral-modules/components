@@ -98,10 +98,9 @@ class QueryCompiler extends Component
      */
     public function update($table, array $columns, array $where = [])
     {
-        $statement = "UPDATE " . $this->quote($table, true, true)
-            . "\nSET" . $this->prepareColumns($columns);
-
-        $statement .= $this->whereStatement("\nWHERE", $where);
+        $statement = "UPDATE {$this->quote($table, true, true)}"
+            . "\nSET" . $this->prepareColumns($columns)
+            . $this->mountExpression("\nWHERE", $this->where($where));
 
         return rtrim($statement);
     }
@@ -116,8 +115,8 @@ class QueryCompiler extends Component
      */
     public function delete($table, array $where = [])
     {
-        $statement = 'DELETE FROM ' . $this->quote($table, true);
-        $statement .= $this->whereStatement("\nWHERE", $where);
+        $statement = "DELETE FROM {$this->quote($table, true)}"
+            . $this->mountExpression("\nWHERE", $this->where($where));
 
         return rtrim($statement);
     }
@@ -156,27 +155,14 @@ class QueryCompiler extends Component
         //This statement parts should be processed first to define set of table and column aliases
         $from = $this->tables($from);
 
-        if (!empty($joins)) {
-            $joins = $this->joins($joins) . ' ';
-        } else {
-            $joins = '';
-        }
-
-        if (!empty($distinct)) {
-            $distinct = ' ' . $this->distinct($distinct) . ' ';
-        }
+        $joins = $this->mountExpression('', $this->joins($joins), ' ');
+        $distinct = $this->mountExpression(' ', $this->distinct($distinct), ' ');
 
         $columns = $this->columns($columns);
 
-        $where = $this->whereStatement("\nWHERE", $where);
-        $having = $this->whereStatement("\nHAVING", $having);
-
-        //Sortings and grouping
-        if (!empty($groupBy)) {
-            $groupBy = "\nGROUP BY " . $this->groupBy($groupBy) . ' ';
-        } else {
-            $groupBy = '';
-        }
+        $where = $this->mountExpression("\nWHERE", $this->where($where));
+        $having = $this->mountExpression("\nHAVING", $this->where($having));
+        $groupBy = $this->mountExpression("\nGROUP BY", $this->groupBy($groupBy), ' ');
 
         //Initial statement have predictable order
         $statement = rtrim(
@@ -402,7 +388,7 @@ class QueryCompiler extends Component
         $statement = '';
         foreach ($joins as $table => $join) {
             $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
-            $statement .= $this->whereStatement("\n    ON", $join['on']);
+            $statement .= $this->mountExpression("\n    ON", $this->where($join['on']));
         }
 
         return $statement;
@@ -586,6 +572,23 @@ class QueryCompiler extends Component
     }
 
     /**
+     * Combine expressing and prefix (usually SQL keyword) but only if expression is not empty.
+     *
+     * @param string $prefix
+     * @param string $expression
+     * @param string $postfix
+     * @return string
+     */
+    protected function mountExpression($prefix, $expression, $postfix = '')
+    {
+        if (empty($expression)) {
+            return '';
+        }
+
+        return $prefix . ' ' . $expression . $postfix;
+    }
+
+    /**
      * Helper method used to interpolate SQL query with set of parameters, must be used only for
      * development purposes and never for real query.
      *
@@ -688,21 +691,5 @@ class QueryCompiler extends Component
         }
 
         return $operator;
-    }
-
-    /**
-     * Generate where statement with desired prefix or return empty string.
-     *
-     * @param string $prefix
-     * @param array  $tokens
-     * @return string
-     */
-    private function whereStatement($prefix, array $tokens)
-    {
-        if (empty($tokens)) {
-            return '';
-        }
-
-        return $prefix . ' ' . $this->where($tokens);
     }
 }

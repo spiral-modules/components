@@ -99,9 +99,7 @@ class QueryCompiler extends Component
         $statement = "UPDATE " . $this->quote($table, true, true)
             . "\nSET" . $this->prepareColumns($columns);
 
-        if (!empty($where)) {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
+        $statement .= $this->whereStatement("\nWHERE", $where);
 
         return rtrim($statement);
     }
@@ -117,9 +115,7 @@ class QueryCompiler extends Component
     public function delete($table, array $where = [])
     {
         $statement = 'DELETE FROM ' . $this->quote($table, true);
-        if (!empty($where)) {
-            $statement .= "\nWHERE " . $this->where($where);
-        }
+        $statement .= $this->whereStatement("\nWHERE", $where);
 
         return rtrim($statement);
     }
@@ -170,18 +166,8 @@ class QueryCompiler extends Component
 
         $columns = $this->columns($columns);
 
-        //Conditions
-        if (!empty($where)) {
-            $where = "\nWHERE " . $this->where($where) . ' ';
-        } else {
-            $where = '';
-        }
-
-        if (!empty($having)) {
-            $having = "\nHAVING " . $this->where($having) . ' ';
-        } else {
-            $having = '';
-        }
+        $where = $this->whereStatement("\nWHERE", $where);
+        $having = $this->whereStatement("\nHAVING", $having);
 
         //Sortings and grouping
         if (!empty($groupBy)) {
@@ -414,10 +400,7 @@ class QueryCompiler extends Component
         $statement = '';
         foreach ($joins as $table => $join) {
             $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
-
-            if (!empty($join['on'])) {
-                $statement .= "\n    ON " . $this->where($join['on']);
-            }
+            $statement .= $this->whereStatement("\n    ON", $join['on']);
         }
 
         return $statement;
@@ -703,5 +686,21 @@ class QueryCompiler extends Component
         }
 
         return $operator;
+    }
+
+    /**
+     * Generate where statement with desired prefix or return empty string.
+     *
+     * @param string $prefix
+     * @param array  $tokens
+     * @return string
+     */
+    private function whereStatement($prefix, array $tokens)
+    {
+        if (empty($tokens)) {
+            return '';
+        }
+
+        return $prefix . ' ' . $this->where($tokens);
     }
 }

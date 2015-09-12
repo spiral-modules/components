@@ -190,44 +190,43 @@ class QueryCompiler extends Component
     /**
      * Query query identifier, if identified stated as table - table prefix must be added.
      *
-     * @param string $identifier  Identifier can include simple column operations and functions,
-     *                            having "." in it will automatically force table prefix to first
-     *                            value.
-     * @param bool   $table       Set to true to let quote method know that identified is related
-     *                            to
-     *                            table name.
+     * @param string $key   Identifier can include simple column operations and functions,
+     *                      having "." in it will automatically force table prefix to first
+     *                      value.
+     * @param bool   $table Set to true to let quote method know that identified is related
+     *                      to table name.
      * @param bool   $forceTable  In some cases we have to force prefix.
      * @return mixed|string
      */
-    public function quote($identifier, $table = false, $forceTable = false)
+    public function quote($key, $table = false, $forceTable = false)
     {
-        if ($identifier instanceof SQLExpression) {
-            return $identifier->sqlStatement($this);
-        } elseif ($identifier instanceof SQLFragmentInterface) {
-            return $identifier->sqlStatement();
+        if ($key instanceof SQLExpression) {
+            return $key->sqlStatement($this);
+        } elseif ($key instanceof SQLFragmentInterface) {
+            return $key->sqlStatement();
         }
 
-        if (preg_match('/ as /i', $identifier, $matches)) {
-            list($identifier, $alias) = explode($matches[0], $identifier);
+        if (preg_match('/ as /i', $key, $matches)) {
+            list($key, $alias) = explode($matches[0], $key);
 
             /**
              * We can't do looped aliases, so let's force table prefix for identifier if we aliasing
              * table name at this moment.
              */
-            $quoted = $this->quote($identifier, $table, $table)
+            $quoted = $this->quote($key, $table, $table)
                 . $matches[0]
                 . $this->driver->identifier($alias);
 
-            if ($table && strpos($identifier, '.') === false) {
+            if ($table && strpos($key, '.') === false) {
                 //We have to apply operation post factum to prevent self aliasing (name AS name
                 //when db has prefix, expected: prefix_name as name)
-                $this->aliases[$alias] = $identifier;
+                $this->aliases[$alias] = $key;
             }
 
             return $quoted;
         }
 
-        if (strpos($identifier, '(') || strpos($identifier, ' ')) {
+        if (strpos($key, '(') || strpos($key, ' ')) {
             return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i',
                 function ($identifier) use (&$table) {
                     $identifier = $identifier[1];
@@ -244,32 +243,32 @@ class QueryCompiler extends Component
                     }
 
                     return $this->quote($identifier);
-                }, $identifier);
+                }, $key);
         }
 
-        if (strpos($identifier, '.') === false) {
-            if (($table && !isset($this->aliases[$identifier])) || $forceTable) {
-                if (!isset($this->aliases[$this->tablePrefix . $identifier])) {
-                    $this->aliases[$this->tablePrefix . $identifier] = $identifier;
+        if (strpos($key, '.') === false) {
+            if (($table && !isset($this->aliases[$key])) || $forceTable) {
+                if (!isset($this->aliases[$this->tablePrefix . $key])) {
+                    $this->aliases[$this->tablePrefix . $key] = $key;
                 }
 
-                $identifier = $this->tablePrefix . $identifier;
+                $key = $this->tablePrefix . $key;
             }
 
-            return $this->driver->identifier($identifier);
+            return $this->driver->identifier($key);
         }
 
-        $identifier = explode('.', $identifier);
+        $key = explode('.', $key);
 
         //Expecting first element be table name
-        if (!isset($this->aliases[$identifier[0]])) {
-            $identifier[0] = $this->tablePrefix . $identifier[0];
+        if (!isset($this->aliases[$key[0]])) {
+            $key[0] = $this->tablePrefix . $key[0];
         }
 
         //No aliases can be collected there
-        $identifier = array_map([$this->driver, 'identifier'], $identifier);
+        $key = array_map([$this->driver, 'identifier'], $key);
 
-        return join('.', $identifier);
+        return join('.', $key);
     }
 
     /**

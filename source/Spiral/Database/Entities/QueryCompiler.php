@@ -158,6 +158,7 @@ class QueryCompiler extends Component
         $joins = $this->mountExpression('', $this->joins($joins), ' ');
         $distinct = $this->mountExpression(' ', $this->distinct($distinct), ' ');
 
+        //After joins and tables to make sure that compiler knows every alias
         $columns = $this->columns($columns);
 
         $where = $this->mountExpression("\nWHERE", $this->where($where));
@@ -165,9 +166,7 @@ class QueryCompiler extends Component
         $groupBy = $this->mountExpression("\nGROUP BY", $this->groupBy($groupBy), ' ');
 
         //Initial statement have predictable order
-        $statement = rtrim(
-                "SELECT{$distinct}\n{$columns}" . "\nFROM {$from} {$joins}{$where}{$groupBy}{$having}"
-            ) . ' ';
+        $statement = "SELECT{$distinct}\n{$columns}\nFROM {$from} {$joins}{$where}{$groupBy}{$having}";
 
         if (empty($unions) && !empty($orderBy)) {
             $statement .= "\nORDER BY " . $this->orderBy($orderBy);

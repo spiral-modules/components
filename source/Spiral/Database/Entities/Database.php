@@ -8,6 +8,7 @@
  */
 namespace Spiral\Database\Entities;
 
+use Spiral\Cache\CacheInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
@@ -253,7 +254,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
         $key = '',
         StoreInterface $store = null
     ) {
-        $store = !empty($store) ? $store : $this->container->get(StoreInterface::class);
+        $store = !empty($store) ? $store : $this->container->get(CacheInterface::class)->store();
 
         if (empty($key)) {
             //Trying to build unique query id based on provided options and environment.

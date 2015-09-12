@@ -156,7 +156,7 @@ class QueryCompiler extends Component
         $from = $this->tables($from);
 
         $joins = $this->mountExpression(' ', $this->joins($joins), ' ');
-        $distinct = $this->mountExpression(' ', $this->distinct($distinct), ' ');
+        $distinct = $this->mountExpression(' ', $this->distinct($distinct));
 
         //After joins and tables to make sure that compiler knows every alias
         $columns = $this->columns($columns);
@@ -190,12 +190,12 @@ class QueryCompiler extends Component
     /**
      * Query query identifier, if identified stated as table - table prefix must be added.
      *
-     * @param string $key   Identifier can include simple column operations and functions,
-     *                      having "." in it will automatically force table prefix to first
-     *                      value.
-     * @param bool   $table Set to true to let quote method know that identified is related
-     *                      to table name.
-     * @param bool   $forceTable  In some cases we have to force prefix.
+     * @param string $key        Identifier can include simple column operations and functions,
+     *                           having "." in it will automatically force table prefix to first
+     *                           value.
+     * @param bool   $table      Set to true to let quote method know that identified is related
+     *                           to table name.
+     * @param bool   $forceTable In some cases we have to force prefix.
      * @return mixed|string
      */
     public function quote($key, $table = false, $forceTable = false)
@@ -345,6 +345,10 @@ class QueryCompiler extends Component
      */
     protected function distinct($distinct)
     {
+        if (empty($distinct)) {
+            return '';
+        }
+
         return "DISTINCT";
     }
 

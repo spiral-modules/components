@@ -212,7 +212,7 @@ class ODM extends Singleton implements InjectorInterface
      * @param string                $class
      * @param array                 $fields
      * @param CompositableInterface $parent
-     * @return Document
+     * @return ActiveDocument
      * @throws DefinitionException
      */
     public function document($class, array $fields, CompositableInterface $parent = null)
@@ -248,14 +248,14 @@ class ODM extends Singleton implements InjectorInterface
         }
 
         $defined = $class;
-        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
+        if ($definition[self::DEFINITION] == ActiveDocument::DEFINITION_LOGICAL) {
             //Resolve using logic function
             if (empty($defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields))) {
                 throw new DefinitionException(
                     "Unable to resolve (logical definition) valid class for document '{$class}'."
                 );
             }
-        } elseif ($definition[self::DEFINITION] == Document::DEFINITION_FIELDS) {
+        } elseif ($definition[self::DEFINITION] == ActiveDocument::DEFINITION_FIELDS) {
             foreach ($definition[self::DEFINITION_OPTIONS] as $field => $child) {
                 if (array_key_exists($field, $fields)) {
                     //Apparently this is child

@@ -10,8 +10,8 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\ODM\AbstractDocument;
 use Spiral\ODM\Document;
+use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -88,9 +88,9 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if ($class == AbstractDocument::class || $class == Document::class) {
+        if ($class == Document::class || $class == ActiveDocument::class) {
             //No need to remember schema for abstract Document
-            return new DocumentSchema($this, AbstractDocument::class);
+            return new DocumentSchema($this, Document::class);
         }
 
         if (!isset($this->documents[$class])) {
@@ -138,9 +138,9 @@ class SchemaBuilder extends Component
 
             foreach ($indexes as $index) {
                 $options = [];
-                if (isset($index[Document::INDEX_OPTIONS])) {
-                    $options = $index[Document::INDEX_OPTIONS];
-                    unset($index[Document::INDEX_OPTIONS]);
+                if (isset($index[ActiveDocument::INDEX_OPTIONS])) {
+                    $options = $index[ActiveDocument::INDEX_OPTIONS];
+                    unset($index[ActiveDocument::INDEX_OPTIONS]);
                 }
 
                 $odmCollection->ensureIndex($index, $options);
@@ -225,8 +225,8 @@ class SchemaBuilder extends Component
      */
     protected function locateDocuments(TokenizerInterface $tokenizer)
     {
-        foreach ($tokenizer->getClasses(AbstractDocument::class) as $class => $definition) {
-            if ($class == AbstractDocument::class || $class == Document::class) {
+        foreach ($tokenizer->getClasses(Document::class) as $class => $definition) {
+            if ($class == Document::class || $class == ActiveDocument::class) {
                 continue;
             }
 

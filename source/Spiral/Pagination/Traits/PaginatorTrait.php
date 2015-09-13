@@ -172,7 +172,9 @@ trait PaginatorTrait
         }
 
         if (!$this instanceof PaginableInterface) {
-            throw new PaginationException("Unable to paginate, PaginableInterface not implemented.");
+            throw new PaginationException(
+                "Unable to paginate, PaginableInterface not implemented."
+            );
         }
 
         return $this->paginator->paginateObject($this);

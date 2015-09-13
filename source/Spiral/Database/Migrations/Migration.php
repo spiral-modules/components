@@ -36,7 +36,7 @@ abstract class Migration extends Component implements MigrationInterface
      *
      * @param DatabaseManager $databases
      */
-    public function setProvider(DatabaseManager $databases)
+    public function setDBAL(DatabaseManager $databases)
     {
         if (!$databases instanceof DatabaseManager) {
             throw new MigrationException(

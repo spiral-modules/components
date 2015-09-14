@@ -40,6 +40,9 @@ use Spiral\Core\ContainerInterface;
  *      ["controller" => "home"]
  * );
  * $route->withHost();
+ *
+ * Attention, controller names are lowercased! If you want to add controller which has multiple
+ * words in it's class name - use aliases.
  */
 class DirectRoute extends AbstractRoute
 {
@@ -116,7 +119,7 @@ class DirectRoute extends AbstractRoute
             $controller = $route->matches['controller'];
 
             //Due we are expecting part of class name we can remove some garbage
-            $controller = preg_replace('/[^a-z_0-9]+/i', '', $controller);
+            $controller = strtolower(preg_replace('/[^a-z_0-9]+/i', '', $controller));
 
             if (isset($route->controllers[$controller])) {
                 //Aliased

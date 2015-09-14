@@ -42,7 +42,7 @@ use Spiral\Core\ContainerInterface;
  * $route->withHost();
  *
  * Attention, controller names are lowercased! If you want to add controller which has multiple
- * words in it's class name - use aliases.
+ * words in it's class name - use aliases (last argument).
  */
 class DirectRoute extends AbstractRoute
 {

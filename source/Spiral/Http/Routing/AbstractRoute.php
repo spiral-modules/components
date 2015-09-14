@@ -353,7 +353,7 @@ abstract class AbstractRoute implements RouteInterface
         $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
 
         $this->compiled = [
-            'pattern'  => '/^' . strtr($template, $replaces) . '$/u',
+            'pattern'  => '/^' . strtr($template, $replaces) . '$/iu',
             'template' => stripslashes(str_replace('?', '', $template)),
             'options'  => array_fill_keys($options, null)
         ];

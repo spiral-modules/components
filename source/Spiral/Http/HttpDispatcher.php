@@ -366,7 +366,9 @@ class HttpDispatcher extends Singleton implements
      */
     protected function response()
     {
-        return new Response('php://memory', Response::SUCCESS, $this->config['headers']);
+        $r = new Response('php://memory', Response::SUCCESS, $this->config['headers']);
+
+        return $r->withProtocolVersion('1.0');
     }
 
     /**

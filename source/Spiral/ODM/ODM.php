@@ -72,10 +72,9 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * Normalized aggregation constants.
      */
-    const AGR_TYPE       = 1;
-    const AGR_COLLECTION = 2;
-    const AGR_DB         = 3;
-    const AGR_QUERY      = 4;
+    const AGR_TYPE  = 1;
+    const ARG_CLASS = 2;
+    const AGR_QUERY = 3;
 
     /**
      * Normalized composition constants.
@@ -249,8 +248,11 @@ class ODM extends Singleton implements InjectorInterface
 
         $defined = $class;
         if ($definition[self::DEFINITION] == ActiveDocument::DEFINITION_LOGICAL) {
+
             //Resolve using logic function
-            if (empty($defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields))) {
+            $defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields, $this);
+
+            if (empty($defined)) {
                 throw new DefinitionException(
                     "Unable to resolve (logical definition) valid class for document '{$class}'."
                 );

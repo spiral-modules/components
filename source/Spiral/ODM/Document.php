@@ -205,10 +205,10 @@ abstract class Document extends DataEntity implements CompositableInterface
 
     /**
      * @see Component::staticContainer()
-     * @param array                                     $fields
+     * @param array                                           $fields
      * @param CompositableInterface|ActiveDocument|DataEntity $parent
-     * @param ODM                                       $odm
-     * @param array                                     $odmSchema
+     * @param ODM                                             $odm
+     * @param array                                           $odmSchema
      */
     public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
     {
@@ -287,7 +287,7 @@ abstract class Document extends DataEntity implements CompositableInterface
          */
         $document = new static($this->serializeData(), $parent, $this->odm, $this->odmSchema);
 
-        return $document->solidState(true, true)->invalidate(true);
+        return $document->solidState(true, true);
     }
 
     /**
@@ -593,8 +593,7 @@ abstract class Document extends DataEntity implements CompositableInterface
             $query = array_merge($query, $arguments[0]);
         }
 
-        $collection = new Collection($this->odm, $aggregation[ODM::AGR_DB],
-            $aggregation[ODM::AGR_COLLECTION], $query);
+        $collection = $this->odm->odmCollection($aggregation[ODM::ARG_CLASS])->query($query);
         if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
             return $collection->findOne();
         }
@@ -811,10 +810,11 @@ abstract class Document extends DataEntity implements CompositableInterface
      * Called by ODM with set of loaded fields. Must return name of appropriate class.
      *
      * @param array $fields
+     * @param ODM   $odm
      * @return string
      * @throws DefinitionException
      */
-    public static function defineClass(array $fields)
+    public static function defineClass(array $fields, ODM $odm)
     {
         throw new DefinitionException("Class definition methods was not implemented.");
     }

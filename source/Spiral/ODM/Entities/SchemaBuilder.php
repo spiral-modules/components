@@ -10,8 +10,8 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\ODM\Document;
 use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -290,10 +290,9 @@ class SchemaBuilder extends Component
         $result = [];
         foreach ($aggregations as $name => $aggregation) {
             $result[$name] = [
-                ODM::AGR_TYPE       => $aggregation['type'],
-                ODM::AGR_COLLECTION => $aggregation['collection'],
-                ODM::AGR_DB         => $aggregation['database'],
-                ODM::AGR_QUERY      => $aggregation['query']
+                ODM::AGR_TYPE  => $aggregation['type'],
+                ODM::ARG_CLASS => $aggregation['class'],
+                ODM::AGR_QUERY => $aggregation['query']
             ];
         }
 

@@ -31,6 +31,10 @@ class QueryCompiler extends AbstractCompiler
      */
     protected function distinct($distinct)
     {
+        if (empty($distinct)) {
+            return '';
+        }
+
         return "DISTINCT" . (is_string($distinct) ? '(' . $this->quote($distinct) . ')' : '');
     }
 }

@@ -41,6 +41,7 @@ class HasOne extends Relation
             $related = $this->getRelated();
             if ($related instanceof Record) {
                 $related->setField($this->definition[Record::OUTER_KEY], null, false);
+
                 if (isset($this->definition[Record::MORPH_KEY])) {
                     //Dropping morph key value
                     $related->setField($this->definition[Record::MORPH_KEY], null);

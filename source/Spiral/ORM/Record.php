@@ -963,8 +963,8 @@ class Record extends DataEntity implements ActiveEntityInterface
                 continue;
             }
 
-            //I'm not very proud of length of this condition
             if (
+                //I'm not very proud of length of this condition
                 !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
                 && !$relation->isValid()
             ) {

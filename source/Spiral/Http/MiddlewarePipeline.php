@@ -122,12 +122,17 @@ class MiddlewarePipeline
                 $request, $response, $this->getNext($position, $request, $response)
             );
         } catch (\Exception $exception) {
+            if ($exception instanceof ClientException) {
+                //To think about client exception isolation
+                return $this->clientException($request, $exception);
+            }
+
             if (!$request->getAttribute('isolated', false)) {
                 //No isolation
                 throw $exception;
             }
 
-            return $this->handleException($request, $exception);
+            return $this->errorException($request, $exception);
         }
     }
 
@@ -151,8 +156,6 @@ class MiddlewarePipeline
         try {
             ob_start();
             $result = $this->execute($request, $response);
-        } catch (ClientException $exception) {
-            $response = $this->clientException($request, $exception);
         } finally {
             while (ob_get_level() > $outputLevel + 1) {
                 $output = ob_get_clean() . $output;
@@ -194,15 +197,12 @@ class MiddlewarePipeline
      * @param \Exception             $exception
      * @return null|ResponseInterface
      */
-    protected function handleException(ServerRequestInterface $request, \Exception $exception)
+    protected function errorException(ServerRequestInterface $request, \Exception $exception)
     {
         /**
          * @var SnapshotInterface $snapshot
          */
-        $snapshot = $this->container->construct(
-            SnapshotInterface::class,
-            compact('exception')
-        );
+        $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
 
         //Snapshot must report about itself
         $snapshot->report();
@@ -216,6 +216,26 @@ class MiddlewarePipeline
             false,
             $request
         );
+    }
+
+    /**
+     * Handle ClientException.
+     *
+     * @param ServerRequestInterface $request
+     * @param ClientException        $exception
+     * @return ResponseInterface
+     */
+    protected function clientException(ServerRequestInterface $request, ClientException $exception)
+    {
+        /**
+         * @var HttpDispatcher $http
+         */
+        $http = $this->container->get(HttpDispatcher::class);
+
+        //Logging client error
+        $http->logError($exception, $request);
+
+        return $http->exceptionResponse($exception, $request);
     }
 
     /**
@@ -237,7 +257,7 @@ class MiddlewarePipeline
         }
 
         if (is_array($result) || $result instanceof \JsonSerializable) {
-            return $this->jsonResponse($response, $result, $output, Response::SUCCESS);
+            return $this->writeJson($response, $result, $output, Response::SUCCESS);
         }
 
         $response->getBody()->write($result . $output);
@@ -274,25 +294,6 @@ class MiddlewarePipeline
         return $next;
     }
 
-    /**
-     * Handle ClientException.
-     *
-     * @param ServerRequestInterface $request
-     * @param ClientException        $exception
-     * @return ResponseInterface
-     */
-    private function clientException(ServerRequestInterface $request, ClientException $exception)
-    {
-        /**
-         * @var HttpDispatcher $http
-         */
-        $http = $this->container->get(HttpDispatcher::class);
-
-        //Logging client error
-        $http->logError($exception, $request);
-
-        return $http->exceptionResponse($exception, $request);
-    }
 
     /**
      * Generate JSON response.
@@ -303,7 +304,7 @@ class MiddlewarePipeline
      * @param int               $code
      * @return JsonResponse
      */
-    private function jsonResponse(
+    private function writeJson(
         ResponseInterface $response,
         $result,
         $output,

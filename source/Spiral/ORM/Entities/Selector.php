@@ -10,6 +10,7 @@ namespace Spiral\ORM\Entities;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LogLevel;
+use Spiral\Cache\CacheInterface;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
@@ -408,6 +409,10 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         if (!empty($this->cacheLifetime)) {
             $cacheKey = $this->cacheKey ?: md5(serialize([$statement, $this->getParameters()]));
+
+            if (empty($this->cacheStore)) {
+                $this->cacheStore = $this->orm->container()->get(CacheInterface::class)->store();
+            }
 
             if ($this->cacheStore->has($cacheKey)) {
                 $this->logger()->debug("Selector result were fetched from cache.");

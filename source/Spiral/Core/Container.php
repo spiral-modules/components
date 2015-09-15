@@ -43,7 +43,7 @@ class Container extends Component implements ContainerInterface
      */
     public function get($alias)
     {
-        //Direct bypass to classes
+        //Direct bypass to construct, i might think about this option... or not.
         return $this->construct($alias);
     }
 
@@ -162,7 +162,7 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      *
-     * @todo: add Parameters
+     * @todo: add Parameters?
      */
     public function bind($alias, $resolver)
     {
@@ -178,7 +178,7 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      *
-     * @todo: add Parameters
+     * @todo: add Parameters?
      */
     public function bindSingleton($alias, $resolver)
     {
@@ -194,7 +194,7 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      *
-     * @todo: add Parameters
+     * @todo: add Parameters?
      */
     public function replace($alias, $resolver)
     {
@@ -216,6 +216,7 @@ class Container extends Component implements ContainerInterface
         list($alias, $resolver) = $replacePayload;
 
         unset($this->bindings[$alias]);
+
         if (!empty($resolver)) {
             //Restoring original value
             $this->bindings[$alias] = $replacePayload;

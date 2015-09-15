@@ -47,6 +47,7 @@ abstract class Component
      * possible both getter and setter methods joined into one. Please use this method only as
      * fallback.
      *
+     * @internal Do not use for business logic.
      * @param ContainerInterface $container
      * @return ContainerInterface
      */
@@ -63,6 +64,7 @@ abstract class Component
      * Must be used only to resolve optional constructor arguments. Use only for classes which are
      * generally resolved using Container.
      *
+     * @internal Do not use for business logic.
      * @param mixed  $default Default value.
      * @param string $class   Requested class.
      * @return mixed|null|object

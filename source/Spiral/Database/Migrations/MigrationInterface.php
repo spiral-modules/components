@@ -27,7 +27,7 @@ interface MigrationInterface
      *
      * @return StatusInterface|null
      */
-    public function getStatus();
+    public function status();
 
     /**
      * Executing migration.

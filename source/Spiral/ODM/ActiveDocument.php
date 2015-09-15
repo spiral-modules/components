@@ -201,7 +201,7 @@ class ActiveDocument extends Document implements ActiveEntityInterface
     }
 
     /**
-     * Find multiple documents based on provided query.
+     * Find multiple documents based on provided query. Selection might return parent documents.
      *
      * @param mixed $query Fields and conditions to filter by.
      * @return Collection
@@ -215,31 +215,42 @@ class ActiveDocument extends Document implements ActiveEntityInterface
     /**
      * Find one document based on provided query and sorting.
      *
-     * @param array $query  Fields and conditions to filter by.
-     * @param array $sortBy Sorting.
+     * @param array $query     Fields and conditions to filter by.
+     * @param array $sortBy    Sorting.
+     * @param bool  $keepChain Only same class or child must be returned, parent document must be
+     *                         ignored.
      * @return static|null
      * @throws ODMException
      */
-    public static function findOne(array $query = [], array $sortBy = [])
+    public static function findOne(array $query = [], array $sortBy = [], $keepChain = true)
     {
-        return static::find($query)->sortBy($sortBy)->findOne();
+        $document = static::find($query)->sortBy($sortBy)->findOne();
+
+        if ($keepChain && !$document instanceof static) {
+            //Parent document found
+            return null;
+        }
+
+        return $document;
     }
 
     /**
      * Find document using it's primary key.
      *
-     * @param mixed $mongoID Valid MongoId, string value must be automatically converted to MongoId
-     *                       object.
+     * @param mixed $mongoID   Valid MongoId, string value must be automatically converted to
+     *                         MongoId object.
+     * @param bool  $keepChain Only same class or child must be returned, parent document must be
+     *                         ignored.
      * @return static|null
      * @throws ODMException
      */
-    public static function findByPK($mongoID)
+    public static function findByPK($mongoID, $keepChain = true)
     {
         if (!$mongoID = ODM::mongoID($mongoID)) {
             return null;
         }
 
-        return static::findOne(['_id' => $mongoID]);
+        return static::findOne(['_id' => $mongoID], [], $keepChain);
     }
 
     /**

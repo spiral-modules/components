@@ -253,6 +253,11 @@ class DocumentSchema extends ReflectionEntity
                 );
             }
 
+            if (!empty($options[ActiveDocument::MANY])) {
+                //Aggregation may select parent document
+                $class = $document->getParent(true)->getName();
+            }
+
             $aggregations[$field] = [
                 'type'       => isset($options[ActiveDocument::ONE]) ? ActiveDocument::ONE : ActiveDocument::MANY,
                 'class'      => $class,

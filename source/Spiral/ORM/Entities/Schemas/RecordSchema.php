@@ -606,6 +606,11 @@ class RecordSchema extends ReflectionEntity
             return $driver::DEFAULT_DATETIME;
         }
 
+        if ($column->abstractType() == 'enum') {
+            //We can use first enum value as default
+            return $column->getEnumValues()[0];
+        }
+
         switch ($column->phpType()) {
             case 'int':
                 return 0;

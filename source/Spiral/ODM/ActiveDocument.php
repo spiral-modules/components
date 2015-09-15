@@ -51,10 +51,10 @@ class ActiveDocument extends Document implements ActiveEntityInterface
 
     /**
      * @see Component::staticContainer()
-     * @param array                                     $fields
+     * @param array                                           $fields
      * @param CompositableInterface|ActiveDocument|DataEntity $parent
-     * @param ODM                                       $odm
-     * @param array                                     $odmSchema
+     * @param ODM                                             $odm
+     * @param array                                           $odmSchema
      */
     public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
     {
@@ -152,7 +152,9 @@ class ActiveDocument extends Document implements ActiveEntityInterface
         }
 
         $this->fire('deleting');
-        $this->isLoaded() && $this->odmCollection($this->odm)->remove(['_id' => $this->primaryKey()]);
+        if ($this->isLoaded()) {
+            $this->odmCollection($this->odm)->remove(['_id' => $this->primaryKey()]);
+        }
         $this->fields = $this->odmSchema()[ODM::D_DEFAULTS];
         $this->fire('deleted');
     }

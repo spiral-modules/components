@@ -9,6 +9,8 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Entities\Table;
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
 use Spiral\ORM\Entities\Relation;
 use Spiral\ORM\Exceptions\RelationException;
@@ -21,6 +23,11 @@ use Spiral\ORM\Record;
  */
 class ManyToMany extends Relation
 {
+    /**
+     * Connection errors.
+     */
+    use LoggerTrait;
+
     /**
      * Relation type, required to fetch record class from relation definition.
      */
@@ -107,7 +114,11 @@ class ManyToMany extends Relation
                  * In future this statement should be optimized to use batchInsert in cases when
                  * set of columns for every record is the same.
                  */
-                $this->pivotTable()->insert($pivotRow);
+                try {
+                    $this->pivotTable()->insert($pivotRow);
+                } catch (QueryException $exception) {
+                    $this->logger()->error($exception->getMessage());
+                }
             }
         }
     }
@@ -139,7 +150,11 @@ class ManyToMany extends Relation
 
         foreach ($pivotRows as $recordID => $pivotRow) {
             if (!in_array($recordID, $linkedIDs)) {
-                $this->pivotTable()->insert($pivotRow);
+                try {
+                    $this->pivotTable()->insert($pivotRow);
+                } catch (QueryException $exception) {
+                    $this->logger()->error($exception->getMessage());
+                }
             } else {
                 //Updating connection
                 $this->pivotTable()->update(

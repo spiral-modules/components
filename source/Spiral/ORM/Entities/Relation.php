@@ -366,6 +366,14 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     }
 
     /**
+     * {@inheritdoc}
+     */
+    protected function container()
+    {
+        return $this->orm->container();
+    }
+
+    /**
      * Class name of outer record.
      *
      * @return string

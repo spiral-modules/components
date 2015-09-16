@@ -257,6 +257,7 @@ class ManyToMany extends Relation
             $query[$this->definition[Record::THOUGHT_INNER_KEY]] = $innerKey;
         }
 
+        //TODO: Where alias!
         if ($wherePivot && !empty($this->definition[Record::WHERE_PIVOT])) {
             //Custom where pivot conditions
             $query = $query + $this->definition[Record::WHERE_PIVOT];

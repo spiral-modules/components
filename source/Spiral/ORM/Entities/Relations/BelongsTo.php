@@ -36,6 +36,19 @@ class BelongsTo extends HasOne
         return $this->loaded;
     }
 
+
+    /**
+     * {@inheritdoc}
+     *
+     * Relation will automatically create related record if relation is not nullable. Usually
+     * applied for has one relations ($user->profile).
+     */
+    public function getRelated()
+    {
+        //TODO: CHECK ENTITY CACHE
+        return parent::getRelated();
+    }
+
     /**
      * {@inheritdoc}
      *

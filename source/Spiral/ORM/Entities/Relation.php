@@ -448,4 +448,30 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     {
         return new Selector($this->orm, $this->getClass());
     }
+
+    /**
+     * Replace {@} in where statement with valid alias.
+     *
+     * @param string $alias
+     * @param array  $where
+     * @return array
+     */
+    protected function mountAlias($alias, array $where)
+    {
+        $result = [];
+
+        foreach ($where as $key => $value) {
+            if (strpos($key, '{@}') !== false) {
+                $key = str_replace('{@}', $alias, $key);
+            }
+
+            if (is_array($value)) {
+                $value = $this->mountAlias($alias, $where);
+            }
+
+            $result[$key] = $value;
+        }
+
+        return $result;
+    }
 }

@@ -36,7 +36,9 @@ class HasMany extends HasOne
         $selector = parent::createSelector();
 
         if (isset($this->definition[Record::WHERE])) {
-            $selector->where($this->definition[Record::WHERE]);
+            $selector->where(
+                $this->mountAlias($selector->getPrimaryAlias(), $this->definition[Record::WHERE])
+            );
         }
 
         return $selector;

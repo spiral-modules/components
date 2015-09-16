@@ -30,7 +30,7 @@ trait ColumnsTrait
     {
         foreach ($columns as $column => $definition) {
             //Addition pivot columns must be defined same way as in Record schema
-            $column = $this->castColumn($table->column($column), $definition);
+            $column = $this->castColumn($table, $table->column($column), $definition);
 
             if (!empty($defaults[$column->getName()])) {
                 $column->defaultValue($defaults[$column->getName()]);
@@ -42,13 +42,14 @@ trait ColumnsTrait
      * Cast (specify) column schema based on provided column definition. Column definition are
      * compatible with database Migrations, AbstractColumn types and Record schema.
      *
+     * @param AbstractTable  $table
      * @param AbstractColumn $column
      * @param string         $definition
      * @return AbstractColumn
      * @throws DefinitionException
      * @throws \Spiral\Database\Exceptions\SchemaException
      */
-    protected function castColumn(AbstractColumn $column, $definition)
+    private function castColumn(AbstractTable $table, AbstractColumn $column, $definition)
     {
         //Expression used to declare column type, easy to read
         $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i';
@@ -75,10 +76,48 @@ trait ColumnsTrait
             !empty($type['options']) ? $type['options'] : []
         );
 
-        /**
-         * No default value is casted for columns created by relations.
-         */
+        //Default value
+        if (!$column->hasDefaultValue() && !$column->isNullable()) {
+            //Ouch, columns like that can break synchronization!
+            $column->defaultValue($this->castDefault($table, $column));
+        }
 
         return $column;
+    }
+
+    /**
+     * Cast default value based on column type. Required to prevent conflicts when not nullable
+     * column added to existed table with data in.
+     *
+     * @param AbstractTable  $table
+     * @param AbstractColumn $column
+     * @return bool|float|int|mixed|string
+     */
+    private function castDefault(AbstractTable $table, AbstractColumn $column)
+    {
+        if ($column->abstractType() == 'timestamp' || $column->abstractType() == 'datetime') {
+            $driver = $table->driver();
+
+            return $driver::DEFAULT_DATETIME;
+        }
+
+        if ($column->abstractType() == 'enum') {
+            //We can use first enum value as default
+            return $column->getEnumValues()[0];
+        }
+
+        switch ($column->phpType()) {
+            case 'int':
+                return 0;
+                break;
+            case 'float':
+                return 0.0;
+                break;
+            case 'bool':
+                return false;
+                break;
+        }
+
+        return '';
     }
 }

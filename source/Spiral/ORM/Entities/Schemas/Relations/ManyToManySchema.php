@@ -96,7 +96,7 @@ class ManyToManySchema extends RelationSchema
         //Set of default values to be used for pivot table
         Record::PIVOT_DEFAULTS    => [],
         //WHERE statement in a form of simplified array definition to be applied to pivot table
-        //data. Not used by default in has() and hasEach() methods.
+        //data.
         Record::WHERE_PIVOT       => [],
         //WHERE statement to be applied for data in outer data while loading relation data
         //can not be inversed. Attention, WHERE conditions not used in has(), link() and sync()

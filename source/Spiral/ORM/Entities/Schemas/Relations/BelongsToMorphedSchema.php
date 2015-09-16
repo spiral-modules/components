@@ -10,6 +10,7 @@ namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
+use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
 
 /**
@@ -128,5 +129,26 @@ class BelongsToMorphedSchema extends MorphedSchema
             //Compound index may help with performance
             $innerSchema->index($this->getMorphKey(), $this->getInnerKey());
         }
+    }
+
+    /**
+     * Normalize schema definition into light cachable form.
+     *
+     * @return array
+     */
+    protected function normalizeDefinition()
+    {
+        $definition = parent::normalizeDefinition();
+        if (empty($this->outerRecords())) {
+            return $definition;
+        }
+
+        //We should only check first record since they all must follow same key
+        if ($this->getOuterKey() == $this->outerRecords()[0]->getPrimaryKey()) {
+            //Linked using primary key
+            $definition[ORM::M_PRIMARY_KEY] = $this->getOuterKey();
+        }
+
+        return $definition;
     }
 }

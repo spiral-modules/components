@@ -200,10 +200,11 @@ interface FilesInterface
     /**
      * Create the most normalized version for path to file or location.
      *
-     * @param string $path File or location path.
+     * @param string $path      File or location path.
+     * @param bool   $directory Path points to directory.
      * @return string
      */
-    public function normalizePath($path);
+    public function normalizePath($path, $directory = false);
 
     /**
      * Get relative location based on absolute path.

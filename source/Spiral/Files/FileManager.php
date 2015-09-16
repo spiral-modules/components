@@ -297,12 +297,12 @@ class FileManager extends Singleton implements FilesInterface
     /**
      * {@inheritdoc}
      */
-    public function normalizePath($path)
+    public function normalizePath($path, $directory = false)
     {
         $path = str_replace('\\', '/', $path);
 
         //Potentially open links and ../ type directories?
-        return rtrim(preg_replace('/\/+/', '/', $path), '/');
+        return rtrim(preg_replace('/\/+/', '/', $path), '/') . ($directory ? '/' : '');
     }
 
     /**

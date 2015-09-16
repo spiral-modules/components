@@ -18,8 +18,6 @@ use Spiral\ORM\Record;
 /**
  * Provides ability to load records related using pivot table, link, unlink and check such records.
  * Relation support WHERE_PIVOT conditions.
- *
- * @TODO: WHERE!
  */
 class ManyToMany extends Relation
 {
@@ -66,110 +64,106 @@ class ManyToMany extends Relation
      * $user->tags()->has(1);
      * $user->tags()->has([1, 2, 3, 4]);
      *
-     * @param mixed $recordID
-     * @param bool  $pivotWhere Use conditions specified by WHERE_PIVOT, disabled by default.
+     * @param mixed $outer
+     * @param bool  $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return bool
      */
-    public function has($recordID, $pivotWhere = false)
+    public function has($outer, $wherePivot = false)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(), $this->prepareIDs($recordID), $pivotWhere
+            $this->parentKey(), $this->prepareRecords($outer), $wherePivot
         ));
 
         //We can use hasEach methods there, but this is more optimal way
-        return $selectQuery->count() == count($recordID);
+        return $selectQuery->count() == count($outer);
     }
 
     /**
-     * Return only list of outer keys which are linked.
-     *
-     * Attention, WHERE_PIVOT conditions are not used here by default, use "pivotWhere" argument to
-     * check with conditions!
-     *
-     * Attention #2, WHERE conditions are not involved in has, link and other methods!
-     *
-     * Examples:
-     * $user->tags()->hasEach($tag);
-     * $user->tags()->hasEach([$tagA, $tagB]);
-     * $user->tags()->hasEach(1);
-     * $user->tags()->hasEach([1, 2, 3, 4]);
-     *
-     * @param mixed $recordIDs
-     * @param bool  $pivotWhere Use conditions specified by WHERE_PIVOT, disabled by default.
-     * @return array
-     */
-    public function hasEach($recordIDs, $pivotWhere = false)
-    {
-        $selectQuery = $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(),
-            $this->prepareIDs($recordIDs),
-            $pivotWhere
-        ));
-
-        $selectQuery->columns($this->definition[Record::THOUGHT_OUTER_KEY]);
-
-        $result = [];
-        foreach ($selectQuery->run() as $row) {
-            //Let's return outer key value as result
-            $result[] = $row[$this->definition[Record::THOUGHT_OUTER_KEY]];
-        }
-
-        return $result;
-    }
-
-    /**
-     * Link or update link for one of multiple related records. You can pass pivotData as additional
-     * argument or associate it with record id.
+     * Link or update link for one of multiple related records. You can pass pivotData as
+     * additional argument or associate it with record id.
      *
      * Attention!
      * This method will not follow WHERE_PIVOT conditions, you have to specify them manually.
      *
      * Examples:
-     * $user->tags->link(1);
-     * $user->tags->link($tag);
-     * $user->tags->link([1, 2], ['approved' => true]);
-     * $user->tags->link([
+     * $user->tags()->link(1);
+     * $user->tags()->link($tag);
+     * $user->tags()->link([1, 2], ['approved' => true]);
+     * $user->tags()->link([
      *      1 => ['approved' => true],
      *      2 => ['approved' => false]
      * ]);
      *
-     * If record already linked it will be updated with provided pivot data, if you disable it by
-     * providing third argument as true.
-     *
      * Method will not affect state of pre-loaded data! Use reset() method to do that.
+     * Attention, method will only link new records, use sync() to remove old and update existed
+     * connections.
      *
-     * @param mixed $recordID
+     * @see sync()
+     * @param mixed $outer
      * @param array $pivotData
-     * @param bool  $linkOnly If true no updates will be performed.
-     * @return int
      */
-    public function link($recordID, array $pivotData = [], $linkOnly = false)
+    public function link($outer, array $pivotData = [])
     {
         //I need different method here
-        $recordID = $this->prepareIDs($recordID, $pivotRows, $pivotData);
-        $existedIDs = $this->hasEach($recordID);
+        $pivotRows = $this->prepareRecords($outer, $pivotData);
+        $linkedIDs = $this->linkedIDs(array_keys($pivotRows));
 
-        $result = 0;
         foreach ($pivotRows as $recordID => $pivotRow) {
-            if (in_array($recordID, $existedIDs)) {
-                if (!$linkOnly) {
-                    //We can update
-                    $result += $this->pivotTable()->update(
-                        $pivotRow,
-                        $this->wherePivot($this->parentKey(), $recordID)
-                    )->run();
-                }
-            } else {
+            if (!in_array($recordID, $linkedIDs)) {
                 /**
                  * In future this statement should be optimized to use batchInsert in cases when
                  * set of columns for every record is the same.
                  */
                 $this->pivotTable()->insert($pivotRow);
-                $result++;
+            }
+        }
+    }
+
+    /**
+     * Method is similar to link() except will update pivot columns of alread exists records and
+     * unlink records not specified in argument.
+     *
+     * Attention!
+     * This method will not follow WHERE_PIVOT conditions, you have to specify them manually.
+     *
+     * Examples:
+     * $user->tags()->sync(1);
+     * $user->tags()->sync($tag);
+     * $user->tags()->sync([1, 2], ['approved' => true]);
+     * $user->tags()->sync([
+     *      1 => ['approved' => true],
+     *      2 => ['approved' => false]
+     * ]);
+     *
+     * Method will not affect state of pre-loaded data! Use reset() method to do that.
+     *
+     * @see link()
+     * @param mixed $outer
+     * @param array $pivotData
+     */
+    public function sync($outer, array $pivotData = [])
+    {
+        $pivotRows = $this->prepareRecords($outer, $pivotData);
+        $linkedIDs = $this->linkedIDs([]);
+
+        foreach ($pivotRows as $recordID => $pivotRow) {
+            if (!in_array($recordID, $linkedIDs)) {
+                $this->pivotTable()->insert($pivotRow);
+            } else {
+                //Updating connection
+                $this->pivotTable()->update(
+                    $pivotRow,
+                    $this->wherePivot($this->parentKey(), $recordID)
+                )->run();
             }
         }
 
-        return $result;
+        foreach ($linkedIDs as $linkedID) {
+            if (!isset($pivotRows[$linkedID])) {
+                //Unlink
+                $this->unlink($linkedID);
+            }
+        }
     }
 
     /**
@@ -189,9 +183,13 @@ class ManyToMany extends Relation
      */
     public function unlink($recordID)
     {
-        return $this->pivotTable()->delete($this->wherePivot(
-            $this->parentKey(), $this->prepareIDs($recordID), false
-        ))->run();
+        return $this->pivotTable()->delete(
+            $this->wherePivot(
+                $this->parentKey(),
+                array_keys($this->prepareRecords($recordID)),
+                false
+            )
+        )->run();
     }
 
     /**
@@ -290,51 +288,46 @@ class ManyToMany extends Relation
     }
 
     /**
-     * Helper method to fetch outer key value from provided list.
+     * Return array of record ids associated with pivot columns.
      *
-     * @param mixed $recordID
-     * @param array $pivotRows Automatically constructed pivot rows will be available here for
-     *                         insertion or update.
+     * @param mixed $records
      * @param array $pivotData
-     * @return mixed
+     * @return array
      * @throws RelationException
      */
-    protected function prepareIDs($recordID, array &$pivotRows = null, array $pivotData = [])
+    protected function prepareRecords($records, array $pivotData = [])
     {
-        if (is_scalar($recordID)) {
-            $pivotRows = [$recordID => $this->pivotRow($recordID, $pivotData)];
-
-            return $recordID;
+        if (is_scalar($records)) {
+            return [
+                $records => $this->pivotRow($records, $pivotData)
+            ];
         }
 
-        if (is_array($recordID)) {
+        if (is_array($records)) {
             $result = [];
-            foreach ($recordID as $key => $value) {
+            foreach ($records as $key => $value) {
                 if (is_scalar($value)) {
-                    $pivotRows[$value] = $this->pivotRow($value, $pivotData);
-                    $result[] = $value;
+                    $result[$value] = $this->pivotRow($value, $pivotData);
                 } else {
                     //Specified in key => pivotData format.
-                    $pivotRows[$key] = $this->pivotRow($key, $value + $pivotData);
-                    $result[] = $key;
+                    $result[$key] = $this->pivotRow($key, $value + $pivotData);
                 }
             }
 
             return $result;
         }
 
-        if (is_object($recordID) && get_class($recordID) != $this->getClass()) {
+        if (is_object($records) && get_class($records) != $this->getClass()) {
             throw new RelationException(
                 "Relation can work only with instances of '{$this->getClass()}' record."
             );
         }
 
-        $recordID = $recordID->getField($this->definition[Record::OUTER_KEY]);
+        $records = $records->getField($this->definition[Record::OUTER_KEY]);
 
-        //To be inserted later
-        $pivotRows = [$recordID => $this->pivotRow($recordID, $pivotData)];
-
-        return $recordID;
+        return [
+            $records => $this->pivotRow($records, $pivotData)
+        ];
     }
 
     /**
@@ -389,4 +382,28 @@ class ManyToMany extends Relation
             $this->definition[Record::PIVOT_TABLE]
         );
     }
+
+    /**
+     * Fetch keys of linked records.
+     *
+     * @param array $outerIDs
+     * @return array
+     */
+    protected function linkedIDs(array $outerIDs)
+    {
+        $selectQuery = $this->pivotTable()->where(
+            $this->wherePivot($this->parentKey(), $outerIDs, false)
+        );
+
+        $selectQuery->columns($this->definition[Record::THOUGHT_OUTER_KEY]);
+
+        $result = [];
+        foreach ($selectQuery->run() as $row) {
+            //Let's return outer key value as result
+            $result[] = $row[$this->definition[Record::THOUGHT_OUTER_KEY]];
+        }
+
+        return $result;
+    }
+
 }

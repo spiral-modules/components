@@ -218,26 +218,6 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * Array or multiple arguments of records or records id to be check if they are presented in
-     * iteration.
-     *
-     * @param array|mixed $records
-     * @return bool
-     */
-    public function hasEach($records)
-    {
-        $records = is_array($records) ? $records : func_get_args();
-
-        foreach ($records as $record) {
-            if (!$this->has($record)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Executes decorated method providing itself as function argument.
      *
      * @param string $method

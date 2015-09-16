@@ -218,11 +218,10 @@ class ManyToMorphed implements RelationInterface
      *
      * @param Record $record
      * @param array  $pivotData Custom pivot data.
-     * @return int
      */
     public function link(Record $record, array $pivotData = [])
     {
-        return $this->morphed($record->recordRole())->link($record, $pivotData);
+        $this->morphed($record->recordRole())->link($record, $pivotData);
     }
 
     /**

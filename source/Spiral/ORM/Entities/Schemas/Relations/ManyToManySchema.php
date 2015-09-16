@@ -94,10 +94,11 @@ class ManyToManySchema extends RelationSchema
         //type as you using for your records
         Record::PIVOT_COLUMNS     => [],
         //WHERE statement in a form of simplified array definition to be applied to pivot table
-        //data
+        //data. Not used by default in has() and hasEach() methods.
         Record::WHERE_PIVOT       => [],
         //WHERE statement to be applied for data in outer data while loading relation data
-        //can not be inversed
+        //can not be inversed. Attention, WHERE conditions not used in has(), link() and sync()
+        //methods.
         Record::WHERE             => []
     ];
 

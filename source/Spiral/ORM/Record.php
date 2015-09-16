@@ -569,6 +569,7 @@ class Record extends DataEntity implements ActiveEntityInterface
             return $this->relations[$name];
         }
 
+
         //Constructing relation
         if (!isset($this->ormSchema[ORM::M_RELATIONS][$name])) {
             throw new RecordException(
@@ -577,7 +578,6 @@ class Record extends DataEntity implements ActiveEntityInterface
         }
 
         $relation = $this->ormSchema[ORM::M_RELATIONS][$name];
-
         return $this->relations[$name] = $this->orm->relation(
             $relation[ORM::R_TYPE],
             $this,

@@ -39,7 +39,10 @@ class HasOne extends Relation
             }
         }
 
-        $this->deassociate();
+        if (!empty($this->instance) && $this->instance != $related) {
+            $this->deassociate();
+        }
+
         parent::associate($related);
         $this->mountRelation($related);
     }

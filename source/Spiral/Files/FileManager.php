@@ -41,7 +41,7 @@ class FileManager extends Singleton implements FilesInterface
     /**
      * {@inheritdoc}
      *
-     * @param bool $recursively Every created directory will get specified permissions.
+     * @param bool $recursive Every created directory will get specified permissions.
      */
     public function ensureLocation($location, $mode = self::RUNTIME, $recursive = true)
     {

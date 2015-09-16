@@ -53,10 +53,7 @@ class ManyToMany extends Relation
      * or instance of ActiveRecord. In case of multiple ids provided method will return true only
      * if every record is linked to relation.
      *
-     * Attention, WHERE_PIVOT conditions are not used here by default, use "pivotWhere" argument to
-     * check with conditions!
-     *
-     * Attention #2, WHERE conditions are not involved in has, link and other methods!
+     * Attention, WHERE conditions are not involved in has, link and other methods!
      *
      * Examples:
      * $user->tags()->has($tag);
@@ -65,13 +62,13 @@ class ManyToMany extends Relation
      * $user->tags()->has([1, 2, 3, 4]);
      *
      * @param mixed $outer
-     * @param bool  $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return bool
      */
-    public function has($outer, $wherePivot = false)
+    public function has($outer)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(), $this->prepareRecords($outer), $wherePivot
+            $this->parentKey(),
+            $this->prepareRecords($outer)
         ));
 
         //We can use hasEach methods there, but this is more optimal way
@@ -79,11 +76,9 @@ class ManyToMany extends Relation
     }
 
     /**
-     * Link or update link for one of multiple related records. You can pass pivotData as
-     * additional argument or associate it with record id.
-     *
-     * Attention!
-     * This method will not follow WHERE_PIVOT conditions, you have to specify them manually.
+     * Link one of multiple related records. You can pass pivotData as additional argument or
+     * associate it with record id. Connections will only be created not updated, check sync()
+     * method. Do not forget to pre-populate pivot columns if you using WHERE_PIVOT conditions.
      *
      * Examples:
      * $user->tags()->link(1);
@@ -95,8 +90,6 @@ class ManyToMany extends Relation
      * ]);
      *
      * Method will not affect state of pre-loaded data! Use reset() method to do that.
-     * Attention, method will only link new records, use sync() to remove old and update existed
-     * connections.
      *
      * @see sync()
      * @param mixed $outer
@@ -121,10 +114,8 @@ class ManyToMany extends Relation
 
     /**
      * Method is similar to link() except will update pivot columns of alread exists records and
-     * unlink records not specified in argument.
-     *
-     * Attention!
-     * This method will not follow WHERE_PIVOT conditions, you have to specify them manually.
+     * unlink records not specified in argument. Do not forget to pre-populate pivot columns if you
+     * using WHERE_PIVOT conditions.
      *
      * Examples:
      * $user->tags()->sync(1);
@@ -183,30 +174,21 @@ class ManyToMany extends Relation
      */
     public function unlink($recordID)
     {
-        return $this->pivotTable()->delete(
-            $this->wherePivot(
-                $this->parentKey(),
-                array_keys($this->prepareRecords($recordID)),
-                false
-            )
-        )->run();
+        return $this->pivotTable()->delete($this->wherePivot(
+            $this->parentKey(),
+            array_keys($this->prepareRecords($recordID))
+        ))->run();
     }
 
     /**
-     * Unlink every associated record, method will return amount of affected rows. Method will
-     * unlink only records matched WHERE_PIVOT by default. Set wherePivot to false to unlink every
-     * record.
+     * Unlink every associated record, method will return amount of affected rows. Method will not
+     * affect state of pre-loaded data! Use reset() method to do that.
      *
-     * Method will not affect state of pre-loaded data! Use reset() method to do that.
-     *
-     * @param bool $wherePivot Use conditions specified by WHERE_PIVOT, enabled by default.
      * @return int
      */
-    public function unlinkAll($wherePivot = true)
+    public function unlinkAll()
     {
-        return $this->pivotTable()->delete($this->wherePivot(
-            $this->parentKey(), null, $wherePivot
-        ))->run();
+        return $this->pivotTable()->delete($this->wherePivot($this->parentKey(), null))->run();
     }
 
     /**
@@ -256,10 +238,9 @@ class ManyToMany extends Relation
      *
      * @param mixed|array $innerKey
      * @param mixed|array $outerKey
-     * @param bool        $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return array
      */
-    protected function wherePivot($innerKey, $outerKey, $wherePivot = false)
+    protected function wherePivot($innerKey, $outerKey)
     {
         $query = [];
         if (!empty($this->definition[Record::MORPH_KEY])) {
@@ -270,7 +251,7 @@ class ManyToMany extends Relation
             $query[$this->definition[Record::THOUGHT_INNER_KEY]] = $innerKey;
         }
 
-        if ($wherePivot && !empty($this->definition[Record::WHERE_PIVOT])) {
+        if (!empty($this->definition[Record::WHERE_PIVOT])) {
             //Custom where pivot conditions
             $query = $query + $this->mountAlias(
                     $this->definition[Record::PIVOT_TABLE],
@@ -392,7 +373,7 @@ class ManyToMany extends Relation
     protected function linkedIDs(array $outerIDs)
     {
         $selectQuery = $this->pivotTable()->where(
-            $this->wherePivot($this->parentKey(), $outerIDs, false)
+            $this->wherePivot($this->parentKey(), $outerIDs)
         );
 
         $selectQuery->columns($this->definition[Record::THOUGHT_OUTER_KEY]);

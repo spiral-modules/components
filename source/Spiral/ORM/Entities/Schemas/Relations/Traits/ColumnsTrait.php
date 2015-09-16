@@ -10,6 +10,7 @@
 namespace Spiral\ORM\Entities\Schemas\Relations\Traits;
 
 use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\ORM\Exceptions\DefinitionException;
 
 /**
@@ -18,6 +19,25 @@ use Spiral\ORM\Exceptions\DefinitionException;
  */
 trait ColumnsTrait
 {
+    /**
+     * Cast table using set of columns and their default values.
+     *
+     * @param AbstractTable $table
+     * @param array         $columns
+     * @param array         $defaults
+     */
+    protected function castTable(AbstractTable $table, array $columns, array $defaults)
+    {
+        foreach ($columns as $column => $definition) {
+            //Addition pivot columns must be defined same way as in Record schema
+            $column = $this->castColumn($table->column($column), $definition);
+
+            if (!empty($defaults[$column->getName()])) {
+                $column->defaultValue($defaults[$column->getName()]);
+            }
+        }
+    }
+
     /**
      * Cast (specify) column schema based on provided column definition. Column definition are
      * compatible with database Migrations, AbstractColumn types and Record schema.

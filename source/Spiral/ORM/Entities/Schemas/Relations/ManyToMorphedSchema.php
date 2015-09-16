@@ -191,16 +191,12 @@ class ManyToMorphedSchema extends MorphedSchema
         $outerKey = $pivotTable->column($this->definition[Record::THOUGHT_OUTER_KEY]);
         $outerKey->type($this->getOuterKeyType());
 
-        foreach ($this->definition[Record::PIVOT_COLUMNS] as $column => $definition) {
-            //Addition pivot columns must be defined same way as in Record schema
-            $column = $this->castColumn($pivotTable->column($column), $definition);
-
-            if (!empty($this->definition[Record::PIVOT_DEFAULTS][$column->getName()])) {
-                $column->defaultValue(
-                    $this->definition[Record::PIVOT_DEFAULTS][$column->getName()]
-                );
-            }
-        }
+        //Casting pivot table columns
+        $this->castTable(
+            $this->pivotSchema(),
+            $this->definition[Record::PIVOT_COLUMNS],
+            $this->definition[Record::PIVOT_DEFAULTS]
+        );
 
         //Complex index
         if ($this->isIndexed()) {

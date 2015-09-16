@@ -188,16 +188,12 @@ class ManyToManySchema extends RelationSchema
         $innerKey = $pivotTable->column($this->definition[Record::THOUGHT_INNER_KEY]);
         $innerKey->type($this->getInnerKeyType());
 
-        foreach ($this->definition[Record::PIVOT_COLUMNS] as $column => $definition) {
-            //Addition pivot columns must be defined same way as in Record schema
-            $column = $this->castColumn($pivotTable->column($column), $definition);
-
-            if (!empty($this->definition[Record::PIVOT_DEFAULTS][$column->getName()])) {
-                $column->defaultValue(
-                    $this->definition[Record::PIVOT_DEFAULTS][$column->getName()]
-                );
-            }
-        }
+        //Casting pivot table columns
+        $this->castTable(
+            $this->pivotSchema(),
+            $this->definition[Record::PIVOT_COLUMNS],
+            $this->definition[Record::PIVOT_DEFAULTS]
+        );
 
         if (!$this->isConstrained() || $this->hasMorphKey()) {
             //Either not need to create constraint or it relation is polymorphic, we also

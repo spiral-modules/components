@@ -37,30 +37,9 @@ class HasOne extends Relation
                     "Unable to de-associate relation data, relation is not nullable."
                 );
             }
-
-            $related = $this->getRelated();
-            if ($related instanceof Record) {
-                $related->setField($this->definition[Record::OUTER_KEY], null, false);
-
-                if (isset($this->definition[Record::MORPH_KEY])) {
-                    //Dropping morph key value
-                    $related->setField($this->definition[Record::MORPH_KEY], null);
-                }
-
-                if (!$related->save()) {
-                    throw new RelationException(
-                        "Unable to de-associate existed and already related record, unable to save."
-                    );
-                }
-            }
-
-            $this->loaded = true;
-            $this->instance = null;
-            $this->data = [];
-
-            return;
         }
 
+        $this->deassociate();
         parent::associate($related);
         $this->mountRelation($related);
     }
@@ -130,5 +109,31 @@ class HasOne extends Relation
         );
 
         return $selector;
+    }
+
+    /**
+     * De associate related record.
+     */
+    protected function deassociate()
+    {
+        $related = $this->getRelated();
+        if ($related instanceof Record) {
+            $related->setField($this->definition[Record::OUTER_KEY], null, false);
+
+            if (isset($this->definition[Record::MORPH_KEY])) {
+                //Dropping morph key value
+                $related->setField($this->definition[Record::MORPH_KEY], null);
+            }
+
+            if (!$related->save()) {
+                throw new RelationException(
+                    "Unable to de-associate existed and already related record, unable to save."
+                );
+            }
+        }
+
+        $this->loaded = true;
+        $this->instance = null;
+        $this->data = [];
     }
 }

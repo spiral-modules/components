@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\ORM\Entities\Traits\AliasTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
@@ -19,6 +20,11 @@ use Spiral\ORM\RelationInterface;
  */
 abstract class Relation implements RelationInterface, \Countable, \IteratorAggregate, \JsonSerializable
 {
+    /**
+     * {@} table aliases.
+     */
+    use AliasTrait;
+
     /**
      * Relation type, required to fetch record class from relation definition.
      */
@@ -447,31 +453,5 @@ abstract class Relation implements RelationInterface, \Countable, \IteratorAggre
     protected function createSelector()
     {
         return new Selector($this->orm, $this->getClass());
-    }
-
-    /**
-     * Replace {@} in where statement with valid alias.
-     *
-     * @param string $alias
-     * @param array  $where
-     * @return array
-     */
-    protected function mountAlias($alias, array $where)
-    {
-        $result = [];
-
-        foreach ($where as $key => $value) {
-            if (strpos($key, '{@}') !== false) {
-                $key = str_replace('{@}', $alias, $key);
-            }
-
-            if (is_array($value)) {
-                $value = $this->mountAlias($alias, $where);
-            }
-
-            $result[$key] = $value;
-        }
-
-        return $result;
     }
 }

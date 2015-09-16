@@ -461,29 +461,6 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
-     * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
-     * loading method.
-     *
-     * @see findByPK()
-     * @param array $where Selection WHERE statement.
-     * @return Record|null
-     */
-    public function findOne(array $where = [])
-    {
-        if (!empty($where)) {
-            $this->where($where);
-        }
-
-        $data = $this->limit(1)->fetchData();
-        if (empty($data)) {
-            return null;
-        }
-
-        return $this->orm->record($this->class, $data[0]);
-    }
-
-    /**
      * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
      * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
      *
@@ -502,7 +479,28 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             );
         }
 
-        if (empty($data = $this->where($primaryKey, $id)->fetchData())) {
+        //No limit here
+        return $this->findOne([$primaryKey => $id], false);
+    }
+
+    /**
+     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
+     * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
+     * loading method.
+     *
+     * @see findByPK()
+     * @param array $where    Selection WHERE statement.
+     * @param bool  $setLimit Use limit 1.
+     * @return Record|null
+     */
+    public function findOne(array $where = [], $setLimit = true)
+    {
+        if (!empty($where)) {
+            $this->where($where);
+        }
+
+        $data = $this->limit($setLimit ? 1 : null)->fetchData();
+        if (empty($data)) {
             return null;
         }
 

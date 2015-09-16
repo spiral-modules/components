@@ -18,6 +18,8 @@ use Spiral\ORM\Record;
 /**
  * Provides ability to load records related using pivot table, link, unlink and check such records.
  * Relation support WHERE_PIVOT conditions.
+ *
+ * @TODO: WHERE!
  */
 class ManyToMany extends Relation
 {
@@ -49,23 +51,14 @@ class ManyToMany extends Relation
     }
 
     /**
-     * Count method will work with pivot table directly.
-     *
-     * @return int
-     */
-    public function count()
-    {
-        return $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(), null
-        ))->count();
-    }
-
-    /**
      * Check if Record(s) associated with this relation. Method can accept one id, array of ids,
      * or instance of ActiveRecord. In case of multiple ids provided method will return true only
      * if every record is linked to relation.
      *
-     * Attention, WHERE_PIVOT will not be used by default, you must force it.
+     * Attention, WHERE_PIVOT conditions are not used here by default, use "pivotWhere" argument to
+     * check with conditions!
+     *
+     * Attention #2, WHERE conditions are not involved in has, link and other methods!
      *
      * Examples:
      * $user->tags()->has($tag);
@@ -74,13 +67,13 @@ class ManyToMany extends Relation
      * $user->tags()->has([1, 2, 3, 4]);
      *
      * @param mixed $recordID
-     * @param bool  $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
+     * @param bool  $pivotWhere Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return bool
      */
-    public function has($recordID, $wherePivot = false)
+    public function has($recordID, $pivotWhere = false)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
-            $this->parentKey(), $this->prepareIDs($recordID), $wherePivot
+            $this->parentKey(), $this->prepareIDs($recordID), $pivotWhere
         ));
 
         //We can use hasEach methods there, but this is more optimal way
@@ -89,7 +82,11 @@ class ManyToMany extends Relation
 
     /**
      * Return only list of outer keys which are linked.
-     * Attention, WHERE_PIVOT will not be used by default, you must force it.
+     *
+     * Attention, WHERE_PIVOT conditions are not used here by default, use "pivotWhere" argument to
+     * check with conditions!
+     *
+     * Attention #2, WHERE conditions are not involved in has, link and other methods!
      *
      * Examples:
      * $user->tags()->hasEach($tag);
@@ -98,15 +95,15 @@ class ManyToMany extends Relation
      * $user->tags()->hasEach([1, 2, 3, 4]);
      *
      * @param mixed $recordIDs
-     * @param bool  $wherePivot Use conditions specified by WHERE_PIVOT, disabled by default.
+     * @param bool  $pivotWhere Use conditions specified by WHERE_PIVOT, disabled by default.
      * @return array
      */
-    public function hasEach($recordIDs, $wherePivot = false)
+    public function hasEach($recordIDs, $pivotWhere = false)
     {
         $selectQuery = $this->pivotTable()->where($this->wherePivot(
             $this->parentKey(),
             $this->prepareIDs($recordIDs),
-            $wherePivot
+            $pivotWhere
         ));
 
         $selectQuery->columns($this->definition[Record::THOUGHT_OUTER_KEY]);
@@ -222,11 +219,29 @@ class ManyToMany extends Relation
         //For Many-to-Many relation we have to use custom loader to parse data, this is ONLY for
         //this type of relation
         $loader = new ManyToManyLoader($this->orm, '', $this->definition);
-
-        return $loader->createSelector($this->parentRole())->where(
+        $selector = $loader->createSelector($this->parentRole())->where(
             $loader->getPivotAlias() . '.' . $this->definition[Record::THOUGHT_INNER_KEY],
             $this->parentKey()
         );
+
+        //Conditions
+        if (!empty($this->definition[Record::WHERE_PIVOT])) {
+            //Custom where pivot conditions
+            $selector->onWhere($this->mountAlias(
+                $loader->getPivotAlias(),
+                $this->definition[Record::WHERE_PIVOT]
+            ));
+        }
+
+        if (!empty($this->definition[Record::WHERE])) {
+            //Custom where pivot conditions
+            $selector->where($this->mountAlias(
+                $loader->getAlias(),
+                $this->definition[Record::WHERE]
+            ));
+        }
+
+        return $selector;
     }
 
     /**
@@ -257,10 +272,12 @@ class ManyToMany extends Relation
             $query[$this->definition[Record::THOUGHT_INNER_KEY]] = $innerKey;
         }
 
-        //TODO: Where alias!
         if ($wherePivot && !empty($this->definition[Record::WHERE_PIVOT])) {
             //Custom where pivot conditions
-            $query = $query + $this->definition[Record::WHERE_PIVOT];
+            $query = $query + $this->mountAlias(
+                    $this->definition[Record::PIVOT_TABLE],
+                    $this->definition[Record::WHERE_PIVOT]
+                );
         }
 
         if (!empty($outerKey)) {

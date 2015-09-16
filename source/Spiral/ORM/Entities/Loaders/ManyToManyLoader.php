@@ -225,7 +225,7 @@ class ManyToManyLoader extends Loader
         }
 
         if (!empty($this->definition[Record::WHERE_PIVOT])) {
-            //Relation WHERE conditions
+            //Relation WHERE_PIVOT conditions
             $router->where($this->definition[Record::WHERE_PIVOT]);
         }
 
@@ -243,7 +243,7 @@ class ManyToManyLoader extends Loader
     {
         //Let's use where decorator to set conditions, it will automatically route tokens to valid
         //destination (JOIN or WHERE)
-        $router = new WhereDecorator(
+        $decorator = new WhereDecorator(
             $selector,
             $this->isJoinable() ? 'onWhere' : 'where',
             $this->getAlias()
@@ -251,11 +251,11 @@ class ManyToManyLoader extends Loader
 
         if (!empty($this->definition[Record::WHERE])) {
             //Relation WHERE conditions
-            $router->where($this->definition[Record::WHERE]);
+            $decorator->where($this->definition[Record::WHERE]);
         }
 
         //User specified WHERE conditions
-        !empty($this->options['where']) && $router->where($this->options['where']);
+        !empty($this->options['where']) && $decorator->where($this->options['where']);
     }
 
     /**

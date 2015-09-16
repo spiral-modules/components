@@ -1085,7 +1085,7 @@ class Record extends DataEntity implements ActiveEntityInterface
      * @param ORM $orm ORM component, global container will be called if not instance provided.
      * @return Selector
      * @throws ORMException
-     * @event selector(Selector $collection)
+     * @event selector(Selector $selector)
      */
     public static function ormSelector(ORM $orm = null)
     {

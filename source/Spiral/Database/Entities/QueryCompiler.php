@@ -673,12 +673,14 @@ class QueryCompiler extends Component
      */
     private function resolveOperator($value, $operator)
     {
-        if (
-            $value === null
-            || ($value instanceof ParameterInterface && $value->getValue() === null)
-        ) {
-            $operator = $operator == '=' ? 'IS' : 'IS NOT';
-        }
+        /**
+         * if (
+         * $value === null
+         * || ($value instanceof ParameterInterface && $value->getValue() === null)
+         * ) {
+         * $operator = $operator == '=' ? 'IS' : 'IS NOT';
+         * }
+         */
 
         if (
             $operator == '='

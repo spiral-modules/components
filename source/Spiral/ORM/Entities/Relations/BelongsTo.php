@@ -13,6 +13,9 @@ use Spiral\ORM\Record;
 
 /**
  * Represents simple BELONGS_TO relation with ability to associate and de-associate parent.
+ *
+ * @todo: Check if relation has inversed version and bypass parent data into it to avoid looped
+ *        queries.
  */
 class BelongsTo extends HasOne
 {

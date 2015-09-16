@@ -23,7 +23,7 @@ use Spiral\ORM\Exceptions\RelationException;
 use Spiral\Validation\ValidatesInterface;
 
 /**
- * Record is base data record for ORM component, it used to describe related table schema,
+ * Record is base data entity for ORM component, it used to describe related table schema,
  * filters, validations and relations to other records. You can count Record class as ActiveRecord
  * pattern. ORM component will automatically analyze existed Documents and create cached version of
  * their schema.

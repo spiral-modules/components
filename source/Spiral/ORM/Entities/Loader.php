@@ -331,20 +331,6 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * Filter function should be applied to primary key values.
-     *
-     * @return callable
-     */
-    public function getPrimaryFilter()
-    {
-        if (!isset($this->schema[ORM::M_PRIMARY_FILTER])) {
-            return null;
-        }
-
-        return $this->schema[ORM::M_PRIMARY_FILTER];
-    }
-
-    /**
      * Pre-load data on inner relation or relation chain. Method automatically called by Selector,
      * see load() method.
      *

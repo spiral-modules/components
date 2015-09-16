@@ -183,24 +183,6 @@ class RecordSchema extends ReflectionEntity
     }
 
     /**
-     * Get function required to filter primary key values before sending them to database.
-     *
-     * @return string|null
-     */
-    public function getPrimaryFilter()
-    {
-        if (empty($column = $this->getPrimaryKey())) {
-            return null;
-        }
-
-        if (empty($filter = $this->getSetters()[$column])) {
-            return null;
-        }
-
-        return $filter;
-    }
-
-    /**
      * Get declared indexes. This may not be the same set of indexes as in associated table schema,
      * use RecordSchema->tableSchema()->getIndexes() method to get real table indexes.
      *

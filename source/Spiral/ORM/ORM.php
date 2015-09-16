@@ -53,19 +53,18 @@ class ORM extends Singleton
     /**
      * Normalized record constants.
      */
-    const M_ROLE_NAME          = 0;
-    const M_TABLE              = 1;
-    const M_DB                 = 2;
-    const M_COLUMNS            = 3;
-    const M_HIDDEN             = 4;
-    const M_SECURED            = 5;
-    const M_FILLABLE           = 6;
-    const M_NULLABLE           = 7;
-    const M_MUTATORS           = 8;
-    const M_VALIDATES          = 9;
-    const M_RELATIONS          = 10;
-    const M_PRIMARY_KEY        = 11;
-    const M_PRIMARY_FILTER = 12;
+    const M_ROLE_NAME   = 0;
+    const M_TABLE       = 1;
+    const M_DB          = 2;
+    const M_COLUMNS     = 3;
+    const M_HIDDEN      = 4;
+    const M_SECURED     = 5;
+    const M_FILLABLE    = 6;
+    const M_NULLABLE    = 7;
+    const M_MUTATORS    = 8;
+    const M_VALIDATES   = 9;
+    const M_RELATIONS   = 10;
+    const M_PRIMARY_KEY = 11;
 
     /**
      * Normalized relation options.

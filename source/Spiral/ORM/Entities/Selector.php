@@ -505,6 +505,10 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         //Typecasting
         if (!empty($id) && !empty($filter = $this->loader->getPrimaryFilter())) {
             $id = call_user_func($filter, $id);
+
+            if (empty($id)) {
+                $id = null;
+            }
         }
 
         if (empty($data = $this->where($primaryKey, $id)->fetchData())) {

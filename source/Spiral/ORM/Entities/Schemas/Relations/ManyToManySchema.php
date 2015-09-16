@@ -93,6 +93,8 @@ class ManyToManySchema extends RelationSchema
         //Additional set of columns to be added into pivot table, you can use same column definition
         //type as you using for your records
         Record::PIVOT_COLUMNS     => [],
+        //Set of default values to be used for pivot table
+        Record::PIVOT_DEFAULTS    => [],
         //WHERE statement in a form of simplified array definition to be applied to pivot table
         //data. Not used by default in has() and hasEach() methods.
         Record::WHERE_PIVOT       => [],
@@ -188,7 +190,13 @@ class ManyToManySchema extends RelationSchema
 
         foreach ($this->definition[Record::PIVOT_COLUMNS] as $column => $definition) {
             //Addition pivot columns must be defined same way as in Record schema
-            $this->castColumn($pivotTable->column($column), $definition);
+            $column = $this->castColumn($pivotTable->column($column), $definition);
+
+            if (!empty($this->definition[Record::PIVOT_DEFAULTS][$column->getName()])) {
+                $column->defaultValue(
+                    $this->definition[Record::PIVOT_DEFAULTS][$column->getName()]
+                );
+            }
         }
 
         if (!$this->isConstrained() || $this->hasMorphKey()) {

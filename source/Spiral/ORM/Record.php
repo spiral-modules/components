@@ -105,10 +105,11 @@ class Record extends DataEntity implements ActiveEntityInterface
     const MORPH_KEY         = 903; //Morph key name
     const PIVOT_TABLE       = 904; //Pivot table name
     const PIVOT_COLUMNS     = 905; //Pre-defined pivot table columns
-    const THOUGHT_INNER_KEY = 906; //Pivot table options
-    const THOUGHT_OUTER_KEY = 907; //Pivot table options
-    const WHERE             = 908; //Where conditions
-    const WHERE_PIVOT       = 909; //Where pivot conditions
+    const PIVOT_DEFAULTS    = 906; //Pre-defined pivot table default values
+    const THOUGHT_INNER_KEY = 907; //Pivot table options
+    const THOUGHT_OUTER_KEY = 908; //Pivot table options
+    const WHERE             = 909; //Where conditions
+    const WHERE_PIVOT       = 910; //Where pivot conditions
 
     /**
      * Additional constants used to control relation schema behaviour.

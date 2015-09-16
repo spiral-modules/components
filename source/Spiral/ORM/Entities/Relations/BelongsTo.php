@@ -9,13 +9,11 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Exceptions\RelationException;
+use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
 
 /**
  * Represents simple BELONGS_TO relation with ability to associate and de-associate parent.
- *
- * @todo: Check if relation has inversed version and bypass parent data into it to avoid looped
- *        queries.
  */
 class BelongsTo extends HasOne
 {
@@ -29,6 +27,8 @@ class BelongsTo extends HasOne
      */
     public function isLoaded()
     {
+        $this->fetchFromCache();
+
         if (empty($this->parent->getField($this->definition[Record::INNER_KEY], false))) {
             return true;
         }
@@ -36,16 +36,13 @@ class BelongsTo extends HasOne
         return $this->loaded;
     }
 
-
     /**
      * {@inheritdoc}
-     *
-     * Relation will automatically create related record if relation is not nullable. Usually
-     * applied for has one relations ($user->profile).
      */
     public function getRelated()
     {
-        //TODO: CHECK ENTITY CACHE
+        $this->fetchFromCache();
+
         return parent::getRelated();
     }
 
@@ -139,5 +136,31 @@ class BelongsTo extends HasOne
         $this->loaded = true;
         $this->instance = null;
         $this->data = [];
+    }
+
+    /**
+     * Try to fetch outer model using entity cache.
+     */
+    private function fetchFromCache()
+    {
+        if (
+            $this->loaded
+            || empty($key = $this->parent->getField($this->definition[Record::INNER_KEY], false)
+            )
+        ) {
+            return;
+        }
+
+        if (empty($this->definition[ORM::M_PRIMARY_KEY])) {
+            //Linked not by primary key
+            return;
+        }
+
+        if (empty($entity = $this->orm->getEntity($this->getClass(), $key))) {
+            return;
+        }
+
+        $this->loaded = true;
+        $this->instance = $entity;
     }
 }

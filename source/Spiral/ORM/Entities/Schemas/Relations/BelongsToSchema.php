@@ -10,6 +10,7 @@ namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
+use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
 
 /**
@@ -129,5 +130,22 @@ class BelongsToSchema extends RelationSchema
 
         $foreignKey->onDelete($this->getConstraintAction());
         $foreignKey->onUpdate($this->getConstraintAction());
+    }
+
+    /**
+     * Normalize schema definition into light cachable form.
+     *
+     * @return array
+     */
+    protected function normalizeDefinition()
+    {
+        $definition = parent::normalizeDefinition();
+
+        if ($this->getOuterKey() == $this->outerRecord()->getPrimaryKey()) {
+            //Linked using primary key
+            $definition[ORM::M_PRIMARY_KEY] = $this->getOuterKey();
+        }
+
+        return $definition;
     }
 }

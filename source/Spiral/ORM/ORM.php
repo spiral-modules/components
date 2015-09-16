@@ -393,6 +393,22 @@ class ORM extends Singleton
     }
 
     /**
+     * Fetch entity from cache.
+     *
+     * @param string $class
+     * @param mixed  $primaryKey
+     * @return null|Record
+     */
+    public function getEntity($class, $primaryKey)
+    {
+        if (empty($this->entityCache[$class . '.' . $primaryKey])) {
+            return null;
+        }
+
+        return $this->entityCache[$class . '.' . $primaryKey];
+    }
+
+    /**
      * Destructing.
      */
     public function __destruct()

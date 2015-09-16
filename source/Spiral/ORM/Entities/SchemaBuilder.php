@@ -327,18 +327,19 @@ class SchemaBuilder extends Component
             }
 
             $schema = [
-                ORM::M_ROLE_NAME   => $record->getRole(),
-                ORM::M_TABLE       => $record->getTable(),
-                ORM::M_DB          => $record->getDatabase(),
-                ORM::M_PRIMARY_KEY => $record->getPrimaryKey(),
-                ORM::M_COLUMNS     => $record->getDefaults(),
-                ORM::M_HIDDEN      => $record->getHidden(),
-                ORM::M_SECURED     => $record->getSecured(),
-                ORM::M_FILLABLE    => $record->getFillable(),
-                ORM::M_NULLABLE    => $record->getNullable(),
-                ORM::M_MUTATORS    => $record->getMutators(),
-                ORM::M_VALIDATES   => $record->getValidates(),
-                ORM::M_RELATIONS   => $this->packRelations($record)
+                ORM::M_ROLE_NAME      => $record->getRole(),
+                ORM::M_TABLE          => $record->getTable(),
+                ORM::M_DB             => $record->getDatabase(),
+                ORM::M_PRIMARY_KEY    => $record->getPrimaryKey(),
+                ORM::M_PRIMARY_FILTER => $record->getPrimaryFilter(),
+                ORM::M_COLUMNS        => $record->getDefaults(),
+                ORM::M_HIDDEN         => $record->getHidden(),
+                ORM::M_SECURED        => $record->getSecured(),
+                ORM::M_FILLABLE       => $record->getFillable(),
+                ORM::M_NULLABLE       => $record->getNullable(),
+                ORM::M_MUTATORS       => $record->getMutators(),
+                ORM::M_VALIDATES      => $record->getValidates(),
+                ORM::M_RELATIONS      => $this->packRelations($record)
             ];
 
             ksort($schema);

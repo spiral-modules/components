@@ -531,7 +531,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function columnSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->construct(static::SCHEMA_COLUMN, compact('table', 'name', 'schema'));
+        return $this->container->construct(static::SCHEMA_COLUMN,
+            compact('table', 'name', 'schema'));
     }
 
     /**
@@ -544,7 +545,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function indexSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->construct(static::SCHEMA_INDEX, compact('table', 'name', 'schema'));
+        return $this->container->construct(static::SCHEMA_INDEX,
+            compact('table', 'name', 'schema'));
     }
 
     /**
@@ -557,7 +559,8 @@ abstract class Driver extends Component implements LoggerAwareInterface
      */
     public function referenceSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->construct(static::SCHEMA_REFERENCE, compact('table', 'name', 'schema'));
+        return $this->container->construct(static::SCHEMA_REFERENCE,
+            compact('table', 'name', 'schema'));
     }
 
     /**

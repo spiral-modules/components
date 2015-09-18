@@ -8,9 +8,9 @@
  */
 namespace Spiral\ODM\Accessors;
 
-use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Exceptions\AccessorException;
+use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\ODM;
 
 /**

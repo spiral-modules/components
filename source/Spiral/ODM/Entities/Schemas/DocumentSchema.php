@@ -10,12 +10,12 @@ namespace Spiral\ODM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\ODM;
 
 /**

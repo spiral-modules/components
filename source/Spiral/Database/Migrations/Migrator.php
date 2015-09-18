@@ -85,7 +85,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      * @param ContainerInterface    $container
      * @param TokenizerInterface    $tokenizer
      * @param FilesInterface        $files
-     * @param DatabaseManager      $databases
+     * @param DatabaseManager       $databases
      */
     public function __construct(
         ConfiguratorInterface $configurator,

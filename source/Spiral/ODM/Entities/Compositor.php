@@ -10,11 +10,11 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\ODM\CompositableInterface;
-use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\ODM;
 
 /**
@@ -528,7 +528,7 @@ class Compositor extends Component implements
      * state and save it as one big array of data.
      *
      * @param ActiveDocument $document
-     * @param bool     $resetState Set to true to reset compositor solid state.
+     * @param bool          $resetState Set to true to reset compositor solid state.
      * @return $this|ActiveDocument[]
      * @throws CompositorException
      */
@@ -563,7 +563,7 @@ class Compositor extends Component implements
      * data.
      *
      * @param array|ActiveDocument $query
-     * @param bool           $resetState Set to true to reset compositor solid state.
+     * @param bool                $resetState Set to true to reset compositor solid state.
      * @return $this|ActiveDocument[]
      * @throws CompositorException
      */
@@ -608,7 +608,7 @@ class Compositor extends Component implements
      * false to keep Compositor in solid state and save it as one big array of data.
      *
      * @param ActiveDocument $document
-     * @param bool     $resetState Set to true to reset compositor solid state.
+     * @param bool          $resetState Set to true to reset compositor solid state.
      * @return $this|ActiveDocument[]
      * @throws CompositorException
      */

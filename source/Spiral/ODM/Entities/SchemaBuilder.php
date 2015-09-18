@@ -10,12 +10,12 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\ODM;
 use Spiral\Tokenizer\TokenizerInterface;
 

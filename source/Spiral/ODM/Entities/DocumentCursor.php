@@ -8,9 +8,9 @@
  */
 namespace Spiral\ODM\Entities;
 
-use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\ActiveDocument;
 use Spiral\ODM\ODM;
 
 /**

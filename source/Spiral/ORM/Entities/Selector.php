@@ -48,21 +48,6 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     use LoggerTrait, BenchmarkTrait;
 
     /**
-     * Relation between count records / count rows and type of log message to be raised. This is
-     * just set of helper values used to better explain what is going on with user data.
-     *
-     * @var array
-     */
-    private $logLevels = [
-        1000 => LogLevel::CRITICAL,
-        500  => LogLevel::ALERT,
-        100  => LogLevel::NOTICE,
-        10   => LogLevel::WARNING,
-        1    => LogLevel::DEBUG,
-        0    => LogLevel::DEBUG
-    ];
-
-    /**
      * Class name of record to be loaded.
      *
      * @var string
@@ -446,9 +431,6 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         $this->benchmark($benchmark);
 
-        //To let developer know if his query is not very optimal
-        !empty($data) && $this->checkCounts(count($data), $rowsCount);
-
         //Memory freeing
         $result->close();
 
@@ -630,36 +612,6 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         return $compiler->delete(
             $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
             $this->whereTokens
-        );
-    }
-
-    /**
-     * Helper method used to verify that spiral performed optimal processing on fetched result set.
-     * If query is too complex or has a lot of inload queries system may spend much more time
-     * building valid data tree.
-     *
-     * @param int $dataCount
-     * @param int $rowsCount
-     */
-    protected function checkCounts($dataCount, $rowsCount)
-    {
-        $dataRatio = $rowsCount / $dataCount;
-        if ($dataRatio == 1) {
-            //No need to log it, everything seems fine
-            return;
-        }
-
-        $logLevel = $this->logLevels[0];
-        foreach ($this->logLevels as $ratio => $logLevel) {
-            if ($dataRatio >= $ratio) {
-                break;
-            }
-        }
-
-        $this->logger()->log(
-            $logLevel,
-            "Query resulted with {rowsCount} row(s) grouped into {dataCount} records.",
-            compact('dataCount', 'rowsCount')
         );
     }
 }

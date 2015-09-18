@@ -176,6 +176,16 @@ class QueryResult implements ResultInterface, \JsonSerializable
     }
 
     /**
+     * All results in array form. Alias for fetch all.
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->fetchAll();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function current()

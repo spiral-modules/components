@@ -9,7 +9,6 @@
 namespace Spiral\ORM\Entities;
 
 use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LogLevel;
 use Spiral\Cache\CacheInterface;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\QueryBuilder;

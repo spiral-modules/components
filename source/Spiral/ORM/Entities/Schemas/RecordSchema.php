@@ -336,7 +336,8 @@ class RecordSchema extends ReflectionEntity
 
         $relation = $this->builder->relationSchema($this, $name, $definition);
 
-        if ($relation->isReasonable()) {
+        //We can cast relation only if it's parent class has active schema
+        if ($this->isActive() && $relation->isReasonable()) {
             //Initiating required columns, foreign keys and indexes
             $relation->buildSchema();
         }

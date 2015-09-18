@@ -393,6 +393,16 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
+     * All records.
+     *
+     * @return Record[]
+     */
+    public function all()
+    {
+        return $this->getIterator()->all();
+    }
+
+    /**
      * Execute query and every related query to compile records data in tree form - every relation
      * data will be included as sub key.
      *

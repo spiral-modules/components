@@ -9,9 +9,9 @@
 namespace Spiral\Database\Migrations;
 
 /**
- * Must represent single migration status.
+ * Must represent single migration status, name and etc.
  */
-interface StatusInterface
+interface StateInterface
 {
     /**
      * Migration statues.
@@ -31,7 +31,7 @@ interface StatusInterface
      *
      * @return bool
      */
-    public function getState();
+    public function getStatus();
 
     /**
      * Get migration creation time.

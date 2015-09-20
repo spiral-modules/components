@@ -17,17 +17,17 @@ interface MigrationInterface
     /**
      * Migration status must be supplied by MigratorInterface and describe migration state.
      *
-     * @param StatusInterface $status
+     * @param StateInterface $status
      */
-    public function setStatus(StatusInterface $status);
+    public function setState(StateInterface $status);
 
     /**
      * Migration status are filled by MigratorInterface and describes status of migration. Can be
      * empty for new migrations.
      *
-     * @return StatusInterface|null
+     * @return StateInterface|null
      */
-    public function status();
+    public function getState();
 
     /**
      * Executing migration.

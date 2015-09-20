@@ -160,12 +160,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
             $migration = $this->container->construct($definition['class']);
 
             //Status
-            $migration->setStatus($this->getStatus($definition));
-
-            //Database provider
-            if ($migration instanceof Migration) {
-                $migration->setDBAL($this->databases);
-            }
+            $migration->setState($this->getStatus($definition));
 
             $migrations[$filename] = $migration;
         }
@@ -208,13 +203,13 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     public function run()
     {
         foreach ($this->getMigrations() as $migration) {
-            if ($migration->status()->getState() == StatusInterface::PENDING) {
+            if ($migration->getState()->getStatus() == StateInterface::PENDING) {
                 //Yey!
                 $migration->up();
 
                 //Registering record in database
                 $this->migrationsTable()->insert([
-                    'migration'     => $migration->status()->getName(),
+                    'migration'     => $migration->getState()->getName(),
                     'timePerformed' => new \DateTime('now')
                 ]);
 
@@ -234,13 +229,13 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
          * @var MigrationInterface $migration
          */
         foreach (array_reverse($this->getMigrations()) as $migration) {
-            if ($migration->status()->getState() == StatusInterface::EXECUTED) {
+            if ($migration->getState()->getStatus() == StateInterface::EXECUTED) {
                 //Rolling back
                 $migration->down();
 
                 //Flushing DB record
                 $this->migrationsTable()->delete([
-                    'migration' => $migration->status()->getName()
+                    'migration' => $migration->getState()->getName()
                 ])->run();
 
                 return $migration;
@@ -289,7 +284,7 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
      * Create migration status based on definition.
      *
      * @param array $definition
-     * @return StatusInterface
+     * @return StateInterface
      */
     private function getStatus(array $definition)
     {
@@ -299,17 +294,17 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
         ])->select('id', 'timePerformed')->run()->fetch();
 
         if (empty($migration['timePerformed'])) {
-            return new Status(
+            return new State(
                 $definition['name'],
-                StatusInterface::PENDING,
+                StateInterface::PENDING,
                 $definition['created'],
                 null
             );
         }
 
-        return new Status(
+        return new State(
             $definition['name'],
-            StatusInterface::EXECUTED,
+            StateInterface::EXECUTED,
             $definition['created'],
             new \DateTime(
                 $migration['timePerformed'],

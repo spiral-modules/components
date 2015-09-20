@@ -9,11 +9,11 @@
 namespace Spiral\Database\Migrations;
 
 use Spiral\Core\Component;
+use Spiral\Core\ContainerInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\DatabasesInterface;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
-use Spiral\Database\Exceptions\MigrationException;
 use Spiral\Database\Exceptions\SchemaException;
 
 /**
@@ -22,7 +22,7 @@ use Spiral\Database\Exceptions\SchemaException;
 abstract class Migration extends Component implements MigrationInterface
 {
     /**
-     * @var StatusInterface|null
+     * @var StateInterface|null
      */
     private $status = null;
 
@@ -32,25 +32,25 @@ abstract class Migration extends Component implements MigrationInterface
     protected $databases = null;
 
     /**
-     * Provide instance of database provider to migration.
-     *
-     * @param DatabaseManager $databases
+     * @invisible
+     * @var ContainerInterface
      */
-    public function setDBAL(DatabaseManager $databases)
-    {
-        if (!$databases instanceof DatabaseManager) {
-            throw new MigrationException(
-                "Spiral Migrations expect to work DatabaseProvider instance."
-            );
-        }
+    protected $container = null;
 
+    /**
+     * @param DatabaseManager    $databases
+     * @param ContainerInterface $container
+     */
+    public function __construct(DatabaseManager $databases, ContainerInterface $container)
+    {
         $this->databases = $databases;
+        $this->container = $container;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setStatus(StatusInterface $status)
+    public function setState(StateInterface $status)
     {
         $this->status = $status;
     }
@@ -58,57 +58,9 @@ abstract class Migration extends Component implements MigrationInterface
     /**
      * {@inheritdoc}
      */
-    public function status()
+    public function getState()
     {
         return $this->status;
-    }
-
-    /**
-     * Get Table abstraction from associated database.
-     *
-     * @param string      $name     Table name without prefix.
-     * @param string|null $database Database to used, keep unfilled for default database.
-     * @return Table
-     */
-    public function table($name, $database = null)
-    {
-        return $this->databases->db($database)->table($name);
-    }
-
-    /**
-     * Get instance of TableSchema associated with specific table name and migration database.
-     *
-     * @param string      $table    Table name without prefix.
-     * @param string|null $database Database to used, keep unfilled for default database.
-     * @return AbstractTable
-     */
-    public function schema($table, $database = null)
-    {
-        return $this->table($table, $database)->schema();
-    }
-
-    /**
-     * Create items in table schema or thrown and exception. No altering allowed.
-     *
-     * @param string   $table
-     * @param callable $creator
-     * @throws SchemaException
-     */
-    public function create($table, callable $creator)
-    {
-        $this->schema($table)->create($creator);
-    }
-
-    /**
-     * Alter items in table schema or thrown and exception. No creations allowed.
-     *
-     * @param string   $table
-     * @param callable $creator
-     * @throws SchemaException
-     */
-    public function alter($table, callable $creator)
-    {
-        $this->schema($table)->alter($creator);
     }
 
     /**
@@ -120,4 +72,52 @@ abstract class Migration extends Component implements MigrationInterface
      * {@inheritdoc}
      */
     abstract public function down();
+
+    /**
+     * Get Table abstraction from associated database.
+     *
+     * @param string      $name     Table name without prefix.
+     * @param string|null $database Database to used, keep unfilled for default database.
+     * @return Table
+     */
+    protected function table($name, $database = null)
+    {
+        return $this->databases->db($database)->table($name);
+    }
+
+    /**
+     * Get instance of TableSchema associated with specific table name and migration database.
+     *
+     * @param string      $table    Table name without prefix.
+     * @param string|null $database Database to used, keep unfilled for default database.
+     * @return AbstractTable
+     */
+    protected function schema($table, $database = null)
+    {
+        return $this->table($table, $database)->schema();
+    }
+
+    /**
+     * Create items in table schema or thrown and exception. No altering allowed.
+     *
+     * @param string   $table
+     * @param callable $creator
+     * @throws SchemaException
+     */
+    protected function create($table, callable $creator)
+    {
+        $this->schema($table)->create($creator);
+    }
+
+    /**
+     * Alter items in table schema or thrown and exception. No creations allowed.
+     *
+     * @param string   $table
+     * @param callable $creator
+     * @throws SchemaException
+     */
+    protected function alter($table, callable $creator)
+    {
+        $this->schema($table)->alter($creator);
+    }
 }

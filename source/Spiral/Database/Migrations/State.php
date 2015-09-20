@@ -11,7 +11,7 @@ namespace Spiral\Database\Migrations;
 /**
  * Default implementation of migration status interface.
  */
-class Status implements StatusInterface
+class State implements StateInterface
 {
     /**
      * @var string
@@ -21,7 +21,7 @@ class Status implements StatusInterface
     /**
      * @var bool
      */
-    private $state = self::PENDING;
+    private $status = self::PENDING;
 
     /**
      * @var \DateTime|null
@@ -35,18 +35,18 @@ class Status implements StatusInterface
 
     /**
      * @param string    $name
-     * @param bool      $state
+     * @param bool      $status
      * @param \DateTime $timeCreated
      * @param \DateTime $timeExecuted
      */
     public function __construct(
         $name,
-        $state,
+        $status,
         \DateTime $timeCreated,
         \DateTime $timeExecuted = null
     ) {
         $this->name = $name;
-        $this->state = $state;
+        $this->status = $status;
         $this->timeCreated = $timeCreated;
         $this->timeExecuted = $timeExecuted;
     }
@@ -62,9 +62,9 @@ class Status implements StatusInterface
     /**
      * {@inheritdoc}
      */
-    public function getState()
+    public function getStatus()
     {
-        return $this->state;
+        return $this->status;
     }
 
     /**

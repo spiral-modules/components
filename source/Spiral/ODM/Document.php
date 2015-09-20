@@ -648,6 +648,14 @@ abstract class Document extends DataEntity implements CompositableInterface
     /**
      * {@inheritdoc}
      */
+    public function defaultValue()
+    {
+        return $this->odmSchema[ODM::D_DEFAULTS];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function isValid()
     {
         $this->validate();

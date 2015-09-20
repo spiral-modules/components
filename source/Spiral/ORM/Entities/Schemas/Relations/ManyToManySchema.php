@@ -175,7 +175,7 @@ class ManyToManySchema extends RelationSchema
 
         //Thought outer key points to inner key in outer record (outer key)
         $outerKey = $pivotTable->column($this->definition[Record::THOUGHT_OUTER_KEY]);
-        $outerKey->type($this->getOuterKeyType());
+        $outerKey->setType($this->getOuterKeyType());
 
         if ($this->hasMorphKey()) {
             //ManyToManyMorphed relation will cause creation set of ManyToMany relations
@@ -186,7 +186,7 @@ class ManyToManySchema extends RelationSchema
 
         //Thought inner key points to inner key in parent record
         $innerKey = $pivotTable->column($this->definition[Record::THOUGHT_INNER_KEY]);
-        $innerKey->type($this->getInnerKeyType());
+        $innerKey->setType($this->getInnerKeyType());
 
         //Casting pivot table columns
         $this->castTable(

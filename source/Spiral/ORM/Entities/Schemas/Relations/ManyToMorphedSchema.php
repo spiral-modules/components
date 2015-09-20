@@ -177,7 +177,7 @@ class ManyToMorphedSchema extends MorphedSchema
 
         //Inner key points to our parent record
         $innerKey = $pivotTable->column($this->definition[Record::THOUGHT_INNER_KEY]);
-        $innerKey->type($this->getInnerKeyType());
+        $innerKey->setType($this->getInnerKeyType());
 
         if ($this->isIndexed()) {
             $innerKey->index();
@@ -189,7 +189,7 @@ class ManyToMorphedSchema extends MorphedSchema
 
         //Points to inner key of our outer records (outer key)
         $outerKey = $pivotTable->column($this->definition[Record::THOUGHT_OUTER_KEY]);
-        $outerKey->type($this->getOuterKeyType());
+        $outerKey->setType($this->getOuterKeyType());
 
         //Casting pivot table columns
         $this->castTable(

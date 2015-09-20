@@ -413,7 +413,7 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         foreach ($this->columns as $columnSchema) {
             if ($columnSchema->getName() == $column) {
-                $columnSchema->name($name);
+                $columnSchema->setName($name);
                 break;
             }
         }

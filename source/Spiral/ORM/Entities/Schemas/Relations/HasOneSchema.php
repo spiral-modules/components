@@ -81,7 +81,7 @@ class HasOneSchema extends RelationSchema
 
         //Outer key type must much inner key type
         $outerKey = $outerTable->column($this->getOuterKey());
-        $outerKey->type($this->getInnerKeyType());
+        $outerKey->setType($this->getInnerKeyType());
 
         //We are only adding nullable flag if that was declared, if column were already nullable
         //this behaviour will be kept

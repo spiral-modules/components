@@ -107,7 +107,7 @@ class BelongsToSchema extends RelationSchema
 
         //Inner key type must match outer key type
         $innerKey = $innerTable->column($this->getInnerKey());
-        $innerKey->type($this->getOuterKeyType());
+        $innerKey->setType($this->getOuterKeyType());
 
         //We are only adding nullable flag if that was declared, if column were already nullable
         //this behaviour will be kept

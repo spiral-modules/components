@@ -405,7 +405,7 @@ abstract class AbstractColumn implements ColumnInterface
      * @param string $name New column name.
      * @return $this
      */
-    public function name($name)
+    public function setName($name)
     {
         $this->name = $name;
 
@@ -423,7 +423,7 @@ abstract class AbstractColumn implements ColumnInterface
      * @return $this
      * @throws SchemaException
      */
-    public function type($abstract)
+    public function setType($abstract)
     {
         if (isset($this->aliases[$abstract])) {
             $abstract = $this->aliases[$abstract];
@@ -496,7 +496,7 @@ abstract class AbstractColumn implements ColumnInterface
             $this->table->setPrimaryKeys([$this->name]);
         }
 
-        return $this->type('primary');
+        return $this->setType('primary');
     }
 
     /**
@@ -511,7 +511,7 @@ abstract class AbstractColumn implements ColumnInterface
             $this->table->setPrimaryKeys([$this->name]);
         }
 
-        return $this->type('bigPrimary');
+        return $this->setType('bigPrimary');
     }
 
     /**
@@ -527,7 +527,7 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function enum($values)
     {
-        $this->type('enum');
+        $this->setType('enum');
         $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
 
         return $this;
@@ -548,7 +548,7 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function string($size = 255)
     {
-        $this->type('string');
+        $this->setType('string');
 
         if ($size > 255) {
             throw new InvalidArgumentException(
@@ -575,7 +575,7 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function decimal($precision, $scale = 0)
     {
-        $this->type('decimal');
+        $this->setType('decimal');
 
         if (empty($precision)) {
             throw new InvalidArgumentException("Invalid precision value.");
@@ -709,7 +709,7 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function __call($type, array $arguments = [])
     {
-        return $this->type($type);
+        return $this->setType($type);
     }
 
     /**

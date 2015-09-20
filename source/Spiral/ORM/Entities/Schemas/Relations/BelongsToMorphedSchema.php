@@ -122,7 +122,7 @@ class BelongsToMorphedSchema extends MorphedSchema
 
         //Points to inner key of outer records (outer key)
         $innerKey = $innerSchema->column($this->getInnerKey());
-        $innerKey->type($this->getOuterKeyType());
+        $innerKey->setType($this->getOuterKeyType());
         $innerKey->nullable($innerKey->isNullable() || $this->isNullable());
 
         if ($this->isIndexed()) {

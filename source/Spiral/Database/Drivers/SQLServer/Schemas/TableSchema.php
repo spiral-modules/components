@@ -106,7 +106,7 @@ class TableSchema extends AbstractTable
                 $column->getName()
             ]);
 
-            $column->name($dbColumn->getName());
+            $column->setName($dbColumn->getName());
         }
 
         //In SQLServer we have to drop ALL related indexes and foreign keys while

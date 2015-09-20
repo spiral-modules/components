@@ -35,7 +35,7 @@ abstract class JsonDocument extends Document implements RecordAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function defaultValue(Driver $driver)
+    public function defaultValue(Driver $driver = null)
     {
         return $this->serializeData();
     }

@@ -23,7 +23,6 @@ use Spiral\ODM\ODM;
  */
 class Compositor extends Component implements
     CompositableInterface,
-    DocumentAccessorInterface,
     \IteratorAggregate,
     \Countable,
     \ArrayAccess

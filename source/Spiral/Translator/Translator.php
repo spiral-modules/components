@@ -188,6 +188,20 @@ class Translator extends Singleton implements TranslatorInterface
     }
 
     /**
+     * Set string translation in specified bundle.
+     *
+     * @param string $bundle
+     * @param string $string
+     * @param string $translation
+     */
+    public function set($bundle, $string, $translation = '')
+    {
+        $this->loadBundle($bundle);
+        $this->bundles[$bundle][$string] = func_num_args() == 2 ? $translation : $string;
+        $this->saveBundle($bundle);
+    }
+
+    /**
      * Location language bundle from memory if not loaded already.
      *
      * @param string $bundle
@@ -232,19 +246,5 @@ class Translator extends Singleton implements TranslatorInterface
     protected function normalize($string)
     {
         return preg_replace('/\s+/', ' ', trim($string));
-    }
-
-    /**
-     * Set string translation in specified bundle.
-     *
-     * @param string $bundle
-     * @param string $string
-     * @param string $translation
-     */
-    public function set($bundle, $string, $translation = '')
-    {
-        $this->loadBundle($bundle);
-        $this->bundles[$bundle][$string] = func_num_args() == 2 ? $translation : $string;
-        $this->saveBundle($bundle);
     }
 }

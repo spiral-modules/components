@@ -203,13 +203,13 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
     public function run()
     {
         foreach ($this->getMigrations() as $migration) {
-            if ($migration->getState()->getStatus() == StateInterface::PENDING) {
+            if ($migration->state()->getStatus() == StateInterface::PENDING) {
                 //Yey!
                 $migration->up();
 
                 //Registering record in database
                 $this->migrationsTable()->insert([
-                    'migration'     => $migration->getState()->getName(),
+                    'migration'     => $migration->state()->getName(),
                     'timePerformed' => new \DateTime('now')
                 ]);
 
@@ -229,13 +229,13 @@ class Migrator extends Component implements MigratorInterface, LoggerAwareInterf
          * @var MigrationInterface $migration
          */
         foreach (array_reverse($this->getMigrations()) as $migration) {
-            if ($migration->getState()->getStatus() == StateInterface::EXECUTED) {
+            if ($migration->state()->getStatus() == StateInterface::EXECUTED) {
                 //Rolling back
                 $migration->down();
 
                 //Flushing DB record
                 $this->migrationsTable()->delete([
-                    'migration' => $migration->getState()->getName()
+                    'migration' => $migration->state()->getName()
                 ])->run();
 
                 return $migration;

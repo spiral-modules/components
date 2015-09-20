@@ -58,7 +58,7 @@ abstract class Migration extends Component implements MigrationInterface
     /**
      * {@inheritdoc}
      */
-    public function getState()
+    public function state()
     {
         return $this->status;
     }

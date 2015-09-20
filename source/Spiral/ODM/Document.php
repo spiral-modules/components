@@ -205,10 +205,10 @@ abstract class Document extends DataEntity implements CompositableInterface
 
     /**
      * @see Component::staticContainer()
-     * @param array                                          $fields
+     * @param array                                           $fields
      * @param CompositableInterface|ActiveDocument|DataEntity $parent
-     * @param ODM                                            $odm
-     * @param array                                          $odmSchema
+     * @param ODM                                             $odm
+     * @param array                                           $odmSchema
      */
     public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
     {
@@ -402,7 +402,7 @@ abstract class Document extends DataEntity implements CompositableInterface
             }
 
             /**
-             * @var mixed|array|EmbeddableInterface|CompositableInterface
+             * @var mixed|array|DocumentAccessorInterface|CompositableInterface
              */
             $value = $this->getField($field);
 
@@ -459,7 +459,7 @@ abstract class Document extends DataEntity implements CompositableInterface
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof EmbeddableInterface && $value->hasUpdates()) {
+                if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -493,7 +493,7 @@ abstract class Document extends DataEntity implements CompositableInterface
         $this->updates = $this->atomics = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof EmbeddableInterface) {
+            if ($value instanceof DocumentAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -538,7 +538,7 @@ abstract class Document extends DataEntity implements CompositableInterface
                 continue;
             }
 
-            if ($value instanceof EmbeddableInterface) {
+            if ($value instanceof DocumentAccessorInterface) {
                 $atomics = array_merge_recursive(
                     $atomics,
                     $value->buildAtomics(($container ? $container . '.' : '') . $field)
@@ -776,7 +776,7 @@ abstract class Document extends DataEntity implements CompositableInterface
         array_walk_recursive($query, function (&$value) use ($fields) {
             if (strpos($value, 'key::') === 0) {
                 $value = $fields[substr($value, 5)];
-                if ($value instanceof EmbeddableInterface) {
+                if ($value instanceof DocumentAccessorInterface) {
                     $value = $value->serializeData();
                 }
             }

@@ -16,7 +16,7 @@ use Spiral\Validation\ValidatesInterface;
  *
  * Compositable instance is primary entity type for ODM.
  */
-interface CompositableInterface extends EmbeddableInterface, ValidatesInterface
+interface CompositableInterface extends DocumentAccessorInterface, ValidatesInterface
 {
     /**
      * Instance must re-validate data.

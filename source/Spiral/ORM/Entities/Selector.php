@@ -426,7 +426,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
 
         //Here we are feeding selected data to our primary loaded to parse it and and create
         //data tree for our records
-        $data = $this->loader->parseResult($result, $rowsCount);
+        $this->loader->parseResult($result, $rowsCount);
 
         $this->benchmark($benchmark);
 

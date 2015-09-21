@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright Â©2009-2015
  */
 namespace Spiral\ODM;
 
@@ -17,9 +17,9 @@ use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * AbstractDocument is base data model for ODM component, it describes it's own schema,
- * compositions, validations and etc. ODM component will automatically analyze existed Documents
- * and create cached version of their schema.
+ * SimpleDocument is base data model for ODM component, it describes it's own schema,
+ * compositions, validations and etc. ODM component will automatically analyze existed
+ * Documents and create cached version of their schema.
  *
  * Can create set of mongo atomic operations and be embedded into other documents.
  */

@@ -164,6 +164,7 @@ trait PaginatorTrait
      * constructed.
      *
      * @return $this
+     * @throws PaginationException
      */
     protected function applyPagination()
     {
@@ -171,13 +172,13 @@ trait PaginatorTrait
             return $this;
         }
 
-        if (!$this instanceof PaginableInterface) {
-            throw new PaginationException(
-                "Unable to paginate, PaginableInterface not implemented."
-            );
+        if ($this instanceof PaginableInterface) {
+            return $this->paginator->paginateObject($this);
         }
 
-        return $this->paginator->paginateObject($this);
+        throw new PaginationException(
+            "Unable to paginate, PaginableInterface not implemented."
+        );
     }
 
     /**

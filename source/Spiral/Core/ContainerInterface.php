@@ -30,9 +30,10 @@ interface ContainerInterface
     public function has($alias);
 
     /**
-     * Resolve alias into it value. I value pointing to class resolver or singleto an object will
-     * be returned.
+     * Resolve alias into it value. I value pointing to class resolver or singleton an object will
+     * be returned. Method will automatically fallback to construct() if no binding exists.
      *
+     * @see construct()
      * @param string $alias
      * @return mixed|null|object
      * @throws InstanceException

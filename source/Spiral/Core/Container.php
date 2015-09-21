@@ -49,6 +49,8 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param \ReflectionParameter $context Related to parameter caused injection if any.
      */
     public function construct($class, $parameters = [], \ReflectionParameter $context = null)
     {
@@ -58,7 +60,21 @@ class Container extends Component implements ContainerInterface
         }
 
         if (!isset($this->bindings[$class])) {
-            return $this->createInstance($class, $parameters, $context);
+            //OK, we can create class by ourselves
+            $instance = $this->createInstance($class, $parameters, $context, $reflector);
+
+            /**
+             * @var \ReflectionClass $reflector
+             */
+            if (
+                $instance instanceof SingletonInterface
+                && !empty($singleton = $reflector->getConstant('SINGLETON'))
+            ) {
+                //Component declared SINGLETON constant, binding as constant value and class name.
+                $this->bindings[$singleton] = $instance;
+            }
+
+            return $instance;
         }
 
         if (is_object($binding = $this->bindings[$class])) {
@@ -68,14 +84,7 @@ class Container extends Component implements ContainerInterface
 
         if (is_string($binding)) {
             //Binding is pointing to something else
-            $instance = $this->construct($binding, $parameters, $context);
-
-            if ($instance instanceof SingletonInterface) {
-                //To prevent double binding, this is not real singleton code, see below
-                $this->bindings[$binding] = $this->bindings[get_class($instance)] = $instance;
-            }
-
-            return $instance;
+            return $this->construct($binding, $parameters, $context);
         }
 
         if (is_array($binding)) {
@@ -271,11 +280,17 @@ class Container extends Component implements ContainerInterface
      * @param string               $class
      * @param array                $parameters Constructor parameters.
      * @param \ReflectionParameter $context
+     * @param \ReflectionClass     $reflector  Instance of reflection associated with class,
+     *                                         reference.
      * @return object
      * @throws InstanceException
      */
-    private function createInstance($class, array $parameters, \ReflectionParameter $context = null)
-    {
+    private function createInstance(
+        $class,
+        array $parameters,
+        \ReflectionParameter $context = null,
+        \ReflectionClass &$reflector = null
+    ) {
         try {
             $reflector = new \ReflectionClass($class);
         } catch (\ReflectionException $exception) {
@@ -305,11 +320,6 @@ class Container extends Component implements ContainerInterface
         } else {
             //No constructor specified
             $instance = $reflector->newInstance();
-        }
-
-        if (!empty($singleton = $reflector->getConstant('SINGLETON'))) {
-            //Component declared SINGLETON constant, binding as constant value and class name.
-            $this->bindings[$reflector->getName()] = $this->bindings[$singleton] = $instance;
         }
 
         return $instance;

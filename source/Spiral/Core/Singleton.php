@@ -9,37 +9,21 @@
 namespace Spiral\Core;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\Exceptions\MissingContainerException;
+use Spiral\Core\Traits\SingletonTrait;
 
 /**
- * Spiral Container will treat classes like that as singletons.
+ * Spiral Container will treat classes like that as singletons + instance function which works with
+ * static container.
  */
 abstract class Singleton extends Component implements SingletonInterface
 {
     /**
+     * instance() function.
+     */
+    use SingletonTrait;
+
+    /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = null;
-
-    /**
-     * Singletons will work as desired only under Spiral Container which can understand SINGLETON
-     * constant. You can consider this functionality as "helper".
-     *
-     * Global/static container used as fallback to receive class instance.
-     *
-     * @param ContainerInterface $container
-     * @return static
-     * @throws MissingContainerException
-     */
-    public static function instance(ContainerInterface $container = null)
-    {
-        $container = !empty($container) ? $container : self::staticContainer();
-        if (empty($container)) {
-            throw new MissingContainerException(
-                "Singleton instance can be constructed only using valid Container."
-            );
-        }
-
-        return $container->get(static::SINGLETON);
-    }
 }

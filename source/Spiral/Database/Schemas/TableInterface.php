@@ -53,11 +53,7 @@ interface TableInterface
     /**
      * Check if table has index related to set of provided columns. Columns order does matter!
      *
-     * Example:
-     * $table->hasIndex('userID', 'tokenID');
-     * $table->hasIndex(array('userID', 'tokenID'));
-     *
-     * @param mixed|array $columns Column #1 or columns list array.
+     * @param mixed|array $columns
      * @return bool
      */
     public function hasIndex(array $columns = []);

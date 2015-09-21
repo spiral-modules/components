@@ -55,12 +55,12 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
 
     /**
      * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $bucket
+     * @param ContainerInterface    $container
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $bucket)
+    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
     {
         $this->config = $configurator->getConfig(static::CONFIG);
-        $this->container = $bucket;
+        $this->container = $container;
 
         //Loading buckets
         foreach ($this->config['buckets'] as $name => $bucket) {

@@ -61,7 +61,7 @@ abstract class Component
     }
 
     /**
-     * Must be used only to resolve optional constructor arguments. Use only for classes which are
+     * Must be used only to resolve optional constructor arguments. Use in classes which are
      * generally resolved using Container.
      *
      * @internal Do not use for business logic.

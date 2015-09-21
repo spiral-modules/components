@@ -467,12 +467,12 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         foreach ($this->indexes as $indexSchema) {
             if (is_array($index) && $indexSchema->getColumns() == $index) {
-                $indexSchema->name($name);
+                $indexSchema->setName($name);
                 break;
             }
 
             if (is_string($index) && $indexSchema->getName() == $index) {
-                $indexSchema->name($name);
+                $indexSchema->setName($name);
                 break;
             }
         }

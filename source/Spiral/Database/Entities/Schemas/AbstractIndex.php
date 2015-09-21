@@ -108,7 +108,7 @@ abstract class AbstractIndex implements IndexInterface
      * @param string $name New index name.
      * @return $this
      */
-    public function name($name)
+    public function setName($name)
     {
         $this->name = $name;
 

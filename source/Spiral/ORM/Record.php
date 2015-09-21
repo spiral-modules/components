@@ -8,7 +8,6 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Core\ContainerInterface;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\AccessorInterface;

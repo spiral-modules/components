@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright Â©2009-2015
  */
 namespace Spiral\ODM;
 
@@ -16,7 +16,7 @@ use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * Document with added ActiveRecord methods and association with collection.
+ * SimpleDocument with added ActiveRecord methods and association with collection.
  */
 abstract class Document extends SimpleDocument implements ActiveEntityInterface
 {

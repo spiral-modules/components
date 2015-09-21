@@ -81,7 +81,6 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
         }
 
-        //Controllable injection implemented
         return $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
                 'storage' => $this
             ] + compact('prefix', 'server', 'options')

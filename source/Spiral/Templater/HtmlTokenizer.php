@@ -152,6 +152,7 @@ class HtmlTokenizer
                     $buffer = '';
                     break;
                 case '"':
+                    //no break
                 case "'":
                     if ($position == self::POSITION_IN_TAG) {
                         //Jumping into argument

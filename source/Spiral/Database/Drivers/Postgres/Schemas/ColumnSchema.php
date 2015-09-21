@@ -266,8 +266,9 @@ class ColumnSchema extends AbstractColumn
         $this->defaultValue = $schema['column_default'];
         $this->nullable = $schema['is_nullable'] == 'YES';
 
-        if (in_array($this->type, ['int', 'bigint', 'integer']) && preg_match("/nextval(.*)/",
-                $this->defaultValue)
+        if (
+            in_array($this->type, ['int', 'bigint', 'integer'])
+            && preg_match("/nextval(.*)/", $this->defaultValue)
         ) {
             $this->type = ($this->type == 'bigint' ? 'bigserial' : 'serial');
             $this->autoIncrement = true;
@@ -277,7 +278,10 @@ class ColumnSchema extends AbstractColumn
             return;
         }
 
-        if (($this->type == 'character varying' || $this->type == 'character') && $schema['character_maximum_length']) {
+        if (
+            ($this->type == 'character varying' || $this->type == 'character')
+            && $schema['character_maximum_length']
+        ) {
             $this->size = $schema['character_maximum_length'];
         }
 
@@ -292,68 +296,18 @@ class ColumnSchema extends AbstractColumn
          */
         if ($this->type == 'USER-DEFINED' && $schema['typtype'] == 'e') {
             $this->type = $schema['typname'];
-
-            $range = $this->table->driver()->query(
-                'SELECT enum_range(NULL::' . $this->type . ')'
-            )->fetchColumn(0);
-
-            $this->enumValues = explode(',', substr($range, 1, -1));
-
-            if (!empty($this->defaultValue)) {
-                //In database: 'value'::enumType
-                $this->defaultValue = substr(
-                    $this->defaultValue,
-                    1,
-                    strpos($this->defaultValue, $this->type) - 4
-                );
-            }
+            $this->resolveNativeEnum();
         }
 
         //Potential enum with manually created constraint (check in)
-        if (($this->type == 'character' || $this->type == 'character varying') && !empty($this->size)) {
-
-            $query = "SELECT conname, consrc FROM pg_constraint WHERE "
-                . "conrelid = ? AND contype = 'c' AND (consrc LIKE ? OR consrc LIKE ?)";
-
-            $constraints = $this->table->driver()->query(
-                $query,
-                [
-                    $schema['tableOID'],
-                    '(' . $this->name . '%',
-                    '("' . $this->name . '%',
-                ]
-            );
-
-            foreach ($constraints as $constraint) {
-                if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches)) {
-                    $enumValues = explode(',', $matches[1]);
-                    foreach ($enumValues as &$value) {
-                        if (preg_match("/^'?(.*?)'?::(.+)/", trim($value), $matches)) {
-                            //In database: 'value'::TYPE
-                            $value = $matches[1];
-                        }
-
-                        unset($value);
-                    }
-
-                    $this->enumValues = $enumValues;
-                    $this->enumConstraint = $constraint['conname'];
-                }
-            }
+        if (
+            ($this->type == 'character' || $this->type == 'character varying')
+            && !empty($this->size)
+        ) {
+            $this->checkCheckConstrain($schema['tableOID']);
         }
 
-        if ($this->hasDefaultValue()) {
-            if (preg_match("/^'?(.*?)'?::(.+)/", $this->defaultValue, $matches)) {
-                //In database: 'value'::TYPE
-                $this->defaultValue = $matches[1];
-            } elseif ($this->type == 'bit') {
-                $this->defaultValue = bindec(
-                    substr($this->defaultValue, 2, strpos($this->defaultValue, '::') - 3)
-                );
-            } elseif ($this->type == 'boolean') {
-                $this->defaultValue = (strtolower($this->defaultValue) == 'true');
-            }
-        }
+        $this->normalizeDefault();
     }
 
     /**
@@ -383,5 +337,78 @@ class ColumnSchema extends AbstractColumn
         }
 
         return $quote ? $this->table->driver()->identifier($this->enumConstraint) : $this->enumConstraint;
+    }
+
+    /**
+     * Normalize default value.
+     */
+    private function normalizeDefault()
+    {
+        if ($this->hasDefaultValue()) {
+            if (preg_match("/^'?(.*?)'?::(.+)/", $this->defaultValue, $matches)) {
+                //In database: 'value'::TYPE
+                $this->defaultValue = $matches[1];
+            } elseif ($this->type == 'bit') {
+                $this->defaultValue = bindec(
+                    substr($this->defaultValue, 2, strpos($this->defaultValue, '::') - 3)
+                );
+            } elseif ($this->type == 'boolean') {
+                $this->defaultValue = (strtolower($this->defaultValue) == 'true');
+            }
+        }
+    }
+
+    /**
+     * Resolve native enum type.
+     **/
+    private function resolveNativeEnum()
+    {
+        $range = $this->table->driver()->query(
+            'SELECT enum_range(NULL::' . $this->type . ')'
+        )->fetchColumn(0);
+
+        $this->enumValues = explode(',', substr($range, 1, -1));
+
+        if (!empty($this->defaultValue)) {
+            //In database: 'value'::enumType
+            $this->defaultValue = substr(
+                $this->defaultValue,
+                1,
+                strpos($this->defaultValue, $this->type) - 4
+            );
+        }
+    }
+
+    /**
+     * Check if column was declared with check constrain. I love name of this method.
+     *
+     * @param string $tableOID
+     */
+    private function checkCheckConstrain($tableOID)
+    {
+        $query = "SELECT conname, consrc FROM pg_constraint WHERE conrelid = ? AND contype = 'c' "
+            . "AND (consrc LIKE ? OR consrc LIKE ?)";
+
+        $constraints = $this->table->driver()->query(
+            $query,
+            [$tableOID, '(' . $this->name . '%', '("' . $this->name . '%',]
+        );
+
+        foreach ($constraints as $constraint) {
+            if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches)) {
+                $enumValues = explode(',', $matches[1]);
+                foreach ($enumValues as &$value) {
+                    if (preg_match("/^'?(.*?)'?::(.+)/", trim($value), $matches)) {
+                        //In database: 'value'::TYPE
+                        $value = $matches[1];
+                    }
+
+                    unset($value);
+                }
+
+                $this->enumValues = $enumValues;
+                $this->enumConstraint = $constraint['conname'];
+            }
+        }
     }
 }

@@ -804,7 +804,7 @@ abstract class SimpleDocument extends DataEntity implements CompositableInterfac
     public static function create($fields = [], ODM $odm = null)
     {
         /**
-         * @var Document $document
+         * @var self $document
          */
         $document = new static([], null, self::saturate($odm, ODM::class));
 

@@ -1018,7 +1018,7 @@ class Record extends DataEntity implements ActiveEntityInterface
     public static function create($fields = [], ORM $orm = null)
     {
         /**
-         * @var Record $record
+         * @var self $record
          */
         $record = new static([], false, self::saturate($orm, ORM::class));
 

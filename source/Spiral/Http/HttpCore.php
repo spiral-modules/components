@@ -14,7 +14,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\HttpException;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
@@ -112,7 +111,6 @@ class HttpCore extends Component implements HttpInterface
      * @param ResponseInterface      $response
      * @param callable               $endpoint User specified endpoint.
      * @return ResponseInterface
-     * @throws ClientException
      * @throws HttpException
      */
     public function perform(

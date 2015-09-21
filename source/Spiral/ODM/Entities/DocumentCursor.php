@@ -10,7 +10,7 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 
 /**
@@ -111,7 +111,7 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     /**
      * Select all documents.
      *
-     * @return ActiveDocument[]
+     * @return Document[]
      * @throws ODMException
      * @throws DefinitionException
      */
@@ -128,7 +128,7 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     /**
      * {@inheritdoc}
      *
-     * @return array|ActiveDocument
+     * @return array|Document
      * @throws ODMException
      * @throws DefinitionException
      */
@@ -180,7 +180,7 @@ class DocumentCursor implements \Iterator, \JsonSerializable
      * @link http://www.php.net/manual/en/mongocursor.getnext.php
      * @throws \MongoConnectionException
      * @throws \MongoCursorTimeoutException
-     * @return array|ActiveDocument Returns the next object
+     * @return array|Document Returns the next object
      */
     public function getNext()
     {

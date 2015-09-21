@@ -10,12 +10,12 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\ODM\Document;
+use Spiral\ODM\SimpleDocument;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
-use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 use Spiral\Tokenizer\TokenizerInterface;
 
@@ -88,9 +88,9 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if ($class == Document::class || $class == ActiveDocument::class) {
+        if ($class == SimpleDocument::class || $class == Document::class) {
             //No need to remember schema for abstract Document
-            return new DocumentSchema($this, Document::class);
+            return new DocumentSchema($this, SimpleDocument::class);
         }
 
         if (!isset($this->documents[$class])) {
@@ -138,9 +138,9 @@ class SchemaBuilder extends Component
 
             foreach ($indexes as $index) {
                 $options = [];
-                if (isset($index[ActiveDocument::INDEX_OPTIONS])) {
-                    $options = $index[ActiveDocument::INDEX_OPTIONS];
-                    unset($index[ActiveDocument::INDEX_OPTIONS]);
+                if (isset($index[Document::INDEX_OPTIONS])) {
+                    $options = $index[Document::INDEX_OPTIONS];
+                    unset($index[Document::INDEX_OPTIONS]);
                 }
 
                 $odmCollection->ensureIndex($index, $options);
@@ -225,8 +225,8 @@ class SchemaBuilder extends Component
      */
     protected function locateDocuments(TokenizerInterface $tokenizer)
     {
-        foreach ($tokenizer->getClasses(Document::class) as $class => $definition) {
-            if ($class == Document::class || $class == ActiveDocument::class) {
+        foreach ($tokenizer->getClasses(SimpleDocument::class) as $class => $definition) {
+            if ($class == SimpleDocument::class || $class == Document::class) {
                 continue;
             }
 

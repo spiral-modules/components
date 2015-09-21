@@ -10,7 +10,7 @@ namespace Spiral\ODM\Accessors;
 
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Exceptions\AccessorException;
-use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 
 /**
@@ -62,7 +62,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
 
     /**
      * @invisible
-     * @var ActiveDocument
+     * @var Document
      */
     protected $parent = null;
 
@@ -145,7 +145,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      */
     public function embed($parent)
     {
-        if (!$parent instanceof ActiveDocument) {
+        if (!$parent instanceof Document) {
             throw new AccessorException("ScalarArrays can be embedded only into Documents.");
         }
 
@@ -220,7 +220,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
 
         if ($this->solidState) {
             //We don't care about atomics
-            return [ActiveDocument::ATOMIC_SET => [$container => $this->serializeData()]];
+            return [Document::ATOMIC_SET => [$container => $this->serializeData()]];
         }
 
         $atomics = [];

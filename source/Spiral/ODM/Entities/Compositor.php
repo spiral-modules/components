@@ -14,7 +14,7 @@ use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 
 /**
@@ -37,7 +37,7 @@ class Compositor extends Component implements
     /**
      * Set of documents to be managed by Compositor.
      *
-     * @var array|ActiveDocument[]
+     * @var array|Document[]
      */
     protected $documents = [];
 
@@ -74,7 +74,7 @@ class Compositor extends Component implements
 
     /**
      * @invisible
-     * @var ActiveDocument
+     * @var Document
      */
     protected $parent = null;
 
@@ -133,7 +133,7 @@ class Compositor extends Component implements
     /**
      * Get composition parent.
      *
-     * @return ActiveDocument|null
+     * @return Document|null
      */
     public function getParent()
     {
@@ -186,7 +186,7 @@ class Compositor extends Component implements
      */
     public function embed($parent)
     {
-        if (!$parent instanceof ActiveDocument) {
+        if (!$parent instanceof Document) {
             throw new CompositorException("Compositor can be embedded only into Documents.");
         }
 
@@ -303,7 +303,7 @@ class Compositor extends Component implements
         }
 
         if ($this->solidState) {
-            return [ActiveDocument::ATOMIC_SET => [$container => $this->serializeData()]];
+            return [Document::ATOMIC_SET => [$container => $this->serializeData()]];
         }
 
         if ($this->changedDirectly) {
@@ -418,7 +418,7 @@ class Compositor extends Component implements
     /**
      * {@inheritdoc}
      *
-     * @return ActiveDocument[]
+     * @return Document[]
      */
     public function getIterator()
     {
@@ -435,7 +435,7 @@ class Compositor extends Component implements
      *
      * @param array  $fields
      * @param string $class
-     * @return ActiveDocument
+     * @return Document
      * @throws CompositorException
      * @throws DefinitionException
      * @throws ODMException
@@ -479,12 +479,12 @@ class Compositor extends Component implements
      * Example:
      * $user->cards->find(['active' => true]);
      *
-     * @param array|ActiveDocument $query
-     * @return array|ActiveDocument[]
+     * @param array|Document $query
+     * @return array|Document[]
      */
     public function find($query = [])
     {
-        if ($query instanceof ActiveDocument) {
+        if ($query instanceof Document) {
             $query = $query->serializeData();
         }
 
@@ -511,7 +511,7 @@ class Compositor extends Component implements
      * $user->cards->findOne(['active' => true]);
      *
      * @param array $query
-     * @return null|ActiveDocument
+     * @return null|Document
      */
     public function findOne($query = [])
     {
@@ -526,12 +526,12 @@ class Compositor extends Component implements
      * Push new document to end of set. Set second argument to false to keep Compositor in solid
      * state and save it as one big array of data.
      *
-     * @param ActiveDocument $document
+     * @param Document $document
      * @param bool          $resetState Set to true to reset compositor solid state.
-     * @return $this|ActiveDocument[]
+     * @return $this|Document[]
      * @throws CompositorException
      */
-    public function push(ActiveDocument $document, $resetState = true)
+    public function push(Document $document, $resetState = true)
     {
         if ($resetState) {
             $this->solidState = false;
@@ -561,9 +561,9 @@ class Compositor extends Component implements
      * second argument to false to keep Compositor in solid state and save it as one big array of
      * data.
      *
-     * @param array|ActiveDocument $query
+     * @param array|Document $query
      * @param bool                $resetState Set to true to reset compositor solid state.
-     * @return $this|ActiveDocument[]
+     * @return $this|Document[]
      * @throws CompositorException
      */
     public function pull($query, $resetState = true)
@@ -572,7 +572,7 @@ class Compositor extends Component implements
             $this->solidState = false;
         }
 
-        if ($query instanceof ActiveDocument) {
+        if ($query instanceof Document) {
             $query = $query->serializeData();
         }
 
@@ -606,12 +606,12 @@ class Compositor extends Component implements
      * Add document to set, only one instance of document must be presented. Set second argument to
      * false to keep Compositor in solid state and save it as one big array of data.
      *
-     * @param ActiveDocument $document
+     * @param Document $document
      * @param bool          $resetState Set to true to reset compositor solid state.
-     * @return $this|ActiveDocument[]
+     * @return $this|Document[]
      * @throws CompositorException
      */
-    public function addToSet(ActiveDocument $document, $resetState = true)
+    public function addToSet(Document $document, $resetState = true)
     {
         if ($resetState) {
             $this->solidState = false;
@@ -715,12 +715,12 @@ class Compositor extends Component implements
      * Fetch or create instance of document based on specified offset.
      *
      * @param int $offset
-     * @return ActiveDocument
+     * @return Document
      */
     protected function getDocument($offset)
     {
         /**
-         * @var array|ActiveDocument $document
+         * @var array|Document $document
          */
         $document = $this->documents[$offset];
         if ($document instanceof CompositableInterface) {

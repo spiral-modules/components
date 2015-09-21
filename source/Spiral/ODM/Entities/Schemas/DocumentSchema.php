@@ -15,7 +15,7 @@ use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
-use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 
 /**
@@ -26,7 +26,7 @@ class DocumentSchema extends ReflectionEntity
     /**
      * Required to validly merge parent and children attributes.
      */
-    const BASE_CLASS = ActiveDocument::class;
+    const BASE_CLASS = Document::class;
 
     /**
      * @invisible
@@ -52,7 +52,7 @@ class DocumentSchema extends ReflectionEntity
      */
     public function isEmbeddable()
     {
-        return !$this->isSubclassOf(ActiveDocument::class);
+        return !$this->isSubclassOf(Document::class);
     }
 
     /**
@@ -235,9 +235,9 @@ class DocumentSchema extends ReflectionEntity
             }
 
             //Class to be aggregated
-            $class = isset($options[ActiveDocument::MANY])
-                ? $options[ActiveDocument::MANY]
-                : $options[ActiveDocument::ONE];
+            $class = isset($options[Document::MANY])
+                ? $options[Document::MANY]
+                : $options[Document::ONE];
 
             if (!$this->builder->hasDocument($class)) {
                 throw new SchemaException(
@@ -253,13 +253,13 @@ class DocumentSchema extends ReflectionEntity
                 );
             }
 
-            if (!empty($options[ActiveDocument::MANY])) {
+            if (!empty($options[Document::MANY])) {
                 //Aggregation may select parent document
                 $class = $document->getParent(true)->getName();
             }
 
             $aggregations[$field] = [
-                'type'       => isset($options[ActiveDocument::ONE]) ? ActiveDocument::ONE : ActiveDocument::MANY,
+                'type'       => isset($options[Document::ONE]) ? Document::ONE : Document::MANY,
                 'class'      => $class,
                 'collection' => $document->getCollection(),
                 'database'   => $document->getDatabase(),
@@ -424,17 +424,17 @@ class DocumentSchema extends ReflectionEntity
             return $this->getName();
         }
 
-        if ($this->getConstant('DEFINITION') == ActiveDocument::DEFINITION_LOGICAL) {
+        if ($this->getConstant('DEFINITION') == Document::DEFINITION_LOGICAL) {
             //Class definition will be performed using method with custom logic
             return [
-                'type'    => ActiveDocument::DEFINITION_LOGICAL,
+                'type'    => Document::DEFINITION_LOGICAL,
                 'options' => [$this->getName(), 'defineClass']
             ];
         }
 
         //Definition will be performed using field = class association
         $definition = [
-            'type'    => ActiveDocument::DEFINITION_FIELDS,
+            'type'    => Document::DEFINITION_FIELDS,
             'options' => []
         ];
 
@@ -527,8 +527,8 @@ class DocumentSchema extends ReflectionEntity
     private function isAggregation($type)
     {
         return is_array($type) && (
-            array_key_exists(ActiveDocument::MANY, $type)
-            || array_key_exists(ActiveDocument::ONE, $type)
+            array_key_exists(Document::MANY, $type)
+            || array_key_exists(Document::ONE, $type)
         );
     }
 

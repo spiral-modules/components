@@ -11,7 +11,7 @@ namespace Spiral\ODM\Entities;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\ODM\ActiveDocument;
+use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
@@ -218,7 +218,7 @@ class Collection extends Component implements
      * Select one document or it's fields from collection.
      *
      * @param array $query Fields and conditions to query by.
-     * @return ActiveDocument|array
+     * @return Document|array
      */
     public function findOne(array $query = [])
     {
@@ -228,7 +228,7 @@ class Collection extends Component implements
     /**
      * Fetch all available document instances from query.
      *
-     * @return ActiveDocument[]
+     * @return Document[]
      */
     public function fetchDocuments()
     {
@@ -267,7 +267,7 @@ class Collection extends Component implements
     /**
      * {@inheritdoc}
      *
-     * @return DocumentCursor|ActiveDocument[]
+     * @return DocumentCursor|Document[]
      */
     public function getIterator()
     {

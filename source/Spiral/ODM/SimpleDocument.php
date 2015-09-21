@@ -216,6 +216,7 @@ abstract class SimpleDocument extends SchematicEntity implements CompositableInt
         //We can use global container as fallback if no default values were provided
         $this->odm = self::saturate($odm, ODM::class);
         $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->getSchema(static::class);
+        parent::__construct($this->odmSchema);
 
         static::initialize();
 
@@ -223,8 +224,6 @@ abstract class SimpleDocument extends SchematicEntity implements CompositableInt
         if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
             $this->fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
         }
-
-        parent::__construct($odmSchema);
     }
 
     /**

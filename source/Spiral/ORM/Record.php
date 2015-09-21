@@ -314,6 +314,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         //We can use global container as fallback if no default values were provided
         $this->orm = self::saturate($orm, ORM::class);
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
+        parent::__construct($this->ormSchema);
 
         static::initialize();
 
@@ -335,8 +336,6 @@ class Record extends SchematicEntity implements ActiveEntityInterface
             //Non loaded records should be in solid state by default and require initial validation
             $this->solidState(true)->invalidate();
         }
-
-        parent::__construct($ormSchema);
     }
 
     /**

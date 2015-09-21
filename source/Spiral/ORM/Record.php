@@ -13,9 +13,9 @@ use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
-use Spiral\Models\DataEntity;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
+use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RecordException;
@@ -30,7 +30,7 @@ use Spiral\Validation\ValidatesInterface;
  *
  * @TODO: Add ability to set primary key manually, for example fpr uuid like fields.
  */
-class Record extends DataEntity implements ActiveEntityInterface
+class Record extends SchematicEntity implements ActiveEntityInterface
 {
     /**
      * Field format declares how entity must process magic setters and getters. Available values:
@@ -336,6 +336,8 @@ class Record extends DataEntity implements ActiveEntityInterface
             //Non loaded records should be in solid state by default and require initial validation
             $this->solidState(true)->invalidate();
         }
+
+        parent::__construct($ormSchema);
     }
 
     /**
@@ -585,31 +587,6 @@ class Record extends DataEntity implements ActiveEntityInterface
             $relation[ORM::R_DEFINITION],
             $data,
             $loaded
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function publicFields()
-    {
-        $fields = $this->getFields();
-        foreach ($this->ormSchema[ORM::M_HIDDEN] as $secured) {
-            unset($fields[$secured]);
-        }
-
-        return $this->fire('publicFields', $fields);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validator(array $rules = [], ContainerInterface $container = null)
-    {
-        //Initiate validation using rules declared in schema
-        return parent::validator(
-            !empty($rules) ? $rules : $this->ormSchema[ORM::M_VALIDATES],
-            $container
         );
     }
 
@@ -977,34 +954,6 @@ class Record extends DataEntity implements ActiveEntityInterface
         parent::validate($reset);
 
         return empty($this->errors + $this->nestedErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function isFillable($field)
-    {
-        if (!empty($this->ormSchema[ORM::M_FILLABLE])) {
-            return in_array($field, $this->ormSchema[ORM::M_FILLABLE]);
-        }
-
-        if ($this->ormSchema[ORM::M_SECURED] === '*') {
-            return false;
-        }
-
-        return !in_array($field, $this->ormSchema[ORM::M_SECURED]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getMutator($field, $mutator)
-    {
-        if (isset($this->ormSchema[ORM::M_MUTATORS][$mutator][$field])) {
-            return $this->ormSchema[ORM::M_MUTATORS][$mutator][$field];
-        }
-
-        return null;
     }
 
     /**

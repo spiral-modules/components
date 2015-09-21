@@ -16,6 +16,7 @@ use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
 use Spiral\Models\DataEntity;
+use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Entities\Selector;
@@ -57,12 +58,12 @@ class ORM extends Singleton
     const M_TABLE       = 1;
     const M_DB          = 2;
     const M_COLUMNS     = 3;
-    const M_HIDDEN      = 4;
-    const M_SECURED     = 5;
-    const M_FILLABLE    = 6;
-    const M_NULLABLE    = 7;
-    const M_MUTATORS    = 8;
-    const M_VALIDATES   = 9;
+    const M_HIDDEN      = SchematicEntity::SH_HIDDEN;
+    const M_SECURED     = SchematicEntity::SH_SECURED;
+    const M_FILLABLE    = SchematicEntity::SH_FILLABLE;
+    const M_MUTATORS    = SchematicEntity::SH_MUTATORS;
+    const M_VALIDATES   = SchematicEntity::SH_VALIDATES;
+    const M_NULLABLE    = 9;
     const M_RELATIONS   = 10;
     const M_PRIMARY_KEY = 11;
 

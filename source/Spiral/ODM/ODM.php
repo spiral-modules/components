@@ -16,6 +16,7 @@ use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
+use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
@@ -61,11 +62,11 @@ class ODM extends Singleton implements InjectorInterface
     const D_COLLECTION   = 1;
     const D_DB           = 2;
     const D_DEFAULTS     = 3;
-    const D_HIDDEN       = 4;
-    const D_SECURED      = 5;
-    const D_FILLABLE     = 6;
-    const D_MUTATORS     = 7;
-    const D_VALIDATES    = 8;
+    const D_HIDDEN       = SchematicEntity::SH_HIDDEN;
+    const D_SECURED      = SchematicEntity::SH_SECURED;
+    const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
+    const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
+    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
     const D_AGGREGATIONS = 9;
     const D_COMPOSITIONS = 10;
 

@@ -8,9 +8,8 @@
  */
 namespace Spiral\ODM;
 
-use Spiral\Core\ContainerInterface;
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\DataEntity;
+use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
@@ -23,7 +22,7 @@ use Spiral\ODM\Exceptions\ODMException;
  *
  * Can create set of mongo atomic operations and be embedded into other documents.
  */
-abstract class SimpleDocument extends DataEntity implements CompositableInterface
+abstract class SimpleDocument extends SchematicEntity implements CompositableInterface
 {
     /**
      * We are going to inherit parent validation rules, this will let spiral translator know about
@@ -224,6 +223,8 @@ abstract class SimpleDocument extends DataEntity implements CompositableInterfac
         if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
             $this->fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
         }
+
+        parent::__construct($odmSchema);
     }
 
     /**
@@ -431,18 +432,6 @@ abstract class SimpleDocument extends DataEntity implements CompositableInterfac
         }
 
         return $this->fire('publicFields', $result);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validator(array $rules = [], ContainerInterface $container = null)
-    {
-        //Initiate validation using rules declared in odmSchema
-        return parent::validator(
-            !empty($rules) ? $rules : $this->odmSchema[ODM::D_VALIDATES],
-            $container
-        );
     }
 
     /**
@@ -717,34 +706,6 @@ abstract class SimpleDocument extends DataEntity implements CompositableInterfac
         parent::validate($reset);
 
         return empty($this->errors + $this->nestedErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function isFillable($field)
-    {
-        if (!empty($this->odmSchema[ODM::D_FILLABLE])) {
-            return in_array($field, $this->odmSchema[ODM::D_FILLABLE]);
-        }
-
-        if ($this->odmSchema[ODM::D_SECURED] === '*') {
-            return false;
-        }
-
-        return !in_array($field, $this->odmSchema[ODM::D_SECURED]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getMutator($field, $mutator)
-    {
-        if (isset($this->odmSchema[ODM::D_MUTATORS][$mutator][$field])) {
-            return $this->odmSchema[ODM::D_MUTATORS][$mutator][$field];
-        }
-
-        return null;
     }
 
     /**

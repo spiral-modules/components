@@ -68,7 +68,7 @@ abstract class AbstractTable extends Component implements TableInterface
     /**
      * Table name including table prefix.
      *
-     * @var string|AbstractColumn
+     * @var string
      */
     protected $name = '';
 

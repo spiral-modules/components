@@ -17,7 +17,7 @@ use Spiral\ORM\Record;
 /**
  * Static find record functionality.
  */
-trait SelectorTrait
+trait FindTrait
 {
     /**
      * Find multiple records based on provided query.

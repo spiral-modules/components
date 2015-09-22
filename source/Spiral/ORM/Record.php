@@ -17,7 +17,7 @@ use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Traits\SelectorTrait;
+use Spiral\ORM\Traits\FindTrait;
 use Spiral\Validation\ValidatesInterface;
 
 /**
@@ -33,7 +33,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
     /**
      * Static find functions.
      */
-    use SelectorTrait;
+    use FindTrait;
 
     /**
      * Field format declares how entity must process magic setters and getters. Available values:

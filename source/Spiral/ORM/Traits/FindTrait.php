@@ -17,29 +17,8 @@ use Spiral\ORM\Record;
 /**
  * Static record functionality including create and find methods.
  */
-trait StaticTrait
+trait FindTrait
 {
-    /**
-     * {@inheritdoc}
-     *
-     * @see   Component::staticContainer()
-     * @param array $fields Record fields to set, will be passed thought filters.
-     * @param ORM   $orm    ORM component, global container will be called if not instance provided.
-     * @event created()
-     */
-    public static function create($fields = [], ORM $orm = null)
-    {
-        /**
-         * @var StaticTrait $record
-         */
-        $record = new static([], false, self::saturate($orm, ORM::class));
-
-        //Forcing validation (empty set of fields is not valid set of fields)
-        $record->setFields($fields)->fire('created');
-
-        return $record;
-    }
-
     /**
      * Find multiple records based on provided query.
      *

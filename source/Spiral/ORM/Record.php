@@ -17,7 +17,7 @@ use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Traits\StaticTrait;
+use Spiral\ORM\Traits\FindTrait;
 use Spiral\Validation\ValidatesInterface;
 
 /**
@@ -33,7 +33,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
     /**
      * Static find functions.
      */
-    use StaticTrait;
+    use FindTrait;
 
     /**
      * Field format declares how entity must process magic setters and getters. Available values:
@@ -986,5 +986,26 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         }
 
         return $updates;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see   Component::staticContainer()
+     * @param array $fields Record fields to set, will be passed thought filters.
+     * @param ORM   $orm    ORM component, global container will be called if not instance provided.
+     * @event created()
+     */
+    public static function create($fields = [], ORM $orm = null)
+    {
+        /**
+         * @var self $record
+         */
+        $record = new static([], false, self::saturate($orm, ORM::class));
+
+        //Forcing validation (empty set of fields is not valid set of fields)
+        $record->setFields($fields)->fire('created');
+
+        return $record;
     }
 }

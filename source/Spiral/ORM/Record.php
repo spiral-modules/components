@@ -713,6 +713,11 @@ class Record extends SchematicEntity implements ActiveEntityInterface
             return true;
         }
 
+        $value = $this->getField($field);
+        if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+            return true;
+        }
+
         return false;
     }
 
@@ -841,24 +846,25 @@ class Record extends SchematicEntity implements ActiveEntityInterface
             return [];
         }
 
+        if ($this->isSolid()) {
+            return $this->solidUpdate();
+        }
+
         $updates = [];
-        foreach ($this->fields as $name => $field) {
-            if ($field instanceof RecordAccessorInterface && ($this->isSolid() || $field->hasUpdates())) {
-                //Update handled by accessor
-                $updates[$name] = $field->compileUpdates($name);
-                continue;
+        foreach ($this->fields as $field => $value) {
+            if ($value instanceof RecordAccessorInterface) {
+                if ($value->hasUpdates()) {
+                    $updates[$field] = $value->compileUpdates($field);
+                    continue;
+                }
+
+                //Will be handled as normal update if needed
+                $value = $value->serializeData();
             }
 
-            if (!$this->isSolid() && !array_key_exists($name, $this->updates)) {
-                //No field updates
-                continue;
+            if (array_key_exists($field, $this->updates)) {
+                $updates[$field] = $value;
             }
-
-            if ($field instanceof RecordAccessorInterface) {
-                $field = $field->serializeData();
-            }
-
-            $updates[$name] = $field;
         }
 
         //Primary key should not present in update set
@@ -977,5 +983,29 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         $record->setFields($fields)->fire('created');
 
         return $record;
+    }
+
+    /**
+     * Full structure update.
+     *
+     * @return array
+     */
+    private function solidUpdate()
+    {
+        $updates = [];
+        foreach ($this->fields as $field => $value) {
+            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+                if ($value->hasUpdates()) {
+                    $updates[$field] = $value->compileUpdates($field);
+                } else {
+                    $updates[$field] = $value->serializeData();
+                }
+                continue;
+            }
+
+            $updates[$field] = $value;
+        }
+
+        return $updates;
     }
 }

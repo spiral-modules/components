@@ -470,6 +470,11 @@ abstract class SimpleDocument extends SchematicEntity implements CompositableInt
             return true;
         }
 
+        $value = $this->getField($field);
+        if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
+            return true;
+        }
+
         return false;
     }
 

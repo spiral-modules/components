@@ -8,7 +8,7 @@ This section contains the primary Spiral components used within the Spiral frame
 
 The components included are:
 * Cache
-* Debug and Global Loggers
+* Debugger, Benchmarker and Global Loggers
 * Encrypter and Randomizer
 * Container and set of Core contracts (Singletons and Injectors)
 * Memory interface (&#1000;)

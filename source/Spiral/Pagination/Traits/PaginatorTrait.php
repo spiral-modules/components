@@ -172,7 +172,7 @@ trait PaginatorTrait
             return $this;
         }
 
-        if ($this instanceof PaginableInterface) {
+        if ($this->paginator instanceof PaginatorInterface && $this instanceof PaginableInterface) {
             return $this->paginator->paginateObject($this);
         }
 

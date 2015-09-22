@@ -997,7 +997,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
                 continue;
             }
 
-            if ($this->isEmbedded($relation) && !$relation->isValid()) {
+            if ($this->isEmbedded($name) && !$relation->isValid()) {
                 $this->nestedErrors[$name] = $relation->getErrors($reset);
             }
         }
@@ -1016,7 +1016,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
                 continue;
             }
 
-            if ($this->isEmbedded($relation) && !$relation->saveAssociation($validate)) {
+            if ($this->isEmbedded($name) && !$relation->saveAssociation($validate)) {
                 throw new RecordException("Unable to save relation '{$name}'.");
             }
         }

@@ -18,7 +18,7 @@ The components included are:
 * Http Dispatcher at top of PSR7 with middlewares, Routing
 * StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP)
 * Templater engine with HTML based syntax, inheritance and widgets
-* Tokenizer with FileReflections, Class locations functionality
+* Tokenizer with FileReflections and class locator functionality
 * Basic DataEntity models with Behaviour Schemas (foundation of ORM and ODM)
 * Validation component + set of checkers
 * Pagination component

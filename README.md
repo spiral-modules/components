@@ -12,13 +12,13 @@ The components included are:
 * Encrypter and Randomizer
 * Container and set of Core contracts (Singletons and Injectors)
 * Memory interface (&#1000;)
-* DBAL with Database and Table abstractions and reflections (two way)
+* DBAL with Database partinions, Query Builders and schema reflections (bidirectional): MySQL, PostgresSQL, SQLite, SQLServer
 * ODM engine with inheritance, composition and aggregation
-* Hybrid ORM (DataMapper + ActiveRecord) with the potential to become a cleaner data mapper
-* Http Dispatcher at top of PSR7 with middlewares and routing
+* Hybrid ORM (DataMapper + ActiveRecord) with the plans to become a cleaner data mapper (non breaking)
+* Http Dispatcher at top of PSR7 with middlewares, Routing
 * StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP)
 * Templater engine with HTML based syntax, inheritance and widgets
-* Tokenizer with FileReflections and class locators
+* Tokenizer with FileReflections, Class locations functionality
 * Basic DataEntity models with behaviour schemas (foundation of ORM and ODM)
 * Validation component + set of checkers
 * Pagination component

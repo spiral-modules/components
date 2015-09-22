@@ -32,6 +32,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         }
 
         //SQLite uses alternative syntax
+        $statement = [];
         $statement[] = "INSERT INTO {$this->quote($table, true)} ({$this->columns($columns)})";
 
         foreach ($rowsets as $rowset) {

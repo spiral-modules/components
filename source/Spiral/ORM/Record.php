@@ -483,7 +483,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
 
         foreach ($fields as $name => $nested) {
             //We can fill data of embedded of relations (usually HAS ONE)
-            if (!empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])) {
+            if ($this->isEmbedded($name)) {
                 //Getting relation instance
                 $relation = $this->relation($name);
 
@@ -640,6 +640,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
 
             //Saving record to entity cache if we have space for that
             $this->orm->registerEntity($this, false);
+
         } elseif ($this->solidState || $this->hasUpdates()) {
             $this->fire('updating');
 
@@ -996,11 +997,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
                 continue;
             }
 
-            if (
-                //I'm not very proud of length of this condition
-                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
-                && !$relation->isValid()
-            ) {
+            if ($this->isEmbedded($relation) && !$relation->isValid()) {
                 $this->nestedErrors[$name] = $relation->getErrors($reset);
             }
         }
@@ -1019,12 +1016,22 @@ class Record extends SchematicEntity implements ActiveEntityInterface
                 continue;
             }
 
-            if (
-                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
-                && !$relation->saveAssociation($validate)
-            ) {
+            if ($this->isEmbedded($relation) && !$relation->saveAssociation($validate)) {
                 throw new RecordException("Unable to save relation '{$name}'.");
             }
         }
+    }
+
+    /**
+     * Check if relation is embedded.
+     *
+     * @param string $relation
+     * @return bool
+     */
+    private function isEmbedded($relation)
+    {
+        return !empty(
+        $this->ormSchema[ORM::M_RELATIONS][$relation][ORM::R_DEFINITION][self::EMBEDDED_RELATION]
+        );
     }
 }

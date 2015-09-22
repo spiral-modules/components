@@ -125,17 +125,17 @@ class QueryCompiler extends Component
      * Create select statement. Compiler must validly resolve table and column aliases used in
      * conditions and joins.
      *
-     * @param array   $from
-     * @param boolean $distinct
-     * @param array   $columns
-     * @param array   $joins
-     * @param array   $where
-     * @param array   $having
-     * @param array   $groupBy
-     * @param array   $orderBy
-     * @param int     $limit
-     * @param int     $offset
-     * @param array   $unions
+     * @param array          $from
+     * @param boolean|string $distinct String only for PostgresSQL.
+     * @param array          $columns
+     * @param array          $joins
+     * @param array          $where
+     * @param array          $having
+     * @param array          $groupBy
+     * @param array          $orderBy
+     * @param int            $limit
+     * @param int            $offset
+     * @param array          $unions
      * @return string
      * @throws CompilerException
      */

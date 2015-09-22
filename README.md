@@ -26,3 +26,5 @@ The components included are:
 Unit Testing is a work in progress.
 
 Read more with examples in [spiral guide](https://github.com/spiral/guide).
+
+P.S. Beta release coming over next week or so once documentation is complete (09/23/2015).

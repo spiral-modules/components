@@ -650,20 +650,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         }
 
         $this->flushUpdates();
-
-        foreach ($this->relations as $name => $relation) {
-            if (!$relation instanceof RelationInterface) {
-                //Was never constructed
-                continue;
-            }
-
-            if (
-                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
-                && !$relation->saveAssociation($validate)
-            ) {
-                throw new RecordException("Unable to save relation '{$name}'.");
-            }
-        }
+        $this->saveRelations($validate);
 
         return true;
     }
@@ -943,21 +930,8 @@ class Record extends SchematicEntity implements ActiveEntityInterface
             }
         }
 
-        //We have to validate relations before saving them
-        foreach ($this->relations as $name => $relation) {
-            if (!$relation instanceof ValidatesInterface) {
-                //Never constructed
-                continue;
-            }
-
-            if (
-                //I'm not very proud of length of this condition
-                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
-                && !$relation->isValid()
-            ) {
-                $this->nestedErrors[$name] = $relation->getErrors($reset);
-            }
-        }
+        //We have to validate some relations before saving them
+        $this->validateRelations($reset);
 
         parent::validate($reset);
 
@@ -1007,5 +981,50 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         $record->setFields($fields)->fire('created');
 
         return $record;
+    }
+
+    /**
+     * Validate embedded relations.
+     *
+     * @param bool $reset
+     */
+    private function validateRelations($reset)
+    {
+        foreach ($this->relations as $name => $relation) {
+            if (!$relation instanceof ValidatesInterface) {
+                //Never constructed
+                continue;
+            }
+
+            if (
+                //I'm not very proud of length of this condition
+                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
+                && !$relation->isValid()
+            ) {
+                $this->nestedErrors[$name] = $relation->getErrors($reset);
+            }
+        }
+    }
+
+    /**
+     * Save embedded relations.
+     *
+     * @param bool $validate
+     */
+    private function saveRelations($validate)
+    {
+        foreach ($this->relations as $name => $relation) {
+            if (!$relation instanceof RelationInterface) {
+                //Was never constructed
+                continue;
+            }
+
+            if (
+                !empty($this->ormSchema[ORM::M_RELATIONS][$name][ORM::R_DEFINITION][self::EMBEDDED_RELATION])
+                && !$relation->saveAssociation($validate)
+            ) {
+                throw new RecordException("Unable to save relation '{$name}'.");
+            }
+        }
     }
 }

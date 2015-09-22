@@ -52,7 +52,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     /**
      * Query must return only unique rows.
      *
-     * @var bool
+     * @var bool|string
      */
     protected $distinct = false;
 

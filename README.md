@@ -11,7 +11,7 @@ The components included are:
 * Debug and Global Loggers
 * Encrypter and Randomizer
 * Container and set of Core contracts (Singletons and Injectors)
-* Memory interface
+* Memory interface (&#1000;)
 * DBAL with Database and Table abstractions and reflections (two way)
 * ODM engine with inheritance, composition and aggregation
 * Hybrid ORM (DataMapper + ActiveRecord) with the potential to become a cleaner data mapper

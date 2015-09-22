@@ -16,7 +16,8 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Session\Exceptions\SessionException;
 
 /**
- * Default implementation of StoreInterface, can map session data to specified SessionHandler.
+ * Default implementation of StoreInterface, can map session data to specified SessionHandler. By
+ * default spiral session uses native php sessions as backbone, it can be changed in future.
  */
 class SessionStore extends Singleton implements SessionInterface, \ArrayAccess, \IteratorAggregate
 {

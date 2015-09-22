@@ -16,7 +16,7 @@ The components included are:
 * ODM engine with inheritance, composition and aggregation
 * Hybrid ORM (DataMapper + ActiveRecord) with the potential to become a cleaner data mapper
 * Http Dispatcher at top of PSR7 with middlewares and routing
-* StorageManager with remote abstractions (Amazon, Rackspace, GridFs, FTP, SFTP)
+* StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP)
 * Templater engine with HTML based syntax, inheritance and widgets
 * Tokenizer with FileReflections and class locators
 * Basic DataEntity models with behaviour schemas (foundation of ORM and ODM)
@@ -24,3 +24,5 @@ The components included are:
 * Pagination component
 
 Unit Testing is a work in progress.
+
+Read more with examples in [spiral guide](https://github.com/spiral/guide).

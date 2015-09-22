@@ -423,9 +423,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
     }
 
     /**
-     * Record primary key value (if any).
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function primaryKey()
     {

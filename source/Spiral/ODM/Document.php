@@ -19,7 +19,7 @@ use Spiral\ODM\Traits\FindTrait;
 /**
  * SimpleDocument with added ActiveRecord methods and association with collection.
  */
-abstract class Document extends SimpleDocument implements ActiveEntityInterface
+ class Document extends SimpleDocument implements ActiveEntityInterface
 {
     /**
      * Static functions.
@@ -73,9 +73,9 @@ abstract class Document extends SimpleDocument implements ActiveEntityInterface
     }
 
     /**
-     * Document primary key value (if any).
+     * {@inheritdoc}
      *
-     * @return null|\MongoId
+     * @return \MongoId|null
      */
     public function primaryKey()
     {

@@ -24,6 +24,13 @@ interface ActiveEntityInterface extends EntityInterface
     public function isLoaded();
 
     /**
+     * Primary entity key if any.
+     *
+     * @return mixed|null
+     */
+    public function primaryKey();
+
+    /**
      * Save entity content into it's primary storage and return true if operation went successfully.
      *
      * @return bool

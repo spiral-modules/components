@@ -738,6 +738,24 @@ class Record extends SchematicEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      */
+    public function isValid()
+    {
+        $this->validate();
+
+        return empty($this->errors) && empty($this->nestedErrors);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getErrors($reset = false)
+    {
+        return parent::getErrors($reset) + $this->nestedErrors;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function __isset($name)
     {
         if (isset($this->ormSchema[ORM::M_RELATIONS][$name])) {
@@ -901,24 +919,6 @@ class Record extends SchematicEntity implements ActiveEntityInterface
 
         //We have to serialize record data
         return $this->updates + $this->serializeData();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isValid()
-    {
-        $this->validate();
-
-        return empty($this->errors) && empty($this->nestedErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getErrors($reset = false)
-    {
-        return parent::getErrors($reset) + $this->nestedErrors;
     }
 
     /**

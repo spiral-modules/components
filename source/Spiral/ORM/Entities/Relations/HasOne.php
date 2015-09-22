@@ -31,7 +31,7 @@ class HasOne extends Relation
     public function associate($related = null)
     {
         //Removing association
-        if (static::MULTIPLE == false && $related === null) {
+        if (static::MULTIPLE === false && $related === null) {
             if (!$this->definition[Record::NULLABLE]) {
                 throw new RelationException(
                     "Unable to de-associate relation data, relation is not nullable."

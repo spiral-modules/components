@@ -14,7 +14,7 @@ use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\Traits\CollectionTrait;
+use Spiral\ODM\Traits\FindTrait;
 
 /**
  * SimpleDocument with added ActiveRecord methods and association with collection.
@@ -24,7 +24,7 @@ abstract class Document extends SimpleDocument implements ActiveEntityInterface
     /**
      * Static functions.
      */
-    use CollectionTrait;
+    use FindTrait;
 
     /**
      * Collection name where document should be stored into.

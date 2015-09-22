@@ -34,7 +34,7 @@ abstract class AbstractIndex implements IndexInterface
      * Index type, by default NORMAL and UNIQUE indexes supported, additional types can be
      * implemented on database driver level.
      *
-     * @var int
+     * @var string
      */
     protected $type = self::NORMAL;
 

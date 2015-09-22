@@ -16,7 +16,7 @@ The components included are:
 * ODM engine with inheritance, composition and aggregation
 * Hybrid ORM (DataMapper + ActiveRecord) with the plans to become a cleaner data mapper (non breaking) includes database scaffolding, relations (+polymorphic for fun), eager loading and easy joins
 * Http Dispatcher at top of PSR7 with middlewares, Routing
-* StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP)
+* StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP) + PSR7 streams
 * Templater engine with HTML based syntax, inheritance and widgets
 * Tokenizer with FileReflections and class locator functionality
 * Basic DataEntity models with Behaviour Schemas (foundation of ORM and ODM)

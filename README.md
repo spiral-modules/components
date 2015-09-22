@@ -10,7 +10,7 @@ The components included are:
 * Cache
 * Debugger, Benchmarker and Global Loggers
 * Encrypter and Randomizer
-* Container and set of Core contracts (Singletons and Injectors)
+* Simple IoC Container and set of Core contracts (Singletons and Injectors)
 * Memory interface (&#1000;)
 * DBAL with Database partinions, Query Builders and schema reflections (bidirectional): MySQL, PostgresSQL, SQLite, SQLServer
 * ODM engine with inheritance, composition and aggregation

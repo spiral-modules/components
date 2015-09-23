@@ -8,15 +8,21 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\Models\ActiveEntityInterface;
+use Spiral\Models\EntityInterface;
+use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Entities\Traits\AliasTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
+use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
 
 /**
  * Abstract implementation of ORM Relations, provides access to associated instances, use ORM entity
  * cache and record iterators. In additional can be serialized into json, or iterated when needed.
+ *
+ * This abstract implement built to work with ORM Record classes.
  */
 abstract class Relation implements
     RelationInterface,
@@ -56,17 +62,17 @@ abstract class Relation implements
     protected $data = [];
 
     /**
-     * Instance of constructed ActiveRecord of RecordIterator.
+     * Instance of constructed EntityInterface of RecordIterator.
      *
      * @invisible
-     * @var Record|RecordIterator
+     * @var EntityInterface|RecordIterator
      */
     protected $instance = null;
 
     /**
      * Parent Record caused relation to be created.
      *
-     * @var Record
+     * @var RecordInterface
      */
     protected $parent = null;
 
@@ -85,15 +91,16 @@ abstract class Relation implements
     protected $orm = null;
 
     /**
-     * @param ORM    $orm
-     * @param Record $parent
-     * @param array  $definition Relation definition, must be normalized by relation schema.
-     * @param mixed  $data       Pre-loaded relation data.
-     * @param bool   $loaded     Indication that relation data has been loaded.
+     * @param ORM             $orm
+     * @param RecordInterface $parent
+     * @param array           $definition Relation definition, must be normalized by relation
+     *                                    schema.
+     * @param mixed           $data       Pre-loaded relation data.
+     * @param bool            $loaded     Indication that relation data has been loaded.
      */
     public function __construct(
         ORM $orm,
-        Record $parent,
+        RecordInterface $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -122,7 +129,7 @@ abstract class Relation implements
     public function getRelated()
     {
         if (!empty($this->instance)) {
-            if ($this->instance instanceof Record && !empty($this->data)) {
+            if ($this->instance instanceof RecordInterface && !empty($this->data)) {
                 //We have to keep record relation context (pivot data and pre-loaded relations)
                 $this->instance->setContext($this->data);
             }
@@ -138,8 +145,8 @@ abstract class Relation implements
 
         if (empty($this->data)) {
             if (
-                array_key_exists(Record::NULLABLE, $this->definition)
-                && !$this->definition[Record::NULLABLE]
+                array_key_exists(RecordEntity::NULLABLE, $this->definition)
+                && !$this->definition[RecordEntity::NULLABLE]
                 && !static::MULTIPLE
             ) {
                 //Not nullable relations must always return requested instance
@@ -156,7 +163,7 @@ abstract class Relation implements
     /**
      * {@inheritdoc}
      */
-    public function associate($related)
+    public function associate(EntityInterface $related = null)
     {
         if (static::MULTIPLE) {
             throw new RelationException(
@@ -195,39 +202,18 @@ abstract class Relation implements
 
         if (static::MULTIPLE) {
             /**
-             * @var RecordIterator|Record[] $instance
+             * @var RecordIterator|EntityInterface[] $instance
              */
             foreach ($instance as $record) {
-                if ($record->isDeleted()) {
-                    continue;
-                }
-
-                //Forcing keys and etc
-                if (!$this->mountRelation($record)->save($validate)) {
+                if (!$this->saveEntity($record, $validate)) {
                     return false;
                 }
-
-                $this->orm->registerEntity($record);
             }
 
             return true;
         }
 
-        /**
-         * @var Record $instance
-         */
-        if ($instance->isDeleted()) {
-            //Deleted by user
-            return true;
-        }
-
-        if (!$this->mountRelation($instance)->save($validate)) {
-            return false;
-        }
-
-        $this->orm->registerEntity($instance);
-
-        return true;
+        return $this->saveEntity($instance, $validate);
     }
 
     /**
@@ -240,7 +226,7 @@ abstract class Relation implements
             return;
         }
 
-        if (!$loaded || !($this->instance instanceof Record)) {
+        if (!$loaded || !($this->instance instanceof EntityInterface)) {
             //Flushing instance
             $this->instance = null;
         }
@@ -256,7 +242,7 @@ abstract class Relation implements
     {
         $related = $this->getRelated();
         if (!static::MULTIPLE) {
-            if ($related instanceof Record) {
+            if ($related instanceof EntityInterface) {
                 return $related->isValid();
             }
 
@@ -264,11 +250,11 @@ abstract class Relation implements
         }
 
         /**
-         * @var RecordIterator|Record[] $data
+         * @var RecordIterator|EntityInterface[] $data
          */
         $hasErrors = false;
-        foreach ($related as $record) {
-            if (!$record->isValid()) {
+        foreach ($related as $entity) {
+            if (!$entity->isValid()) {
                 $hasErrors = true;
             }
         }
@@ -295,7 +281,7 @@ abstract class Relation implements
         $related = $this->getRelated();
 
         if (!static::MULTIPLE) {
-            if ($related instanceof Record) {
+            if ($related instanceof EntityInterface) {
                 return $related->getErrors($reset);
             }
 
@@ -303,7 +289,7 @@ abstract class Relation implements
         }
 
         /**
-         * @var RecordIterator|Record[] $data
+         * @var RecordIterator|EntityInterface[] $data
          */
         $errors = [];
         foreach ($related as $position => $record) {
@@ -342,7 +328,7 @@ abstract class Relation implements
      * Perform iterator on pre-loaded data. Use relation selector to iterate thought custom relation
      * query.
      *
-     * @return Record|Record[]|RecordIterator
+     * @return RecordEntity|RecordEntity[]|RecordIterator
      */
     public function getIterator()
     {
@@ -391,10 +377,10 @@ abstract class Relation implements
      * Mount relation keys to parent or children records to ensure their connection. Method called
      * when record requests relation save.
      *
-     * @param Record $record
-     * @return Record
+     * @param EntityInterface $record
+     * @return EntityInterface
      */
-    abstract protected function mountRelation(Record $record);
+    abstract protected function mountRelation(EntityInterface $record);
 
     /**
      * Convert pre-loaded relation data to record iterator record.
@@ -409,7 +395,7 @@ abstract class Relation implements
     /**
      * Convert pre-loaded relation data to active record record.
      *
-     * @return Record
+     * @return RecordEntity
      */
     protected function createRecord()
     {
@@ -419,7 +405,7 @@ abstract class Relation implements
     /**
      * Create empty record to be associated with non nullable relation.
      *
-     * @return Record
+     * @return RecordEntity
      */
     protected function emptyRecord()
     {
@@ -458,12 +444,41 @@ abstract class Relation implements
      * Internal ORM relation method used to create valid selector used to pre-load relation data or
      * create custom query based on relation options.
      *
-     * Must be redeclared in child implementations.
+     * Must be redeclarated in child implementations.
      *
      * @return Selector
      */
     protected function createSelector()
     {
-        return new Selector($this->orm, $this->getClass());
+        return $this->orm->ormSelector($this->getClass());
+    }
+
+    /**
+     * Save simple related entity.
+     *
+     * @param EntityInterface $entity
+     * @param bool            $validate
+     * @return bool|void
+     */
+    private function saveEntity(EntityInterface $entity, $validate)
+    {
+        if ($entity instanceof RecordInterface && $entity->isDeleted()) {
+            return true;
+        }
+
+        if (!$entity instanceof ActiveEntityInterface) {
+            throw new RelationException("Unable to save non active entity.");
+        }
+
+        $this->mountRelation($entity);
+        if (!$entity->save($validate)) {
+            return false;
+        }
+
+        if ($entity instanceof IdentifiedInterface) {
+            $this->orm->registerEntity($entity);
+        }
+
+        return true;
     }
 }

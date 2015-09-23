@@ -11,7 +11,7 @@ namespace Spiral\ORM\Entities\Schemas\Relations;
 use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * BelongsToMorphed are almost identical to BelongsTo except it parent Record defined by role value
@@ -48,7 +48,7 @@ class BelongsToMorphedSchema extends MorphedSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Record::BELONGS_TO_MORPHED;
+    const RELATION_TYPE = RecordEntity::BELONGS_TO_MORPHED;
 
     /**
      * {@inheritdoc}
@@ -58,15 +58,15 @@ class BelongsToMorphedSchema extends MorphedSchema
     protected $defaultDefinition = [
         //By default, we are looking for primary key in our outer records, outer key must present
         //in every outer record and be consistent
-        Record::OUTER_KEY      => '{outer:primaryKey}',
+        RecordEntity::OUTER_KEY      => '{outer:primaryKey}',
         //Inner key name will be created based on singular relation name and outer key name
-        Record::INNER_KEY      => '{name:singular}_{definition:outerKey}',
+        RecordEntity::INNER_KEY      => '{name:singular}_{definition:outerKey}',
         //Morph key created based on singular relation name and postfix _type
-        Record::MORPH_KEY      => '{name:singular}_type',
+        RecordEntity::MORPH_KEY      => '{name:singular}_type',
         //Relation allowed to create indexes in pivot table
-        Record::CREATE_INDEXES => true,
+        RecordEntity::CREATE_INDEXES => true,
         //Relation is nullable by default
-        Record::NULLABLE       => true
+        RecordEntity::NULLABLE       => true
     ];
 
     /**
@@ -78,8 +78,8 @@ class BelongsToMorphedSchema extends MorphedSchema
     {
         //Same logic as in BelongsTo
         if (
-            !is_array($this->definition[Record::INVERSE])
-            || !isset($this->definition[Record::INVERSE][1])
+            !is_array($this->definition[RecordEntity::INVERSE])
+            || !isset($this->definition[RecordEntity::INVERSE][1])
         ) {
             throw new RelationSchemaException(
                 "Unable to revert BELONG_TO_MORPHED relation '{$this->record}'.'{$this}', " .
@@ -88,17 +88,17 @@ class BelongsToMorphedSchema extends MorphedSchema
         }
 
         //We are going to inverse relation to every outer record
-        $inversed = $this->definition[Record::INVERSE];
+        $inversed = $this->definition[RecordEntity::INVERSE];
         foreach ($this->outerRecords() as $record) {
             if (!$record->hasRelation($inversed[1])) {
                 $record->addRelation(
                     $inversed[1],
                     [
                         $inversed[0]      => $this->record->getName(),
-                        Record::OUTER_KEY => $this->definition[Record::INNER_KEY],
-                        Record::INNER_KEY => $this->definition[Record::OUTER_KEY],
-                        Record::MORPH_KEY => $this->definition[Record::MORPH_KEY],
-                        Record::NULLABLE  => $this->definition[Record::NULLABLE]
+                        RecordEntity::OUTER_KEY => $this->definition[RecordEntity::INNER_KEY],
+                        RecordEntity::INNER_KEY => $this->definition[RecordEntity::OUTER_KEY],
+                        RecordEntity::MORPH_KEY => $this->definition[RecordEntity::MORPH_KEY],
+                        RecordEntity::NULLABLE  => $this->definition[RecordEntity::NULLABLE]
                     ]
                 );
             }

@@ -17,30 +17,34 @@ use Spiral\Models\IdentifiedInterface;
 interface RecordInterface extends IdentifiedInterface
 {
     /**
-     * Due setContext() method and entity cache of ORM any custom initiation code in constructor
-     * must not depends on database data.
-     *
-     * @see Component::staticContainer()
-     * @see setContext
-     * @param array      $data
-     * @param bool|false $loaded
-     * @param ORM|null   $orm
-     * @param array      $ormSchema
-     */
-    public function __construct(
-        array $data = [],
-        $loaded = false,
-        ORM $orm = null,
-        array $ormSchema = []
-    );
-
-    /**
-     * Record context must be updated in cases where single record instance can be accessed from
-     * multiple places, context must not change record fields but might overwrite pivot data or
-     * clarify loaded relations.
+     * RecordInterface context must be updated in cases where single record instance can be
+     * accessed from multiple places, context must not change record fields but might overwrite
+     * pivot data or clarify loaded relations. Must be supplied in array form.
      *
      * @param array $context
      * @return $this
      */
     public function setContext(array $context);
+
+    /**
+     * Is record were fetched from databases or recently created?
+     *
+     * @return bool
+     */
+    public function isLoaded();
+
+    /**
+     * Indication that record data was deleted.
+     *
+     * @return bool
+     */
+    public function isDeleted();
+
+    /**
+     * Role name used in morphed relations to detect outer record table and class. In general case
+     * must simply return unique name.
+     *
+     * @return string
+     */
+    public function recordRole();
 }

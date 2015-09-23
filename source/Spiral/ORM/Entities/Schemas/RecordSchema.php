@@ -14,13 +14,13 @@ use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
+use Spiral\ORM\ActiveAccessorInterface;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\Record;
-use Spiral\ORM\RecordAccessorInterface;
+use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
 
 /**
@@ -33,7 +33,7 @@ class RecordSchema extends ReflectionEntity
     /**
      * Required to validly merge parent and children attributes.
      */
-    const BASE_CLASS = Record::class;
+    const BASE_CLASS = RecordEntity::class;
 
     /**
      * Every ORM Record must have associated database table, table will be used to read column
@@ -245,7 +245,7 @@ class RecordSchema extends ReflectionEntity
             if (isset($accessors[$column->getName()])) {
                 $accessor = $accessors[$column->getName()];
                 $accessor = new $accessor($default, null);
-                if ($accessor instanceof RecordAccessorInterface) {
+                if ($accessor instanceof ActiveAccessorInterface) {
                     $default = $accessor->defaultValue($this->tableSchema->driver());
                 }
             }
@@ -536,7 +536,7 @@ class RecordSchema extends ReflectionEntity
         //Columns index associated too
         $columns = [];
         foreach ($definition as $chunk) {
-            if ($chunk == Record::INDEX || $chunk == Record::UNIQUE) {
+            if ($chunk == RecordEntity::INDEX || $chunk == RecordEntity::UNIQUE) {
                 $type = $chunk;
                 continue;
             }
@@ -563,7 +563,7 @@ class RecordSchema extends ReflectionEntity
         }
 
         //Casting schema
-        return $this->tableSchema->index($columns)->unique($type == Record::UNIQUE);
+        return $this->tableSchema->index($columns)->unique($type == RecordEntity::UNIQUE);
     }
 
     /**

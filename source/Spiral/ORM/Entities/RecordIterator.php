@@ -11,7 +11,7 @@ namespace Spiral\ORM\Entities;
 use Spiral\ORM\Exceptions\IteratorException;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Provides iteration over set of specified records data using internal instances cache. In
@@ -56,7 +56,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Constructed record instances. Cache.
      *
-     * @var Record[]
+     * @var RecordEntity[]
      */
     protected $instances = [];
 
@@ -96,14 +96,14 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Get all Records as array.
      *
-     * @return Record[]
+     * @return RecordEntity[]
      */
     public function all()
     {
         $result = [];
 
         /**
-         * @var self|Record[] $iterator
+         * @var self|RecordEntity[] $iterator
          */
         $iterator = clone $this;
         foreach ($iterator as $nested) {
@@ -119,7 +119,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * {@inheritdoc}
      *
-     * @return Record
+     * @return RecordEntity
      * @see ORM::record()
      * @see Record::setContext()
      * @throws ORMException
@@ -176,13 +176,13 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Check if record or record with specified id presents in iteration.
      *
-     * @param Record|string|int $record
+     * @param RecordEntity|string|int $record
      * @return true
      */
     public function has($record)
     {
         /**
-         * @var self|Record[] $iterator
+         * @var self|RecordEntity[] $iterator
          */
         $iterator = clone $this;
         foreach ($iterator as $nested) {
@@ -192,7 +192,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
                     //Comparing fields intersection
                     $found = true;
                 }
-            } elseif (!$record instanceof Record) {
+            } elseif (!$record instanceof RecordEntity) {
 
                 if (!empty($record) && $nested->primaryKey() == $record) {
                     //Comparing using primary keys
@@ -243,7 +243,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
-     * @return Record[]
+     * @return RecordEntity[]
      */
     public function __debugInfo()
     {

@@ -87,7 +87,7 @@ class ORM extends Singleton
      * mainly to ensure the same instance of object, even if was accessed from different spots.
      * Cache usage increases memory consumption and does not decreases amount of queries being made.
      *
-     * @var Record[]
+     * @var RecordEntity[]
      */
     private $entityCache = [];
 
@@ -182,7 +182,7 @@ class ORM extends Singleton
      * @param string $class Record class name.
      * @param array  $data
      * @param bool   $cache Add record to entity cache if enabled.
-     * @return Record
+     * @return RecordEntity
      */
     public function record($class, array $data = [], $cache = true)
     {
@@ -222,16 +222,21 @@ class ORM extends Singleton
     /**
      * Create record relation instance by given relation type, parent and definition (options).
      *
-     * @param int    $type
-     * @param Record $parent
-     * @param array  $definition Relation definition.
-     * @param array  $data
-     * @param bool   $loaded
+     * @param int          $type
+     * @param RecordEntity $parent
+     * @param array        $definition Relation definition.
+     * @param array        $data
+     * @param bool         $loaded
      * @return RelationInterface
      * @throws ORMException
      */
-    public function relation($type, Record $parent, $definition, $data = null, $loaded = false)
-    {
+    public function relation(
+        $type,
+        RecordEntity $parent,
+        $definition,
+        $data = null,
+        $loaded = false
+    ) {
         if (!isset($this->config['relations'][$type]['class'])) {
             throw new ORMException("Undefined relation type '{$type}'.");
         }
@@ -314,7 +319,7 @@ class ORM extends Singleton
      * @param RecordSchema  $record
      * @param string        $name
      * @param array         $definition
-     * @return RelationInterface
+     * @return Schemas\RelationInterface
      */
     public function relationSchema(
         $type,
@@ -364,7 +369,7 @@ class ORM extends Singleton
      *
      * @param IdentifiedInterface $entity
      * @param bool                $ignoreLimit Cache overflow will be ignored.
-     * @return Record
+     * @return RecordEntity
      */
     public function registerEntity(IdentifiedInterface $entity, $ignoreLimit = true)
     {
@@ -392,6 +397,18 @@ class ORM extends Singleton
         }
 
         unset($this->entityCache[get_class($entity) . '.' . $entity->primaryKey()]);
+    }
+
+    /**
+     * Check if desired entity was already cached.
+     *
+     * @param string $class
+     * @param mixed  $primaryKey
+     * @return bool
+     */
+    public function hasEntity($class, $primaryKey)
+    {
+        return isset($this->entityCache[$class . '.' . $primaryKey]);
     }
 
     /**

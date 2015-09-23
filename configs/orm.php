@@ -7,7 +7,7 @@
  * - relation classes including schema generators, loaders and relation representers
  */
 use Spiral\ORM\Entities;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 return [
     'entityCache'    => [
@@ -23,31 +23,31 @@ return [
     'mutatorAliases' => [
     ],
     'relations'      => [
-        Record::BELONGS_TO         => [
+        RecordEntity::BELONGS_TO         => [
             'class'  => Entities\Relations\BelongsTo::class,
             'schema' => Entities\Schemas\Relations\BelongsToSchema::class,
             'loader' => Entities\Loaders\BelongsToLoader::class
         ],
-        Record::BELONGS_TO_MORPHED => [
+        RecordEntity::BELONGS_TO_MORPHED => [
             'class'  => Entities\Relations\BelongsToMorphed::class,
             'schema' => Entities\Schemas\Relations\BelongsToMorphedSchema::class
         ],
-        Record::HAS_ONE            => [
+        RecordEntity::HAS_ONE            => [
             'class'  => Entities\Relations\HasOne::class,
             'schema' => Entities\Schemas\Relations\HasOneSchema::class,
             'loader' => Entities\Loaders\HasOneLoader::class
         ],
-        Record::HAS_MANY           => [
+        RecordEntity::HAS_MANY           => [
             'class'  => Entities\Relations\HasMany::class,
             'schema' => Entities\Schemas\Relations\HasManySchema::class,
             'loader' => Entities\Loaders\HasManyLoader::class
         ],
-        Record::MANY_TO_MANY       => [
+        RecordEntity::MANY_TO_MANY       => [
             'class'  => Entities\Relations\ManyToMany::class,
             'schema' => Entities\Schemas\Relations\ManyToManySchema::class,
             'loader' => Entities\Loaders\ManyToManyLoader::class
         ],
-        Record::MANY_TO_MORPHED    => [
+        RecordEntity::MANY_TO_MORPHED    => [
             'class'  => Entities\Relations\ManyToMorphed::class,
             'schema' => Entities\Schemas\Relations\ManyToMorphedSchema::class
         ]

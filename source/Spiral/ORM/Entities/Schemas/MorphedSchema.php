@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities\Schemas;
 
 use Spiral\ORM\Exceptions\RelationSchemaException;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * {@inheritdoc}
@@ -28,7 +28,7 @@ abstract class MorphedSchema extends RelationSchema
     public function isInversable()
     {
         //Morphed relations must control unique relations on lower level
-        return !empty($this->definition[Record::INVERSE]) && $this->isReasonable();
+        return !empty($this->definition[RecordEntity::INVERSE]) && $this->isReasonable();
     }
 
     /**

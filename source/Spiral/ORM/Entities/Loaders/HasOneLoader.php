@@ -11,7 +11,7 @@ namespace Spiral\ORM\Entities\Loaders;
 use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
@@ -23,7 +23,7 @@ class HasOneLoader extends Loader
      * Relation type is required to correctly resolve foreign record class based on relation
      * definition.
      */
-    const RELATION_TYPE = Record::HAS_ONE;
+    const RELATION_TYPE = RecordEntity::HAS_ONE;
 
     /**
      * Default load method (inload or postload).
@@ -60,7 +60,7 @@ class HasOneLoader extends Loader
         }
 
         //Adding condition
-        $selector->where($this->getKey(Record::OUTER_KEY), 'IN', $aggregatedKeys);
+        $selector->where($this->getKey(RecordEntity::OUTER_KEY), 'IN', $aggregatedKeys);
 
         return $selector;
     }
@@ -71,7 +71,7 @@ class HasOneLoader extends Loader
     protected function clarifySelector(Selector $selector)
     {
         $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
-            $this->getKey(Record::OUTER_KEY) => $this->getParentKey()
+            $this->getKey(RecordEntity::OUTER_KEY) => $this->getParentKey()
         ]);
 
         $this->mountConditions($selector);
@@ -87,7 +87,7 @@ class HasOneLoader extends Loader
     protected function mountConditions(Selector $selector)
     {
         //We only going to mount morph key as additional condition
-        if (!empty($morphKey = $this->getKey(Record::MORPH_KEY))) {
+        if (!empty($morphKey = $this->getKey(RecordEntity::MORPH_KEY))) {
             if ($this->isJoinable()) {
                 $selector->onWhere($morphKey, $this->parent->schema[ORM::M_ROLE_NAME]);
             } else {

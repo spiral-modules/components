@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Entities\Schemas\Relations;
 
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Declares simple has many relation. Relations like that used when parent record has many child
@@ -28,7 +28,7 @@ class HasManySchema extends HasOneSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Record::HAS_MANY;
+    const RELATION_TYPE = RecordEntity::HAS_MANY;
 
     /**
      * Relation represent multiple records.
@@ -42,19 +42,19 @@ class HasManySchema extends HasOneSchema
      */
     protected $defaultDefinition = [
         //Let's use parent record primary key as default inner key
-        Record::INNER_KEY         => '{record:primaryKey}',
+        RecordEntity::INNER_KEY         => '{record:primaryKey}',
         //Outer key will be based on parent record role and inner key name
-        Record::OUTER_KEY         => '{record:role}_{definition:innerKey}',
+        RecordEntity::OUTER_KEY         => '{record:role}_{definition:innerKey}',
         //Set constraints (foreign keys) by default
-        Record::CONSTRAINT        => true,
+        RecordEntity::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
-        Record::CONSTRAINT_ACTION => 'CASCADE',
+        RecordEntity::CONSTRAINT_ACTION => 'CASCADE',
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Record::NULLABLE          => true,
+        RecordEntity::NULLABLE          => true,
         //Relation allowed to create indexes in outer table
-        Record::CREATE_INDEXES    => true,
+        RecordEntity::CREATE_INDEXES    => true,
         //HasMany allow us to define default WHERE statement for relation in a simplified array form
-        Record::WHERE             => []
+        RecordEntity::WHERE             => []
     ];
 }

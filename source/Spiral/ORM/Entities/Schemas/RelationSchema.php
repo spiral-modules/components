@@ -15,7 +15,7 @@ use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
 
 /**
@@ -207,11 +207,11 @@ abstract class RelationSchema implements RelationInterface
      */
     public function isInversable()
     {
-        if (empty($this->definition[Record::INVERSE]) || !$this->isReasonable()) {
+        if (empty($this->definition[RecordEntity::INVERSE]) || !$this->isReasonable()) {
             return false;
         }
 
-        $inversed = $this->definition[Record::INVERSE];
+        $inversed = $this->definition[RecordEntity::INVERSE];
         if (is_array($inversed)) {
             //Some relations requires not only inversed relation name but also type
             $inversed = $inversed[1];
@@ -239,8 +239,8 @@ abstract class RelationSchema implements RelationInterface
      */
     public function isNullable()
     {
-        if (array_key_exists(Record::NULLABLE, $this->definition)) {
-            return $this->definition[Record::NULLABLE];
+        if (array_key_exists(RecordEntity::NULLABLE, $this->definition)) {
+            return $this->definition[RecordEntity::NULLABLE];
         }
 
         return false;
@@ -257,7 +257,7 @@ abstract class RelationSchema implements RelationInterface
      */
     public function hasMorphKey()
     {
-        return !empty($this->definition[Record::MORPH_KEY]);
+        return !empty($this->definition[RecordEntity::MORPH_KEY]);
     }
 
     /**
@@ -267,8 +267,8 @@ abstract class RelationSchema implements RelationInterface
      */
     public function getMorphKey()
     {
-        if (isset($this->definition[Record::MORPH_KEY])) {
-            return $this->definition[Record::MORPH_KEY];
+        if (isset($this->definition[RecordEntity::MORPH_KEY])) {
+            return $this->definition[RecordEntity::MORPH_KEY];
         }
 
         return null;
@@ -281,7 +281,7 @@ abstract class RelationSchema implements RelationInterface
      */
     public function isIndexed()
     {
-        return !empty($this->definition[Record::CREATE_INDEXES]);
+        return !empty($this->definition[RecordEntity::CREATE_INDEXES]);
     }
 
     /**
@@ -296,8 +296,8 @@ abstract class RelationSchema implements RelationInterface
             return false;
         }
 
-        if (array_key_exists(Record::CONSTRAINT, $this->definition)) {
-            return $this->definition[Record::CONSTRAINT];
+        if (array_key_exists(RecordEntity::CONSTRAINT, $this->definition)) {
+            return $this->definition[RecordEntity::CONSTRAINT];
         }
 
         return false;
@@ -311,8 +311,8 @@ abstract class RelationSchema implements RelationInterface
      */
     public function getConstraintAction()
     {
-        if (array_key_exists(Record::CONSTRAINT_ACTION, $this->definition)) {
-            return $this->definition[Record::CONSTRAINT_ACTION];
+        if (array_key_exists(RecordEntity::CONSTRAINT_ACTION, $this->definition)) {
+            return $this->definition[RecordEntity::CONSTRAINT_ACTION];
         }
 
         return null;
@@ -344,8 +344,8 @@ abstract class RelationSchema implements RelationInterface
      */
     public function getInnerKey()
     {
-        if (isset($this->definition[Record::INNER_KEY])) {
-            return $this->definition[Record::INNER_KEY];
+        if (isset($this->definition[RecordEntity::INNER_KEY])) {
+            return $this->definition[RecordEntity::INNER_KEY];
         }
 
         return null;
@@ -358,8 +358,8 @@ abstract class RelationSchema implements RelationInterface
      */
     public function getOuterKey()
     {
-        if (isset($this->definition[Record::OUTER_KEY])) {
-            return $this->definition[Record::OUTER_KEY];
+        if (isset($this->definition[RecordEntity::OUTER_KEY])) {
+            return $this->definition[RecordEntity::OUTER_KEY];
         }
 
         return null;
@@ -431,11 +431,11 @@ abstract class RelationSchema implements RelationInterface
 
         //Unnecessary fields.
         unset(
-            $definition[Record::CONSTRAINT],
-            $definition[Record::CONSTRAINT_ACTION],
-            $definition[Record::CREATE_PIVOT],
-            $definition[Record::INVERSE],
-            $definition[Record::CREATE_INDEXES]
+            $definition[RecordEntity::CONSTRAINT],
+            $definition[RecordEntity::CONSTRAINT_ACTION],
+            $definition[RecordEntity::CREATE_PIVOT],
+            $definition[RecordEntity::INVERSE],
+            $definition[RecordEntity::CREATE_INDEXES]
         );
 
         return $definition;
@@ -491,9 +491,9 @@ abstract class RelationSchema implements RelationInterface
 
         //Some options may use values declared in other definition fields
         $proposed = [
-            Record::OUTER_KEY   => 'outerKey',
-            Record::INNER_KEY   => 'innerKey',
-            Record::PIVOT_TABLE => 'pivotTable'
+            RecordEntity::OUTER_KEY   => 'outerKey',
+            RecordEntity::INNER_KEY   => 'innerKey',
+            RecordEntity::PIVOT_TABLE => 'pivotTable'
         ];
 
         foreach ($proposed as $property => $alias) {

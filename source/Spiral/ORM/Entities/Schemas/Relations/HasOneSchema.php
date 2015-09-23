@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Spiral\ORM\Entities\Schemas\RelationSchema;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Declares simple has one relation. Relations like that used when parent record has one child with
@@ -26,7 +26,7 @@ class HasOneSchema extends RelationSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Record::HAS_ONE;
+    const RELATION_TYPE = RecordEntity::HAS_ONE;
 
     /**
      * {@inheritdoc}
@@ -35,20 +35,20 @@ class HasOneSchema extends RelationSchema
      */
     protected $defaultDefinition = [
         //Let's use parent record primary key as default inner key
-        Record::INNER_KEY         => '{record:primaryKey}',
+        RecordEntity::INNER_KEY         => '{record:primaryKey}',
         //Outer key will be based on parent record role and inner key name
-        Record::OUTER_KEY         => '{record:role}_{definition:innerKey}',
+        RecordEntity::OUTER_KEY         => '{record:role}_{definition:innerKey}',
         //Set constraints (foreign keys) by default
-        Record::CONSTRAINT        => true,
+        RecordEntity::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
-        Record::CONSTRAINT_ACTION => 'CASCADE',
+        RecordEntity::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in outer table
-        Record::CREATE_INDEXES    => true,
+        RecordEntity::CREATE_INDEXES    => true,
         //Has one counted as not nullable by default
-        Record::NULLABLE          => false,
+        RecordEntity::NULLABLE          => false,
         //Embedded relations are validated and saved with parent model and can accept values using
         //setFields
-        Record::EMBEDDED_RELATION => true
+        RecordEntity::EMBEDDED_RELATION => true
     ];
 
     /**
@@ -58,15 +58,15 @@ class HasOneSchema extends RelationSchema
     {
         //Inverting definition
         $this->outerRecord()->addRelation(
-            $this->definition[Record::INVERSE],
+            $this->definition[RecordEntity::INVERSE],
             [
-                Record::BELONGS_TO        => $this->record->getName(),
-                Record::INNER_KEY         => $this->definition[Record::OUTER_KEY],
-                Record::OUTER_KEY         => $this->definition[Record::INNER_KEY],
-                Record::CONSTRAINT        => $this->definition[Record::CONSTRAINT],
-                Record::CONSTRAINT_ACTION => $this->definition[Record::CONSTRAINT_ACTION],
-                Record::CREATE_INDEXES    => $this->definition[Record::CREATE_INDEXES],
-                Record::NULLABLE          => $this->definition[Record::NULLABLE]
+                RecordEntity::BELONGS_TO        => $this->record->getName(),
+                RecordEntity::INNER_KEY         => $this->definition[RecordEntity::OUTER_KEY],
+                RecordEntity::OUTER_KEY         => $this->definition[RecordEntity::INNER_KEY],
+                RecordEntity::CONSTRAINT        => $this->definition[RecordEntity::CONSTRAINT],
+                RecordEntity::CONSTRAINT_ACTION => $this->definition[RecordEntity::CONSTRAINT_ACTION],
+                RecordEntity::CREATE_INDEXES    => $this->definition[RecordEntity::CREATE_INDEXES],
+                RecordEntity::NULLABLE          => $this->definition[RecordEntity::NULLABLE]
             ]
         );
     }

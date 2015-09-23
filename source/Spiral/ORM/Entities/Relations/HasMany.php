@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Represents simple HAS_MANY relation with pre-defined WHERE query for generated selector.
@@ -21,7 +21,7 @@ class HasMany extends HasOne
     /**
      * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Record::HAS_MANY;
+    const RELATION_TYPE = RecordEntity::HAS_MANY;
 
     /**
      * Indication that relation represent multiple records (HAS_MANY relations).
@@ -35,10 +35,11 @@ class HasMany extends HasOne
     {
         $selector = parent::createSelector();
 
-        if (isset($this->definition[Record::WHERE])) {
-            $selector->where(
-                $this->mountAlias($selector->getPrimaryAlias(), $this->definition[Record::WHERE])
-            );
+        if (isset($this->definition[RecordEntity::WHERE])) {
+            $selector->where($this->mountAlias(
+                $selector->getPrimaryAlias(),
+                $this->definition[RecordEntity::WHERE]
+            ));
         }
 
         return $selector;

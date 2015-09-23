@@ -11,11 +11,12 @@ namespace Spiral\ORM\Entities\Relations;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
 use Spiral\ORM\Entities\Relation;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Provides ability to load records related using pivot table, link, unlink and check such records.
@@ -31,7 +32,7 @@ class ManyToMany extends Relation
     /**
      * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Record::MANY_TO_MANY;
+    const RELATION_TYPE = RecordEntity::MANY_TO_MANY;
 
     /**
      * Indication that relation represent multiple records (HAS_MANY relations).
@@ -215,24 +216,24 @@ class ManyToMany extends Relation
         //this type of relation
         $loader = new ManyToManyLoader($this->orm, '', $this->definition);
         $selector = $loader->createSelector($this->parentRole())->where(
-            $loader->getPivotAlias() . '.' . $this->definition[Record::THOUGHT_INNER_KEY],
+            $loader->getPivotAlias() . '.' . $this->definition[RecordEntity::THOUGHT_INNER_KEY],
             $this->parentKey()
         );
 
         //Conditions
-        if (!empty($this->definition[Record::WHERE_PIVOT])) {
+        if (!empty($this->definition[RecordEntity::WHERE_PIVOT])) {
             //Custom where pivot conditions
             $selector->onWhere($this->mountAlias(
                 $loader->getPivotAlias(),
-                $this->definition[Record::WHERE_PIVOT]
+                $this->definition[RecordEntity::WHERE_PIVOT]
             ));
         }
 
-        if (!empty($this->definition[Record::WHERE])) {
+        if (!empty($this->definition[RecordEntity::WHERE])) {
             //Custom where pivot conditions
             $selector->where($this->mountAlias(
                 $loader->getAlias(),
-                $this->definition[Record::WHERE]
+                $this->definition[RecordEntity::WHERE]
             ));
         }
 
@@ -242,7 +243,7 @@ class ManyToMany extends Relation
     /**
      * {@inheritdoc}
      */
-    protected function mountRelation(Record $record)
+    protected function mountRelation(EntityInterface $record)
     {
         //Nothing to do, every fetched record should be already linked
         return $record;
@@ -258,24 +259,24 @@ class ManyToMany extends Relation
     protected function wherePivot($innerKey, $outerKey)
     {
         $query = [];
-        if (!empty($this->definition[Record::MORPH_KEY])) {
-            $query[$this->definition[Record::MORPH_KEY]] = $this->parentRole();
+        if (!empty($this->definition[RecordEntity::MORPH_KEY])) {
+            $query[$this->definition[RecordEntity::MORPH_KEY]] = $this->parentRole();
         }
 
         if (!empty($innerKey)) {
-            $query[$this->definition[Record::THOUGHT_INNER_KEY]] = $innerKey;
+            $query[$this->definition[RecordEntity::THOUGHT_INNER_KEY]] = $innerKey;
         }
 
-        if (!empty($this->definition[Record::WHERE_PIVOT])) {
+        if (!empty($this->definition[RecordEntity::WHERE_PIVOT])) {
             //Custom where pivot conditions
             $query = $query + $this->mountAlias(
-                    $this->definition[Record::PIVOT_TABLE],
-                    $this->definition[Record::WHERE_PIVOT]
+                    $this->definition[RecordEntity::PIVOT_TABLE],
+                    $this->definition[RecordEntity::WHERE_PIVOT]
                 );
         }
 
         if (!empty($outerKey)) {
-            $query[$this->definition[Record::THOUGHT_OUTER_KEY]] = is_array($outerKey)
+            $query[$this->definition[RecordEntity::THOUGHT_OUTER_KEY]] = is_array($outerKey)
                 ? ['IN' => $outerKey]
                 : $outerKey;
         }
@@ -319,7 +320,7 @@ class ManyToMany extends Relation
             );
         }
 
-        $records = $records->getField($this->definition[Record::OUTER_KEY]);
+        $records = $records->getField($this->definition[RecordEntity::OUTER_KEY]);
 
         return [
             $records => $this->pivotRow($records, $pivotData)
@@ -336,12 +337,12 @@ class ManyToMany extends Relation
     protected function pivotRow($outerKey, array $pivotData = [])
     {
         $data = [
-            $this->definition[Record::THOUGHT_INNER_KEY] => $this->parentKey(),
-            $this->definition[Record::THOUGHT_OUTER_KEY] => $outerKey
+            $this->definition[RecordEntity::THOUGHT_INNER_KEY] => $this->parentKey(),
+            $this->definition[RecordEntity::THOUGHT_OUTER_KEY] => $outerKey
         ];
 
-        if (!empty($this->definition[Record::MORPH_KEY])) {
-            $data[$this->definition[Record::MORPH_KEY]] = $this->parentRole();
+        if (!empty($this->definition[RecordEntity::MORPH_KEY])) {
+            $data[$this->definition[RecordEntity::MORPH_KEY]] = $this->parentRole();
         }
 
         return $data + $pivotData;
@@ -364,7 +365,7 @@ class ManyToMany extends Relation
      */
     protected function parentKey()
     {
-        return $this->parent->getField($this->definition[Record::INNER_KEY]);
+        return $this->parent->getField($this->definition[RecordEntity::INNER_KEY]);
     }
 
     /**
@@ -375,7 +376,7 @@ class ManyToMany extends Relation
     protected function pivotTable()
     {
         return $this->orm->dbalDatabase($this->definition[ORM::R_DATABASE])->table(
-            $this->definition[Record::PIVOT_TABLE]
+            $this->definition[RecordEntity::PIVOT_TABLE]
         );
     }
 
@@ -391,12 +392,12 @@ class ManyToMany extends Relation
             $this->wherePivot($this->parentKey(), $outerIDs)
         );
 
-        $selectQuery->columns($this->definition[Record::THOUGHT_OUTER_KEY]);
+        $selectQuery->columns($this->definition[RecordEntity::THOUGHT_OUTER_KEY]);
 
         $result = [];
         foreach ($selectQuery->run() as $row) {
             //Let's return outer key value as result
-            $result[] = $row[$this->definition[Record::THOUGHT_OUTER_KEY]];
+            $result[] = $row[$this->definition[RecordEntity::THOUGHT_OUTER_KEY]];
         }
 
         return $result;

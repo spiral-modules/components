@@ -14,7 +14,7 @@ use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -482,7 +482,7 @@ abstract class Loader implements LoaderInterface
     {
         //In most of cases reference key is inner key name (parent "ID" field name), don't be confused
         //by INNER_KEY, remember that we building relation from parent record point of view
-        return $this->definition[Record::INNER_KEY];
+        return $this->definition[RecordEntity::INNER_KEY];
     }
 
     /**
@@ -838,7 +838,7 @@ abstract class Loader implements LoaderInterface
             throw new LoaderException("Unable to get parent key, no parent loader provided.");
         }
 
-        return $this->parent->getAlias() . '.' . $this->definition[Record::INNER_KEY];
+        return $this->parent->getAlias() . '.' . $this->definition[RecordEntity::INNER_KEY];
     }
 
     /**
@@ -871,11 +871,11 @@ abstract class Loader implements LoaderInterface
      */
     protected function fetchCriteria(array $data)
     {
-        if (!isset($data[$this->definition[Record::OUTER_KEY]])) {
+        if (!isset($data[$this->definition[RecordEntity::OUTER_KEY]])) {
             return null;
         }
 
-        return $data[$this->definition[Record::OUTER_KEY]];
+        return $data[$this->definition[RecordEntity::OUTER_KEY]];
     }
 
     /**

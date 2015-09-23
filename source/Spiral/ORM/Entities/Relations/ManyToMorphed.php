@@ -9,10 +9,12 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Entities\Table;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
+use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
 
 /**
@@ -34,7 +36,7 @@ class ManyToMorphed implements RelationInterface
     /**
      * Parent Record caused relation to be created.
      *
-     * @var Record
+     * @var RecordInterface
      */
     protected $parent = null;
 
@@ -57,7 +59,7 @@ class ManyToMorphed implements RelationInterface
      */
     public function __construct(
         ORM $orm,
-        Record $parent,
+        RecordInterface $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -90,7 +92,7 @@ class ManyToMorphed implements RelationInterface
     /**
      * {@inheritdoc}
      */
-    public function associate($related)
+    public function associate(EntityInterface $related = null)
     {
         throw new RelationException("Unable to associate with morphed relation.");
     }
@@ -173,10 +175,10 @@ class ManyToMorphed implements RelationInterface
      */
     public function count()
     {
-        $innerKey = $this->definition[Record::INNER_KEY];
+        $innerKey = $this->definition[RecordEntity::INNER_KEY];
 
         return $this->pivotTable()->where([
-            $this->definition[Record::THOUGHT_INNER_KEY] => $this->parent->getField($innerKey)
+            $this->definition[RecordEntity::THOUGHT_INNER_KEY] => $this->parent->getField($innerKey)
         ])->count();
     }
 
@@ -188,7 +190,7 @@ class ManyToMorphed implements RelationInterface
      * $tag->tagged->posts;
      *
      * @param string $alias
-     * @return Record|RecordIterator
+     * @return RecordEntity|RecordIterator
      */
     public function __get($alias)
     {
@@ -216,10 +218,10 @@ class ManyToMorphed implements RelationInterface
     /**
      * Link morphed record to relation. Method will bypass request to appropriate nested relation.
      *
-     * @param Record $record
-     * @param array  $pivotData Custom pivot data.
+     * @param RecordInterface $record
+     * @param array           $pivotData Custom pivot data.
      */
-    public function link(Record $record, array $pivotData = [])
+    public function link(RecordInterface $record, array $pivotData = [])
     {
         $this->morphed($record->recordRole())->link($record, $pivotData);
     }
@@ -227,10 +229,10 @@ class ManyToMorphed implements RelationInterface
     /**
      * Unlink morphed record from relation.
      *
-     * @param Record $record
+     * @param RecordInterface $record
      * @return int
      */
-    public function unlink(Record $record)
+    public function unlink(RecordInterface $record)
     {
         return $this->morphed($record->recordRole())->unlink($record);
     }
@@ -245,14 +247,14 @@ class ManyToMorphed implements RelationInterface
      */
     public function unlinkAll($wherePivot = true)
     {
-        $innerKey = $this->definition[Record::INNER_KEY];
+        $innerKey = $this->definition[RecordEntity::INNER_KEY];
 
         $query = [
-            $this->definition[Record::THOUGHT_INNER_KEY] => $this->parent->getField($innerKey)
+            $this->definition[RecordEntity::THOUGHT_INNER_KEY] => $this->parent->getField($innerKey)
         ];
 
-        if ($wherePivot && !empty($this->definition[Record::WHERE_PIVOT])) {
-            $query = $query + $this->definition[Record::WHERE_PIVOT];
+        if ($wherePivot && !empty($this->definition[RecordEntity::WHERE_PIVOT])) {
+            $query = $query + $this->definition[RecordEntity::WHERE_PIVOT];
         }
 
         return $this->pivotTable()->delete($query)->run();
@@ -272,24 +274,25 @@ class ManyToMorphed implements RelationInterface
         }
 
         if (
-            !isset($this->definition[Record::MORPHED_ALIASES][$alias])
-            && !empty($reversed = array_search($alias, $this->definition[Record::MORPHED_ALIASES]))
+            !isset($this->definition[RecordEntity::MORPHED_ALIASES][$alias])
+            && !empty($reversed = array_search($alias,
+                $this->definition[RecordEntity::MORPHED_ALIASES]))
         ) {
             //Requested by singular form of role name, let's reverse mapping
             $alias = $reversed;
         }
 
-        if (!isset($this->definition[Record::MORPHED_ALIASES][$alias])) {
+        if (!isset($this->definition[RecordEntity::MORPHED_ALIASES][$alias])) {
             throw new RelationException("No such morphed-relation or method '{$alias}'.");
         }
 
         //We have to create custom definition
         $definition = $this->definition;
 
-        $roleName = $this->definition[Record::MORPHED_ALIASES][$alias];
-        $definition[Record::MANY_TO_MANY] = $definition[Record::MANY_TO_MORPHED][$roleName];
+        $roleName = $this->definition[RecordEntity::MORPHED_ALIASES][$alias];
+        $definition[RecordEntity::MANY_TO_MANY] = $definition[RecordEntity::MANY_TO_MORPHED][$roleName];
 
-        unset($definition[Record::MANY_TO_MORPHED], $definition[Record::MORPHED_ALIASES]);
+        unset($definition[RecordEntity::MANY_TO_MORPHED], $definition[RecordEntity::MORPHED_ALIASES]);
 
         //Creating many-to-many relation
         $this->relations[$alias] = new ManyToMany($this->orm, $this->parent, $definition);
@@ -308,7 +311,7 @@ class ManyToMorphed implements RelationInterface
     protected function pivotTable()
     {
         return $this->orm->dbalDatabase($this->definition[ORM::R_DATABASE])->table(
-            $this->definition[Record::PIVOT_TABLE]
+            $this->definition[RecordEntity::PIVOT_TABLE]
         );
     }
 }

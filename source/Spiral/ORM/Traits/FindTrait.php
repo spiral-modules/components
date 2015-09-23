@@ -12,7 +12,7 @@ namespace Spiral\ORM\Traits;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Static record functionality including create and find methods.
@@ -44,7 +44,7 @@ trait FindTrait
      * @param array|\Closure $where   Selection WHERE statement.
      * @param array          $load    Array or relations to be pre-loaded.
      * @param array          $orderBy Sort by conditions.
-     * @return Record|null
+     * @return RecordEntity|null
      */
     public static function findOne($where = [], array $load = [], array $orderBy = [])
     {
@@ -64,7 +64,7 @@ trait FindTrait
      *
      * @param mixed $primaryKey Primary key.
      * @param array $load       Array or relations to be pre-loaded.
-     * @return Record|null
+     * @return RecordEntity|null
      */
     public static function findByPK($primaryKey, array $load = [])
     {

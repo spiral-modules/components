@@ -14,7 +14,7 @@ use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * ManyToMorphed relation declares relation between parent record and set of outer records joined by
@@ -64,7 +64,7 @@ class ManyToMorphedSchema extends MorphedSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Record::MANY_TO_MORPHED;
+    const RELATION_TYPE = RecordEntity::MANY_TO_MORPHED;
 
     /**
      * Relation represent multiple records.
@@ -78,36 +78,36 @@ class ManyToMorphedSchema extends MorphedSchema
      */
     protected $defaultDefinition = [
         //Association list between tables and roles, internal
-        Record::MORPHED_ALIASES   => [],
+        RecordEntity::MORPHED_ALIASES   => [],
         //Pivot table name will be generated based on singular relation name and _map postfix
-        Record::PIVOT_TABLE       => '{name:singular}_map',
+        RecordEntity::PIVOT_TABLE       => '{name:singular}_map',
         //Inner key points to primary key of parent record by default
-        Record::INNER_KEY         => '{record:primaryKey}',
+        RecordEntity::INNER_KEY         => '{record:primaryKey}',
         //By default, we are looking for primary key in our outer records, outer key must present
         //in every outer record and be consistent
-        Record::OUTER_KEY         => '{outer:primaryKey}',
+        RecordEntity::OUTER_KEY         => '{outer:primaryKey}',
         //Linking pivot table and parent record
-        Record::THOUGHT_INNER_KEY => '{record:role}_{definition:innerKey}',
+        RecordEntity::THOUGHT_INNER_KEY => '{record:role}_{definition:innerKey}',
         //Linking pivot table and outer records
-        Record::THOUGHT_OUTER_KEY => '{name:singular}_{definition:outerKey}',
+        RecordEntity::THOUGHT_OUTER_KEY => '{name:singular}_{definition:outerKey}',
         //Declares what specific record pivot record linking to
-        Record::MORPH_KEY         => '{name:singular}_type',
+        RecordEntity::MORPH_KEY         => '{name:singular}_type',
         //Set constraints in pivot table (foreign keys)
-        Record::CONSTRAINT        => true,
+        RecordEntity::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
-        Record::CONSTRAINT_ACTION => 'CASCADE',
+        RecordEntity::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in pivot table
-        Record::CREATE_INDEXES    => true,
+        RecordEntity::CREATE_INDEXES    => true,
         //Relation allowed to create pivot table
-        Record::CREATE_PIVOT      => true,
+        RecordEntity::CREATE_PIVOT      => true,
         //Additional set of columns to be added into pivot table, you can use same column definition
         //type as you using for your records
-        Record::PIVOT_COLUMNS     => [],
+        RecordEntity::PIVOT_COLUMNS     => [],
         //Set of default values to be used for pivot table
-        Record::PIVOT_DEFAULTS    => [],
+        RecordEntity::PIVOT_DEFAULTS    => [],
         //WHERE statement in a form of simplified array definition to be applied to pivot table
         //data
-        Record::WHERE_PIVOT       => []
+        RecordEntity::WHERE_PIVOT       => []
     ];
 
     /**
@@ -119,21 +119,21 @@ class ManyToMorphedSchema extends MorphedSchema
     {
         //WHERE conditions can not be inversed
         foreach ($this->outerRecords() as $record) {
-            if (!$record->hasRelation($this->definition[Record::INVERSE])) {
+            if (!$record->hasRelation($this->definition[RecordEntity::INVERSE])) {
                 $record->addRelation(
-                    $this->definition[Record::INVERSE],
+                    $this->definition[RecordEntity::INVERSE],
                     [
-                        Record::MANY_TO_MANY      => $this->record->getName(),
-                        Record::PIVOT_TABLE       => $this->definition[Record::PIVOT_TABLE],
-                        Record::OUTER_KEY         => $this->definition[Record::INNER_KEY],
-                        Record::INNER_KEY         => $this->definition[Record::OUTER_KEY],
-                        Record::THOUGHT_INNER_KEY => $this->definition[Record::THOUGHT_OUTER_KEY],
-                        Record::THOUGHT_OUTER_KEY => $this->definition[Record::THOUGHT_INNER_KEY],
-                        Record::MORPH_KEY         => $this->definition[Record::MORPH_KEY],
-                        Record::CREATE_INDEXES    => $this->definition[Record::CREATE_INDEXES],
-                        Record::CREATE_PIVOT      => $this->definition[Record::CREATE_PIVOT],
-                        Record::PIVOT_COLUMNS     => $this->definition[Record::PIVOT_COLUMNS],
-                        Record::WHERE_PIVOT       => $this->definition[Record::WHERE_PIVOT]
+                        RecordEntity::MANY_TO_MANY      => $this->record->getName(),
+                        RecordEntity::PIVOT_TABLE       => $this->definition[RecordEntity::PIVOT_TABLE],
+                        RecordEntity::OUTER_KEY         => $this->definition[RecordEntity::INNER_KEY],
+                        RecordEntity::INNER_KEY         => $this->definition[RecordEntity::OUTER_KEY],
+                        RecordEntity::THOUGHT_INNER_KEY => $this->definition[RecordEntity::THOUGHT_OUTER_KEY],
+                        RecordEntity::THOUGHT_OUTER_KEY => $this->definition[RecordEntity::THOUGHT_INNER_KEY],
+                        RecordEntity::MORPH_KEY         => $this->definition[RecordEntity::MORPH_KEY],
+                        RecordEntity::CREATE_INDEXES    => $this->definition[RecordEntity::CREATE_INDEXES],
+                        RecordEntity::CREATE_PIVOT      => $this->definition[RecordEntity::CREATE_PIVOT],
+                        RecordEntity::PIVOT_COLUMNS     => $this->definition[RecordEntity::PIVOT_COLUMNS],
+                        RecordEntity::WHERE_PIVOT       => $this->definition[RecordEntity::WHERE_PIVOT]
                     ]
                 );
             }
@@ -147,7 +147,7 @@ class ManyToMorphedSchema extends MorphedSchema
      */
     public function getPivotTable()
     {
-        return $this->definition[Record::PIVOT_TABLE];
+        return $this->definition[RecordEntity::PIVOT_TABLE];
     }
 
     /**
@@ -168,7 +168,7 @@ class ManyToMorphedSchema extends MorphedSchema
      */
     public function buildSchema()
     {
-        if (!$this->definition[Record::CREATE_PIVOT]) {
+        if (!$this->definition[RecordEntity::CREATE_PIVOT]) {
             //No pivot table creation were requested, noting really to do
             return;
         }
@@ -176,7 +176,7 @@ class ManyToMorphedSchema extends MorphedSchema
         $pivotTable = $this->pivotSchema();
 
         //Inner key points to our parent record
-        $innerKey = $pivotTable->column($this->definition[Record::THOUGHT_INNER_KEY]);
+        $innerKey = $pivotTable->column($this->definition[RecordEntity::THOUGHT_INNER_KEY]);
         $innerKey->setType($this->getInnerKeyType());
 
         if ($this->isIndexed()) {
@@ -188,23 +188,23 @@ class ManyToMorphedSchema extends MorphedSchema
         $morphKey->string(static::MORPH_COLUMN_SIZE);
 
         //Points to inner key of our outer records (outer key)
-        $outerKey = $pivotTable->column($this->definition[Record::THOUGHT_OUTER_KEY]);
+        $outerKey = $pivotTable->column($this->definition[RecordEntity::THOUGHT_OUTER_KEY]);
         $outerKey->setType($this->getOuterKeyType());
 
         //Casting pivot table columns
         $this->castTable(
             $this->pivotSchema(),
-            $this->definition[Record::PIVOT_COLUMNS],
-            $this->definition[Record::PIVOT_DEFAULTS]
+            $this->definition[RecordEntity::PIVOT_COLUMNS],
+            $this->definition[RecordEntity::PIVOT_DEFAULTS]
         );
 
         //Complex index
         if ($this->isIndexed()) {
             //Complex index including 3 columns from pivot table
             $pivotTable->unique(
-                $this->definition[Record::THOUGHT_INNER_KEY],
-                $this->definition[Record::MORPH_KEY],
-                $this->definition[Record::THOUGHT_OUTER_KEY]
+                $this->definition[RecordEntity::THOUGHT_INNER_KEY],
+                $this->definition[RecordEntity::MORPH_KEY],
+                $this->definition[RecordEntity::THOUGHT_OUTER_KEY]
             );
         }
 
@@ -227,10 +227,10 @@ class ManyToMorphedSchema extends MorphedSchema
         $definition = parent::normalizeDefinition();
 
         foreach ($this->outerRecords() as $record) {
-            if (!in_array($record->getRole(), $definition[Record::MORPHED_ALIASES])) {
+            if (!in_array($record->getRole(), $definition[RecordEntity::MORPHED_ALIASES])) {
                 //Let's remember associations between tables and roles
                 $plural = Inflector::pluralize($record->getRole());
-                $definition[Record::MORPHED_ALIASES][$plural] = $record->getRole();
+                $definition[RecordEntity::MORPHED_ALIASES][$plural] = $record->getRole();
             }
 
             //We must include pivot table database into data for easier access
@@ -238,9 +238,9 @@ class ManyToMorphedSchema extends MorphedSchema
         }
 
         //Let's include pivot table columns
-        $definition[Record::PIVOT_COLUMNS] = [];
+        $definition[RecordEntity::PIVOT_COLUMNS] = [];
         foreach ($this->pivotSchema()->getColumns() as $column) {
-            $definition[Record::PIVOT_COLUMNS][] = $column->getName();
+            $definition[RecordEntity::PIVOT_COLUMNS][] = $column->getName();
         }
 
         return $definition;

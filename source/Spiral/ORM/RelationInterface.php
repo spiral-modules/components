@@ -24,7 +24,7 @@ interface RelationInterface extends ValidatesInterface
 {
     /**
      * @param ORM                  $orm        ORM component.
-     * @param null|EntityInterface $parent     Parent RecordEntity.
+     * @param null|RecordInterface $parent     Parent RecordEntity.
      * @param array                $definition Relation definition, crated by RelationSchema.
      * @param mixed                $data       Pre-loaded relation data.
      * @param bool                 $loaded     Indication that relation data has been loaded from
@@ -32,7 +32,7 @@ interface RelationInterface extends ValidatesInterface
      */
     public function __construct(
         ORM $orm,
-        EntityInterface $parent,
+        RecordInterface $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -54,7 +54,7 @@ interface RelationInterface extends ValidatesInterface
      * echo $user->profile->facebookUID;
      *
      * @see Record::__get()
-     * @return null|null|RecordInterface
+     * @return null|EntityInterface
      * @throws EntityInterface
      */
     public function getRelated();

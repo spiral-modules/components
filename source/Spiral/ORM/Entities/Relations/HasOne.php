@@ -9,9 +9,10 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\Relation;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Represent simple HAS_ONE relation with ability to associate and de-associate records.
@@ -21,31 +22,24 @@ class HasOne extends Relation
     /**
      * Relation type, required to fetch record class from relation definition.
      */
-    const RELATION_TYPE = Record::HAS_ONE;
+    const RELATION_TYPE = RecordEntity::HAS_ONE;
 
     /**
      * {@inheritdoc}
      *
-     * Attention, while associating old instance will not be removed or de-associated automatically!
+     * Attention, you have to drop association with old instance manually!
      */
-    public function associate($related = null)
+    public function associate(EntityInterface $related = null)
     {
         //Removing association
         if (static::MULTIPLE === false && $related === null) {
-            if (!$this->definition[Record::NULLABLE]) {
+            if (!$this->definition[RecordEntity::NULLABLE]) {
                 throw new RelationException(
                     "Unable to de-associate relation data, relation is not nullable."
                 );
             }
         }
-
-        //todo: preload related instance!
-        if (!empty($this->instance) && $this->instance != $related) {
-            $this->deassociate();
-        }
-
-        parent::associate($related);
-        $this->mountRelation($related);
+        parent::associate($this->mountRelation($related));
     }
 
     /**
@@ -54,7 +48,7 @@ class HasOne extends Relation
      * Pre-loaded data will not be altered, unless reset() method are called.
      *
      * @param mixed $fields
-     * @return Record
+     * @return RecordEntity
      */
     public function create($fields = [])
     {
@@ -66,24 +60,24 @@ class HasOne extends Relation
     /**
      * {@inheritdoc}
      */
-    protected function mountRelation(Record $record)
+    protected function mountRelation(EntityInterface $record)
     {
         //Key in child record
-        $outerKey = $this->definition[Record::OUTER_KEY];
+        $outerKey = $this->definition[RecordEntity::OUTER_KEY];
 
         //Key in parent record
-        $innerKey = $this->definition[Record::INNER_KEY];
+        $innerKey = $this->definition[RecordEntity::INNER_KEY];
 
         if ($record->getField($outerKey, false) != $this->parent->getField($innerKey, false)) {
-            $record->setField($outerKey, $this->parent->getField($innerKey, false), false);
+            $record->setField($outerKey, $this->parent->getField($innerKey, false));
         }
 
-        if (!isset($this->definition[Record::MORPH_KEY])) {
+        if (!isset($this->definition[RecordEntity::MORPH_KEY])) {
             //No morph key presented
             return $record;
         }
 
-        $morphKey = $this->definition[Record::MORPH_KEY];
+        $morphKey = $this->definition[RecordEntity::MORPH_KEY];
 
         if ($record->getField($morphKey) != $this->parent->recordRole()) {
             $record->setField($morphKey, $this->parent->recordRole());
@@ -100,44 +94,18 @@ class HasOne extends Relation
         $selector = parent::createSelector();
 
         //We are going to clarify selector manually (without loaders), that's easy relation
-        if (isset($this->definition[Record::MORPH_KEY])) {
+        if (isset($this->definition[RecordEntity::MORPH_KEY])) {
             $selector->where(
-                $selector->getPrimaryAlias() . '.' . $this->definition[Record::MORPH_KEY],
+                $selector->getPrimaryAlias() . '.' . $this->definition[RecordEntity::MORPH_KEY],
                 $this->parent->recordRole()
             );
         }
 
         $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[Record::OUTER_KEY],
-            $this->parent->getField($this->definition[Record::INNER_KEY], false)
+            $selector->getPrimaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
+            $this->parent->getField($this->definition[RecordEntity::INNER_KEY], false)
         );
 
         return $selector;
-    }
-
-    /**
-     * De associate related record.
-     */
-    protected function deassociate()
-    {
-        $related = $this->getRelated();
-        if ($related instanceof Record) {
-            $related->setField($this->definition[Record::OUTER_KEY], null, false);
-
-            if (isset($this->definition[Record::MORPH_KEY])) {
-                //Dropping morph key value
-                $related->setField($this->definition[Record::MORPH_KEY], null);
-            }
-
-            if (!$related->save()) {
-                throw new RelationException(
-                    "Unable to de-associate existed and already related record, unable to save."
-                );
-            }
-        }
-
-        $this->loaded = true;
-        $this->instance = null;
-        $this->data = [];
     }
 }

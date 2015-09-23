@@ -11,7 +11,7 @@ namespace Spiral\ORM\Entities\Schemas\Relations;
 use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Declares that parent record belongs to some parent based on value in [inner] key. Basically this
@@ -32,7 +32,7 @@ class BelongsToSchema extends RelationSchema
     /**
      * {@inheritdoc}
      */
-    const RELATION_TYPE = Record::BELONGS_TO;
+    const RELATION_TYPE = RecordEntity::BELONGS_TO;
 
     /**
      * {@inheritdoc}
@@ -40,7 +40,7 @@ class BelongsToSchema extends RelationSchema
      * When relation states that record belongs to interface relation will be switched to
      * BelongsToMorphed.
      */
-    const EQUIVALENT_RELATION = Record::BELONGS_TO_MORPHED;
+    const EQUIVALENT_RELATION = RecordEntity::BELONGS_TO_MORPHED;
 
     /**
      * {@inheritdoc}
@@ -49,18 +49,18 @@ class BelongsToSchema extends RelationSchema
      */
     protected $defaultDefinition = [
         //Outer key is primary key of related record by default
-        Record::OUTER_KEY         => '{outer:primaryKey}',
+        RecordEntity::OUTER_KEY         => '{outer:primaryKey}',
         //Inner key will be based on singular name of relation and outer key name
-        Record::INNER_KEY         => '{name:singular}_{definition:outerKey}',
+        RecordEntity::INNER_KEY         => '{name:singular}_{definition:outerKey}',
         //Set constraints (foreign keys) by default
-        Record::CONSTRAINT        => true,
+        RecordEntity::CONSTRAINT        => true,
         //@link https://en.wikipedia.org/wiki/Foreign_key
-        Record::CONSTRAINT_ACTION => 'CASCADE',
+        RecordEntity::CONSTRAINT_ACTION => 'CASCADE',
         //Relation allowed to create indexes in inner table
-        Record::CREATE_INDEXES    => true,
+        RecordEntity::CREATE_INDEXES    => true,
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Record::NULLABLE          => true
+        RecordEntity::NULLABLE          => true
     ];
 
     /**
@@ -73,8 +73,8 @@ class BelongsToSchema extends RelationSchema
          * type which can be either HAS_ONE or HAS_MANY.
          */
         if (
-            !is_array($this->definition[Record::INVERSE])
-            || !isset($this->definition[Record::INVERSE][1])
+            !is_array($this->definition[RecordEntity::INVERSE])
+            || !isset($this->definition[RecordEntity::INVERSE][1])
         ) {
             throw new RelationSchemaException(
                 "Unable to revert BELONG_TO relation '{$this->record}'.'{$this}', " .
@@ -84,15 +84,15 @@ class BelongsToSchema extends RelationSchema
 
         //Inverting definition
         $this->outerRecord()->addRelation(
-            $this->definition[Record::INVERSE][1],
+            $this->definition[RecordEntity::INVERSE][1],
             [
-                $this->definition[Record::INVERSE][0] => $this->record->getName(),
-                Record::OUTER_KEY                     => $this->definition[Record::INNER_KEY],
-                Record::INNER_KEY                     => $this->definition[Record::OUTER_KEY],
-                Record::CONSTRAINT                    => $this->definition[Record::CONSTRAINT],
-                Record::CONSTRAINT_ACTION             => $this->definition[Record::CONSTRAINT_ACTION],
-                Record::CREATE_INDEXES                => $this->definition[Record::CREATE_INDEXES],
-                Record::NULLABLE                      => $this->definition[Record::NULLABLE]
+                $this->definition[RecordEntity::INVERSE][0] => $this->record->getName(),
+                RecordEntity::OUTER_KEY                     => $this->definition[RecordEntity::INNER_KEY],
+                RecordEntity::INNER_KEY                     => $this->definition[RecordEntity::OUTER_KEY],
+                RecordEntity::CONSTRAINT                    => $this->definition[RecordEntity::CONSTRAINT],
+                RecordEntity::CONSTRAINT_ACTION             => $this->definition[RecordEntity::CONSTRAINT_ACTION],
+                RecordEntity::CREATE_INDEXES                => $this->definition[RecordEntity::CREATE_INDEXES],
+                RecordEntity::NULLABLE                      => $this->definition[RecordEntity::NULLABLE]
             ]
         );
     }

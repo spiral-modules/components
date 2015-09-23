@@ -21,7 +21,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Selectors provide QueryBuilder (see Database) like syntax and support for ORM records to be
@@ -379,7 +379,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     /**
      * All records.
      *
-     * @return Record[]
+     * @return RecordEntity[]
      */
     public function all()
     {
@@ -457,7 +457,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      *
      * @see findOne()
      * @param mixed $id Primary key value.
-     * @return Record|null
+     * @return RecordEntity|null
      * @throws SelectorException
      */
     public function findByPK($id)
@@ -482,7 +482,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * @see findByPK()
      * @param array $where    Selection WHERE statement.
      * @param bool  $setLimit Use limit 1.
-     * @return Record|null
+     * @return RecordEntity|null
      */
     public function findOne(array $where = [], $setLimit = true)
     {

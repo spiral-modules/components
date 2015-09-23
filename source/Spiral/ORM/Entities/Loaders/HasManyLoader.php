@@ -10,7 +10,7 @@ namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Entities\WhereDecorator;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Dedicated to load HAS_MANY relation data, POSTLOAD is preferred loading method. Additional where
@@ -22,7 +22,7 @@ class HasManyLoader extends HasOneLoader
      * Relation type is required to correctly resolve foreign record class based on relation
      * definition.
      */
-    const RELATION_TYPE = Record::HAS_MANY;
+    const RELATION_TYPE = RecordEntity::HAS_MANY;
 
     /**
      * Default load method (inload or postload).
@@ -51,9 +51,9 @@ class HasManyLoader extends HasOneLoader
             $selector, $this->isJoinable() ? 'onWhere' : 'where', $this->getAlias()
         );
 
-        if (!empty($this->definition[Record::WHERE])) {
+        if (!empty($this->definition[RecordEntity::WHERE])) {
             //Relation WHERE conditions
-            $decorator->where($this->definition[Record::WHERE]);
+            $decorator->where($this->definition[RecordEntity::WHERE]);
         }
 
         //User specified WHERE conditions

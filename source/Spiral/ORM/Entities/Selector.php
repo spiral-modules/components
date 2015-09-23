@@ -22,6 +22,7 @@ use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
+use Spiral\ORM\RecordInterface;
 
 /**
  * Selectors provide QueryBuilder (see Database) like syntax and support for ORM records to be
@@ -379,7 +380,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     /**
      * All records.
      *
-     * @return RecordEntity[]
+     * @return RecordInterface[]
      */
     public function all()
     {

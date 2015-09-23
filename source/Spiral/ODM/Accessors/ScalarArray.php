@@ -9,8 +9,8 @@
 namespace Spiral\ODM\Accessors;
 
 use Spiral\Models\EntityInterface;
-use Spiral\ODM\Document;
 use Spiral\ODM\AtomicAccessorInterface;
+use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\ODM;
 
@@ -222,7 +222,7 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
 
         if ($this->solidState) {
             //We don't care about atomics
-            return [Document::ATOMIC_SET => [$container => $this->serializeData()]];
+            return [DocumentEntity::ATOMIC_SET => [$container => $this->serializeData()]];
         }
 
         $atomics = [];

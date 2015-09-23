@@ -317,7 +317,7 @@ class Compositor extends Component implements
         }
 
         if ($this->solidState) {
-            return [Document::ATOMIC_SET => [$container => $this->serializeData()]];
+            return [DocumentEntity::ATOMIC_SET => [$container => $this->serializeData()]];
         }
 
         if ($this->changedDirectly) {
@@ -561,7 +561,7 @@ class Compositor extends Component implements
      */
     public function find($query = [])
     {
-        if ($query instanceof Document) {
+        if ($query instanceof DocumentEntity) {
             $query = $query->serializeData();
         }
 

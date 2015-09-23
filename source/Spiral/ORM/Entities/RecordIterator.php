@@ -12,6 +12,7 @@ use Spiral\ORM\Exceptions\IteratorException;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
+use Spiral\ORM\RecordInterface;
 
 /**
  * Provides iteration over set of specified records data using internal instances cache. In
@@ -96,14 +97,14 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * Get all Records as array.
      *
-     * @return RecordEntity[]
+     * @return RecordInterface[]
      */
     public function all()
     {
         $result = [];
 
         /**
-         * @var self|RecordEntity[] $iterator
+         * @var self|RecordInterface[] $iterator
          */
         $iterator = clone $this;
         foreach ($iterator as $nested) {
@@ -119,7 +120,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     /**
      * {@inheritdoc}
      *
-     * @return RecordEntity
+     * @return RecordInterface
      * @see ORM::record()
      * @see Record::setContext()
      * @throws ORMException

@@ -182,7 +182,7 @@ class ORM extends Singleton
      * @param string $class Record class name.
      * @param array  $data
      * @param bool   $cache Add record to entity cache if enabled.
-     * @return RecordEntity
+     * @return RecordInterface
      */
     public function record($class, array $data = [], $cache = true)
     {

@@ -248,7 +248,7 @@ class ODM extends Singleton implements InjectorInterface
         }
 
         $defined = $class;
-        if ($definition[self::DEFINITION] == Document::DEFINITION_LOGICAL) {
+        if ($definition[self::DEFINITION] == DocumentEntity::DEFINITION_LOGICAL) {
 
             //Resolve using logic function
             $defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields, $this);
@@ -258,7 +258,7 @@ class ODM extends Singleton implements InjectorInterface
                     "Unable to resolve (logical definition) valid class for document '{$class}'."
                 );
             }
-        } elseif ($definition[self::DEFINITION] == Document::DEFINITION_FIELDS) {
+        } elseif ($definition[self::DEFINITION] == DocumentEntity::DEFINITION_FIELDS) {
             foreach ($definition[self::DEFINITION_OPTIONS] as $field => $child) {
                 if (array_key_exists($field, $fields)) {
                     //Apparently this is child

@@ -12,6 +12,7 @@ use Exception;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SaturableInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewInterface;
 use Spiral\Views\ViewsInterface;
@@ -22,6 +23,11 @@ use Spiral\Views\ViewsInterface;
  */
 class Snapshot extends Component implements SnapshotInterface, ViewInterface
 {
+    /**
+     * Additional constructor arguments.
+     */
+    use SaturateTrait;
+
     /**
      * Message format.
      */
@@ -87,10 +93,10 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
         $this->exception = $exception;
 
         //We can use global container as fallback if no default values were provided
-        $this->container = self::saturate($container, ContainerInterface::class);
-        $this->debugger = self::saturate($debugger, Debugger::class);
-        $this->files = self::saturate($files, FilesInterface::class);
-        $this->views = self::saturate($views, ViewsInterface::class);
+        $this->container = $this->saturate($container, ContainerInterface::class);
+        $this->debugger = $this->saturate($debugger, Debugger::class);
+        $this->files = $this->saturate($files, FilesInterface::class);
+        $this->views = $this->saturate($views, ViewsInterface::class);
 
         $this->config = $this->debugger->config()[static::CONFIG];
     }

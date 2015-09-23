@@ -10,6 +10,7 @@ namespace Spiral\Debug\Logger\Handlers;
 
 use Spiral\Core\Component;
 use Spiral\Core\Container\SaturableInterface;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Logger\HandlerInterface;
 use Spiral\Files\FilesInterface;
 
@@ -18,6 +19,11 @@ use Spiral\Files\FilesInterface;
  */
 class FileHandler extends Component implements HandlerInterface
 {
+    /**
+     * Additional constructor arguments.
+     */
+    use SaturateTrait;
+
     /**
      * @var array
      */
@@ -43,7 +49,7 @@ class FileHandler extends Component implements HandlerInterface
         $this->options = $options + $this->options;
 
         //We can use global container as fallback if no default values were provided
-        $this->files = self::saturate($files, FilesInterface::class);
+        $this->files = $this->saturate($files, FilesInterface::class);
     }
 
     /**

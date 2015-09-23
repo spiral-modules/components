@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\AccessorInterface;
@@ -33,7 +34,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
     /**
      * Static find functions.
      */
-    use FindTrait;
+    use FindTrait, SaturateTrait;
 
     /**
      * Field format declares how entity must process magic setters and getters. Available values:
@@ -316,7 +317,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         $this->loaded = $loaded;
 
         //We can use global container as fallback if no default values were provided
-        $this->orm = self::saturate($orm, ORM::class);
+        $this->orm = $this->saturate($orm, ORM::class);
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
         parent::__construct($this->ormSchema);
 
@@ -835,6 +836,10 @@ class Record extends SchematicEntity implements ActiveEntityInterface
      */
     protected function container()
     {
+        if (empty($this->orm)) {
+            return parent::container();
+        }
+
         return $this->orm->container();
     }
 
@@ -974,7 +979,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         /**
          * @var self $record
          */
-        $record = new static([], false, self::saturate($orm, ORM::class));
+        $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
         $record->setFields($fields)->fire('created');

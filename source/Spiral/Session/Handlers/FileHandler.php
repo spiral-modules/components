@@ -9,6 +9,7 @@
 namespace Spiral\Session\Handlers;
 
 use Spiral\Core\Component;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Files\FilesInterface;
 
 /**
@@ -16,6 +17,11 @@ use Spiral\Files\FilesInterface;
  */
 class FileHandler extends Component implements \SessionHandlerInterface
 {
+    /**
+     * Additional constructor arguments.
+     */
+    use SaturateTrait;
+
     /**
      * @var string
      */
@@ -39,7 +45,7 @@ class FileHandler extends Component implements \SessionHandlerInterface
         $this->location = $options['directory'];
 
         //Global container as fallback
-        $this->files = self::saturate($files, FilesInterface::class);
+        $this->files = $this->saturate($files, FilesInterface::class);
     }
 
     /**

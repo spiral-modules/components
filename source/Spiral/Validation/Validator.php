@@ -11,6 +11,7 @@ namespace Spiral\Validation;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Validation\Exceptions\InvalidArgumentException;
@@ -48,7 +49,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * Validator will translate default errors and throw log messages when validation rule fails.
      */
-    use LoggerTrait, TranslatorTrait;
+    use LoggerTrait, TranslatorTrait, SaturateTrait;
 
     /**
      * Errors added manually to validator using addError() method.
@@ -118,9 +119,9 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         $this->rules = $rules;
 
         //We can use global container as fallback if no default values were provided
-        $this->container = self::saturate($container, ContainerInterface::class);
+        $this->container = $this->saturate($container, ContainerInterface::class);
 
-        $configurator = self::saturate($configurator, ValidationProvider::class);
+        $configurator = $this->saturate($configurator, ValidationProvider::class);
         $this->options = $configurator->config() + $this->options;
     }
 

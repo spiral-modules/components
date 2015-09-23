@@ -11,7 +11,7 @@ namespace Spiral\ORM\Accessors;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\SQLExpression;
 use Spiral\ORM\Record;
-use Spiral\ORM\RecordAccessorInterface;
+use Spiral\ORM\ActiveAccessorInterface;
 
 /**
  * Atomic number accessor provides ability to change numeric record field using delta values, this
@@ -21,7 +21,7 @@ use Spiral\ORM\RecordAccessorInterface;
  * record is solid (solid state) dynamic expression will be ignored and accessor will return it's
  * internal numeric value (altered by inc/dec operations and based on original record value).
  */
-class AtomicNumber implements RecordAccessorInterface
+class AtomicNumber implements ActiveAccessorInterface
 {
     /**
      * Current numeric value.

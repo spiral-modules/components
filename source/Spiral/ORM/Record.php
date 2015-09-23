@@ -688,7 +688,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+                if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -701,7 +701,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         }
 
         $value = $this->getField($field);
-        if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+        if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
             return true;
         }
 
@@ -716,7 +716,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
         $this->updates = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof RecordAccessorInterface) {
+            if ($value instanceof ActiveAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -861,7 +861,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
 
         $updates = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof RecordAccessorInterface) {
+            if ($value instanceof ActiveAccessorInterface) {
                 if ($value->hasUpdates()) {
                     $updates[$field] = $value->compileUpdates($field);
                     continue;
@@ -951,7 +951,7 @@ class Record extends SchematicEntity implements ActiveEntityInterface
     {
         $updates = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
                 if ($value->hasUpdates()) {
                     $updates[$field] = $value->compileUpdates($field);
                 } else {

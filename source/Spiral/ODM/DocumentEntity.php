@@ -413,7 +413,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             }
 
             /**
-             * @var mixed|array|DocumentAccessorInterface|CompositableInterface
+             * @var mixed|array|AtomicAccessorInterface|CompositableInterface
              */
             $value = $this->getField($field);
 
@@ -458,7 +458,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
+                if ($value instanceof AtomicAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -482,7 +482,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         $value = $this->getField($field);
-        if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
+        if ($value instanceof AtomicAccessorInterface && $value->hasUpdates()) {
             return true;
         }
 
@@ -497,7 +497,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         $this->updates = $this->atomics = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof DocumentAccessorInterface) {
+            if ($value instanceof AtomicAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -542,7 +542,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
                 continue;
             }
 
-            if ($value instanceof DocumentAccessorInterface) {
+            if ($value instanceof AtomicAccessorInterface) {
                 $atomics = array_merge_recursive(
                     $atomics,
                     $value->buildAtomics(($container ? $container . '.' : '') . $field)
@@ -770,7 +770,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         array_walk_recursive($query, function (&$value) use ($fields) {
             if (strpos($value, 'key::') === 0) {
                 $value = $fields[substr($value, 5)];
-                if ($value instanceof DocumentAccessorInterface) {
+                if ($value instanceof AtomicAccessorInterface) {
                     $value = $value->serializeData();
                 }
             }

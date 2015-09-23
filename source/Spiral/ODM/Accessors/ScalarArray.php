@@ -10,7 +10,7 @@ namespace Spiral\ODM\Accessors;
 
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\Document;
-use Spiral\ODM\DocumentAccessorInterface;
+use Spiral\ODM\AtomicAccessorInterface;
 use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\ODM;
 
@@ -18,7 +18,7 @@ use Spiral\ODM\ODM;
  * Simple ODM accessor with ability to mock access to array field. ScalarArray support atomic
  * operations and performs type normalization.
  */
-class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Countable, \ArrayAccess
+class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Countable, \ArrayAccess
 {
     /**
      * No typecasting will be performed if primary array type defined as "mixed".

@@ -18,7 +18,7 @@ use Spiral\Models\EntityInterface;
  */
 interface CompositableInterface extends
     EntityInterface,
-    DocumentAccessorInterface
+    AtomicAccessorInterface
 {
     /**
      * {@inheritdoc}

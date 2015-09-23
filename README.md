@@ -23,6 +23,8 @@ The components included are:
 * Validation component + set of checkers
 * Pagination component
 
+Code style: PSR-2 (minor violations, feel free to fix), base line width is 100
+
 Unit Testing is a work in progress.
 
 Read more with examples in [spiral guide](https://github.com/spiral/guide).

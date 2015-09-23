@@ -10,7 +10,7 @@ namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\SQLExpression;
-use Spiral\ORM\Record;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\ActiveAccessorInterface;
 
 /**
@@ -43,14 +43,14 @@ class AtomicNumber implements ActiveAccessorInterface
     protected $delta = 0;
 
     /**
-     * @var Record
+     * @var EntityInterface
      */
     protected $parent = null;
 
     /**
      * {@inheritdoc}
      */
-    public function __construct($number, $parent = null)
+    public function __construct($number, EntityInterface $parent = null)
     {
         $this->original = $this->value = $number;
         $this->parent = $parent;
@@ -59,15 +59,7 @@ class AtomicNumber implements ActiveAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function defaultValue(Driver $driver)
-    {
-        return $this->serializeData();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function embed($parent)
+    public function embed(EntityInterface $parent)
     {
         $accessor = clone $this;
         $accessor->parent = $parent;
@@ -165,6 +157,14 @@ class AtomicNumber implements ActiveAccessorInterface
         $this->delta -= $delta;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function defaultValue(Driver $driver)
+    {
+        return $this->serializeData();
     }
 
     /**

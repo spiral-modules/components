@@ -17,9 +17,9 @@ use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\Traits\FindTrait;
 
 /**
- * SimpleDocument with added ActiveRecord methods and association with collection.
+ * DocumentEntity with added ActiveRecord methods and association with collection.
  */
- class Document extends SimpleDocument implements ActiveEntityInterface
+ class Document extends DocumentEntity implements ActiveEntityInterface
 {
     /**
      * Static functions.

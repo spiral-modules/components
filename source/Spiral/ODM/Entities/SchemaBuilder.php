@@ -10,7 +10,7 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
-use Spiral\ODM\SimpleDocument;
+use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -88,9 +88,9 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if ($class == SimpleDocument::class || $class == Document::class) {
+        if ($class == DocumentEntity::class || $class == Document::class) {
             //No need to remember schema for abstract Document
-            return new DocumentSchema($this, SimpleDocument::class);
+            return new DocumentSchema($this, DocumentEntity::class);
         }
 
         if (!isset($this->documents[$class])) {
@@ -225,8 +225,8 @@ class SchemaBuilder extends Component
      */
     protected function locateDocuments(TokenizerInterface $tokenizer)
     {
-        foreach ($tokenizer->getClasses(SimpleDocument::class) as $class => $definition) {
-            if ($class == SimpleDocument::class || $class == Document::class) {
+        foreach ($tokenizer->getClasses(DocumentEntity::class) as $class => $definition) {
+            if ($class == DocumentEntity::class || $class == Document::class) {
                 continue;
             }
 

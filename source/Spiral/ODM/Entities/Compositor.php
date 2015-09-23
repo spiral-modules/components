@@ -15,7 +15,7 @@ use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
-use Spiral\ODM\SimpleDocument;
+use Spiral\ODM\DocumentEntity;
 
 /**
  * Compositor is responsible for managing set (array) of classes nested to parent Document.
@@ -37,7 +37,7 @@ class Compositor extends Component implements
     /**
      * Set of documents to be managed by Compositor.
      *
-     * @var array|SimpleDocument[]
+     * @var array|DocumentEntity[]
      */
     protected $documents = [];
 
@@ -74,7 +74,7 @@ class Compositor extends Component implements
 
     /**
      * @invisible
-     * @var SimpleDocument
+     * @var DocumentEntity
      */
     protected $parent = null;
 
@@ -186,7 +186,7 @@ class Compositor extends Component implements
      */
     public function embed($parent)
     {
-        if (!$parent instanceof SimpleDocument) {
+        if (!$parent instanceof DocumentEntity) {
             throw new CompositorException("Compositor can be embedded only into Documents.");
         }
 
@@ -479,8 +479,8 @@ class Compositor extends Component implements
      * Example:
      * $user->cards->find(['active' => true]);
      *
-     * @param array|SimpleDocument $query
-     * @return array|SimpleDocument[]
+     * @param array|DocumentEntity $query
+     * @return array|DocumentEntity[]
      */
     public function find($query = [])
     {
@@ -510,8 +510,8 @@ class Compositor extends Component implements
      * Example:
      * $user->cards->findOne(['active' => true]);
      *
-     * @param array|SimpleDocument $query
-     * @return null|SimpleDocument
+     * @param array|DocumentEntity $query
+     * @return null|DocumentEntity
      */
     public function findOne($query = [])
     {
@@ -526,12 +526,12 @@ class Compositor extends Component implements
      * Push new document to end of set. Set second argument to false to keep Compositor in solid
      * state and save it as one big array of data.
      *
-     * @param SimpleDocument $document
+     * @param DocumentEntity $document
      * @param bool           $resetState Set to true to reset compositor solid state.
-     * @return $this|SimpleDocument[]
+     * @return $this|DocumentEntity[]
      * @throws CompositorException
      */
-    public function push(SimpleDocument $document, $resetState = true)
+    public function push(DocumentEntity $document, $resetState = true)
     {
         if ($resetState) {
             $this->solidState = false;
@@ -561,9 +561,9 @@ class Compositor extends Component implements
      * second argument to false to keep Compositor in solid state and save it as one big array of
      * data.
      *
-     * @param array|SimpleDocument $query
+     * @param array|DocumentEntity $query
      * @param bool                 $resetState Set to true to reset compositor solid state.
-     * @return $this|SimpleDocument[]
+     * @return $this|DocumentEntity[]
      * @throws CompositorException
      */
     public function pull($query, $resetState = true)
@@ -572,7 +572,7 @@ class Compositor extends Component implements
             $this->solidState = false;
         }
 
-        if ($query instanceof SimpleDocument) {
+        if ($query instanceof DocumentEntity) {
             $query = $query->serializeData();
         }
 
@@ -606,12 +606,12 @@ class Compositor extends Component implements
      * Add document to set, only one instance of document must be presented. Set second argument to
      * false to keep Compositor in solid state and save it as one big array of data.
      *
-     * @param SimpleDocument $document
+     * @param DocumentEntity $document
      * @param bool           $resetState Set to true to reset compositor solid state.
-     * @return $this|SimpleDocument[]
+     * @return $this|DocumentEntity[]
      * @throws CompositorException
      */
-    public function addToSet(SimpleDocument $document, $resetState = true)
+    public function addToSet(DocumentEntity $document, $resetState = true)
     {
         if ($resetState) {
             $this->solidState = false;
@@ -715,7 +715,7 @@ class Compositor extends Component implements
      * Fetch or create instance of document based on specified offset.
      *
      * @param int $offset
-     * @return SimpleDocument
+     * @return DocumentEntity
      */
     private function getDocument($offset)
     {

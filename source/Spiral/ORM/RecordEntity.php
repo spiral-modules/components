@@ -883,13 +883,13 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
-     * Related and cached ODM schema.
+     * Related and cached ORM schema.
      *
      * @return array
      */
-    protected function odmSchema()
+    protected function ormSchema()
     {
-        return $this->odmSchema;
+        return $this->ormSchema;
     }
 
     /**

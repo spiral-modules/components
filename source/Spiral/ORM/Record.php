@@ -54,7 +54,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
         }
 
         //Primary key field name
-        $primaryKey = $this->odmSchema()[ORM::M_PRIMARY_KEY];
+        $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
         if (!$this->isLoaded()) {
             $this->fire('saving');
 
@@ -102,7 +102,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
             $this->sourceTable()->delete($this->getCriteria())->run();
         }
 
-        $this->fields = $this->odmSchema()[ORM::M_COLUMNS];
+        $this->fields = $this->ormSchema()[ORM::M_COLUMNS];
         $this->loadedState(self::DELETED)->fire('deleted');
     }
 

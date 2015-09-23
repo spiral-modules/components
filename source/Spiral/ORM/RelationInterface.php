@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\Validation\ValidatesInterface;
@@ -22,15 +23,16 @@ use Spiral\Validation\ValidatesInterface;
 interface RelationInterface extends ValidatesInterface
 {
     /**
-     * @param ORM    $orm        ORM component.
-     * @param Record $parent     Parent Record.
-     * @param array  $definition Relation definition, crated by RelationSchema.
-     * @param mixed  $data       Pre-loaded relation data.
-     * @param bool   $loaded     Indication that relation data has been loaded from database.
+     * @param ORM                  $orm        ORM component.
+     * @param null|EntityInterface $parent     Parent RecordEntity.
+     * @param array                $definition Relation definition, crated by RelationSchema.
+     * @param mixed                $data       Pre-loaded relation data.
+     * @param bool                 $loaded     Indication that relation data has been loaded from
+     *                                         database.
      */
     public function __construct(
         ORM $orm,
-        Record $parent,
+        EntityInterface $parent,
         array $definition,
         $data = null,
         $loaded = false
@@ -52,8 +54,8 @@ interface RelationInterface extends ValidatesInterface
      * echo $user->profile->facebookUID;
      *
      * @see Record::__get()
-     * @return mixed|object
-     * @throws RelationException
+     * @return null|null|RecordInterface
+     * @throws EntityInterface
      */
     public function getRelated();
 
@@ -72,14 +74,14 @@ interface RelationInterface extends ValidatesInterface
      * $post->picture = null;
      *
      * @see Record::__set()
-     * @param mixed|object|null $related
+     * @param EntityInterface|null $related
      * @throws RelationException
      * @throws ORMException
      */
-    public function associate($related);
+    public function associate(EntityInterface $related = null);
 
     /**
-     * Must save related data into database by Record request.
+     * Must save related data into database by parent Record request.
      *
      * @see Record::save()
      * @param bool $validate

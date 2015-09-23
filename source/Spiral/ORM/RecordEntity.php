@@ -9,10 +9,13 @@
 
 namespace Spiral\ORM;
 
+use Spiral\Models\SchematicEntity;
+
 /**
- * Basic instance of ORM record without active record stuff.
+ * Basic instance of ORM record without active record stuff. Responsible for data hydration and
+ * relations.
  */
-class RecordEntity
+class RecordEntity extends SchematicEntity implements RecordInterface
 {
 
 }

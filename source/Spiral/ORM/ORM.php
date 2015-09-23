@@ -15,8 +15,8 @@ use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
-use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
+use Spiral\Models\IdentifiedInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
@@ -362,36 +362,36 @@ class ORM extends Singleton
     /**
      * Add Record to entity cache (only if cache enabled). Primary key is required for caching.
      *
-     * @param ActiveEntityInterface $record
-     * @param bool                  $ignoreLimit Cache overflow will be ignored.
+     * @param IdentifiedInterface $entity
+     * @param bool                $ignoreLimit Cache overflow will be ignored.
      * @return Record
      */
-    public function registerEntity(ActiveEntityInterface $record, $ignoreLimit = true)
+    public function registerEntity(IdentifiedInterface $entity, $ignoreLimit = true)
     {
-        if (empty($record->primaryKey()) || !$this->config['entityCache']['enabled']) {
-            return $record;
+        if (empty($entity->primaryKey()) || !$this->config['entityCache']['enabled']) {
+            return $entity;
         }
 
         if (!$ignoreLimit && count($this->entityCache) > $this->config['entityCache']['maxSize']) {
             //We are full
-            return $record;
+            return $entity;
         }
 
-        return $this->entityCache[get_class($record) . '.' . $record->primaryKey()] = $record;
+        return $this->entityCache[get_class($entity) . '.' . $entity->primaryKey()] = $entity;
     }
 
     /**
      * Remove Record record from entity cache. Primary key is required for caching.
      *
-     * @param ActiveEntityInterface $record
+     * @param IdentifiedInterface $entity
      */
-    public function unregisterEntity(ActiveEntityInterface $record)
+    public function unregisterEntity(IdentifiedInterface $entity)
     {
-        if (empty($record->primaryKey())) {
+        if (empty($entity->primaryKey())) {
             return;
         }
 
-        unset($this->entityCache[get_class($record) . '.' . $record->primaryKey()]);
+        unset($this->entityCache[get_class($entity) . '.' . $entity->primaryKey()]);
     }
 
     /**
@@ -399,7 +399,7 @@ class ORM extends Singleton
      *
      * @param string $class
      * @param mixed  $primaryKey
-     * @return null|ActiveEntityInterface
+     * @return null|IdentifiedInterface
      */
     public function getEntity($class, $primaryKey)
     {

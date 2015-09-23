@@ -18,7 +18,11 @@ use Spiral\ORM\RelationInterface;
  * Abstract implementation of ORM Relations, provides access to associated instances, use ORM entity
  * cache and record iterators. In additional can be serialized into json, or iterated when needed.
  */
-abstract class Relation implements RelationInterface, \Countable, \IteratorAggregate, \JsonSerializable
+abstract class Relation implements
+    RelationInterface,
+    \Countable,
+    \IteratorAggregate,
+    \JsonSerializable
 {
     /**
      * {@} table aliases.

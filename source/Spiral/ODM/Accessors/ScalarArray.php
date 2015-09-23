@@ -8,9 +8,10 @@
  */
 namespace Spiral\ODM\Accessors;
 
+use Spiral\Models\EntityInterface;
+use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Exceptions\AccessorException;
-use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 
 /**
@@ -62,7 +63,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
 
     /**
      * @invisible
-     * @var Document
+     * @var EntityInterface
      */
     protected $parent = null;
 
@@ -84,9 +85,14 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      *
      * @param mixed $type Type to be filtered by. Set to null or mixed to allow any type.
      */
-    public function __construct($data, $parent = null, ODM $odm = null, $type = self::MIXED_TYPE)
-    {
+    public function __construct(
+        $data,
+        EntityInterface $parent = null,
+        ODM $odm = null,
+        $type = self::MIXED_TYPE
+    ) {
         $this->parent = $parent;
+
         if (!is_array($data) && $data !== null) {
             throw new AccessorException("ScalarArray support only scalar arrays."); //:)
         }
@@ -143,12 +149,8 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     /**
      * {@inheritdoc}
      */
-    public function embed($parent)
+    public function embed(EntityInterface $parent)
     {
-        if (!$parent instanceof Document) {
-            throw new AccessorException("ScalarArrays can be embedded only into Documents.");
-        }
-
         if ($parent === $this->parent) {
             return $this;
         }

@@ -10,6 +10,7 @@ namespace Spiral\ODM;
 
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
+use Spiral\Models\EntityInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -198,7 +199,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
     /**
      * @invisible
-     * @var object
+     * @var EntityInterface
      */
     protected $parent = null;
 
@@ -210,13 +211,17 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
     /**
      * @see Component::staticContainer()
-     * @param array  $fields
-     * @param object $parent
-     * @param ODM    $odm
-     * @param array  $odmSchema
+     * @param array           $fields
+     * @param EntityInterface $parent
+     * @param ODM             $odm
+     * @param array           $odmSchema
      */
-    public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
-    {
+    public function __construct(
+        $fields = [],
+        EntityInterface $parent = null,
+        ODM $odm = null,
+        $odmSchema = null
+    ) {
         $this->parent = $parent;
 
         //We can use global container as fallback if no default values were provided
@@ -275,7 +280,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      */
-    public function embed($parent)
+    public function embed(EntityInterface $parent)
     {
         if (empty($this->parent)) {
             $this->parent = $parent;
@@ -741,7 +746,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             //Pointing to document instance
             $accessor = $this->odm->document($options, $value, $this);
         } else {
-            $accessor = new $accessor($value, $this, $this->odm, $options);
+            //Additional options are supplied for CompositableInterface
+            $accessor = new $accessor(
+                $value,
+                $this,
+                $this->odm,
+                $options
+            );
         }
 
         return $accessor;

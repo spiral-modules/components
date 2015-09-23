@@ -9,19 +9,20 @@
 namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
+use Spiral\Core\ContainerInterface;
+use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
+use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
-use Spiral\ODM\DocumentEntity;
 
 /**
  * Compositor is responsible for managing set (array) of classes nested to parent Document.
  * Compositor can manage class and all it's children.
- *
- * @todo: implement EntityInterface
  */
 class Compositor extends Component implements
     CompositableInterface,
@@ -30,6 +31,11 @@ class Compositor extends Component implements
     \ArrayAccess
 {
     /**
+     * Optional arguments.
+     */
+    use SaturateTrait;
+
+    /**
      * Class being composited.
      *
      * @var string
@@ -37,19 +43,12 @@ class Compositor extends Component implements
     private $class = '';
 
     /**
-     * Set of documents to be managed by Compositor.
-     *
-     * @var array|DocumentEntity[]
-     */
-    protected $documents = [];
-
-    /**
      * When solid state is enabled no atomic operations will be pushed to databases and document
      * composition will be saved as one big set. Enabled by default.
      *
      * @var bool
      */
-    protected $solidState = true;
+    private $solidState = true;
 
     /**
      * Indication that composition data were changed without using atomic operations, this flag
@@ -58,7 +57,14 @@ class Compositor extends Component implements
      *
      * @var bool
      */
-    protected $changedDirectly = false;
+    private $changedDirectly = false;
+
+    /**
+     * Set of documents to be managed by Compositor.
+     *
+     * @var array|DocumentEntity[]
+     */
+    protected $documents = [];
 
     /**
      * Set of atomic operation applied to whole composition set.
@@ -76,7 +82,7 @@ class Compositor extends Component implements
 
     /**
      * @invisible
-     * @var DocumentEntity
+     * @var EntityInterface
      */
     protected $parent = null;
 
@@ -90,10 +96,15 @@ class Compositor extends Component implements
      *
      * @param string $class Primary class being composited.
      */
-    public function __construct($data, $parent = null, ODM $odm = null, $class = null)
-    {
-        $this->class = $class;
+    public function __construct(
+        $data,
+        EntityInterface $parent = null,
+        ODM $odm = null,
+        $class = null
+    ) {
         $this->parent = $parent;
+        $this->class = $class;
+
         if (!empty($data) && is_array($data)) {
             $this->documents = $data;
         }
@@ -105,8 +116,7 @@ class Compositor extends Component implements
         }
 
         //Allowed only when global container is set
-        //todo: change that
-        $this->odm = !empty($odm) ? $odm : ODM::instance();
+        $this->odm = $this->saturate($odm, ODM::class);
 
         if (empty($this->odm)) {
             throw new CompositorException(
@@ -187,12 +197,8 @@ class Compositor extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function embed($parent)
+    public function embed(EntityInterface $parent)
     {
-        if (!$parent instanceof DocumentEntity) {
-            throw new CompositorException("Compositor can be embedded only into Documents.");
-        }
-
         if ($parent === $this->parent) {
             return $this;
         }
@@ -204,7 +210,12 @@ class Compositor extends Component implements
             return $this->solidState(true);
         }
 
-        return new static($this->serializeData(), $parent, $this->class, $this->odm);
+        return new static(
+            $this->serializeData(),
+            $parent,
+            $this->class,
+            $this->odm
+        );
     }
 
     /**
@@ -420,6 +431,67 @@ class Compositor extends Component implements
 
     /**
      * {@inheritdoc}
+     */
+    public function hasField($name)
+    {
+        return $this->offsetExists($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setField($name, $value)
+    {
+        $this->offsetSet($name, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws CompositorException
+     */
+    public function getField($name, $default = null)
+    {
+        if (!$this->hasField($name)) {
+            return $default;
+        }
+
+        return $this->offsetGet($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setFields($fields = [])
+    {
+        $this->setData($fields);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getFields()
+    {
+        return $this->all();
+    }
+
+    /**
+     * Return all composited documents in array form.
+     *
+     * @return Document[]
+     */
+    public function all()
+    {
+        $result = [];
+        foreach ($this->getIterator() as $document) {
+            $result[] = $document;
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * @return Document[]
      */
@@ -455,8 +527,11 @@ class Compositor extends Component implements
         $class = !empty($class) ? $class : $this->class;
 
         $this->changedDirectly = true;
-        $this->documents[] = $document = call_user_func([$class, 'create'], $fields,
-            $this->odm)->embed($this);
+        $this->documents[] = $document = call_user_func(
+            [$class, 'create'],
+            $fields,
+            $this->odm
+        )->embed($this);
 
         return $document;
     }
@@ -473,7 +548,6 @@ class Compositor extends Component implements
 
         return $this;
     }
-
 
     /**
      * Find documents based on provided field values or document instance. Only simple query support
@@ -693,6 +767,18 @@ class Compositor extends Component implements
             'atomics' => $this->buildAtomics('@compositor'),
             'errors'  => $this->getErrors()
         ];
+    }
+
+    /**
+     * @return null|ContainerInterface
+     */
+    protected function container()
+    {
+        if (!empty($this->parent) && $this->parent instanceof Component) {
+            return $this->parent->container();
+        }
+
+        return parent::container();
     }
 
     /**

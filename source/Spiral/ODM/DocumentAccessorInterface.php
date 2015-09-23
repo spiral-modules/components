@@ -9,7 +9,6 @@
 namespace Spiral\ODM;
 
 use Spiral\Models\AccessorInterface;
-use Spiral\ODM\Exceptions\AccessorException;
 
 /**
  * Declares requirement for every ODM field accessor to be an instance of AccessorInterface and
@@ -21,17 +20,6 @@ use Spiral\ODM\Exceptions\AccessorException;
  */
 interface DocumentAccessorInterface extends AccessorInterface
 {
-    /**
-     * {@inheritdoc}
-     *
-     * Accessor options include field type resolved by DocumentSchema.
-     *
-     * @param ODM   $odm     ODM component.
-     * @param mixed $options Implementation specific options. In ODM will always contain field type.
-     * @throws AccessorException
-     */
-    public function __construct($data, $parent = null, ODM $odm = null, $options = null);
-
     /**
      * Check if object has any update.
      *

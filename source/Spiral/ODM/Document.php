@@ -9,7 +9,7 @@
 namespace Spiral\ODM;
 
 use Spiral\Models\ActiveEntityInterface;
-use Spiral\Models\DataEntity;
+use Spiral\Models\EntityInterface;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -56,13 +56,17 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
 
     /**
      * @see Component::staticContainer()
-     * @param array                                     $fields
-     * @param CompositableInterface|Document|DataEntity $parent
-     * @param ODM                                       $odm
-     * @param array                                     $odmSchema
+     * @param array           $fields
+     * @param EntityInterface $parent
+     * @param ODM             $odm
+     * @param array           $odmSchema
      */
-    public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
-    {
+    public function __construct(
+        $fields = [],
+        EntityInterface $parent = null,
+        ODM $odm = null,
+        $odmSchema = null
+    ) {
         parent::__construct($fields, $parent, $odm, $odmSchema);
 
         if ((!$this->isLoaded() && !$this->isEmbedded()) || empty($fields)) {

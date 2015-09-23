@@ -14,7 +14,7 @@ The components included are:
 * Memory interface (&#1000;)
 * DBAL with Database partinions, Query Builders and schema reflections (bidirectional): MySQL, PostgresSQL, SQLite, SQLServer
 * ODM engine with inheritance, composition and aggregation
-* Hybrid ORM (DataMapper + ActiveRecord) with the plans to become a cleaner data mapper (non breaking) includes database scaffolding, relations (+polymorphic for fun), eager loading and easy joins
+* Hybrid ORM (DataMapper + ActiveRecord) with the plans to become a cleaner data mapper (non breaking), includes database scaffolding, relations (+polymorphic for fun), eager loading and easy joins
 * Http Dispatcher at top of PSR7 with middlewares, Routing
 * StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP) + PSR7 streams
 * Templater engine with HTML based syntax, inheritance and widgets

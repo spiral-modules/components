@@ -39,6 +39,7 @@ class HasOne extends Relation
             }
         }
 
+        //todo: preload related instance!
         if (!empty($this->instance) && $this->instance != $related) {
             $this->deassociate();
         }

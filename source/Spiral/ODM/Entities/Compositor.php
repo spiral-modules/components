@@ -20,6 +20,8 @@ use Spiral\ODM\DocumentEntity;
 /**
  * Compositor is responsible for managing set (array) of classes nested to parent Document.
  * Compositor can manage class and all it's children.
+ *
+ * @todo: implement EntityInterface
  */
 class Compositor extends Component implements
     CompositableInterface,

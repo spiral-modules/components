@@ -13,6 +13,8 @@ use Spiral\Validation\ValueInterface;
 
 /**
  * Accessors used to mock access to model field, control value setting, serializing and etc.
+ *
+ * @todo Add EntityInterface constrain on parent
  */
 interface AccessorInterface extends ValueInterface, \JsonSerializable
 {

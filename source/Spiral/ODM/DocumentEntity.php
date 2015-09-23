@@ -304,7 +304,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      */
-    public function setData($data)
+    public function setValue($data)
     {
         return $this->setFields($data);
     }

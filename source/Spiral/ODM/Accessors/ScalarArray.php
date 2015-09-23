@@ -167,7 +167,7 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
      *
      * @return $this
      */
-    public function setData($data)
+    public function setValue($data)
     {
         $this->updated = $this->solidState = true;
 

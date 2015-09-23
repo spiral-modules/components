@@ -223,7 +223,7 @@ class Compositor extends Component implements
      *
      * @return $this
      */
-    public function setData($data)
+    public function setValue($data)
     {
         $this->changedDirectly = $this->solidState = true;
 
@@ -464,7 +464,7 @@ class Compositor extends Component implements
      */
     public function setFields($fields = [])
     {
-        $this->setData($fields);
+        $this->setValue($fields);
     }
 
     /**

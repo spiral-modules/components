@@ -41,7 +41,7 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      * @param mixed $data
      * @throws AccessorExceptionInterface
      */
-    public function setData($data);
+    public function setValue($data);
 
     /**
      * Serialize mocked data to be stored in database or retrieved by user.

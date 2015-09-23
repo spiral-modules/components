@@ -235,7 +235,7 @@ abstract class DataEntity extends Component implements
                 $this->fields[$name] = $field = $this->createAccessor($accessor, $field);
             }
 
-            $field->setData($value);
+            $field->setValue($value);
 
             return;
         }

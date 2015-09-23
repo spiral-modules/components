@@ -70,7 +70,7 @@ class AtomicNumber implements ActiveAccessorInterface
     /**
      * {@inheritdoc}
      */
-    public function setData($data)
+    public function setValue($data)
     {
         $this->original = $this->value = $data;
         $this->delta = 0;

@@ -10,7 +10,6 @@ namespace Spiral\ODM;
 
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\DataEntity;
-use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -19,7 +18,7 @@ use Spiral\ODM\Traits\FindTrait;
 /**
  * DocumentEntity with added ActiveRecord methods and association with collection.
  */
- class Document extends DocumentEntity implements ActiveEntityInterface
+abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
     /**
      * Static functions.
@@ -57,10 +56,10 @@ use Spiral\ODM\Traits\FindTrait;
 
     /**
      * @see Component::staticContainer()
-     * @param array                                           $fields
+     * @param array                                     $fields
      * @param CompositableInterface|Document|DataEntity $parent
-     * @param ODM                                             $odm
-     * @param array                                           $odmSchema
+     * @param ODM                                       $odm
+     * @param array                                     $odmSchema
      */
     public function __construct($fields = [], $parent = null, ODM $odm = null, $odmSchema = null)
     {

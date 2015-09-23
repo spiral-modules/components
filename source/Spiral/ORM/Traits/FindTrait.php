@@ -90,7 +90,10 @@ trait FindTrait
          *
          * @var ORM $orm
          */
-        $orm = self::saturate($orm, ORM::class);
+        if (empty($orm)) {
+            //Using global container as fallback
+            $orm = self::staticContainer()->get(ORM::class);
+        }
 
         return static::events()->fire('selector', $orm->ormSelector(static::class));
     }

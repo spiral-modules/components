@@ -85,8 +85,10 @@ trait FindTrait
         //Ensure traits
         static::initialize();
 
-        //Using global container as fallback
-        $odm = self::saturate($odm, ODM::class);
+        if (empty($odm)) {
+            //Using global container as fallback
+            $odm = self::staticContainer()->get(ODM::class);
+        }
 
         return self::events()->fire('collection', $odm->odmCollection(static::class));
     }

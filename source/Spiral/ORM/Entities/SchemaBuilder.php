@@ -17,6 +17,7 @@ use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
 use Spiral\Tokenizer\TokenizerInterface;
@@ -392,7 +393,7 @@ class SchemaBuilder extends Component
         //Table names associated with records
         $sources = [];
         foreach ($tokenizer->getClasses(RecordEntity::class) as $class => $definition) {
-            if ($class == RecordEntity::class) {
+            if ($class == RecordEntity::class || $class == Record::class) {
                 continue;
             }
 

@@ -21,13 +21,6 @@ use Spiral\Models\AccessorInterface;
 interface RecordAccessorInterface extends AccessorInterface
 {
     /**
-     * {@inheritdoc}
-     *
-     * Parent will not be supplied while schema analysis.
-     */
-    public function __construct($data, $parent = null);
-
-    /**
      * Check if object has any update.
      *
      * @return bool

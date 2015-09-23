@@ -32,13 +32,12 @@ class HasOne extends Relation
     public function associate(EntityInterface $related = null)
     {
         //Removing association
-        if (static::MULTIPLE === false && $related === null) {
-            if (!$this->definition[RecordEntity::NULLABLE]) {
-                throw new RelationException(
-                    "Unable to de-associate relation data, relation is not nullable."
-                );
-            }
+        if ($related === null) {
+            throw new RelationException(
+                "Unable to associate null to HAS_ONE relation."
+            );
         }
+
         parent::associate($this->mountRelation($related));
     }
 

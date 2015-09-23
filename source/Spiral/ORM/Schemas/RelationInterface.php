@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\ORM;
+namespace Spiral\ORM\Schemas;
 
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
@@ -20,7 +20,7 @@ use Spiral\ORM\Exceptions\SchemaException;
  * pack it's definition it cachable form which will be later feeded to record Relation and will be
  * used as set of instructions
  */
-interface RelationSchemaInterface
+interface RelationInterface
 {
     /**
      * @param SchemaBuilder $builder
@@ -64,7 +64,7 @@ interface RelationSchemaInterface
      * Get definition for equivalent (usually polymorphic relationship) relation. For example this
      * method can route to ODM relations if outer record is instance of Document.
      *
-     * @return RelationSchemaInterface
+     * @return RelationInterface
      * @throws RelationSchemaException
      * @throws RecordSchemaException
      */

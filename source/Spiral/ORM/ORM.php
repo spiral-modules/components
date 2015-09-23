@@ -314,7 +314,7 @@ class ORM extends Singleton
      * @param RecordSchema  $record
      * @param string        $name
      * @param array         $definition
-     * @return RelationSchemaInterface
+     * @return RelationInterface
      */
     public function relationSchema(
         $type,

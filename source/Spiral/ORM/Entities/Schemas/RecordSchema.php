@@ -21,7 +21,7 @@ use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordAccessorInterface;
-use Spiral\ORM\RelationSchemaInterface;
+use Spiral\ORM\Schemas\RelationInterface;
 
 /**
  * Performs analysis, schema building and table declaration for one specific Record class.
@@ -46,7 +46,7 @@ class RecordSchema extends ReflectionEntity
     /**
      * Declared and requested record relationships.
      *
-     * @var RelationSchemaInterface[]
+     * @var RelationInterface[]
      */
     protected $relations = [];
 
@@ -348,7 +348,7 @@ class RecordSchema extends ReflectionEntity
     /**
      * Get all declared or requested record relation schemas.
      *
-     * @return RelationSchemaInterface[]
+     * @return RelationInterface[]
      */
     public function getRelations()
     {

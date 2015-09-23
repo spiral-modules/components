@@ -16,12 +16,12 @@ use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
-use Spiral\ORM\RelationSchemaInterface;
+use Spiral\ORM\Schemas\RelationInterface;
 
 /**
  * Generic (abstract) implementation of relation schema. Used for basic ORM relations.
  */
-abstract class RelationSchema implements RelationSchemaInterface
+abstract class RelationSchema implements RelationInterface
 {
     /**
      * Must contain relation type, this constant is required to fetch outer record(s) class name

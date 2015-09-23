@@ -18,7 +18,7 @@ use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
-use Spiral\ORM\RelationSchemaInterface;
+use Spiral\ORM\Schemas\RelationInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
@@ -200,7 +200,7 @@ class SchemaBuilder extends Component
          * We have to perform inversion after every generic relation was defined. Sometimes records
          * can define inversed relation by themselves.
          *
-         * @var RelationSchemaInterface $relation
+         * @var RelationInterface $relation
          */
         foreach ($inversedRelations as $relation) {
             if ($relation->isInversable()) {
@@ -356,7 +356,7 @@ class SchemaBuilder extends Component
      * @param RecordSchema $record
      * @param string       $name
      * @param array        $definition
-     * @return RelationSchemaInterface
+     * @return RelationInterface
      * @throws SchemaException
      */
     public function relationSchema(RecordSchema $record, $name, array $definition)

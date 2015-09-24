@@ -29,4 +29,4 @@ Unit Testing is a work in progress.
 
 Read more with examples in [spiral guide](https://github.com/spiral/guide). Check [Framework Bundle](https://github.com/spiral/spiral).
 
-P.S. Beta release coming over next week or so once documentation is complete (09/23/2015).
+P.S. Beta release coming over next week or so once documentation is complete (09/28/2015).

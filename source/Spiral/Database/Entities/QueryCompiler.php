@@ -605,24 +605,7 @@ class QueryCompiler extends Component
         }
 
         array_walk($parameters, function (&$parameter) {
-            switch (gettype($parameter)) {
-                case "boolean":
-                    return $parameter = $parameter ? 'true' : 'false';
-                case "integer":
-                    return $parameter = $parameter + 0;
-                case "NULL":
-                    return $parameter = 'NULL';
-                case "double":
-                    return $parameter = sprintf('%F', $parameter);
-                case "string":
-                    return $parameter = "'" . addcslashes($parameter, "'") . "'";
-                case 'object':
-                    if (method_exists($parameter, '__toString')) {
-                        return $parameter = "'" . addcslashes((string)$parameter, "'") . "'";
-                    }
-            }
-
-            return $parameter = "[UNRESOLVED]";
+            return $parameter = self::normalizeParameter($parameter);
         });
 
         reset($parameters);
@@ -686,5 +669,37 @@ class QueryCompiler extends Component
         }
 
         return $operator;
+    }
+
+    /**
+     * Normalize parameter value to be interpolated.
+     *
+     * @param mixed $parameter
+     * @return string
+     */
+    private static function normalizeParameter($parameter)
+    {
+        if ($parameter instanceof ParameterInterface) {
+            return self::normalizeParameter($parameter->getValue());
+        }
+
+        switch (gettype($parameter)) {
+            case "boolean":
+                return $parameter ? 'true' : 'false';
+            case "integer":
+                return $parameter + 0;
+            case "NULL":
+                return 'NULL';
+            case "double":
+                return sprintf('%F', $parameter);
+            case "string":
+                return "'" . addcslashes($parameter, "'") . "'";
+            case 'object':
+                if (method_exists($parameter, '__toString')) {
+                    return "'" . addcslashes((string)$parameter, "'") . "'";
+                }
+        }
+
+        return "[UNRESOLVED]";
     }
 }

@@ -18,7 +18,7 @@ interface RecordInterface extends IdentifiedInterface
 {
     /**
      * Due setContext() method and entity cache of ORM any custom initiation code in constructor
-     * must not depends on database data.
+     * must not depends on relations data.
      *
      * @see Component::staticContainer()
      * @see setContext

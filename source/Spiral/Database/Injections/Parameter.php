@@ -24,11 +24,20 @@ class Parameter implements ParameterInterface
     private $value = null;
 
     /**
-     * @param mixed $value
+     * Parameter type.
+     *
+     * @var int|null
      */
-    public function __construct($value)
+    private $type = null;
+
+    /**
+     * @param mixed $value
+     * @param int   $type
+     */
+    public function __construct($value, $type = \PDO::PARAM_STR)
     {
         $this->value = $value;
+        $this->type = $type;
     }
 
     /**
@@ -46,7 +55,26 @@ class Parameter implements ParameterInterface
      */
     public function getValue()
     {
+        if (is_array($this->value)) {
+            $result = [];
+            foreach ($this->value as $value) {
+                $result[] = new self($value, $this->type);
+            }
+
+            return $result;
+        }
+
         return $this->value;
+    }
+
+    /**
+     * Parameter type.
+     *
+     * @return int
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 
     /**

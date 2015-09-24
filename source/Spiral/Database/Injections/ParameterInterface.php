@@ -25,4 +25,11 @@ interface ParameterInterface extends SQLFragmentInterface
      * @return mixed|array
      */
     public function getValue();
+
+    /**
+     * Parameter type.
+     *
+     * @return int|mixed
+     */
+    public function getType();
 }

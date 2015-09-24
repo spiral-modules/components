@@ -17,6 +17,7 @@ use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\ParameterInterface;
+use Spiral\Database\Injections\PDOParameter;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -295,9 +296,22 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
             $pdoStatement = $this->getPDO()->prepare($query);
 
+
+            foreach ($parameters as $position => $parameter) {
+                if ($parameter instanceof ParameterInterface) {
+                    $pdoStatement->bindValue(
+                        $position + 1,
+                        $parameter->getValue(),
+                        $parameter->getType()
+                    );
+                } else {
+                    //Simple string, potentially i should wrap every parameter as Parameter
+                    $pdoStatement->bindValue($position + 1, $parameter);
+                }
+            }
+
             try {
-                //Configuring statement binded parameters
-                $pdoStatement->execute($parameters);
+                $pdoStatement->execute();
             } finally {
                 !empty($benchmark) && $this->benchmark($benchmark);
             }
@@ -362,7 +376,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     {
         $result = [];
         foreach ($parameters as $parameter) {
-            if ($parameter instanceof ParameterInterface) {
+            if ($parameter instanceof ParameterInterface && is_array($parameter->getValue())) {
                 $parameter = $parameter->getValue();
             }
 

@@ -346,6 +346,8 @@ abstract class AbstractWhere extends QueryBuilder
     {
         return function ($parameter) {
             if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
+                //is_array condition can be removed, in this case we can wrap
+                //every parameter using our object
                 $parameter = new Parameter($parameter);
             }
 

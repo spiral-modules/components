@@ -18,6 +18,7 @@ use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
+use Spiral\Database\Injections\Parameter;
 
 /**
  * Talks to postgres databases.
@@ -85,10 +86,9 @@ class PostgresDriver extends Driver
     {
         $result = parent::prepareParameters($parameters);
 
-        array_walk_recursive($result, function (&$value) {
+        array_walk($result, function (&$value) {
             if (is_bool($value)) {
-                //PDO casts boolean as string, Postgres can't understand it, let's cast it as int
-                $value = (int)$value;
+                $value = new Parameter($value, \PDO::PARAM_BOOL);
             }
         });
 

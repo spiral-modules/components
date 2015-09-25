@@ -25,7 +25,7 @@ trait SaturateTrait
 
     /**
      * Must be used only to resolve optional constructor arguments. Use in classes which are
-     * generally resolved using Container.
+     * generally resolved using Container. Default value MUST always be supplied from outside.
      *
      * @internal Do not use for business logic.
      * @param mixed  $default Default value.

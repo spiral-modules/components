@@ -59,10 +59,11 @@ class Record extends RecordEntity implements ActiveEntityInterface
             return false;
         }
 
-        //Primary key field name
-        $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
         if (!$this->isLoaded()) {
             $this->fire('saving');
+
+            //Primary key field name (if any)
+            $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
 
             //We will need to support records with multiple primary keys in future
             unset($this->fields[$primaryKey]);

@@ -37,7 +37,7 @@ trait TranslatorTrait
      * @param array  $options Interpolation options.
      * @return string
      */
-    public static function translate($string, array $options = [])
+    protected static function translate($string, array $options = [])
     {
         if (
             substr($string, 0, 2) === Translator::I18N_PREFIX

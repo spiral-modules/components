@@ -174,6 +174,7 @@ interface BucketInterface
     /**
      * Move storage object data to another bucket. Method must return new object address on success.
      *
+     * @todo Add ability to specify new name, not only destination.
      * @param BucketInterface $destination
      * @param string          $name
      * @return string

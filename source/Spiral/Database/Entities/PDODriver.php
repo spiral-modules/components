@@ -295,19 +295,8 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
             $pdoStatement = $this->getPDO()->prepare($query);
 
-
-            foreach ($parameters as $position => $parameter) {
-                if ($parameter instanceof ParameterInterface) {
-                    $pdoStatement->bindValue(
-                        $position + 1,
-                        $parameter->getValue(),
-                        $parameter->getType()
-                    );
-                } else {
-                    //Simple string, potentially i should wrap every parameter as Parameter
-                    $pdoStatement->bindValue($position + 1, $parameter);
-                }
-            }
+            //Configuring statement with parameters
+            $this->configureStatement($pdoStatement, $parameters);
 
             try {
                 $pdoStatement->execute();
@@ -565,5 +554,28 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     {
         $this->logger()->info("Rolling back savepoint '{$name}'.");
         $this->statement("ROLLBACK TO SAVEPOINT " . $this->identifier("SVP{$name}"));
+    }
+
+    /**
+     * Configure PDO statement with parameters.
+     *
+     * @param \PDOStatement              $pdoStatement
+     * @param array|ParameterInterface[] $parameters
+     */
+    private function configureStatement(\PDOStatement $pdoStatement, array $parameters)
+    {
+        foreach ($parameters as $position => $parameter) {
+            if ($parameter instanceof ParameterInterface) {
+                $pdoStatement->bindValue(
+                    $position + 1,
+                    $parameter->getValue(),
+                    $parameter->getType()
+                );
+            } else {
+                //Simple string, potentially i should wrap every parameter as Parameter and remove
+                //this part
+                $pdoStatement->bindValue($position + 1, $parameter);
+            }
+        }
     }
 }

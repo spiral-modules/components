@@ -19,6 +19,7 @@ interface SessionInterface
      * Set session id, if session already started data has to be committed to permanent storage.
      *
      * @param string $id
+     * @throws SessionException
      */
     public function setID($id);
 

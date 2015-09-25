@@ -11,7 +11,7 @@ namespace Spiral\Database\Query;
 use PDO;
 use Spiral\Cache\StoreInterface;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Exceptions\ResultException;
 
 /**
  * CacheResult is almost identical to QueryResult by it's functionality, but used to represent query
@@ -98,11 +98,13 @@ class CachedResult extends QueryResult
 
     /**
      * {@inheritdoc}
+     *
+     * @throws ResultException
      */
     public function fetchMode($mode)
     {
         if ($mode != PDO::FETCH_ASSOC && $mode != PDO::FETCH_NUM) {
-            throw new QueryException(
+            throw new ResultException(
                 'Cached query supports only FETCH_ASSOC and FETCH_NUM fetching modes.'
             );
         }
@@ -149,7 +151,7 @@ class CachedResult extends QueryResult
     /**
      * {@inheritdoc}
      *
-     * @throws QueryException
+     * @throws ResultException
      */
     public function bind($columnID, &$variable)
     {
@@ -167,10 +169,10 @@ class CachedResult extends QueryResult
                 }
             }
 
-            throw new QueryException("No such index '{$columnID}' in the result columns.");
+            throw new ResultException("No such index '{$columnID}' in the result columns.");
         } else {
             if (!isset($this->data[0][$columnID])) {
-                throw new QueryException("No such column name '{$columnID}' in the result columns.");
+                throw new ResultException("No such column name '{$columnID}' in the result columns.");
             }
 
             $this->bindings[$columnID] = &$variable;

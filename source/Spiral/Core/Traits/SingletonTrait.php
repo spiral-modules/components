@@ -19,7 +19,8 @@ trait SingletonTrait
 {
     /**
      * Singletons will work as desired only under Spiral Container which can understand SINGLETON
-     * constant. You can consider this functionality as "helper".
+     * constant. You can consider this functionality as "helper", if you can avoid using such
+     * function - please do not use it.
      *
      * Global/static container used as fallback to receive class instance.
      *

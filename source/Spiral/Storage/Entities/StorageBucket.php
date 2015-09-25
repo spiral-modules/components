@@ -144,9 +144,9 @@ class StorageBucket extends Component implements
             "Check existence of '{$this->buildAddress($name)}' at '{$this->getServerID()}'."
         );
 
-        $this->benchmark($this->getServerID(), "exists::{$this->buildAddress($name)}");
+        $benchmark = $this->benchmark($this->getServerID(), "exists::{$this->buildAddress($name)}");
         $result = (bool)$this->server()->exists($this, $name);
-        $this->benchmark($this->getServerID(), "exists::{$this->buildAddress($name)}");
+        $this->benchmark($benchmark);
 
         return $result;
     }
@@ -160,9 +160,9 @@ class StorageBucket extends Component implements
             "Get size of '{$this->buildAddress($name)}' at '{$this->getServerID()}'."
         );
 
-        $this->benchmark($this->getServerID(), "size::{$this->buildAddress($name)}");
+        $benchmark = $this->benchmark($this->getServerID(), "size::{$this->buildAddress($name)}");
         $size = $this->server()->size($this, $name);
-        $this->benchmark($this->getServerID(), "size::{$this->buildAddress($name)}");
+        $this->benchmark($benchmark);
 
         return $size;
     }
@@ -185,9 +185,9 @@ class StorageBucket extends Component implements
             $source = \GuzzleHttp\Psr7\stream_for($source);
         }
 
-        $this->benchmark($this->getServerID(), "put::{$this->buildAddress($name)}");
+        $benchmark = $this->benchmark($this->getServerID(), "put::{$this->buildAddress($name)}");
         $this->server()->put($this, $name, $source);
-        $this->benchmark($this->getServerID(), "put::{$this->buildAddress($name)}");
+        $this->benchmark($benchmark);
 
         return $this->storage->open($this->buildAddress($name));
     }

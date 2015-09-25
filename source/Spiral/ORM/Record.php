@@ -52,6 +52,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
     public function save($validate = null)
     {
         if (is_null($validate)) {
+            //Using default model behaviour
             $validate = static::VALIDATE_SAVE;
         }
 

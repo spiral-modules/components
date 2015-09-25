@@ -117,6 +117,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         $validate = !is_null($validate) ? $validate : static::VALIDATE_SAVE;
 
         if ($validate && !$this->isValid()) {
+            //Using default model behaviour
             return false;
         }
 

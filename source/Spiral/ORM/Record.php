@@ -82,8 +82,11 @@ class Record extends RecordEntity implements ActiveEntityInterface
         } elseif ($this->isSolid() || $this->hasUpdates()) {
             $this->fire('updating');
 
-            //Updating
-            $this->sourceTable()->update($this->compileUpdates(), $this->stateCriteria())->run();
+            //Updating changed/all field based on model criteria (in usual case primaryKey)
+            $this->sourceTable()->update(
+                $this->compileUpdates(),
+                $this->stateCriteria()
+            )->run();
 
             $this->fire('updated');
         }

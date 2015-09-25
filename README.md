@@ -4,7 +4,7 @@ Spiral Framework Core Components
 [![Build Status](https://travis-ci.org/spiral/components.svg?branch=master)](https://travis-ci.org/spiral/components)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral/components/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spiral/components/?branch=master)
 
-This section contains the primary Spiral components used within the Spiral framework bundle.
+This repository contains the primary Spiral components used within the Spiral framework bundle.
 
 The components included are:
 * Cache
@@ -23,7 +23,7 @@ The components included are:
 * Validation component + set of checkers
 * Pagination component
 
-Code style: PSR-2 (minor violations, feel free to fix), base line width is 100
+Code style: PSR-2 (minor violations, feel free to fix), base line width is 100.
 
 Unit Testing is a work in progress.
 

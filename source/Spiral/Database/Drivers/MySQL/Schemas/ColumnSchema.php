@@ -203,7 +203,7 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
 
         if (count($options) > 1) {
             list($this->precision, $this->scale) = $options;
-        } elseif ($options) {
+        } elseif (!empty($options)) {
             $this->size = $options[0];
         }
 

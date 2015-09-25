@@ -97,6 +97,7 @@ class TableSchema extends AbstractTable
     {
         /**
          * @var ColumnSchema $column
+         * @var ColumnSchema $dbColumn
          */
 
         //Renaming is separate operation

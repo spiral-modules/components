@@ -186,7 +186,7 @@ class SftpServer extends StorageServer
                 ssh2_auth_none($session, $this->options['username']);
                 break;
 
-            case self::PASSWORD;
+            case self::PASSWORD:
                 ssh2_auth_password($session, $this->options['username'],
                     $this->options['password']);
                 break;

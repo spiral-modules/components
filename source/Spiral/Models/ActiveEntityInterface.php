@@ -16,14 +16,6 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 interface ActiveEntityInterface extends IdentifiedInterface
 {
     /**
-     * Indication that entity was fetched from it's primary source (database usually) and not just
-     * created. Flag must be set to true once entity will be successfully saved.
-     *
-     * @return bool
-     */
-    public function isLoaded();
-
-    /**
      * Save entity content into it's primary storage and return true if operation went successfully.
      *
      * @param bool $validate

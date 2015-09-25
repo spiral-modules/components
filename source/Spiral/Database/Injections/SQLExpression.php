@@ -16,6 +16,8 @@ use Spiral\Database\Entities\QueryCompiler;
  * query compilation.
  *
  * Example: new SQLExpression("table.column = table.column + 1");
+ *
+ * I potentially should have an interface for such class.
  */
 class SQLExpression extends SQLFragment
 {

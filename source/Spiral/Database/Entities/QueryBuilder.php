@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Core\Component;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\ParameterInterface;
 
 /**
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
@@ -44,7 +45,7 @@ abstract class QueryBuilder extends Component
      * Get ordered list of builder parameters.
      *
      * @param QueryCompiler $compiler
-     * @return array
+     * @return array|ParameterInterface[]
      * @throws BuilderException
      */
     abstract public function getParameters(QueryCompiler $compiler = null);

@@ -75,8 +75,8 @@ class GridfsServer extends StorageServer
         $this->delete($bucket, $name);
 
         /**
-         * For some reason mongo driver i have locally don't want to read wrapped streams,
-         * it either dies with "error setting up file" or hangs.
+         * For some reason mongo driver i have don't want to read wrapped streams, it either dies
+         * with "error setting up file" or hangs.
          *
          * I was not able to debug cause of this error at this moment as i don't have Visual Studio
          * at this PC.

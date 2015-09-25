@@ -335,6 +335,7 @@ trait JoinsTrait
     {
         return function ($parameter) {
             if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
+                //Convert every value into parameter
                 $parameter = new Parameter($parameter);
             }
 

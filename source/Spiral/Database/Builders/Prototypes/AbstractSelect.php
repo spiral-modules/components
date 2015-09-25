@@ -409,6 +409,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     {
         return function ($parameter) {
             if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
+                //Convert every parameter into object!
                 $parameter = new Parameter($parameter);
             }
 

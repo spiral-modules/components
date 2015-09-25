@@ -178,7 +178,8 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
 
         $this->data = [];
         foreach ($data as $value) {
-            if (($value = $this->filter($value)) !== null) {
+            $value = $this->filter($value);
+            if (!is_null($value)) {
                 $this->data[] = $value;
             }
         }

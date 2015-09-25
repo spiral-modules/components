@@ -45,13 +45,6 @@ interface RecordInterface extends IdentifiedInterface
     public function setContext(array $context);
 
     /**
-     * Is record were fetched from databases or recently created?
-     *
-     * @return bool
-     */
-    public function isLoaded();
-
-    /**
      * Indication that record data was deleted.
      *
      * @return bool

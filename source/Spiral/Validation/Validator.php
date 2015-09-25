@@ -108,22 +108,23 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * {@inheritdoc}
      *
      * @param ContainerInterface $container
-     * @param ValidationProvider $configurator
+     * @param ValidationProvider $provider
      */
     public function __construct(
         $data = [],
         array $rules = [],
         ContainerInterface $container = null,
-        ValidationProvider $configurator = null
+        ValidationProvider $provider = null
     ) {
         $this->data = $data;
         $this->rules = $rules;
 
         //We can use global container as fallback if no default values were provided
         $this->container = $this->saturate($container, ContainerInterface::class);
-
-        $configurator = $this->saturate($configurator, ValidationProvider::class);
-        $this->options = $configurator->config() + $this->options;
+        $this->options = array_merge(
+            $this->options,
+            $this->saturate($provider, ValidationProvider::class)->config()
+        );
     }
 
     /**

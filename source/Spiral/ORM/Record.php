@@ -108,6 +108,9 @@ class Record extends RecordEntity implements ActiveEntityInterface
             $this->sourceTable()->delete($this->stateCriteria())->run();
         }
 
+        //We don't really need to delete embedded or loaded relations,
+        //we have foreign keys for that
+
         $this->fields = $this->ormSchema()[ORM::M_COLUMNS];
         $this->loadedState(self::DELETED)->fire('deleted');
     }

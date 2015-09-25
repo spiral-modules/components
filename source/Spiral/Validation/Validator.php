@@ -52,12 +52,13 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     use LoggerTrait, TranslatorTrait, SaturateTrait;
 
     /**
-     * Errors added manually to validator using addError() method.
+     * Errors added manually to validator using addError() method. This is only placeholder for
+     * condition value (see defaultMessage).
      */
     const FORCED_ERROR = "forced";
 
     /**
-     * Return from validation rule to stop any future field validations.
+     * Return from validation rule to stop any future field validations. Internal contract.
      */
     const STOP_VALIDATION = -99;
 

@@ -13,6 +13,9 @@ use Spiral\Database\Entities\QueryCompiler;
 /**
  * Default implementation of ParameterInterface, provides ability to mock value or array of values
  * and automatically create valid query placeholder at moment of query compilation (? vs (?, ?, ?)).
+ *
+ * In a nearest future Parameter class will be used for every QueryBuilder parameter, it can also
+ * be used to detect value type automatically.
  */
 class Parameter implements ParameterInterface
 {

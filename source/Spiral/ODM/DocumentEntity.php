@@ -40,12 +40,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     const I18N_INHERIT_MESSAGES = true;
 
     /**
-     * Indication that save methods must be validated by default, can be altered by calling save
-     * method with user arguments.
-     */
-    const VALIDATE_SAVE = true;
-
-    /**
      * Helper constant to identify atomic SET operations.
      */
     const ATOMIC_SET = '$set';

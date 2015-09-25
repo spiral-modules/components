@@ -26,6 +26,12 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     use FindTrait;
 
     /**
+     * Indication that save methods must be validated by default, can be altered by calling save
+     * method with user arguments.
+     */
+    const VALIDATE_SAVE = true;
+
+    /**
      * Collection name where document should be stored into.
      *
      * @var string

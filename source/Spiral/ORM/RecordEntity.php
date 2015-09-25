@@ -48,12 +48,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     const I18N_INHERIT_MESSAGES = true;
 
     /**
-     * Indication that save methods must be validated by default, can be altered by calling save
-     * method with user arguments.
-     */
-    const VALIDATE_SAVE = true;
-
-    /**
      * ORM records are be divided by two sections: active and passive records. When record is active
      * ORM allowed to modify associated record table using declared schema and created relations.
      *
@@ -389,7 +383,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         if ($forceUpdate) {
             if ($this->ormSchema[ORM::M_PRIMARY_KEY]) {
-                $this->updates = $this->getCriteria();
+                $this->updates = $this->stateCriteria();
             } else {
                 $this->updates = $this->ormSchema[ORM::M_COLUMNS];
             }
@@ -738,6 +732,37 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
+     * Get associated Database\Table instance.
+     *
+     * @see save()
+     * @see delete()
+     * @return Table
+     */
+    protected function sourceTable()
+    {
+        return $this->orm->dbalDatabase($this->ormSchema[ORM::M_DB])->table(
+            $this->ormSchema[ORM::M_TABLE]
+        );
+    }
+
+
+    /**
+     * Get WHERE array to be used to perform record data update or deletion. Usually will include
+     * record primary key.
+     *
+     * @return array
+     */
+    protected function stateCriteria()
+    {
+        if (!empty($primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY])) {
+            return [$primaryKey => $this->primaryKey()];
+        }
+
+        //We have to serialize record data
+        return $this->updates + $this->serializeData();
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function container()
@@ -786,36 +811,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         unset($updates[$this->ormSchema[ORM::M_PRIMARY_KEY]]);
 
         return $updates;
-    }
-
-    /**
-     * Get associated Database\Table instance.
-     *
-     * @see save()
-     * @see delete()
-     * @return Table
-     */
-    protected function sourceTable()
-    {
-        return $this->orm->dbalDatabase($this->ormSchema[ORM::M_DB])->table(
-            $this->ormSchema[ORM::M_TABLE]
-        );
-    }
-
-    /**
-     * Get WHERE array to be used to perform record data update or deletion. Usually will include
-     * record primary key.
-     *
-     * @return array
-     */
-    protected function getCriteria()
-    {
-        if (!empty($this->ormSchema[ORM::M_PRIMARY_KEY])) {
-            return [$this->ormSchema[ORM::M_PRIMARY_KEY] => $this->primaryKey()];
-        }
-
-        //We have to serialize record data
-        return $this->updates + $this->serializeData();
     }
 
     /**

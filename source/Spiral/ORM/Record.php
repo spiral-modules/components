@@ -26,13 +26,19 @@ class Record extends RecordEntity implements ActiveEntityInterface
     use FindTrait;
 
     /**
+     * Indication that save methods must be validated by default, can be altered by calling save
+     * method with user arguments.
+     */
+    const VALIDATE_SAVE = true;
+
+    /**
      * {@inheritdoc}
      *
      * Create or update record data in database. Record will validate all EMBEDDED and loaded
      * relations.
      *
      * @see   sourceTable()
-     * @see   getCriteria()
+     * @see   updateChriteria()
      * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
      *                             disable validation before saving.
      * @return bool
@@ -77,7 +83,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
             $this->fire('updating');
 
             //Updating
-            $this->sourceTable()->update($this->compileUpdates(), $this->getCriteria())->run();
+            $this->sourceTable()->update($this->compileUpdates(), $this->stateCriteria())->run();
 
             $this->fire('updated');
         }
@@ -99,7 +105,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
         $this->fire('deleting');
 
         if ($this->isLoaded()) {
-            $this->sourceTable()->delete($this->getCriteria())->run();
+            $this->sourceTable()->delete($this->stateCriteria())->run();
         }
 
         $this->fields = $this->ormSchema()[ORM::M_COLUMNS];

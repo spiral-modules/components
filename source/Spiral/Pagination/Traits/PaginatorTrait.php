@@ -11,7 +11,6 @@ namespace Spiral\Pagination\Traits;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
-use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
 
@@ -172,13 +171,7 @@ trait PaginatorTrait
             return $this;
         }
 
-        if ($this->paginator instanceof PaginatorInterface && $this instanceof PaginableInterface) {
-            return $this->paginator->paginateObject($this);
-        }
-
-        throw new PaginationException(
-            "Unable to paginate, PaginableInterface not implemented."
-        );
+        return $this->paginator->paginateObject($this);
     }
 
     /**

@@ -6,9 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-
 namespace Spiral\ORM;
-
 
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\ActiveEntityInterface;

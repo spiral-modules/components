@@ -18,6 +18,9 @@ use Spiral\Translator\Translator;
  *
  * Trait uses global container and default Translator implementation (for now, i'm currently
  * thinking how to use static container without violating anything).
+ *
+ * I think i have to teach tokenizer to locate $this->translate() method and make this method non
+ * static.
  */
 trait TranslatorTrait
 {
@@ -27,7 +30,9 @@ trait TranslatorTrait
      *
      * Example: User::translate("User account is invalid.");
      *
-     * @see Component::staticContainer()
+     * @see      Component::staticContainer()
+     * @internal Please avoid using this method (use translator directly) until non static solution
+     *           are implemented.
      * @param string $string
      * @param array  $options Interpolation options.
      * @return string

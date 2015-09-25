@@ -42,7 +42,8 @@ abstract class QueryBuilder extends Component
     }
 
     /**
-     * Get ordered list of builder parameters.
+     * Get ordered list of builder parameters. Attention, this method WILL return only
+     * ParameterInterface instances in future as scalar parameters will be dropped.
      *
      * @param QueryCompiler $compiler
      * @return array|ParameterInterface[]

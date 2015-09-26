@@ -12,7 +12,7 @@ use Spiral\Validation\Exceptions\ValidationException;
 
 /**
  * Validators responsible for data validations. Validation rules are implementation dependent but
- * should always be specified in array form (same as in default implementation :)).
+ * should always be specified in array form relative to validator implementation.
  */
 interface ValidatorInterface
 {
@@ -20,7 +20,7 @@ interface ValidatorInterface
      * @param array|\ArrayAccess $data  Data to be validated.
      * @param array              $rules Validation rules.
      */
-    public function __construct($data, array $rules);
+    public function __construct($data = [], array $rules = []);
 
     /**
      * Update validation data (context).

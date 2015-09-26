@@ -677,7 +677,7 @@ class QueryCompiler extends Component
      * @param mixed $parameter
      * @return string
      */
-    private static function normalizeParameter($parameter)
+    protected static function normalizeParameter($parameter)
     {
         if ($parameter instanceof ParameterInterface) {
             return self::normalizeParameter($parameter->getValue());

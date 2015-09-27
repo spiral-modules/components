@@ -654,12 +654,6 @@ abstract class AbstractColumn implements ColumnInterface
 
         $difference = [];
         foreach ($columnVars as $name => $value) {
-            if($name == 'logger') {
-                //Some drivers can assign logger to columns, i might need to create additional
-                //implementation option to ignore some properties while comparasion
-                continue;
-            }
-
             //Default values has to compared using type-casted value
             if ($name == 'defaultValue') {
                 if ($this->getDefaultValue() != $original->getDefaultValue()) {

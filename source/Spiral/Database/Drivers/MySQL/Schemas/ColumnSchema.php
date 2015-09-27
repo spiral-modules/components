@@ -8,8 +8,6 @@
  */
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
@@ -18,13 +16,8 @@ use Spiral\Database\Injections\SQLFragment;
 /**
  * MySQL column schema.
  */
-class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
+class ColumnSchema extends AbstractColumn
 {
-    /**
-     * Default value warning.
-     */
-    use LoggerAwareTrait;
-
     /**
      * {@inheritdoc}
      */
@@ -150,12 +143,6 @@ class ColumnSchema extends AbstractColumn implements LoggerAwareInterface
         if (in_array($this->type, $this->forbiddenDefaults)) {
             //Flushing default value for forbidden types
             $this->defaultValue = null;
-
-            if (!empty($this->logger)) {
-                $this->logger->warning("Default value is not allowed for MySQL type '{type}'.", [
-                    'type' => $this->type
-                ]);
-            }
         }
 
         $statement = parent::sqlStatement();

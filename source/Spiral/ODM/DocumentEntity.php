@@ -16,7 +16,6 @@ use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\Traits\AtomicsTrait;
 
 /**
  * DocumentEntity is base data model for ODM component, it describes it's own schema,
@@ -30,7 +29,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * Optional constructor arguments.
      */
-    use SaturateTrait, AtomicsTrait;
+    use SaturateTrait;
 
     /**
      * We are going to inherit parent validation rules, this will let spiral translator know about
@@ -340,6 +339,56 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             //Restoring default value if presented (required for typecasting)
             $this->fields[$offset] = $this->odmSchema[ODM::D_DEFAULTS][$offset];
         }
+    }
+
+    /**
+     * Alias for atomic operation $set. Attention, this operation is not identical to setField()
+     * method, it performs low level operation and can be used only on simple fields. No filters
+     * will be applied to field!
+     *
+     * @param string $field
+     * @param mixed  $value
+     * @return $this
+     * @throws DocumentException
+     */
+    public function set($field, $value)
+    {
+        if ($this->hasUpdates($field, true)) {
+            throw new DocumentException(
+                "Unable to apply multiple atomic operation to field '{$field}'."
+            );
+        }
+
+        $this->atomics[self::ATOMIC_SET][$field] = $value;
+        $this->fields[$field] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Alias for atomic operation $inc.
+     *
+     * @param string $field
+     * @param string $value
+     * @return $this
+     * @throws DocumentException
+     */
+    public function inc($field, $value)
+    {
+        if ($this->hasUpdates($field, true) && !isset($this->atomics['$inc'][$field])) {
+            throw new DocumentException(
+                "Unable to apply multiple atomic operation to field '{$field}'."
+            );
+        }
+
+        if (!isset($this->atomics['$inc'][$field])) {
+            $this->atomics['$inc'][$field] = 0;
+        }
+
+        $this->atomics['$inc'][$field] += $value;
+        $this->fields[$field] += $value;
+
+        return $this;
     }
 
     /**

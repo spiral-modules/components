@@ -9,7 +9,7 @@
 namespace Spiral;
 
 /**
- * Interpolate string with given parameters, most used function there.
+ * Interpolate string with given parameters, used by many spiral components.
  *
  * Input: Hello {name}! Good {time}! + ['name' => 'Member', 'time' => 'day']
  * Output: Hello Member! Good Day!

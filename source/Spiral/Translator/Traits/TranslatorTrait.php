@@ -41,6 +41,14 @@ trait TranslatorTrait
             $string = substr($string, 2, -2);
         }
 
+        if (
+            empty(self::staticContainer())
+            || !self::staticContainer()->has(TranslatorInterface::class)
+        ) {
+            //No translator defined
+            return $string;
+        }
+
         //This code will work only when global container is set (see Component::staticContainer).
         return self::staticContainer()->get(TranslatorInterface::class)->translate(
             static::class,

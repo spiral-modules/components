@@ -26,7 +26,7 @@ trait TranslatorTrait
      *
      * Example: User::translate("User account is invalid.");
      *
-     * @see      Component::staticContainer()
+     * @see Component::staticContainer()
      * @param string $string
      * @param array  $options Interpolation options.
      * @return string

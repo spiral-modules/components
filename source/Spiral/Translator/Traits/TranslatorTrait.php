@@ -9,15 +9,14 @@
 namespace Spiral\Translator\Traits;
 
 use Spiral\Core\Container;
-use Spiral\Translator\Translator;
+use Spiral\Translator\TranslatorInterface;
 
 /**
  * Add bundle specific translation functionality, class name will be used as translation bundle.
  * In addition every default string message declared in class using [[]] braces can be indexed by
  * spiral application. Use translate() method statically to make it indexable by spiral.
  *
- * Trait uses global container and default Translator implementation (for now, i'm currently
- * thinking how to use static container without violating anything).
+ * Trait uses global container meaning such trait can ONLY be added to Component class.
  */
 trait TranslatorTrait
 {
@@ -35,14 +34,18 @@ trait TranslatorTrait
     protected static function translate($string, array $options = [])
     {
         if (
-            substr($string, 0, 2) === Translator::I18N_PREFIX
-            && substr($string, -2) === Translator::I18N_POSTFIX
+            substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
+            && substr($string, -2) === TranslatorInterface::I18N_POSTFIX
         ) {
             //This string was defined in class attributes
             $string = substr($string, 2, -2);
         }
 
         //This code will work only when global container is set (see Component::staticContainer).
-        return Translator::instance()->translate(static::class, $string, $options);
+        return self::staticContainer()->get(TranslatorInterface::class)->translate(
+            static::class,
+            $string,
+            $options
+        );
     }
 }

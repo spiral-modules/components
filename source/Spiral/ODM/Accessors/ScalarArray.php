@@ -179,7 +179,7 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
         $this->data = [];
         foreach ($data as $value) {
             $value = $this->filter($value);
-            if (!is_null($value)) {
+            if (!is_null($value) || $this->type == self::MIXED_TYPE) {
                 $this->data[] = $value;
             }
         }
@@ -275,7 +275,9 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
             );
         }
 
-        if (($value = $this->filter($value)) === null) {
+        $value = $this->filter($value);
+        if (is_null($value) && $this->type != self::MIXED_TYPE) {
+            //Invalid value
             return;
         }
 

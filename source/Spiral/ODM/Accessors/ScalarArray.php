@@ -417,6 +417,7 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
         }
 
         if (!is_scalar($value)) {
+            //This is ScalarArray
             return null;
         }
 

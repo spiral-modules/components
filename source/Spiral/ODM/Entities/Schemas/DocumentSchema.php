@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright ï¿½2009-2015
  */
 namespace Spiral\ODM\Entities\Schemas;
 
@@ -63,10 +63,14 @@ class DocumentSchema extends ReflectionEntity
      */
     public function getCollection()
     {
+        if($this->isEmbeddable()) {
+            return null;
+        }
+
         $collection = $this->property('collection');
 
         if (empty($collection)) {
-            $collection = Inflector::classify($this->getShortName());
+            $collection = Inflector::classify(lcfirst($this->getShortName()));
 
             $collection = Inflector::pluralize($collection);
         }
@@ -81,6 +85,10 @@ class DocumentSchema extends ReflectionEntity
      */
     public function getDatabase()
     {
+        if($this->isEmbeddable()) {
+            return null;
+        }
+
         $database = $this->property('database');
         if (empty($database)) {
             $database = $this->builder->getODM()->config()['default'];

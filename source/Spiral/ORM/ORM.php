@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright ï¿½2009-2015
  */
 namespace Spiral\ORM;
 
@@ -22,6 +22,7 @@ use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Entities\Selector;
 use Spiral\ORM\Exceptions\ORMException;
+use Spiral\Tokenizer\TokenizerInterface;
 
 /**
  * ORM component used to manage state of cached Record's schema, record creation and schema
@@ -134,14 +135,6 @@ class ORM extends Singleton
 
         $this->memory = $memory;
         $this->container = $container;
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    public function container()
-    {
-        return $this->container;
     }
 
     /**
@@ -299,13 +292,15 @@ class ORM extends Singleton
     /**
      * Get instance of ORM SchemaBuilder.
      *
+     * @param TokenizerInterface $tokenizer
      * @return SchemaBuilder
      */
-    public function schemaBuilder()
+    public function schemaBuilder(TokenizerInterface $tokenizer = null)
     {
         return $this->container->construct(SchemaBuilder::class, [
-            'config' => $this->config,
-            'orm'    => $this,
+            'config'    => $this->config,
+            'orm'       => $this,
+            'tokenizer' => $tokenizer
         ]);
     }
 

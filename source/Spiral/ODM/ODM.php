@@ -22,6 +22,7 @@ use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\Tokenizer\TokenizerInterface;
 
 /**
  * ODM component used to manage state of cached Document's schema, document creation and schema
@@ -126,14 +127,6 @@ class ODM extends Singleton implements InjectorInterface
 
         $this->memory = $memory;
         $this->container = $container;
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    public function container()
-    {
-        return $this->container;
     }
 
     /**
@@ -331,13 +324,15 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * Get instance of ODM SchemaBuilder.
      *
+     * @param TokenizerInterface $tokenizer
      * @return SchemaBuilder
      */
-    public function schemaBuilder()
+    public function schemaBuilder(TokenizerInterface $tokenizer = null)
     {
         return $this->container->construct(SchemaBuilder::class, [
-            'odm'    => $this,
-            'config' => $this->config['schemas']
+            'odm'       => $this,
+            'config'    => $this->config['schemas'],
+            'tokenizer' => $tokenizer
         ]);
     }
 

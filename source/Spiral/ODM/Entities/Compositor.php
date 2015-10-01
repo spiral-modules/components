@@ -21,8 +21,8 @@ use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
 /**
- * Compositor is responsible for managing set (array) of classes nested to parent Document.
- * Compositor can manage class and all it's children.
+ * Compositor is responsible for managing set (array) of classes nested to parent DocumentEntity.
+ * Compositor can manage Documents and all it's children.
  */
 class Compositor extends Component implements
     CompositableInterface,

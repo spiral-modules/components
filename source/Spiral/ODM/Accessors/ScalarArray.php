@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright ï¿½2009-2015
  */
 namespace Spiral\ODM\Accessors;
 
@@ -222,7 +222,7 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
         }
 
         if ($this->solidState) {
-            //We don't care about atomics
+            //We don't care about atomics in solid state
             return [DocumentEntity::ATOMIC_SET => [$container => $this->serializeData()]];
         }
 

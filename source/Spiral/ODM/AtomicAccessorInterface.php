@@ -12,9 +12,7 @@ use Spiral\Models\AccessorInterface;
 
 /**
  * Declares requirement for every ODM field accessor to be an instance of AccessorInterface and
- * declare it's default value. In addition constructor is unified and no container used to create
- * accessors, however accessor still can resolve it's dependencies using container() method of
- * ODM component which must always be provided by parent document.
+ * declare it's default value and ability to build array of atomic updated for declared container.
  *
  * Parent model will not be supplied to accessor while schema analysis!
  */

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2015
  */
-namespace Spiral\Core\HMVC;
+namespace Spiral\Core;
 
 use Spiral\Debug\SnapshotInterface;
 

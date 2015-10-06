@@ -51,8 +51,7 @@ use Spiral\Http\Uri;
  * )->useHost();
  *
  * Routes can be used non only with controllers (no idea why you may need it):
- * $this->http->route('users', function ()
- * {
+ * $this->http->route('users', function () {
  *      return "This is users route.";
  * });
  */

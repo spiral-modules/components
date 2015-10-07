@@ -34,10 +34,10 @@ interface ValidatorInterface
     /**
      * Update validation rules.
      *
-     * @param array $validates
+     * @param array $rules
      * @return self
      */
-    public function setRules(array $validates);
+    public function setRules(array $rules);
 
     /**
      * Check if context data valid accordingly to provided rules.

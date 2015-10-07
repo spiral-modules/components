@@ -197,9 +197,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc} See DataEntity class.
      *
-     * ODM:
-     * Get instance of Collection or Document associated with described aggregation. Use method
-     * arguments to specify additional query.
+     * ODM: Get instance of Collection or Document associated with described aggregation.
      *
      * Example:
      * $parentGroup = $user->group();

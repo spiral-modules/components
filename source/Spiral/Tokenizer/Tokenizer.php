@@ -119,6 +119,9 @@ class Tokenizer extends Singleton implements TokenizerInterface
     /**
      * {@inheritdoc}
      *
+     * @param string $namespace Only classes in this namespace will be retrieved, empty by default
+     *                          (all namespaces).
+     * @param string $postfix   Only classes with such postfix will be analyzed, empty by default.
      * @throws ReflectionException
      */
     public function getClasses($parent = null, $namespace = null, $postfix = '')

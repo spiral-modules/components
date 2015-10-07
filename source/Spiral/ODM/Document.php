@@ -297,7 +297,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         $fields = $this->fields;
         array_walk_recursive($query, function (&$value) use ($fields) {
             if (strpos($value, 'self::') === 0) {
-                $value = $this->dotGet([substr($value, 6)]);
+                $value = $this->dotGet(substr($value, 6));
             }
         });
 

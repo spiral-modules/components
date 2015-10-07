@@ -68,7 +68,7 @@ class Dumper extends Singleton
      * @param Debugger $debugger
      * @param array    $options
      */
-    public function __construct(Debugger $debugger, array $options = [])
+    public function __construct(Debugger $debugger = null, array $options = [])
     {
         $this->debugger = $debugger;
         $this->options = $options + $this->options;
@@ -126,15 +126,19 @@ class Dumper extends Singleton
                 return $result;
 
             case self::OUTPUT_LOG:
-                $this->debugger->logger()->debug(
-                    print_r($value, true)
-                );
+                if (!empty($this->debugger)) {
+                    $this->debugger->logger()->debug(
+                        print_r($value, true)
+                    );
+                }
                 break;
 
             case self::OUTPUT_LOG_NICE:
-                $this->debugger->logger()->debug(
-                    $this->dump($value, self::OUTPUT_RETURN)
-                );
+                if (!empty($this->debugger)) {
+                    $this->debugger->logger()->debug(
+                        $this->dump($value, self::OUTPUT_RETURN)
+                    );
+                }
                 break;
         }
 

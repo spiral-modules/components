@@ -8,8 +8,10 @@
  */
 namespace Spiral\ODM;
 
+use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\EntityInterface;
+use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -17,6 +19,23 @@ use Spiral\ODM\Traits\FindTrait;
 
 /**
  * DocumentEntity with added ActiveRecord methods and association with collection.
+ *
+ * Document also provides an ability to specify aggregations using it's schema:
+ *
+ * protected $schema = [
+ *     ...,
+ *     'outer' => [self::ONE => Outer::class, [   //Reference to outer document using internal
+ *          '_id' => 'self::outerID'              //outerID value
+ *     ]],
+ *     'many' => [self::MANY => Outer::class, [   //Reference to many outer document using
+ *          'innerID' => 'self::_id'              //document primary key
+ *     ]]
+ * ];
+ *
+ * Note: self::{name} construction will be replaced with document value in resulted query, even
+ * in case of arrays ;) You can also use dot notation to get value from nested document.
+ *
+ * @var array
  */
 abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
@@ -176,6 +195,57 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     }
 
     /**
+     * {@inheritdoc} See DataEntity class.
+     *
+     * ODM:
+     * Get instance of Collection or Document associated with described aggregation. Use method
+     * arguments to specify additional query.
+     *
+     * Example:
+     * $parentGroup = $user->group();
+     * echo $user->posts()->where(['published' => true])->count();
+     *
+     * @return mixed|AccessorInterface|Collection|Document[]|Document
+     * @throws DocumentException
+     */
+    public function __call($offset, array $arguments)
+    {
+        if (!isset($this->odmSchema()[ODM::D_AGGREGATIONS][$offset])) {
+            return parent::__call($offset, $arguments);
+        }
+
+        return $this->aggregate($offset);
+    }
+
+    /**
+     * Get document aggregation.
+     *
+     * @param string $aggregation
+     * @return Collection|Document
+     */
+    public function aggregate($aggregation)
+    {
+        if (!isset($this->odmSchema()[ODM::D_AGGREGATIONS][$aggregation])) {
+            throw new DocumentException("Undefined aggregation '{$aggregation}'.");
+        }
+
+        $aggregation = $this->odmSchema()[ODM::D_AGGREGATIONS][$aggregation];
+
+        //Query preparations
+        $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
+
+        //Every aggregation works thought ODM collection
+        $collection = $this->odm->odmCollection($aggregation[ODM::ARG_CLASS])->query($query);
+
+        //In future i might need separate class to represent aggregation
+        if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
+            return $collection->findOne();
+        }
+
+        return $collection;
+    }
+
+    /**
      * @return Object
      */
     public function __debugInfo()
@@ -214,5 +284,65 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         return $accessor;
+    }
+
+    /**
+     * Interpolate aggregation query with document values.
+     *
+     * @param array $query
+     * @return array
+     */
+    protected function interpolateQuery(array $query)
+    {
+        $fields = $this->fields;
+        array_walk_recursive($query, function (&$value) use ($fields) {
+            if (strpos($value, 'self::') === 0) {
+                $value = $this->dotGet([substr($value, 6)]);
+            }
+        });
+
+        return $query;
+    }
+
+    /**
+     * Get field value using dot notation.
+     *
+     * @param string $name
+     * @return mixed|null
+     */
+    private function dotGet($name)
+    {
+        /**
+         * @var EntityInterface|AccessorInterface $source
+         */
+        $source = $this;
+
+        $path = explode('.', $name);
+        foreach ($path as $step) {
+            if ($source instanceof EntityInterface) {
+                if (!$source->hasField($step)) {
+                    return null;
+                }
+
+                //Sub entity
+                $source = $source->getField($step);
+                continue;
+            }
+
+            if ($source instanceof AccessorInterface) {
+                $source = $source->serializeData();
+                continue;
+            }
+
+            if (is_array($source) && array_key_exists($step, $source)) {
+                $source = &$source[$step];
+                continue;
+            }
+
+            //Unable to resolve value, an exception required here
+            return null;
+        }
+
+        return $source;
     }
 }

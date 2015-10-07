@@ -12,7 +12,6 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\SchematicEntity;
-use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -161,22 +160,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *     many
      *                               //document intances
      * ];
-     *
-     * Attention, every composited class will be validated with it's parent document!
-     *
-     * Aggregations:
-     * protected $schema = [
-     *     ...,
-     *     'outer' => [self::ONE => Outer::class, [   //Reference to outer document using internal
-     *          '_id' => 'key::outerID'               //outerID value
-     *     ]],
-     *     'many' => [self::MANY => Outer::class, [   //Reference to many outer document using
-     *          'innerID' => 'key::_id'               //document primary key
-     *     ]]
-     * ];
-     *
-     * Note: key::{name} construction will be replaced with document value in resulted query, even
-     * in case of arrays ;)
      *
      * Documents can extend each other, in this case schema will also be inherited.
      *
@@ -562,44 +545,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     }
 
     /**
-     * {@inheritdoc} See DataEntity class.
-     *
-     * ODM:
-     * Get instance of Collection or Document associated with described aggregation. Use method
-     * arguments to specify additional query.
-     *
-     * Example:
-     * $parentGroup = $user->group();
-     * echo $user->posts(['published' => true])->count();
-     *
-     * @return mixed|AccessorInterface|Collection|Document[]|Document
-     * @throws DocumentException
-     */
-    public function __call($offset, array $arguments)
-    {
-        if (!isset($this->odmSchema[ODM::D_AGGREGATIONS][$offset])) {
-            return parent::__call($offset, $arguments);
-        }
-
-        $aggregation = $this->odmSchema[ODM::D_AGGREGATIONS][$offset];
-
-        //Query preparations
-        $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
-
-        if (isset($arguments[0]) && is_array($arguments[0])) {
-            //Clarifying query
-            $query = array_merge($query, $arguments[0]);
-        }
-
-        $collection = $this->odm->odmCollection($aggregation[ODM::ARG_CLASS])->query($query);
-        if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
-            return $collection->findOne();
-        }
-
-        return $collection;
-    }
-
-    /**
      * @return Object
      */
     public function __debugInfo()
@@ -750,27 +695,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         return $accessor;
-    }
-
-    /**
-     * Interpolate aggregation query with document values.
-     *
-     * @param array $query
-     * @return array
-     */
-    protected function interpolateQuery(array $query)
-    {
-        $fields = $this->fields;
-        array_walk_recursive($query, function (&$value) use ($fields) {
-            if (strpos($value, 'key::') === 0) {
-                $value = $fields[substr($value, 5)];
-                if ($value instanceof AtomicAccessorInterface) {
-                    $value = $value->serializeData();
-                }
-            }
-        });
-
-        return $query;
     }
 
     /**

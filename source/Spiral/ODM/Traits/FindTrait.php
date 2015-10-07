@@ -9,6 +9,7 @@
  */
 namespace Spiral\ODM\Traits;
 
+use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
@@ -37,7 +38,7 @@ trait FindTrait
      * @param array $sortBy    Sorting.
      * @param bool  $keepChain Only same class or child must be returned, parent document must be
      *                         ignored.
-     * @return static|null
+     * @return Document|null
      * @throws ODMException
      */
     public static function findOne(array $query = [], array $sortBy = [], $keepChain = true)
@@ -59,7 +60,7 @@ trait FindTrait
      *                         MongoId object.
      * @param bool  $keepChain Only same class or child must be returned, parent document must be
      *                         ignored.
-     * @return static|null
+     * @return Document|null
      * @throws ODMException
      */
     public static function findByPK($mongoID, $keepChain = true)

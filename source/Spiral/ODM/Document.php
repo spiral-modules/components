@@ -313,7 +313,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     private function dotGet($name)
     {
         /**
-         * @var EntityInterface|AccessorInterface $source
+         * @var EntityInterface|AccessorInterface|array $source
          */
         $source = $this;
 

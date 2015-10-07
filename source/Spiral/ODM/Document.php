@@ -209,6 +209,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     public function __call($offset, array $arguments)
     {
         if (!isset($this->odmSchema()[ODM::D_AGGREGATIONS][$offset])) {
+            //Field getter/setter
             return parent::__call($offset, $arguments);
         }
 

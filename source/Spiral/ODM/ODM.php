@@ -173,9 +173,9 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    public function createInjection(\ReflectionClass $class, $context)
     {
-        return $this->db($parameter->getName());
+        return $this->db($context);
     }
 
     /**

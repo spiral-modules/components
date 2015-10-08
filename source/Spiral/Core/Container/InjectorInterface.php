@@ -24,11 +24,11 @@ interface InjectorInterface
      * Parameter reflection can be used for dynamic class constructing, for example it can define
      * database name or config section to be used to construct requested instance.
      *
-     * @param \ReflectionClass     $class
-     * @param \ReflectionParameter $parameter
+     * @param \ReflectionClass $class   Request class type.
+     * @param string           $context Parameter or alias name.
      * @return object
      * @throws ContainerException
      * @throws \ErrorException
      */
-    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter);
+    public function createInjection(\ReflectionClass $class, $context);
 }

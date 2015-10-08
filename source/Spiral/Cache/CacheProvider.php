@@ -119,7 +119,7 @@ class CacheProvider extends Singleton implements CacheInterface, InjectorInterfa
      *
      * @throws CacheException
      */
-    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    public function createInjection(\ReflectionClass $class, $context)
     {
         if (!$class->isInstantiable()) {
             return $this->store();

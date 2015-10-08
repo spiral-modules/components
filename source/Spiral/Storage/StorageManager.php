@@ -106,9 +106,9 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    public function createInjection(\ReflectionClass $class, $context)
     {
-        return $this->bucket($parameter->getName());
+        return $this->bucket($context);
     }
 
     /**

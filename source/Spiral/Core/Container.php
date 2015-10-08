@@ -52,7 +52,7 @@ class Container extends Component implements ContainerInterface
      *
      * @param \ReflectionParameter $context Related to parameter caused injection if any.
      */
-    public function construct($class, $parameters = [], \ReflectionParameter $context = null)
+    public function construct($class, $parameters = [], $context = null)
     {
         if ($class == ContainerInterface::class) {
             //Shortcut
@@ -151,7 +151,7 @@ class Container extends Component implements ContainerInterface
 
             try {
                 //Trying to resolve dependency
-                $arguments[] = $this->construct($class->getName(), [], $parameter);
+                $arguments[] = $this->construct($class->getName(), [], $parameter->getName());
 
                 continue;
             } catch (InstanceException $exception) {
@@ -277,10 +277,10 @@ class Container extends Component implements ContainerInterface
     /**
      * Create instance of desired class.
      *
-     * @param string               $class
-     * @param array                $parameters Constructor parameters.
-     * @param \ReflectionParameter $context
-     * @param \ReflectionClass     $reflector  Instance of reflection associated with class,
+     * @param string           $class
+     * @param array            $parameters     Constructor parameters.
+     * @param string|null      $context
+     * @param \ReflectionClass $reflector      Instance of reflection associated with class,
      *                                         reference.
      * @return object
      * @throws InstanceException
@@ -288,7 +288,7 @@ class Container extends Component implements ContainerInterface
     private function createInstance(
         $class,
         array $parameters,
-        \ReflectionParameter $context = null,
+        $context = null,
         \ReflectionClass &$reflector = null
     ) {
         try {

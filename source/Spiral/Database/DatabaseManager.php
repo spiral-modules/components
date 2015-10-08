@@ -179,8 +179,8 @@ class DatabaseManager extends Singleton implements InjectorInterface, DatabasesI
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, \ReflectionParameter $parameter)
+    public function createInjection(\ReflectionClass $class, $context)
     {
-        return $this->db($parameter->getName());
+        return $this->db($context);
     }
 }

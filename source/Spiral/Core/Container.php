@@ -40,11 +40,17 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * Context parameter will be passed to class injectors, which makes possible to use this method
+     * as:
+     * $this->container->get(DatabaseInterface::class, 'default');
+     *
+     * @param string|null $context Call context.
      */
-    public function get($alias)
+    public function get($alias, $context = null)
     {
         //Direct bypass to construct, i might think about this option... or not.
-        return $this->construct($alias);
+        return $this->construct($alias, [], $context);
     }
 
     /**

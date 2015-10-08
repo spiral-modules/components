@@ -56,7 +56,7 @@ class Container extends Component implements ContainerInterface
     /**
      * {@inheritdoc}
      *
-     * @param \ReflectionParameter $context Related to parameter caused injection if any.
+     * @param string|null $context Related to parameter caused injection if any.
      */
     public function construct($class, $parameters = [], $context = null)
     {

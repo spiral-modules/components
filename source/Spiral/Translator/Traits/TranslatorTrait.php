@@ -15,8 +15,6 @@ use Spiral\Translator\TranslatorInterface;
  * Add bundle specific translation functionality, class name will be used as translation bundle.
  * In addition every default string message declared in class using [[]] braces can be indexed by
  * spiral application. Use translate() method statically to make it indexable by spiral.
- *
- * Trait uses global container meaning such trait can ONLY be added to Component class.
  */
 trait TranslatorTrait
 {
@@ -41,19 +39,11 @@ trait TranslatorTrait
             $string = substr($string, 2, -2);
         }
 
-        if (
-            empty(self::staticContainer())
-            || !self::staticContainer()->has(TranslatorInterface::class)
-        ) {
+        if (!TraitSupport::hasTranslator()) {
             //No translator defined
             return $string;
         }
 
-        //This code will work only when global container is set (see Component::staticContainer).
-        return self::staticContainer()->get(TranslatorInterface::class)->translate(
-            static::class,
-            $string,
-            $options
-        );
+        return TraitSupport::getTranslator()->translate(static::class, $string, $options);
     }
 }

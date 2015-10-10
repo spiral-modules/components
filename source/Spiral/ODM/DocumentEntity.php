@@ -208,6 +208,10 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         static::initialize();
 
+        if (empty($fields)) {
+            $this->invalidate();
+        }
+
         $this->fields = is_array($fields) ? $fields : [];
         if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
             $this->fields = array_replace_recursive(
@@ -557,38 +561,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
             'errors'  => $this->getErrors()
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Will invalidate every composited object.
-     *
-     * @param bool $soft Do not invalidate composited documents.
-     * @return $this
-     */
-    public function invalidate($soft = true)
-    {
-        parent::invalidate();
-
-        if ($soft) {
-            return $this;
-        }
-
-        //Invalidating all compositions
-        foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
-            //Let's force composition construction
-            $composition = $this->getField($field);
-            if (!$composition instanceof CompositableInterface) {
-                throw new DocumentException(
-                    "All compositions must be an instance of CompositableInterface."
-                );
-            }
-
-            $composition->invalidate();
-        }
-
-        return $this;
     }
 
     /**

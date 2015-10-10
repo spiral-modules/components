@@ -745,7 +745,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         );
     }
 
-
     /**
      * Get WHERE array to be used to perform record data update or deletion. Usually will include
      * record primary key.

@@ -413,11 +413,25 @@ abstract class DataEntity extends Component implements
     /**
      * Entity must re-validate data.
      *
+     * @param bool $soft Do not invalidate entity accessors.
      * @return $this
      */
-    public function invalidate()
+    public function invalidate($soft = false)
     {
         $this->validated = false;
+
+        if ($soft) {
+            return $this;
+        }
+
+        //Invalidating all compositions
+        foreach ($this->fields as $field => $value) {
+            //Let's force composition construction
+            $accessor = $this->getField($field);
+            if ($accessor instanceof self) {
+                $accessor->invalidate($soft);
+            }
+        }
 
         return $this;
     }

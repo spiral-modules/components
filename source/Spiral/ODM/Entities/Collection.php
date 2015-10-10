@@ -279,7 +279,7 @@ class Collection extends Component implements
      *
      * @return DocumentCursor
      */
-    public function gerCursor()
+    public function getCursor()
     {
         return $this->createCursor();
     }
@@ -343,7 +343,7 @@ class Collection extends Component implements
         $cursorReader = new DocumentCursor(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,
-            $this->odm->collectionClass($this->database, $this->name),
+            empty($fields) ? $this->odm->collectionClass($this->database, $this->name) : null,
             $this->sort,
             !empty($limit) ? $limit : $this->limit,
             $this->offset

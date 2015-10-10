@@ -1,4 +1,4 @@
-Spiral Framework Core Components
+Spiral Framework Core Components (beta)
 ================================
 
 [![Build Status](https://travis-ci.org/spiral/components.svg?branch=master)](https://travis-ci.org/spiral/components)

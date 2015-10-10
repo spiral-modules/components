@@ -267,7 +267,7 @@ class HttpDispatcher extends HttpCore implements
      */
     protected function endpoint()
     {
-        if (empty(!$endpoint = parent::endpoint())) {
+        if (!empty($endpoint = parent::endpoint())) {
             //Endpoint specified by user
             return $endpoint;
         }

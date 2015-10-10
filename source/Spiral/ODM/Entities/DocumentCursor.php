@@ -69,7 +69,7 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     /**
      * @param \MongoCursor $cursor
      * @param ODM          $odm
-     * @param string       $class
+     * @param string|null  $class
      * @param array        $sort
      * @param int          $limit
      * @param int          $offset

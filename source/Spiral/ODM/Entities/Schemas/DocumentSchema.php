@@ -70,7 +70,7 @@ class DocumentSchema extends ReflectionEntity
         $collection = $this->property('collection');
 
         if (empty($collection)) {
-            $collection = Inflector::classify(lcfirst($this->getShortName()));
+            $collection = Inflector::camelize($this->getShortName());
 
             $collection = Inflector::pluralize($collection);
         }

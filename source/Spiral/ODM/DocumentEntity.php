@@ -210,7 +210,10 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         $this->fields = is_array($fields) ? $fields : [];
         if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
-            $this->fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
+            $this->fields = array_replace_recursive(
+                $this->odmSchema[ODM::D_DEFAULTS],
+                $this->fields
+            );
         }
     }
 

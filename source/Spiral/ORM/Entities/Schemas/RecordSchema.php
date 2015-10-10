@@ -612,6 +612,10 @@ class RecordSchema extends ReflectionEntity
             return $column->getEnumValues()[0];
         }
 
+        if ($column->abstractType() == 'json') {
+            return '{}';
+        }
+
         switch ($column->phpType()) {
             case 'int':
                 return 0;

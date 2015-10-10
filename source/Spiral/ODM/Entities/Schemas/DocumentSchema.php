@@ -11,11 +11,11 @@ namespace Spiral\ODM\Entities\Schemas;
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\AtomicAccessorInterface;
+use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
-use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 
 /**
@@ -63,15 +63,19 @@ class DocumentSchema extends ReflectionEntity
      */
     public function getCollection()
     {
-        if($this->isEmbeddable()) {
+        if ($this->isEmbeddable()) {
             return null;
         }
 
         $collection = $this->property('collection');
 
         if (empty($collection)) {
-            $collection = Inflector::camelize($this->getShortName());
+            if ($this->parentSchema()) {
+                //Using parent collection
+                return $this->parentSchema()->getCollection();
+            }
 
+            $collection = Inflector::camelize($this->getShortName());
             $collection = Inflector::pluralize($collection);
         }
 
@@ -85,12 +89,17 @@ class DocumentSchema extends ReflectionEntity
      */
     public function getDatabase()
     {
-        if($this->isEmbeddable()) {
+        if ($this->isEmbeddable()) {
             return null;
         }
 
         $database = $this->property('database');
         if (empty($database)) {
+            if ($this->parentSchema()) {
+                //Using parent database
+                return $this->parentSchema()->getDatabase();
+            }
+
             $database = $this->builder->getODM()->config()['default'];
         }
 
@@ -387,7 +396,7 @@ class DocumentSchema extends ReflectionEntity
     {
         $result = $this;
         foreach ($this->builder->getDocuments() as $document) {
-            if (!$result->isInstance($document)) {
+            if (!$result->isSubclassOf($document)) {
                 //I'm not your father!
                 continue;
             }

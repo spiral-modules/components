@@ -10,12 +10,12 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
-use Spiral\ODM\Document;
 use Spiral\ODM\ODM;
 use Spiral\Tokenizer\TokenizerInterface;
 
@@ -250,7 +250,7 @@ class SchemaBuilder extends Component
             //Getting fully specified collection name (with specified db)
             $collection = $document->getDatabase() . '/' . $document->getCollection();
             if (isset($this->collections[$collection])) {
-                //Already described by parent class
+                //Already described by parent
                 continue;
             }
 

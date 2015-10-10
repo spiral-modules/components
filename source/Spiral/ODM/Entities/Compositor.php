@@ -338,7 +338,7 @@ class Compositor extends Component implements
             }
 
             //Into array form
-            $atomics[$operation][$container] = $this->serializeDocuments($items);
+            $atomics[$operation][$container]['$each'] = $this->serializeDocuments($items);
         }
 
         //Document specific atomic operations, make sure it's not colliding with Compositor level

@@ -300,6 +300,10 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function setField($name, $value, $filter = true)
     {
+        if (!array_key_exists($name, $this->fields)) {
+            throw new DocumentException("Undefined field '{$name}' in '" . static::class . "'.");
+        }
+
         $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
         parent::setField($name, $value, $filter);
 

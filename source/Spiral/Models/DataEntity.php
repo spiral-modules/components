@@ -551,7 +551,7 @@ abstract class DataEntity extends Component implements
      * @param string           $property
      * @param mixed            $value
      * @return mixed Returns filtered value.
-     * @event describe($property, $value, EntitySchema $schema)
+     * @event describe($property, $value, EntitySchema $schema): $value
      */
     public static function describeProperty(ReflectionEntity $schema, $property, $value)
     {

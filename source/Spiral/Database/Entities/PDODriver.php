@@ -365,6 +365,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         $result = [];
         foreach ($parameters as $parameter) {
             if ($parameter instanceof ParameterInterface && is_array($parameter->getValue())) {
+                //Generating sub parameters
                 $parameter = $parameter->getValue();
             }
 

@@ -61,6 +61,12 @@ class Parameter implements ParameterInterface
         if (is_array($this->value)) {
             $result = [];
             foreach ($this->value as $value) {
+                if (is_object($value)) {
+                    //We are not wrapping objects
+                    $result[] = $value;
+                    continue;
+                }
+
                 $result[] = new self($value, $this->type);
             }
 

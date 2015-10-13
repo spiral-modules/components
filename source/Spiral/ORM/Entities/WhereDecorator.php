@@ -12,8 +12,9 @@ use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Exceptions\BuilderException;
 
 /**
- * WhereDecorator used to trick user functions and route where() calls to specified destination.
- * This functionality used to describe WHERE conditions in ORM loaders using unified where syntax.
+ * WhereDecorator used to trick user functions and route where() calls to specified destination
+ * (where, onWhere, etc). This functionality used to describe WHERE conditions in ORM loaders using
+ * unified where syntax.
  *
  * Decorator can additionally decorate target table name, using magic expression "{@}". Table name
  * decoration is required as Loader target table can be unknown for user.

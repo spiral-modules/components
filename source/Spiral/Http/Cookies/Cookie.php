@@ -8,6 +8,9 @@
  */
 namespace Spiral\Http\Cookies;
 
+/**
+ * Represent singular cookie header value with packing abilities.
+ */
 class Cookie
 {
     /**

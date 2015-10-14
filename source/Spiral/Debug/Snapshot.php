@@ -179,6 +179,7 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
             return;
         }
 
+        //Snapshot filename
         $filename = \Spiral\interpolate($this->config['reporting']['filename'], [
             'date'      => date($this->config['reporting']['dateFormat'], time()),
             'exception' => $this->getName()

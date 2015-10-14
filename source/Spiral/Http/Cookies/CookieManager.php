@@ -26,7 +26,7 @@ use Spiral\Session\Http\SessionStarter;
  * attribute which can be used by other middlewares.
  *
  * Even if cookie manager can be used in general part of application as singleton - it is not.
- * Singleton binding will be available only while CookieManager performing incoming request.
+ * Shared binding will be available only while CookieManager performing incoming request.
  */
 class CookieManager extends Component implements MiddlewareInterface
 {

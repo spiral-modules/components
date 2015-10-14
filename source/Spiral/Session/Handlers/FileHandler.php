@@ -13,7 +13,7 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Files\FilesInterface;
 
 /**
- * Stores session data in filename.
+ * Stores session data in file.
  */
 class FileHandler extends Component implements \SessionHandlerInterface
 {

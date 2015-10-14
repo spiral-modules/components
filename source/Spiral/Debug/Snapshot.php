@@ -233,11 +233,14 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
             return $this->renderCache;
         }
 
-        return $this->renderCache = $this->views->render($this->config['view'], [
-            'snapshot'  => $this,
-            'container' => $this->container,
-            'debugger'  => $this->debugger
-        ]);
+        return $this->renderCache = $this->views->render(
+            $this->config['view'], 
+            [
+                'snapshot'  => $this,
+                'container' => $this->container,
+                'debugger'  => $this->debugger
+            ]
+        );
     }
 
     /**

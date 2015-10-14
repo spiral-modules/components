@@ -156,12 +156,15 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      */
     public function getMessage()
     {
-        return \Spiral\interpolate(static::MESSAGE, [
-            'exception' => $this->getClass(),
-            'message'   => $this->exception->getMessage(),
-            'file'      => $this->getFile(),
-            'line'      => $this->getLine()
-        ]);
+        return \Spiral\interpolate(
+            static::MESSAGE,
+            [
+                'exception' => $this->getClass(),
+                'message'   => $this->exception->getMessage(),
+                'file'      => $this->getFile(),
+                'line'      => $this->getLine()
+            ]
+        );
     }
 
     /**

@@ -85,7 +85,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             $this->regions = (array)$this->store->get($this->options['username'] . '@rackspace-regions');
         }
 
-        //Some options can be passed directly for guzzle client
+        //This code is going to use additional abstraction layer to connect storage and guzzle
         $this->client = new Client($this->options);
         $this->connect();
     }

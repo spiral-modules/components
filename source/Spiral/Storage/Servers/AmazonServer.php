@@ -47,7 +47,7 @@ class AmazonServer extends StorageServer
     {
         parent::__construct($files, $options);
 
-        //Some options can be passed directly for guzzle client
+        //This code is going to use additional abstraction layer to connect storage and guzzle
         $this->client = new Client($this->options);
     }
 

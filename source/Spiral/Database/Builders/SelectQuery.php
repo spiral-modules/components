@@ -166,4 +166,14 @@ class SelectQuery extends AbstractSelect
             $this->unions
         );
     }
+
+    /**
+     * Request all results as array.
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->getIterator()->all();
+    }
 }

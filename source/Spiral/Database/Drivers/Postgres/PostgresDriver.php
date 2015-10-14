@@ -139,6 +139,7 @@ class PostgresDriver extends Driver
         if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
             return $this->primaryKeys[$table];
         }
+        
         if (!$this->hasTable($table)) {
             throw new DriverException(
                 "Unable to fetch table primary key, no such table '{$table}' exists."

@@ -16,6 +16,7 @@ abstract class Component
 {
     /**
      * Global/static mainly used to resolve singletons outside of the runtime scope.
+     * Must be used as fallback only, or not used at all.
      *
      * @var ContainerInterface
      */

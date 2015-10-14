@@ -19,7 +19,7 @@ use Spiral\Views\ViewsInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using
- * views.
+ * ViewsInterface.
  */
 class Snapshot extends Component implements SnapshotInterface, ViewInterface
 {

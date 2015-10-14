@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright Â©2009-2015
  */
 namespace Spiral\ORM;
 
@@ -29,7 +29,7 @@ use Spiral\Validation\ValidatesInterface;
 class RecordEntity extends SchematicEntity implements RecordInterface
 {
     /**
-     * Static find functions.
+     * Static container fallback.
      */
     use SaturateTrait;
 

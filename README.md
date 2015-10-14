@@ -7,7 +7,7 @@ Spiral Core Components
 This repository contains the primary Spiral components used within the Spiral framework bundle.
 
 The components included are:
-* Cache
+* Cache with contextual injections
 * Debugger, Benchmarker and Global Loggers
 * Encrypter and Randomizer
 * Simple IoC Container and set of Core contracts (Singletons and Injectors)

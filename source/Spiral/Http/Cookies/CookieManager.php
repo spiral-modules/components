@@ -25,7 +25,7 @@ use Spiral\Session\Http\SessionStarter;
  * Middleware used to encrypt and decrypt cookies. In addition it will set cookieDomain request
  * attribute which can be used by other middlewares.
  *
- * Event if cookie manager can be used in general part of application as singleton - it is not.
+ * Even if cookie manager can be used in general part of application as singleton - it is not.
  * Singleton binding will be available only while CookieManager performing incoming request.
  */
 class CookieManager extends Component implements MiddlewareInterface

@@ -145,6 +145,7 @@ class PostgresDriver extends Driver
                 "Unable to fetch table primary key, no such table '{$table}' exists."
             );
         }
+        
         $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
         if (count($this->primaryKeys[$table]) === 1) {
             //We do support only single primary key

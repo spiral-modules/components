@@ -19,7 +19,7 @@ use Spiral\Views\ViewsInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using
- * views.
+ * ViewsInterface.
  */
 class Snapshot extends Component implements SnapshotInterface, ViewInterface
 {
@@ -156,12 +156,15 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      */
     public function getMessage()
     {
-        return \Spiral\interpolate(static::MESSAGE, [
-            'exception' => $this->getClass(),
-            'message'   => $this->exception->getMessage(),
-            'file'      => $this->getFile(),
-            'line'      => $this->getLine()
-        ]);
+        return \Spiral\interpolate(
+            static::MESSAGE,
+            [
+                'exception' => $this->getClass(),
+                'message'   => $this->exception->getMessage(),
+                'file'      => $this->getFile(),
+                'line'      => $this->getLine()
+            ]
+        );
     }
 
     /**
@@ -176,6 +179,7 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
             return;
         }
 
+        //Snapshot filename
         $filename = \Spiral\interpolate($this->config['reporting']['filename'], [
             'date'      => date($this->config['reporting']['dateFormat'], time()),
             'exception' => $this->getName()
@@ -229,11 +233,14 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
             return $this->renderCache;
         }
 
-        return $this->renderCache = $this->views->render($this->config['view'], [
-            'snapshot'  => $this,
-            'container' => $this->container,
-            'debugger'  => $this->debugger
-        ]);
+        return $this->renderCache = $this->views->render(
+            $this->config['view'], 
+            [
+                'snapshot'  => $this,
+                'container' => $this->container,
+                'debugger'  => $this->debugger
+            ]
+        );
     }
 
     /**

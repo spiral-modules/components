@@ -4,7 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
+ * @copyright Â©2009-2015
  */
 namespace Spiral\Core\Traits;
 
@@ -13,6 +13,10 @@ use Spiral\Core\Exceptions\MissingContainerException;
 
 /**
  * Saturate optional constructor or method argument (class) using internal container.
+ * In most of cases trait is doing nothing since spiral Container populates even
+ * optional class dependencies.
+ * 
+ * Avoid using this trait in custom code, it's only a development sugar.
  */
 trait SaturateTrait
 {

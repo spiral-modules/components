@@ -31,4 +31,4 @@ Unit Testing is a work in progress.
 
 Read more with examples in [spiral guide](https://github.com/spiral/guide). Check [Framework Bundle](https://github.com/spiral/spiral). Framework interfaces [can be found here](https://github.com/spiral/guide/blob/master/framework/interfaces.md).
 
-**P.S. Need help to identify what parts of framework can be swapped with Symfony, Zend components without breaking internal interfaces. So far best candidates: FilesInterface, Events\DispatcherInterface, TranslatorInterface (?).**
+**P.S. Need help to identify what parts of framework can be swapped or implemented with Symfony, Zend components without breaking internal interfaces. So far best candidates: FilesInterface, Events\DispatcherInterface, TranslatorInterface (?).**

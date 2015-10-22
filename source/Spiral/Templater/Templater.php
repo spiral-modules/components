@@ -22,8 +22,7 @@ use Spiral\Templater\Imports\StopImport;
  * - importing outer view
  *
  * P.S. Do not even think to use Templater without caching layer at top of it, templater not just
- * slow, it's SUPER SLOW*.
- * * per design
+ * slow, it's SUPER SLOW (per design).
  */
 abstract class Templater implements SupervisorInterface
 {

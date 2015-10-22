@@ -59,11 +59,6 @@ class Container extends Component implements ContainerInterface
      */
     public function construct($class, $parameters = [], $context = null)
     {
-        if ($class == ContainerInterface::class) {
-            //Shortcut
-            return $this;
-        }
-
         if (!isset($this->bindings[$class])) {
             //OK, we can create class by ourselves
             $instance = $this->createInstance($class, $parameters, $context, $reflector);

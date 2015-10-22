@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\ORM\Entities\Loaders;
 
@@ -140,7 +139,8 @@ class ManyToManyLoader extends Loader
         }
 
         //Adding condition
-        $selector->where($this->getPivotKey(RecordEntity::THOUGHT_INNER_KEY), 'IN', $aggregatedKeys);
+        $selector->where($this->getPivotKey(RecordEntity::THOUGHT_INNER_KEY), 'IN',
+            $aggregatedKeys);
 
         return $selector;
     }

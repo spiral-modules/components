@@ -4,15 +4,13 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Tests\Cases\Encrypter;
 
 use Spiral\Core\Configurator;
 use Spiral\Encrypter\Encrypter;
-use Spiral\Tests\TestCase;
 
-class RandomTest extends TestCase
+class RandomTest extends \PHPUnit_Framework_TestCase
 {
     public function testRandom()
     {

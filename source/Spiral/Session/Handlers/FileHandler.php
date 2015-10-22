@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Session\Handlers;
 
@@ -110,7 +109,7 @@ class FileHandler extends Component implements \SessionHandlerInterface
         return $this->files->write(
             $this->getFilename($session_id),
             $session_data,
-            FilesInterface::RUNTIME, 
+            FilesInterface::RUNTIME,
             true
         );
     }

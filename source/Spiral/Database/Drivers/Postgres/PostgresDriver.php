@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Database\Drivers\Postgres;
 
@@ -139,13 +138,13 @@ class PostgresDriver extends Driver
         if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
             return $this->primaryKeys[$table];
         }
-        
+
         if (!$this->hasTable($table)) {
             throw new DriverException(
                 "Unable to fetch table primary key, no such table '{$table}' exists."
             );
         }
-        
+
         $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
         if (count($this->primaryKeys[$table]) === 1) {
             //We do support only single primary key

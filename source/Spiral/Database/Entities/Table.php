@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Database\Entities;
 
@@ -49,7 +48,8 @@ use Spiral\Pagination\PaginableInterface;
  * @method SelectQuery offset($offset = 0)
  * @method int getOffset()
  *
- * @method SelectQuery paginate($limit = 25, $pageParameter = 'page', ServerRequestInterface $request = null)
+ * @method SelectQuery paginate($limit = 25, $pageParameter = 'page', ServerRequestInterface
+ *         $request = null)
  * @method PaginableInterface getPaginator()
  *
  * @method SelectQuery join($type, $table, $on = null)

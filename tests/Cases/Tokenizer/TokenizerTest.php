@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Tests\Cases\Tokenizer;
 
@@ -17,11 +16,10 @@ use Spiral\Tests\Cases\Tokenizer\Classes\ClassB;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassC;
 use Spiral\Tests\Cases\Tokenizer\Classes\Inner\ClassD;
 use Spiral\Tests\RuntimeMemory;
-use Spiral\Tests\TestCase;
 use Spiral\Tokenizer\Reflections\ReflectionArgument;
 use Spiral\Tokenizer\Tokenizer;
 
-class TokenizerTest extends TestCase
+class TokenizerTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var Loader

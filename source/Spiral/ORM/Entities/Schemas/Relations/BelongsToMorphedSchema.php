@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\ORM\Entities\Schemas\Relations;
 
@@ -94,7 +93,7 @@ class BelongsToMorphedSchema extends MorphedSchema
                 $record->addRelation(
                     $inversed[1],
                     [
-                        $inversed[0]      => $this->record->getName(),
+                        $inversed[0]            => $this->record->getName(),
                         RecordEntity::OUTER_KEY => $this->definition[RecordEntity::INNER_KEY],
                         RecordEntity::INNER_KEY => $this->definition[RecordEntity::OUTER_KEY],
                         RecordEntity::MORPH_KEY => $this->definition[RecordEntity::MORPH_KEY],

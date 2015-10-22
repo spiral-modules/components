@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Database\Schemas;
 
@@ -82,7 +81,8 @@ interface TableInterface
 
     /**
      * Get list of table names current schema depends on, must include every table linked using
-     * foreign key or other constraint. Table names must not include database prefix if such presented.
+     * foreign key or other constraint. Table names must not include database prefix if such
+     * presented.
      *
      * @return array
      */

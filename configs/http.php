@@ -34,7 +34,7 @@ return [
         Middlewares\JsonParser::class,
         \Spiral\Session\Http\SessionStarter::class,
     ],
-    'router'     => [
+    'router'       => [
         'class'   => Http\Routing\Router::class,
         'default' => [
             'pattern'     => '[<controller>[/<action>[/<id>]]]',

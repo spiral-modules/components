@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
 namespace Spiral\Debug;
 
@@ -234,7 +233,7 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
         }
 
         return $this->renderCache = $this->views->render(
-            $this->config['view'], 
+            $this->config['view'],
             [
                 'snapshot'  => $this,
                 'container' => $this->container,

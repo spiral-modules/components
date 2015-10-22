@@ -4,9 +4,7 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright ©2009-2015
  */
-
 namespace Spiral\Debug\Traits;
 
 use Psr\Log\LoggerInterface;

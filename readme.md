@@ -22,7 +22,7 @@ The components included are:
 * Tokenizer with FileReflections and class locator functionality
 * Basic DataEntity models with Behaviour Schemas (foundation of ORM and ODM)
 * Validation component + set of checkers
-* Pagination component
+* Pagination component and interfaces
 
 Code style: PSR-2 (minor violations, feel free to fix), base line width is 100.
 

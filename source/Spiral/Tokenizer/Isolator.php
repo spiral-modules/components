@@ -11,7 +11,7 @@ use Spiral\Core\Component;
 
 /**
  * Isolators used to find and replace php blocks in given source. Can be used by view processors,
- * or to remove php core from some string.
+ * or to remove php code from some string.
  */
 class Isolator extends Component
 {

@@ -20,7 +20,7 @@ The components included are:
 * StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP) + PSR7 streams
 * Templater engine with HTML based syntax, inheritance and widgets
 * Tokenizer with FileReflections and class locator functionality
-* Basic DataEntity models with Behaviour Schemas (foundation of ORM and ODM)
+* Basic DataEntity models with Behaviour Schemas (foundation for ORM and ODM)
 * Validation component + set of checkers
 * Pagination component and interfaces
 

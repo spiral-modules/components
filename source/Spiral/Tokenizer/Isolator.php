@@ -237,7 +237,8 @@ class Isolator extends Component
                 continue;
             }
 
-            $source = preg_replace_callback($pattern['regexp'],
+            $source = preg_replace_callback(
+                $pattern['regexp'],
                 function ($tag) use (&$replaces, $pattern) {
                     $tag = $tag[0];
 
@@ -249,7 +250,9 @@ class Isolator extends Component
                     $replaces[$replace] = $tag;
 
                     return $replace;
-                }, $source);
+                },
+                $source
+            );
         }
 
         return $source;

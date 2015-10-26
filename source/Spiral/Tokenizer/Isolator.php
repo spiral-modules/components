@@ -39,7 +39,7 @@ class Isolator extends Component
 
     /**
      * Set of patterns to convert "disabled" php blocks into catchable (in terms of token_get_all)
-     * code. Will fix short tags using regular expressions.
+     * code. Will fix short tags using regular expressions. Legacy.
      *
      * @var array
      */

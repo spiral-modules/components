@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Templater;
 

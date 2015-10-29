@@ -1,8 +1,7 @@
 Spiral Core Components
 ================================
 
-[![Latest Stable Version](https://poser.pugx.org/spiral/components/v/stable)](https://packagist.org/packages/spiral/components) [![Total Downloads](https://poser.pugx.org/spiral/components/downloads)](https://packagist.org/packages/spiral/components) [![Latest Unstable Version](https://poser.pugx.org/spiral/components/v/unstable)](https://packagist.org/packages/spiral/components) [![License](https://poser.pugx.org/spiral/components/license)](https://packagist.org/packages/spiral/components)
-
+[![Latest Stable Version](https://poser.pugx.org/spiral/components/v/stable)](https://packagist.org/packages/spiral/components) [![Total Downloads](https://poser.pugx.org/spiral/components/downloads)](https://packagist.org/packages/spiral/components) [![License](https://poser.pugx.org/spiral/components/license)](https://packagist.org/packages/spiral/components)
 [![Build Status](https://travis-ci.org/spiral/components.svg?branch=master)](https://travis-ci.org/spiral/components)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral/components/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spiral/components/?branch=master)
 
@@ -21,9 +20,9 @@ The components included are:
 * StorageManager with remote abstractions (Amazon, Rackspace, GridFS, FTP, SFTP) + PSR7 streams
 * Templater engine with HTML based syntax, inheritance and widgets
 * Tokenizer with FileReflections and class locator functionality
-* Basic DataEntity models with Behaviour Schemas (foundation of ORM and ODM)
+* Basic DataEntity models with Behaviour Schemas (foundation for ORM and ODM)
 * Validation component + set of checkers
-* Pagination component
+* Pagination component and interfaces
 
 Code style: PSR-2 (minor violations, feel free to fix), base line width is 100.
 
@@ -31,4 +30,4 @@ Unit Testing is a work in progress.
 
 Read more with examples in [spiral guide](https://github.com/spiral/guide). Check [Framework Bundle](https://github.com/spiral/spiral). Framework interfaces [can be found here](https://github.com/spiral/guide/blob/master/framework/interfaces.md).
 
-**P.S. Need help to identify what parts of framework can be swapped with Symfony, Zend components without breaking internal interfaces. So far best candidates: FilesInterface, Events\DispatcherInterface, TranslatorInterface (?).**
+**P.S. Need help to identify what parts of framework can be swapped or implemented with Symfony, Zend components without breaking internal interfaces. So far best candidates: FilesInterface, Events\DispatcherInterface, TranslatorInterface (?).**

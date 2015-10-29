@@ -11,7 +11,7 @@ use Spiral\Core\Component;
 
 /**
  * Isolators used to find and replace php blocks in given source. Can be used by view processors,
- * or to remove php core from some string.
+ * or to remove php code from some string.
  */
 class Isolator extends Component
 {
@@ -39,7 +39,7 @@ class Isolator extends Component
 
     /**
      * Set of patterns to convert "disabled" php blocks into catchable (in terms of token_get_all)
-     * code. Will fix short tags using regular expressions.
+     * code. Will fix short tags using regular expressions. Legacy.
      *
      * @var array
      */
@@ -237,7 +237,8 @@ class Isolator extends Component
                 continue;
             }
 
-            $source = preg_replace_callback($pattern['regexp'],
+            $source = preg_replace_callback(
+                $pattern['regexp'],
                 function ($tag) use (&$replaces, $pattern) {
                     $tag = $tag[0];
 
@@ -249,7 +250,9 @@ class Isolator extends Component
                     $replaces[$replace] = $tag;
 
                     return $replace;
-                }, $source);
+                },
+                $source
+            );
         }
 
         return $source;

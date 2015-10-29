@@ -90,6 +90,8 @@ class CookieManager extends Component implements MiddlewareInterface
      */
     public function __construct(ContainerInterface $container, HttpDispatcher $dispatcher)
     {
+        //Yes, by default we are using configuration of parent HttpDispatcher (i probably need a
+        //method for that).
         $this->config = $dispatcher->config()['cookies'];
         $this->container = $container;
     }

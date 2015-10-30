@@ -10,8 +10,6 @@ namespace Spiral\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Debug\SnapshotInterface;
-use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Responses\JsonResponse;
 
 /**
@@ -102,37 +100,23 @@ class MiddlewarePipeline
         ServerRequestInterface $request,
         ResponseInterface $response
     ) {
-        try {
-            if (!isset($this->middlewares[$position])) {
-                //Middleware target endpoint to be called and converted into response
-                return $this->createResponse($request, $response);
-            }
-
-            /**
-             * @var callable $middleware
-             */
-            $middleware = $this->middlewares[$position];
-            $middleware = is_string($middleware)
-                ? $this->container->construct($middleware)
-                : $middleware;
-
-            //Executing next middleware
-            return $middleware(
-                $request, $response, $this->getNext($position, $request, $response)
-            );
-        } catch (\Exception $exception) {
-            if ($exception instanceof ClientException) {
-                //To think about client exception isolation
-                return $this->clientException($request, $exception);
-            }
-
-            if (!$request->getAttribute('isolated', false)) {
-                //No isolation
-                throw $exception;
-            }
-
-            return $this->errorException($request, $exception);
+        if (!isset($this->middlewares[$position])) {
+            //Middleware target endpoint to be called and converted into response
+            return $this->createResponse($request, $response);
         }
+
+        /**
+         * @var callable $middleware
+         */
+        $middleware = $this->middlewares[$position];
+        $middleware = is_string($middleware)
+            ? $this->container->construct($middleware)
+            : $middleware;
+
+        //Executing next middleware
+        return $middleware(
+            $request, $response, $this->getNext($position, $request, $response)
+        );
     }
 
     /**
@@ -190,54 +174,6 @@ class MiddlewarePipeline
     }
 
     /**
-     * Handle application exception.
-     *
-     * @param ServerRequestInterface $request
-     * @param \Exception             $exception
-     * @return null|ResponseInterface
-     */
-    protected function errorException(ServerRequestInterface $request, \Exception $exception)
-    {
-        /**
-         * @var SnapshotInterface $snapshot
-         */
-        $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
-
-        //Snapshot must report about itself
-        $snapshot->report();
-
-        /**
-         * We need HttpDispatcher to convert snapshot into response.
-         */
-
-        return $this->container->get(HttpDispatcher::class)->handleSnapshot(
-            $snapshot,
-            false,
-            $request
-        );
-    }
-
-    /**
-     * Handle ClientException.
-     *
-     * @param ServerRequestInterface $request
-     * @param ClientException        $exception
-     * @return ResponseInterface
-     */
-    protected function clientException(ServerRequestInterface $request, ClientException $exception)
-    {
-        /**
-         * @var HttpDispatcher $http
-         */
-        $http = $this->container->get(HttpDispatcher::class);
-
-        //Logging client error
-        $http->logError($exception, $request);
-
-        return $http->exceptionResponse($exception, $request);
-    }
-
-    /**
      * Convert endpoint result into valid response.
      *
      * @param ResponseInterface $response Initial pipeline response.
@@ -292,7 +228,6 @@ class MiddlewarePipeline
 
         return $next;
     }
-
 
     /**
      * Generate JSON response.

@@ -20,6 +20,7 @@ use Spiral\Debug\SnapshotInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\ClientExceptions\ServerErrorException;
+use Spiral\Http\Exceptions\HttpException;
 use Spiral\Http\Responses\ExceptionResponse;
 use Spiral\Http\Responses\HtmlResponse;
 use Spiral\Http\Responses\JsonResponse;
@@ -123,6 +124,45 @@ class HttpDispatcher extends HttpCore implements
     }
 
     /**
+     * Pass request thought all http middlewares to appropriate endpoint. Default endpoint will be
+     * used as fallback. Can thrown an exception happen in internal code.
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
+     * @param callable               $endpoint User specified endpoint.
+     * @return ResponseInterface
+     * @throws HttpException
+     * @throws \Exception Depends on request isolation.
+     */
+    public function perform(
+        ServerRequestInterface $request,
+        ResponseInterface $response = null,
+        callable $endpoint = null
+    ) {
+        try {
+            return parent::perform($request, $response, $endpoint);
+        } catch (ClientException $exception) {
+            //Soft exception (TODO: Pass ResponseInterface)
+            return $this->clientException($request, $exception);
+        } catch (\Exception $exception) {
+            if (!$request->getAttribute('isolated', false)) {
+                //No isolation
+                throw $exception;
+            }
+
+            /**
+             * @var SnapshotInterface $snapshot
+             */
+            $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
+
+            //Snapshot must report about itself
+            $snapshot->report();
+
+            return $this->handleSnapshot($snapshot, false, $request);
+        }
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param bool                   $dispatch Snapshot will be automatically dispatched.
@@ -168,64 +208,18 @@ class HttpDispatcher extends HttpCore implements
     }
 
     /**
-     * Add error to http log.
+     * Handle ClientException.
      *
-     * @param ClientException        $exception
      * @param ServerRequestInterface $request
-     */
-    public function logError(ClientException $exception, ServerRequestInterface $request)
-    {
-        $remoteAddress = '-undefined-';
-        if (!empty($request->getServerParams()['REMOTE_ADDR'])) {
-            $remoteAddress = $request->getServerParams()['REMOTE_ADDR'];
-        }
-
-        $this->logger()->warning(
-            "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.",
-            [
-                'scheme'  => $request->getUri()->getScheme(),
-                'host'    => $request->getUri()->getHost(),
-                'path'    => $request->getUri()->getPath(),
-                'code'    => $exception->getCode(),
-                'message' => $exception->getMessage() ?: '-not specified-',
-                'remote'  => $remoteAddress
-            ]
-        );
-    }
-
-    /**
-     * Create response for specifier error code, some responses can be have associated view files.
-     *
      * @param ClientException        $exception
-     * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    public function exceptionResponse(
-        ClientException $exception,
-        ServerRequestInterface $request
-    ) {
-        if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
-            return new JsonResponse(
-                ['status' => $exception->getCode()],
-                $exception->getCode()
-            );
-        }
+    protected function clientException(ServerRequestInterface $request, ClientException $exception)
+    {
+        //Logging client error
+        $this->logError($exception, $request);
 
-        if (isset($this->config['httpErrors'][$exception->getCode()])) {
-            /**
-             * Exception response will render html content on demand, it gives us ability to handle
-             * response "as exception" somewhere in middleware and do something crazy.
-             */
-            return new ExceptionResponse(
-                $exception,
-                $this->viewsProvider()->get($this->config['httpErrors'][$exception->getCode()], [
-                    'http'    => $this,
-                    'request' => $request
-                ])
-            );
-        }
-
-        return new ExceptionResponse($exception);
+        return $this->exceptionResponse($exception, $request);
     }
 
     /**
@@ -286,16 +280,77 @@ class HttpDispatcher extends HttpCore implements
     }
 
     /**
+     * Create response for specifier error code, some responses can be have associated view files.
+     *
+     * @param ClientException        $exception
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    private function exceptionResponse(
+        ClientException $exception,
+        ServerRequestInterface $request
+    ) {
+        if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
+            return new JsonResponse(
+                ['status' => $exception->getCode()],
+                $exception->getCode()
+            );
+        }
+
+        if (isset($this->config['httpErrors'][$exception->getCode()])) {
+            /**
+             * Exception response will render html content on demand, it gives us ability to handle
+             * response "as exception" somewhere in middleware and do something crazy.
+             */
+            return new ExceptionResponse(
+                $exception,
+                $this->viewManager()->get($this->config['httpErrors'][$exception->getCode()], [
+                    'http'    => $this,
+                    'request' => $request
+                ])
+            );
+        }
+
+        return new ExceptionResponse($exception);
+    }
+
+    /**
      * Get associated views component or fetch it from container.
      *
      * @return ViewsInterface
      */
-    private function viewsProvider()
+    private function viewManager()
     {
         if (!empty($this->views)) {
             return $this->views;
         }
 
         return $this->views = $this->container->get(ViewsInterface::class);
+    }
+
+    /**
+     * Add error to http log.
+     *
+     * @param ClientException        $exception
+     * @param ServerRequestInterface $request
+     */
+    private function logError(ClientException $exception, ServerRequestInterface $request)
+    {
+        $remoteAddress = '-undefined-';
+        if (!empty($request->getServerParams()['REMOTE_ADDR'])) {
+            $remoteAddress = $request->getServerParams()['REMOTE_ADDR'];
+        }
+
+        $this->logger()->warning(
+            "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.",
+            [
+                'scheme'  => $request->getUri()->getScheme(),
+                'host'    => $request->getUri()->getHost(),
+                'path'    => $request->getUri()->getPath(),
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage() ?: '-not specified-',
+                'remote'  => $remoteAddress
+            ]
+        );
     }
 }

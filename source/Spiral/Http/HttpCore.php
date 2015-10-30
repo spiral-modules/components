@@ -104,7 +104,7 @@ class HttpCore extends Component implements HttpInterface
 
     /**
      * Pass request thought all http middlewares to appropriate endpoint. Default endpoint will be
-     * used as fallback.
+     * used as fallback. Can thrown an exception happen in internal code.
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface      $response

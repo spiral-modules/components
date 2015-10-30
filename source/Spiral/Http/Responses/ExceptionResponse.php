@@ -17,6 +17,8 @@ use Spiral\Views\ViewInterface;
  * ClientException related response with ability to render error page on demand.
  *
  * This class is questionable.
+ *
+ * @todo Drop this class.
  */
 class ExceptionResponse extends Response
 {

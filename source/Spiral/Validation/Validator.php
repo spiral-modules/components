@@ -9,6 +9,7 @@ namespace Spiral\Validation;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
+use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -49,6 +50,11 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * Validator will translate default errors and throw log messages when validation rule fails.
      */
     use LoggerTrait, TranslatorTrait, SaturateTrait;
+
+    /**
+     * Configuration section.
+     */
+    const CONFIG = 'validation';
 
     /**
      * Errors added manually to validator using addError() method. This is only placeholder for
@@ -106,14 +112,14 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      *
-     * @param ContainerInterface $container
-     * @param ValidationProvider $provider
+     * @param ContainerInterface    $container
+     * @param ConfiguratorInterface $configurator
      */
     public function __construct(
         $data = [],
         array $rules = [],
         ContainerInterface $container = null,
-        ValidationProvider $provider = null
+        ConfiguratorInterface $configurator = null
     ) {
         $this->data = $data;
         $this->rules = $rules;
@@ -122,7 +128,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         $this->container = $this->saturate($container, ContainerInterface::class);
         $this->options = array_merge(
             $this->options,
-            $this->saturate($provider, ValidationProvider::class)->config()
+            $this->saturate($configurator, ConfiguratorInterface::class)->getConfig(self::CONFIG)
         );
     }
 

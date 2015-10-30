@@ -20,7 +20,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             'field' => 'value'
         ]);
 
-        $this->assertEquals('value', $validator->field('value'));
+        $this->assertEquals('value', $validator->field('field'));
         $this->assertEquals('DEFAULT VALUE', $validator->field('undefined', 'DEFAULT VALUE'));
     }
 

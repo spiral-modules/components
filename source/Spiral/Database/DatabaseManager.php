@@ -160,7 +160,7 @@ class DatabaseManager extends Singleton implements InjectorInterface, DatabasesI
     }
 
     /**
-     * Get instance of every available driver.
+     * Get instance of every available driver/connection.
      *
      * @return Driver[]
      * @throws DatabaseException

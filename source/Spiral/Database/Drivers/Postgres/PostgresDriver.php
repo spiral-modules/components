@@ -64,15 +64,15 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      * @param ContainerInterface   $container
-     * @param HippocampusInterface $memory
      * @param string               $name
      * @param array                $config
+     * @param HippocampusInterface $memory
      */
     public function __construct(
         ContainerInterface $container,
-        HippocampusInterface $memory,
         $name,
-        array $config
+        array $config,
+        HippocampusInterface $memory = null
     ) {
         parent::__construct($container, $name, $config);
         $this->memory = $memory;
@@ -131,7 +131,7 @@ class PostgresDriver extends Driver
      */
     public function getPrimary($table)
     {
-        if (empty($this->primaryKeys)) {
+        if (!empty($this->memory) && empty($this->primaryKeys)) {
             $this->primaryKeys = $this->memory->loadData($this->getSource() . '-primary');
         }
 
@@ -154,7 +154,9 @@ class PostgresDriver extends Driver
         }
 
         //Caching
-        $this->memory->saveData($this->getSource() . '-primary', $this->primaryKeys);
+        if (!empty($this->memory)) {
+            $this->memory->saveData($this->getSource() . '-primary', $this->primaryKeys);
+        }
 
         return $this->primaryKeys[$table];
     }

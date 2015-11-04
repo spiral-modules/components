@@ -7,7 +7,7 @@
  */
 namespace Spiral\Core\HMVC;
 
-use Spiral\Core\Exceptions\ControllerException;
+use Spiral\Core\Exceptions\ControllerExceptionInterface;
 
 /**
  * Class being treated as controller.
@@ -20,7 +20,7 @@ interface ControllerInterface
      * @param string $action     Action name, without postfixes and prefixes.
      * @param array  $parameters Method parameters.
      * @return mixed
-     * @throws ControllerException
+     * @throws ControllerExceptionInterface
      * @throws \Exception
      */
     public function callAction($action = '', array $parameters = []);

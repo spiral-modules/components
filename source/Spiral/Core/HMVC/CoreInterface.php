@@ -7,7 +7,7 @@
  */
 namespace Spiral\Core\HMVC;
 
-use Spiral\Core\Exceptions\ControllerException;
+use Spiral\Core\Exceptions\ControllerExceptionInterface;
 
 /**
  * General application enterpoint class.
@@ -23,7 +23,7 @@ interface CoreInterface
      *                           action).
      * @param array  $parameters Action parameters (if any).
      * @return mixed
-     * @throws ControllerException
+     * @throws ControllerExceptionInterface
      * @throws \Exception
      */
     public function callAction($controller, $action = '', array $parameters = []);

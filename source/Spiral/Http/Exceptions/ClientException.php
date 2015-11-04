@@ -7,10 +7,12 @@
  */
 namespace Spiral\Http\Exceptions;
 
+use Spiral\Core\Exceptions\ClientExceptionInterface;
+
 /**
  * Generic client driven http exception.
  */
-class ClientException extends HttpException
+class ClientException extends HttpException implements ClientExceptionInterface
 {
     /**
      * Most common codes.

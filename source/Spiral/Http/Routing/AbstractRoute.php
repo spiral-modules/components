@@ -12,7 +12,7 @@ use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Exceptions\ControllerExceptionInterface;
+use Spiral\Core\Exceptions\ControllerException;
 use Spiral\Core\HMVC\CoreInterface;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\MiddlewareInterface;
@@ -318,11 +318,15 @@ abstract class AbstractRoute implements RouteInterface
 
         try {
             return $this->core->callAction($controller, $action, $parameters);
-        } catch (ControllerExceptionInterface $exception) {
+        } catch (ControllerException $exception) {
             $code = $exception->getCode();
 
-            if ($code == ControllerExceptionInterface::BAD_ACTION || $code == ControllerExceptionInterface::NOT_FOUND) {
+            if ($code == ControllerException::BAD_ACTION || $code == ControllerException::NOT_FOUND) {
                 throw new ClientException(ClientException::NOT_FOUND, $exception->getMessage());
+            }
+
+            if ($code == ControllerException::FORBIDDEN) {
+                throw new ClientException(ClientException::FORBIDDEN, $exception->getMessage());
             }
 
             throw new ClientException(ClientException::BAD_DATA, $exception->getMessage());

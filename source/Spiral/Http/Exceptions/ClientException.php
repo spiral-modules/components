@@ -18,6 +18,7 @@ class ClientException extends HttpException implements ClientExceptionInterface
      * Most common codes.
      */
     const BAD_DATA  = 400;
+    const FORBIDDEN = 403;
     const NOT_FOUND = 404;
     const ERROR     = 500;
 

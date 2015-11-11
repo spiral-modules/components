@@ -19,6 +19,7 @@ use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
+use Spiral\ODM\Entities\Source;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\Tokenizer\TokenizerInterface;
@@ -212,6 +213,17 @@ class ODM extends Singleton implements InjectorInterface
         $class = $this->defineClass($class, $fields, $schema);
 
         return new $class($fields, $parent, $this, $schema);
+    }
+
+    /**
+     * Get instance of ODM source associated with given model class.
+     *
+     * @param string $class
+     * @return Source
+     */
+    public function documentSource($class)
+    {
+
     }
 
     /**

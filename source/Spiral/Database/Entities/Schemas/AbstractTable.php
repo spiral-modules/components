@@ -738,7 +738,8 @@ abstract class AbstractTable extends Component implements TableInterface
             $this->references[$reference] = $foreignSchema;
         }
 
-        $this->save();
+        //Do not remove non declared schemas
+        $this->save(false, false, false);
 
         return $this;
     }
@@ -848,7 +849,8 @@ abstract class AbstractTable extends Component implements TableInterface
             }
         }
 
-        $this->save();
+        //Do not remove non declared schemas
+        $this->save(false, false, false);
 
         return $this;
     }

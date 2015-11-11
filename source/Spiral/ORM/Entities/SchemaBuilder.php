@@ -257,21 +257,15 @@ class SchemaBuilder extends Component
             }
         }
 
-        //We need list of declared tables in order of
-        foreach ($tables as $name => $table) {
-            //We can only alter table columns if record allows us
-            $record = $this->findRelatedRecord($table);
 
-            if (!empty($record) && $record->isAbstract() || empty($table->getColumns())) {
-                //Abstract tables might declare table schema, but we are going to ignore it
-                continue;
-            }
+        //Dropping foreign keys first
+        $this->saveTables($tables, false, false, true);
 
-            /**
-             * All ORM magic happens here. Check Database schemas to find more.
-             */
-            $table->save();
-        }
+        //Dropping indexes
+        $this->saveTables($tables, false, true, true);
+
+        //Dropping all non declared columns (safe to do it now)
+        $this->saveTables($tables, true, true, true);
     }
 
     /**
@@ -452,5 +446,28 @@ class SchemaBuilder extends Component
         }
 
         return $result;
+    }
+
+    /**
+     * Save tables.
+     *
+     * @param AbstractTable[] $tables
+     * @param bool            $forceColumns  Drop all non declared columns.
+     * @param bool            $forceIndexes  Drop all non declared indexes.
+     * @param bool            $forceForeigns Drop all non declared foreign keys.
+     */
+    private function saveTables(array $tables, $forceColumns, $forceIndexes, $forceForeigns)
+    {
+        foreach ($tables as $name => $table) {
+            //We can only alter table columns if record allows us
+            $record = $this->findRelatedRecord($table);
+
+            if (!empty($record) && $record->isAbstract() || empty($table->getColumns())) {
+                //Abstract tables might declare table schema, but we are going to ignore it
+                continue;
+            }
+
+            $table->save($forceColumns, $forceIndexes, $forceForeigns);
+        }
     }
 }

@@ -7,6 +7,7 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
+use Spiral\Database\Entities\Schemas\Traits\DeclaredTrait;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\ReferenceInterface;
 
@@ -16,6 +17,11 @@ use Spiral\Database\Schemas\ReferenceInterface;
  */
 abstract class AbstractReference implements ReferenceInterface
 {
+    /**
+     * Required to build full table diff.
+     */
+    use DeclaredTrait;
+
     /**
      * Constraint name.
      *
@@ -86,12 +92,19 @@ abstract class AbstractReference implements ReferenceInterface
     {
         $name = $this->name;
         if (empty($this->name)) {
-            $name = $this->table->getName() . '_foreign_' . $this->column . '_' . uniqid();
+            $name = $this->table->getName()
+                . '_foreign_'
+                . $this->column
+                . '_' . uniqid();
         }
 
         if (strlen($name) > 64) {
             //Many dbs has limitations on identifier length
             $name = md5($name);
+        }
+
+        if (empty($this->name)) {
+            $this->name = $name;
         }
 
         return $quoted ? $this->table->driver()->identifier($name) : $name;
@@ -210,7 +223,10 @@ abstract class AbstractReference implements ReferenceInterface
      */
     public function compare(AbstractReference $original)
     {
-        return $this == $original;
+        $normalized = clone $original;
+        $normalized->declared = $this->declared;
+
+        return $this == $normalized;
     }
 
     /**

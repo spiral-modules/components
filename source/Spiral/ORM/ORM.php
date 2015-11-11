@@ -21,6 +21,7 @@ use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\Source;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\Tokenizer\TokenizerInterface;
 
@@ -210,6 +211,17 @@ class ORM extends Singleton
     public function ormSelector($class)
     {
         return new Selector($this, $class);
+    }
+
+    /**
+     * Get instance of ORM source associated with given model class.
+     *
+     * @param string $class
+     * @return Source
+     */
+    public function recordSource($class)
+    {
+
     }
 
     /**

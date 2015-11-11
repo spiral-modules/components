@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Entities\Schemas;
 
@@ -22,6 +21,8 @@ use Spiral\Debug\Traits\LoggerTrait;
  *
  * Most of table operation like column, index or foreign key creation/altering will be applied when
  * save() method will be called.
+ *
+ * @todo Class is too big, possible separate it (commands class, diff class and etc).
  *
  * Column configuration shortcuts:
  * @method AbstractColumn primary($column)
@@ -315,6 +316,8 @@ abstract class AbstractTable extends Component implements TableInterface
         }
 
         $result = $this->columns[$column];
+        $result->markDeclared();
+
         if ($result instanceof LoggerAwareInterface) {
             $result->setLogger($this->logger());
         }
@@ -338,11 +341,15 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         $columns = is_array($columns) ? $columns : func_get_args();
         if (!empty($index = $this->findIndex($columns))) {
+            $index->markDeclared();
+
             return $index;
         }
 
         //New index
         $index = $this->driver->indexSchema($this, false);
+        $index->markDeclared();
+
         $index->columns($columns)->unique(false);
 
         //Adding to declared schema
@@ -383,11 +390,15 @@ abstract class AbstractTable extends Component implements TableInterface
     public function foreign($column)
     {
         if (!empty($foreign = $this->findForeign($column))) {
+            $foreign->markDeclared();
+
             return $foreign;
         }
 
         //Create foreign key
         $foreign = $this->driver->referenceSchema($this, false);
+        $foreign->markDeclared();
+
         $foreign->column($column);
 
         //Adding to declared schema
@@ -413,6 +424,7 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         foreach ($this->columns as $columnSchema) {
             if ($columnSchema->getName() == $column) {
+                $columnSchema->markDeclared();
                 $columnSchema->setName($name);
                 break;
             }
@@ -467,11 +479,13 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         foreach ($this->indexes as $indexSchema) {
             if (is_array($index) && $indexSchema->getColumns() == $index) {
+                $indexSchema->markDeclared();
                 $indexSchema->setName($name);
                 break;
             }
 
             if (is_string($index) && $indexSchema->getName() == $index) {
+                $indexSchema->markDeclared();
                 $indexSchema->setName($name);
                 break;
             }
@@ -708,8 +722,8 @@ abstract class AbstractTable extends Component implements TableInterface
             $this->indexes[$index] = $indexSchema;
         }
 
-        foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
-            if ($this->hasForeign($foreignSchema->getColumns())) {
+        foreach ($table->alteredReferences() as $reference => $foreignSchema) {
+            if ($this->hasForeign($foreignSchema->getColumn())) {
                 throw new SchemaException(
                     "Foreign key '{$reference}' already exists in '{$this->getName()}'."
                 );
@@ -803,7 +817,10 @@ abstract class AbstractTable extends Component implements TableInterface
                 );
             }
 
-            $previous = array_search($this->findIndex($indexSchema->getColumns()), $this->indexes);
+            $previous = array_search(
+                $this->findIndex($indexSchema->getColumns()),
+                $this->indexes
+            );
 
             if (!empty($indexSchema)) {
                 $this->indexes[$previous] = $indexSchema;
@@ -812,15 +829,17 @@ abstract class AbstractTable extends Component implements TableInterface
             unset($this->indexes[$previous]);
         }
 
-        foreach ($table->alteredIndexes() as $reference => $foreignSchema) {
-            if (!$this->hasForeign($foreignSchema->getColumns())) {
+        foreach ($table->alteredReferences() as $reference => $foreignSchema) {
+            if (!$this->hasForeign($foreignSchema->getColumn())) {
                 throw new SchemaException(
                     "Unable to alter, foreign key '{$reference}' does not exists in '{$this->getName()}'."
                 );
             }
 
-            $previous = array_search($this->findIndex($foreignSchema->getColumns()),
-                $this->references);
+            $previous = array_search(
+                $this->findForeign($foreignSchema->getColumn()),
+                $this->references
+            );
 
             if (!empty($foreignSchema)) {
                 $this->references[$previous] = $foreignSchema;
@@ -876,13 +895,23 @@ abstract class AbstractTable extends Component implements TableInterface
     /**
      * Save table schema including every column, index, foreign key creation/altering. If table does
      * not exist it must be created.
+     *
+     * @param bool $dropColumns   Drop all non declared columns.
+     * @param bool $forceIndexes  Drop all non declared indexes.
+     * @param bool $forceForeigns Drop all non declared foreign keys.
+     * @throws \Exception
      */
-    public function save()
+    public function save($dropColumns = true, $forceIndexes = true, $forceForeigns = true)
     {
         if (!$this->exists()) {
             $this->createSchema(true);
         } else {
-            $this->hasChanges() && $this->updateSchema();
+            //Building table difference
+            $this->calculateDifference($dropColumns, $forceIndexes, $forceForeigns);
+
+            if ($this->hasChanges()) {
+                $this->updateSchema();
+            }
         }
 
         //Refreshing schema
@@ -938,8 +967,10 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function __call($type, array $arguments)
     {
-        return call_user_func_array([$this->column($arguments[0]), $type],
-            array_slice($arguments, 1));
+        return call_user_func_array(
+            [$this->column($arguments[0]), $type],
+            array_slice($arguments, 1)
+        );
     }
 
     /**
@@ -1105,6 +1136,49 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
+     * Calculate difference (removed columns, indexes and foreign keys).
+     *
+     * @param bool $forceColumns
+     * @param bool $forceIndexes
+     * @param bool $forceForeigns
+     */
+    protected function calculateDifference(
+        $forceColumns = true,
+        $forceIndexes = true,
+        $forceForeigns = true
+    ) {
+        //We don't need to worry about changed or created columns, indexes and foreign keys here
+        //as it already handled, we only have to drop columns which were not listed in schema
+
+        if ($forceColumns) {
+            foreach ($this->columns as $column) {
+                if (!$column->isDeclared()) {
+                    //Wasn't declared
+                    $this->dropColumn($column->getName());
+                }
+            }
+        }
+
+        if ($forceIndexes) {
+            foreach ($this->indexes as $index) {
+                if (!$index->isDeclared()) {
+                    //Wasn't declared
+                    $this->dropIndex($index->getColumns());
+                }
+            }
+        }
+
+        if ($forceForeigns) {
+            foreach ($this->references as $foreign) {
+                if (!$foreign->isDeclared()) {
+                    //Wasn't declared
+                    $this->dropForeign($foreign->getColumn());
+                }
+            }
+        }
+    }
+
+    /**
      * Driver specific column add command.
      *
      * @param AbstractColumn $column
@@ -1130,6 +1204,13 @@ abstract class AbstractTable extends Component implements TableInterface
 
         if ($this->hasForeign($column->getName())) {
             $this->doForeignDrop($this->foreign($column->getName()));
+        }
+
+        foreach ($this->indexes as $index) {
+            //Dropping related indexes
+            if (in_array($column->getName(), $index->getColumns())) {
+                $this->doIndexDrop($index);
+            }
         }
 
         $this->driver->statement(

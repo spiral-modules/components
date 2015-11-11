@@ -8,6 +8,7 @@
 namespace Spiral\Database\Entities\Schemas;
 
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\Schemas\Traits\DeclaredTrait;
 use Spiral\Database\Exceptions\InvalidArgumentException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\SQLFragment;
@@ -45,6 +46,11 @@ use Spiral\Database\Schemas\ColumnInterface;
  */
 abstract class AbstractColumn implements ColumnInterface
 {
+    /**
+     * Required to build full table diff.
+     */
+    use DeclaredTrait;
+
     /**
      * Abstract type aliases (for consistency).
      *
@@ -644,12 +650,15 @@ abstract class AbstractColumn implements ColumnInterface
      */
     public function compare(AbstractColumn $original)
     {
-        if ($this == $original) {
+        $normalized = clone $original;
+        $normalized->declared = $this->declared;
+
+        if ($this == $normalized) {
             return true;
         }
 
         $columnVars = get_object_vars($this);
-        $dbColumnVars = get_object_vars($original);
+        $dbColumnVars = get_object_vars($normalized);
 
         $difference = [];
         foreach ($columnVars as $name => $value) {
@@ -727,8 +736,9 @@ abstract class AbstractColumn implements ColumnInterface
     public function __debugInfo()
     {
         $column = [
-            'name' => $this->name,
-            'type' => [
+            'name'     => $this->name,
+            'declared' => $this->declared,
+            'type'     => [
                 'database' => $this->type,
                 'schema'   => $this->abstractType(),
                 'php'      => $this->phpType()

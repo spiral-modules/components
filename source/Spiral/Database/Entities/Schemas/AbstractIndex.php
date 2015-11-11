@@ -7,6 +7,7 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
+use Spiral\Database\Entities\Schemas\Traits\DeclaredTrait;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\IndexInterface;
 
@@ -16,6 +17,11 @@ use Spiral\Database\Schemas\IndexInterface;
  */
 abstract class AbstractIndex implements IndexInterface
 {
+    /**
+     * Required to build full table diff.
+     */
+    use DeclaredTrait;
+
     /**
      * Index types.
      */
@@ -72,13 +78,20 @@ abstract class AbstractIndex implements IndexInterface
     {
         $name = $this->name;
         if (empty($this->name)) {
-            $name = $this->table->getName() . '_index_' . join('_',
-                    $this->columns) . '_' . uniqid();
+            //We can generate name
+            $name = $this->table->getName()
+                . '_index_'
+                . join('_', $this->columns)
+                . '_' . uniqid();
         }
 
         if (strlen($name) > 64) {
             //Many dbs has limitations on identifier length
             $name = md5($name);
+        }
+
+        if (empty($this->name)) {
+            $this->name = $name;
         }
 
         return $quoted ? $this->table->driver()->identifier($name) : $name;
@@ -165,14 +178,17 @@ abstract class AbstractIndex implements IndexInterface
      */
     public function compare(AbstractIndex $original)
     {
-        return $this == $original;
+        $normalized = clone $original;
+        $normalized->declared = $this->declared;
+
+        return $this == $normalized;
     }
 
     /**
      * Index sql creation syntax.
      *
-     * @param bool $includeTable Include table ON statement (not required for inline index
-     *                           creation).
+     * @param bool $includeTable   Include table ON statement (not required for inline index
+     *                             creation).
      * @return string
      */
     public function sqlStatement($includeTable = true)

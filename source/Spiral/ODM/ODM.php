@@ -207,7 +207,7 @@ class ODM extends Singleton implements InjectorInterface
      * @return Document
      * @throws DefinitionException
      */
-    public function document($class, array $fields, CompositableInterface $parent = null)
+    public function document($class, $fields, CompositableInterface $parent = null)
     {
         $class = $this->defineClass($class, $fields, $schema);
 

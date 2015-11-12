@@ -145,15 +145,18 @@ class HttpDispatcher extends HttpCore implements
             //Soft exception (TODO: Pass ResponseInterface)
             return $this->clientException($request, $exception);
         } catch (\Exception $exception) {
+            //No isolation, let's throw an exception
             if (!$request->getAttribute('isolated', false)) {
-                //No isolation
                 throw $exception;
             }
 
             /**
              * @var SnapshotInterface $snapshot
              */
-            $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
+            $snapshot = $this->container->construct(
+                SnapshotInterface::class,
+                compact('exception')
+            );
 
             //Snapshot must report about itself
             $snapshot->report();

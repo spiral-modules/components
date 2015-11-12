@@ -7,14 +7,15 @@
  */
 namespace Spiral\Files;
 
-use Spiral\Core\Singleton;
+use Spiral\Core\Component;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\Exceptions\FileNotFoundException;
 use Spiral\Files\Exceptions\WriteErrorException;
 
 /**
  * Default files storage, points to local hard drive.
  */
-class FileManager extends Singleton implements FilesInterface
+class FileManager extends Component implements SingletonInterface, FilesInterface
 {
     /**
      * Declares to IoC that component instance should be treated as singleton.

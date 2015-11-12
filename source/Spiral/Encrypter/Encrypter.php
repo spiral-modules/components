@@ -7,8 +7,9 @@
  */
 namespace Spiral\Encrypter;
 
+use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\Singleton;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
@@ -16,7 +17,7 @@ use Spiral\Encrypter\Exceptions\EncrypterException;
 /**
  * Default implementation of spiral encrypter.
  */
-class Encrypter extends Singleton implements EncrypterInterface
+class Encrypter extends Component implements EncrypterInterface, SingletonInterface
 {
     /**
      * To edit configuration in runtime.
@@ -34,7 +35,7 @@ class Encrypter extends Singleton implements EncrypterInterface
     const CONFIG = 'encrypter';
 
     /**
-     * Keys to use in packed data.
+     * Keys to use in packed data. This is internal constants.
      */
     const IV        = 'a';
     const DATA      = 'b';
@@ -60,7 +61,9 @@ class Encrypter extends Singleton implements EncrypterInterface
         $this->config = $configurator->getConfig(static::CONFIG);
 
         $this->setKey($this->config['key']);
+
         if (!empty($this->config['cipher'])) {
+            //We are allowing to skip definition of ciper to be used
             $this->cipher = $this->config['cipher'];
         }
     }

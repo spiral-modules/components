@@ -61,7 +61,12 @@ class Container extends Component implements ContainerInterface
     {
         if (!isset($this->bindings[$class])) {
             //OK, we can create class by ourselves
-            $instance = $this->createInstance($class, $parameters, $context, $reflector);
+            $instance = $this->createInstance(
+                $class,
+                $parameters,
+                $context,
+                $reflector
+            );
 
             /**
              * @var \ReflectionClass $reflector
@@ -299,11 +304,14 @@ class Container extends Component implements ContainerInterface
             );
         }
 
-        if (!empty($context) && $injector = $reflector->getConstant('INJECTOR')) {
+        if (
+            (!empty($context) || !$reflector->isInstantiable())
+            && $injector = $reflector->getConstant('INJECTOR')
+        ) {
             //We have to construct class using external injector.
             //Remember about this magick constant?
             return call_user_func(
-                [$this->construct($injector), 'createInjection'],
+                [$this->get($injector), 'createInjection'],
                 $reflector, $context, $this
             );
         }

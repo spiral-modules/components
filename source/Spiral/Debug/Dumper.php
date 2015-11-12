@@ -7,13 +7,20 @@
  */
 namespace Spiral\Debug;
 
-use Spiral\Core\Singleton;
+use Spiral\Core\Component;
+use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Traits\SingletonTrait;
 
 /**
  * One of the oldest spiral parts, used to dump variables content in user friendly way.
  */
-class Dumper extends Singleton
+class Dumper extends Component implements SingletonInterface
 {
+    /**
+     * Static method instance().
+     */
+    use SingletonTrait;
+
     /**
      * Declaring to IoC that class is singleton.
      */

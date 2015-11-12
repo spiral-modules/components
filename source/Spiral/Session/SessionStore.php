@@ -7,9 +7,10 @@
  */
 namespace Spiral\Session;
 
+use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Session\Exceptions\SessionException;
@@ -18,7 +19,11 @@ use Spiral\Session\Exceptions\SessionException;
  * Default implementation of StoreInterface, can map session data to specified SessionHandler. By
  * default spiral session uses native php sessions as backbone, it can be changed in future.
  */
-class SessionStore extends Singleton implements SessionInterface, \ArrayAccess, \IteratorAggregate
+class SessionStore extends Component implements
+    SingletonInterface,
+    SessionInterface,
+    \ArrayAccess,
+    \IteratorAggregate
 {
     /**
      * Handler creation can be slow, we can benchmark it.

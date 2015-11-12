@@ -8,17 +8,21 @@
 namespace Spiral\Cache;
 
 use Spiral\Cache\Exceptions\CacheException;
+use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
 /**
  * Default implementation of CacheInterface. Better fit for spiral.
  */
-class CacheProvider extends Singleton implements CacheInterface, InjectorInterface
+class CacheManager extends Component implements
+    SingletonInterface,
+    CacheInterface,
+    InjectorInterface
 {
     /**
      * Some operations can be slow.
@@ -43,13 +47,6 @@ class CacheProvider extends Singleton implements CacheInterface, InjectorInterfa
     private $stores = false;
 
     /**
-     * Due configuration is reverted we have to some weird things.
-     *
-     * @var array
-     */
-    private $optionsPull = [];
-
-    /**
      * @invisible
      * @var ContainerInterface
      */
@@ -67,50 +64,36 @@ class CacheProvider extends Singleton implements CacheInterface, InjectorInterfa
 
     /**
      * {@inheritdoc}
+     *
+     * @param string $class (Store class to be used).
      */
-    public function store($store = null, array $options = [])
+    public function store($store = null, $class = null)
     {
+        //Default store id
         $store = $store ?: $this->config['store'];
-        if (isset($this->stores[$store])) {
-            return $this->stores[$store];
+
+        $storeID = $store . ':' . $class;
+        if (isset($this->stores[$storeID])) {
+            return $this->stores[$storeID];
         }
 
-        //To be requested by storeOptions()
-        $this->optionsPull[] = $options + $this->config['stores'][$store];
-
-        $benchmark = $this->benchmark('store', $store);
+        $benchmark = $this->benchmark('store', $storeID);
         try {
-            $this->stores[$store] = $this->container->construct(
-                $this->config['stores'][$store]['class'],
-                ['cache' => $this]
+            $storeInstance = $this->stores[$storeID] = $this->container->construct(
+                !empty($class) ? $class : $this->config['stores'][$store]['class'],
+                $this->config['stores'][$store]
             );
         } finally {
             $this->benchmark($benchmark);
         }
 
-        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
+        if ($store == $this->config['store'] && !$storeInstance->isAvailable()) {
             throw new CacheException(
                 "Unable to use default store '{$store}', driver is unavailable."
             );
         }
 
-        return $this->stores[$store];
-    }
-
-    /**
-     * Cache adapters support controllable injections, so we are giving them options from different
-     * angle.
-     *
-     * @param string $adapter
-     * @return array
-     */
-    public function storeOptions($adapter)
-    {
-        if (empty($this->optionsPull[$adapter])) {
-            return $this->config['stores'][$adapter];
-        }
-
-        return array_shift($this->optionsPull);
+        return $storeInstance;
     }
 
     /**
@@ -118,13 +101,22 @@ class CacheProvider extends Singleton implements CacheInterface, InjectorInterfa
      *
      * @throws CacheException
      */
-    public function createInjection(\ReflectionClass $class, $context)
+    public function createInjection(\ReflectionClass $class, $context = null)
     {
-        if (!$class->isInstantiable()) {
+        if (!$class->isInstantiable() || empty($class->getConstant('STORE'))) {
+            //Default store
             return $this->store();
         }
 
-        $store = $this->container->construct($class->getName(), ['cache' => $this]);
+        if (empty($this->config['stores'][$class->getConstant('STORE')])) {
+            throw new CacheException(
+                "Unable construct cache store '{$class}', no options found."
+            );
+        }
+
+        //Store class tells us default options set
+        $store = $this->store($class->getConstant('STORE'), $class->getName());
+
         if (!$store->isAvailable()) {
             throw new CacheException(
                 "Unable to use store '" . get_class($store) . "', driver is unavailable."

@@ -29,5 +29,5 @@ interface InjectorInterface
      * @throws ContainerException
      * @throws \ErrorException
      */
-    public function createInjection(\ReflectionClass $class, $context);
+    public function createInjection(\ReflectionClass $class, $context = null);
 }

@@ -7,30 +7,18 @@
  */
 namespace Spiral\Cache\Stores\Memcache;
 
-use Spiral\Cache\CacheStore;
-
 /**
  * Two sisters.
  */
-class MemcachedDriver extends CacheStore implements DriverInterface
+class MemcachedDriver extends AbstractDriver
 {
-    /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
-     * @var \Memcached
-     */
-    protected $service = null;
-
     /**
      * {@inheritdoc}
      */
-    public function __construct(array $options)
+    public function __construct(array $servers)
     {
-        $this->options = $options;
-        $this->service = new \Memcached();
+        $this->servers = $servers;
+        $this->driver = new \Memcached();
     }
 
     /**
@@ -38,13 +26,12 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function connect()
     {
-        foreach ($this->options['options'] as $option => $value) {
-            $this->service->setOption($option, $value);
-        }
+        foreach ($this->servers as $server) {
 
-        foreach ($this->options['servers'] as $server) {
-            $server = $server + $this->options['defaultServer'];
-            $this->service->addServer(
+            //Merging default options
+            $server = $server + $this->defaultServer;
+
+            $this->driver->addServer(
                 $server['host'],
                 $server['port'],
                 $server['weight']
@@ -55,18 +42,10 @@ class MemcachedDriver extends CacheStore implements DriverInterface
     /**
      * {@inheritdoc}
      */
-    public function isAvailable()
-    {
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function has($name)
     {
-        if ($this->service->get($name) === false) {
-            return $this->service->getResultCode() != \Memcached::RES_NOTFOUND;
+        if ($this->driver->get($name) === false) {
+            return $this->driver->getResultCode() != \Memcached::RES_NOTFOUND;
         }
 
         return true;
@@ -77,7 +56,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function get($name)
     {
-        return $this->service->get($name);
+        return $this->driver->get($name);
     }
 
     /**
@@ -87,7 +66,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function set($name, $data, $lifetime)
     {
-        return $this->service->set($name, $data, $lifetime);
+        return $this->driver->set($name, $data, $lifetime);
     }
 
     /**
@@ -95,7 +74,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function forever($name, $data)
     {
-        $this->service->set($name, $data);
+        $this->driver->set($name, $data);
     }
 
     /**
@@ -103,7 +82,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function delete($name)
     {
-        $this->service->delete($name);
+        $this->driver->delete($name);
     }
 
     /**
@@ -117,7 +96,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
             return $delta;
         }
 
-        return $this->service->increment($name, $delta);
+        return $this->driver->increment($name, $delta);
     }
 
     /**
@@ -125,7 +104,7 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function decrement($name, $delta = 1)
     {
-        return $this->service->decrement($name, $delta);
+        return $this->driver->decrement($name, $delta);
     }
 
     /**
@@ -133,6 +112,6 @@ class MemcachedDriver extends CacheStore implements DriverInterface
      */
     public function flush()
     {
-        $this->service->flush();
+        $this->driver->flush();
     }
 }

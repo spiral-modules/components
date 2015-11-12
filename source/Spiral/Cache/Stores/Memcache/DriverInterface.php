@@ -17,9 +17,9 @@ interface DriverInterface extends StoreInterface
     /**
      * New driver using user options. Driver should ignore prefix from config.
      *
-     * @param array $options
+     * @param array $servers
      */
-    public function __construct(array $options);
+    public function __construct(array $servers);
 
     /**
      * Connect driver.

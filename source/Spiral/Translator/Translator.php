@@ -7,16 +7,17 @@
  */
 namespace Spiral\Translator;
 
+use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Translator\Exceptions\LanguageException;
 
 /**
  * Default spiral translator implementation.
  */
-class Translator extends Singleton implements TranslatorInterface
+class Translator extends Component implements SingletonInterface, TranslatorInterface
 {
     /**
      * Has configuration.

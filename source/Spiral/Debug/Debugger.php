@@ -8,9 +8,10 @@
 namespace Spiral\Debug;
 
 use Psr\Log\LoggerAwareInterface;
+use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Exceptions\BenchmarkException;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -18,7 +19,10 @@ use Spiral\Debug\Traits\LoggerTrait;
 /**
  * Debugger is responsible for global log, benchmarking and configuring spiral loggers.
  */
-class Debugger extends Singleton implements BenchmarkerInterface, LoggerAwareInterface
+class Debugger extends Component implements
+    BenchmarkerInterface,
+    LoggerAwareInterface,
+    SingletonInterface
 {
     /**
      * Logger trait is required for Dumper to perform dump into debug log.

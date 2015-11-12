@@ -7,15 +7,16 @@
  */
 namespace Spiral\Core\Components;
 
+use Spiral\Core\Component;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Singleton;
 use Spiral\Events\Traits\EventsTrait;
 
 /**
  * Can speed up class loading in some conditions. In addition this class is needed for tokenizer
  * to handle not found classes.
  */
-class Loader extends Singleton
+class Loader extends Component implements SingletonInterface
 {
     /**
      * Event if class not found.

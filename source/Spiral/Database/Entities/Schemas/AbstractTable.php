@@ -898,18 +898,18 @@ abstract class AbstractTable extends Component implements TableInterface
      * Save table schema including every column, index, foreign key creation/altering. If table does
      * not exist it must be created.
      *
-     * @param bool $dropColumns   Drop all non declared columns.
+     * @param bool $forceColumns  Drop all non declared columns.
      * @param bool $forceIndexes  Drop all non declared indexes.
      * @param bool $forceForeigns Drop all non declared foreign keys.
      * @throws \Exception
      */
-    public function save($dropColumns = true, $forceIndexes = true, $forceForeigns = true)
+    public function save($forceColumns = true, $forceIndexes = true, $forceForeigns = true)
     {
         if (!$this->exists()) {
             $this->createSchema(true);
         } else {
             //Building table difference
-            $this->calculateDifference($dropColumns, $forceIndexes, $forceForeigns);
+            $this->calculateDifference($forceColumns, $forceIndexes, $forceForeigns);
 
             if ($this->hasChanges()) {
                 $this->updateSchema();

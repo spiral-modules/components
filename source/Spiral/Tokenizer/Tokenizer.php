@@ -7,10 +7,11 @@
  */
 namespace Spiral\Tokenizer;
 
+use Spiral\Core\Component;
 use Spiral\Core\Components\Loader;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Singleton;
 use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Events\Entities\Event;
@@ -22,7 +23,7 @@ use Spiral\Tokenizer\Reflections\ReflectionFile;
 /**
  * Default implementation of spiral tokenizer support while and blacklisted directories and etc.
  */
-class Tokenizer extends Singleton implements TokenizerInterface
+class Tokenizer extends Component implements SingletonInterface, TokenizerInterface
 {
     /**
      * Required traits.

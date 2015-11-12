@@ -13,7 +13,7 @@ use Spiral\Files\Exceptions\WriteErrorException;
 /**
  * Access to hard drive or local store. Does not provide full filesystem abstractions.
  *
- * @todo Add lock and unlock method.
+ * @todo Add lock and unlock method. Connection filesystem?
  */
 interface FilesInterface
 {

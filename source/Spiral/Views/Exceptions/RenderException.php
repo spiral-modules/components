@@ -12,5 +12,4 @@ namespace Spiral\Views\Exceptions;
  */
 class RenderException extends ViewException
 {
-
 }

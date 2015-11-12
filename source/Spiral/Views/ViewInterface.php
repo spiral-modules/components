@@ -10,7 +10,7 @@ namespace Spiral\Views;
 use Spiral\Views\Exceptions\RenderException;
 
 /**
- * Provides ability to configure and compile specified view.
+ * Provides ability to configure (implementation specific) and compile specified view.
  */
 interface ViewInterface
 {

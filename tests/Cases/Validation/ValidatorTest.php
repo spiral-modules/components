@@ -14,7 +14,7 @@ use Spiral\Validation\Validator;
 
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
-    public function testField()
+    public function testGetField()
     {
         $validator = $this->validator([
             'field' => 'value'

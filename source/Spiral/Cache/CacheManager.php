@@ -64,36 +64,33 @@ class CacheManager extends Component implements
 
     /**
      * {@inheritdoc}
-     *
-     * @param string $class (Store class to be used).
      */
-    public function store($store = null, $class = null)
+    public function store($store = null)
     {
         //Default store id
         $store = $store ?: $this->config['store'];
 
-        $storeID = $store . ':' . $class;
-        if (isset($this->stores[$storeID])) {
-            return $this->stores[$storeID];
+        if (isset($this->stores[$store])) {
+            return $this->stores[$store];
         }
 
-        $benchmark = $this->benchmark('store', $storeID);
+        $benchmark = $this->benchmark('store', $store);
         try {
-            $storeInstance = $this->stores[$storeID] = $this->container->construct(
-                !empty($class) ? $class : $this->config['stores'][$store]['class'],
+            $this->stores[$store] = $this->container->construct(
+                $this->config['stores'][$store]['class'],
                 $this->config['stores'][$store]
             );
         } finally {
             $this->benchmark($benchmark);
         }
 
-        if ($store == $this->config['store'] && !$storeInstance->isAvailable()) {
+        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
             throw new CacheException(
                 "Unable to use default store '{$store}', driver is unavailable."
             );
         }
 
-        return $storeInstance;
+        return $this->stores[$store];
     }
 
     /**
@@ -114,8 +111,12 @@ class CacheManager extends Component implements
             );
         }
 
-        //Store class tells us default options set
-        $store = $this->store($class->getConstant('STORE'), $class->getName());
+        $store = $this->store($class->getConstant('STORE'));
+        if (!$class->isInstance($store)) {
+            throw new CacheException(
+                "Invalid cache configuration, '{$class}' store has invalid options linking."
+            );
+        }
 
         if (!$store->isAvailable()) {
             throw new CacheException(

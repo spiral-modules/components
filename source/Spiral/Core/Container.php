@@ -8,9 +8,12 @@
 namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
+use Spiral\Core\Container\InjectableInterface;
+use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\ContainerException;
+use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 
 /**
@@ -61,12 +64,7 @@ class Container extends Component implements ContainerInterface
     {
         if (!isset($this->bindings[$class])) {
             //OK, we can create class by ourselves
-            $instance = $this->createInstance(
-                $class,
-                $parameters,
-                $context,
-                $reflector
-            );
+            $instance = $this->createInstance($class, $parameters, $context, $reflector);
 
             /**
              * @var \ReflectionClass $reflector
@@ -96,9 +94,15 @@ class Container extends Component implements ContainerInterface
             if (is_string($binding[0])) {
                 //Class name with singleton flag
                 $instance = $this->construct($binding[0], $parameters, $context);
+            } elseif ($binding[0] instanceof \Closure) {
+                $reflection = new \ReflectionFunction($binding[0]);
+
+                //Invoking Closure
+                $instance = $reflection->invokeArgs(
+                    $this->resolveArguments($reflection, $parameters)
+                );
             } else {
-                //Closure with singleton flag
-                $instance = call_user_func($binding[0], $this);
+                throw new ContainerException("Invalid binding.");
             }
 
             if ($binding[1]) {
@@ -175,8 +179,6 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @todo: add Parameters?
      */
     public function bind($alias, $resolver)
     {
@@ -191,8 +193,6 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @todo: add Parameters?
      */
     public function bindSingleton($alias, $resolver)
     {
@@ -207,8 +207,6 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @todo: add Parameters?
      */
     public function replace($alias, $resolver)
     {
@@ -285,7 +283,7 @@ class Container extends Component implements ContainerInterface
      * @param string           $class
      * @param array            $parameters     Constructor parameters.
      * @param string|null      $context
-     * @param \ReflectionClass $reflector      Instance of reflection associated with class,
+     * @param \ReflectionClass $reflection     Instance of reflection associated with class,
      *                                         reference.
      * @return object
      * @throws InstanceException
@@ -294,36 +292,67 @@ class Container extends Component implements ContainerInterface
         $class,
         array $parameters,
         $context = null,
-        \ReflectionClass &$reflector = null
+        \ReflectionClass &$reflection = null
     ) {
         try {
-            $reflector = new \ReflectionClass($class);
+            $reflection = new \ReflectionClass($class);
         } catch (\ReflectionException $exception) {
             throw new InstanceException(
                 $exception->getMessage(), $exception->getCode(), $exception
             );
         }
 
-        if (!empty($injector = $reflector->getConstant('INJECTOR'))) {
-            //We have to construct class using external injector.
-            //Remember about this magick constant?
-            return call_user_func([$this->get($injector), 'createInjection'], $reflector, $context);
+        //We have to construct class using external injector
+        if (empty($parameters) && $this->hasInjector($reflection)) {
+            //Creating class using injector/factory
+            $instance = $this->getInjector($reflection)->createInjection(
+                $reflection,
+                $context
+            );
+
+            if (!$reflection->isInstance($instance)) {
+                throw new InjectionException("Invalid injector response.");
+            }
+
+            return $instance;
         }
 
-        if (!$reflector->isInstantiable()) {
+        if (!$reflection->isInstantiable()) {
             throw new InstanceException("Class '{$class}' can not be constructed.");
         }
 
-        if (!empty($constructor = $reflector->getConstructor())) {
+        if (!empty($constructor = $reflection->getConstructor())) {
             //Using constructor with resolved arguments
-            $instance = $reflector->newInstanceArgs(
+            $instance = $reflection->newInstanceArgs(
                 $this->resolveArguments($constructor, $parameters)
             );
         } else {
             //No constructor specified
-            $instance = $reflector->newInstance();
+            $instance = $reflection->newInstance();
         }
 
         return $instance;
+    }
+
+    /**
+     * Check if given class has associated injector.
+     *
+     * @param \ReflectionClass $reflection
+     * @return bool
+     */
+    private function hasInjector(\ReflectionClass $reflection)
+    {
+        return $reflection->isSubclassOf(InjectableInterface::class);
+    }
+
+    /**
+     * Get injector associated with given class.
+     *
+     * @param \ReflectionClass $reflection
+     * @return InjectorInterface
+     */
+    private function getInjector(\ReflectionClass $reflection)
+    {
+        return $this->get(call_user_func([$reflection->getName(), 'getInjector']));
     }
 }

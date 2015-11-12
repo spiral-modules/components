@@ -7,8 +7,10 @@
  */
 namespace Spiral\Core\Traits;
 
+use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\MissingContainerException;
+use Spiral\Core\Exceptions\SingletonException;
 
 /**
  * Expects to be part of Component which has SINGLETON constant.
@@ -28,11 +30,23 @@ trait SingletonTrait
      */
     public static function instance(ContainerInterface $container = null)
     {
+        if (!is_subclass_of(static::class, Component::class)) {
+            throw new SingletonException(
+                "SingletonTrait has to be associated with Component classes only."
+            );
+        }
+
+        //Excepted to be part of Component
         $container = !empty($container) ? $container : self::staticContainer();
+
         if (empty($container)) {
             throw new MissingContainerException(
                 "Singleton instance can be constructed only using valid Container."
             );
+        }
+
+        if (!defined('self::SINGLETON')) {
+            throw new SingletonException("Singleton constant 'SINGLETON' is missing.");
         }
 
         return $container->get(static::SINGLETON);

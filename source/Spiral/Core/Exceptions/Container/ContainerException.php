@@ -7,12 +7,12 @@
  */
 namespace Spiral\Core\Exceptions\Container;
 
-use Spiral\Core\Exceptions\CoreException;
+use Spiral\Core\Exceptions\DependencyException;
 
 /**
  * Something inside container.
  */
-class ContainerException extends CoreException
+class ContainerException extends DependencyException
 {
 
 }

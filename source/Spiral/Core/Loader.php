@@ -5,12 +5,9 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Core\Components;
+namespace Spiral\Core;
 
-use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\HippocampusInterface;
-use Spiral\Events\Traits\EventsTrait;
 
 /**
  * Can speed up class loading in some conditions. In addition this class is needed for tokenizer
@@ -18,11 +15,6 @@ use Spiral\Events\Traits\EventsTrait;
  */
 class Loader extends Component implements SingletonInterface
 {
-    /**
-     * Event if class not found.
-     */
-    use EventsTrait;
-
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
@@ -36,7 +28,7 @@ class Loader extends Component implements SingletonInterface
     private $classes = [];
 
     /**
-     * Name of memory sections to use.
+     * Name of memory sections to be used.
      *
      * @var string
      */
@@ -65,11 +57,17 @@ class Loader extends Component implements SingletonInterface
      * Loader will automatically handle SPL autoload functions to start caching loadmap.
      *
      * @param HippocampusInterface $memory
+     * @param string               $name   Memory section name.
+     * @param bool                 $enable Automatically enable.
      */
-    public function __construct(HippocampusInterface $memory)
+    public function __construct(HippocampusInterface $memory, $name = 'loadmap', $enable = true)
     {
         $this->memory = $memory;
-        $this->enable();
+        $this->name = $name;
+
+        if ($enable) {
+            $this->enable();
+        }
     }
 
     /**
@@ -80,13 +78,15 @@ class Loader extends Component implements SingletonInterface
     public function enable()
     {
         if (!$this->enabled) {
-            if (empty($this->loadmap = (array)$this->memory->loadData($this->name))) {
-                $this->loadmap = [];
-            }
-
-            spl_autoload_register([$this, 'loadClass'], true, true);
-            $this->enabled = true;
+            return $this;
         }
+
+        if (empty($this->loadmap = (array)$this->memory->loadData($this->name))) {
+            $this->loadmap = [];
+        }
+
+        spl_autoload_register([$this, 'loadClass'], true, true);
+        $this->enabled = true;
 
         return $this;
     }
@@ -98,7 +98,10 @@ class Loader extends Component implements SingletonInterface
      */
     public function disable()
     {
-        $this->enabled && spl_autoload_unregister([$this, 'loadClass']);
+        if ($this->enabled) {
+            spl_autoload_unregister([$this, 'loadClass']);
+        }
+
         $this->enabled = false;
 
         return $this;
@@ -109,11 +112,11 @@ class Loader extends Component implements SingletonInterface
      */
     public function reset()
     {
-        $this->disable()->enable();
+        return $this->disable()->enable();
     }
 
     /**
-     * Memory section to use.
+     * Set loadmap name (section to be used).
      *
      * @param string $name
      */
@@ -132,33 +135,36 @@ class Loader extends Component implements SingletonInterface
      * Find class declaration and load it.
      *
      * @param string $class Class name with namespace included.
-     * @event notFound($class)
+     * @return bool
      */
     public function loadClass($class)
     {
         if (isset($this->loadmap[$class])) {
             try {
+
                 //We already know route to class declaration
                 include_once($this->classes[$class] = $this->loadmap[$class]);
+
             } catch (\ErrorException $exception) {
                 //File was replaced or removed
                 unset($this->loadmap[$class]);
                 $this->memory->saveData($this->name, $this->loadmap);
 
                 //Try to update route to class
-                $this->loadClass($class);
+                return $this->loadClass($class);
             }
-
-            return;
         }
 
         //Composer and other loaders.
         foreach (spl_autoload_functions() as $function) {
             if ($function instanceof \Closure || $function[0] != $this) {
+                //Calling loaders
                 call_user_func($function, $class);
 
-                if (class_exists($class, false) || interface_exists($class,
-                        false) || trait_exists($class, false)
+                if (
+                    class_exists($class, false)
+                    || interface_exists($class, false)
+                    || trait_exists($class, false)
                 ) {
                     //Class has been successfully found by external loader
                     //External loader are not going to provide us any information about class
@@ -178,12 +184,13 @@ class Loader extends Component implements SingletonInterface
                         //getFileName can throw and exception, we can ignore it
                     }
 
-                    return;
+                    //Class found
+                    return true;
                 }
             }
         }
 
-        $this->fire('notFound', compact('class'));
+        return false;
     }
 
     /**

@@ -17,12 +17,13 @@ use Spiral\Core\Exceptions\Container\InstanceException;
  *
  *
  * @see InjectorInterface
- * @see StaurableInterface
  * @see SingletonInterface
  */
 interface ContainerInterface
 {
     /**
+     * Check if alias binded.
+     *
      * @param string $alias
      * @return bool
      */

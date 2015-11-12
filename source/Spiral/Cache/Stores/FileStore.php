@@ -31,6 +31,7 @@ class FileStore extends CacheStore
     private $extension = 'cache';
 
     /**
+     * @invisible
      * @var FilesInterface
      */
     protected $files = null;

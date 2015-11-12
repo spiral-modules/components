@@ -8,31 +8,28 @@
 namespace Spiral\Encrypter;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
 
 /**
  * Default implementation of spiral encrypter.
  */
-class Encrypter extends Component implements EncrypterInterface, SingletonInterface
+class Encrypter extends Component implements
+    EncrypterInterface,
+    InjectableInterface,
+    SingletonInterface
 {
-    /**
-     * To edit configuration in runtime.
-     */
-    use ConfigurableTrait;
-
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
 
     /**
-     * Configuration section.
+     * Injection is dedicated to outer class since Encrypter is pretty simple.
      */
-    const CONFIG = 'encrypter';
+    const INJECTOR = EncrypterManager::class;
 
     /**
      * Keys to use in packed data. This is internal constants.
@@ -54,17 +51,18 @@ class Encrypter extends Component implements EncrypterInterface, SingletonInterf
     private $cipher = 'aes-256-cbc';
 
     /**
-     * @param ConfiguratorInterface $configurator
+     * Encrypter constructor.
+     *
+     * @param string      $key
+     * @param string|null $cipher
      */
-    public function __construct(ConfiguratorInterface $configurator)
+    public function __construct($key, $cipher = null)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->setKey($key);
 
-        $this->setKey($this->config['key']);
-
-        if (!empty($this->config['cipher'])) {
-            //We are allowing to skip definition of ciper to be used
-            $this->cipher = $this->config['cipher'];
+        if (!empty($cipher)) {
+            //We are allowing to skip definition of cipher to be used
+            $this->cipher = $cipher;
         }
     }
 
@@ -108,20 +106,6 @@ class Encrypter extends Component implements EncrypterInterface, SingletonInterf
     }
 
     /**
-     * Restore default encrypter key and method.
-     *
-     * @return $this
-     * @throws EncrypterException
-     */
-    public function restoreDefaults()
-    {
-        $this->setKey($this->config['key']);
-        $this->setCipher($this->config['cipher']);
-
-        return $this;
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @param bool $passWeak Do not throw an exception if result is "weak". Not recommended.
@@ -144,7 +128,6 @@ class Encrypter extends Component implements EncrypterInterface, SingletonInterf
 
         return $result;
     }
-
 
     /**
      * {@inheritdoc}

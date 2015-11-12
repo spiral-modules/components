@@ -7,14 +7,13 @@
  */
 namespace Spiral\Tests\Cases\Encrypter;
 
-use Spiral\Core\Configurator;
 use Spiral\Encrypter\Encrypter;
 
 class RandomTest extends \PHPUnit_Framework_TestCase
 {
     public function testRandom()
     {
-        $encrypter = $this->encrypter();
+        $encrypter = $this->makeEncrypter();
 
         $previousRandoms = [];
         for ($try = 0; $try < 100; $try++) {
@@ -26,11 +25,11 @@ class RandomTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param array $config
+     * @param string $key
      * @return Encrypter
      */
-    protected function encrypter($config = ['key' => '1234567890123456'])
+    protected function makeEncrypter($key = '1234567890123456')
     {
-        return new Encrypter(new Configurator($config));
+        return new Encrypter($key);
     }
 }

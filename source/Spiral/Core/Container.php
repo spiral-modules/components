@@ -304,16 +304,10 @@ class Container extends Component implements ContainerInterface
             );
         }
 
-        if (
-            (!empty($context) || !$reflector->isInstantiable())
-            && $injector = $reflector->getConstant('INJECTOR')
-        ) {
+        if (!empty($injector = $reflector->getConstant('INJECTOR'))) {
             //We have to construct class using external injector.
             //Remember about this magick constant?
-            return call_user_func(
-                [$this->get($injector), 'createInjection'],
-                $reflector, $context, $this
-            );
+            return call_user_func([$this->get($injector), 'createInjection'], $reflector, $context);
         }
 
         if (!$reflector->isInstantiable()) {

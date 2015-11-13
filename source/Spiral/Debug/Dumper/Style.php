@@ -76,7 +76,7 @@ class Style
      * @param string $dump
      * @return string
      */
-    public function addContainer($dump)
+    public function mountContainer($dump)
     {
         return \Spiral\interpolate($this->container, compact('dump'));
     }

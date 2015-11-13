@@ -31,6 +31,14 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     const SINGLETON = self::class;
 
     /**
+     * Options for dump() function to specify output.
+     */
+    const OUTPUT_ECHO     = 0;
+    const OUTPUT_RETURN   = 1;
+    const OUTPUT_LOG      = 2;
+    const OUTPUT_LOG_NICE = 3;
+
+    /**
      * Deepest level to be dumped.
      *
      * @var int
@@ -75,13 +83,12 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      * Dump specified value.
      *
      * @param mixed $value
-     * @param bool  $output
+     * @param int   $output
      * @return null|string
      */
-    public function dump($value, $output = false)
+    public function dump($value, $output = self::OUTPUT_ECHO)
     {
-        //TODO: output types
-        if (php_sapi_name() === 'cli' && !$output) {
+        if (php_sapi_name() === 'cli' && $output == self::OUTPUT_ECHO) {
             print_r($value);
             if (is_scalar($value)) {
                 echo "\n";
@@ -90,14 +97,23 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
             return null;
         }
 
-        //Locating dumper data into container
-        $result = $this->style->addContainer($this->dumpValue($value, '', 0));
+        switch ($output) {
+            case self::OUTPUT_ECHO:
+                echo $this->style->mountContainer($this->dumpValue($value, '', 0));
+                break;
 
-        if ($output) {
-            return $result;
+            case self::OUTPUT_RETURN:
+                return $this->style->mountContainer($this->dumpValue($value, '', 0));
+                break;
+
+            case self::OUTPUT_LOG:
+                $this->logger()->debug(print_r($value, true));
+                break;
+
+            case self::OUTPUT_LOG_NICE:
+                $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
+                break;
         }
-
-        echo $result;
 
         return null;
     }

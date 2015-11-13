@@ -7,9 +7,11 @@
  */
 namespace Spiral\Debug\Traits;
 
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Spiral\Core\ContainerInterface;
+use Spiral\Debug\LogsInterface;
 
 /**
  * On demand logger creation. Allows class to share same logger between instances.
@@ -17,35 +19,23 @@ use Spiral\Core\ContainerInterface;
 trait LoggerTrait
 {
     /**
-     * Loggers associated to classes not instances.
-     *
+     * Set logger method.
+     */
+    use LoggerAwareTrait;
+
+    /**
      * @var LoggerInterface[]
      */
-    private static $loggers = [];
+    protected static $loggers = [];
 
     /**
-     * The logger instance.
-     *
-     * @var LoggerInterface
-     */
-    private $logger = null;
-
-    /**
-     * Sets a logger. Static loggers has less priority over loggers associated with specific object.
+     * Set class specific logger (associated with every instance).
      *
      * @param LoggerInterface $logger
-     * @param bool            $static Associate logger to set of classes, not one object.
-     * @return $this
      */
-    public function setLogger(LoggerInterface $logger, $static = false)
+    public static function sharedLogger(LoggerInterface $logger)
     {
-        if ($static) {
-            self::$loggers[static::class] = $logger;
-        } else {
-            $this->logger = $logger;
-        }
-
-        return $this;
+        self::$loggers[static::class] = $logger;
     }
 
     /**
@@ -53,7 +43,7 @@ trait LoggerTrait
      *
      * @return LoggerInterface
      */
-    public function logger()
+    protected function logger()
     {
         if (!empty($this->logger)) {
             return $this->logger;
@@ -63,14 +53,23 @@ trait LoggerTrait
             return self::$loggers[static::class];
         }
 
-        if (empty($container = $this->container()) || !$container->has(LoggerInterface::class)) {
-            //That's easy
+        //We are using class name as log channel (name) by default
+        return self::$loggers[static::class] = $this->createLogger();
+    }
+
+    /**
+     * Create new instance of associated logger.
+     *
+     * @return LoggerInterface
+     */
+    protected function createLogger()
+    {
+        if (empty($container = $this->container()) || !$container->has(LogsInterface::class)) {
             return new NullLogger();
         }
 
-        return self::$loggers[static::class] = $container->construct(LoggerInterface::class, [
-            'name' => static::class
-        ]);
+        //We are using class name as log channel (name) by default
+        return $container->get(LogsInterface::class)->getLogger(static::class);
     }
 
     /**

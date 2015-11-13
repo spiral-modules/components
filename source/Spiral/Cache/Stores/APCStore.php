@@ -15,11 +15,6 @@ use Spiral\Cache\CacheStore;
 class APCStore extends CacheStore
 {
     /**
-     * {@inheritdoc}
-     */
-    const STORE = 'apc';
-
-    /**
      * Cache driver types.
      */
     const APC_DRIVER  = 0;

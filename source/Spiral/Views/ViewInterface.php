@@ -15,6 +15,15 @@ use Spiral\Views\Exceptions\RenderException;
 interface ViewInterface
 {
     /**
+     * Alter view parameters (should replace existed value).
+     *
+     * @param string $name
+     * @param mixed  $value
+     * @return self
+     */
+    public function set($name, $value);
+
+    /**
      * Render view source using internal logic.
      *
      * @return string

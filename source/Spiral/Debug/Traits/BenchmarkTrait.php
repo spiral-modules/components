@@ -43,7 +43,6 @@ trait BenchmarkTrait
     protected function benchmark($record, $context = '')
     {
         if (empty($this->benchmarker)) {
-
             if (
                 empty($container = $this->container())
                 || !$container->has(BenchmarkerInterface::class)

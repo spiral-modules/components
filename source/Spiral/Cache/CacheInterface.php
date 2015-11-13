@@ -18,9 +18,9 @@ interface CacheInterface
      * Create specified or default cache store. This function will load cache adapter if it
      * was not initiated, or fetch it from memory.
      *
-     * @param string $store Keep null, empty or not specified to get default cache adapter.
+     * @param string $class Keep null, empty or not specified to get default cache adapter.
      * @return StoreInterface
      * @throws CacheException
      */
-    public function store($store = null);
+    public function store($class = null);
 }

@@ -26,12 +26,7 @@ abstract class CacheStore implements StoreInterface, InjectableInterface
      */
     const INJECTOR = CacheManager::class;
 
-    /**
-     * Store settings class associated with (see CacheManager).
-     */
-    const STORE = '';
-
-    /**
+      /**
      * {@inheritdoc}
      */
     public function pull($name)

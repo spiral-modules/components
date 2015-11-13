@@ -8,8 +8,8 @@
 namespace Spiral\Tests\Cases\Tokenizer;
 
 use Psr\Log\NullLogger;
-use Spiral\Core\Components\Loader;
 use Spiral\Core\Configurator;
+use Spiral\Core\Loader;
 use Spiral\Files\FileManager;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassA;
 use Spiral\Tests\Cases\Tokenizer\Classes\ClassB;

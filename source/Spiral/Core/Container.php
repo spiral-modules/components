@@ -267,17 +267,6 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
-     * Alias for get.
-     *
-     * @param string $alias
-     * @return mixed|null|object
-     */
-    public function __get($alias)
-    {
-        return $this->get($alias);
-    }
-
-    /**
      * Create instance of desired class.
      *
      * @param string           $class

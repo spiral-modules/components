@@ -19,11 +19,6 @@ use Spiral\Cache\Stores\Memcache\MemcacheDriver;
 class MemcacheStore extends CacheStore
 {
     /**
-     * {@inheritdoc}
-     */
-    const STORE = 'memcache';
-
-    /**
      * Maximum expiration time you can set.
      *
      * @link http://www.php.net/manual/ru/memcache.set.php

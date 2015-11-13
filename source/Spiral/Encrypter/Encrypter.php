@@ -10,6 +10,7 @@ namespace Spiral\Encrypter;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Traits\InjectableTrait;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
 
@@ -21,6 +22,11 @@ class Encrypter extends Component implements
     InjectableInterface,
     SingletonInterface
 {
+    /**
+     * Can be injected.
+     */
+    use InjectableTrait;
+
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */

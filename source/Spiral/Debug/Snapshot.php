@@ -8,24 +8,25 @@
 namespace Spiral\Debug;
 
 use Exception;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Container\SaturableInterface;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
-use Spiral\Views\ViewInterface;
 use Spiral\Views\ViewsInterface;
 
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using
  * ViewsInterface.
  */
-class Snapshot extends Component implements SnapshotInterface, ViewInterface
+class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterface
 {
     /**
      * Additional constructor arguments.
      */
-    use SaturateTrait;
+    use SaturateTrait, LoggerTrait;
 
     /**
      * Message format.
@@ -47,23 +48,12 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      *
      * @var string
      */
-    private $renderCache = '';
+    private $rendered = '';
 
     /**
      * @var array
      */
     protected $config = [];
-
-    /**
-     * @invisible
-     * @var ContainerInterface
-     */
-    protected $container = null;
-
-    /**
-     * @var Debugger
-     */
-    protected $debugger = null;
 
     /**
      * @var FilesInterface
@@ -76,28 +66,30 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
     protected $views = null;
 
     /**
-     * @param Exception          $exception
-     * @param ContainerInterface $container
-     * @param Debugger           $debugger
-     * @param FilesInterface     $files
-     * @param ViewsInterface     $views
+     * Snapshot constructor.
+     *
+     * @param Exception             $exception
+     * @param LoggerInterface       $logger
+     * @param ConfiguratorInterface $configurator
+     * @param FilesInterface        $files
+     * @param ViewsInterface        $views
      */
     public function __construct(
         Exception $exception,
-        ContainerInterface $container = null,
-        Debugger $debugger = null,
+        LoggerInterface $logger = null,
+        ConfiguratorInterface $configurator = null,
         FilesInterface $files = null,
         ViewsInterface $views = null
     ) {
         $this->exception = $exception;
+        $this->logger = $logger;
+
+        //Snapshot configuration tells how to rotate files and etc
+        $this->config = $configurator->getConfig(static::CONFIG);
 
         //We can use global container as fallback if no default values were provided
-        $this->container = $this->saturate($container, ContainerInterface::class);
-        $this->debugger = $this->saturate($debugger, Debugger::class);
         $this->files = $this->saturate($files, FilesInterface::class);
         $this->views = $this->saturate($views, ViewsInterface::class);
-
-        $this->config = $this->debugger->config()[static::CONFIG];
     }
 
     /**
@@ -105,9 +97,7 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      */
     public function getName()
     {
-        $reflection = new \ReflectionObject($this->exception);
-
-        return $reflection->getShortName();
+        return (new \ReflectionObject($this->exception))->getShortName();
     }
 
     /**
@@ -155,15 +145,12 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      */
     public function getMessage()
     {
-        return \Spiral\interpolate(
-            static::MESSAGE,
-            [
-                'exception' => $this->getClass(),
-                'message'   => $this->exception->getMessage(),
-                'file'      => $this->getFile(),
-                'line'      => $this->getLine()
-            ]
-        );
+        return \Spiral\interpolate(static::MESSAGE, [
+            'exception' => $this->getClass(),
+            'message'   => $this->exception->getMessage(),
+            'file'      => $this->getFile(),
+            'line'      => $this->getLine()
+        ]);
     }
 
     /**
@@ -171,7 +158,7 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      */
     public function report()
     {
-        $this->debugger->logger()->error($this->getMessage());
+        $this->logger()->error($this->getMessage());
 
         if (!$this->config['reporting']['enabled']) {
             //No need to record anything
@@ -194,17 +181,7 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
 
         $snapshots = $this->files->getFiles($this->config['reporting']['directory']);
         if (count($snapshots) > $this->config['reporting']['maxSnapshots']) {
-            $oldestSnapshot = '';
-            $oldestTimestamp = PHP_INT_MAX;
-            foreach ($snapshots as $snapshot) {
-                $snapshotTimestamp = $this->files->time($snapshot);
-                if ($snapshotTimestamp < $oldestTimestamp) {
-                    $oldestTimestamp = $snapshotTimestamp;
-                    $oldestSnapshot = $snapshot;
-                }
-            }
-
-            $this->files->delete($oldestSnapshot);
+            $this->dropOldest($snapshots);
         }
     }
 
@@ -228,18 +205,13 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
      */
     public function render()
     {
-        if (!empty($this->renderCache)) {
-            return $this->renderCache;
+        if (!empty($this->rendered)) {
+            return $this->rendered;
         }
 
-        return $this->renderCache = $this->views->render(
-            $this->config['view'],
-            [
-                'snapshot'  => $this,
-                'container' => $this->container,
-                'debugger'  => $this->debugger
-            ]
-        );
+        return $this->rendered = $this->views->render($this->config['view'], [
+            'snapshot' => $this
+        ]);
     }
 
     /**
@@ -252,5 +224,26 @@ class Snapshot extends Component implements SnapshotInterface, ViewInterface
         }
 
         return $this->render();
+    }
+
+    /**
+     * Clean old snapshots.
+     *
+     * @param array $snapshots
+     */
+    private function dropOldest(array $snapshots)
+    {
+        $oldest = '';
+        $oldestTimestamp = PHP_INT_MAX;
+        foreach ($snapshots as $snapshot) {
+            $snapshotTimestamp = $this->files->time($snapshot);
+
+            if ($snapshotTimestamp < $oldestTimestamp) {
+                $oldestTimestamp = $snapshotTimestamp;
+                $oldest = $snapshot;
+            }
+        }
+
+        $this->files->delete($oldest);
     }
 }

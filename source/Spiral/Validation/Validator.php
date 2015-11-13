@@ -112,14 +112,14 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      *
-     * @param ContainerInterface    $container
      * @param ConfiguratorInterface $configurator
+     * @param ContainerInterface    $container
      */
     public function __construct(
         $data = [],
         array $rules = [],
-        ContainerInterface $container = null,
-        ConfiguratorInterface $configurator = null
+        ConfiguratorInterface $configurator = null,
+        ContainerInterface $container = null
     ) {
         $this->data = $data;
         $this->rules = $rules;

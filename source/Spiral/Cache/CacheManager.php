@@ -65,32 +65,34 @@ class CacheManager extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function store($store = null)
+    public function store($class = null)
     {
-        //Default store id
-        $store = $store ?: $this->config['store'];
+        //Default store class
+        $class = $class ?: $this->config['store'];
 
-        if (isset($this->stores[$store])) {
-            return $this->stores[$store];
+        if (isset($this->stores[$class])) {
+            return $this->stores[$class];
         }
 
-        $benchmark = $this->benchmark('store', $store);
+        $benchmark = $this->benchmark('store', $class);
         try {
-            $this->stores[$store] = $this->container->construct(
-                $this->config['stores'][$store]['class'],
-                $this->config['stores'][$store]
+
+            //Constructing cache instance
+            $this->stores[$class] = $this->container->construct(
+                $class,
+                $this->config['stores'][$class]
             );
         } finally {
             $this->benchmark($benchmark);
         }
 
-        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
+        if ($class == $this->config['store'] && !$this->stores[$class]->isAvailable()) {
             throw new CacheException(
-                "Unable to use default store '{$store}', driver is unavailable."
+                "Unable to use default store '{$class}', driver is unavailable."
             );
         }
 
-        return $this->stores[$store];
+        return $this->stores[$class];
     }
 
     /**
@@ -100,30 +102,17 @@ class CacheManager extends Component implements
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        if (!$class->isInstantiable() || empty($class->getConstant('STORE'))) {
+        if (!$class->isInstantiable()) {
             //Default store
             return $this->store();
         }
 
-        if (empty($this->config['stores'][$class->getConstant('STORE')])) {
+        if (empty($this->config['stores'][$class->getName()])) {
             throw new CacheException(
                 "Unable construct cache store '{$class}', no options found."
             );
         }
 
-        $store = $this->store($class->getConstant('STORE'));
-        if (!$class->isInstance($store)) {
-            throw new CacheException(
-                "Invalid cache configuration, '{$class}' store has invalid options linking."
-            );
-        }
-
-        if (!$store->isAvailable()) {
-            throw new CacheException(
-                "Unable to use store '" . get_class($store) . "', driver is unavailable."
-            );
-        }
-
-        return $store;
+        return $this->store($class->getName());
     }
 }

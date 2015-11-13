@@ -16,11 +16,6 @@ use Spiral\Files\FilesInterface;
 class FileStore extends CacheStore
 {
     /**
-     * {@inheritdoc}
-     */
-    const STORE = 'file';
-
-    /**
      * @var string
      */
     private $directory = '';

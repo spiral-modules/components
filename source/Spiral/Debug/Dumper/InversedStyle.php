@@ -10,9 +10,8 @@ namespace Spiral\Debug\Dumper;
 /**
  * Alternative to default debug style.
  */
-class DarkStyle extends Style
+class InversedStyle extends Style
 {
-
     /**
      * Container element used to inject dump into, usually pre elemnt with some styling.
      *
@@ -45,7 +44,7 @@ class DarkStyle extends Style
         'type'     => [
             'common'   => 'color: #E6E1DC',
             'object'   => 'color: #E6E1DC',
-            'array'    => 'color: #C26230',
+            'array'    => 'color: #E6E1DC',
             'null'     => 'color: #C26230; font-weight: bold',
             'resource' => 'color: #C26230; font-weight: bold',
         ],

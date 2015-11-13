@@ -8,11 +8,11 @@
 namespace Spiral\Tokenizer\Reflections;
 
 /**
- * ReflectionCall used to represent function or static method call found by ReflectionFile. This
- * reflection is very useful for static analysis and mainly used in Translator component to index
- * translation function usages.
+ * ReflectionInvocation used to represent function or static method call found by ReflectionFile.
+ * This reflection is very useful for static analysis and mainly used in Translator component to
+ * index translation function usages.
  */
-class ReflectionCall
+class ReflectionInvocation
 {
     /**
      * @var string
@@ -27,12 +27,17 @@ class ReflectionCall
     /**
      * @var string
      */
-    private $name = '';
+    private $class = '';
 
     /**
      * @var string
      */
-    private $class = '';
+    private $operator = '';
+
+    /**
+     * @var string
+     */
+    private $name = '';
 
     /**
      * @var string
@@ -45,16 +50,6 @@ class ReflectionCall
     private $arguments = [];
 
     /**
-     * @var int
-     */
-    private $openTID = 0;
-
-    /**
-     * @var int
-     */
-    private $closeTID = 0;
-
-    /**
      * Was a function used inside another function call?
      *
      * @var int
@@ -64,35 +59,32 @@ class ReflectionCall
     /**
      * New call reflection.
      *
-     * @param string $filename
-     * @param int    $line
-     * @param string $class
-     * @param string $name
-     * @param array  $arguments
-     * @param string $source
-     * @param int    $openTID
-     * @param int    $closeTID
-     * @param int    $level
+     * @param string               $filename
+     * @param int                  $line
+     * @param string               $class
+     * @param string               $operator
+     * @param string               $name
+     * @param ReflectionArgument[] $arguments
+     * @param string               $source
+     * @param int                  $level
      */
     public function __construct(
         $filename,
         $line,
         $class,
+        $operator,
         $name,
         array $arguments,
         $source,
-        $openTID,
-        $closeTID,
         $level
     ) {
         $this->filename = $filename;
         $this->line = $line;
         $this->class = $class;
+        $this->operator = $operator;
         $this->name = $name;
         $this->arguments = $arguments;
         $this->source = $source;
-        $this->openTID = $openTID;
-        $this->closeTID = $closeTID;
         $this->level = $level;
     }
 
@@ -117,23 +109,33 @@ class ReflectionCall
     }
 
     /**
-     * Function usage name, may include :: with a parent static class.
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Function usage name, may include :: with parent static class.
+     * Parent class.
      *
      * @return string
      */
     public function getClass()
     {
         return $this->class;
+    }
+
+    /**
+     * Method operator (:: or ->).
+     *
+     * @return string
+     */
+    public function getOperator()
+    {
+        return $this->operator;
+    }
+
+    /**
+     * Function or method name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -157,16 +159,6 @@ class ReflectionCall
     }
 
     /**
-     * All parsed function arguments.
-     *
-     * @return ReflectionArgument[]
-     */
-    public function getArguments()
-    {
-        return $this->arguments;
-    }
-
-    /**
      * Count of arguments in call.
      *
      * @return int
@@ -174,6 +166,16 @@ class ReflectionCall
     public function countArguments()
     {
         return count($this->arguments);
+    }
+
+    /**
+     * All parsed function arguments.
+     *
+     * @return ReflectionArgument[]
+     */
+    public function getArguments()
+    {
+        return $this->arguments;
     }
 
     /**
@@ -188,27 +190,7 @@ class ReflectionCall
     }
 
     /**
-     * Where function usage begins.
-     *
-     * @return int
-     */
-    public function getOpenTID()
-    {
-        return $this->openTID;
-    }
-
-    /**
-     * Where function usage ends.
-     *
-     * @return int
-     */
-    public function getCloseTID()
-    {
-        return $this->closeTID;
-    }
-
-    /**
-     * Function is used inside another function.
+     * Invoking level.
      *
      * @return int
      */

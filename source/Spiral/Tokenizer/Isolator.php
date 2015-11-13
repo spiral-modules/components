@@ -30,11 +30,17 @@ class Isolator extends Component
     private $phpBlocks = [];
 
     /**
-     * Isolated prefix and postfix. Use any values that will not corrupt HTML or other source.
+     * Isolation prefix. Use any values that will not corrupt HTML or other source.
      *
      * @var string
      */
     private $prefix = '';
+
+    /**
+     * Isolation postfix. Use any values that will not corrupt HTML or other source.
+     *
+     * @var string
+     */
     private $postfix = '';
 
     /**

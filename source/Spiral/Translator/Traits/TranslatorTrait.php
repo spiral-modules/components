@@ -8,12 +8,13 @@
 namespace Spiral\Translator\Traits;
 
 use Spiral\Core\Container;
+use Spiral\Core\ContainerInterface;
 use Spiral\Translator\TranslatorInterface;
 
 /**
  * Add bundle specific translation functionality, class name will be used as translation bundle.
  * In addition every default string message declared in class using [[]] braces can be indexed by
- * spiral application. Use translate() method statically to make it indexable by spiral.
+ * spiral application.
  */
 trait TranslatorTrait
 {
@@ -21,14 +22,13 @@ trait TranslatorTrait
      * Translate message using parent class as bundle name. Method will remove string braces ([[ and
      * ]]) if specified.
      *
-     * Example: User::translate("User account is invalid.");
+     * Example: $this->translate("User account is invalid.");
      *
-     * @see Component::staticContainer()
      * @param string $string
      * @param array  $options Interpolation options.
      * @return string
      */
-    protected static function translate($string, array $options = [])
+    protected function translate($string, array $options = [])
     {
         if (
             substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
@@ -38,11 +38,20 @@ trait TranslatorTrait
             $string = substr($string, 2, -2);
         }
 
-        if (!TraitSupport::hasTranslator()) {
-            //No translator defined
+        if (empty($container = $this->container()) || !$container->has(TranslatorInterface::class)) {
+            //No translator available
             return $string;
         }
 
-        return TraitSupport::getTranslator()->translate(static::class, $string, $options);
+        return $container->get(TranslatorInterface::class)->translate(
+            static::class,
+            $string,
+            $options
+        );
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

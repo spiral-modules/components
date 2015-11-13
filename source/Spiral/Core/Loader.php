@@ -77,12 +77,12 @@ class Loader extends Component implements SingletonInterface
      */
     public function enable()
     {
-        if (!$this->enabled) {
+        if ($this->enabled) {
             return $this;
         }
 
-        if (empty($this->loadmap = (array)$this->memory->loadData($this->name))) {
-            $this->loadmap = [];
+        if (!empty($this->name)) {
+            $this->loadmap = (array)$this->memory->loadData($this->name);
         }
 
         spl_autoload_register([$this, 'loadClass'], true, true);
@@ -122,7 +122,7 @@ class Loader extends Component implements SingletonInterface
      */
     public function setName($name)
     {
-        if ($this->name != $name) {
+        if ($this->name != $name && !empty($name)) {
             if (empty($this->loadmap = (array)$this->memory->loadData($name))) {
                 $this->loadmap = [];
             }
@@ -141,18 +141,21 @@ class Loader extends Component implements SingletonInterface
     {
         if (isset($this->loadmap[$class])) {
             try {
-
                 //We already know route to class declaration
                 include_once($this->classes[$class] = $this->loadmap[$class]);
-
             } catch (\ErrorException $exception) {
                 //File was replaced or removed
                 unset($this->loadmap[$class]);
-                $this->memory->saveData($this->name, $this->loadmap);
+
+                if (!empty($this->name)) {
+                    $this->memory->saveData($this->name, $this->loadmap);
+                }
 
                 //Try to update route to class
                 return $this->loadClass($class);
             }
+
+            return true;
         }
 
         //Composer and other loaders.

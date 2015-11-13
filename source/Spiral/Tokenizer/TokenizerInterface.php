@@ -7,9 +7,11 @@
  */
 namespace Spiral\Tokenizer;
 
+use Spiral\Tokenizer\Exceptions\ReflectionException;
+use Spiral\Tokenizer\Exceptions\TokenizerException;
+
 /**
- * Tokenizers must support different classes with parsed PHP tokens (default functionality of
- * token_get_all) and ability to find project classes with specified parent or namespace.
+ * Simple wrapper at top of token_get_all.
  */
 interface TokenizerInterface
 {
@@ -30,21 +32,12 @@ interface TokenizerInterface
     public function fetchTokens($filename);
 
     /**
-     * Index all available files and generate list of found classes with their names and filenames.
-     * Unreachable classes or files with conflicts must be skipped. This is SLOW method, should be
-     * used only for static analysis.
+     * Get file reflection for given filename.
      *
-     * Output format:
-     * $result['CLASS_NAME'] = [
-     *      'class'    => 'CLASS_NAME',
-     *      'filename' => 'FILENAME',
-     *      'abstract' => 'ABSTRACT_BOOL'
-     * ]
-     *
-     * @param mixed $parent  Class, interface or trait parent. By default - null (all classes).
-     *                       Parent (class) will also be included to classes list as one of
-     *                       results.
-     * @return array
+     * @param string $filename
+     * @return ReflectionFileInterface
+     * @throws TokenizerException
+     * @throws ReflectionException
      */
-    public function getClasses($parent = null);
+    public function fileReflection($filename);
 }

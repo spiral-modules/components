@@ -11,6 +11,7 @@ use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
+use Spiral\Core\Traits\InjectableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
@@ -30,7 +31,7 @@ class StorageBucket extends Component implements
     /**
      * Most of storage operations are pretty slow, we might record and explain all of them.
      */
-    use BenchmarkTrait, LoggerTrait;
+    use BenchmarkTrait, LoggerTrait, InjectableTrait;
 
     /**
      * This is magick constant used by Spiral Constant, it helps system to resolve controllable

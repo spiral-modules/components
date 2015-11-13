@@ -7,6 +7,7 @@
  */
 namespace Spiral\Debug;
 
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 use Psr\Log\LoggerAwareInterface;
@@ -87,13 +88,17 @@ class Debugger extends Component implements
 
         $handlers = [];
         foreach ($this->config['logHandlers'][$name] as $handler) {
+            /**
+             * @var HandlerInterface $instance
+             */
             $handlers[] = $instance = $this->container->construct(
                 $handler['handler'],
                 $handler['options']
             );
 
-            if (!empty($handler['formatter'])) {
-
+            if (!empty($handler['format'])) {
+                //Let's use custom line formatter
+                $instance->setFormatter(new LineFormatter($handler['format']));
             }
         }
 

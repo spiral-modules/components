@@ -19,7 +19,8 @@
     "guzzlehttp/guzzle": "~6.0",
     "zendframework/zend-diactoros": "^1.1",
     "cocur/slugify": "^1.2",
-    "monolog/monolog": "^1.17"
+    "monolog/monolog": "^1.17",
+    "symfony/finder": "^2.7"
   },
   "autoload": {
     "files": [

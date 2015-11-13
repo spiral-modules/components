@@ -8,6 +8,7 @@
 namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Container\InjectableInterface;
+use Spiral\Core\Traits\InjectableTrait;
 use Spiral\ODM\ODM;
 
 /**
@@ -15,6 +16,8 @@ use Spiral\ODM\ODM;
  */
 class MongoDatabase extends \MongoDB implements InjectableInterface
 {
+    use InjectableTrait;
+
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
      * injections.

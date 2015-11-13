@@ -12,6 +12,7 @@ use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Traits\InjectableTrait;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -34,7 +35,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * Query and statement events.
      */
-    use EventsTrait;
+    use EventsTrait, InjectableTrait;
 
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable

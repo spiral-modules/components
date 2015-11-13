@@ -1,1 +1,0 @@
-This directory contains set of sample configs for spiral components.

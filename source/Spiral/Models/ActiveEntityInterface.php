@@ -10,7 +10,7 @@ namespace Spiral\Models;
 use Spiral\Models\Exceptions\EntityExceptionInterface;
 
 /**
- * Represents generic "ActiveRecord" patten.
+ * Represents generic "ActiveRecord" like patten.
  */
 interface ActiveEntityInterface extends IdentifiedInterface
 {
@@ -28,13 +28,4 @@ interface ActiveEntityInterface extends IdentifiedInterface
      * operation.
      */
     public function delete();
-
-    /**
-     * Create instance of specific DataEntity and set it's fields (safely). Resulted entity must
-     * not be saved into it's storage automatically.
-     *
-     * @param array $fields Entity fields to be set.
-     * @return static
-     */
-    public static function create($fields = []);
 }

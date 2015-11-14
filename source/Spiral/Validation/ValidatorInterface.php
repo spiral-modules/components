@@ -16,10 +16,18 @@ use Spiral\Validation\Exceptions\ValidationException;
 interface ValidatorInterface
 {
     /**
-     * @param array|\ArrayAccess $data  Data to be validated.
      * @param array              $rules Validation rules.
+     * @param array|\ArrayAccess $data  Data to be validated.
      */
-    public function __construct($data = [], array $rules = []);
+    public function __construct(array $rules = [], $data = []);
+
+    /**
+     * Update validation rules.
+     *
+     * @param array $rules
+     * @return self
+     */
+    public function setRules(array $rules);
 
     /**
      * Update validation data (context).
@@ -29,14 +37,6 @@ interface ValidatorInterface
      * @throws ValidationException
      */
     public function setData($data);
-
-    /**
-     * Update validation rules.
-     *
-     * @param array $rules
-     * @return self
-     */
-    public function setRules(array $rules);
 
     /**
      * Check if context data valid accordingly to provided rules.

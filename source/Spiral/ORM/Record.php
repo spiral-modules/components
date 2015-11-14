@@ -58,7 +58,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
         }
 
         if (!$this->isLoaded()) {
-            $this->fire('saving');
+            $this->dispatch('saving');
 
             //Primary key field name (if any)
             $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
@@ -73,13 +73,13 @@ class Record extends RecordEntity implements ActiveEntityInterface
                 $this->fields[$primaryKey] = $lastID;
             }
 
-            $this->loadedState(true)->fire('saved');
+            $this->loadedState(true)->dispatch('saved');
 
             //Saving record to entity cache if we have space for that
             $this->orm->registerEntity($this, false);
 
         } elseif ($this->isSolid() || $this->hasUpdates()) {
-            $this->fire('updating');
+            $this->dispatch('updating');
 
             //Updating changed/all field based on model criteria (in usual case primaryKey)
             $this->sourceTable()->update(
@@ -87,7 +87,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
                 $this->stateCriteria()
             )->run();
 
-            $this->fire('updated');
+            $this->dispatch('updated');
         }
 
         $this->flushUpdates();
@@ -104,7 +104,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
      */
     public function delete()
     {
-        $this->fire('deleting');
+        $this->dispatch('deleting');
 
         if ($this->isLoaded()) {
             $this->sourceTable()->delete($this->stateCriteria())->run();
@@ -114,7 +114,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
         //we have foreign keys for that
 
         $this->fields = $this->ormSchema()[ORM::M_COLUMNS];
-        $this->loadedState(self::DELETED)->fire('deleted');
+        $this->loadedState(self::DELETED)->dispatch('deleted');
     }
 
     /**

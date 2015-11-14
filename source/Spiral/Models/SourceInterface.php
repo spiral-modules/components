@@ -8,7 +8,7 @@
 namespace Spiral\Models;
 
 /**
- * Simple initial interface for ORM and ODM Source classes.
+ * Simple initial interface for ORM and ODM Source classes. Only share one common method - findByPK.
  */
 interface SourceInterface
 {

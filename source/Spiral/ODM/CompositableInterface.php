@@ -26,7 +26,7 @@ interface CompositableInterface extends
      * @param mixed $options Implementation specific options. In ODM will always contain field type.
      */
     public function __construct(
-        $data,
+        $value,
         EntityInterface $parent = null,
         ODM $odm = null,
         $options = null

@@ -9,19 +9,23 @@ namespace Spiral\Models;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Core\Component;
-use Spiral\Core\Exceptions\MissingContainerException;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Models\Events\DescribeEvent;
+use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Reflections\ReflectionEntity;
+use Spiral\Validation\Events\ValidatedEvent;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\Traits\ValidatorTrait;
+use Spiral\Validation\ValidatorInterface;
 
 /**
  * DataEntity in spiral used to represent basic data set with validation rules, filters and
  * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity.  In addition
  * it creates magic set of getters and setters for every field name (see validator trait) in model.
  */
-abstract class DataEntity extends Component implements
+class DataEntity extends Component implements
     EntityInterface,
     \JsonSerializable,
     \IteratorAggregate,
@@ -71,13 +75,16 @@ abstract class DataEntity extends Component implements
     protected $fillable = [];
 
     /**
-     * List of fields not allowed to be filled by setFields() method. By default no fields can be
-     * set. Replace with and empty array to allow all fields.
+     * List of fields not allowed to be filled by setFields() method. Replace with and empty array
+     * to allow all fields.
+     *
+     * By default all entity fields are settable! Opposite behaviour has to be described in entity
+     * child implementations.
      *
      * @see setFields()
      * @var array|string
      */
-    protected $secured = '*';
+    protected $secured = [];
 
     /**
      * @see setField()
@@ -163,7 +170,6 @@ abstract class DataEntity extends Component implements
      * @param bool               $all Fill all fields including non fillable.
      * @return $this
      * @throws AccessorExceptionInterface
-     * @event setFields($fields)
      */
     public function setFields($fields = [], $all = false)
     {
@@ -171,7 +177,7 @@ abstract class DataEntity extends Component implements
             return $this;
         }
 
-        foreach ($this->fire('setFields', $fields) as $name => $value) {
+        foreach ($fields as $name => $value) {
             if ($all || $this->isFillable($name)) {
                 $this->setField($name, $value, true);
             }
@@ -234,6 +240,7 @@ abstract class DataEntity extends Component implements
                 $this->fields[$name] = $field = $this->createAccessor($accessor, $field);
             }
 
+            //Letting accessor to set value
             $field->setValue($value);
 
             return;
@@ -243,7 +250,7 @@ abstract class DataEntity extends Component implements
             try {
                 $this->fields[$name] = call_user_func($setter, $value);
             } catch (\ErrorException $exception) {
-                $this->fields[$name] = call_user_func($setter, null);
+                //Exceptional situation, we are choosing to keep original field value
             }
         } else {
             $this->fields[$name] = $value;
@@ -261,6 +268,7 @@ abstract class DataEntity extends Component implements
         $value = $this->hasField($name) ? $this->fields[$name] : $default;
 
         if ($value instanceof AccessorInterface) {
+            //Accessor will deal with setting value by itself
             return $value;
         }
 
@@ -278,6 +286,17 @@ abstract class DataEntity extends Component implements
         }
 
         return $value;
+    }
+
+    /**
+     * Attach custom validator to model.
+     *
+     * @param ValidatorInterface $validator
+     */
+    public function setValidator(ValidatorInterface $validator)
+    {
+        $this->validator = $validator;
+        $this->validated = false;
     }
 
     /**
@@ -369,16 +388,15 @@ abstract class DataEntity extends Component implements
      * @see   getFields()
      * @return array
      * @throws AccessorExceptionInterface
-     * @event publicFields($publicFields)
      */
     public function publicFields()
     {
-        $fields = $this->getFields();
+        $publicFields = $this->getFields();
         foreach ($this->hidden as $secured) {
-            unset($fields[$secured]);
+            unset($publicFields[$secured]);
         }
 
-        return $this->fire('publicFields', $fields);
+        return $publicFields;
     }
 
     /**
@@ -402,17 +420,17 @@ abstract class DataEntity extends Component implements
     /**
      * {@inheritdoc}
      *
-     * @event jsonSerialize($publicFields)
+     * By default use publicFields to be json serialized.
      */
     public function jsonSerialize()
     {
-        return $this->fire('jsonSerialize', $this->publicFields());
+        return $this->publicFields();
     }
 
     /**
      * Entity must re-validate data.
      *
-     * @param bool $soft Do not invalidate entity accessors.
+     * @param bool $soft Do not invalidate nested models (if such presented).
      * @return $this
      */
     public function invalidate($soft = false)
@@ -424,11 +442,10 @@ abstract class DataEntity extends Component implements
         }
 
         //Invalidating all compositions
-        foreach ($this->fields as $field => $value) {
+        foreach ($this->getFields() as $value) {
             //Let's force composition construction
-            $accessor = $this->getField($field);
-            if ($accessor instanceof self) {
-                $accessor->invalidate($soft);
+            if ($value instanceof self) {
+                $value->invalidate($soft);
             }
         }
 
@@ -452,29 +469,37 @@ abstract class DataEntity extends Component implements
      * @param bool $reset
      * @return bool
      * @throws ValidationException
-     * @throws MissingContainerException
+     * @throws SugarException
      * @event validation()
      * @event validated($errors)
      */
     protected function validate($reset = false)
     {
-        if (empty($this->validates)) {
+        if (empty($this->validates) && empty($this->validator)) {
+            //No validation rules assigned, nothing to do
             $this->validated = true;
-        } elseif (!$this->validated || $reset) {
-            $this->fire('validation');
-
-            $this->errors = $this->validator()->getErrors();
-
-            //We just validated our model
-            $this->validated = true;
-
-            //Cleaning memory
-            $this->validator->setData([]);
-
-            $this->errors = (array)$this->fire('validated', $this->errors);
         }
 
-        return empty($this->errors);
+        if ($this->validated && !$reset) {
+            //Nothing to do
+            return empty($this->errors);
+        }
+
+        //Refreshing validation fields
+        $this->validator()->setData($this->fields);
+
+        /**
+         * @var ValidatedEvent $validatedEvent
+         */
+        $validatedEvent = $this->dispatch('validated', new ValidatedEvent(
+            $this->validator()->getErrors()
+        ));
+
+        //Validation performed
+        $this->validated = true;
+
+        //Collecting errors if any
+        return empty($this->errors = $validatedEvent->getErrors());
     }
 
     /**
@@ -543,24 +568,41 @@ abstract class DataEntity extends Component implements
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public static function create($fields = [])
+    {
+        $entity = new static();
+        $entity->setFields($fields);
+        $entity->dispatch('created', new EntityEvent($entity));
+
+        return $entity;
+    }
+
+    /**
      * Method used while entity static analysis to describe model related property using even
      * dispatcher and associated model traits.
      *
-     * @param ReflectionEntity $schema
+     * @param ReflectionEntity $reflection
      * @param string           $property
      * @param mixed            $value
      * @return mixed Returns filtered value.
-     * @event describe($property, $value, EntitySchema $schema): $value
+     * @event describe(DescribeEvent)
      */
-    public static function describeProperty(ReflectionEntity $schema, $property, $value)
+    public static function describeProperty(ReflectionEntity $reflection, $property, $value)
     {
         static::initialize(true);
 
-        //Clarifying property value using traits or other listeners
-        return static::events()->fire(
-            'describe',
-            compact('property', 'value', 'schema')
-        )['value'];
+        /**
+         * Clarifying property value using traits or other listeners.
+         *
+         * @var DescribeEvent $describeEvent
+         */
+        $describeEvent = static::events()->dispatch(
+            'describe', new DescribeEvent($reflection, $property, $value)
+        );
+
+        return $describeEvent->getValue();
     }
 
     /**

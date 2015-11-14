@@ -34,23 +34,13 @@ interface PaginatorInterface
     public function getPage();
 
     /**
-     * Apply pagination to a simple array, should fetch count from target array and return sliced
-     * array version.
-     *
-     * @param array $haystack Target array must be paginated.
-     * @return array
-     * @throws PaginationException
-     */
-    public function paginateArray(array $haystack);
-
-    /**
      * Apply paginator to paginable object.
      *
-     * @param PaginableInterface $object
+     * @param PaginableInterface $paginable
      * @return PaginableInterface
      * @throws PaginationException
      */
-    public function paginateObject(PaginableInterface $object);
+    public function paginate(PaginableInterface $paginable);
 
     /**
      * Create page URL using specific page number. No domain or schema information included by

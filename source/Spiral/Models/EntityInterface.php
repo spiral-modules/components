@@ -57,4 +57,14 @@ interface EntityInterface extends ValidatesInterface
      * @throws EntityExceptionInterface
      */
     public function getFields();
+
+    /**
+     * Create instance of specific DataEntity and set it's fields (safely). Resulted entity must
+     * not be saved into it's storage automatically.
+     *
+     * @param array $fields Entity fields to be set.
+     * @return static
+     * @event created(EntityEvent)
+     */
+    public static function create($fields = []);
 }

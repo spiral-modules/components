@@ -14,12 +14,11 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Validation\Exceptions\InvalidArgumentException;
 use Spiral\Validation\Exceptions\ValidationException;
 
 /**
  * Validator is default implementation of ValidatorInterface. Class support functional rules with
- * user parameters. In addition part of validation rules moved into validation checkers used to
+ * user parameters. In addition, part of validation rules moved into validation checkers used to
  * simplify adding new rules, checkers are resolved using container and can be rebinded in
  * application.
  *
@@ -57,12 +56,6 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     const CONFIG = 'validation';
 
     /**
-     * Errors added manually to validator using addError() method. This is only placeholder for
-     * condition value (see defaultMessage).
-     */
-    const FORCED_ERROR = "forced";
-
-    /**
      * Return from validation rule to stop any future field validations. Internal contract.
      */
     const STOP_VALIDATION = -99;
@@ -89,6 +82,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * If rule has no definer error message this text will be used instead. Localizable.
      *
+     * @invisible
      * @var string
      */
     protected $defaultMessage = "[[Condition '{condition}' does not meet.]]";
@@ -100,6 +94,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     protected $container = null;
 
     /**
+     * @invisible
      * @var array
      */
     protected $options = [
@@ -112,39 +107,25 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      *
-     * @param ConfiguratorInterface $configurator
      * @param ContainerInterface    $container
+     * @param ConfiguratorInterface $configurator
      */
     public function __construct(
-        $data = [],
         array $rules = [],
-        ConfiguratorInterface $configurator = null,
-        ContainerInterface $container = null
+        $data = [],
+        ContainerInterface $container = null,
+        ConfiguratorInterface $configurator = null
     ) {
         $this->data = $data;
         $this->rules = $rules;
 
         //We can use global container as fallback if no default values were provided
         $this->container = $this->saturate($container, ContainerInterface::class);
-        $this->options = array_merge(
-            $this->options,
-            $this->saturate($configurator, ConfiguratorInterface::class)->getConfig(self::CONFIG)
-        );
-    }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setData($data)
-    {
-        if ($this->data == $data) {
-            return $this;
-        }
+        //Configurator is required as it provides set of rule aliases and checkers
+        $configurator = $this->saturate($configurator, ConfiguratorInterface::class);
 
-        $this->data = $data;
-        $this->errors = [];
-
-        return $this;
+        $this->options = array_merge($this->options, $configurator->getConfig(self::CONFIG));
     }
 
     /**
@@ -157,6 +138,21 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         }
 
         $this->rules = $rules;
+        $this->errors = [];
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setData($data)
+    {
+        if ($this->data == $data) {
+            return $this;
+        }
+
+        $this->data = $data;
         $this->errors = [];
 
         return $this;
@@ -284,7 +280,6 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param array  $arguments Rule arguments if any.
      * @return bool|Checker
      * @throws ValidationException
-     * @throws InvalidArgumentException
      */
     protected function check($field, $value, &$condition, array $arguments = [])
     {

@@ -19,11 +19,11 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      * Accessors creation flow is unified and must be performed without Container for performance
      * reasons.
      *
-     * @param mixed           $data
+     * @param mixed           $value
      * @param EntityInterface $parent
      * @throws AccessorExceptionInterface
      */
-    public function __construct($data, EntityInterface $parent);
+    public function __construct($value, EntityInterface $parent);
 
     /**
      * Must embed accessor to another parent model. Allowed to clone itself.
@@ -41,12 +41,4 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
      * @throws AccessorExceptionInterface
      */
     public function setValue($data);
-
-    /**
-     * Serialize mocked data to be stored in database or retrieved by user.
-     *
-     * @return mixed
-     * @throws AccessorExceptionInterface
-     */
-    public function serializeData();
 }

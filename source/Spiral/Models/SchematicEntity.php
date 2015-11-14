@@ -56,16 +56,20 @@ class SchematicEntity extends DataEntity
             $result[$field] = $value;
         }
 
-        return $this->fire('publicFields', $result);
+        return $this->dispatch('publicFields', $result);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function validator(array $rules = [], ContainerInterface $container = null)
+    public function createValidator(array $rules = [], ContainerInterface $container = null)
     {
+        if (!empty($this->validator)) {
+            return $this->validator;
+        }
+
         //Initiate validation using rules declared in odmSchema
-        return parent::validator(
+        return parent::createValidator(
             !empty($rules) ? $rules : $this->schema[self::SH_VALIDATES],
             $container
         );

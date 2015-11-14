@@ -23,7 +23,6 @@ use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
-use Spiral\Events\Traits\EventsTrait;
 
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
@@ -35,7 +34,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * Query and statement events.
      */
-    use EventsTrait, InjectableTrait;
+    use InjectableTrait;
 
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
@@ -226,12 +225,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      */
     public function statement($query, array $parameters = [])
     {
-        return $this->fire('statement', [
-            'statement'  => $this->driver->statement($query, $parameters),
-            'query'      => $query,
-            'parameters' => $parameters,
-            'database'   => $this
-        ])['statement'];
+        return $this->driver->statement($query, $parameters);
     }
 
     /**

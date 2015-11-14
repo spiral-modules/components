@@ -97,7 +97,7 @@ class Compositor extends Component implements
      * @param string $class Primary class being composited.
      */
     public function __construct(
-        $data,
+        $value,
         EntityInterface $parent = null,
         ODM $odm = null,
         $class = null
@@ -105,8 +105,8 @@ class Compositor extends Component implements
         $this->parent = $parent;
         $this->class = $class;
 
-        if (!empty($data) && is_array($data)) {
-            $this->documents = $data;
+        if (!empty($value) && is_array($value)) {
+            $this->documents = $value;
         }
 
         if (empty($this->class)) {

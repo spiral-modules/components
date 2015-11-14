@@ -9,6 +9,7 @@ namespace Spiral\Pagination\Traits;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Pagination\Exceptions\PaginationException;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
@@ -100,12 +101,19 @@ trait PaginatorTrait
         $pageParameter = Paginator::DEFAULT_PARAMETER,
         ServerRequestInterface $request = null
     ) {
-        if (empty($container = $this->container()) && empty($request)) {
-            throw new PaginationException("Unable to create pagination without specified request.");
-        }
+        //Will be used in two places
+        $container = $this->container();
 
-        //If no request provided we can try to fetch it from container
-        $request = !empty($request) ? $request : $container->get(ServerRequestInterface::class);
+        if (empty($request)) {
+            if (empty($container) || !$container->has(ServerRequestInterface::class)) {
+                throw new SugarException(
+                    "Unable to create pagination without specified request."
+                );
+            }
+
+            //Getting request from container scope
+            $request = $container->get(ServerRequestInterface::class);
+        }
 
         if (empty($container) || !$container->has(PaginatorInterface::class)) {
             //Let's use default paginator
@@ -170,7 +178,7 @@ trait PaginatorTrait
             return $this;
         }
 
-        return $this->paginator->paginateObject($this);
+        return $this->paginator->paginate($this);
     }
 
     /**

@@ -44,9 +44,7 @@ trait TranslatorTrait
         }
 
         return $container->get(TranslatorInterface::class)->translate(
-            static::class,
-            $string,
-            $options
+            static::class, $string, $options
         );
     }
 

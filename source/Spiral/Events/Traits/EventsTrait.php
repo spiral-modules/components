@@ -7,19 +7,17 @@
  */
 namespace Spiral\Events\Traits;
 
-use Spiral\Events\Dispatcher;
-use Spiral\Events\DispatcherInterface;
-use Spiral\Events\Entities\ObjectEvent;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Allow class to have statically (class name) based event dispatcher.
+ * Event trait utilized Symfony\Events dispatcher to add class (not instance) specific dispatcher.
  */
 trait EventsTrait
 {
     /**
-     * List of dispatchers associated with their class name.
-     *
-     * @var DispatcherInterface[]
+     * @var EventDispatcherInterface[]
      */
     private static $dispatchers = [];
 
@@ -27,9 +25,9 @@ trait EventsTrait
      * Set event dispatchers manually for current class. Can erase existed dispatcher by providing
      * null as value.
      *
-     * @param DispatcherInterface|null $dispatcher
+     * @param EventDispatcherInterface|null $dispatcher
      */
-    public static function setEvents(DispatcherInterface $dispatcher = null)
+    public static function setEvents(EventDispatcherInterface $dispatcher = null)
     {
         self::$dispatchers[static::class] = $dispatcher;
     }
@@ -37,7 +35,7 @@ trait EventsTrait
     /**
      * Get class associated event dispatcher or create default one.
      *
-     * @return DispatcherInterface
+     * @return EventDispatcherInterface
      */
     public static function events()
     {
@@ -45,24 +43,23 @@ trait EventsTrait
             return self::$dispatchers[static::class];
         }
 
-        return self::$dispatchers[static::class] = new Dispatcher();
+        return self::$dispatchers[static::class] = new EventDispatcher();
     }
 
     /**
-     * Fire object specific event (ObjectEvent will be used) with pointer to parent class (can be
-     * called only in runtime).
+     * Dispatch event. If no dispatched associated even will be returned without dispatching.
      *
-     * @param string $event   Event name.
-     * @param mixed  $context Passed context.
-     * @return mixed          Processed event content.
+     * @param string     $name  Event name.
+     * @param Event|null $event Event class if any.
+     * @return Event
      */
-    protected function fire($event, $context = null)
+    protected function dispatch($name, Event $event = null)
     {
         if (empty(self::$dispatchers[static::class])) {
             //We can bypass dispatcher creation
-            return $context;
+            return $event;
         }
 
-        return self::$dispatchers[static::class]->fire(new ObjectEvent($this, $event, $context));
+        return static::events()->dispatch($name, $event);
     }
 }

@@ -14,7 +14,7 @@ use Spiral\Http\Responses\JsonResponse;
 use Spiral\Views\ViewInterface;
 
 /**
- * Class used to pass request and response thought chain of middlewares.
+ * Pipeline used to pass request and response thought the chain of middlewares.
  */
 class MiddlewarePipeline
 {

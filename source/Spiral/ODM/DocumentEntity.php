@@ -428,7 +428,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             $result[$field] = $value;
         }
 
-        return $this->fire('publicFields', $result);
+        return $this->dispatch('publicFields', $result);
     }
 
     /**
@@ -691,7 +691,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         $document = new static([], null, $odm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $document->setFields($fields)->fire('created');
+        $document->setFields($fields)->dispatch('created');
 
         return $document;
     }

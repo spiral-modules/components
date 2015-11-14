@@ -9,7 +9,7 @@ namespace Spiral\Core\Traits;
 
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Exceptions\MissingContainerException;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Exceptions\SingletonException;
 
 /**
@@ -26,7 +26,7 @@ trait SingletonTrait
      *
      * @param ContainerInterface $container
      * @return static
-     * @throws MissingContainerException
+     * @throws SugarException
      */
     public static function instance(ContainerInterface $container = null)
     {
@@ -40,7 +40,7 @@ trait SingletonTrait
         $container = !empty($container) ? $container : self::staticContainer();
 
         if (empty($container)) {
-            throw new MissingContainerException(
+            throw new SugarException(
                 "Singleton instance can be constructed only using valid Container."
             );
         }

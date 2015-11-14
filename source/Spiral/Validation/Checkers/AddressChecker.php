@@ -50,9 +50,11 @@ class AddressChecker extends Checker implements SingletonInterface
      */
     public function url($url, $requireScheme = true)
     {
-        if (!$requireScheme && stripos($url, 'http://') === false && stripos($url,
-                'https://') === false
+        if (
+            !$requireScheme
+            && stripos($url, 'http://') === false && stripos($url, 'https://') === false
         ) {
+            //Forcing scheme (not super great idea)
             $url = 'http://' . $url;
         }
 

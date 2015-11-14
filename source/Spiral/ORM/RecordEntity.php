@@ -857,7 +857,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $record->setFields($fields)->fire('created');
+        $record->setFields($fields)->dispatch('created');
 
         return $record;
     }

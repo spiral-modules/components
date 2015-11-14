@@ -5,7 +5,6 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-
 namespace Spiral\Http;
 
 use Psr\Http\Message\ResponseInterface;
@@ -17,6 +16,9 @@ use Spiral\Http\Exceptions\HttpException;
 use Zend\Diactoros\Response\EmitterInterface;
 use Zend\Diactoros\Response\SapiEmitter;
 
+/**
+ * Magically simple implementation of PRS7 Http core.
+ */
 class HttpCore extends Component implements HttpInterface
 {
     /**

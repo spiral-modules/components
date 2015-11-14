@@ -11,6 +11,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\Exceptions\FileNotFoundException;
 use Spiral\Files\Exceptions\WriteErrorException;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Default files storage, points to local hard drive.
@@ -63,6 +64,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         }
 
         foreach (array_reverse($directoryChain) as $directory) {
+            //Creatin
             if (!mkdir($baseDirectory = $baseDirectory . '/' . $directory)) {
                 return false;
             }
@@ -93,7 +95,9 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     public function write($filename, $data, $mode = null, $ensureLocation = false, $append = false)
     {
         try {
-            $ensureLocation && $this->ensureLocation(dirname($filename), $mode);
+            if ($ensureLocation) {
+                $this->ensureLocation(dirname($filename), $mode);
+            }
 
             if (!empty($mode) && $this->exists($filename)) {
                 //Forcing mode for existed file
@@ -125,6 +129,19 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     public function append($filename, $data, $mode = null, $ensureLocation = false)
     {
         return $this->write($filename, $data, $mode, $ensureLocation, true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function localUri($filename)
+    {
+        if (!$this->exists($filename)) {
+            throw new FileNotFoundException($filename);
+        }
+
+        //Since default implementation is local we are allowed to do that
+        return $filename;
     }
 
     /**
@@ -249,26 +266,24 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
 
     /**
      * {@inheritdoc}
+     *
+     * @param Finder $finder Optional initial finder.
      */
-    public function getFiles($location, $extension = null, &$result = [])
+    public function getFiles($location, $pattern = null, Finder $finder = null)
     {
-        if (is_string($extension)) {
-            $extension = [$extension];
+        if (empty($finder)) {
+            $finder = new Finder();
         }
 
-        $location = $this->normalizePath($location) . static::SEPARATOR;
+        $finder->files()->in($location);
 
-        foreach (glob($location . '*') as $item) {
-            if (is_dir($item)) {
-                $this->getFiles($item . static::SEPARATOR, $extension, $result);
-                continue;
-            }
+        if (!empty($pattern)) {
+            $finder->name($pattern);
+        }
 
-            if (!empty($extension) && !in_array($this->extension($item), $extension)) {
-                continue;
-            }
-
-            $result[] = $this->normalizePath($item);
+        $result = [];
+        foreach ($finder->getIterator() as $file) {
+            $result[] = (string)$file;
         }
 
         return $result;
@@ -310,25 +325,25 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
      */
-    public function relativePath($path, $directory)
+    public function relativePath($path, $from)
     {
         $path = $this->normalizePath($path);
-        $directory = $this->normalizePath($directory);
+        $from = $this->normalizePath($from);
 
-        $directory = explode('/', $directory);
+        $from = explode('/', $from);
         $path = explode('/', $path);
         $relative = $path;
 
-        foreach ($directory as $depth => $dir) {
+        foreach ($from as $depth => $dir) {
             //Find first non-matching dir
             if ($dir === $path[$depth]) {
                 //Ignore this directory
                 array_shift($relative);
             } else {
                 //Get number of remaining dirs to $from
-                $remaining = count($directory) - $depth;
+                $remaining = count($from) - $depth;
                 if ($remaining > 1) {
-                    //Add traversals up to first matching dir
+                    //Add traversals up to first matching directory
                     $padLength = (count($relative) + $remaining - 1) * -1;
                     $relative = array_pad($relative, $padLength, '..');
                     break;

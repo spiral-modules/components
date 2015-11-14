@@ -13,6 +13,13 @@ namespace Spiral\Validation;
 interface ValidatesInterface
 {
     /**
+     * Attach custom validator to entity.
+     *
+     * @param ValidatorInterface $validator
+     */
+    public function setValidator(ValidatorInterface $validator);
+
+    /**
      * Check if context data is valid.
      *
      * @return bool

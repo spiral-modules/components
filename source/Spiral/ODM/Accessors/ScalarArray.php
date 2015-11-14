@@ -86,18 +86,18 @@ class ScalarArray implements AtomicAccessorInterface, \IteratorAggregate, \Count
      * @param mixed $type Type to be filtered by. Set to null or mixed to allow any type.
      */
     public function __construct(
-        $data,
+        $value,
         EntityInterface $parent = null,
         ODM $odm = null,
         $type = self::MIXED_TYPE
     ) {
         $this->parent = $parent;
 
-        if (!is_array($data) && $data !== null) {
+        if (!is_array($value) && $value !== null) {
             throw new AccessorException("ScalarArray support only scalar arrays."); //:)
         }
 
-        $this->data = is_array($data) ? $data : [];
+        $this->data = is_array($value) ? $value : [];
         $this->type = !empty($type) ? $type : self::MIXED_TYPE;
 
         if ($this->type != self::MIXED_TYPE && !isset($this->filters[$this->type])) {

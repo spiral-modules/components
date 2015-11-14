@@ -146,15 +146,15 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         if (!$this->isLoaded()) {
-            $this->fire('saving');
+            $this->dispatch('saving');
             unset($this->fields['_id']);
 
             //Create new document
             $this->odmCollection($this->odm)->insert($this->fields = $this->serializeData());
 
-            $this->fire('saved');
+            $this->dispatch('saved');
         } elseif ($this->isSolid() || $this->hasUpdates()) {
-            $this->fire('updating');
+            $this->dispatch('updating');
 
             //Update existed document
             $this->odmCollection($this->odm)->update(
@@ -162,7 +162,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
                 $this->buildAtomics()
             );
 
-            $this->fire('updated');
+            $this->dispatch('updated');
         }
 
         $this->flushUpdates();
@@ -185,12 +185,12 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             );
         }
 
-        $this->fire('deleting');
+        $this->dispatch('deleting');
         if ($this->isLoaded()) {
             $this->odmCollection($this->odm)->remove(['_id' => $this->primaryKey()]);
         }
         $this->fields = $this->odmSchema()[ODM::D_DEFAULTS];
-        $this->fire('deleted');
+        $this->dispatch('deleted');
     }
 
     /**

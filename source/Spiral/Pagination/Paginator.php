@@ -300,28 +300,20 @@ class Paginator implements PaginatorInterface, \Countable
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function paginateArray(array $haystack)
-    {
-        $this->setCount(count($haystack));
-
-        return array_slice($haystack, $this->getOffset(), $this->limit);
-    }
 
     /**
      * {@inheritdoc}
      */
-    public function paginateObject(PaginableInterface $object)
+    public function paginate(PaginableInterface $paginable)
     {
-        $this->setCount($object->count());
-        $object->setPaginator($this);
+        //todo: think?
+        $this->setCount($paginable->count());
+        $paginable->setPaginator($this);
 
-        $object->offset($this->getOffset());
-        $object->limit($this->getLimit());
+        $paginable->offset($this->getOffset());
+        $paginable->limit($this->getLimit());
 
-        return $object;
+        return $paginable;
     }
 
     /**

@@ -24,6 +24,14 @@ interface ViewInterface
     public function set($name, $value);
 
     /**
+     * Set view data.
+     *
+     * @param array $data
+     * @return self
+     */
+    public function setData(array $data);
+
+    /**
      * Render view source using internal logic.
      *
      * @return string

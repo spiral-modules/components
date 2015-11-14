@@ -12,8 +12,6 @@ use Spiral\Files\Exceptions\WriteErrorException;
 
 /**
  * Access to hard drive or local store. Does not provide full filesystem abstractions.
- *
- * @todo Add lock and unlock method. Connection filesystem?
  */
 interface FilesInterface
 {
@@ -59,7 +57,7 @@ interface FilesInterface
 
     /**
      * Write file data with specified mode. Ensure location option should be used only if desired
-     * location may not exist to ensure sush location/directory (slow operation).
+     * location may not exist to ensure such location/directory (slow operation).
      *
      * @param string $filename
      * @param string $data
@@ -82,6 +80,15 @@ interface FilesInterface
      * @throws WriteErrorException
      */
     public function append($filename, $data, $mode = null, $ensureLocation = false);
+
+    /**
+     * Method has to return local uri which can be used in require and include statements.
+     * Implementation is allowed to use virtual stream uris if it's not local.
+     *
+     * @param string $filename
+     * @return string
+     */
+    public function localUri($filename);
 
     /**
      * Delete local file if possible. No error should be raised if file does not exists.
@@ -182,11 +189,11 @@ interface FilesInterface
     /**
      * Flat list of every file in every sub location. Locations must be normalized.
      *
-     * @param string            $location  Location for search.
-     * @param null|string|array $extension Extension or array of extensions to files.
+     * @param string $location Location for search.
+     * @param string $pattern  Extension pattern.
      * @return array
      */
-    public function getFiles($location, $extension = null);
+    public function getFiles($location, $pattern = null);
 
     /**
      * Return unique name of temporary (should be removed when interface implementation destructed)
@@ -210,9 +217,9 @@ interface FilesInterface
     /**
      * Get relative location based on absolute path.
      *
-     * @param string $path      Original file or directory location (to).
-     * @param string $directory Path will be converted to be relative to this directory (from).
+     * @param string $path Original file or directory location (to).
+     * @param string $from Path will be converted to be relative to this directory (from).
      * @return string
      */
-    public function relativePath($path, $directory);
+    public function relativePath($path, $from);
 }

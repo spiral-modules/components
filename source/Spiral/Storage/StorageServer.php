@@ -6,7 +6,6 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2011
  */
-
 namespace Spiral\Storage;
 
 use Psr\Http\Message\StreamInterface;
@@ -38,8 +37,8 @@ abstract class StorageServer extends Component implements ServerInterface
     protected $files = null;
 
     /**
-     * @param FilesInterface $files
-     * @param array          $options
+     * @param FilesInterface $files   Required for local filesystem operations.
+     * @param array          $options Server specific options.
      */
     public function __construct(FilesInterface $files, array $options)
     {

@@ -6,9 +6,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Entities\Compiler;
-
-use Spiral\Database\Entities\PDODriver;
+namespace Spiral\Database\Entities;
 
 /**
  * Class responsible for "intelligent" table and column name quoting.

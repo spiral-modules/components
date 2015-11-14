@@ -9,7 +9,7 @@ namespace Spiral\Tests\Cases\Database;
 
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Drivers\SQLServer\SQLServerDriver;
-use Spiral\Database\Entities\Compiler\Quoter;
+use Spiral\Database\Entities\Quoter;
 use Spiral\Database\Entities\PDODriver;
 
 class QuoterTest extends \PHPUnit_Framework_TestCase

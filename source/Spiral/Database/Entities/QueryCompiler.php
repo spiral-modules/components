@@ -8,7 +8,6 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
-use Spiral\Database\Entities\Compiler\Quoter;
 use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
@@ -310,7 +309,7 @@ class QueryCompiler extends Component
     {
         $statement = '';
         foreach ($joinTokens as $table => $join) {
-            $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
+            $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true);
             $statement .= $this->optional("\n    ON", $this->compileWhere($join['on']));
         }
 

@@ -94,7 +94,7 @@ class Quoter
         return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i', function ($match) {
             $identifier = $match[1];
 
-            //Function nam
+            //Function name
             if ($this->hasExpressions($identifier)) {
                 return $identifier;
             }

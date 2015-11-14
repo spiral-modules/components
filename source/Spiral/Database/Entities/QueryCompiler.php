@@ -245,16 +245,8 @@ class QueryCompiler extends Component
     protected function prepareUpdates(array $updates)
     {
         foreach ($updates as $column => &$value) {
-
-            if ($value instanceof QueryBuilder) {
-                //Nested query
-                $value = '(' . $value->sqlStatement($this) . ')';
-            } elseif ($value instanceof ExpressionInterface) {
-                //Expression
-                $value = $value->sqlStatement($this);
-            } elseif ($value instanceof FragmentInterface) {
-                //Plain fragment (i forgot why i'm using fragments without compiler)
-                $value = $value->sqlStatement();
+            if ($value instanceof FragmentInterface) {
+                $value = $this->prepareFragment($value);
             } else {
                 //Simple value (such condition should never be met since every value has to be
                 //wrapped using parameter interface)

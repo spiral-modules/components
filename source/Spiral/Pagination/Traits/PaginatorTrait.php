@@ -17,6 +17,8 @@ use Spiral\Pagination\PaginatorInterface;
 /**
  * Provides ability to paginate associated instance. Will work with default Paginator or fetch one
  * from container.
+ *
+ * Compatible with PaginatorAwareInterface.
  */
 trait PaginatorTrait
 {
@@ -86,6 +88,41 @@ trait PaginatorTrait
     }
 
     /**
+     * Manually set paginator instance for specific object.
+     *
+     * @param PaginatorInterface $paginator
+     * @return $this
+     */
+    public function setPaginator(PaginatorInterface $paginator)
+    {
+        $this->paginator = $paginator;
+
+        return $this;
+    }
+
+    /**
+     * Get paginator for the current selection. Paginate method should be already called.
+     *
+     * @see isPaginated()
+     * @see paginate()
+     * @return PaginatorInterface|Paginator|null
+     */
+    public function getPaginator()
+    {
+        return $this->paginator;
+    }
+
+    /**
+     * Indication that object was paginated.
+     *
+     * @return bool
+     */
+    public function isPaginated()
+    {
+        return !empty($this->paginator);
+    }
+
+    /**
      * Paginate current selection using Paginator class.
      *
      * @param int                    $limit         Pagination limit.
@@ -115,7 +152,7 @@ trait PaginatorTrait
             $request = $container->get(ServerRequestInterface::class);
         }
 
-        if (empty($container) || !$container->has(PaginatorInterface::class)) {
+        if (empty($container) || !$container->has(Paginator::class)) {
             //Let's use default paginator
             $this->paginator = new Paginator($request, $pageParameter);
         } else {
@@ -128,41 +165,6 @@ trait PaginatorTrait
         $this->paginator->setLimit($limit);
 
         return $this;
-    }
-
-    /**
-     * Manually set paginator instance for specific object.
-     *
-     * @param PaginatorInterface $paginator
-     * @return $this
-     */
-    public function setPaginator(PaginatorInterface $paginator)
-    {
-        $this->paginator = $paginator;
-
-        return $this;
-    }
-
-    /**
-     * Indication that object was paginated.
-     *
-     * @return bool
-     */
-    public function isPaginated()
-    {
-        return !empty($this->paginator);
-    }
-
-    /**
-     * Get paginator for the current selection. Paginate method should be already called.
-     *
-     * @see isPaginated()
-     * @see paginate()
-     * @return PaginatorInterface|Paginator|null
-     */
-    public function getPaginator()
-    {
-        return $this->paginator;
     }
 
     /**

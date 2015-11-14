@@ -13,7 +13,7 @@ use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -344,7 +344,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             $columns = !empty($this->dataColumns) ? $this->dataColumns : ['*'];
         }
 
-        return $compiler->select(
+        return $compiler->compileSelect(
             [$this->loader->getTable() . ' AS ' . $this->loader->getAlias()],
             $this->distinct,
             $columns,
@@ -532,14 +532,14 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
                 continue;
             }
 
-            if ($value instanceof SQLFragmentInterface && !$value instanceof ParameterInterface) {
+            if ($value instanceof FragmentInterface && !$value instanceof ParameterInterface) {
                 continue;
             }
 
             $normalized[] = $value;
         }
 
-        return $this->database->execute($statement, $this->compiler->prepareParameters(
+        return $this->database->execute($statement, $this->compiler->orderParameters(
             QueryCompiler::UPDATE_QUERY,
             $this->whereParameters,
             $this->onParameters,
@@ -571,7 +571,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         }
 
         return $this->database->execute($this->deleteStatement(),
-            $this->compiler->prepareParameters(
+            $this->compiler->orderParameters(
                 QueryCompiler::DELETE_QUERY,
                 $this->whereParameters,
                 $this->onParameters
@@ -590,7 +590,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
         $this->loader->configureSelector($this, false);
 
-        return $compiler->update(
+        return $compiler->compileUpdate(
             $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
             $columns,
             $this->whereTokens
@@ -608,7 +608,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
         $this->loader->configureSelector($this, false);
 
-        return $compiler->delete(
+        return $compiler->compileDelete(
             $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
             $this->whereTokens
         );

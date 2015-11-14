@@ -7,11 +7,11 @@
  */
 namespace Spiral\Database\Entities;
 
-use Spiral\Cache\CacheInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\InjectableTrait;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
@@ -123,31 +123,34 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * @var string
      */
-    private $tablePrefix = '';
+    private $prefix = '';
 
     /**
+     * Needed to receive cache store on demand.
+     *
      * @invisible
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * @param ContainerInterface $container
-     * @param Driver             $driver      Driver instance responsible for database connection.
-     * @param string             $name        Internal database name/id.
-     * @param string             $tablePrefix Default database table prefix, will be used for all
-     *                                        table identifiers.
+     * @param Driver             $driver    Driver instance responsible for database connection.
+     * @param string             $name      Internal database name/id.
+     * @param string             $prefix    Default database table prefix, will be used for all
+     *                                      table identifiers.
+     * @param ContainerInterface $container Needed to receive cache store on demand.
      */
     public function __construct(
-        ContainerInterface $container,
         Driver $driver,
         $name,
-        $tablePrefix = ''
+        $prefix = '',
+        ContainerInterface $container = null
     ) {
         $this->driver = $driver;
         $this->name = $name;
-        $this->setPrefix($tablePrefix);
+        $this->setPrefix($prefix);
 
+        //No saturation here as container is not mandratory
         $this->container = $container;
     }
 
@@ -176,12 +179,12 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     }
 
     /**
-     * @param string $tablePrefix
+     * @param string $prefix
      * @return $this
      */
-    public function setPrefix($tablePrefix)
+    public function setPrefix($prefix)
     {
-        $this->tablePrefix = $tablePrefix;
+        $this->prefix = $prefix;
 
         return $this;
     }
@@ -191,7 +194,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      */
     public function getPrefix()
     {
-        return $this->tablePrefix;
+        return $this->prefix;
     }
 
     /**
@@ -248,11 +251,20 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
         $key = '',
         StoreInterface $store = null
     ) {
-        $store = !empty($store) ? $store : $this->container->get(CacheInterface::class)->store();
+        if (empty($store) && empty($this->container)) {
+            throw new SugarException(
+                "Unable to receive cache 'StoreInterface', no container set of user store provided."
+            );
+        }
+
+        if (empty($store)) {
+            //We can request store from container
+            $store = $this->container->get(StoreInterface::class);
+        }
 
         if (empty($key)) {
             //Trying to build unique query id based on provided options and environment.
-            $key = md5(serialize([$query, $parameters, $this->name, $this->tablePrefix]));
+            $key = md5(serialize([$query, $parameters, $this->name, $this->prefix]));
         }
 
         $data = $store->remember($key, $lifetime, function () use ($query, $parameters) {
@@ -368,7 +380,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      */
     public function hasTable($name)
     {
-        return $this->driver->hasTable($this->tablePrefix . $name);
+        return $this->driver->hasTable($this->prefix . $name);
     }
 
     /**
@@ -390,12 +402,12 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     {
         $result = [];
         foreach ($this->driver->tableNames() as $table) {
-            if ($this->tablePrefix && strpos($table, $this->tablePrefix) !== 0) {
+            if ($this->prefix && strpos($table, $this->prefix) !== 0) {
                 //Logical partitioning
                 continue;
             }
 
-            $result[] = $this->table(substr($table, strlen($this->tablePrefix)));
+            $result[] = $this->table(substr($table, strlen($this->prefix)));
         }
 
         return $result;

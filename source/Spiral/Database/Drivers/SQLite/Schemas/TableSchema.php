@@ -182,7 +182,7 @@ class TableSchema extends AbstractTable
                 );
 
                 //Renaming (without prefix)
-                $this->rename(substr($tableName, strlen($this->tablePrefix)));
+                $this->rename(substr($tableName, strlen($this->prefix)));
 
                 //Restoring indexes, we can create them now
                 $this->indexes = $indexes;

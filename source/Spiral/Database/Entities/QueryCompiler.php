@@ -8,10 +8,11 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
+use Spiral\Database\Entities\Compiler\Quoter;
 use Spiral\Database\Exceptions\CompilerException;
+use Spiral\Database\Injections\ExpressionInterface;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\SQLExpression;
-use Spiral\Database\Injections\SQLFragmentInterface;
 
 /**
  * Responsible for conversion of set of query parameters (where tokens, table names and etc) into
@@ -30,47 +31,73 @@ class QueryCompiler extends Component
     const INSERT_QUERY = 'insert';
 
     /**
-     * Cached list of table aliases used to correctly inject prefixed tables into conditions.
-     *
-     * @var array
-     */
-    private $aliases = [];
-
-    /**
      * Associated driver instance, may be required for some data assumptions.
      *
-     * @var Driver
+     * @var PDODriver
      */
     protected $driver = null;
 
     /**
-     * Table prefix will be applied to every table name found in query.
+     * Quotes names and expressions.
      *
-     * @var string
+     * @var Quoter
      */
-    protected $tablePrefix = '';
+    protected $quoter = null;
 
     /**
-     * @param Driver $driver
-     * @param string $tablePrefix
+     * QueryCompiler constructor.
+     *
+     * @param PDODriver $driver
+     * @param Quoter    $quoter
      */
-    public function __construct(Driver $driver, $tablePrefix = '')
+    public function __construct(PDODriver $driver, Quoter $quoter)
     {
         $this->driver = $driver;
-        $this->tablePrefix = $tablePrefix;
+        $this->quoter = $quoter;
+    }
+
+    /**
+     * Reset table aliases cache, required if same compiler used twice.
+     */
+    public function resetQuoter()
+    {
+        $this->quoter->reset();
+    }
+
+    /**
+     * Sort list of parameters in dbms query specific order, query type must be provided. This
+     * method was used at times when delete and update queries supported joins, i might need to
+     * drop it now.
+     *
+     * @param int   $queryType
+     * @param array $whereParameters
+     * @param array $onParameters
+     * @param array $havingParameters
+     * @param array $columnIdentifiers Column names (if any).
+     * @return array
+     */
+    public function orderParameters(
+        $queryType,
+        array $whereParameters = [],
+        array $onParameters = [],
+        array $havingParameters = [],
+        array $columnIdentifiers = []
+    ) {
+        return array_merge($columnIdentifiers, $onParameters, $whereParameters, $havingParameters);
     }
 
     /**
      * Create insert query using table names, columns and rowsets. Must support both - single and
      * batch inserts.
      *
-     * @param string $table
-     * @param array  $columns
-     * @param array  $rowsets
+     * @param string              $table
+     * @param array               $columns
+     * @param FragmentInterface[] $rowsets Every rowset has to be convertable into string. Raw data
+     *                                     not allowed!
      * @return string
      * @throws CompilerException
      */
-    public function insert($table, array $columns, array $rowsets)
+    public function compileInsert($table, array $columns, array $rowsets)
     {
         if (empty($columns)) {
             throw new CompilerException("Unable to build insert statement, columns must be set.");
@@ -82,258 +109,164 @@ class QueryCompiler extends Component
             );
         }
 
-        return "INSERT INTO {$this->quote($table, true)} ({$this->columns($columns)})\n"
-        . "VALUES " . join(",\n", $rowsets);
+        //To add needed prefixes (if any)
+        $table = $this->quote($table, true);
+
+        //Compiling list of columns
+        $columns = $this->prepareColumns($columns);
+
+        //Simply joining every rowset
+        $rowsets = join(",\n", $rowsets);
+
+        return "INSERT INTO {$table} ({$columns})\nVALUES {$rowsets}";
     }
 
     /**
      * Create update statement.
      *
      * @param string $table
-     * @param array  $columns
-     * @param array  $where
+     * @param array  $updates
+     * @param array  $whereTokens
      * @return string
      * @throws CompilerException
      */
-    public function update($table, array $columns, array $where = [])
+    public function compileUpdate($table, array $updates, array $whereTokens = [])
     {
-        $statement = "UPDATE {$this->quote($table, true, true)}\nSET "
-            . $this->prepareColumns($columns)
-            . $this->mountExpression("\nWHERE", $this->where($where));
+        $table = $this->quote($table, true);
 
-        return rtrim($statement);
+        //Preparing update column statement
+        $updates = $this->prepareUpdates($updates);
+
+        //Where statement is optional for update queries
+        $whereStatement = $this->optional("\nWHERE", $this->compileWhere($whereTokens));
+
+        return rtrim("UPDATE {$table}\nSET {$updates} {$whereStatement}");
     }
 
     /**
      * Create delete statement.
      *
      * @param string $table
-     * @param array  $where
+     * @param array  $whereTokens
      * @return string
      * @throws CompilerException
      */
-    public function delete($table, array $where = [])
+    public function compileDelete($table, array $whereTokens = [])
     {
-        $statement = "DELETE FROM {$this->quote($table, true)}"
-            . $this->mountExpression("\nWHERE", $this->where($where));
+        $table = $this->quote($table, true);
 
-        return rtrim($statement);
+        //Where statement is optional for delete query (which is weird)
+        $whereStatement = $this->optional("\nWHERE", $this->compileWhere($whereTokens));
+
+        return rtrim("DELETE FROM {$table} {$whereStatement}");
     }
 
     /**
      * Create select statement. Compiler must validly resolve table and column aliases used in
      * conditions and joins.
      *
-     * @param array          $from
+     * @param array          $fromTables
      * @param boolean|string $distinct String only for PostgresSQL.
      * @param array          $columns
-     * @param array          $joins
-     * @param array          $where
-     * @param array          $having
-     * @param array          $groupBy
-     * @param array          $orderBy
+     * @param array          $joinTokens
+     * @param array          $whereTokens
+     * @param array          $havingTokens
+     * @param array          $grouping
+     * @param array          $ordering
      * @param int            $limit
      * @param int            $offset
-     * @param array          $unions
+     * @param array          $unionTokens
      * @return string
      * @throws CompilerException
      */
-    public function select(
-        array $from,
+    public function compileSelect(
+        array $fromTables,
         $distinct,
         array $columns,
-        array $joins = [],
-        array $where = [],
-        array $having = [],
-        array $groupBy = [],
-        array $orderBy = [],
+        array $joinTokens = [],
+        array $whereTokens = [],
+        array $havingTokens = [],
+        array $grouping = [],
+        array $ordering = [],
         $limit = 0,
         $offset = 0,
-        array $unions = []
+        array $unionTokens = []
     ) {
         //This statement parts should be processed first to define set of table and column aliases
-        $from = $this->tables($from);
+        $fromTables = $this->compileTables($fromTables);
 
-        $joins = $this->mountExpression(' ', $this->joins($joins), ' ');
-        $distinct = $this->mountExpression(' ', $this->distinct($distinct));
+        $joinsStatement = $this->optional(' ', $this->compileJoins($joinTokens), ' ');
 
-        //After joins and tables to make sure that compiler knows every alias
-        $columns = $this->columns($columns);
+        //Distinct flag (if any)
+        $distinct = $this->optional(' ', $this->compileDistinct($distinct));
 
-        $where = $this->mountExpression("\nWHERE", $this->where($where));
-        $having = $this->mountExpression("\nHAVING", $this->where($having));
-        $groupBy = $this->mountExpression("\nGROUP BY", $this->groupBy($groupBy), ' ');
+        //Columns are compiled after table names and joins to enshure aliases and prefixes
+        $columns = $this->prepareColumns($columns);
+
+        //A lot of constrain and other statements
+        $whereStatement = $this->optional("\nWHERE", $this->compileWhere($whereTokens));
+        $havingStatement = $this->optional("\nHAVING", $this->compileWhere($havingTokens));
+        $groupingStatement = $this->optional("\nGROUP BY", $this->compileGrouping($grouping), ' ');
+
+        //Union statement has new line at beginning of every union
+        $unionsStatement = $this->optional("\n", $this->compileUnions($unionTokens));
+        $orderingStatement = $this->optional("\nORDER BY ", $this->compileOrdering($ordering));
+
+        $limingStatement = $this->optional("\n", $this->compileLimit($limit, $offset));
 
         //Initial statement have predictable order
-        $statement = "SELECT{$distinct}\n{$columns}\nFROM {$from}{$joins}{$where}{$groupBy}{$having}";
-
-        if (empty($unions) && !empty($orderBy)) {
-            $statement .= "\nORDER BY " . $this->orderBy($orderBy);
-        }
-
-        if (!empty($unions)) {
-            $statement .= $this->unions($unions);
-        }
-
-        if (!empty($unions) && !empty($orderBy)) {
-            $statement .= "\nORDER BY " . $this->orderBy($orderBy);
-        }
-
-        if (!empty($limit) || !empty($offset)) {
-            $statement .= "\n" . $this->limit($limit, $offset);
-        }
+        $statement = "SELECT{$distinct}\n{$columns}\nFROM {$fromTables}";
+        $statement .= "{$joinsStatement}{$whereStatement}{$groupingStatement}{$havingStatement}";
+        $statement .= "{$unionsStatement}{$orderingStatement}{$limingStatement}";
 
         return rtrim($statement);
     }
 
     /**
-     * Query query identifier, if identified stated as table - table prefix must be added.
+     * Quote and wrap column identifiers (used in insert statement compilation).
      *
-     * @param string $key        Identifier can include simple column operations and functions,
-     *                           having "." in it will automatically force table prefix to first
-     *                           value.
-     * @param bool   $table      Set to true to let quote method know that identified is related
-     *                           to table name.
-     * @param bool   $forceTable In some cases we have to force prefix.
-     * @return mixed|string
+     * @param array $columnIdentifiers
+     * @param int   $maxLength Automatically wrap columns.
+     * @return string
      */
-    public function quote($key, $table = false, $forceTable = false)
+    protected function prepareColumns(array $columnIdentifiers, $maxLength = 180)
     {
-        if ($key instanceof SQLExpression) {
-            return $key->sqlStatement($this);
-        } elseif ($key instanceof SQLFragmentInterface) {
-            return $key->sqlStatement();
-        }
+        //Let's quote every identifier
+        $columnIdentifiers = array_map([$this, 'quote'], $columnIdentifiers);
 
-        if (preg_match('/ as /i', $key, $matches)) {
-            list($key, $alias) = explode($matches[0], $key);
-
-            /**
-             * We can't do looped aliases, so let's force table prefix for identifier if we aliasing
-             * table name at this moment.
-             */
-            $quoted = $this->quote($key, $table, $table)
-                . $matches[0]
-                . $this->driver->identifier($alias);
-
-            if ($table && strpos($key, '.') === false) {
-                //We have to apply operation post factum to prevent self aliasing (name AS name
-                //when db has prefix, expected: prefix_name as name)
-                $this->aliases[$alias] = $key;
-            }
-
-            return $quoted;
-        }
-
-        if (strpos($key, '(') || strpos($key, ' ')) {
-            return preg_replace_callback('/([a-z][0-9_a-z\.]*\(?)/i',
-                function ($identifier) use (&$table) {
-                    $identifier = $identifier[1];
-                    if (substr($identifier, -1) == '(') {
-                        //Function name
-                        return $identifier;
-                    }
-
-                    if ($table) {
-                        $table = false;
-
-                        //Only first table has to be escaped
-                        return $this->quote($identifier, true);
-                    }
-
-                    return $this->quote($identifier);
-                }, $key);
-        }
-
-        if (strpos($key, '.') === false) {
-            if (($table && !isset($this->aliases[$key])) || $forceTable) {
-                if (!isset($this->aliases[$this->tablePrefix . $key])) {
-                    $this->aliases[$this->tablePrefix . $key] = $key;
-                }
-
-                $key = $this->tablePrefix . $key;
-            }
-
-            return $this->driver->identifier($key);
-        }
-
-        $key = explode('.', $key);
-
-        //Expecting first element be table name
-        if (!isset($this->aliases[$key[0]])) {
-            $key[0] = $this->tablePrefix . $key[0];
-        }
-
-        //No aliases can be collected there
-        $key = array_map([$this->driver, 'identifier'], $key);
-
-        return join('.', $key);
-    }
-
-    /**
-     * Sort list of parameters in dbms query specific order, query type must be provided. This
-     * method was used at times when delete and update queries supported joins, we might drop it
-     * now.
-     *
-     * @param int   $type
-     * @param array $where
-     * @param array $joins
-     * @param array $having
-     * @param array $columns
-     * @return array
-     */
-    public function prepareParameters(
-        $type,
-        array $where = [],
-        array $joins = [],
-        array $having = [],
-        array $columns = []
-    ) {
-        return array_merge($columns, $joins, $where, $having);
-    }
-
-    /**
-     * Reset compiler aliases cache.
-     *
-     * @return $this
-     */
-    public function reset()
-    {
-        $this->aliases = [];
-
-        return $this;
+        return wordwrap(join(', ', $columnIdentifiers), $maxLength);
     }
 
     /**
      * Prepare column values to be used in UPDATE statement.
      *
-     * @param array  $columns
-     * @param string $tableAlias Forced table alias for updated columns.
+     * @param array $updates
      * @return array
      */
-    protected function prepareColumns(array $columns, $tableAlias = '')
+    protected function prepareUpdates(array $updates)
     {
-        foreach ($columns as $column => &$value) {
+        foreach ($updates as $column => &$value) {
+
             if ($value instanceof QueryBuilder) {
+                //Nested query
                 $value = '(' . $value->sqlStatement($this) . ')';
-            } elseif ($value instanceof SQLExpression) {
+            } elseif ($value instanceof ExpressionInterface) {
+                //Expression
                 $value = $value->sqlStatement($this);
-            } elseif ($value instanceof SQLFragmentInterface) {
+            } elseif ($value instanceof FragmentInterface) {
+                //Plain fragment (i forgot why i'm using fragments without compiler)
                 $value = $value->sqlStatement();
             } else {
+                //Simple value (such condition should never be met since every value has to be
+                //wrapped using parameter interface)
                 $value = '?';
             }
 
-            if (strpos($column, '.') === false && !empty($tableAlias)) {
-                $column = $tableAlias . '.' . $column;
-            }
-
-            $value = ' ' . $this->quote($column) . ' = ' . $value;
-
+            $value = "{$this->quote($column)} = {$value}";
             unset($value);
         }
 
-        return trim(join(", ", $columns));
+        return trim(join(",", $updates));
     }
 
     /**
@@ -342,7 +275,7 @@ class QueryCompiler extends Component
      * @param mixed $distinct Not every DBMS support distinct expression, only Postgres does.
      * @return string
      */
-    protected function distinct($distinct)
+    protected function compileDistinct($distinct)
     {
         if (empty($distinct)) {
             return '';
@@ -357,10 +290,10 @@ class QueryCompiler extends Component
      * @param array $tables
      * @return string
      */
-    protected function tables(array $tables)
+    protected function compileTables(array $tables)
     {
         foreach ($tables as &$table) {
-            $table = $this->quote($table, true, true);
+            $table = $this->quote($table, true);
             unset($table);
         }
 
@@ -368,168 +301,55 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Compile columns list statement.
-     *
-     * @param array $columns
-     * @return string
-     */
-    protected function columns(array $columns)
-    {
-        return wordwrap(join(', ', array_map([$this, 'quote'], $columns)), 180);
-    }
-
-    /**
      * Compiler joins statement.
      *
-     * @param array $joins
+     * @param array $joinTokens
      * @return string
      */
-    protected function joins(array $joins)
+    protected function compileJoins(array $joinTokens)
     {
         $statement = '';
-        foreach ($joins as $table => $join) {
+        foreach ($joinTokens as $table => $join) {
             $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true, true);
-            $statement .= $this->mountExpression("\n    ON", $this->where($join['on']));
+            $statement .= $this->optional("\n    ON", $this->compileWhere($join['on']));
         }
 
         return $statement;
-    }
-
-    /**
-     * Compile where statement.
-     *
-     * @param array $tokens
-     * @return string
-     * @throws CompilerException
-     */
-    protected function where(array $tokens)
-    {
-        if (empty($tokens)) {
-            return '';
-        }
-
-        $statement = '';
-
-        $activeGroup = true;
-        foreach ($tokens as $condition) {
-            $joiner = $condition[0];
-            $context = $condition[1];
-
-            //First condition in group/query, no any AND, OR required
-            if ($activeGroup) {
-                //Kill AND, OR and etc.
-                $joiner = '';
-
-                //Next conditions require AND or OR
-                $activeGroup = false;
-            } else {
-                $joiner .= ' ';
-            }
-
-            if ($context == '(') {
-                //New where group.
-                $activeGroup = true;
-            }
-
-            if (is_string($context)) {
-                $statement = rtrim($statement . $joiner)
-                    . ($joiner && $context == '(' ? ' ' : '')
-                    . $context
-                    . ($context == ')' ? ' ' : '');
-
-                continue;
-            }
-
-            if ($context instanceof QueryBuilder) {
-                $statement .= $joiner . ' (' . $context->sqlStatement($this) . ') ';
-                continue;
-            }
-
-            if ($context instanceof SQLExpression) {
-                //( ?? )
-                $statement .= $joiner . ' ' . $context->sqlStatement($this) . ' ';
-                continue;
-            } elseif ($context instanceof SQLFragmentInterface) {
-                //( ?? )
-                $statement .= $joiner . ' ' . $context->sqlStatement() . ' ';
-                continue;
-            }
-
-            list($identifier, $operator, $value) = $context;
-            $identifier = $this->normalizeIdentifier($identifier);
-
-            if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN') {
-                $statement .= "{$joiner} {$identifier} " . "{$operator} "
-                    . "{$this->getPlaceholder($value)} AND {$this->getPlaceholder($context[3])} ";
-
-                continue;
-            }
-
-            //Resolve operator value for various types
-            $operator = $this->resolveOperator($value, $operator);
-
-            if ($value instanceof QueryBuilder) {
-                $value = ' (' . $value . ') ';
-            } else {
-                $value = $this->getPlaceholder($value);
-            }
-
-            $statement .= "{$joiner}{$identifier} {$operator} {$value} ";
-        }
-
-        if ($activeGroup) {
-            throw new CompilerException("Unable to build where statement, unclosed where group.");
-        }
-
-        return trim($statement);
-    }
-
-    /**
-     * Prepare value to be replaced into query (replace ?).
-     *
-     * @param string $value
-     * @return string
-     */
-    protected function getPlaceholder($value)
-    {
-        if ($value instanceof SQLExpression) {
-            return $value->sqlStatement($this);
-        }
-        if ($value instanceof SQLFragmentInterface) {
-            return $value->sqlStatement();
-        }
-
-        return '?';
     }
 
     /**
      * Compile union statement chunk. Keywords UNION and ALL will be included, this methods will
      * automatically move every union on new line.
      *
-     * @param array $unions
+     * @param array $unionTokens
      * @return string
      */
-    protected function unions(array $unions)
+    protected function compileUnions(array $unionTokens)
     {
+        if (empty($unionTokens)) {
+            return '';
+        }
+
         $statement = '';
-        foreach ($unions as $union) {
+        foreach ($unionTokens as $union) {
+            //First key is union type, second united query (no need to share compiler)
             $statement .= "\nUNION {$union[1]}\n({$union[0]})";
         }
 
-        return $statement;
+        return ltrim($statement, "\n");
     }
 
     /**
      * Compile ORDER BY statement.
      *
-     * @param array $orderBy
+     * @param array $ordering
      * @return string
      */
-    protected function orderBy(array $orderBy)
+    protected function compileOrdering(array $ordering)
     {
         $result = [];
-        foreach ($orderBy as $item) {
-            $result[] = $this->quote($item[0]) . ' ' . strtoupper($item[1]);
+        foreach ($ordering as $order) {
+            $result[] = $this->quote($order[0]) . ' ' . strtoupper($order[1]);
         }
 
         return join(', ', $result);
@@ -538,13 +358,13 @@ class QueryCompiler extends Component
     /**
      * Compiler GROUP BY statement.
      *
-     * @param array $groupBy
+     * @param array $grouping
      * @return string
      */
-    protected function groupBy(array $groupBy)
+    protected function compileGrouping(array $grouping)
     {
         $statement = '';
-        foreach ($groupBy as $identifier) {
+        foreach ($grouping as $identifier) {
             $statement .= $this->quote($identifier);
         }
 
@@ -558,8 +378,12 @@ class QueryCompiler extends Component
      * @param int $offset
      * @return string
      */
-    protected function limit($limit, $offset)
+    protected function compileLimit($limit, $offset)
     {
+        if (empty($limit) && empty($offset)) {
+            return '';
+        }
+
         $statement = '';
         if (!empty($limit)) {
             $statement = "LIMIT {$limit} ";
@@ -573,14 +397,130 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Combine expressing and prefix (usually SQL keyword) but only if expression is not empty.
+     * Compile where statement.
+     *
+     * @param array $tokens
+     * @return string
+     * @throws CompilerException
+     */
+    protected function compileWhere(array $tokens)
+    {
+        if (empty($tokens)) {
+            return '';
+        }
+
+        $statement = '';
+
+        $activeGroup = true;
+        foreach ($tokens as $condition) {
+            //OR/AND keyword
+            $boolean = $condition[0];
+
+            //See AbstractWhere
+            $context = $condition[1];
+
+            //First condition in group/query, no any AND, OR required
+            if ($activeGroup) {
+                //Kill AND, OR and etc.
+                $boolean = '';
+
+                //Next conditions require AND or OR
+                $activeGroup = false;
+            }
+
+            /**
+             * When context is string it usually represent control keyword/syntax such as opening
+             * or closing braces.
+             */
+            if (is_string($context)) {
+                if ($context == '(') {
+                    //New where group.
+                    $activeGroup = true;
+                }
+
+                $postfix = ' ';
+                if ($context == '(') {
+                    //We don't need space after opening brace
+                    $postfix = '';
+                }
+
+                $statement .= ltrim("{$boolean} {$context}{$postfix}");
+                continue;
+            }
+
+            if ($context instanceof FragmentInterface) {
+                //Fragments has to be compiled separately
+                $statement .= "{$boolean} {$this->prepareFragment($context)} ";
+                continue;
+            }
+
+            if (!is_array($context)) {
+                throw new CompilerException(
+                    "Invalid where token, context expected to be an array."
+                );
+            }
+
+            /**
+             * This is "normal" where token which includes identifier, operator and value.
+             */
+            list($identifier, $operator, $value) = $context;
+
+            //Identifier can be column name, expression or even query builder
+            $identifier = $this->quote($identifier);
+
+            //Value has to be prepared as well
+            $value = $this->prepareValue($value);
+
+            if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN') {
+                //Between statement has additional parameter
+                $right = $this->prepareValue($context[3]);
+
+                $statement .= "{$boolean} {$identifier} {$operator} {$value} AND {$right} ";
+                continue;
+            }
+
+            //Compiler can switch equal to IN if value points to array
+            $operator = $this->prepareOperator($value, $operator);
+
+            $statement .= "{$boolean} {$identifier} {$operator} {$value} ";
+        }
+
+        if ($activeGroup) {
+            throw new CompilerException("Unable to build where statement, unclosed where group.");
+        }
+
+        return trim($statement);
+    }
+
+    /**
+     * Query query identifier, if identified stated as table - table prefix must be added.
+     *
+     * @param string $identifier Identifier can include simple column operations and functions,
+     *                           having "." in it will automatically force table prefix to first
+     *                           value.
+     * @param bool   $table      Set to true to let quote method know that identified is related
+     *                           to table name.
+     * @return mixed|string
+     */
+    protected function quote($identifier, $table = false)
+    {
+        if ($identifier instanceof FragmentInterface) {
+            return $this->prepareFragment($identifier);
+        }
+
+        return $this->quoter->quote($identifier, $table);
+    }
+
+    /**
+     * Combine expression with prefix/postfix (usually SQL keyword) but only if expression is not
+     * empty.
      *
      * @param string $prefix
      * @param string $expression
      * @param string $postfix
      * @return string
      */
-    protected function mountExpression($prefix, $expression, $postfix = '')
+    protected function optional($prefix, $expression, $postfix = '')
     {
         if (empty($expression)) {
             return '';
@@ -590,60 +530,40 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Helper method used to interpolate SQL query with set of parameters, must be used only for
-     * development purposes and never for real query.
+     * Prepare value to be replaced into query (replace ?).
      *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     * @return mixed
+     * @param string $value
+     * @return string
      */
-    public static function interpolate($query, array $parameters = [])
+    private function prepareValue($value)
     {
-        if (empty($parameters)) {
-            return $query;
+        if ($value instanceof FragmentInterface) {
+            return $this->prepareFragment($value);
         }
 
-        array_walk($parameters, function (&$parameter) {
-            return $parameter = self::normalizeParameter($parameter);
-        });
-
-        reset($parameters);
-        if (!is_int(key($parameters))) {
-            return \Spiral\interpolate($query, $parameters, '', '');
-        }
-
-        foreach ($parameters as $parameter) {
-            $query = preg_replace('/\?/', $parameter, $query, 1);
-        }
-
-        return $query;
+        //Technically should never happen (but i prefer to keep this legacy code)
+        return '?';
     }
 
     /**
-     * Normalize identifier value.
+     * Prepare where fragment to be injected into statement.
      *
-     * @param mixed $identifier
-     * @return mixed|string
+     * @param FragmentInterface $context
+     * @return string
      */
-    private function normalizeIdentifier($identifier)
+    private function prepareFragment(FragmentInterface $context)
     {
-        if ($identifier instanceof QueryBuilder) {
-            $identifier = '(' . $identifier->sqlStatement($this) . ')';
-
-            return $identifier;
-        } elseif ($identifier instanceof SQLExpression) {
-            $identifier = $identifier->sqlStatement($this);
-
-            return $identifier;
-        } elseif ($identifier instanceof SQLFragmentInterface) {
-            $identifier = $identifier->sqlStatement();
-
-            return $identifier;
-        } else {
-            $identifier = $this->quote($identifier);
-
-            return $identifier;
+        if ($context instanceof QueryBuilder) {
+            //Nested queries has to be wrapped with braces
+            return '(' . $context->sqlStatement($this) . ')';
         }
+
+        if ($context instanceof ExpressionInterface) {
+            //Fragments does not need braces around them
+            return $context->sqlStatement($this);
+        }
+
+        return $context->sqlStatement();
     }
 
     /**
@@ -653,52 +573,18 @@ class QueryCompiler extends Component
      * @param string $operator
      * @return string
      */
-    private function resolveOperator($value, $operator)
+    private function prepareOperator($value, $operator)
     {
-        if (
-            $operator == '='
-            && (
-                is_array($value)
-                || ($value instanceof ParameterInterface && is_array($value->getValue()))
-            )
-        ) {
-            $operator = 'IN';
-
+        if ($operator != '=' || is_scalar($value)) {
+            //Doing nothing for non equal operators
             return $operator;
         }
 
+        if ($value instanceof ParameterInterface && is_array($value->getValue())) {
+            //Automatically switching between equal and IN
+            return 'IN';
+        }
+
         return $operator;
-    }
-
-    /**
-     * Normalize parameter value to be interpolated.
-     *
-     * @param mixed $parameter
-     * @return string
-     */
-    protected static function normalizeParameter($parameter)
-    {
-        if ($parameter instanceof ParameterInterface) {
-            return self::normalizeParameter($parameter->getValue());
-        }
-
-        switch (gettype($parameter)) {
-            case "boolean":
-                return $parameter ? 'true' : 'false';
-            case "integer":
-                return $parameter + 0;
-            case "NULL":
-                return 'NULL';
-            case "double":
-                return sprintf('%F', $parameter);
-            case "string":
-                return "'" . addcslashes($parameter, "'") . "'";
-            case 'object':
-                if (method_exists($parameter, '__toString')) {
-                    return "'" . addcslashes((string)$parameter, "'") . "'";
-                }
-        }
-
-        return "[UNRESOLVED]";
     }
 }

@@ -77,7 +77,7 @@ abstract class AbstractTable extends Component implements TableInterface
      *
      * @var string
      */
-    protected $tablePrefix = '';
+    protected $prefix = '';
 
     /**
      * Primary key columns are stored separately from other indexes and can be modified only during
@@ -147,15 +147,15 @@ abstract class AbstractTable extends Component implements TableInterface
     protected $driver = null;
 
     /**
-     * @param string $name        Table name, must include table prefix.
-     * @param string $tablePrefix Database specific table prefix.
-     * @param Driver $driver
+     * @param Driver $driver Parent driver.
+     * @param string $name   Table name, must include table prefix.
+     * @param string $prefix Database specific table prefix.
      */
-    public function __construct($name, $tablePrefix, Driver $driver)
+    public function __construct(Driver $driver, $name, $prefix)
     {
-        $this->name = $name;
-        $this->tablePrefix = $tablePrefix;
         $this->driver = $driver;
+        $this->name = $name;
+        $this->prefix = $prefix;
 
         if (!$this->driver->hasTable($this->name)) {
             return;
@@ -200,9 +200,9 @@ abstract class AbstractTable extends Component implements TableInterface
      *
      * @return string
      */
-    public function getTablePrefix()
+    public function getPrefix()
     {
-        return $this->tablePrefix;
+        return $this->prefix;
     }
 
     /**
@@ -274,7 +274,7 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         $tables = [];
         foreach ($this->getForeigns() as $foreign) {
-            $tables[] = substr($foreign->getForeignTable(), strlen($this->tablePrefix));
+            $tables[] = substr($foreign->getForeignTable(), strlen($this->prefix));
         }
 
         return $tables;
@@ -675,11 +675,11 @@ abstract class AbstractTable extends Component implements TableInterface
         if ($this->exists()) {
             $this->driver->statement(\Spiral\interpolate(static::RENAME_STATEMENT, [
                 'table' => $this->getName(true),
-                'name'  => $this->driver->identifier($this->tablePrefix . $name)
+                'name'  => $this->driver->identifier($this->prefix . $name)
             ]));
         }
 
-        $this->name = $this->tablePrefix . $name;
+        $this->name = $this->prefix . $name;
     }
 
     /**

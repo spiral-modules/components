@@ -19,6 +19,11 @@ use Spiral\Database\Entities\QueryCompiler;
 class Parameter implements ParameterInterface
 {
     /**
+     * Use in constructor to automatically detect parameter type.
+     */
+    const DETECT_TYPE = 900888;
+
+    /**
      * Mocked value or array of values.
      *
      * @var mixed|array
@@ -36,10 +41,15 @@ class Parameter implements ParameterInterface
      * @param mixed $value
      * @param int   $type
      */
-    public function __construct($value, $type = \PDO::PARAM_STR)
+    public function __construct($value, $type = self::DETECT_TYPE)
     {
         $this->value = $value;
-        $this->type = $type;
+
+        if ($type == self::DETECT_TYPE && !is_array($value)) {
+            $this->type = $this->detectType($value);
+        } else {
+            $this->type = $type;
+        }
     }
 
     /**
@@ -57,21 +67,6 @@ class Parameter implements ParameterInterface
      */
     public function getValue()
     {
-        if (is_array($this->value)) {
-            $result = [];
-            foreach ($this->value as $value) {
-                if (is_object($value)) {
-                    //We are not wrapping objects
-                    $result[] = $value;
-                    continue;
-                }
-
-                $result[] = new self($value, $this->type);
-            }
-
-            return $result;
-        }
-
         return $this->value;
     }
 
@@ -87,8 +82,26 @@ class Parameter implements ParameterInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param QueryCompiler $compiler
+     */
+    public function flatten()
+    {
+        if (is_array($this->value)) {
+            $result = [];
+            foreach ($this->value as $value) {
+                if (!$value instanceof ParameterInterface) {
+                    $value = new self($value, $this->type);
+                }
+                $result = array_merge($result, $value->flatten());
+            }
+
+            return $result;
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
@@ -117,5 +130,19 @@ class Parameter implements ParameterInterface
             'statement' => $this->sqlStatement(),
             'value'     => $this->value
         ];
+    }
+
+    protected function detectType($value)
+    {
+        switch (gettype($value)) {
+            case "boolean":
+                return \PDO::PARAM_BOOL;
+            case "integer":
+                return \PDO::PARAM_INT;
+            case "NULL":
+                return \PDO::PARAM_NULL;
+            default:
+                return \PDO::PARAM_STR;
+        }
     }
 }

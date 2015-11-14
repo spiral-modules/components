@@ -11,11 +11,14 @@ use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Entities\Compiler\Quoter;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\PDOParameter;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -29,7 +32,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * There is few points can raise warning message or take long time to execute, we better profile
      * them.
      */
-    use LoggerTrait, BenchmarkTrait;
+    use LoggerTrait, BenchmarkTrait, SaturateTrait;
 
     /**
      * One of DatabaseInterface types.
@@ -107,23 +110,30 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     ];
 
     /**
+     * Container is needed to construct instances of QueryCompiler.
+     *
      * @invisible
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * @param ContainerInterface $container
      * @param string             $name
      * @param array              $config
+     * @param ContainerInterface $container Container is needed to construct instances of
+     *                                      QueryCompiler.
+     * @throws SugarException
      */
-    public function __construct(ContainerInterface $container, $name, array $config)
+    public function __construct($name, array $config, ContainerInterface $container = null)
     {
-        $this->container = $container;
         $this->name = $name;
 
         $this->config = $config + $this->config;
+
+        //PDO connection options has to be stored under key "options" of config
         $this->options = $config['options'] + $this->options;
+
+        $this->container = $this->saturate($container, ContainerInterface::class);
     }
 
     /**
@@ -159,16 +169,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function getType()
     {
         return static::TYPE;
-    }
-
-    /**
-     * Driver configuration.
-     *
-     * @return array
-     */
-    public function config()
-    {
-        return $this->config;
     }
 
     /**
@@ -277,42 +277,45 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Create instance of PDOStatement using provided SQL query and set of parameters.
      *
      * @param string $query
-     * @param array  $parameters         Parameters to be binded into query.
-     * @param array  $preparedParameters Prepared list of parameters, reference.
+     * @param array  $parameters Parameters to be binded into query.
      * @return \PDOStatement
      * @throws QueryException
      */
-    public function statement($query, array $parameters = [], &$preparedParameters = null)
+    public function statement($query, array $parameters = [])
     {
-        $preparedParameters = $parameters = $this->prepareParameters($parameters);
-
         try {
             if ($this->isProfiling()) {
-                $queryString = $this->queryCompiler()->interpolate($query, $parameters);
+                $queryString = QueryInterpolator::interpolate($query, $parameters);
                 $benchmark = $this->benchmark($this->name, $queryString);
             }
 
+            //Prepared statement
             $pdoStatement = $this->getPDO()->prepare($query);
 
-            //Configuring statement with parameters
-            $this->configureStatement($pdoStatement, $parameters);
+            foreach ($this->flattenParameters($parameters) as $index => $parameter) {
+                //Let's mount statement parameters
+                $pdoStatement->bindValue($index + 1, $parameter->getValue(), $parameter->getType());
+            }
 
             try {
                 $pdoStatement->execute();
             } finally {
-                !empty($benchmark) && $this->benchmark($benchmark);
+                if (!empty($benchmark)) {
+                    $this->benchmark($benchmark);
+                }
             }
 
             if (!empty($queryString)) {
-                $this->logger()->debug($queryString, compact('query', 'parameters'));
+                $this->logger()->info($queryString, compact('query', 'parameters'));
             }
         } catch (\PDOException $exception) {
-
             if (empty($queryString)) {
-                $queryString = $this->queryCompiler()->interpolate($query, $parameters);
+                $queryString = QueryInterpolator::interpolate($query, $parameters);
             }
 
             $this->logger()->error($queryString, compact('query', 'parameters'));
+
+            //Consistency
             throw new QueryException($exception);
         }
 
@@ -324,16 +327,15 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * QueryResult.
      *
      * @param string $query
-     * @param array  $parameters         Parameters to be binded into query.
-     * @param array  $preparedParameters Prepared list of parameters, reference.
+     * @param array  $parameters Parameters to be binded into query.
      * @return QueryResult
      * @throws QueryException
      */
-    public function query($query, array $parameters = [], &$preparedParameters = null)
+    public function query($query, array $parameters = [])
     {
         return $this->container->construct(static::QUERY_RESULT, [
-            'statement'  => $this->statement($query, $parameters, $preparedParameters),
-            'parameters' => $preparedParameters
+            'statement'  => $this->statement($query, $parameters),
+            'parameters' => $parameters
         ]);
     }
 
@@ -356,34 +358,30 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Prepare set of query builder/user parameters to be send to PDO. Must convert DateTime
      * instances into valid database timestamps and resolve values of ParameterInterface.
      *
+     * Every value has to wrapped with parameter interface.
+     *
      * @param array $parameters
-     * @return array
+     * @return ParameterInterface[]
      */
-    public function prepareParameters(array $parameters)
+    public function flattenParameters(array $parameters)
     {
-        $result = [];
+        $flatten = [];
         foreach ($parameters as $parameter) {
-            if ($parameter instanceof ParameterInterface && is_array($parameter->getValue())) {
-                //Generating sub parameters
-                $parameter = $parameter->getValue();
+            if (!$parameter instanceof ParameterInterface) {
+                //Let's wrap value
+                $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
             }
 
-            if ($parameter instanceof \DateTime) {
-                //We are going to convert all timestamps to database timezone which is UTC by default
-                $parameter = $parameter->setTimezone(
-                    new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE)
-                )->format(static::DATETIME);
+            if ($parameter->getValue() instanceof \DateTime) {
+                //Converting datetime object into string representation
+                $parameter->setValue($this->prepareDateTime($parameter->getValue()));
             }
 
-            if (is_array($parameter)) {
-                $result = array_merge($result, $this->prepareParameters($parameter));
-                continue;
-            }
-
-            $result[] = $parameter;
+            //We have to flatten all parameters as some of them can be provided in array form
+            $flatten[] = array_merge($flatten, $parameter->flatten());
         }
 
-        return $result;
+        return $flatten;
     }
 
     /**
@@ -465,15 +463,15 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Get instance of Driver specific QueryCompiler.
      *
-     * @param string $tablePrefix Database specific table prefix, used to quote table names and
-     *                            build aliases.
+     * @param string $prefix Database specific table prefix, used to quote table names and build
+     *                       aliases.
      * @return QueryCompiler
      */
-    public function queryCompiler($tablePrefix = '')
+    public function queryCompiler($prefix = '')
     {
         return $this->container->construct(static::QUERY_COMPILER, [
-            'driver'      => $this,
-            'tablePrefix' => $tablePrefix
+            'driver' => $this,
+            'quoter' => new Quoter($this, $prefix)
         ]);
     }
 
@@ -514,7 +512,10 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     protected function setIsolationLevel($level)
     {
         $this->logger()->info("Set transaction isolation level to '{$level}'.");
-        !empty($level) && $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
+
+        if (!empty($level)) {
+            $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
+        }
     }
 
     /**
@@ -557,25 +558,16 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Configure PDO statement with parameters.
+     * Convert DateTime object into local database representation. Driver will automatically force
+     * needed timezone.
      *
-     * @param \PDOStatement              $pdoStatement
-     * @param array|ParameterInterface[] $parameters
+     * @param \DateTime $dateTime
+     * @return string
      */
-    private function configureStatement(\PDOStatement $pdoStatement, array $parameters)
+    protected function prepareDateTime(\DateTime $dateTime)
     {
-        foreach ($parameters as $position => $parameter) {
-            if ($parameter instanceof ParameterInterface) {
-                $pdoStatement->bindValue(
-                    $position + 1,
-                    $parameter->getValue(),
-                    $parameter->getType()
-                );
-            } else {
-                //Simple string, potentially i should wrap every parameter as Parameter and remove
-                //this part
-                $pdoStatement->bindValue($position + 1, $parameter);
-            }
-        }
+        return $dateTime->setTimezone(new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE))->format(
+            static::DATETIME
+        );
     }
 }

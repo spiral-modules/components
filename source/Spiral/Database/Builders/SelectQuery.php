@@ -11,7 +11,7 @@ use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 
 /**
  * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION
@@ -101,10 +101,10 @@ class SelectQuery extends AbstractSelect
     /**
      * Add select query to be united with.
      *
-     * @param SQLFragmentInterface $query
+     * @param FragmentInterface $query
      * @return $this
      */
-    public function union(SQLFragmentInterface $query)
+    public function union(FragmentInterface $query)
     {
         $this->unions[] = ['', $query];
 
@@ -114,10 +114,10 @@ class SelectQuery extends AbstractSelect
     /**
      * Add select query to be united with. Duplicate values will be included in result.
      *
-     * @param SQLFragmentInterface $query
+     * @param FragmentInterface $query
      * @return $this
      */
-    public function unionAll(SQLFragmentInterface $query)
+    public function unionAll(FragmentInterface $query)
     {
         $this->unions[] = ['ALL', $query];
 
@@ -151,7 +151,7 @@ class SelectQuery extends AbstractSelect
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
         //11 parameters!
-        return $compiler->select(
+        return $compiler->compileSelect(
             $this->tables,
             $this->distinct,
             $this->columns,

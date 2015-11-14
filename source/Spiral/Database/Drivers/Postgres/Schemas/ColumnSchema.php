@@ -9,7 +9,7 @@
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
 use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Injections\SQLFragment;
+use Spiral\Database\Injections\Fragment;
 
 /**
  * Postgres column schema.
@@ -273,7 +273,7 @@ class ColumnSchema extends AbstractColumn
             $this->type = ($this->type == 'bigint' ? 'bigserial' : 'serial');
             $this->autoIncrement = true;
 
-            $this->defaultValue = new SQLFragment($this->defaultValue);
+            $this->defaultValue = new Fragment($this->defaultValue);
 
             return;
         }

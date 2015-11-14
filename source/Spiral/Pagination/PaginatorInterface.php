@@ -34,15 +34,6 @@ interface PaginatorInterface
     public function getPage();
 
     /**
-     * Apply paginator to paginable object.
-     *
-     * @param PaginableInterface $paginable
-     * @return PaginableInterface
-     * @throws PaginationException
-     */
-    public function paginate(PaginableInterface $paginable);
-
-    /**
      * Create page URL using specific page number. No domain or schema information included by
      * default, starts with path.
      *
@@ -50,4 +41,13 @@ interface PaginatorInterface
      * @return UriInterface
      */
     public function createUri($pageNumber);
+
+    /**
+     * Apply paginator to paginable object.
+     *
+     * @param PaginableInterface $paginable
+     * @return PaginableInterface
+     * @throws PaginationException
+     */
+    public function paginate(PaginableInterface $paginable);
 }

@@ -13,7 +13,7 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Database\TableInterface;
 use Spiral\Pagination\PaginableInterface;
@@ -23,8 +23,8 @@ use Spiral\Pagination\PaginableInterface;
  * table.
  *
  * @method SelectQuery columns($columns)
- * @method SelectQuery union(SQLFragmentInterface $query)
- * @method SelectQuery unionAll(SQLFragmentInterface $query)
+ * @method SelectQuery union(FragmentInterface $query)
+ * @method SelectQuery unionAll(FragmentInterface $query)
  *
  * @method SelectQuery distinct($distinct = 1)
  * @method SelectQuery having($identifier, $variousA = null, $variousB = null, $variousC = null)
@@ -48,8 +48,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method SelectQuery offset($offset = 0)
  * @method int getOffset()
  *
- * @method SelectQuery paginate($limit = 25, $pageParameter = 'page', ServerRequestInterface
- *         $request = null)
+ * @method SelectQuery paginate($limit = 25, $pageParameter = 'page', ServerRequestInterface $request = null)
  * @method PaginableInterface getPaginator()
  *
  * @method SelectQuery join($type, $table, $on = null)

@@ -10,7 +10,7 @@ namespace Spiral\Database\Injections;
 /**
  * Declares ability to be converted into sql statement.
  */
-interface SQLFragmentInterface
+interface FragmentInterface
 {
     /**
      * @return string

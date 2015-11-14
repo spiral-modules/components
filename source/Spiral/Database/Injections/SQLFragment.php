@@ -15,7 +15,7 @@ use Spiral\Database\Entities\QueryCompiler;
  *
  * Example: ...->where('time_created', '>', new SQLFragment("NOW()"));
  */
-class SQLFragment implements SQLFragmentInterface
+class Fragment implements FragmentInterface
 {
     /**
      * @var string

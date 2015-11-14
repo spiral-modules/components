@@ -12,7 +12,7 @@ use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLExpression;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 
 /**
  * Provides ability to generate QueryCompiler JOIN tokens including ON conditions and table/column
@@ -317,7 +317,7 @@ trait JoinsTrait
     private function onWrapper()
     {
         return function ($parameter) {
-            if (!$parameter instanceof SQLFragmentInterface) {
+            if (!$parameter instanceof FragmentInterface) {
                 return new SQLExpression($parameter);
             }
 
@@ -340,7 +340,7 @@ trait JoinsTrait
 
             if
             (
-                $parameter instanceof SQLFragmentInterface
+                $parameter instanceof FragmentInterface
                 && !$parameter instanceof ParameterInterface
                 && !$parameter instanceof QueryBuilder
             ) {

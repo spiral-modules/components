@@ -11,8 +11,8 @@ use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Schemas\Traits\DeclaredTrait;
 use Spiral\Database\Exceptions\InvalidArgumentException;
 use Spiral\Database\Exceptions\SchemaException;
-use Spiral\Database\Injections\SQLFragment;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\Fragment;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Schemas\ColumnInterface;
 
 /**
@@ -318,13 +318,13 @@ abstract class AbstractColumn implements ColumnInterface
             return null;
         }
 
-        if ($this->defaultValue instanceof SQLFragmentInterface) {
+        if ($this->defaultValue instanceof FragmentInterface) {
             return $this->defaultValue;
         }
 
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
-            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->timestampNow())) {
-                return new SQLFragment($this->defaultValue);
+            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->nowExpression())) {
+                return new Fragment($this->defaultValue);
             }
         }
 
@@ -483,7 +483,7 @@ abstract class AbstractColumn implements ColumnInterface
             $this->abstractType() == 'timestamp'
             && strtolower($value) == strtolower(Database::TIMESTAMP_NOW)
         ) {
-            $this->defaultValue = $this->table->driver()->timestampNow();
+            $this->defaultValue = $this->table->driver()->nowExpression();
         }
 
         return $this;
@@ -807,7 +807,7 @@ abstract class AbstractColumn implements ColumnInterface
             return 'NULL';
         }
 
-        if ($defaultValue instanceof SQLFragmentInterface) {
+        if ($defaultValue instanceof FragmentInterface) {
             return $defaultValue->sqlStatement();
         }
 

@@ -15,7 +15,7 @@ use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Pagination\PaginableInterface;
@@ -121,7 +121,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
-        return $this->flattenParameters($compiler->prepareParameters(
+        return $this->flattenParameters($compiler->orderParameters(
             QueryCompiler::SELECT_QUERY,
             $this->whereParameters,
             $this->onParameters,
@@ -414,7 +414,7 @@ abstract class AbstractSelect extends AbstractWhere implements
 
             if
             (
-                $parameter instanceof SQLFragmentInterface
+                $parameter instanceof FragmentInterface
                 && !$parameter instanceof ParameterInterface
                 && !$parameter instanceof QueryBuilder
             ) {

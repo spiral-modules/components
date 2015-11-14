@@ -35,7 +35,7 @@ class DeleteQuery extends AbstractAffect
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
-        return $this->flattenParameters($compiler->prepareParameters(
+        return $this->flattenParameters($compiler->orderParameters(
             QueryCompiler::DELETE_QUERY, $this->whereParameters
         ));
     }
@@ -47,6 +47,6 @@ class DeleteQuery extends AbstractAffect
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
-        return $compiler->delete($this->table, $this->whereTokens);
+        return $compiler->compileDelete($this->table, $this->whereTokens);
     }
 }

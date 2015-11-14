@@ -175,7 +175,7 @@ abstract class AbstractReference implements ReferenceInterface
      */
     public function references($table, $column = 'id')
     {
-        $this->foreignTable = $this->table->getTablePrefix() . $table;
+        $this->foreignTable = $this->table->getPrefix() . $table;
         $this->foreignKey = $column;
 
         return $this;

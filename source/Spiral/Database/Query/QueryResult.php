@@ -8,7 +8,7 @@
 namespace Spiral\Database\Query;
 
 use PDOStatement;
-use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Entities\QueryInterpolator;
 use Spiral\Database\ResultInterface;
 
 /**
@@ -74,13 +74,13 @@ class QueryResult implements ResultInterface, \JsonSerializable
     }
 
     /**
-     * Query string associated with PDOStatement.
+     * Query string associated with PDOStatement. To be used for debug purposes only.
      *
      * @return string
      */
     public function queryString()
     {
-        return QueryCompiler::interpolate($this->statement->queryString, $this->parameters);
+        return QueryInterpolator::interpolate($this->statement->queryString, $this->parameters);
     }
 
     /**
@@ -216,7 +216,8 @@ class QueryResult implements ResultInterface, \JsonSerializable
      */
     public function valid()
     {
-        //We can't use cursor or any other method to walk though data as SQLite will return 0 for count.
+        //We can't use cursor or any other method to walk though data as SQLite will
+        //return 0 for count.
         return $this->rowData !== false;
     }
 

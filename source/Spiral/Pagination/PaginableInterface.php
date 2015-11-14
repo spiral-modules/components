@@ -37,27 +37,4 @@ interface PaginableInterface extends \Countable
      * @return int
      */
     public function getOffset();
-
-    /**
-     * Manually set paginator instance for specific object.
-     *
-     * @param PaginatorInterface $paginator
-     * @return $this
-     */
-    public function setPaginator(PaginatorInterface $paginator);
-
-    /**
-     * Indication that object was paginated.
-     *
-     * @return bool
-     */
-    public function isPaginated();
-
-    /**
-     * Get paginator for the current selection. Paginate method should be already called.
-     *
-     * @see paginate()
-     * @return PaginatorInterface
-     */
-    public function getPaginator();
 }

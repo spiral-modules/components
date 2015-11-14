@@ -12,7 +12,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\ActiveAccessorInterface;
 use Spiral\ORM\Entities\SchemaBuilder;
@@ -580,7 +580,7 @@ class RecordSchema extends ReflectionEntity
         }
 
         $defaultValue = $column->getDefaultValue();
-        if ($defaultValue instanceof SQLFragmentInterface) {
+        if ($defaultValue instanceof FragmentInterface) {
             //We can't cache values like that
             return null;
         }

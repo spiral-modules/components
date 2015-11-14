@@ -11,7 +11,8 @@ use Spiral\Database\Exceptions\QueryException;
 
 /**
  * DatabaseInterface is high level abstraction used to represent single database. You MUST always
- * check database type using getType() method before writing SQL for execute and query methods.
+ * (you are good person) check database type using getType() method before writing plain SQL for
+ * execute and query methods.
  */
 interface DatabaseInterface
 {

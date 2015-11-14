@@ -8,7 +8,7 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Models\AccessorInterface;
 
 /**
@@ -36,7 +36,7 @@ interface ActiveAccessorInterface extends AccessorInterface
      * and expressions.
      *
      * @param string $field Name of field where accessor associated to.
-     * @return mixed|SQLFragmentInterface
+     * @return mixed|FragmentInterface
      */
     public function compileUpdates($field = '');
 

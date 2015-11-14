@@ -18,7 +18,7 @@ use Spiral\Database\Entities\QueryCompiler;
  *
  * I potentially should have an interface for such class.
  */
-class SQLExpression extends SQLFragment
+class SQLExpression extends Fragment
 {
     /**
      * {@inheritdoc}

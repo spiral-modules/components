@@ -81,22 +81,6 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function prepareParameters(array $parameters)
-    {
-        $result = parent::prepareParameters($parameters);
-
-        array_walk($result, function (&$value) {
-            if (is_bool($value)) {
-                $value = new Parameter($value, \PDO::PARAM_BOOL);
-            }
-        });
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function hasTable($name)
     {
         $query = 'SELECT "table_name" FROM "information_schema"."tables" '

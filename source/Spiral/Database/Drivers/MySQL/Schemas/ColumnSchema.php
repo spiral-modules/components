@@ -10,7 +10,7 @@ namespace Spiral\Database\Drivers\MySQL\Schemas;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Injections\SQLFragment;
+use Spiral\Database\Injections\Fragment;
 
 /**
  * MySQL column schema.
@@ -196,7 +196,7 @@ class ColumnSchema extends AbstractColumn
         //Default value conversions
         if ($this->type == 'bit' && $this->hasDefaultValue()) {
             //Cutting b\ and '
-            $this->defaultValue = new SQLFragment($this->defaultValue);
+            $this->defaultValue = new Fragment($this->defaultValue);
         }
 
         if ($this->abstractType() == 'timestamp' && $this->defaultValue == '0000-00-00 00:00:00') {

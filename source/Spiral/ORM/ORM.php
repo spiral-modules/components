@@ -146,7 +146,7 @@ class ORM extends Singleton
      */
     public function dbalDatabase($database)
     {
-        return $this->databases->db($database);
+        return $this->databases->database($database);
     }
 
     /**

@@ -25,15 +25,15 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function insert($table, array $columns, array $rowsets)
+    public function compileInsert($table, array $columns, array $rowsets)
     {
         if (count($rowsets) == 1) {
-            return parent::insert($table, $columns, $rowsets);
+            return parent::compileInsert($table, $columns, $rowsets);
         }
 
         //SQLite uses alternative syntax
         $statement = [];
-        $statement[] = "INSERT INTO {$this->quote($table, true)} ({$this->columns($columns)})";
+        $statement[] = "INSERT INTO {$this->quote($table, true)} ({$this->prepareColumns($columns)})";
 
         foreach ($rowsets as $rowset) {
             if (count($statement) == 1) {
@@ -56,7 +56,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      *
      * @link http://stackoverflow.com/questions/10491492/sqllite-with-skip-offset-only-not-limit
      */
-    protected function limit($limit, $offset)
+    protected function compileLimit($limit, $offset)
     {
         $statement = '';
 

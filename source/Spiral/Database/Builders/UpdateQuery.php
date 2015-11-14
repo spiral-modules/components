@@ -13,7 +13,7 @@ use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\FragmentInterface;
 
 /**
  * Update statement builder.
@@ -111,7 +111,7 @@ class UpdateQuery extends AbstractAffect
                 continue;
             }
 
-            if ($value instanceof SQLFragmentInterface && !$value instanceof ParameterInterface) {
+            if ($value instanceof FragmentInterface && !$value instanceof ParameterInterface) {
                 continue;
             }
 
@@ -119,7 +119,7 @@ class UpdateQuery extends AbstractAffect
         }
 
         //Join and where parameters are going after values
-        return $this->flattenParameters($compiler->prepareParameters(
+        return $this->flattenParameters($compiler->orderParameters(
             QueryCompiler::UPDATE_QUERY, $this->whereParameters, [], [], $values
         ));
     }
@@ -135,6 +135,6 @@ class UpdateQuery extends AbstractAffect
 
         $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
 
-        return $compiler->update($this->table, $this->values, $this->whereTokens);
+        return $compiler->compileUpdate($this->table, $this->values, $this->whereTokens);
     }
 }

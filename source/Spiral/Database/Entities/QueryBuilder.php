@@ -76,7 +76,7 @@ abstract class QueryBuilder extends Component
     {
         return $this->compiler->interpolate(
             $this->sqlStatement(),
-            $this->database->driver()->prepareParameters($this->getParameters())
+            $this->database->driver()->flattenParameters($this->getParameters())
         );
     }
 

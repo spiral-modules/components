@@ -7,7 +7,6 @@
  */
 namespace Spiral\Database\Entities;
 
-use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -20,9 +19,9 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 /**
  * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to
  * hide implementation specific functionality. Extends PDODriver and adds ability to create driver
- * specific query builders and schemas.
+ * specific query builders and schemas (basically operates like a factory).
  */
-abstract class Driver extends PDODriver implements LoggerAwareInterface
+abstract class Driver extends PDODriver
 {
     /**
      * Driver schemas.
@@ -47,7 +46,7 @@ abstract class Driver extends PDODriver implements LoggerAwareInterface
      *
      * @return string
      */
-    public function timestampNow()
+    public function nowExpression()
     {
         return static::TIMESTAMP_NOW;
     }
@@ -81,17 +80,17 @@ abstract class Driver extends PDODriver implements LoggerAwareInterface
      * Get Driver specific AbstractTable implementation.
      *
      * @param string $table       Table name without prefix included.
-     * @param string $tablePrefix Database specific table prefix, this parameter is not required,
+     * @param string $prefix      Database specific table prefix, this parameter is not required,
      *                            but if provided all
      *                            foreign keys will be created using it.
      * @return AbstractTable
      */
-    public function tableSchema($table, $tablePrefix = '')
+    public function tableSchema($table, $prefix = '')
     {
         return $this->container->construct(static::SCHEMA_TABLE, [
-            'driver'      => $this,
-            'name'        => $table,
-            'tablePrefix' => $tablePrefix
+            'driver' => $this,
+            'name'   => $table,
+            'prefix' => $prefix
         ]);
     }
 
@@ -105,8 +104,10 @@ abstract class Driver extends PDODriver implements LoggerAwareInterface
      */
     public function columnSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->construct(static::SCHEMA_COLUMN,
-            compact('table', 'name', 'schema'));
+        return $this->container->construct(
+            static::SCHEMA_COLUMN,
+            compact('table', 'name', 'schema')
+        );
     }
 
     /**
@@ -119,8 +120,10 @@ abstract class Driver extends PDODriver implements LoggerAwareInterface
      */
     public function indexSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->construct(static::SCHEMA_INDEX,
-            compact('table', 'name', 'schema'));
+        return $this->container->construct(
+            static::SCHEMA_INDEX,
+            compact('table', 'name', 'schema')
+        );
     }
 
     /**
@@ -133,8 +136,10 @@ abstract class Driver extends PDODriver implements LoggerAwareInterface
      */
     public function referenceSchema(AbstractTable $table, $name, $schema = null)
     {
-        return $this->container->construct(static::SCHEMA_REFERENCE,
-            compact('table', 'name', 'schema'));
+        return $this->container->construct(
+            static::SCHEMA_REFERENCE,
+            compact('table', 'name', 'schema')
+        );
     }
 
     /**
@@ -200,15 +205,15 @@ abstract class Driver extends PDODriver implements LoggerAwareInterface
     /**
      * Get instance of Driver specific QueryCompiler.
      *
-     * @param string $tablePrefix Database specific table prefix, used to quote table names and
-     *                            build aliases.
+     * @param string $prefix         Database specific table prefix, used to quote table names and
+     *                               build aliases.
      * @return QueryCompiler
      */
-    public function queryCompiler($tablePrefix = '')
+    public function queryCompiler($prefix = '')
     {
         return $this->container->construct(static::QUERY_COMPILER, [
             'driver'      => $this,
-            'tablePrefix' => $tablePrefix
+            'tablePrefix' => $prefix
         ]);
     }
 }

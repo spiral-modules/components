@@ -9,8 +9,8 @@ namespace Spiral\Tests\Cases\Database;
 
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Drivers\SQLServer\SQLServerDriver;
-use Spiral\Database\Entities\Quoter;
 use Spiral\Database\Entities\PDODriver;
+use Spiral\Database\Entities\Quoter;
 
 class QuoterTest extends \PHPUnit_Framework_TestCase
 {
@@ -18,34 +18,19 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter();
 
-        $this->assertEquals(
-            '*',
-            $quoter->quote('*')
-        );
+        $this->assertEquals('*', $quoter->quote('*'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"column"',
-            $quoter->quote('column')
-        );
+        $this->assertEquals('"column"', $quoter->quote('column'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"table"."column"',
-            $quoter->quote('table.column')
-        );
+        $this->assertEquals('"table"."column"', $quoter->quote('table.column'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"table".*',
-            $quoter->quote('table.*')
-        );
+        $this->assertEquals('"table".*', $quoter->quote('table.*'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"table_name"',
-            $quoter->quote('table_name', true)
-        );
+        $this->assertEquals('"table_name"', $quoter->quote('table_name', true));
 
         $quoter->reset();
         $this->assertEquals(
@@ -64,22 +49,13 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter();
 
-        $this->assertEquals(
-            'COUNT(*)',
-            $quoter->quote('COUNT(*)')
-        );
+        $this->assertEquals('COUNT(*)', $quoter->quote('COUNT(*)'));
 
         $quoter->reset();
-        $this->assertEquals(
-            'SUM("column")',
-            $quoter->quote('SUM(column)')
-        );
+        $this->assertEquals('SUM("column")', $quoter->quote('SUM(column)'));
 
         $quoter->reset();
-        $this->assertEquals(
-            'MIN("table"."column")',
-            $quoter->quote('MIN(table.column)')
-        );
+        $this->assertEquals('MIN("table"."column")', $quoter->quote('MIN(table.column)'));
 
         $quoter->reset();
         $this->assertEquals(
@@ -92,16 +68,10 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter();
 
-        $this->assertEquals(
-            '"column_a" + "column_b"',
-            $quoter->quote('column_a + column_b')
-        );
+        $this->assertEquals('"column_a" + "column_b"', $quoter->quote('column_a + column_b'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"table"."column" * 10',
-            $quoter->quote('table.column * 10')
-        );
+        $this->assertEquals('"table"."column" * 10', $quoter->quote('table.column * 10'));
 
         $quoter->reset();
         $this->assertEquals(
@@ -114,34 +84,19 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter('p_');
 
-        $this->assertEquals(
-            '*',
-            $quoter->quote('*')
-        );
+        $this->assertEquals('*', $quoter->quote('*'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"column"',
-            $quoter->quote('column')
-        );
+        $this->assertEquals('"column"', $quoter->quote('column'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"p_table"."column"',
-            $quoter->quote('table.column')
-        );
+        $this->assertEquals('"p_table"."column"', $quoter->quote('table.column'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"p_table".*',
-            $quoter->quote('table.*')
-        );
+        $this->assertEquals('"p_table".*', $quoter->quote('table.*'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"p_table_name"',
-            $quoter->quote('table_name', true)
-        );
+        $this->assertEquals('"p_table_name"', $quoter->quote('table_name', true));
 
         $quoter->reset();
         $this->assertEquals(
@@ -160,22 +115,13 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter('p_');
 
-        $this->assertEquals(
-            'COUNT(*)',
-            $quoter->quote('COUNT(*)')
-        );
+        $this->assertEquals('COUNT(*)', $quoter->quote('COUNT(*)'));
 
         $quoter->reset();
-        $this->assertEquals(
-            'SUM("column")',
-            $quoter->quote('SUM(column)')
-        );
+        $this->assertEquals('SUM("column")', $quoter->quote('SUM(column)'));
 
         $quoter->reset();
-        $this->assertEquals(
-            'MIN("p_table"."column")',
-            $quoter->quote('MIN(table.column)')
-        );
+        $this->assertEquals('MIN("p_table"."column")', $quoter->quote('MIN(table.column)'));
 
         $quoter->reset();
         $this->assertEquals(
@@ -188,16 +134,10 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter('p_');
 
-        $this->assertEquals(
-            '"column_a" + "column_b"',
-            $quoter->quote('column_a + column_b')
-        );
+        $this->assertEquals('"column_a" + "column_b"', $quoter->quote('column_a + column_b'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"p_table"."column" * 10',
-            $quoter->quote('table.column * 10')
-        );
+        $this->assertEquals('"p_table"."column" * 10', $quoter->quote('table.column * 10'));
 
         $quoter->reset();
         $this->assertEquals(
@@ -210,20 +150,12 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     {
         $quoter = $this->quoter('p_');
 
-        $this->assertEquals(
-            '"p_table"."column"',
-            $quoter->quote('table.column')
-        );
-
-        $this->assertEquals(
-            '"p_table_name"',
-            $quoter->quote('table_name', true)
-        );
+        $this->assertEquals('"p_table"."column"', $quoter->quote('table.column'));
+        $this->assertEquals('"p_table_name"', $quoter->quote('table_name', true));
 
         $this->assertEquals(
             '"p_table_name" AS "bubble"',
-            $quoter->quote('table_name AS bubble', true)
-        );
+            $quoter->quote('table_name AS bubble', true));
 
         $this->assertEquals(
             '"bubble"."column" AS "column_alias"',
@@ -235,16 +167,10 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
             $quoter->quote('table_name AS table_name', true)
         );
 
-        $this->assertEquals(
-            '"table_name"."column"',
-            $quoter->quote('table_name.column')
-        );
+        $this->assertEquals('"table_name"."column"', $quoter->quote('table_name.column'));
 
         $quoter->reset();
-        $this->assertEquals(
-            '"p_table_name"."column"',
-            $quoter->quote('table_name.column')
-        );
+        $this->assertEquals('"p_table_name"."column"', $quoter->quote('table_name.column'));
 
         $this->assertEquals(
             '"p_bubble"."column" AS "column_alias"',
@@ -285,8 +211,8 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertEquals(
-            '("p_table"."column" + "some_column") / "bubble"."column_b"',
-            $quoter->quote('(table.column + some_column) / bubble.column_b')
+            '("p_table"."column" + "some_column") / "p_yolo"."column_b"',
+            $quoter->quote('(table.column + some_column) / yolo.column_b')
         );
 
         $this->assertEquals(
@@ -304,15 +230,8 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
             $quoter->quote('table.column AS bubble')
         );
 
-        $this->assertEquals(
-            '"bubble"',
-            $quoter->quote('bubble', false)
-        );
-
-        $this->assertEquals(
-            '"p_bubble"',
-            $quoter->quote('bubble', true)
-        );
+        $this->assertEquals('"bubble"', $quoter->quote('bubble', false));
+        $this->assertEquals('"p_bubble"', $quoter->quote('bubble', true));
 
         $this->assertEquals(
             '"p_bubble"."column" AS "new_bubble"',
@@ -324,15 +243,8 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
             $quoter->quote('new_bubble AS x_bubble', true)
         );
 
-        $this->assertEquals(
-            '"p_new_bubble"',
-            $quoter->quote('new_bubble', true)
-        );
-
-        $this->assertEquals(
-            '"x_bubble"',
-            $quoter->quote('x_bubble', true)
-        );
+        $this->assertEquals('"p_new_bubble"', $quoter->quote('new_bubble', true));
+        $this->assertEquals('"x_bubble"', $quoter->quote('x_bubble', true));
     }
 
     public function testMySQLlPrefixes()
@@ -381,7 +293,6 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-
     public function testSQLServerPrefixes()
     {
         $quoter = $this->quoter('p_', SQLServerDriver::class);
@@ -428,12 +339,11 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-
     /**
-     * Get instance of quoter, mocked driver must use default identifier quoting characters.
+     * Get instance of quoter.
      *
      * @param string $prefix
-     * @param string $driver
+     * @param string $driver Driver class.
      * @return Quoter
      */
     protected function quoter($prefix = '', $driver = PDODriver::class)

@@ -350,6 +350,8 @@ abstract class AbstractWhere extends QueryBuilder
                 $parameter = new Parameter($parameter);
             }
 
+            //TODO: YOLOLO!
+
             if
             (
                 $parameter instanceof FragmentInterface

@@ -12,6 +12,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
@@ -73,6 +74,7 @@ class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterf
      * @param ConfiguratorInterface $configurator
      * @param FilesInterface        $files
      * @param ViewsInterface        $views
+     * @throws SugarException
      */
     public function __construct(
         Exception $exception,

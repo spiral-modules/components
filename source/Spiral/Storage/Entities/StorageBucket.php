@@ -145,10 +145,11 @@ class StorageBucket extends Component implements
         );
 
         $benchmark = $this->benchmark($this->getServerID(), "exists::{$this->buildAddress($name)}");
-        $result = (bool)$this->server()->exists($this, $name);
-        $this->benchmark($benchmark);
-
-        return $result;
+        try {
+            return (bool)$this->server()->exists($this, $name);
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -161,10 +162,11 @@ class StorageBucket extends Component implements
         );
 
         $benchmark = $this->benchmark($this->getServerID(), "size::{$this->buildAddress($name)}");
-        $size = $this->server()->size($this, $name);
-        $this->benchmark($benchmark);
-
-        return $size;
+        try {
+            return $this->server()->size($this, $name);
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -186,10 +188,14 @@ class StorageBucket extends Component implements
         }
 
         $benchmark = $this->benchmark($this->getServerID(), "put::{$this->buildAddress($name)}");
-        $this->server()->put($this, $name, $source);
-        $this->benchmark($benchmark);
+        try {
+            $this->server()->put($this, $name, $source);
 
-        return $this->storage->open($this->buildAddress($name));
+            //Reopening
+            return $this->storage->open($this->buildAddress($name));
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -205,10 +211,11 @@ class StorageBucket extends Component implements
             $this->getServerID(), "filename::{$this->buildAddress($name)}"
         );
 
-        $filename = $this->server()->allocateFilename($this, $name);
-        $this->benchmark($benchmark);
-
-        return $filename;
+        try {
+            return $this->server()->allocateFilename($this, $name);
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -223,10 +230,12 @@ class StorageBucket extends Component implements
         $benchmark = $this->benchmark(
             $this->getServerID(), "stream::{$this->buildAddress($name)}"
         );
-        $stream = $this->server()->allocateStream($this, $name);
-        $this->benchmark($benchmark);
 
-        return $stream;
+        try {
+            return $this->server()->allocateStream($this, $name);
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -241,8 +250,12 @@ class StorageBucket extends Component implements
         $benchmark = $this->benchmark(
             $this->getServerID(), "delete::{$this->buildAddress($name)}"
         );
-        $this->server()->delete($this, $name);
-        $this->benchmark($benchmark);
+
+        try {
+            $this->server()->delete($this, $name);
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -262,10 +275,14 @@ class StorageBucket extends Component implements
         $benchmark = $this->benchmark(
             $this->getServerID(), "rename::{$this->buildAddress($oldname)}"
         );
-        $this->server()->rename($this, $oldname, $newname);
-        $this->benchmark($benchmark);
 
-        return $this->buildAddress($newname);
+        try {
+            $this->server()->rename($this, $oldname, $newname);
+
+            return $this->buildAddress($newname);
+        } finally {
+            $this->benchmark($benchmark);
+        }
     }
 
     /**
@@ -287,8 +304,12 @@ class StorageBucket extends Component implements
             $benchmark = $this->benchmark(
                 $this->getServerID(), "copy::{$this->buildAddress($name)}"
             );
-            $this->server()->copy($this, $destination, $name);
-            $this->benchmark($benchmark);
+
+            try {
+                $this->server()->copy($this, $destination, $name);
+            } finally {
+                $this->benchmark($benchmark);
+            }
         } else {
             $this->logger()->info(
                 "External copy of '{$this->getServerID()}'.'{$this->buildAddress($name)}' "
@@ -320,17 +341,25 @@ class StorageBucket extends Component implements
             $benchmark = $this->benchmark(
                 $this->getServerID(), "replace::{$this->buildAddress($name)}"
             );
-            $this->server()->replace($this, $destination, $name);
-            $this->benchmark($benchmark);
+
+            try {
+                $this->server()->replace($this, $destination, $name);
+            } finally {
+                $this->benchmark($benchmark);
+            }
         } else {
             $this->logger()->info(
                 "External move '{$this->getServerID()}'.'{$this->buildAddress($name)}'"
                 . " to '{$destination->getServerID()}'.'{$destination->buildAddress($name)}'."
             );
 
-            $stream = $this->allocateStream($name);
-            $destination->put($name, $stream);
-            $stream->detach() && $this->delete($name);
+            //Copying using temporary stream (buffer)
+            $destination->put($name, $stream = $this->allocateStream($name));
+
+            if ($stream->detach()) {
+                //Dropping temporary stream
+                $this->delete($name);
+            }
         }
 
         return $destination->buildAddress($name);

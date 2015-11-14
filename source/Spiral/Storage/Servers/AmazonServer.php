@@ -147,16 +147,12 @@ class AmazonServer extends StorageServer
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         try {
-            $this->client->send($this->buildRequest(
-                'PUT',
-                $bucket,
-                $newname,
-                [],
-                [
-                    'Acl'         => $bucket->getOption('public') ? 'public-read' : 'private',
-                    'Copy-Source' => $this->buildUri($bucket, $oldname)->getPath()
-                ]
-            ));
+            $request = $this->buildRequest('PUT', $bucket, $newname, [], [
+                'Acl'         => $bucket->getOption('public') ? 'public-read' : 'private',
+                'Copy-Source' => $this->buildUri($bucket, $oldname)->getPath()
+            ]);
+
+            $this->client->send($request);
         } catch (ClientException $exception) {
             if ($exception->getCode() != 404) {
                 //Some authorization or other error
@@ -177,16 +173,12 @@ class AmazonServer extends StorageServer
     public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
     {
         try {
-            $this->client->send($this->buildRequest(
-                'PUT',
-                $destination,
-                $name,
-                [],
-                [
-                    'Acl'         => $destination->getOption('public') ? 'public-read' : 'private',
-                    'Copy-Source' => $this->buildUri($bucket, $name)->getPath()
-                ]
-            ));
+            $request = $this->buildRequest('PUT', $destination, $name, [], [
+                'Acl'         => $destination->getOption('public') ? 'public-read' : 'private',
+                'Copy-Source' => $this->buildUri($bucket, $name)->getPath()
+            ]);
+
+            $this->client->send($request);
         } catch (ClientException $exception) {
             if ($exception->getCode() != 404) {
                 //Some authorization or other error

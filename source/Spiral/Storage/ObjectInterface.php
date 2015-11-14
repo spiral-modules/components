@@ -13,7 +13,8 @@ use Spiral\Storage\Exceptions\ObjectException;
 use Spiral\Storage\Exceptions\ServerException;
 
 /**
- * Representation of a single storage object.
+ * Representation of a single storage object. Technically this is only helper interface, does not
+ * contain any important logic rather than dedicating operations to container.
  */
 interface ObjectInterface extends StreamableInterface
 {

@@ -31,9 +31,11 @@ class LocalServer extends StorageServer
      */
     public function size(BucketInterface $bucket, $name)
     {
-        return $this->files->exists($this->getPath($bucket, $name))
-            ? $this->files->size($this->getPath($bucket, $name))
-            : false;
+        if (!$this->files->exists($this->getPath($bucket, $name))) {
+            return false;
+        }
+
+        return $this->files->size($this->getPath($bucket, $name));
     }
 
     /**
@@ -59,7 +61,8 @@ class LocalServer extends StorageServer
             );
         }
 
-        return $this->getPath($bucket, $name);
+        //localUri call is required to mock filesystem operations
+        return $this->files->localUri($this->getPath($bucket, $name));
     }
 
     /**
@@ -74,7 +77,9 @@ class LocalServer extends StorageServer
         }
 
         //Getting readonly stream
-        return \GuzzleHttp\Psr7\stream_for(fopen($this->allocateFilename($bucket, $name), 'rb'));
+        return \GuzzleHttp\Psr7\stream_for(
+            fopen($this->allocateFilename($bucket, $name), 'rb')
+        );
     }
 
     /**
@@ -137,6 +142,8 @@ class LocalServer extends StorageServer
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
+
+        //Pre-enshuring location
         $this->files->ensureLocation(dirname($destination), $mode);
 
         if (!$this->files->move($filename, $destination)) {
@@ -162,6 +169,8 @@ class LocalServer extends StorageServer
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
+
+        //Pre-ensuring location
         $this->files->ensureLocation(dirname($destination), $mode);
 
         if (!$this->files->copy($filename, $destination)) {

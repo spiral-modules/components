@@ -34,11 +34,14 @@ class SftpServer extends StorageServer
         'methods'    => [],
         'port'       => 22,
         'home'       => '/',
+
         //Authorization method and username
         'authMethod' => 'password',
         'username'   => '',
+
         //Used with "password" authorization
         'password'   => '',
+
         //User with "pubkey" authorization
         'publicKey'  => '',
         'privateKey' => '',
@@ -65,6 +68,7 @@ class SftpServer extends StorageServer
             );
         }
 
+        //Let's automatically connect!
         $this->connect();
     }
 

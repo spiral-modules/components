@@ -21,7 +21,8 @@ use Spiral\Storage\Exceptions\StorageException;
 interface BucketInterface
 {
     /**
-     * @param string           $server  Responsible server id or name.
+     * @param string           $server  Responsible server id or name. Server will be requested on
+     *                                  demand.
      * @param string           $prefix  Bucket prefix.
      * @param array            $options Server related options.
      * @param StorageInterface $storage

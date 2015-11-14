@@ -11,6 +11,7 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\ContainerInterface;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -109,6 +110,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      *
      * @param ContainerInterface    $container
      * @param ConfiguratorInterface $configurator
+     * @throws SugarException
      */
     public function __construct(
         array $rules = [],

@@ -7,6 +7,9 @@
  */
 namespace Spiral\Storage\Entities;
 
+use Spiral\Core\Component;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ObjectException;
 use Spiral\Storage\ObjectInterface;
@@ -15,8 +18,13 @@ use Spiral\Storage\StorageInterface;
 /**
  * Default implementation of storage object.
  */
-class StorageObject implements ObjectInterface
+class StorageObject extends Component implements ObjectInterface
 {
+    /**
+     * We all love sugar.
+     */
+    use SaturateTrait;
+
     /**
      * @var BucketInterface
      */
@@ -40,10 +48,12 @@ class StorageObject implements ObjectInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws SugarException
      */
     public function __construct($address, StorageInterface $storage)
     {
-        $this->storage = $storage;
+        $this->storage = $this->saturate($storage, StorageInterface::class);
 
         //Trying to find bucket using address
         if (empty($address)) {

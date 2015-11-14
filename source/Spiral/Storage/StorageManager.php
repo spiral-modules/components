@@ -7,6 +7,7 @@
  */
 namespace Spiral\Storage;
 
+use Spiral\Core\Component;
 use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
@@ -19,7 +20,7 @@ use Spiral\Storage\Exceptions\StorageException;
 /**
  * Default implementation of StorageInterface.
  */
-class StorageManager extends Singleton implements StorageInterface, InjectorInterface
+class StorageManager extends Component implements StorageInterface, InjectorInterface
 {
     /**
      * Runtime configuration editing + some logging.
@@ -64,9 +65,9 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
         //Loading buckets
         foreach ($this->config['buckets'] as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
-                    'storage' => $this
-                ] + $bucket
+            $this->buckets[$name] = $this->container->construct(
+                StorageBucket::class,
+                ['storage' => $this] + $bucket
             );
         }
     }
@@ -80,9 +81,9 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
         }
 
-        return $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
-                'storage' => $this
-            ] + compact('prefix', 'server', 'options')
+        return $this->buckets[$name] = $this->container->construct(
+            StorageBucket::class,
+            ['storage' => $this] + compact('prefix', 'server', 'options')
         );
     }
 
@@ -105,8 +106,12 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context)
+    public function createInjection(\ReflectionClass $class, $context = null)
     {
+        if (empty($context)) {
+            throw new StorageException("Storage bucket can be requested without specified context.");
+        }
+
         return $this->bucket($context);
     }
 

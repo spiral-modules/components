@@ -69,7 +69,7 @@ class Quoter
             return $this->aliasing($identifier, $alias, $table);
         }
 
-        if ($this->hasStops($identifier)) {
+        if ($this->hasExpressions($identifier)) {
             //Processing complex expression
             return $this->expression($identifier);
         }
@@ -95,7 +95,7 @@ class Quoter
             $identifier = $match[1];
 
             //Function nam
-            if ($this->hasStops($identifier)) {
+            if ($this->hasExpressions($identifier)) {
                 return $identifier;
             }
 
@@ -160,12 +160,12 @@ class Quoter
     }
 
     /**
-     * Check if string has stop symbols.
+     * Check if string has expression markers.
      *
      * @param string $string
      * @return bool
      */
-    protected function hasStops($string)
+    protected function hasExpressions($string)
     {
         foreach ($this->stops as $symbol) {
             if (strpos($string, $symbol) !== false) {

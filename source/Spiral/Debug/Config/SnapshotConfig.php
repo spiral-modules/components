@@ -41,7 +41,6 @@ class SnapshotConfig extends ArrayConfig
         return $this->config['view'];
     }
 
-
     /**
      * @return bool
      */

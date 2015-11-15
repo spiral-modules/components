@@ -25,6 +25,6 @@ class DebugLogger extends Logger implements SingletonInterface
      */
     public function __construct(Debugger $debugger)
     {
-        parent::__construct(static::class, $debugger->getHandlers(static::class));
+        parent::__construct(static::class, $debugger->logHandlers(static::class));
     }
 }

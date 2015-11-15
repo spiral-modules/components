@@ -13,8 +13,8 @@ use Monolog\Logger;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
+use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Debug\Config\DebuggerConfig;
 use Spiral\Debug\Exceptions\BenchmarkException;
 
@@ -35,6 +35,11 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
     private $benchmarks = [];
 
     /**
+     * @var HandlerInterface
+     */
+    protected $sharedHandler = null;
+
+    /**
      * @var DebuggerConfig
      */
     protected $config = null;
@@ -43,18 +48,18 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
      * Container is needed to construct log handlers.
      *
      * @invisible
-     * @var ContainerInterface
+     * @var ConstructorInterface
      */
-    protected $container = null;
+    protected $constructor = null;
 
     /**
-     * @param DebuggerConfig     $config
-     * @param ContainerInterface $container
+     * @param DebuggerConfig       $config
+     * @param ConstructorInterface $constructor
      */
-    public function __construct(DebuggerConfig $config, ContainerInterface $container)
+    public function __construct(DebuggerConfig $config, ConstructorInterface $constructor)
     {
         $this->config = $config;
-        $this->container = $container;
+        $this->constructor = $constructor;
     }
 
     /**
@@ -62,7 +67,7 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
      */
     public function createLogger($name)
     {
-        return new Logger($name, $this->getHandlers($name));
+        return new Logger($name, $this->logHandlers($name));
     }
 
     /**
@@ -71,18 +76,23 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
      * @param string $name
      * @return HandlerInterface[]
      */
-    public function getHandlers($name)
+    public function logHandlers($name)
     {
-        if (!$this->config->hasHandlers($name)) {
-            return [];
+        $handlers = [];
+        if (!empty($this->sharedHandler)) {
+            //Shared handler applied to every Logger
+            $handlers[] = $this->sharedHandler;
         }
 
-        $handlers = [];
+        if (!$this->config->hasHandlers($name)) {
+            return $handlers;
+        }
+
         foreach ($this->config->logHandlers($name) as $handler) {
             /**
              * @var HandlerInterface $instance
              */
-            $handlers[] = $instance = $this->container->construct(
+            $handlers[] = $instance = $this->constructor->construct(
                 $handler['handler'],
                 $handler['options']
             );
@@ -94,6 +104,17 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
         }
 
         return $handlers;
+    }
+
+    /**
+     * Set instance of shared HandlerInterface, such handler will be passed to every created log.
+     * To remove existed handler set it argument as null.
+     *
+     * @param HandlerInterface $handler
+     */
+    public function shareHandler(HandlerInterface $handler = null)
+    {
+        $this->sharedHandler = $handler;
     }
 
     /**

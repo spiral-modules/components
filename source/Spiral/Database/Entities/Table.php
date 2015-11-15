@@ -49,7 +49,7 @@ use Spiral\Pagination\PaginableInterface;
  * @method int getOffset()
  *
  * @method SelectQuery paginate($limit = 25, $pageParameter = 'page', ServerRequestInterface $request = null)
- * @method PaginableInterface getPaginator()
+ * @method PaginableInterface paginator()
  *
  * @method SelectQuery join($type, $table, $on = null)
  * @method SelectQuery innerJoin($table, $on = null)
@@ -99,8 +99,10 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function schema()
     {
-        return $this->database->driver()->tableSchema($this->getRealName(),
-            $this->database->getPrefix());
+        return $this->database->driver()->tableSchema(
+            $this->realName(),
+            $this->database->getPrefix()
+        );
     }
 
     /**
@@ -126,7 +128,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return string
      */
-    public function getRealName()
+    public function realName()
     {
         return $this->database->getPrefix() . $this->name;
     }
@@ -151,9 +153,8 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function truncate()
     {
-        $this->database->driver()->truncate($this->getRealName());
+        $this->database->driver()->truncate($this->realName());
     }
-
 
     /**
      * {@inheritdoc}

@@ -18,10 +18,12 @@ trait DeclaredTrait
 
     /**
      * Mark schema entity as declared, it will be kept in final diff.
+     *
+     * @param bool $declared
      */
-    public function markDeclared()
+    public function declared($declared = true)
     {
-        $this->declared = true;
+        $this->declared = $declared;
     }
 
     /**

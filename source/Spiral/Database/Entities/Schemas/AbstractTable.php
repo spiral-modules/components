@@ -315,7 +315,7 @@ abstract class AbstractTable extends Component implements TableInterface
         }
 
         $result = $this->columns[$column];
-        $result->markDeclared();
+        $result->declared();
 
         if ($result instanceof LoggerAwareInterface) {
             $result->setLogger($this->logger());
@@ -340,14 +340,14 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         $columns = is_array($columns) ? $columns : func_get_args();
         if (!empty($index = $this->findIndex($columns))) {
-            $index->markDeclared();
+            $index->declared();
 
             return $index;
         }
 
         //New index
         $index = $this->driver->indexSchema($this, false);
-        $index->markDeclared();
+        $index->declared();
 
         $index->columns($columns)->unique(false);
 
@@ -389,14 +389,14 @@ abstract class AbstractTable extends Component implements TableInterface
     public function foreign($column)
     {
         if (!empty($foreign = $this->findForeign($column))) {
-            $foreign->markDeclared();
+            $foreign->declared();
 
             return $foreign;
         }
 
         //Create foreign key
         $foreign = $this->driver->referenceSchema($this, false);
-        $foreign->markDeclared();
+        $foreign->declared();
 
         $foreign->column($column);
 
@@ -423,7 +423,7 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         foreach ($this->columns as $columnSchema) {
             if ($columnSchema->getName() == $column) {
-                $columnSchema->markDeclared();
+                $columnSchema->declared();
                 $columnSchema->setName($name);
                 break;
             }
@@ -478,13 +478,13 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         foreach ($this->indexes as $indexSchema) {
             if (is_array($index) && $indexSchema->getColumns() == $index) {
-                $indexSchema->markDeclared();
+                $indexSchema->declared();
                 $indexSchema->setName($name);
                 break;
             }
 
             if (is_string($index) && $indexSchema->getName() == $index) {
-                $indexSchema->markDeclared();
+                $indexSchema->declared();
                 $indexSchema->setName($name);
                 break;
             }

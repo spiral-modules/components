@@ -10,8 +10,6 @@ namespace Spiral\Tokenizer;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\Core\Exceptions\LoaderException;
-use Spiral\Core\Traits\InjectableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Tokenizer\Exceptions\LocatorException;
 use Symfony\Component\Finder\Finder;
@@ -28,7 +26,7 @@ class ClassLocator extends Component implements
     /**
      * Injection over constant.
      */
-    use InjectableTrait, LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Parent injector/factory.

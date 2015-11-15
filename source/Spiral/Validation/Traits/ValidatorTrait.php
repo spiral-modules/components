@@ -35,6 +35,7 @@ trait ValidatorTrait
     /**
      * Fields (data) to be validated. Named like that for convenience.
      *
+     * @whatif private
      * @var array
      */
     protected $fields = [];
@@ -47,6 +48,7 @@ trait ValidatorTrait
     protected $validates = [];
 
     /**
+     * @whatif private
      * @var array
      */
     protected $errors = [];

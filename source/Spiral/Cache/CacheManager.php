@@ -7,37 +7,28 @@
  */
 namespace Spiral\Cache;
 
+use Spiral\Cache\Config\CacheConfig;
 use Spiral\Cache\Exceptions\CacheException;
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
 /**
  * Default implementation of CacheInterface. Better fit for spiral.
  */
-class CacheManager extends Component implements
-    SingletonInterface,
-    CacheInterface,
-    InjectorInterface
+class CacheManager extends Component implements SingletonInterface, CacheInterface, InjectorInterface
 {
     /**
      * Some operations can be slow.
      */
-    use ConfigurableTrait, BenchmarkTrait;
+    use BenchmarkTrait;
 
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Configuration section.
-     */
-    const CONFIG = 'cache';
 
     /**
      * Already constructed cache adapters.
@@ -47,18 +38,23 @@ class CacheManager extends Component implements
     private $stores = false;
 
     /**
+     * @var CacheConfig
+     */
+    protected $config = null;
+
+    /**
      * @invisible
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
+     * @param CacheConfig        $config
+     * @param ContainerInterface $container
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    public function __construct(CacheConfig $config, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->config = $config;
         $this->container = $container;
     }
 
@@ -80,7 +76,7 @@ class CacheManager extends Component implements
             //Constructing cache instance
             $this->stores[$class] = $this->container->construct(
                 $class,
-                $this->config['stores'][$class]
+                $this->config->storeOptions($class)
             );
         } finally {
             $this->benchmark($benchmark);
@@ -107,7 +103,7 @@ class CacheManager extends Component implements
             return $this->store();
         }
 
-        if (empty($this->config['stores'][$class->getName()])) {
+        if (!$this->config->hasStore($class->getName())) {
             throw new CacheException(
                 "Unable construct cache store '{$class}', no options found."
             );

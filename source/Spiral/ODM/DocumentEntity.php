@@ -7,6 +7,7 @@
  */
 namespace Spiral\ODM;
 
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
@@ -186,11 +187,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     protected $odm = null;
 
     /**
-     * @see Component::staticContainer()
      * @param array           $fields
      * @param EntityInterface $parent
      * @param ODM             $odm
      * @param array           $odmSchema
+     * @throws SugarException
      */
     public function __construct(
         $fields = [],

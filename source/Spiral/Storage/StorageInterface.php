@@ -55,11 +55,10 @@ interface StorageInterface
      * Get or create instance of storage server.
      *
      * @param string $server
-     * @param array  $options Used to create new instance.
      * @return ServerInterface
      * @throws StorageException
      */
-    public function server($server, array $options = []);
+    public function server($server);
 
     /**
      * Put object data into specified bucket under provided name. Should support filenames, PSR7

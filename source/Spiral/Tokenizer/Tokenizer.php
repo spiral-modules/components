@@ -8,14 +8,12 @@
 namespace Spiral\Tokenizer;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Loader;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
+use Spiral\Tokenizer\Config\TokenizerConfig;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Symfony\Component\Finder\Finder;
 
@@ -27,17 +25,12 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Required traits.
      */
-    use ConfigurableTrait, LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Configuration section (used by Class locator).
-     */
-    const CONFIG = 'tokenizer';
 
     /**
      * Memory section.
@@ -47,9 +40,15 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Cache of already processed file reflections, used to speed up lookup.
      *
+     * @invisible
      * @var array
      */
     private $cache = [];
+
+    /**
+     * @var TokenizerConfig
+     */
+    protected $config = null;
 
     /**
      * @invisible
@@ -66,20 +65,19 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Tokenizer constructor.
      *
-     * @param FilesInterface        $files
-     * @param ConfiguratorInterface $configurator
-     * @param HippocampusInterface  $runtime
+     * @param FilesInterface       $files
+     * @param TokenizerConfig      $config
+     * @param HippocampusInterface $runtime
      */
     public function __construct(
         FilesInterface $files,
-        ConfiguratorInterface $configurator,
+        TokenizerConfig $config,
         HippocampusInterface $runtime
     ) {
         $this->files = $files;
+        $this->config = $config;
         $this->memory = $runtime;
 
-        //Configuration is required for ClassLocator directories and excludes
-        $this->config = $configurator->getConfig(static::CONFIG);
         $this->cache = $this->memory->loadData(static::MEMORY);
     }
 
@@ -143,11 +141,11 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         $finder = !empty($finder) ?: new Finder();
 
         if (empty($directories)) {
-            $directories = $this->config['directories'];
+            $directories = $this->config->getDirectories();
         }
 
         if (empty($exclude)) {
-            $exclude = $this->config['exclude'];
+            $exclude = $this->config->getExcludes();
         }
 
         //Configuring finder

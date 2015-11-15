@@ -342,6 +342,6 @@ class Container extends Component implements ContainerInterface
      */
     private function getInjector(\ReflectionClass $reflection)
     {
-        return $this->get(call_user_func([$reflection->getName(), 'getInjector']));
+        return $this->get($reflection->getConstant('INJECTOR'));
     }
 }

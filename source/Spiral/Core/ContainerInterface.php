@@ -7,7 +7,6 @@
  */
 namespace Spiral\Core;
 
-use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InstanceException;
@@ -19,7 +18,7 @@ use Spiral\Core\Exceptions\Container\InstanceException;
  * @see InjectorInterface
  * @see SingletonInterface
  */
-interface ContainerInterface
+interface ContainerInterface extends ConstructorInterface, ResolverInterface
 {
     /**
      * Check if alias binded.
@@ -40,29 +39,6 @@ interface ContainerInterface
      * @throws ArgumentException
      */
     public function get($alias);
-
-    /**
-     * Create instance of requested class using binding class aliases and set of parameters provided
-     * by user, rest of constructor parameters must be filled by container. Method might return
-     * pre-constructed singleton.
-     *
-     * @param string $class
-     * @param array  $parameters Parameters to construct new class.
-     * @return mixed|null|object
-     * @throws InstanceException
-     * @throws ArgumentException
-     */
-    public function construct($class, $parameters = []);
-
-    /**
-     * Get list of arguments with resolved dependencies for specified function or method.
-     *
-     * @param ContextFunction $reflection Target function or method.
-     * @param array           $parameters User specified parameters.
-     * @return array
-     * @throws ArgumentException
-     */
-    public function resolveArguments(ContextFunction $reflection, array $parameters = []);
 
     /**
      * Bind value resolver to container alias. Resolver can be class name (will be constructed

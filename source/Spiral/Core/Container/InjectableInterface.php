@@ -9,14 +9,9 @@
 namespace Spiral\Core\Container;
 
 /**
- * Class must be injected using specialized factory and argument context.
+ * Must define constant INJECTOR pointing to associated injector class or binding.
  */
 interface InjectableInterface
 {
-    /**
-     * Has to return name of class used for injection/as factory.
-     *
-     * @return string
-     */
-    static public function getInjector();
+
 }

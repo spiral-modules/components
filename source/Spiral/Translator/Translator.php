@@ -8,10 +8,9 @@
 namespace Spiral\Translator;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Translator\Config\TranslatorConfig;
 use Spiral\Translator\Exceptions\LanguageException;
 
 /**
@@ -20,19 +19,9 @@ use Spiral\Translator\Exceptions\LanguageException;
 class Translator extends Component implements SingletonInterface, TranslatorInterface
 {
     /**
-     * Has configuration.
-     */
-    use ConfigurableTrait;
-
-    /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Configuration section.
-     */
-    const CONFIG = 'translator';
 
     /**
      * @var string
@@ -57,22 +46,27 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     private $bundles = [];
 
     /**
+     * @var TranslatorConfig
+     */
+    protected $config = null;
+
+    /**
      * @invisible
      * @var HippocampusInterface
      */
     protected $memory = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param HippocampusInterface  $memory
+     * @param TranslatorConfig     $config
+     * @param HippocampusInterface $memory
      * @throws LanguageException
      */
-    public function __construct(ConfiguratorInterface $configurator, HippocampusInterface $memory)
+    public function __construct(TranslatorConfig $config, HippocampusInterface $memory)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->config = $config;
         $this->memory = $memory;
 
-        $this->setLanguage($this->config['default']);
+        $this->setLanguage($this->config->defaultLanguage());
     }
 
     /**
@@ -80,7 +74,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      */
     public function setLanguage($language)
     {
-        if (!isset($this->config['languages'][$language])) {
+        if (!$this->config->hasLanguage($language)) {
             throw new LanguageException("Invalid language '{$language}', no presets found.");
         }
 
@@ -88,7 +82,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         $this->bundles = [];
 
         $this->language = $language;
-        $this->languageOptions = $this->config['languages'][$language];
+        $this->languageOptions = $this->config->languageOptions($language);
     }
 
     /**
@@ -182,7 +176,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
             return $this->pluralizers[$language];
         }
 
-        $pluralizer = $this->config['languages'][$language]['pluralizer'];
+        $pluralizer = $this->config->languagePluralizer($language);
 
         return $this->pluralizers[$language] = new $pluralizer;
     }
@@ -212,8 +206,11 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
             return;
         }
 
-        $this->bundles[$bundle] = $this->memory->loadData($bundle,
-            $this->languageOptions['directory']);
+        $this->bundles[$bundle] = $this->memory->loadData(
+            $bundle,
+            $this->languageOptions['directory']
+        );
+
         if (empty($this->bundles[$bundle])) {
             $this->bundles[$bundle] = [];
         }

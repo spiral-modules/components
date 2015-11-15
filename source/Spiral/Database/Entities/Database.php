@@ -12,7 +12,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\Traits\InjectableTrait;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -31,12 +30,7 @@ use Spiral\Database\Query\QueryResult;
  */
 class Database extends Component implements DatabaseInterface, InjectableInterface
 {
-    /**
-     * Query and statement events.
-     */
-    use InjectableTrait;
-
-    /**
+   /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
      * injections.
      */

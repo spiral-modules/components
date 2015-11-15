@@ -43,7 +43,8 @@ abstract class Checker extends Component
      * @param string    $method
      * @param mixed     $value
      * @param array     $arguments
-     * @param Validator $validator Parent validator.
+     * @param Validator $validator Parent validator. Attention, singleton checkers ignore parent
+     *                             validator and keep reference to first validator.
      * @return mixed
      */
     public function check($method, $value, array $arguments = [], Validator $validator = null)

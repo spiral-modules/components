@@ -11,9 +11,9 @@ use Exception;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Debug\Config\SnapshotConfig;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewsInterface;
@@ -52,9 +52,9 @@ class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterf
     private $rendered = '';
 
     /**
-     * @var array
+     * @var SnapshotConfig
      */
-    protected $config = [];
+    protected $config = null;
 
     /**
      * @var FilesInterface
@@ -69,25 +69,24 @@ class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterf
     /**
      * Snapshot constructor.
      *
-     * @param Exception             $exception
-     * @param LoggerInterface       $logger
-     * @param ConfiguratorInterface $configurator
-     * @param FilesInterface        $files
-     * @param ViewsInterface        $views
+     * @param Exception       $exception
+     * @param LoggerInterface $logger
+     * @param SnapshotConfig  $config
+     * @param FilesInterface  $files
+     * @param ViewsInterface  $views
      * @throws SugarException
      */
     public function __construct(
         Exception $exception,
         LoggerInterface $logger = null,
-        ConfiguratorInterface $configurator = null,
+        SnapshotConfig $config = null,
         FilesInterface $files = null,
         ViewsInterface $views = null
     ) {
         $this->exception = $exception;
         $this->logger = $logger;
 
-        //Snapshot configuration tells how to rotate files and etc
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->config = $this->saturate($config, SnapshotConfig::class);
 
         //We can use global container as fallback if no default values were provided
         $this->files = $this->saturate($files, FilesInterface::class);
@@ -162,27 +161,21 @@ class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterf
     {
         $this->logger()->error($this->getMessage());
 
-        if (!$this->config['reporting']['enabled']) {
+        if (!$this->config->reportingEnabled()) {
             //No need to record anything
             return;
         }
 
-        //Snapshot filename
-        $filename = \Spiral\interpolate($this->config['reporting']['filename'], [
-            'date'      => date($this->config['reporting']['dateFormat'], time()),
-            'exception' => $this->getName()
-        ]);
-
         //Writing to hard drive
         $this->files->write(
-            $this->config['reporting']['directory'] . '/' . $filename,
+            $this->config->snapshotFilename($this->getName(), time()),
             $this->render(),
             FilesInterface::RUNTIME,
             true
         );
 
-        $snapshots = $this->files->getFiles($this->config['reporting']['directory']);
-        if (count($snapshots) > $this->config['reporting']['maxSnapshots']) {
+        $snapshots = $this->files->getFiles($this->config->reportingDirectory());
+        if (count($snapshots) > $this->config->maxSnapshots()) {
             $this->dropOldest($snapshots);
         }
     }
@@ -211,7 +204,7 @@ class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterf
             return $this->rendered;
         }
 
-        return $this->rendered = $this->views->render($this->config['view'], [
+        return $this->rendered = $this->views->render($this->config->viewName(), [
             'snapshot' => $this
         ]);
     }

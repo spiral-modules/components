@@ -13,40 +13,31 @@ use Monolog\Logger;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Debug\Config\DebuggerConfig;
 use Spiral\Debug\Exceptions\BenchmarkException;
 
 /**
  * Debugger is responsible for global log, benchmarking and configuring Monolog loggers.
  */
-class Debugger extends Component implements
-    BenchmarkerInterface,
-    LogsInterface,
-    SingletonInterface
+class Debugger extends Component implements BenchmarkerInterface, LogsInterface, SingletonInterface
 {
-    /**
-     * Logger trait is required for Dumper to perform dump into debug log.
-     */
-    use ConfigurableTrait;
-
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
 
     /**
-     * Configuration section.
-     */
-    const CONFIG = 'debug';
-
-    /**
      * @invisible
      * @var array
      */
     private $benchmarks = [];
+
+    /**
+     * @var DebuggerConfig
+     */
+    protected $config = null;
 
     /**
      * Container is needed to construct log handlers.
@@ -57,12 +48,12 @@ class Debugger extends Component implements
     protected $container = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
+     * @param DebuggerConfig     $config
+     * @param ContainerInterface $container
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    public function __construct(DebuggerConfig $config, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->config = $config;
         $this->container = $container;
     }
 
@@ -82,12 +73,12 @@ class Debugger extends Component implements
      */
     public function getHandlers($name)
     {
-        if (empty($this->config['logHandlers'][$name])) {
+        if (!$this->config->hasHandlers($name)) {
             return [];
         }
 
         $handlers = [];
-        foreach ($this->config['logHandlers'][$name] as $handler) {
+        foreach ($this->config->logHandlers($name) as $handler) {
             /**
              * @var HandlerInterface $instance
              */

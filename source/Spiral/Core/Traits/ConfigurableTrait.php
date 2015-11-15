@@ -7,6 +7,8 @@
  */
 namespace Spiral\Core\Traits;
 
+use Spiral\Core\ConfigInterface;
+
 /**
  * Provides simplified access to component specific configuration.
  */
@@ -15,14 +17,14 @@ trait ConfigurableTrait
     /**
      * Component configuration.
      *
-     * @var array
+     * @var ConfigInterface
      */
-    protected $config = [];
+    protected $config = null;
 
     /**
      * Current component configuration. Short naming.
      *
-     * @return array
+     * @return ConfigInterface|array
      */
     public function config()
     {

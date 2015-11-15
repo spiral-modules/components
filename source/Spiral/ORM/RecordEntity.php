@@ -7,6 +7,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Entities\Table;
 use Spiral\Models\AccessorInterface;
@@ -291,12 +292,12 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      * Due setContext() method and entity cache of ORM any custom initiation code in constructor
      * must not depends on database data.
      *
-     * @see Component::staticContainer()
      * @see setContext
      * @param array      $data
      * @param bool|false $loaded
      * @param ORM|null   $orm
      * @param array      $ormSchema
+     * @throws SugarException
      */
     public function __construct(
         array $data = [],

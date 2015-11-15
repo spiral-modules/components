@@ -8,10 +8,9 @@
 namespace Spiral\Database;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Database\Config\DatabasesConfig;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DatabaseException;
@@ -22,19 +21,9 @@ use Spiral\Database\Exceptions\DatabaseException;
 class DatabaseManager extends Component implements InjectorInterface, DatabasesInterface
 {
     /**
-     * Configuration.
-     */
-    use ConfigurableTrait;
-
-    /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Configuration section.
-     */
-    const CONFIG = 'database';
 
     /**
      * By default spiral will force time conversion into single timezone before storing in
@@ -54,18 +43,23 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
     private $drivers = [];
 
     /**
+     * @var DatabasesConfig
+     */
+    protected $config = null;
+
+    /**
      * @invisible
      * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
+     * @param DatabasesConfig    $config
+     * @param ContainerInterface $container
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    public function __construct(DatabasesConfig $config, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->config = $config;
         $this->container = $container;
     }
 

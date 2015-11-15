@@ -7,48 +7,38 @@
  */
 namespace Spiral\Encrypter;
 
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\Exceptions\Container\ContainerException;
+use Spiral\Core\Container\SingletonInterface;
+use Spiral\Encrypter\Config\EncrypterConfig;
 
-class EncrypterManager implements InjectorInterface
+/**
+ * Only manages encrypter injections.
+ */
+class EncrypterManager implements InjectorInterface, SingletonInterface
 {
     /**
-     * Configuration section.
+     * To be constructed only once.
      */
-    const CONFIG = 'encrypter';
+    const SINGLETON = self::class;
 
     /**
-     * Component configuration.
-     *
-     * @var array
+     * @var EncrypterConfig
      */
-    protected $config = [];
+    protected $config = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
+     * @param EncrypterConfig $config
      */
-    public function __construct(ConfiguratorInterface $configurator)
+    public function __construct(EncrypterConfig $config)
     {
-        $this->config = $configurator->getConfig(static::CONFIG) + ['cipher' => null];
+        $this->config = $config;
     }
 
     /**
-     * Injector will receive requested class or interface reflection and reflection linked
-     * to parameter in constructor or method.
-     *
-     * This method can return pre-defined instance or create new one based on requested class.
-     * Parameter reflection can be used for dynamic class constructing, for example it can define
-     * database name or config section to be used to construct requested instance.
-     *
-     * @param \ReflectionClass $class   Request class type.
-     * @param string           $context Parameter or alias name.
-     * @return object
-     * @throws ContainerException
-     * @throws \ErrorException
+     * {@inheritdoc}
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $class->newInstance($this->config['key'], $this->config['cipher']);
+        return $class->newInstance($this->config->getKey(), $this->config->getCipher());
     }
 }

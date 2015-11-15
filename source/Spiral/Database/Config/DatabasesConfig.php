@@ -61,11 +61,28 @@ class DatabasesConfig extends ArrayConfig
     }
 
     /**
+     * @param string $connection
+     * @return bool
+     */
+    public function hasConnection($connection)
+    {
+        return isset($this->config['connections'][$connection]);
+    }
+
+    /**
      * @return array
      */
     public function databaseNames()
     {
         return array_keys($this->config['databases']);
+    }
+
+    /**
+     * @return array
+     */
+    public function connectionNames()
+    {
+        return array_keys($this->config['connections']);
     }
 
     /**
@@ -92,15 +109,6 @@ class DatabasesConfig extends ArrayConfig
 
     /**
      * @param string $connection
-     * @return bool
-     */
-    public function hasConnection($connection)
-    {
-        return isset($this->config['connections'][$connection]);
-    }
-
-    /**
-     * @param string $connection
      * @return string
      */
     public function connectionDriver($connection)
@@ -117,11 +125,4 @@ class DatabasesConfig extends ArrayConfig
         return $this->config['connections'][$connection];
     }
 
-    /**
-     * @return array
-     */
-    public function connectionNames()
-    {
-        return array_keys($this->config['connections']);
-    }
 }

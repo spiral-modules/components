@@ -12,8 +12,8 @@ use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
-use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\FragmentInterface;
+use Spiral\Database\Injections\ParameterInterface;
 
 /**
  * Update statement builder.
@@ -46,12 +46,12 @@ class UpdateQuery extends AbstractAffect
     /**
      * Change target table.
      *
-     * @param string $into Table name without prefix.
+     * @param string $table Table name without prefix.
      * @return $this
      */
-    public function table($into)
+    public function in($table)
     {
-        $this->table = $into;
+        $this->table = $table;
 
         return $this;
     }
@@ -99,7 +99,9 @@ class UpdateQuery extends AbstractAffect
      */
     public function getParameters(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler;
+        if (empty($compiler)) {
+            $compiler = $this->compiler;
+        }
 
         $values = [];
         foreach ($this->values as $value) {
@@ -112,6 +114,7 @@ class UpdateQuery extends AbstractAffect
             }
 
             if ($value instanceof FragmentInterface && !$value instanceof ParameterInterface) {
+                //Apparently sql fragment
                 continue;
             }
 
@@ -133,7 +136,9 @@ class UpdateQuery extends AbstractAffect
             throw new BuilderException("Update values must be specified.");
         }
 
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
         return $compiler->compileUpdate($this->table, $this->values, $this->whereTokens);
     }

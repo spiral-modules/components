@@ -145,7 +145,9 @@ class InsertQuery extends QueryBuilder
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
         return $compiler->compileInsert($this->table, $this->columns, $this->rowsets);
     }

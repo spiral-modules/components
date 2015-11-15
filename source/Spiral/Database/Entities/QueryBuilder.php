@@ -75,10 +75,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
      */
     public function queryString()
     {
-        return $this->compiler->interpolate(
-            $this->sqlStatement(),
-            $this->database->driver()->flattenParameters($this->getParameters())
-        );
+        return QueryInterpolator::interpolate($this->sqlStatement(), $this->getParameters());
     }
 
     /**

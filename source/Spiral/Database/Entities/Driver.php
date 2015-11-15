@@ -201,19 +201,4 @@ abstract class Driver extends PDODriver
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
     }
-
-    /**
-     * Get instance of Driver specific QueryCompiler.
-     *
-     * @param string $prefix         Database specific table prefix, used to quote table names and
-     *                               build aliases.
-     * @return QueryCompiler
-     */
-    public function queryCompiler($prefix = '')
-    {
-        return $this->container->construct(static::QUERY_COMPILER, [
-            'driver'      => $this,
-            'tablePrefix' => $prefix
-        ]);
-    }
 }

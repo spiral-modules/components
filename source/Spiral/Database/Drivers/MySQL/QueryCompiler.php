@@ -8,6 +8,7 @@
 namespace Spiral\Database\Drivers\MySQL;
 
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
+use Spiral\Database\Injections\ParameterInterface;
 
 /**
  * MySQL syntax specific compiler.
@@ -29,7 +30,8 @@ class QueryCompiler extends AbstractCompiler
             return array_merge($onParameters, $columnIdentifiers, $whereParameters);
         }
 
-        return parent::orderParameters($queryType, $whereParameters, $onParameters, $havingParameters, $columnIdentifiers);
+        return parent::orderParameters($queryType, $whereParameters, $onParameters,
+            $havingParameters, $columnIdentifiers);
     }
 
     /**
@@ -51,5 +53,26 @@ class QueryCompiler extends AbstractCompiler
         }
 
         return trim($statement);
+    }
+
+    /**
+     * Resolve operator value based on value value. ;)
+     *
+     * @param mixed  $parameter
+     * @param string $operator
+     * @return string
+     */
+    protected function prepareOperator(ParameterInterface $parameter, $operator)
+    {
+        if ($parameter->getType() == \PDO::PARAM_NULL) {
+            switch ($operator) {
+                case '=':
+                    return 'IS';
+                case '!=':
+                    return 'IS NOT';
+            }
+        }
+
+        return parent::prepareOperator($parameter, $operator);
     }
 }

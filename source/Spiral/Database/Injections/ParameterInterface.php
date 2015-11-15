@@ -26,6 +26,13 @@ interface ParameterInterface extends ExpressionInterface
     public function getValue();
 
     /**
+     * Change parameter value.
+     *
+     * @param mixed $value
+     */
+    public function setValue($value);
+
+    /**
      * Parameter type.
      *
      * @return int|mixed

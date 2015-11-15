@@ -14,7 +14,6 @@ use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Entities\Compiler\Quoter;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\Parameter;
@@ -372,13 +371,21 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
             }
 
-            if ($parameter->getValue() instanceof \DateTime) {
-                //Converting datetime object into string representation
-                $parameter->setValue($this->prepareDateTime($parameter->getValue()));
+            //Converting into flat array
+            $flattenParameter = $parameter->flatten();
+
+            /**
+             * @var ParameterInterface $value
+             */
+            foreach ($flattenParameter as $value) {
+                if ($value->getValue() instanceof \DateTime) {
+                    //Converting datetime object into string representation
+                    $value->setValue($this->prepareDateTime($value->getValue()));
+                }
             }
 
             //We have to flatten all parameters as some of them can be provided in array form
-            $flatten[] = array_merge($flatten, $parameter->flatten());
+            $flatten = array_merge($flatten, $flattenParameter);
         }
 
         return $flatten;
@@ -398,7 +405,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         $this->transactionLevel++;
         if ($this->transactionLevel == 1) {
             if (!empty($isolationLevel)) {
-                $this->setIsolationLevel($isolationLevel);
+                $this->isolationLevel($isolationLevel);
             }
 
             $this->logger()->info('Starting transaction.');
@@ -509,7 +516,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $level
      */
-    protected function setIsolationLevel($level)
+    protected function isolationLevel($level)
     {
         $this->logger()->info("Set transaction isolation level to '{$level}'.");
 

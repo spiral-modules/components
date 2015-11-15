@@ -9,9 +9,9 @@ namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\FragmentInterface;
 
 /**
  * Abstract query with WHERE conditions generation support. Provides simplified way to generate
@@ -174,6 +174,7 @@ abstract class AbstractWhere extends QueryBuilder
             return;
         }
 
+        //Where conditions specified in array form
         if (is_array($identifier)) {
             if (count($identifier) == 1) {
                 $this->arrayWhere(
@@ -202,7 +203,7 @@ abstract class AbstractWhere extends QueryBuilder
         }
 
         if ($identifier instanceof QueryBuilder) {
-            //This will copy every parameter from QueryBuilder
+            //Will copy every parameter from QueryBuilder
             $wrapper($identifier);
         }
 
@@ -344,23 +345,17 @@ abstract class AbstractWhere extends QueryBuilder
     private function whereWrapper()
     {
         return function ($parameter) {
-            if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
-                //is_array condition can be removed (still check that parameter not instance of
-                // sqlfragment, in this case we can wrap every parameter using our object
-                $parameter = new Parameter($parameter);
+            if ($parameter instanceof FragmentInterface) {
+                //We are only not creating bindings for plan fragments
+                if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
+                    return $parameter;
+                }
             }
 
-            //TODO: YOLOLO!
+            //Wrapping all values with ParameterInterface
+            $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);;
 
-            if
-            (
-                $parameter instanceof FragmentInterface
-                && !$parameter instanceof ParameterInterface
-                && !$parameter instanceof QueryBuilder
-            ) {
-                return $parameter;
-            }
-
+            //Let's store to sent to driver when needed
             $this->whereParameters[] = $parameter;
 
             return $parameter;

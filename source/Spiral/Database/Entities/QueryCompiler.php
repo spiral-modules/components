@@ -57,10 +57,14 @@ class QueryCompiler extends Component
 
     /**
      * Reset table aliases cache, required if same compiler used twice.
+     *
+     * @return $this
      */
     public function resetQuoter()
     {
         $this->quoter->reset();
+
+        return $this;
     }
 
     /**
@@ -460,20 +464,20 @@ class QueryCompiler extends Component
             $identifier = $this->quote($identifier);
 
             //Value has to be prepared as well
-            $value = $this->prepareValue($value);
+            $placeholder = $this->prepareValue($value);
 
             if ($operator == 'BETWEEN' || $operator == 'NOT BETWEEN') {
                 //Between statement has additional parameter
                 $right = $this->prepareValue($context[3]);
 
-                $statement .= "{$boolean} {$identifier} {$operator} {$value} AND {$right} ";
+                $statement .= "{$boolean} {$identifier} {$operator} {$placeholder} AND {$right} ";
                 continue;
             }
 
             //Compiler can switch equal to IN if value points to array
             $operator = $this->prepareOperator($value, $operator);
 
-            $statement .= "{$boolean} {$identifier} {$operator} {$value} ";
+            $statement .= "{$boolean} {$identifier} {$operator} {$placeholder} ";
         }
 
         if ($activeGroup) {
@@ -521,12 +525,34 @@ class QueryCompiler extends Component
     }
 
     /**
+     * Resolve operator value based on value value. ;)
+     *
+     * @param mixed  $parameter
+     * @param string $operator
+     * @return string
+     */
+    protected function prepareOperator(ParameterInterface $parameter, $operator)
+    {
+        if ($operator != '=' || is_scalar($parameter->getValue())) {
+            //Doing nothing for non equal operators
+            return $operator;
+        }
+
+        if (is_array($parameter->getValue())) {
+            //Automatically switching between equal and IN
+            return 'IN';
+        }
+
+        return $operator;
+    }
+
+    /**
      * Prepare value to be replaced into query (replace ?).
      *
      * @param string $value
      * @return string
      */
-    private function prepareValue($value)
+    protected function prepareValue($value)
     {
         if ($value instanceof FragmentInterface) {
             return $this->prepareFragment($value);
@@ -542,7 +568,7 @@ class QueryCompiler extends Component
      * @param FragmentInterface $context
      * @return string
      */
-    private function prepareFragment(FragmentInterface $context)
+    protected function prepareFragment(FragmentInterface $context)
     {
         if ($context instanceof QueryBuilder) {
             //Nested queries has to be wrapped with braces
@@ -555,27 +581,5 @@ class QueryCompiler extends Component
         }
 
         return $context->sqlStatement();
-    }
-
-    /**
-     * Resolve operator value based on value value. ;)
-     *
-     * @param mixed  $value
-     * @param string $operator
-     * @return string
-     */
-    private function prepareOperator($value, $operator)
-    {
-        if ($operator != '=' || is_scalar($value)) {
-            //Doing nothing for non equal operators
-            return $operator;
-        }
-
-        if ($value instanceof ParameterInterface && is_array($value->getValue())) {
-            //Automatically switching between equal and IN
-            return 'IN';
-        }
-
-        return $operator;
     }
 }

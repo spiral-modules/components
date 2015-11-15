@@ -13,6 +13,11 @@ namespace Spiral\Cache\Stores\Memcache;
 class MemcacheDriver extends AbstractDriver
 {
     /**
+     * @var \Memcache
+     */
+    protected $driver = null;
+
+    /**
      * {@inheritdoc}
      */
     public function __construct(array $servers)

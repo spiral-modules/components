@@ -91,13 +91,14 @@ class Parameter implements ParameterInterface
                 if (!$value instanceof ParameterInterface) {
                     $value = new self($value, $this->type);
                 }
+
                 $result = array_merge($result, $value->flatten());
             }
 
             return $result;
         }
 
-        return $this;
+        return [$this];
     }
 
     /**

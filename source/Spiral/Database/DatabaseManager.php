@@ -8,8 +8,8 @@
 namespace Spiral\Database;
 
 use Spiral\Core\Component;
+use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Database\Config\DatabasesConfig;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
@@ -49,18 +49,18 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
 
     /**
      * @invisible
-     * @var ContainerInterface
+     * @var ConstructorInterface
      */
-    protected $container = null;
+    protected $constructor = null;
 
     /**
-     * @param DatabasesConfig    $config
-     * @param ContainerInterface $container
+     * @param DatabasesConfig      $config
+     * @param ConstructorInterface $constructor
      */
-    public function __construct(DatabasesConfig $config, ContainerInterface $container)
+    public function __construct(DatabasesConfig $config, ConstructorInterface $constructor)
     {
         $this->config = $config;
-        $this->container = $container;
+        $this->constructor = $constructor;
     }
 
     /**
@@ -88,7 +88,7 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
         }
 
         //No need to benchmark here, due connection will happen later
-        $this->databases[$database] = $this->container->construct(Database::class, [
+        $this->databases[$database] = $this->constructor->construct(Database::class, [
             'name'   => $database,
             'driver' => $this->driver($this->config->databaseConnection($database)),
             'prefix' => $this->config->databasePrefix($database)
@@ -117,7 +117,7 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
             );
         }
 
-        $this->drivers[$connection] = $this->container->construct(
+        $this->drivers[$connection] = $this->constructor->construct(
             $this->config->connectionDriver($connection),
             [
                 'name'   => $connection,

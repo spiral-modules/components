@@ -351,8 +351,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             $this->joinTokens,
             $this->whereTokens,
             $this->havingTokens,
-            $this->groupBy,
-            $this->orderBy,
+            $this->grouping,
+            $this->ordering,
             $this->limit,
             $this->offset
         );
@@ -368,7 +368,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function getIterator(array $callbacks = [])
     {
-        if (!empty($this->columns) || !empty($this->groupBy)) {
+        if (!empty($this->columns) || !empty($this->grouping)) {
             //QueryResult for user requests
             return $this->run();
         }

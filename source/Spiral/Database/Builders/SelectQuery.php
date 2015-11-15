@@ -32,7 +32,7 @@ class SelectQuery extends AbstractSelect
      *
      * @var array
      */
-    protected $unions = [];
+    protected $unionTokens = [];
 
     /**
      * @param Database      $database Parent database.
@@ -106,7 +106,7 @@ class SelectQuery extends AbstractSelect
      */
     public function union(FragmentInterface $query)
     {
-        $this->unions[] = ['', $query];
+        $this->unionTokens[] = ['', $query];
 
         return $this;
     }
@@ -119,7 +119,7 @@ class SelectQuery extends AbstractSelect
      */
     public function unionAll(FragmentInterface $query)
     {
-        $this->unions[] = ['ALL', $query];
+        $this->unionTokens[] = ['ALL', $query];
 
         return $this;
     }
@@ -129,12 +129,14 @@ class SelectQuery extends AbstractSelect
      */
     public function getParameters(QueryCompiler $compiler = null)
     {
-        $parameters = parent::getParameters(
-            $compiler = !empty($compiler) ? $compiler : $this->compiler->reset()
-        );
+        if (empty($compiler)) {
+            $compiler = $this->compiler;
+        }
+
+        $parameters = parent::getParameters($compiler);
 
         //Unions always located at the end of query.
-        foreach ($this->unions as $union) {
+        foreach ($this->unionTokens as $union) {
             if ($union[0] instanceof QueryBuilder) {
                 $parameters = array_merge($parameters, $union[0]->getParameters($compiler));
             }
@@ -148,7 +150,9 @@ class SelectQuery extends AbstractSelect
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
         //11 parameters!
         return $compiler->compileSelect(
@@ -158,11 +162,11 @@ class SelectQuery extends AbstractSelect
             $this->joinTokens,
             $this->whereTokens,
             $this->havingTokens,
-            $this->groupBy,
-            $this->orderBy,
+            $this->grouping,
+            $this->ordering,
             $this->limit,
             $this->offset,
-            $this->unions
+            $this->unionTokens
         );
     }
 

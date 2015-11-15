@@ -9,10 +9,10 @@ namespace Spiral\Database\Builders\Traits;
 
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\SQLExpression;
-use Spiral\Database\Injections\FragmentInterface;
 
 /**
  * Provides ability to generate QueryCompiler JOIN tokens including ON conditions and table/column
@@ -181,7 +181,8 @@ trait JoinsTrait
     public function on($joined = null, $operator = null, $outer = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->onWrapper()
+            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWrapper()
         );
 
         return $this;
@@ -200,7 +201,8 @@ trait JoinsTrait
     public function andOn($joined = null, $operator = null, $outer = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->onWrapper()
+            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWrapper()
         );
 
         return $this;
@@ -317,11 +319,11 @@ trait JoinsTrait
     private function onWrapper()
     {
         return function ($parameter) {
-            if (!$parameter instanceof FragmentInterface) {
-                return new SQLExpression($parameter);
+            if ($parameter instanceof FragmentInterface) {
+                return $parameter;
             }
 
-            return $parameter;
+            return new SQLExpression($parameter);
         };
     }
 
@@ -333,20 +335,17 @@ trait JoinsTrait
     private function whereWrapper()
     {
         return function ($parameter) {
-            if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
-                //Convert every value into parameter
-                $parameter = new Parameter($parameter);
+            if ($parameter instanceof FragmentInterface) {
+                //We are only not creating bindings for plan fragments
+                if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
+                    return $parameter;
+                }
             }
 
-            if
-            (
-                $parameter instanceof FragmentInterface
-                && !$parameter instanceof ParameterInterface
-                && !$parameter instanceof QueryBuilder
-            ) {
-                return $parameter;
-            }
+            //Wrapping all values with ParameterInterface
+            $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);;
 
+            //Let's store to sent to driver when needed
             $this->onParameters[] = $parameter;
 
             return $parameter;

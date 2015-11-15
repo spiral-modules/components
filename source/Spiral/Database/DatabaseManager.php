@@ -71,31 +71,27 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
     public function database($database = null)
     {
         if (empty($database)) {
-            $database = $this->config['default'];
+            $database = $this->config->defaultDatabase();
         }
 
-        while (isset($this->config['aliases'][$database])) {
-            //Resolving database alias
-            $database = $this->config['aliases'][$database];
-        }
+        //Spiral support ability to link multiple virtual databases together using aliases
+        $database = $this->config->resolveAlias($database);
 
         if (isset($this->databases[$database])) {
             return $this->databases[$database];
         }
 
-        if (!isset($this->config['databases'][$database])) {
+        if (!$this->config->hasDatabase($database)) {
             throw new DatabaseException(
                 "Unable to create database, no presets for '{$database}' found."
             );
         }
 
-        $config = $this->config['databases'][$database];
-
         //No need to benchmark here, due connection will happen later
         $this->databases[$database] = $this->container->construct(Database::class, [
-            'name'        => $database,
-            'driver'      => $this->driver($config['connection']),
-            'tablePrefix' => isset($config['tablePrefix']) ? $config['tablePrefix'] : ''
+            'name'   => $database,
+            'driver' => $this->driver($this->config->databaseConnection($database)),
+            'prefix' => $this->config->databasePrefix($database)
         ]);
 
         return $this->databases[$database];
@@ -115,16 +111,18 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
             return $this->drivers[$connection];
         }
 
-        if (!isset($this->config['connections'][$connection])) {
+        if (!$this->config->hasConnection($connection)) {
             throw new DatabaseException(
                 "Unable to create Driver, no presets for '{$connection}' found."
             );
         }
 
-        $config = $this->config['connections'][$connection];
-
         $this->drivers[$connection] = $this->container->construct(
-            $config['driver'], compact('name', 'config')
+            $this->config->connectionDriver($connection),
+            [
+                'name'   => $connection,
+                'config' => $this->config->connectionConfig($connection)
+            ]
         );
 
         return $this->drivers[$connection];
@@ -139,7 +137,7 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
     public function getDatabases()
     {
         $result = [];
-        foreach ($this->config['databases'] as $name => $config) {
+        foreach ($this->config->databaseNames() as $name) {
             $result[] = $this->database($name);
         }
 
@@ -155,7 +153,7 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
     public function getDrivers()
     {
         $result = [];
-        foreach ($this->config['connections'] as $name => $config) {
+        foreach ($this->config->connectionNames() as $name) {
             $result[] = $this->driver($name);
         }
 

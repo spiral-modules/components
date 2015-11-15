@@ -31,9 +31,7 @@ class ArrayConfig extends Component implements ConfigInterface, \ArrayAccess, \I
      */
     public function __construct(array $config = [])
     {
-        if (!empty($config)) {
-            $this->config = $config;
-        }
+        $this->config = $config;
     }
 
     /**

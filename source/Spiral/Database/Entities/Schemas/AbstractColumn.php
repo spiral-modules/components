@@ -8,7 +8,7 @@
 namespace Spiral\Database\Entities\Schemas;
 
 use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\Schemas\Traits\DeclaredTrait;
+use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Exceptions\InvalidArgumentException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\Fragment;
@@ -44,13 +44,8 @@ use Spiral\Database\Schemas\ColumnInterface;
  *
  * @method AbstractColumn|$this json()
  */
-abstract class AbstractColumn implements ColumnInterface
+abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 {
-    /**
-     * Required to build full table diff.
-     */
-    use DeclaredTrait;
-
     /**
      * Abstract type aliases (for consistency).
      *
@@ -95,35 +90,45 @@ abstract class AbstractColumn implements ColumnInterface
         //Primary sequences
         'primary'     => null,
         'bigPrimary'  => null,
+
         //Enum type (mapped via method)
         'enum'        => null,
+
         //Logical types
         'boolean'     => null,
+
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => null,
         'tinyInteger' => null,
         'bigInteger'  => null,
+
         //String with specified length (mapped via method)
         'string'      => null,
+
         //Generic types
         'text'        => null,
         'tinyText'    => null,
         'longText'    => null,
+
         //Real types
         'double'      => null,
         'float'       => null,
+
         //Decimal type (mapped via method)
         'decimal'     => null,
+
         //Date and Time types
         'datetime'    => null,
         'date'        => null,
         'time'        => null,
         'timestamp'   => null,
+
         //Binary types
         'binary'      => null,
         'tinyBinary'  => null,
         'longBinary'  => null,
+
         //Additional types
         'json'        => null
     ];
@@ -159,13 +164,6 @@ abstract class AbstractColumn implements ColumnInterface
         'longBinary'  => [],
         'json'        => []
     ];
-
-    /**
-     * Column name.
-     *
-     * @var string
-     */
-    protected $name = '';
 
     /**
      * DBMS specific column type.
@@ -216,35 +214,6 @@ abstract class AbstractColumn implements ColumnInterface
      * @var array
      */
     protected $enumValues = [];
-
-    /**
-     * @invisible
-     * @var AbstractTable
-     */
-    protected $table = null;
-
-    /**
-     * @param AbstractTable $table
-     * @param string        $name
-     * @param mixed         $schema Driver specific column information.
-     */
-    public function __construct(AbstractTable $table, $name, $schema = null)
-    {
-        $this->name = $name;
-        $this->table = $table;
-
-        !empty($schema) && $this->resolveSchema($schema);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param bool $quoted Quote name.
-     */
-    public function getName($quoted = false)
-    {
-        return $quoted ? $this->table->driver()->identifier($this->name) : $this->name;
-    }
 
     /**
      * {@inheritdoc}
@@ -323,7 +292,9 @@ abstract class AbstractColumn implements ColumnInterface
         }
 
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
-            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->nowExpression())) {
+            if (
+                strtolower($this->defaultValue) == strtolower($this->table->driver()->nowExpression())
+            ) {
                 return new Fragment($this->defaultValue);
             }
         }
@@ -401,20 +372,6 @@ abstract class AbstractColumn implements ColumnInterface
         }
 
         return 'unknown';
-    }
-
-    /**
-     * Set column name. It's recommended to use AbstractTable->renameColumn() to safely rename
-     * columns.
-     *
-     * @param string $name New column name.
-     * @return $this
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -635,22 +592,14 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Schedule column drop when parent table schema will be saved.
-     */
-    public function drop()
-    {
-        $this->table->dropColumn($this->getName());
-    }
-
-    /**
      * Must compare two instances of AbstractColumn.
      *
-     * @param AbstractColumn $original
+     * @param AbstractColumn $initial
      * @return bool
      */
-    public function compare(AbstractColumn $original)
+    public function compare(AbstractColumn $initial)
     {
-        $normalized = clone $original;
+        $normalized = clone $initial;
         $normalized->declared = $this->declared;
 
         if ($this == $normalized) {
@@ -662,9 +611,9 @@ abstract class AbstractColumn implements ColumnInterface
 
         $difference = [];
         foreach ($columnVars as $name => $value) {
-            //Default values has to compared using type-casted value
             if ($name == 'defaultValue') {
-                if ($this->getDefaultValue() != $original->getDefaultValue()) {
+                //Default values has to compared using type-casted value
+                if ($this->getDefaultValue() != $initial->getDefaultValue()) {
                     $difference[] = $name;
                 }
 
@@ -721,14 +670,6 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->sqlStatement();
-    }
-
-    /**
      * Simplified way to dump information.
      *
      * @return object
@@ -768,14 +709,6 @@ abstract class AbstractColumn implements ColumnInterface
 
         return (object)$column;
     }
-
-    /**
-     * Parse driver specific schema information and populate schema fields.
-     *
-     * @param mixed $schema
-     * @throws SchemaException
-     */
-    abstract protected function resolveSchema($schema);
 
     /**
      * Get database specific enum type definition options.

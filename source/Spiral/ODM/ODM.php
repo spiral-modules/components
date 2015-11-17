@@ -53,19 +53,18 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     /**
      * Normalized document constants.
      */
-    const D_DEFINITION = self::DEFINITION;
-    const D_COLLECTION = 1;
-    const D_DB         = 2;
-    const D_SOURCE     = 3;
-    const D_HIDDEN     = SchematicEntity::SH_HIDDEN;
-    const D_SECURED    = SchematicEntity::SH_SECURED;
-    const D_FILLABLE   = SchematicEntity::SH_FILLABLE;
-    const D_MUTATORS   = SchematicEntity::SH_MUTATORS;
-    const D_VALIDATES  = SchematicEntity::SH_VALIDATES;
-
-    const D_DEFAULTS     = 3;
-    const D_AGGREGATIONS = 9;
-    const D_COMPOSITIONS = 10;
+    const D_DEFINITION   = self::DEFINITION;
+    const D_COLLECTION   = 1;
+    const D_DB           = 2;
+    const D_SOURCE       = 3;
+    const D_HIDDEN       = SchematicEntity::SH_HIDDEN;
+    const D_SECURED      = SchematicEntity::SH_SECURED;
+    const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
+    const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
+    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
+    const D_DEFAULTS     = 9;
+    const D_AGGREGATIONS = 10;
+    const D_COMPOSITIONS = 11;
 
     /**
      * Normalized aggregation constants.

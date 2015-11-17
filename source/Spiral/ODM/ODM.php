@@ -150,7 +150,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
             return $this->databases[$database];
         }
 
-        if ($this->config->hasDatabase($database)) {
+        if (!$this->config->hasDatabase($database)) {
             throw new ODMException(
                 "Unable to initiate mongo database, no presets for '{$database}' found."
             );

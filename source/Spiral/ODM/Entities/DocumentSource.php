@@ -7,10 +7,61 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\ODM\DocumentEntity;
+use Spiral\ODM\ODM;
+use Spiral\ORM\Exceptions\SourceException;
 
+/**
+ * Source class associated to one or multiple (default implementation) ODM models.
+ */
 class DocumentSource extends Collection
 {
+    /**
+     * Sugary!
+     */
+    use SaturateTrait;
+
+    /**
+     * Linked document model.
+     */
+    const DOCUMENT = null;
+
+    /**
+     * Associated document class. Attention, collection might return parent class on document
+     * construction!
+     *
+     * @var string
+     */
+    private $class = null;
+
+    /**
+     * @param string $class
+     * @param ODM    $odm
+     * @param array  $query
+     * @throws SourceException
+     */
+    public function __construct($class = null, ODM $odm = null, array $query = [])
+    {
+        if (empty($class)) {
+            if (empty(static::DOCUMENT)) {
+                throw new SourceException("Unable to create source without associate class.");
+            }
+
+            $class = static::DOCUMENT;
+        }
+
+        $this->class = $class;
+
+        if (empty($odm)) {
+            $odm = $this->saturate($odm, ODM::class);
+        }
+
+        //We can fetch collection and database from associated schema
+        $schema = $odm->schema($this->class);
+        parent::__construct($odm, $schema[ODM::D_DB], $schema[ODM::D_COLLECTION], $query);
+    }
+
     /**
      * Create new Record based on set of provided fields.
      *

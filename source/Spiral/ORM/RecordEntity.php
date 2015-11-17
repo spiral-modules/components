@@ -315,9 +315,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->schema(static::class);
         parent::__construct($this->ormSchema);
 
-        //Initiating associated traits
-        static::initialize();
-
         if (isset($data[ORM::PIVOT_DATA])) {
             $this->pivotData = $data[ORM::PIVOT_DATA];
             unset($data[ORM::PIVOT_DATA]);
@@ -571,11 +568,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $relation = $this->ormSchema[ORM::M_RELATIONS][$name];
 
         return $this->relations[$name] = $this->orm->relation(
-            $relation[ORM::R_TYPE],
-            $this,
-            $relation[ORM::R_DEFINITION],
-            $data,
-            $loaded
+            $relation[ORM::R_TYPE], $this, $relation[ORM::R_DEFINITION], $data, $loaded
         );
     }
 

@@ -204,10 +204,12 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODM::class);
-        $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->schema(static::class);
-        parent::__construct($this->odmSchema);
 
-        static::initialize();
+        $this->odmSchema = !empty($odmSchema)
+            ? $odmSchema
+            : $this->odm->schema(static::class);
+
+        parent::__construct($this->odmSchema);
 
         if (empty($fields)) {
             $this->invalidate();
@@ -430,7 +432,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             $result[$field] = $value;
         }
 
-        return $this->dispatch('publicFields', $result);
+        return $result;
     }
 
     /**

@@ -36,6 +36,7 @@ class SchematicEntity extends DataEntity
     public function __construct(array $schema)
     {
         $this->schema = $schema;
+        static::initialize();
     }
 
     /**
@@ -56,23 +57,7 @@ class SchematicEntity extends DataEntity
             $result[$field] = $value;
         }
 
-        return $this->dispatch('publicFields', $result);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createValidator(array $rules = [], ContainerInterface $container = null)
-    {
-        if (!empty($this->validator)) {
-            return $this->validator;
-        }
-
-        //Initiate validation using rules declared in odmSchema
-        return parent::createValidator(
-            !empty($rules) ? $rules : $this->schema[self::SH_VALIDATES],
-            $container
-        );
+        return $result;
     }
 
     /**
@@ -101,5 +86,17 @@ class SchematicEntity extends DataEntity
         }
 
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createValidator(array $rules = [], ContainerInterface $container = null)
+    {
+        //Initiate validation using rules declared in model schema
+        return parent::createValidator(
+            !empty($rules) ? $rules : $this->schema[self::SH_VALIDATES],
+            $container
+        );
     }
 }

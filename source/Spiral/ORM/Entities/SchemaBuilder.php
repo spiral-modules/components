@@ -325,7 +325,7 @@ class SchemaBuilder extends Component
     protected function locateSources(LocatorInterface $locator)
     {
         foreach ($locator->getClasses(RecordSource::class) as $class => $definition) {
-            $reflection = new ClassReflection($class);
+            $reflection = new \ReflectionClass($class);
 
             if ($reflection->isAbstract() || empty($record = $reflection->getConstant('RECORD'))) {
                 continue;

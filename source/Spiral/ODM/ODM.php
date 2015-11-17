@@ -16,7 +16,6 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Configs\ODMConfig;
-use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
@@ -201,17 +200,17 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      * Get instance of ODM source associated with given model class.
      *
      * @param string $class
+     * @param array  $query
      * @return DocumentSource
      */
-    public function source($class)
+    public function source($class, array $query = [])
     {
         $schema = $this->schema($class);
-
-        if (empty($schema[self::D_DB])) {
-            throw new ODMException("Document '{$class}' does not have any associated collection.");
+        if (empty($source = $schema[self::D_SOURCE])) {
+            $source = DocumentSource::class;
         }
 
-        return new Collection($this, $schema[self::D_DB], $schema[self::D_COLLECTION], []);
+        return new $source($class, $this, $query);
     }
 
     /**

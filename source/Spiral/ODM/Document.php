@@ -10,7 +10,9 @@ namespace Spiral\ODM;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\EntityInterface;
+use Spiral\Models\Events\EntityEvent;
 use Spiral\ODM\Entities\Collection;
+use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -140,23 +142,20 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         if (!$this->isLoaded()) {
-            $this->dispatch('saving');
+            $this->dispatch('saving', new EntityEvent($this));
             unset($this->fields['_id']);
 
             //Create new document
-            $this->odmCollection($this->odm)->insert($this->fields = $this->serializeData());
+            $this->odmSource()->insert($this->fields = $this->serializeData());
 
-            $this->dispatch('saved');
+            $this->dispatch('saved', new EntityEvent($this));
         } elseif ($this->isSolid() || $this->hasUpdates()) {
-            $this->dispatch('updating');
+            $this->dispatch('updating', new EntityEvent($this));
 
             //Update existed document
-            $this->odmCollection($this->odm)->update(
-                ['_id' => $this->primaryKey()],
-                $this->buildAtomics()
-            );
+            $this->odmSource()->update(['_id' => $this->primaryKey()], $this->buildAtomics());
 
-            $this->dispatch('updated');
+            $this->dispatch('updated', new EntityEvent($this));
         }
 
         $this->flushUpdates();
@@ -179,12 +178,13 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             );
         }
 
-        $this->dispatch('deleting');
+        $this->dispatch('deleting', new EntityEvent($this));
         if ($this->isLoaded()) {
-            $this->odmCollection($this->odm)->remove(['_id' => $this->primaryKey()]);
+            $this->odmSource()->remove(['_id' => $this->primaryKey()]);
         }
+
         $this->fields = $this->odmSchema()[ODM::D_DEFAULTS];
-        $this->dispatch('deleted');
+        $this->dispatch('deleted', new EntityEvent($this));
     }
 
     /**
@@ -213,7 +213,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * Get document aggregation.
      *
      * @param string $aggregation
-     * @return Collection|Document
+     * @return DocumentSource|Document
      */
     public function aggregate($aggregation)
     {
@@ -227,14 +227,14 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
 
         //Every aggregation works thought ODM collection
-        $collection = $this->odm->source($aggregation[ODM::ARG_CLASS])->query($query);
+        $source = $this->odm->source($aggregation[ODM::ARG_CLASS])->query($query);
 
         //In future i might need separate class to represent aggregation
         if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
-            return $collection->findOne();
+            return $source->findOne();
         }
 
-        return $collection;
+        return $source;
     }
 
     /**
@@ -270,7 +270,11 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     {
         $accessor = parent::createAccessor($accessor, $value);
 
-        if ($accessor instanceof CompositableInterface && !$this->isLoaded() && !$this->isEmbedded()) {
+        if (
+            $accessor instanceof CompositableInterface
+            && !$this->isLoaded()
+            && !$this->isEmbedded()
+        ) {
             //Newly created object
             $accessor->invalidate();
         }
@@ -336,5 +340,15 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         return $source;
+    }
+
+    /**
+     * Associated document source (collection).
+     *
+     * @return DocumentSource
+     */
+    private function odmSource()
+    {
+        return $this->odm->source(static::class);
     }
 }

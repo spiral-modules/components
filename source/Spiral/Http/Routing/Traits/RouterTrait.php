@@ -8,10 +8,9 @@
 namespace Spiral\Http\Routing\Traits;
 
 use Spiral\Core\ContainerInterface;
-use Spiral\Http\Exceptions\RouterException;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Http\Routing\Route;
 use Spiral\Http\Routing\RouteInterface;
-use Spiral\Http\Routing\Router;
 use Spiral\Http\Routing\RouterInterface;
 
 /**
@@ -23,19 +22,9 @@ use Spiral\Http\Routing\RouterInterface;
 trait RouterTrait
 {
     /**
-     * @var RouteInterface[]
-     */
-    private $routes = [];
-
-    /**
      * @var RouterInterface|null
      */
     private $router = null;
-
-    /**
-     * @return ContainerInterface
-     */
-    abstract public function container();
 
     /**
      * Set custom router implementation.
@@ -65,11 +54,13 @@ trait RouterTrait
      * Add new route.
      *
      * @param RouteInterface $route
+     * @return $this
      */
     public function addRoute(RouteInterface $route)
     {
-        $this->routes[] = $route;
-        !empty($this->router) && $this->router->addRoute($route);
+        $this->router()->addRoute($route);
+
+        return $this;
     }
 
     /**
@@ -84,8 +75,14 @@ trait RouterTrait
      */
     public function route($pattern, $target, array $defaults = [])
     {
-        $name = is_string($target) ? $target : uniqid('route', true);
-        $this->addRoute($route = new Route($name, $pattern, $target, $defaults));
+        $route = new Route(
+            is_string($target) ? $target : uniqid('route', true),
+            $pattern,
+            $target,
+            $defaults
+        );
+
+        $this->addRoute($route);
 
         return $route;
     }
@@ -94,14 +91,22 @@ trait RouterTrait
      * Create router instance using container.
      *
      * @return RouterInterface
-     * @throws RouterException
+     * @throws SugarException
      */
     protected function createRouter()
     {
-        if (empty($container = $this->container())) {
-            throw new RouterException("Unable to create default router, default container not set.");
+        if (empty($container = $this->container()) || !$container->has(RouterInterface::class)) {
+            throw new SugarException(
+                "Unable to create Router, container not set or binding is missing."
+            );
         }
 
-        return new Router($container, $this->routes);
+        //Let's create default router
+        return $container->get(RouterInterface::class);
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

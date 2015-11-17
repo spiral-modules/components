@@ -52,13 +52,6 @@ class HttpDispatcher extends HttpCore implements
     protected $config = null;
 
     /**
-     * Initial server request.
-     *
-     * @var ServerRequestInterface
-     */
-    protected $request = null;
-
-    /**
      * Required to render error pages.
      *
      * @var ViewsInterface
@@ -231,10 +224,6 @@ class HttpDispatcher extends HttpCore implements
      */
     protected function request()
     {
-        if (!empty($this->request)) {
-            return $this->request;
-        }
-
         //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose
         //error
         return $this->request = ServerRequestFactory::fromGlobals(
@@ -276,9 +265,9 @@ class HttpDispatcher extends HttpCore implements
     protected function createRouter()
     {
         return $this->container->construct($this->config['router']['class'], [
-                'routes'   => $this->routes,
                 'basePath' => $this->basePath()
-            ] + $this->config['router']);
+            ] + $this->config['router']
+        );
     }
 
     /**

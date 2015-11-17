@@ -10,8 +10,8 @@ namespace Spiral\ODM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Document;
+use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -29,6 +29,13 @@ class DocumentSchema extends ReflectionEntity
     const BASE_CLASS = Document::class;
 
     /**
+     * Related source class.
+     *
+     * @var string
+     */
+    private $source = null;
+
+    /**
      * @invisible
      * @var SchemaBuilder
      */
@@ -43,6 +50,26 @@ class DocumentSchema extends ReflectionEntity
     {
         $this->builder = $builder;
         parent::__construct($class);
+    }
+
+    /**
+     * Associate source class.
+     *
+     * @param string $class
+     */
+    public function setSource($class)
+    {
+        $this->source = $class;
+    }
+
+    /**
+     * Related source class.
+     *
+     * @return string|null
+     */
+    public function getSource()
+    {
+        return $this->source;
     }
 
     /**
@@ -93,22 +120,7 @@ class DocumentSchema extends ReflectionEntity
             return null;
         }
 
-        $database = $this->property('database');
-        if (empty($database)) {
-            if ($this->parentSchema()) {
-                //Using parent database
-                return $this->parentSchema()->getDatabase();
-            }
-
-            $database = $this->builder->getODM()->config()['default'];
-        }
-
-        $aliases = $this->builder->getODM()->config()['aliases'];
-        while (isset($aliases[$database])) {
-            $database = $aliases[$database];
-        }
-
-        return $database;
+        return $this->builder->databaseAlias($this->property('database'));
     }
 
     /**
@@ -578,7 +590,7 @@ class DocumentSchema extends ReflectionEntity
 
         if ($accessor != ODM::CMP_ONE) {
             //Not an accessor but composited class
-            $accessor = new $accessor($default, null, $this->builder->getODM(), $options);
+            $accessor = new $accessor($default, null, $this->builder->odm(), $options);
 
             if ($accessor instanceof DocumentAccessorInterface) {
                 return $accessor->defaultValue();

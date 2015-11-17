@@ -110,18 +110,14 @@ class Compositor extends Component implements
         }
 
         if (empty($this->class)) {
-            throw new CompositorException(
-                "Compositor requires to know it's primary class name."
-            );
+            throw new CompositorException("Compositor requires to know it's primary class name.");
         }
 
         //Allowed only when global container is set
         $this->odm = $this->saturate($odm, ODM::class);
 
         if (empty($this->odm)) {
-            throw new CompositorException(
-                "ODM instance if required for Compositor to work properly."
-            );
+            throw new CompositorException("ODM instance if required for Compositor to work properly.");
         }
     }
 
@@ -527,11 +523,9 @@ class Compositor extends Component implements
         $class = !empty($class) ? $class : $this->class;
 
         $this->changedDirectly = true;
-        $this->documents[] = $document = call_user_func(
-            [$class, 'create'],
-            $fields,
-            $this->odm
-        )->embed($this);
+
+        $document = call_user_func([$class, 'create'], $fields, $this->odm)->embed($this);
+        $this->documents[] = $document;
 
         return $document;
     }

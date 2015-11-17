@@ -11,6 +11,7 @@ use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
+use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
@@ -665,12 +666,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             $accessor = $this->odm->document($options, $value, $this);
         } else {
             //Additional options are supplied for CompositableInterface
-            $accessor = new $accessor(
-                $value,
-                $this,
-                $this->odm,
-                $options
-            );
+            $accessor = new $accessor($value, $this, $this->odm, $options);
         }
 
         return $accessor;
@@ -692,7 +688,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         $document = new static([], null, $odm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $document->setFields($fields)->dispatch('created');
+        $document->setFields($fields)->dispatch('created', new EntityEvent($document));
 
         return $document;
     }

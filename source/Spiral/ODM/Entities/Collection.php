@@ -31,7 +31,8 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method array validate($validate)
  * @method bool|array insert($array_of_fields_OR_object, $options = [])
  * @method mixed batchInsert($documents, $options = [])
- * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options = [])
+ * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options =
+ *         [])
  * @method bool|array remove($array_of_fields_OR_object, $options = [])
  * @method bool ensureIndex($key_OR_array_of_keys, $options = [])
  * @method array deleteIndex($string_OR_array_of_keys)
@@ -118,8 +119,12 @@ class Collection extends Component implements
     public function __construct(ODM $odm, $database, $collection, array $query = [])
     {
         $this->odm = $odm;
+
+
         $this->name = $collection;
         $this->database = $database;
+
+
         $this->query = $query;
     }
 
@@ -211,17 +216,6 @@ class Collection extends Component implements
         $this->sort = $fields;
 
         return $this;
-    }
-
-    /**
-     * Select one document or it's fields from collection.
-     *
-     * @param array $query Fields and conditions to query by.
-     * @return Document|array
-     */
-    public function findOne(array $query = [])
-    {
-        return $this->createCursor($query, [], 1)->getNext();
     }
 
     /**

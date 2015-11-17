@@ -47,7 +47,7 @@ class RecordSource extends Selector implements SourceInterface
      *
      * @final Change static method of entity, not this one.
      * @param array $fields
-     * @return RecordInterface
+     * @return RecordEntity
      */
     final public function create($fields = [])
     {

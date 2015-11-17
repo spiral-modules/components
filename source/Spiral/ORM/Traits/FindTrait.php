@@ -7,7 +7,7 @@
  */
 namespace Spiral\ORM\Traits;
 
-use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
@@ -25,11 +25,11 @@ trait FindTrait
      *
      * @param array|\Closure $where Selection WHERE statement.
      * @param array          $load  Array or relations to be pre-loaded.
-     * @return Selector
+     * @return RecordSource
      */
     public static function find($where = [], array $load = [])
     {
-        return static::ormSelector()->load($load)->where($where);
+        return static::source()->load($load)->where($where);
     }
 
     /**
@@ -46,12 +46,12 @@ trait FindTrait
      */
     public static function findOne($where = [], array $load = [], array $orderBy = [])
     {
-        $selector = static::find($where, $load);
+        $source = static::find($where, $load);
         foreach ($orderBy as $column => $direction) {
-            $selector->orderBy($column, $direction);
+            $source->orderBy($column, $direction);
         }
 
-        return $selector->findOne();
+        return $source->findOne();
     }
 
     /**
@@ -66,7 +66,7 @@ trait FindTrait
      */
     public static function findByPK($primaryKey, array $load = [])
     {
-        return static::ormSelector()->load($load)->findByPK($primaryKey);
+        return static::source()->load($load)->findByPK($primaryKey);
     }
 
     /**
@@ -74,15 +74,12 @@ trait FindTrait
      *
      * @see   Component::staticContainer()
      * @param ORM $orm ORM component, global container will be called if not instance provided.
-     * @return Selector
+     * @return RecordSource
      * @throws ORMException
      * @event selector(Selector $selector)
      */
-    public static function ormSelector(ORM $orm = null)
+    public static function source(ORM $orm = null)
     {
-        //Ensure traits
-        static::initialize();
-
         /**
          * Using global container as fallback.
          *
@@ -93,6 +90,6 @@ trait FindTrait
             $orm = self::staticContainer()->get(ORM::class);
         }
 
-        return static::events()->fire('selector', $orm->source(static::class));
+        return $orm->source(static::class);
     }
 }

@@ -15,9 +15,7 @@ use Spiral\Models\EntityInterface;
  *
  * Compositable instance is primary entity type for ODM.
  */
-interface CompositableInterface extends
-    EntityInterface,
-    DocumentAccessorInterface
+interface CompositableInterface extends EntityInterface, DocumentAccessorInterface
 {
     /**
      * {@inheritdoc}

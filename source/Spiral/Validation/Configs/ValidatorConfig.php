@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Validation\Config;
+namespace Spiral\Validation\Configs;
 
 use Spiral\Core\ArrayConfig;
 

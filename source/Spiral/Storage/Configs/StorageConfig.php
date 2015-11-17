@@ -5,7 +5,7 @@
  * @license MIT
  * @author  Anton Titov (Wolfy-J)
  */
-namespace Spiral\Storage\Config;
+namespace Spiral\Storage\Configs;
 
 use Spiral\Core\ArrayConfig;
 

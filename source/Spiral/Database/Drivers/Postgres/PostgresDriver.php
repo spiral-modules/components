@@ -10,14 +10,11 @@ namespace Spiral\Database\Drivers\Postgres;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\Postgres\Schemas\ColumnSchema;
-use Spiral\Database\Drivers\Postgres\Schemas\IndexSchema;
-use Spiral\Database\Drivers\Postgres\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\Postgres\Schemas\Commander;
 use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
-use Spiral\Database\Injections\Parameter;
 
 /**
  * Talks to postgres databases.
@@ -32,10 +29,12 @@ class PostgresDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE     = TableSchema::class;
-    const SCHEMA_COLUMN    = ColumnSchema::class;
-    const SCHEMA_INDEX     = IndexSchema::class;
-    const SCHEMA_REFERENCE = ReferenceSchema::class;
+    const SCHEMA_TABLE = TableSchema::class;
+
+    /**
+     * Commander used to execute commands. :)
+     */
+    const COMMANDER = Commander::class;
 
     /**
      * Query compiler class.
@@ -56,6 +55,8 @@ class PostgresDriver extends Driver
     private $primaryKeys = [];
 
     /**
+     * Needed to remeber table primary keys.
+     *
      * @invisible
      * @var HippocampusInterface
      */
@@ -63,18 +64,18 @@ class PostgresDriver extends Driver
 
     /**
      * {@inheritdoc}
-     * @param ContainerInterface   $container
      * @param string               $name
      * @param array                $config
+     * @param ContainerInterface   $container
      * @param HippocampusInterface $memory
      */
     public function __construct(
-        ContainerInterface $container,
         $name,
         array $config,
+        ContainerInterface $container,
         HippocampusInterface $memory = null
     ) {
-        parent::__construct($container, $name, $config);
+        parent::__construct($name, $config, $container);
         $this->memory = $memory;
     }
 
@@ -84,8 +85,7 @@ class PostgresDriver extends Driver
     public function hasTable($name)
     {
         $query = 'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' '
-            . 'AND "table_name" = ?';
+            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?';
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }

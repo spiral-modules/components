@@ -12,7 +12,7 @@ use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\SQLExpression;
+use Spiral\Database\Injections\Expression;
 
 /**
  * Provides ability to generate QueryCompiler JOIN tokens including ON conditions and table/column
@@ -323,7 +323,7 @@ trait JoinsTrait
                 return $parameter;
             }
 
-            return new SQLExpression($parameter);
+            return new Expression($parameter);
         };
     }
 

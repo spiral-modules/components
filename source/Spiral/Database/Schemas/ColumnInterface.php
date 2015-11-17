@@ -13,14 +13,6 @@ namespace Spiral\Database\Schemas;
 interface ColumnInterface
 {
     /**
-     * PHP types for phpType() method.
-     */
-    const INT    = 'int';
-    const BOOL   = 'bool';
-    const STRING = 'string';
-    const FLOAT  = 'float';
-
-    /**
      * Column name.
      *
      * @return string

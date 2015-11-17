@@ -13,7 +13,7 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
-use Spiral\Tokenizer\Config\TokenizerConfig;
+use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Symfony\Component\Finder\Finder;
 

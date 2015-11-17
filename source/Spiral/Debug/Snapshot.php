@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Debug\Config\SnapshotConfig;
+use Spiral\Debug\Configs\SnapshotConfig;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Views\ViewsInterface;

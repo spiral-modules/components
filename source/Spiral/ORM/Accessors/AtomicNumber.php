@@ -8,7 +8,7 @@
 namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Injections\SQLExpression;
+use Spiral\Database\Injections\Expression;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\ActiveAccessorInterface;
 
@@ -113,7 +113,7 @@ class AtomicNumber implements ActiveAccessorInterface
         $sign = $this->delta > 0 ? '+' : '-';
 
         //"field" = "field" + delta
-        return new SQLExpression("{$field} {$sign} " . abs($this->delta));
+        return new Expression("{$field} {$sign} " . abs($this->delta));
     }
 
     /**

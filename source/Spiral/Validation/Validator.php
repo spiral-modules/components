@@ -14,7 +14,7 @@ use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Validation\Config\ValidatorConfig;
+use Spiral\Validation\Configs\ValidatorConfig;
 use Spiral\Validation\Exceptions\ValidationException;
 
 /**

@@ -10,7 +10,7 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Database\Config\DatabasesConfig;
+use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DatabaseException;

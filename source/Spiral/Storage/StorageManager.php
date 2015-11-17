@@ -10,7 +10,7 @@ namespace Spiral\Storage;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\ContainerInterface;
-use Spiral\Storage\Config\StorageConfig;
+use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\Entities\StorageObject;
 use Spiral\Storage\Exceptions\StorageException;

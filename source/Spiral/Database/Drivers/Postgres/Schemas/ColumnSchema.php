@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
@@ -23,35 +22,45 @@ class ColumnSchema extends AbstractColumn
         //Primary sequences
         'primary'     => ['type' => 'serial', 'autoIncrement' => true, 'nullable' => false],
         'bigPrimary'  => ['type' => 'bigserial', 'autoIncrement' => true, 'nullable' => false],
+
         //Enum type (mapped via method)
         'enum'        => 'enum',
+
         //Logical types
         'boolean'     => 'boolean',
+
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => 'integer',
         'tinyInteger' => 'smallint',
         'bigInteger'  => 'bigint',
+
         //String with specified length (mapped via method)
         'string'      => 'character varying',
+
         //Generic types
         'text'        => 'text',
         'tinyText'    => 'text',
         'longText'    => 'text',
+
         //Real types
         'double'      => 'double precision',
         'float'       => 'real',
+
         //Decimal type (mapped via method)
         'decimal'     => 'numeric',
+
         //Date and Time types
         'datetime'    => 'timestamp without time zone',
         'date'        => 'date',
         'time'        => 'time',
         'timestamp'   => 'timestamp without time zone',
+
         //Binary types
         'binary'      => 'bytea',
         'tinyBinary'  => 'bytea',
         'longBinary'  => 'bytea',
+
         //Additional types
         'json'        => 'json'
     ];
@@ -196,7 +205,7 @@ class ColumnSchema extends AbstractColumn
      * @param AbstractColumn $original
      * @return array
      */
-    public function alterOperations(AbstractColumn $original)
+    public function alteringOperations(AbstractColumn $original)
     {
         $operations = [];
 
@@ -386,12 +395,11 @@ class ColumnSchema extends AbstractColumn
      */
     private function checkCheckConstrain($tableOID)
     {
-        $query = "SELECT conname, consrc FROM pg_constraint WHERE conrelid = ? AND contype = 'c' "
-            . "AND (consrc LIKE ? OR consrc LIKE ?)";
+        $query = "SELECT conname, consrc FROM pg_constraint "
+            . "WHERE conrelid = ? AND contype = 'c' AND (consrc LIKE ? OR consrc LIKE ?)";
 
         $constraints = $this->table->driver()->query(
-            $query,
-            [$tableOID, '(' . $this->name . '%', '("' . $this->name . '%',]
+            $query, [$tableOID, '(' . $this->name . '%', '("' . $this->name . '%',]
         );
 
         foreach ($constraints as $constraint) {

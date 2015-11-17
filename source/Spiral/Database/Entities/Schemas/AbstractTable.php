@@ -8,20 +8,18 @@
 namespace Spiral\Database\Entities\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
-use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Exceptions\SchemaException;
+use Spiral\Database\Schemas\ColumnInterface;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\ODM\Exceptions\SchemaException;
 
 /**
- * Abstract table schema with read (see TableInterface) and write abilities. Must be implemented
- * by driver to support DBMS specific syntax and creation rules.
+ * AbstractTable class used to describe and manage state of specified table. It provides ability to
+ * get table introspection, update table schema and automatically generate set of diff operations.
  *
  * Most of table operation like column, index or foreign key creation/altering will be applied when
  * save() method will be called.
- *
- * @todo Class is too big, possible separate it (commands class, diff class and etc).
  *
  * Column configuration shortcuts:
  * @method AbstractColumn primary($column)
@@ -46,99 +44,42 @@ use Spiral\Debug\Traits\LoggerTrait;
  * @method AbstractColumn tinyBinary($column)
  * @method AbstractColumn longBinary($column)
  */
-abstract class AbstractTable extends Component implements TableInterface
+abstract class AbstractTable extends TableState implements TableInterface, LoggerAwareInterface
 {
     /**
-     * AbstractTable will raise few warning and debug messages to console.
+     * Some operation better to be logged.
      */
     use LoggerTrait;
-
-    /**
-     * Rename SQL statement is usually the same... usually.
-     */
-    const RENAME_STATEMENT = "ALTER TABLE {table} RENAME TO {name}";
 
     /**
      * Indication that table is exists and current schema is fetched from database.
      *
      * @var bool
      */
-    protected $exists = false;
-
-    /**
-     * Table name including table prefix.
-     *
-     * @var string
-     */
-    protected $name = '';
+    private $exists = false;
 
     /**
      * Database specific tablePrefix. Required for table renames.
      *
      * @var string
      */
-    protected $prefix = '';
+    private $prefix = '';
 
     /**
-     * Primary key columns are stored separately from other indexes and can be modified only during
-     * table creation.
-     *
-     * @var array
-     */
-    protected $primaryKeys = [];
-
-    /**
-     * Primary keys fetched from database.
+     * We have to remember original schema state to create set of diff based commands.
      *
      * @invisible
-     * @var array
+     * @var TableState
      */
-    protected $dbPrimaryKeys = [];
+    protected $initial = null;
 
     /**
-     * Column schemas fetched from db or created by user.
-     *
-     * @var AbstractColumn[]
-     */
-    protected $columns = [];
-
-    /**
-     * Column schemas fetched from db. Synced with $columns in table save() method.
+     * Compares current and original states.
      *
      * @invisible
-     * @var AbstractColumn[]
+     * @var Comparator
      */
-    protected $dbColumns = [];
-
-    /**
-     * Index schemas fetched from db or created by user.
-     *
-     * @var AbstractIndex[]
-     */
-    protected $indexes = [];
-
-    /**
-     * Index schemas fetched from db. Synced with $indexes in table save() method.
-     *
-     * @invisible
-     * @var AbstractIndex[]
-     */
-    protected $dbIndexes = [];
-
-    /**
-     * Foreign key schemas fetched from db or created by user.
-     *
-     * @var AbstractReference[]
-     */
-    protected $references = [];
-
-    /**
-     * Foreign key schemas fetched from db. Synced with $references in table save() method.
-     *
-     * @invisible
-     * @var AbstractReference[]
-     */
-    protected $dbReferences = [];
+    protected $comparator = null;
 
     /**
      * @invisible
@@ -147,34 +88,65 @@ abstract class AbstractTable extends Component implements TableInterface
     protected $driver = null;
 
     /**
-     * @param Driver $driver Parent driver.
-     * @param string $name   Table name, must include table prefix.
-     * @param string $prefix Database specific table prefix.
+     * Executes table operations.
+     *
+     * @var AbstractCommander
      */
-    public function __construct(Driver $driver, $name, $prefix)
+    protected $commander = null;
+
+    /**
+     * @param Driver            $driver Parent driver.
+     * @param AbstractCommander $commander
+     * @param string            $name   Table name, must include table prefix.
+     * @param string            $prefix Database specific table prefix.
+     */
+    public function __construct(Driver $driver, AbstractCommander $commander, $name, $prefix)
     {
+        parent::__construct($name);
+
         $this->driver = $driver;
-        $this->name = $name;
+        $this->commander = $commander;
+
         $this->prefix = $prefix;
 
-        if (!$this->driver->hasTable($this->name)) {
+        //Locking down initial table state
+        $this->initial = new TableState($name);
+
+        //Needed to compare schemas
+        $this->comparator = new Comparator($this->initial, $this);
+
+        if (!$this->driver->hasTable($this->getName())) {
+            //There is no need to load table schema when table does not exist
             return;
         }
 
         //Loading table information
-        $this->loadColumns();
-        $this->loadIndexes();
-        $this->loadReferences();
+        $this->loadColumns()->loadIndexes()->loadReferences();
+
+        //Syncing schemas
+        $this->initial->syncSchema($this);
 
         $this->exists = true;
     }
 
     /**
+     * Get associated table driver.
+     *
      * @return Driver
      */
     public function driver()
     {
         return $this->driver;
+    }
+
+    /**
+     * Get table comparator.
+     *
+     * @return Comparator
+     */
+    public function comparator()
+    {
+        return $this->comparator;
     }
 
     /**
@@ -188,11 +160,25 @@ abstract class AbstractTable extends Component implements TableInterface
     /**
      * {@inheritdoc}
      *
+     * Automatically forces prefix value.
+     */
+    public function setName($name)
+    {
+        parent::setName($this->prefix . $name);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @param bool $quoted Quote name.
      */
     public function getName($quoted = false)
     {
-        return $quoted ? $this->driver->identifier($this->name) : $this->name;
+        if (!$quoted) {
+            return parent::getName();
+        }
+
+        return $this->driver->identifier(parent::getName());
     }
 
     /**
@@ -203,68 +189,6 @@ abstract class AbstractTable extends Component implements TableInterface
     public function getPrefix()
     {
         return $this->prefix;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPrimaryKeys()
-    {
-        return $this->primaryKeys;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasColumn($name)
-    {
-        return isset($this->columns[$name]);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return AbstractColumn[]
-     */
-    public function getColumns()
-    {
-        return $this->columns;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasIndex(array $columns = [])
-    {
-        return !empty($this->findIndex(is_array($columns) ? $columns : func_get_args()));
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return AbstractIndex[]
-     */
-    public function getIndexes()
-    {
-        return $this->indexes;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasForeign($column)
-    {
-        return !empty($this->findForeign($column));
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return AbstractReference[]
-     */
-    public function getForeigns()
-    {
-        return $this->references;
     }
 
     /**
@@ -281,8 +205,8 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Set table primary keys. Operation can be applied for newly created tables. Now every database
-     * might support compound indexes.
+     * Set table primary keys. Operation can only be applied for newly created tables. Now every
+     * database might support compound indexes.
      *
      * @param array $columns
      * @return $this
@@ -290,38 +214,34 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function setPrimaryKeys(array $columns)
     {
-        if ($this->exists() && $this->primaryKeys != $columns) {
+        if ($this->exists() && $this->getPrimaryKeys() != $columns) {
             throw new SchemaException("Unable to change primary keys for already exists table.");
         }
 
-        $this->primaryKeys = $columns;
+        parent::setPrimaryKeys($columns);
 
         return $this;
     }
 
     /**
-     * Get/create instance of AbstractColumn associated with current table based on column name.
+     * Get/create instance of AbstractColumn associated with current table.
      *
      * Examples:
      * $table->column('name')->string();
      *
-     * @param string $column Column name.
+     * @param string $name
      * @return AbstractColumn
      */
-    public function column($column)
+    public function column($name)
     {
-        if (!isset($this->columns[$column])) {
-            $this->columns[$column] = $this->driver->columnSchema($this, $column);
+        if (!empty($column = $this->findColumn($name))) {
+            return $column->declared(true);
         }
 
-        $result = $this->columns[$column];
-        $result->declared();
+        $column = $this->columnSchema($name)->declared(true);
 
-        if ($result instanceof LoggerAwareInterface) {
-            $result->setLogger($this->logger());
-        }
-
-        return $this->columns[$column];
+        //Registering (without adding to initial schema)
+        return parent::registerColumn($column);
     }
 
     /**
@@ -333,31 +253,21 @@ abstract class AbstractTable extends Component implements TableInterface
      * $table->index('key', 'key2');
      * $table->index(['key', 'key2']);
      *
-     * @param mixed $columns Column name, or array of columns.
+     * @param mixed $columns   Column name, or array of columns.
+     * @param bool  $forceType Force index in non-unique state.
      * @return AbstractIndex
      */
-    public function index($columns)
+    public function index($columns, $forceType = true)
     {
         $columns = is_array($columns) ? $columns : func_get_args();
         if (!empty($index = $this->findIndex($columns))) {
-            $index->declared();
-
-            return $index;
+            return $index->declared(true);
         }
 
-        //New index
-        $index = $this->driver->indexSchema($this, false);
-        $index->declared();
-
+        $index = $this->indexSchema(null)->declared(true);
         $index->columns($columns)->unique(false);
 
-        //Adding to declared schema
-        $this->indexes[$index->getName()] = $index;
-        if ($index instanceof LoggerAwareInterface) {
-            $index->setLogger($this->logger());
-        }
-
-        return $index;
+        return parent::registerIndex($index);
     }
 
     /**
@@ -376,7 +286,7 @@ abstract class AbstractTable extends Component implements TableInterface
     {
         $columns = is_array($columns) ? $columns : func_get_args();
 
-        return $this->index($columns)->unique();
+        return $this->index($columns)->unique(true);
     }
 
     /**
@@ -389,31 +299,17 @@ abstract class AbstractTable extends Component implements TableInterface
     public function foreign($column)
     {
         if (!empty($foreign = $this->findForeign($column))) {
-            $foreign->declared();
-
-            return $foreign;
+            return $foreign->declared(true);
         }
 
-        //Create foreign key
-        $foreign = $this->driver->referenceSchema($this, false);
-        $foreign->declared();
-
+        $foreign = $this->referenceSchema(null)->declared(true);
         $foreign->column($column);
 
-        //Adding to declared schema
-        $this->references[$foreign->getName()] = $foreign;
-
-        if ($foreign instanceof LoggerAwareInterface) {
-            $foreign->setLogger($this->logger());
-        }
-
-        return $foreign;
+        return parent::registerReference($foreign);
     }
 
     /**
-     * Rename existed column or change name of scheduled column schema. This operation can be safe
-     * to use on recurring basis as rename will be skipped if target column does not exists or
-     * already named so.
+     * Rename column (only if column exists).
      *
      * @param string $column
      * @param string $name New column name.
@@ -421,337 +317,79 @@ abstract class AbstractTable extends Component implements TableInterface
      */
     public function renameColumn($column, $name)
     {
-        foreach ($this->columns as $columnSchema) {
-            if ($columnSchema->getName() == $column) {
-                $columnSchema->declared();
-                $columnSchema->setName($name);
-                break;
-            }
+        if (empty($column = $this->findColumn($column))) {
+            return $this;
         }
+
+        //Renaming automatically declares column
+        $column->declared(true)->setName($name);
 
         return $this;
     }
 
     /**
-     * Drop column from table schema.
+     * Rename index (only if index exists).
+     *
+     * @param array  $columns Index forming columns.
+     * @param string $name    New index name.
+     * @return $this
+     */
+    public function renameIndex(array $columns, $name)
+    {
+        if (empty($index = $this->findIndex($columns))) {
+            return $this;
+        }
+
+        //Renaming automatically declares index
+        $index->declared(true)->setName($name);
+
+        return $this;
+    }
+
+    /**
+     * Drop column by it's name.
      *
      * @param string $column
      * @return $this
      */
     public function dropColumn($column)
     {
-        foreach ($this->columns as $id => $columnSchema) {
-            if ($columnSchema->getName() == $column) {
-                unset($this->columns[$id]);
-                break;
-            }
+        if (!empty($column = $this->findColumn($column))) {
+            $this->forgetColumn($column);
+            $this->removeDependent($column);
         }
 
         return $this;
     }
 
     /**
-     * Drop multiple columns using it's name.
+     * Drop index by it's forming columns.
      *
      * @param array $columns
-     * @return $this
+     * @return $this;
      */
-    public function dropColumns(array $columns)
+    public function dropIndex(array $columns)
     {
-        foreach ($columns as $column) {
-            $this->dropColumn($column);
+        if (!empty($index = $this->findIndex($columns))) {
+            $this->forgetIndex($index);
         }
 
         return $this;
     }
 
     /**
-     * Rename existed index or change name of scheduled index schema. Index name must be used. This
-     * operation can be safe to use on recurring basis as rename will be skipped if target index
-     * does not exists or already named so.
-     *
-     * @param string $index Index name or forming columns.
-     * @param string $name  New index name.
-     * @return $this
-     */
-    public function renameIndex($index, $name)
-    {
-        foreach ($this->indexes as $indexSchema) {
-            if (is_array($index) && $indexSchema->getColumns() == $index) {
-                $indexSchema->declared();
-                $indexSchema->setName($name);
-                break;
-            }
-
-            if (is_string($index) && $indexSchema->getName() == $index) {
-                $indexSchema->declared();
-                $indexSchema->setName($name);
-                break;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Drop index from table schema using it's name or forming columns.
-     *
-     * @param string|array $index Index name or forming columns.
-     * @return $this
-     */
-    public function dropIndex($index)
-    {
-        foreach ($this->indexes as $id => $indexSchema) {
-            if (is_array($index) && $indexSchema->getColumns() == $index) {
-                unset($this->indexes[$id]);
-                break;
-            }
-
-            if (is_string($index) && $indexSchema->getName() == $index) {
-                unset($this->indexes[$id]);
-                break;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     *Drop multiple indexes using it's forming columns or names.
-     *
-     * @param array $indexes
-     * @return $this
-     */
-    public function dropIndexes(array $indexes)
-    {
-        foreach ($indexes as $index) {
-            $this->dropIndex($index);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Drop foreign key from table schema using it's forming column.
+     * Drop foreign key by it's name.
      *
      * @param string $column
      * @return $this
      */
     public function dropForeign($column)
     {
-        foreach ($this->references as $id => $foreignSchema) {
-            if ($foreignSchema->getColumn() == $column) {
-                unset($this->references[$id]);
-                break;
-            }
+        if (!empty($foreign = $this->findForeign($column))) {
+            $this->forgetForeign($foreign);
         }
 
         return $this;
-    }
-
-    /**
-     * Drop multiple foreign keys using it's forming columns.
-     *
-     * @param array $columns
-     * @return $this
-     */
-    public function dropForeigns(array $columns)
-    {
-        foreach ($columns as $column) {
-            $this->dropForeign($column);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Check if table schema were altered and must be synced.
-     *
-     * @return bool
-     */
-    public function hasChanges()
-    {
-        return (
-            !empty($this->alteredColumns())
-            || !empty($this->alteredIndexes())
-            || !empty($this->alteredReferences())
-        ) || $this->primaryKeys != $this->dbPrimaryKeys;
-    }
-
-    /**
-     * List of altered column schemas.
-     *
-     * @return array|AbstractColumn[]
-     */
-    public function alteredColumns()
-    {
-        $altered = [];
-        foreach ($this->columns as $column => $schema) {
-            if (!isset($this->dbColumns[$column])) {
-                $altered[$column] = $schema;
-                continue;
-            }
-
-            if (!$schema->compare($this->dbColumns[$column])) {
-                $altered[$column] = $schema;
-            }
-        }
-
-        foreach ($this->dbColumns as $column => $schema) {
-            if (!isset($this->columns[$column])) {
-                //Going to be dropped
-                $altered[$column] = null;
-            }
-        }
-
-        return $altered;
-    }
-
-    /**
-     * List of altered index schemas.
-     *
-     * @return array|AbstractIndex[]
-     */
-    public function alteredIndexes()
-    {
-        $altered = [];
-        foreach ($this->indexes as $index => $schema) {
-            if (!isset($this->dbIndexes[$index])) {
-                $altered[$index] = $schema;
-                continue;
-            }
-
-            if (!$schema->compare($this->dbIndexes[$index])) {
-                $altered[$index] = $schema;
-            }
-        }
-
-        foreach ($this->dbIndexes as $index => $schema) {
-            if (!isset($this->indexes[$index])) {
-                //Going to be dropped
-                $altered[$index] = null;
-            }
-        }
-
-        return $altered;
-    }
-
-    /**
-     * List of altered foreign key schemas.
-     *
-     * @return array|AbstractReference[]
-     */
-    public function alteredReferences()
-    {
-        $altered = [];
-        foreach ($this->references as $constraint => $schema) {
-            if (!isset($this->dbReferences[$constraint])) {
-                $altered[$constraint] = $schema;
-                continue;
-            }
-
-            if (!$schema->compare($this->dbReferences[$constraint])) {
-                $altered[$constraint] = $schema;
-            }
-        }
-
-        foreach ($this->dbReferences as $constraint => $schema) {
-            if (!isset($this->references[$constraint])) {
-                //Going to be dropped
-                $altered[$constraint] = null;
-            }
-        }
-
-        return $altered;
-    }
-
-    /**
-     * Rename table. Operation must be applied immediately.
-     *
-     * @param string $name New table name without prefix. Database prefix will be used.
-     */
-    public function rename($name)
-    {
-        if ($this->exists()) {
-            $this->driver->statement(\Spiral\interpolate(static::RENAME_STATEMENT, [
-                'table' => $this->getName(true),
-                'name'  => $this->driver->identifier($this->prefix . $name)
-            ]));
-        }
-
-        $this->name = $this->prefix . $name;
-    }
-
-    /**
-     * Drop table schema in database. This operation must be applied immediately.
-     */
-    public function drop()
-    {
-        if (!$this->exists()) {
-            $this->columns = $this->dbColumns = $this->primaryKeys = $this->dbPrimaryKeys = [];
-            $this->indexes = $this->dbIndexes = $this->references = $this->dbReferences = [];
-
-            return;
-        }
-
-        //Dropping syntax is the same everywhere, for now...
-        $this->driver->statement(\Spiral\interpolate("DROP TABLE {table}", [
-            'table' => $this->getName(true)
-        ]));
-
-        $this->exists = false;
-        $this->columns = $this->dbColumns = $this->primaryKeys = $this->dbPrimaryKeys = [];
-        $this->indexes = $this->dbIndexes = $this->references = $this->dbReferences = [];
-    }
-
-    /**
-     * Save table schema including every column, index, foreign key creation/altering. If table does
-     * not exist it must be created.
-     *
-     * @param bool $forceColumns  Drop all non declared columns.
-     * @param bool $forceIndexes  Drop all non declared indexes.
-     * @param bool $forceForeigns Drop all non declared foreign keys.
-     * @throws \Exception
-     */
-    public function save($forceColumns = true, $forceIndexes = true, $forceForeigns = true)
-    {
-        if (!$this->exists()) {
-            $this->createSchema(true);
-        } else {
-            //Building table difference
-            $this->calculateDifference($forceColumns, $forceIndexes, $forceForeigns);
-
-            if ($this->hasChanges()) {
-                $this->updateSchema();
-            }
-        }
-
-        //Refreshing schema
-        $this->exists = true;
-        $this->dbPrimaryKeys = $this->primaryKeys;
-
-        $columns = $this->columns;
-        $indexes = $this->indexes;
-        $references = $this->references;
-
-        //Syncing schema lists
-        $this->columns = $this->dbColumns = [];
-        foreach ($columns as $column) {
-            $this->columns[$column->getName()] = $column;
-            $this->dbColumns[$column->getName()] = clone $column;
-        }
-
-        $this->indexes = $this->dbIndexes = [];
-        foreach ($indexes as $index) {
-            $this->indexes[$index->getName()] = $index;
-            $this->dbIndexes[$index->getName()] = clone $index;
-        }
-
-        $this->references = $this->dbReferences = [];
-        foreach ($references as $reference) {
-            $this->references[$reference->getName()] = $reference;
-            $this->dbReferences[$reference->getName()] = clone $reference;
-        }
     }
 
     /**
@@ -786,6 +424,72 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
+     * Declare every existed element. Method has to be called if table modification applied to
+     * existed table to prevent dropping of existed elements.
+     *
+     * @return $this
+     */
+    public function declareExisted()
+    {
+        foreach ($this->getColumns() as $column) {
+            $column->declared(true);
+        }
+
+        foreach ($this->getIndexes() as $index) {
+            $index->declared(true);
+        }
+
+        foreach ($this->getForeigns() as $foreign) {
+            $foreign->declared(true);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Save table schema including every column, index, foreign key creation/altering. If table does
+     * not exist it must be created.
+     *
+     * @param bool $forgetColumns  Drop all non declared columns.
+     * @param bool $forgetIndexes  Drop all non declared indexes.
+     * @param bool $forgetForeigns Drop all non declared foreign keys.
+     */
+    public function save($forgetColumns = true, $forgetIndexes = true, $forgetForeigns = true)
+    {
+        if (!$this->exists()) {
+            $this->createSchema();
+        } else {
+            //Let's remove from schema elements which wasn't declared
+            $this->forgetUndeclared($forgetColumns, $forgetIndexes, $forgetForeigns);
+
+            if ($this->hasChanges()) {
+                $this->synchroniseSchema();
+            }
+        }
+
+        //Syncing internal states
+        $this->initial->syncSchema($this);
+        $this->exists = true;
+    }
+
+    /**
+     * Drop table schema in database. This operation must be applied immediately.
+     */
+    public function drop()
+    {
+        $this->forgetElements();
+
+        //Re-syncing initial state
+        $this->initial->syncSchema($this->forgetElements());
+
+        if ($this->exists()) {
+            $this->commander->dropTable($this->getName());
+        }
+
+        $this->exists = false;
+    }
+
+    /**
      * @return AbstractColumn|string
      */
     public function __toString()
@@ -794,506 +498,346 @@ abstract class AbstractTable extends Component implements TableInterface
     }
 
     /**
-     * Driver specific columns information load. Columns must be added using registerColumn method
+     * @return object
+     */
+    public function __debugInfo()
+    {
+        return (object)[
+            'name'        => $this->getName(),
+            'primaryKeys' => $this->getPrimaryKeys(),
+            'columns'     => array_values($this->getColumns()),
+            'indexes'     => array_values($this->getIndexes()),
+            'references'  => array_values($this->getForeigns())
+        ];
+    }
+
+    /**
+     * Create table.
+     */
+    protected function createSchema()
+    {
+        $this->logger()->info("Creating new table {table}.", ['table' => $this->getName(true)]);
+
+        $this->driver->beginTransaction();
+        try {
+            $this->commander->createTable($this);
+        } catch (\Exception $exception) {
+            $this->driver->rollbackTransaction();
+            throw $exception;
+        }
+
+        $this->driver->commitTransaction();
+    }
+
+    /**
+     * Execute schema update.
+     */
+    protected function synchroniseSchema()
+    {
+        if ($this->getName() != $this->initial->getName()) {
+            //Executing renaming
+            $this->commander->renameTable($this->initial->getName(), $this->getName());
+        }
+
+        $this->driver->beginTransaction();
+        try {
+            //Some data has to be dropped before column updates
+            $this->dropForeigns()->dropIndexes();
+
+            //Generate update flow
+            $this->synchroniseColumns()->synchroniseIndexes()->synchroniseForeigns();
+        } catch (\Exception $exception) {
+            $this->driver->rollbackTransaction();
+            throw $exception;
+        }
+
+        $this->driver->commitTransaction();
+    }
+
+    /**
+     * Synchronise columns.
+     *
+     * @return $this
+     */
+    protected function synchroniseColumns()
+    {
+        foreach ($this->comparator->droppedColumns() as $column) {
+            $this->logger()->info("Dropping column [{statement}] from table {table}.", [
+                'statement' => $column->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->dropColumn($this, $column);
+        }
+
+        foreach ($this->comparator->addedColumns() as $column) {
+            $this->logger()->info("Adding column [{statement}] into table {table}.", [
+                'statement' => $column->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->addColumn($this, $column);
+        }
+
+        foreach ($this->comparator->alteredColumns() as $pair) {
+            /**
+             * @var AbstractColumn $initial
+             * @var AbstractColumn $current
+             */
+            list($current, $initial) = $pair;
+
+            $this->logger()->info("Altering column [{statement}] to [{new}] in table {table}.", [
+                'statement' => $initial->sqlStatement(),
+                'new'       => $current->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->alterColumn($this, $initial, $current);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Drop needed indexes.
+     *
+     * @return $this
+     */
+    protected function dropIndexes()
+    {
+        foreach ($this->comparator->droppedIndexes() as $index) {
+            $this->logger()->info("Dropping index [{statement}] from table {table}.", [
+                'statement' => $index->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->dropIndex($this, $index);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Synchronise indexes.
+     *
+     * @return $this
+     */
+    protected function synchroniseIndexes()
+    {
+        foreach ($this->comparator->addedIndexes() as $index) {
+            $this->logger()->info("Adding index [{statement}] into table {table}.", [
+                'statement' => $index->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->addIndex($this, $index);
+        }
+
+        foreach ($this->comparator->alteredIndexes() as $pair) {
+            /**
+             * @var AbstractIndex $initial
+             * @var AbstractIndex $current
+             */
+            list($current, $initial) = $pair;
+
+            $this->logger()->info("Altering index [{statement}] to [{new}] in table {table}.", [
+                'statement' => $initial->sqlStatement(),
+                'new'       => $current->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->alterIndex($this, $initial, $current);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Drop needed foreign keys.
+     *
+     * @return $this
+     */
+    protected function dropForeigns()
+    {
+        foreach ($this->comparator->droppedForeigns() as $foreign) {
+            $this->logger()->info("Dropping foreign key [{statement}] from table {table}.", [
+                'statement' => $foreign->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->dropForeign($this, $foreign);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Synchronise foreign keys.
+     *
+     * @return $this
+     */
+    protected function synchroniseForeigns()
+    {
+        foreach ($this->comparator->addedForeigns() as $foreign) {
+            $this->logger()->info("Adding foreign key [{statement}] into table {table}.", [
+                'statement' => $foreign->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->addForeign($this, $foreign);
+        }
+
+        foreach ($this->comparator->alteredForeigns() as $pair) {
+            /**
+             * @var AbstractReference $initial
+             * @var AbstractReference $current
+             */
+            list($current, $initial) = $pair;
+
+            $this->logger()->info("Altering foreign key [{statement}] to [{new}] in {table}.", [
+                'statement' => $initial->sqlStatement(),
+                'table'     => $this->getName(true)
+            ]);
+
+            $this->commander->alterForeign($this, $initial, $current);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Driver specific column schema.
+     *
+     * @param string $name
+     * @param mixed  $schema
+     * @return AbstractColumn
+     */
+    abstract protected function columnSchema($name, $schema = null);
+
+    /**
+     * Driver specific index schema.
+     *
+     * @param string $name
+     * @param mixed  $schema
+     * @return AbstractIndex
+     */
+    abstract protected function indexSchema($name, $schema = null);
+
+    /**
+     * Driver specific reference schema.
+     *
+     * @param string $name
+     * @param mixed  $schema
+     * @return AbstractReference
+     */
+    abstract protected function referenceSchema($name, $schema = null);
+
+
+    /**
+     * Must load table columns.
      *
      * @see registerColumn()
+     * @return self
      */
     abstract protected function loadColumns();
 
     /**
-     * Register column schema supplied by database.
-     *
-     * @param string $name   Column name.
-     * @param mixed  $schema Driver specific column information schema.
-     * @return AbstractColumn
-     */
-    protected function registerColumn($name, $schema)
-    {
-        $column = $this->driver->columnSchema($this, $name, $schema);
-        $this->dbColumns[$name] = clone $column;
-
-        return $this->columns[$name] = $column;
-    }
-
-    /**
-     * Driver specific indexes information load. Columns must be added using registerColumn method
+     * Must load table indexes.
      *
      * @see registerIndex()
+     * @return self
      */
     abstract protected function loadIndexes();
 
     /**
-     * Register index schema supplied by database.
-     *
-     * @param string $name   Index name.
-     * @param mixed  $schema Driver specific index information schema.
-     * @return AbstractIndex
-     */
-    protected function registerIndex($name, $schema)
-    {
-        $index = $this->driver->indexSchema($this, $name, $schema);
-        $this->dbIndexes[$name] = clone $index;
-
-        return $this->indexes[$name] = $index;
-    }
-
-    /**
-     * Driver specific foreign keys information load. Columns must be added using registerColumn
-     * method.
+     * Must load table references.
      *
      * @see registerReference()
+     * @return self
      */
     abstract protected function loadReferences();
 
     /**
-     * Register foreign key schema supplied by database.
+     * Check if table schema has been modified. Attention, you have to execute dropUndeclared first
+     * to get valid results.
      *
-     * @param string $name   Foreign key name.
-     * @param mixed  $schema Driver specific foreign key information schema.
-     * @return AbstractReference
+     * @return bool
      */
-    protected function registerReference($name, $schema)
+    protected function hasChanges()
     {
-        $reference = $this->driver->referenceSchema($this, $name, $schema);
-        $this->dbReferences[$name] = clone $reference;
-
-        return $this->references[$name] = $reference;
-    }
-
-    /**
-     * Generate (and execute if specified) table creation syntax.
-     *
-     * @param bool $execute If true generated statement will be automatically executed.
-     * @return string
-     * @throws \Exception
-     */
-    protected function createSchema($execute = true)
-    {
-        $statement = [];
-        $statement[] = "CREATE TABLE {$this->getName(true)} (";
-
-        $inner = [];
-
-        //Columns
-        foreach ($this->columns as $column) {
-            $inner[] = $column->sqlStatement();
-        }
-
-        //Primary key
-        if (!empty($this->primaryKeys)) {
-            $inner[] = 'PRIMARY KEY (' . join(', ', array_map(
-                    [$this->driver, 'identifier'],
-                    $this->primaryKeys
-                )) . ')';
-        }
-
-        //Constraints
-        foreach ($this->references as $reference) {
-            $inner[] = $reference->sqlStatement();
-        }
-
-        $statement[] = "    " . join(",\n    ", $inner);
-        $statement[] = ')';
-
-        $statement = join("\n", $statement);
-
-        $this->driver->beginTransaction();
-
-        try {
-            if ($execute) {
-                $this->logger()->info(
-                    "Creating new table {table}.", ['table' => $this->getName(true)]
-                );
-
-                $this->driver->statement($statement);
-
-                //Not all databases support adding index while table creation, so we can do it after
-                foreach ($this->indexes as $index) {
-                    $this->doIndexAdd($index);
-                }
-            }
-        } catch (\Exception $exception) {
-            $this->driver->rollbackTransaction();
-            throw $exception;
-        }
-
-        $this->driver->commitTransaction();
-
-        return $statement;
-    }
-
-    /**
-     * Perform set of atomic operations required to update table schema.
-     *
-     * @throws SchemaException
-     * @throws \Exception
-     */
-    protected function updateSchema()
-    {
-        if ($this->primaryKeys != $this->dbPrimaryKeys) {
-            throw new SchemaException("Primary keys can not be changed for already exists table.");
-        }
-
-        $this->driver->beginTransaction();
-        try {
-            $this->updateColumns();
-            $this->updateIndexes();
-            $this->updateForeigns();
-        } catch (\Exception $exception) {
-            $this->driver->rollbackTransaction();
-            throw $exception;
-        }
-
-        $this->driver->commitTransaction();
+        return $this->comparator->hasChanges();
     }
 
     /**
      * Calculate difference (removed columns, indexes and foreign keys).
      *
-     * @param bool $forceColumns
-     * @param bool $forceIndexes
-     * @param bool $forceForeigns
+     * @param bool $forgetColumns
+     * @param bool $forgetIndexes
+     * @param bool $forgetForeigns
      */
-    protected function calculateDifference(
-        $forceColumns = true,
-        $forceIndexes = true,
-        $forceForeigns = true
-    ) {
+    protected function forgetUndeclared($forgetColumns, $forgetIndexes, $forgetForeigns)
+    {
         //We don't need to worry about changed or created columns, indexes and foreign keys here
         //as it already handled, we only have to drop columns which were not listed in schema
 
-        if ($forceColumns) {
-            foreach ($this->columns as $column) {
-                if (!$column->isDeclared()) {
-                    //Wasn't declared
-                    $this->dropColumn($column->getName());
-                }
+        foreach ($this->getColumns() as $column) {
+            if ($forgetColumns && !$column->isDeclared()) {
+                $this->forgetColumn($column);
+                $this->removeDependent($column);
             }
         }
 
-        if ($forceIndexes) {
-            foreach ($this->indexes as $index) {
-                if (!$index->isDeclared()) {
-                    //Wasn't declared
-                    $this->dropIndex($index->getColumns());
-                }
+        foreach ($this->getIndexes() as $index) {
+            if ($forgetIndexes && !$index->isDeclared()) {
+                $this->forgetIndex($index);
             }
         }
 
-        if ($forceForeigns) {
-            foreach ($this->references as $foreign) {
-                if (!$foreign->isDeclared()) {
-                    //Wasn't declared
-                    $this->dropForeign($foreign->getColumn());
-                }
+        foreach ($this->getForeigns() as $foreign) {
+            if ($forgetForeigns && !$foreign->isDeclared()) {
+                $this->forgetForeign($foreign);
             }
         }
     }
 
     /**
-     * Driver specific column add command.
+     * Remove dependent indexes and foreign keys.
      *
-     * @param AbstractColumn $column
+     * @param ColumnInterface $column
      */
-    protected function doColumnAdd(AbstractColumn $column)
+    private function removeDependent(ColumnInterface $column)
     {
-        $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} ADD COLUMN {$column->sqlStatement()}"
-        );
-    }
-
-    /**
-     * Driver specific column remove (drop) command.
-     *
-     * @param AbstractColumn $column
-     */
-    protected function doColumnDrop(AbstractColumn $column)
-    {
-        //We have to erase all associated constraints
-        foreach ($column->getConstraints() as $constraint) {
-            $this->doConstraintDrop($constraint);
-        }
-
         if ($this->hasForeign($column->getName())) {
-            $this->doForeignDrop($this->foreign($column->getName()));
+            $this->forgetForeign($this->foreign($column->getName()));
         }
 
-        foreach ($this->indexes as $index) {
-            //Dropping related indexes
+        foreach ($this->getIndexes() as $index) {
             if (in_array($column->getName(), $index->getColumns())) {
-                $this->doIndexDrop($index);
+                //Dropping related indexes
+                $this->forgetIndex($index);
             }
         }
-
-        $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} DROP COLUMN {$column->getName(true)}"
-        );
     }
 
     /**
-     * Driver specific column alter command.
+     * Forget all elements.
      *
-     * @param AbstractColumn $column
-     * @param AbstractColumn $dbColumn
+     * @return $this
      */
-    abstract protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn);
-
-    /**
-     * Driver specific index adding command.
-     *
-     * @param AbstractIndex $index
-     */
-    protected function doIndexAdd(AbstractIndex $index)
+    private function forgetElements()
     {
-        $this->driver->statement("CREATE {$index->sqlStatement()}");
-    }
-
-    /**
-     * Driver specific index remove (drop) command.
-     *
-     * @param AbstractIndex $index
-     */
-    protected function doIndexDrop(AbstractIndex $index)
-    {
-        $this->driver->statement("DROP INDEX {$index->getName(true)}");
-    }
-
-    /**
-     * Driver specific index alter command, by default it will remove and add index.
-     *
-     * @param AbstractIndex $index
-     * @param AbstractIndex $dbIndex
-     */
-    protected function doIndexChange(AbstractIndex $index, AbstractIndex $dbIndex)
-    {
-        $this->doIndexDrop($dbIndex);
-        $this->doIndexAdd($index);
-    }
-
-    /**
-     * Driver specific foreign key adding command.
-     *
-     * @param AbstractReference $foreign
-     */
-    protected function doForeignAdd(AbstractReference $foreign)
-    {
-        $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} ADD {$foreign->sqlStatement()}"
-        );
-    }
-
-    /**
-     * Driver specific foreign key remove (drop) command.
-     *
-     * @param AbstractReference $foreign
-     */
-    protected function doForeignDrop(AbstractReference $foreign)
-    {
-        $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} DROP CONSTRAINT {$foreign->getName(true)}"
-        );
-    }
-
-    /**
-     * Drop column constraint using it's name.
-     *
-     * @param string $constraint
-     */
-    protected function doConstraintDrop($constraint)
-    {
-        $this->driver->statement(
-            "ALTER TABLE {$this->getName(true)} DROP CONSTRAINT "
-            . $this->driver->identifier($constraint)
-        );
-    }
-
-    /**
-     * Driver specific foreign key alter command, by default it will remove and add foreign key.
-     *
-     * @param AbstractReference $foreign
-     * @param AbstractReference $dbForeign
-     */
-    protected function doForeignChange(AbstractReference $foreign, AbstractReference $dbForeign)
-    {
-        $this->doForeignDrop($dbForeign);
-        $this->doForeignAdd($foreign);
-    }
-
-    /**
-     * Find index using it's forming columns.
-     *
-     * @param array $columns
-     * @return AbstractIndex|null
-     */
-    private function findIndex(array $columns)
-    {
-        foreach ($this->indexes as $index) {
-            if ($index->getColumns() == $columns) {
-                return $index;
-            }
+        foreach ($this->getColumns() as $column) {
+            $this->forgetColumn($column);
         }
 
-        return null;
-    }
-
-    /**
-     * Find foreign using it's forming column.
-     *
-     * @param string $column
-     * @return AbstractReference|null
-     */
-    private function findForeign($column)
-    {
-        foreach ($this->references as $reference) {
-            if ($reference->getColumn() == $column) {
-                return $reference;
-            }
+        foreach ($this->getIndexes() as $index) {
+            $this->forgetIndex($index);
         }
 
-        return null;
-    }
-
-    /**
-     * Perform column updates.
-     */
-    private function updateColumns()
-    {
-        foreach ($this->alteredColumns() as $name => $schema) {
-            $dbColumn = isset($this->dbColumns[$name]) ? $this->dbColumns[$name] : null;
-
-            if (empty($schema) && !empty($dbColumn)) {
-                $this->logger()->info(
-                    "Dropping column [{statement}] from table {table}.",
-                    [
-                        'statement' => $dbColumn->sqlStatement(),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doColumnDrop($dbColumn);
-                continue;
-            }
-
-            if (empty($dbColumn)) {
-                $this->logger()->info(
-                    "Adding column [{statement}] into table {table}.",
-                    [
-                        'statement' => $schema->sqlStatement(),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doColumnAdd($schema);
-                continue;
-            }
-
-            //Altering
-            $this->logger()->info(
-                "Altering column [{statement}] to [{new}] in table {table}.",
-                [
-                    'statement' => $dbColumn->sqlStatement(),
-                    'new'       => $schema->sqlStatement(),
-                    'table'     => $this->getName(true)
-                ]
-            );
-
-            $this->doColumnChange($schema, $dbColumn);
+        foreach ($this->getForeigns() as $foreign) {
+            $this->forgetForeign($foreign);
         }
-    }
 
-    /**
-     * Update index changes.
-     */
-    private function updateIndexes()
-    {
-        foreach ($this->alteredIndexes() as $name => $schema) {
-            $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
-
-            if (empty($schema) && !empty($dbIndex)) {
-                $this->logger()->info(
-                    "Dropping index [{statement}] from table {table}.",
-                    [
-                        'statement' => $dbIndex->sqlStatement(true),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doIndexDrop($dbIndex);
-                continue;
-            }
-
-            if (empty($dbIndex)) {
-                $this->logger()->info(
-                    "Adding index [{statement}] into table {table}.",
-                    [
-                        'statement' => $schema->sqlStatement(false),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doIndexAdd($schema);
-                continue;
-            }
-
-            //Altering
-            $this->logger()->info(
-                "Altering index [{statement}] to [{new}] in table {table}.",
-                [
-                    'statement' => $dbIndex->sqlStatement(false),
-                    'new'       => $schema->sqlStatement(false),
-                    'table'     => $this->getName(true)
-                ]
-            );
-
-            $this->doIndexChange($schema, $dbIndex);
-        }
-    }
-
-    /**
-     * Update foreign changes.
-     */
-    private function updateForeigns()
-    {
-        foreach ($this->alteredReferences() as $name => $schema) {
-            $dbForeign = isset($this->dbReferences[$name]) ? $this->dbReferences[$name] : null;
-
-            if (empty($schema) && !empty($dbForeign)) {
-                $this->logger()->info(
-                    "Dropping foreign key [{statement}] in table {table}.",
-                    [
-                        'statement' => $dbForeign->sqlStatement(),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doForeignDrop($this->dbReferences[$name]);
-                continue;
-            }
-
-            if (empty($dbForeign)) {
-                $this->logger()->info(
-                    "Adding foreign key [{statement}] into table {table}.",
-                    [
-                        'statement' => $schema->sqlStatement(),
-                        'table'     => $this->getName(true)
-                    ]
-                );
-
-                $this->doForeignAdd($schema);
-                continue;
-            }
-
-            //Altering
-            $this->logger()->info(
-                "Altering foreign key [{statement}] to [{new}] in table {table}.",
-                [
-                    'statement' => $dbForeign->sqlStatement(),
-                    'new'       => $schema->sqlStatement(),
-                    'table'     => $this->getName(true)
-                ]
-            );
-
-            $this->doForeignChange($schema, $dbForeign);
-        }
+        return $this;
     }
 }

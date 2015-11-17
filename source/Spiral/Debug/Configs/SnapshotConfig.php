@@ -5,7 +5,7 @@
  * @license MIT
  * @author  Anton Titov (Wolfy-J)
  */
-namespace Spiral\Debug\Config;
+namespace Spiral\Debug\Configs;
 
 use Spiral\Core\ArrayConfig;
 

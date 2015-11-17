@@ -30,8 +30,13 @@ class QueryCompiler extends AbstractCompiler
             return array_merge($onParameters, $columnIdentifiers, $whereParameters);
         }
 
-        return parent::orderParameters($queryType, $whereParameters, $onParameters,
-            $havingParameters, $columnIdentifiers);
+        return parent::orderParameters(
+            $queryType,
+            $whereParameters,
+            $onParameters,
+            $havingParameters,
+            $columnIdentifiers
+        );
     }
 
     /**
@@ -41,8 +46,11 @@ class QueryCompiler extends AbstractCompiler
      */
     protected function compileLimit($limit, $offset)
     {
-        $statement = '';
+        if (empty($limit) && empty($offset)) {
+            return '';
+        }
 
+        $statement = '';
         if (!empty($limit) || !empty($offset)) {
             //When limit is not provided but offset does we can replace limit value with PHP_INT_MAX
             $statement = "LIMIT " . ($limit ?: '18446744073709551615') . ' ';

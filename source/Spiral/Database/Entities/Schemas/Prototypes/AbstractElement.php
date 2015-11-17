@@ -111,20 +111,6 @@ abstract class AbstractElement extends Component
     }
 
     /**
-     * Compare two elements together.
-     *
-     * @param AbstractElement $initial
-     * @return bool
-     */
-    public function compare(self $initial)
-    {
-        $normalized = clone $initial;
-        $normalized->declared = $this->declared;
-
-        return $this == $normalized;
-    }
-
-    /**
      * Element creation/definition syntax.
      *
      * @return string

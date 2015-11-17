@@ -20,5 +20,5 @@ interface LogsInterface
      * @param string $name
      * @return LoggerInterface
      */
-    public function createLogger($name);
+    public function getLogger($name);
 }

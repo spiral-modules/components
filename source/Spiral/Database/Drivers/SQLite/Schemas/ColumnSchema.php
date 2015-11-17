@@ -29,35 +29,45 @@ class ColumnSchema extends AbstractColumn
             'primaryKey' => true,
             'nullable'   => false
         ],
+
         //Enum type (mapped via method)
         'enum'        => 'enum',
+
         //Logical types
         'boolean'     => 'boolean',
+
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => 'integer',
         'tinyInteger' => 'tinyint',
         'bigInteger'  => 'bigint',
+
         //String with specified length (mapped via method)
         'string'      => 'text',
+
         //Generic types
         'text'        => 'text',
         'tinyText'    => 'text',
         'longText'    => 'text',
+
         //Real types
         'double'      => 'double',
         'float'       => 'real',
+
         //Decimal type (mapped via method)
         'decimal'     => 'numeric',
+
         //Date and Time types
         'datetime'    => 'datetime',
         'date'        => 'date',
         'time'        => 'time',
         'timestamp'   => 'timestamp',
+
         //Binary types
         'binary'      => 'blob',
         'tinyBinary'  => 'blob',
         'longBinary'  => 'blob',
+
         //Additional types
         'json'        => 'text'
     ];

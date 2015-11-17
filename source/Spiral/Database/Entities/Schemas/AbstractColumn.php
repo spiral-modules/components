@@ -47,6 +47,14 @@ use Spiral\Database\Schemas\ColumnInterface;
 abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 {
     /**
+     * PHP types for phpType() method.
+     */
+    const INT    = 'int';
+    const BOOL   = 'bool';
+    const STRING = 'string';
+    const FLOAT  = 'float';
+
+    /**
      * Abstract type aliases (for consistency).
      *
      * @var array
@@ -592,12 +600,41 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     }
 
     /**
+     * Compile column create statement.
+     *
+     * @return string
+     */
+    public function sqlStatement()
+    {
+        $statement = [$this->getName(true), $this->type];
+
+        if ($this->abstractType() == 'enum') {
+            //Enum specific column options
+            if (!empty($enumDefinition = $this->prepareEnum())) {
+                $statement[] = $enumDefinition;
+            }
+        } elseif (!empty($this->precision)) {
+            $statement[] = "({$this->precision}, {$this->scale})";
+        } elseif (!empty($this->size)) {
+            $statement[] = "({$this->size})";
+        }
+
+        $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
+
+        if ($this->defaultValue !== null) {
+            $statement[] = "DEFAULT {$this->prepareDefault()}";
+        }
+
+        return join(' ', $statement);
+    }
+
+    /**
      * Must compare two instances of AbstractColumn.
      *
-     * @param AbstractColumn $initial
+     * @param self $initial
      * @return bool
      */
-    public function compare(AbstractColumn $initial)
+    public function compare(self $initial)
     {
         $normalized = clone $initial;
         $normalized->declared = $this->declared;
@@ -626,35 +663,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         return empty($difference);
-    }
-
-    /**
-     * Compile column create statement.
-     *
-     * @return string
-     */
-    public function sqlStatement()
-    {
-        $statement = [$this->getName(true), $this->type];
-
-        if ($this->abstractType() == 'enum') {
-            //Enum specific column options
-            if (!empty($enumDefinition = $this->prepareEnum())) {
-                $statement[] = $enumDefinition;
-            }
-        } elseif (!empty($this->precision)) {
-            $statement[] = "({$this->precision}, {$this->scale})";
-        } elseif (!empty($this->size)) {
-            $statement[] = "({$this->size})";
-        }
-
-        $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
-
-        if ($this->defaultValue !== null) {
-            $statement[] = "DEFAULT {$this->prepareDefault()}";
-        }
-
-        return join(' ', $statement);
     }
 
     /**

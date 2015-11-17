@@ -283,7 +283,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
 
         $result = [];
         foreach ($finder->getIterator() as $file) {
-            $result[] = (string)$file;
+            $result[] = $this->normalizePath((string)$file);
         }
 
         return $result;

@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Cache\Config;
+namespace Spiral\Cache\Configs;
 
 use Spiral\Core\ArrayConfig;
 

@@ -68,6 +68,25 @@ class QueryCompiler extends Component
     }
 
     /**
+     * Query query identifier, if identified stated as table - table prefix must be added.
+     *
+     * @param string $identifier Identifier can include simple column operations and functions,
+     *                           having "." in it will automatically force table prefix to first
+     *                           value.
+     * @param bool   $table      Set to true to let quote method know that identified is related
+     *                           to table name.
+     * @return mixed|string
+     */
+    public function quote($identifier, $table = false)
+    {
+        if ($identifier instanceof FragmentInterface) {
+            return $this->prepareFragment($identifier);
+        }
+
+        return $this->quoter->quote($identifier, $table);
+    }
+
+    /**
      * Sort list of parameters in dbms query specific order, query type must be provided. This
      * method was used at times when delete and update queries supported joins, i might need to
      * drop it now.
@@ -485,25 +504,6 @@ class QueryCompiler extends Component
         }
 
         return trim($statement);
-    }
-
-    /**
-     * Query query identifier, if identified stated as table - table prefix must be added.
-     *
-     * @param string $identifier Identifier can include simple column operations and functions,
-     *                           having "." in it will automatically force table prefix to first
-     *                           value.
-     * @param bool   $table      Set to true to let quote method know that identified is related
-     *                           to table name.
-     * @return mixed|string
-     */
-    protected function quote($identifier, $table = false)
-    {
-        if ($identifier instanceof FragmentInterface) {
-            return $this->prepareFragment($identifier);
-        }
-
-        return $this->quoter->quote($identifier, $table);
     }
 
     /**

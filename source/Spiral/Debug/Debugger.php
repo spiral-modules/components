@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Debug\Config\DebuggerConfig;
+use Spiral\Debug\Configs\DebuggerConfig;
 use Spiral\Debug\Exceptions\BenchmarkException;
 
 /**
@@ -65,7 +65,7 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
     /**
      * {@inheritdoc}
      */
-    public function createLogger($name)
+    public function getLogger($name)
     {
         return new Logger($name, $this->logHandlers($name));
     }

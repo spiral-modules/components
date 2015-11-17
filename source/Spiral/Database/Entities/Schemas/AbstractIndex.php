@@ -28,14 +28,14 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @var string
      */
-    private $type = self::NORMAL;
+    protected $type = self::NORMAL;
 
     /**
      * Columns used to form index.
      *
      * @var array
      */
-    private $columns = [];
+    protected $columns = [];
 
     /**
      * {@inheritdoc}
@@ -44,7 +44,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      */
     public function getName($quoted = false)
     {
-        if (empty($this->getName())) {
+        if (empty(parent::getName())) {
             $this->setName($this->generateName());
         }
 
@@ -129,6 +129,20 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
         $statement[] = "({$columns})";
 
         return join(' ', $statement);
+    }
+
+    /**
+     * Compare two elements together.
+     *
+     * @param self $initial
+     * @return bool
+     */
+    public function compare(self $initial)
+    {
+        $normalized = clone $initial;
+        $normalized->declared = $this->declared;
+
+        return $this == $normalized;
     }
 
     /**

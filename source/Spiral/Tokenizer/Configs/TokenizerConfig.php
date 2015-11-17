@@ -5,7 +5,7 @@
  * @license MIT
  * @author  Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tokenizer\Config;
+namespace Spiral\Tokenizer\Configs;
 
 use Spiral\Core\ArrayConfig;
 

@@ -4,12 +4,12 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\SQLServer;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
+use Spiral\Database\Entities\Quoter;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Debug\Traits\LoggerTrait;
 
@@ -30,11 +30,11 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
     /**
      * @param SQLServerDriver $driver
-     * @param string          $prefix
+     * @param Quoter          $quoter
      */
-    public function __construct(SQLServerDriver $driver, $prefix = '')
+    public function __construct(SQLServerDriver $driver, Quoter $quoter)
     {
-        parent::__construct($driver, $prefix);
+        parent::__construct($driver, $quoter);
     }
 
     /**
@@ -61,12 +61,13 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
     ) {
         if (
             empty($limit) && empty($offset)
-            || ($this->driver->getServerVersion() >= 12 && !empty($ordering))
+            || ($this->driver->serverVersion() >= 12 && !empty($ordering))
         ) {
+            //When no limits are specified we can use normal query syntax
             return call_user_func_array(['parent', 'compileSelect'], func_get_args());
         }
 
-        if ($this->driver->getServerVersion() >= 12) {
+        if ($this->driver->serverVersion() >= 12) {
             $this->logger()->warning(
                 "You can't use query limiting without specifying ORDER BY statement, sql fallback used."
             );
@@ -78,22 +79,34 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         }
 
         if ($ordering) {
-            $ordering = 'ORDER BY ' . $this->compileOrdering($ordering);
+            $ordering = "ORDER BY {$this->compileOrdering($ordering)}";
         } else {
             $ordering = "ORDER BY (SELECT NULL)";
         }
 
         //Will be removed by QueryResult
         $columns[] = new Fragment(
-            "ROW_NUMBER() OVER ($ordering) AS " . $this->quote(QueryResult::ROW_NUMBER_COLUMN)
+            "ROW_NUMBER() OVER ($ordering) AS {$this->quote(QueryResult::ROW_NUMBER_COLUMN)}"
         );
 
+        //Let's compile MOST of our query :)
         $selection = parent::compileSelect(
-            $fromTables, $distinct, $columns, $joinsStatement, $whereTokens, $havingTokens, $grouping, [], 0, 0, $unionTokens
+            $fromTables,
+            $distinct,
+            $columns,
+            $joinsStatement,
+            $whereTokens,
+            $havingTokens,
+            $grouping,
+            [],
+            0, //No limit or offset
+            0, //No limit or offset
+            $unionTokens
         );
 
-        return "SELECT * FROM (\n{$selection}\n) AS [selection_alias] "
-        . $this->compileLimit($limit, $offset, QueryResult::ROW_NUMBER_COLUMN);
+        $limitStatement = $this->compileLimit($limit, $offset, QueryResult::ROW_NUMBER_COLUMN);
+
+        return "SELECT * FROM (\n{$selection}\n) AS [selection_alias] {$limitStatement}";
     }
 
     /**
@@ -103,7 +116,12 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      */
     protected function compileLimit($limit, $offset, $rowNumber = null)
     {
-        if (empty($rowNumber) && $this->driver->getServerVersion() >= 12) {
+        if (empty($limit) && empty($offset)) {
+            return '';
+        }
+
+        //Modern SQLServer are easier to work with
+        if (empty($rowNumber) && $this->driver->serverVersion() >= 12) {
             $statement = "OFFSET {$offset} ROWS ";
 
             if (!empty($limit)) {

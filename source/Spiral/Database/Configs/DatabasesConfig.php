@@ -5,7 +5,7 @@
  * @license MIT
  * @author  Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Config;
+namespace Spiral\Database\Configs;
 
 use Spiral\Core\ArrayConfig;
 

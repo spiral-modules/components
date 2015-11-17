@@ -7,7 +7,7 @@
  */
 namespace Spiral\Cache;
 
-use Spiral\Cache\Config\CacheConfig;
+use Spiral\Cache\Configs\CacheConfig;
 use Spiral\Cache\Exceptions\CacheException;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectorInterface;

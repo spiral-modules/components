@@ -9,7 +9,7 @@ namespace Spiral\Encrypter;
 
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Encrypter\Config\EncrypterConfig;
+use Spiral\Encrypter\Configs\EncrypterConfig;
 
 /**
  * Only manages encrypter injections.

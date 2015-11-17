@@ -52,7 +52,7 @@ interface TableInterface
     /**
      * Check if table has index related to set of provided columns. Columns order does matter!
      *
-     * @param mixed|array $columns
+     * @param array $columns
      * @return bool
      */
     public function hasIndex(array $columns = []);
@@ -65,7 +65,7 @@ interface TableInterface
     public function getIndexes();
 
     /**
-     * Check if table has foreign key related to table column
+     * Check if table has foreign key related to table column.
      *
      * @param string $column Column name.
      * @return bool
@@ -82,7 +82,7 @@ interface TableInterface
     /**
      * Get list of table names current schema depends on, must include every table linked using
      * foreign key or other constraint. Table names must not include database prefix if such
-     * presented.
+     * presented (meaning both tables must belong to the same database namespace).
      *
      * @return array
      */

@@ -10,7 +10,7 @@ namespace Spiral\Translator;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Translator\Config\TranslatorConfig;
+use Spiral\Translator\Configs\TranslatorConfig;
 use Spiral\Translator\Exceptions\LanguageException;
 
 /**

@@ -4,24 +4,16 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\SQLite;
 
-use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * SQLite specific syntax compiler.
  */
-class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
+class QueryCompiler extends AbstractCompiler
 {
-    /**
-     * There is few warnings while rendering sql code for SQLite database.
-     */
-    use LoggerTrait;
-
     /**
      * {@inheritdoc}
      */
@@ -58,13 +50,17 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      */
     protected function compileLimit($limit, $offset)
     {
+        if (empty($limit) && empty($offset)) {
+            return '';
+        }
+
         $statement = '';
 
-        if ($limit || $offset) {
+        if (!empty($limit) || !empty($offset)) {
             $statement = "LIMIT " . ($limit ?: '-1') . " ";
         }
 
-        if ($offset) {
+        if (!empty($offset)) {
             $statement .= "OFFSET {$offset}";
         }
 

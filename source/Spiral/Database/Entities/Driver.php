@@ -11,9 +11,6 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractIndex;
-use Spiral\Database\Entities\Schemas\AbstractReference;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 
 /**
@@ -27,9 +24,11 @@ abstract class Driver extends PDODriver
      * Driver schemas.
      */
     const SCHEMA_TABLE     = '';
-    const SCHEMA_COLUMN    = '';
-    const SCHEMA_INDEX     = '';
-    const SCHEMA_REFERENCE = '';
+
+    /**
+     * Commander used to execute commands. :)
+     */
+    const COMMANDER = '';
 
     /**
      * Default datetime value.
@@ -88,58 +87,11 @@ abstract class Driver extends PDODriver
     public function tableSchema($table, $prefix = '')
     {
         return $this->container->construct(static::SCHEMA_TABLE, [
-            'driver' => $this,
-            'name'   => $table,
-            'prefix' => $prefix
+            'driver'    => $this,
+            'name'      => $table,
+            'prefix'    => $prefix,
+            'commander' => $this->container->construct(static::COMMANDER, ['driver' => $this])
         ]);
-    }
-
-    /**
-     * Get Driver specific AbstractColumn implementation.
-     *
-     * @param AbstractTable $table  Parent TableSchema.
-     * @param string        $name   Column name.
-     * @param mixed         $schema Driver specific column schema.
-     * @return AbstractColumn
-     */
-    public function columnSchema(AbstractTable $table, $name, $schema = null)
-    {
-        return $this->container->construct(
-            static::SCHEMA_COLUMN,
-            compact('table', 'name', 'schema')
-        );
-    }
-
-    /**
-     * Get Driver specific AbstractIndex implementation.
-     *
-     * @param AbstractTable $table  Parent TableSchema.
-     * @param string        $name   Index name.
-     * @param mixed         $schema Driver specific index schema.
-     * @return AbstractIndex
-     */
-    public function indexSchema(AbstractTable $table, $name, $schema = null)
-    {
-        return $this->container->construct(
-            static::SCHEMA_INDEX,
-            compact('table', 'name', 'schema')
-        );
-    }
-
-    /**
-     * Get Driver specific AbstractReference implementation.
-     *
-     * @param AbstractTable $table  Parent TableSchema.
-     * @param string        $name   Constraint name.
-     * @param mixed         $schema Driver specific foreign key schema.
-     * @return AbstractReference
-     */
-    public function referenceSchema(AbstractTable $table, $name, $schema = null)
-    {
-        return $this->container->construct(
-            static::SCHEMA_REFERENCE,
-            compact('table', 'name', 'schema')
-        );
     }
 
     /**

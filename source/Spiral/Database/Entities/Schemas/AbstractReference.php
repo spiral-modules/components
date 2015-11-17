@@ -53,6 +53,22 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     protected $updateRule = self::NO_ACTION;
 
     /**
+     * Mark schema entity as declared, it will be kept in final diff.
+     *
+     * @param bool $declared
+     * @return $this
+     */
+    public function declared($declared = true)
+    {
+        if ($declared && $this->table->hasIndex([$this->column])) {
+            //Some databases require index for each foreign key
+            $this->table->index([$this->column], false)->declared(true);
+        }
+
+        return parent::declared($declared);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string $name
@@ -199,6 +215,20 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
         $statement[] = "ON UPDATE {$this->updateRule}";
 
         return join(" ", $statement);
+    }
+
+    /**
+     * Compare two elements together.
+     *
+     * @param self $initial
+     * @return bool
+     */
+    public function compare(self $initial)
+    {
+        $normalized = clone $initial;
+        $normalized->declared = $this->declared;
+
+        return $this == $normalized;
     }
 
     /**

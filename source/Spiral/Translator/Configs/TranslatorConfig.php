@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Translator\Config;
+namespace Spiral\Translator\Configs;
 
 use Spiral\Core\ArrayConfig;
 

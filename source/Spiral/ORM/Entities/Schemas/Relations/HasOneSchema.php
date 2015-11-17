@@ -56,18 +56,15 @@ class HasOneSchema extends RelationSchema
     public function inverseRelation()
     {
         //Inverting definition
-        $this->outerRecord()->addRelation(
-            $this->definition[RecordEntity::INVERSE],
-            [
-                RecordEntity::BELONGS_TO        => $this->record->getName(),
-                RecordEntity::INNER_KEY         => $this->definition[RecordEntity::OUTER_KEY],
-                RecordEntity::OUTER_KEY         => $this->definition[RecordEntity::INNER_KEY],
-                RecordEntity::CONSTRAINT        => $this->definition[RecordEntity::CONSTRAINT],
-                RecordEntity::CONSTRAINT_ACTION => $this->definition[RecordEntity::CONSTRAINT_ACTION],
-                RecordEntity::CREATE_INDEXES    => $this->definition[RecordEntity::CREATE_INDEXES],
-                RecordEntity::NULLABLE          => $this->definition[RecordEntity::NULLABLE]
-            ]
-        );
+        $this->outerRecord()->addRelation($this->definition[RecordEntity::INVERSE], [
+            RecordEntity::BELONGS_TO        => $this->record->getName(),
+            RecordEntity::INNER_KEY         => $this->definition[RecordEntity::OUTER_KEY],
+            RecordEntity::OUTER_KEY         => $this->definition[RecordEntity::INNER_KEY],
+            RecordEntity::CONSTRAINT        => $this->definition[RecordEntity::CONSTRAINT],
+            RecordEntity::CONSTRAINT_ACTION => $this->definition[RecordEntity::CONSTRAINT_ACTION],
+            RecordEntity::CREATE_INDEXES    => $this->definition[RecordEntity::CREATE_INDEXES],
+            RecordEntity::NULLABLE          => $this->definition[RecordEntity::NULLABLE]
+        ]);
     }
 
     /**

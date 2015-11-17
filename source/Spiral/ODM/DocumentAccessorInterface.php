@@ -15,7 +15,7 @@ use Spiral\Models\AccessorInterface;
  *
  * Parent model will not be supplied to accessor while schema analysis!
  */
-interface AtomicAccessorInterface extends AccessorInterface
+interface DocumentAccessorInterface extends AccessorInterface
 {
     /**
      * Check if object has any update.

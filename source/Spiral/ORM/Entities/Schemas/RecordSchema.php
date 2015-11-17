@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\ORM\Entities\Schemas;
 
@@ -14,12 +13,12 @@ use Spiral\Database\Entities\Schemas\AbstractIndex;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ORM\ActiveAccessorInterface;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
+use Spiral\ORM\RecordAccessorInterface;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
 
@@ -34,6 +33,13 @@ class RecordSchema extends ReflectionEntity
      * Required to validly merge parent and children attributes.
      */
     const BASE_CLASS = RecordEntity::class;
+
+    /**
+     * Related source class.
+     *
+     * @var string
+     */
+    private $source = null;
 
     /**
      * Every ORM Record must have associated database table, table will be used to read column
@@ -70,16 +76,33 @@ class RecordSchema extends ReflectionEntity
         $this->builder = $builder;
 
         //Associated table
-        $this->tableSchema = $this->builder->declareTable(
-            $this->getDatabase(),
-            $this->getTable()
-        );
+        $this->tableSchema = $this->builder->declareTable($this->getDatabase(), $this->getTable());
 
         /**
          * Use record schema (property) to declare table indexes, columns and default values.
          * No relations has to be declared at this point.
          */
         $this->castSchema();
+    }
+
+    /**
+     * Associate source class.
+     *
+     * @param string $class
+     */
+    public function setSource($class)
+    {
+        $this->source = $class;
+    }
+
+    /**
+     * Related source class.
+     *
+     * @return string|null
+     */
+    public function getSource()
+    {
+        return $this->source;
     }
 
     /**
@@ -161,7 +184,7 @@ class RecordSchema extends ReflectionEntity
      *
      * @return string
      */
-    public function getSourceID()
+    public function getTableID()
     {
         return $this->getDatabase() . '.' . $this->getTable();
     }
@@ -228,6 +251,7 @@ class RecordSchema extends ReflectionEntity
         $accessors = $this->getAccessors();
 
         foreach ($this->tableSchema->getColumns() as $column) {
+
             //Let's use default value fetched from column first
             $default = $this->exportDefault($column);
 
@@ -245,7 +269,7 @@ class RecordSchema extends ReflectionEntity
             if (isset($accessors[$column->getName()])) {
                 $accessor = $accessors[$column->getName()];
                 $accessor = new $accessor($default, null);
-                if ($accessor instanceof ActiveAccessorInterface) {
+                if ($accessor instanceof RecordAccessorInterface) {
                     $default = $accessor->defaultValue($this->tableSchema->driver());
                 }
             }

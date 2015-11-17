@@ -80,7 +80,7 @@ class ManyToManyLoader extends Loader
      *
      * @return string
      */
-    public function getPivotTable()
+    public function pivotTable()
     {
         return $this->definition[RecordEntity::PIVOT_TABLE];
     }
@@ -90,7 +90,7 @@ class ManyToManyLoader extends Loader
      *
      * @return string
      */
-    public function getPivotAlias()
+    public function pivotAlias()
     {
         if (!empty($this->options['pivotAlias'])) {
             return $this->options['pivotAlias'];
@@ -113,7 +113,7 @@ class ManyToManyLoader extends Loader
 
         //Pivot table joining (INNER in post selection)
         $pivotOuterKey = $this->getPivotKey(RecordEntity::THOUGHT_OUTER_KEY);
-        $selector->innerJoin($this->getPivotTable() . ' AS ' . $this->getPivotAlias(), [
+        $selector->innerJoin($this->pivotTable() . ' AS ' . $this->pivotAlias(), [
             $pivotOuterKey => $this->getKey(RecordEntity::OUTER_KEY)
         ]);
 
@@ -153,7 +153,7 @@ class ManyToManyLoader extends Loader
     {
         $selector->join(
             $this->joinType(),
-            $this->getPivotTable() . ' AS ' . $this->getPivotAlias(),
+            $this->pivotTable() . ' AS ' . $this->pivotAlias(),
             [$this->getPivotKey(RecordEntity::THOUGHT_INNER_KEY) => $this->getParentKey()]
         );
 
@@ -184,7 +184,7 @@ class ManyToManyLoader extends Loader
         );
 
         $this->pivotOffset = $selector->generateColumns(
-            $this->getPivotAlias(),
+            $this->pivotAlias(),
             $this->pivotColumns
         );
     }
@@ -202,7 +202,7 @@ class ManyToManyLoader extends Loader
             return null;
         }
 
-        return $this->getPivotAlias() . '.' . $this->definition[$key];
+        return $this->pivotAlias() . '.' . $this->definition[$key];
     }
 
     /**
@@ -215,7 +215,7 @@ class ManyToManyLoader extends Loader
     protected function pivotConditions(Selector $selector, $parentRole = '')
     {
         //We have to route all conditions to ON statement
-        $router = new WhereDecorator($selector, 'onWhere', $this->getPivotAlias());
+        $router = new WhereDecorator($selector, 'onWhere', $this->pivotAlias());
 
         if (!empty($morphKey = $this->getPivotKey(RecordEntity::MORPH_KEY))) {
             $router->where(

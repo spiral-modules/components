@@ -401,7 +401,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             }
 
             /**
-             * @var mixed|array|AtomicAccessorInterface|CompositableInterface
+             * @var mixed|array|DocumentAccessorInterface|CompositableInterface
              */
             $value = $this->getField($field);
 
@@ -446,7 +446,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof AtomicAccessorInterface && $value->hasUpdates()) {
+                if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -470,7 +470,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         $value = $this->getField($field);
-        if ($value instanceof AtomicAccessorInterface && $value->hasUpdates()) {
+        if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
             return true;
         }
 
@@ -485,7 +485,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         $this->updates = $this->atomics = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof AtomicAccessorInterface) {
+            if ($value instanceof DocumentAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -530,7 +530,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
                 continue;
             }
 
-            if ($value instanceof AtomicAccessorInterface) {
+            if ($value instanceof DocumentAccessorInterface) {
                 $atomics = array_merge_recursive(
                     $atomics,
                     $value->buildAtomics(($container ? $container . '.' : '') . $field)

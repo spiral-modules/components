@@ -449,7 +449,7 @@ abstract class Relation implements
      */
     protected function createSelector()
     {
-        return $this->orm->ormSelector($this->getClass());
+        return $this->orm->source($this->getClass());
     }
 
     /**
@@ -475,7 +475,7 @@ abstract class Relation implements
         }
 
         if ($entity instanceof IdentifiedInterface) {
-            $this->orm->registerEntity($entity);
+            $this->orm->rememberEntity($entity);
         }
 
         return true;

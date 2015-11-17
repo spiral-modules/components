@@ -51,7 +51,7 @@ class BelongsToMorphed extends BelongsTo
         $selector = new Selector($this->orm, $this->getClass());
 
         return $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
+            $selector->primaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
             $this->parent->getField($this->definition[RecordEntity::INNER_KEY], false)
         );
     }

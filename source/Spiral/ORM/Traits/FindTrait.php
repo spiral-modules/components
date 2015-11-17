@@ -93,6 +93,6 @@ trait FindTrait
             $orm = self::staticContainer()->get(ORM::class);
         }
 
-        return static::events()->fire('selector', $orm->ormSelector(static::class));
+        return static::events()->fire('selector', $orm->source(static::class));
     }
 }

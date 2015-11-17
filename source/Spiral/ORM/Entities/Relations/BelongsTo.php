@@ -27,7 +27,7 @@ class BelongsTo extends HasOne
      */
     public function isLoaded()
     {
-        $this->fetchFromCache();
+        $this->fromCache();
 
         if (empty($this->parent->getField($this->definition[RecordEntity::INNER_KEY], false))) {
             return true;
@@ -41,7 +41,7 @@ class BelongsTo extends HasOne
      */
     public function getRelated()
     {
-        $this->fetchFromCache();
+        $this->fromCache();
 
         return parent::getRelated();
     }
@@ -141,15 +141,15 @@ class BelongsTo extends HasOne
     /**
      * Try to fetch outer model using entity cache.
      */
-    private function fetchFromCache()
+    private function fromCache()
     {
         if ($this->loaded) {
             return;
         }
 
-        if (
-        empty($key = $this->parent->getField($this->definition[RecordEntity::INNER_KEY], false))
-        ) {
+        $innerKey = $this->parent->getField($this->definition[RecordEntity::INNER_KEY], false);
+
+        if (empty($innerKey)) {
             return;
         }
 
@@ -158,7 +158,7 @@ class BelongsTo extends HasOne
             return;
         }
 
-        if (empty($entity = $this->orm->getEntity($this->getClass(), $key))) {
+        if (empty($entity = $this->orm->getEntity($this->getClass(), $innerKey))) {
             return;
         }
 

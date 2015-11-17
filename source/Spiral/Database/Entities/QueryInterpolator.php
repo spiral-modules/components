@@ -63,12 +63,12 @@ class QueryInterpolator
         $flatten = [];
         foreach ($parameters as $parameter) {
             if ($parameter instanceof ParameterInterface) {
-                $flatten[] = array_merge($flatten, $parameter->flatten());
+                $flatten = array_merge($flatten, $parameter->flatten());
                 continue;
             }
 
             if (is_array($parameter)) {
-                $flatten[] = array_merge($flatten, $parameter);
+                $flatten = array_merge($flatten, $parameter);
             }
 
             $flatten[] = $parameter;

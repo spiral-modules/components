@@ -9,18 +9,18 @@ namespace Spiral\ORM\Entities;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Cache\CacheInterface;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Injections\FragmentInterface;
+use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORM;
-use Spiral\ORM\RecordEntity;
 use Spiral\ORM\RecordInterface;
 
 /**
@@ -44,7 +44,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * Selector provides set of profiling functionality helps to understand what is going on with
      * query and data parsing.
      */
-    use LoggerTrait, BenchmarkTrait;
+    use LoggerTrait, BenchmarkTrait, SaturateTrait;
 
     /**
      * Class name of record to be loaded.
@@ -88,10 +88,10 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      * @param ORM    $orm
      * @param Loader $loader
      */
-    public function __construct(ORM $orm, $class, Loader $loader = null)
+    public function __construct($class, ORM $orm = null, Loader $loader = null)
     {
         $this->class = $class;
-        $this->orm = $orm;
+        $this->orm = $this->saturate($orm, ORM::class);
         $this->columns = $this->dataColumns = [];
 
         //We aways need primary loader
@@ -99,11 +99,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             //Selector always need primary data loaded to define data structure and perform query
             //parsing, in most of cases we can easily use RootLoader associated with primary record
             //schema
-            $this->loader = new RootLoader(
-                $this->orm,
-                null,
-                $this->orm->getSchema($class)
-            );
+            $this->loader = new RootLoader($this->orm, null, $this->orm->schema($class));
         }
 
         //Every ORM loader has ability to declare it's primary database, we are going to use
@@ -111,10 +107,17 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $database = $this->loader->dbalDatabase();
 
         //AbstractSelect construction
-        parent::__construct(
-            $database,
-            $database->driver()->queryCompiler($database->getPrefix())
-        );
+        parent::__construct($database, $database->driver()->queryCompiler($database->getPrefix()));
+    }
+
+    /**
+     * Primary selection table.
+     *
+     * @return string
+     */
+    public function primaryTable()
+    {
+        return $this->loader->getTable();
     }
 
     /**
@@ -122,7 +125,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      *
      * @return string
      */
-    public function getPrimaryAlias()
+    public function primaryAlias()
     {
         return $this->loader->getAlias();
     }
@@ -332,8 +335,9 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        //We have to reset aliases if we own this compiler
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
         //Primary loader may add custom conditions to select query
         $this->loader->configureSelector($this);
@@ -345,7 +349,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         }
 
         return $compiler->compileSelect(
-            [$this->loader->getTable() . ' AS ' . $this->loader->getAlias()],
+            ["{$this->primaryTable()} AS {$this->primaryAlias()}"],
             $this->distinct,
             $columns,
             $this->joinTokens,
@@ -399,6 +403,8 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     {
         //Pagination!
         $this->applyPagination();
+
+        //Generating statement
         $statement = $this->sqlStatement();
 
         if (!empty($this->cacheLifetime)) {
@@ -452,53 +458,6 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
-     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
-     *
-     * @see findOne()
-     * @param mixed $id Primary key value.
-     * @return RecordEntity|null
-     * @throws SelectorException
-     */
-    public function findByPK($id)
-    {
-        $primaryKey = $this->loader->getPrimaryKey();
-
-        if (empty($primaryKey)) {
-            throw new SelectorException(
-                "Unable to fetch data by primary key, no primary key found."
-            );
-        }
-
-        //No limit here
-        return $this->findOne([$primaryKey => $id], false);
-    }
-
-    /**
-     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
-     * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
-     * loading method.
-     *
-     * @see findByPK()
-     * @param array $where    Selection WHERE statement.
-     * @param bool  $setLimit Use limit 1.
-     * @return RecordEntity|null
-     */
-    public function findOne(array $where = [], $setLimit = true)
-    {
-        if (!empty($where)) {
-            $this->where($where);
-        }
-
-        $data = $this->limit($setLimit ? 1 : null)->fetchData();
-        if (empty($data)) {
-            return null;
-        }
-
-        return $this->orm->record($this->class, $data[0]);
-    }
-
-    /**
      * Update all matched records with provided columns set. You are no allowed to use join
      * conditions or with() method, you can update your records manually in cases like that.
      *
@@ -539,15 +498,17 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             $normalized[] = $value;
         }
 
-        return $this->database->execute($statement, $this->compiler->orderParameters(
-            QueryCompiler::UPDATE_QUERY,
-            $this->whereParameters,
-            $this->onParameters,
-            [],
-            $normalized
-        ));
+        return $this->database->execute(
+            $statement,
+            $this->compiler->orderParameters(
+                QueryCompiler::UPDATE_QUERY,
+                $this->whereParameters,
+                $this->onParameters,
+                [],
+                $normalized
+            )
+        );
     }
-
 
     /**
      * Delete all matched records and return count of affected rows. You are no allowed to use join
@@ -570,14 +531,16 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             );
         }
 
-        return $this->database->execute($this->deleteStatement(),
+        return $this->database->execute(
+            $this->deleteStatement(),
             $this->compiler->orderParameters(
                 QueryCompiler::DELETE_QUERY,
                 $this->whereParameters,
                 $this->onParameters
-            ));
+            )
+        );
     }
-
+    
     /**
      * Create update statement based on WHERE statement and columns set provided by Selector.
      *
@@ -587,13 +550,14 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     protected function updateStatement(array $columns, QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
+
         $this->loader->configureSelector($this, false);
 
         return $compiler->compileUpdate(
-            $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
-            $columns,
-            $this->whereTokens
+            "{$this->primaryTable()} AS {$this->primaryAlias()}", $columns, $this->whereTokens
         );
     }
 
@@ -605,12 +569,14 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
      */
     protected function deleteStatement(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
+
         $this->loader->configureSelector($this, false);
 
         return $compiler->compileDelete(
-            $this->loader->getTable() . ' AS ' . $this->loader->getAlias(),
-            $this->whereTokens
+            "{$this->primaryTable()} AS {$this->primaryAlias()}", $this->whereTokens
         );
     }
 }

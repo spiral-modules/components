@@ -254,6 +254,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * You can easily combine table and relations definition in one schema:
      * protected $schema = [
+     *
      *      //Table schema
      *      'id'          => 'bigPrimary',
      *      'name'        => 'string',
@@ -309,9 +310,11 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         //We can use global container as fallback if no default values were provided
         $this->orm = $this->saturate($orm, ORM::class);
-        $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
+
+        $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->schema(static::class);
         parent::__construct($this->ormSchema);
 
+        //Initiating associated traits
         static::initialize();
 
         if (isset($data[ORM::PIVOT_DATA])) {
@@ -588,7 +591,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
+                if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -601,7 +604,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         $value = $this->getField($field);
-        if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
+        if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
             return true;
         }
 
@@ -616,7 +619,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->updates = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof ActiveAccessorInterface) {
+            if ($value instanceof RecordAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -740,7 +743,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     protected function sourceTable()
     {
-        return $this->orm->dbalDatabase($this->ormSchema[ORM::M_DB])->table(
+        return $this->orm->database($this->ormSchema[ORM::M_DB])->table(
             $this->ormSchema[ORM::M_TABLE]
         );
     }
@@ -791,7 +794,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         $updates = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof ActiveAccessorInterface) {
+            if ($value instanceof RecordAccessorInterface) {
                 if ($value->hasUpdates()) {
                     $updates[$field] = $value->compileUpdates($field);
                     continue;
@@ -908,7 +911,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     {
         $updates = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                 if ($value->hasUpdates()) {
                     $updates[$field] = $value->compileUpdates($field);
                 } else {

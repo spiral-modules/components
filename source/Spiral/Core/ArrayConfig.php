@@ -93,4 +93,15 @@ class ArrayConfig extends Component implements ConfigInterface, \ArrayAccess, \I
     {
         return new \ArrayIterator($this->config);
     }
+
+    /**
+     * Restoring sttae.
+     *
+     * @param array $an_array
+     * @return static
+     */
+    public static function __set_state($an_array)
+    {
+        return new static($an_array['config']);
+    }
 }

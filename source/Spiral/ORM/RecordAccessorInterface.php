@@ -17,7 +17,7 @@ use Spiral\Models\AccessorInterface;
  *
  * ORM accessors are much more simple by initiation that ODM accessors.
  */
-interface ActiveAccessorInterface extends AccessorInterface
+interface RecordAccessorInterface extends AccessorInterface
 {
     /**
      * Check if object has any update.

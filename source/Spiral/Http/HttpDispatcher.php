@@ -10,14 +10,13 @@ namespace Spiral\Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerAwareInterface;
-use Spiral\Core\ConfiguratorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\DispatcherInterface;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Core\Traits\SingletonTrait;
 use Spiral\Debug\SnapshotInterface;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Http\Configs\HttpConfig;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\ClientExceptions\ServerErrorException;
 use Spiral\Http\Exceptions\HttpException;
@@ -40,7 +39,7 @@ class HttpDispatcher extends HttpCore implements
     /**
      * HttpDispatcher has embedded router and log it's errors.
      */
-    use ConfigurableTrait, RouterTrait, LoggerTrait, SingletonTrait;
+    use RouterTrait, LoggerTrait, SingletonTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -48,9 +47,9 @@ class HttpDispatcher extends HttpCore implements
     const SINGLETON = self::class;
 
     /**
-     * Configuration section.
+     * @var HttpConfig
      */
-    const CONFIG = 'http';
+    protected $config = null;
 
     /**
      * Initial server request.
@@ -67,12 +66,12 @@ class HttpDispatcher extends HttpCore implements
     protected $views = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
+     * @param HttpConfig         $config
+     * @param ContainerInterface $container
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    public function __construct(HttpConfig $config, ContainerInterface $container)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
+        $this->config = $config;
 
         parent::__construct(
             $container,

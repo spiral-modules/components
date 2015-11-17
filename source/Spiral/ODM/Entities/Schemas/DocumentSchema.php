@@ -10,7 +10,7 @@ namespace Spiral\ODM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\AtomicAccessorInterface;
+use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
@@ -580,7 +580,7 @@ class DocumentSchema extends ReflectionEntity
             //Not an accessor but composited class
             $accessor = new $accessor($default, null, $this->builder->getODM(), $options);
 
-            if ($accessor instanceof AtomicAccessorInterface) {
+            if ($accessor instanceof DocumentAccessorInterface) {
                 return $accessor->defaultValue();
             }
         }

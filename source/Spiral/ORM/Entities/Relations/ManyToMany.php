@@ -215,7 +215,7 @@ class ManyToMany extends Relation
         //this type of relation
         $loader = new ManyToManyLoader($this->orm, '', $this->definition);
         $selector = $loader->createSelector($this->parentRole())->where(
-            $loader->getPivotAlias() . '.' . $this->definition[RecordEntity::THOUGHT_INNER_KEY],
+            $loader->pivotAlias() . '.' . $this->definition[RecordEntity::THOUGHT_INNER_KEY],
             $this->parentKey()
         );
 
@@ -223,7 +223,7 @@ class ManyToMany extends Relation
         if (!empty($this->definition[RecordEntity::WHERE_PIVOT])) {
             //Custom where pivot conditions
             $selector->onWhere($this->mountAlias(
-                $loader->getPivotAlias(),
+                $loader->pivotAlias(),
                 $this->definition[RecordEntity::WHERE_PIVOT]
             ));
         }
@@ -374,7 +374,7 @@ class ManyToMany extends Relation
      */
     protected function pivotTable()
     {
-        return $this->orm->dbalDatabase($this->definition[ORM::R_DATABASE])->table(
+        return $this->orm->database($this->definition[ORM::R_DATABASE])->table(
             $this->definition[RecordEntity::PIVOT_TABLE]
         );
     }

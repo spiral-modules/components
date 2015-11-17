@@ -201,7 +201,7 @@ abstract class Loader implements LoaderInterface
         $this->orm = $orm;
 
         //Related record schema
-        $this->schema = $orm->getSchema($definition[static::RELATION_TYPE]);
+        $this->schema = $orm->schema($definition[static::RELATION_TYPE]);
 
         $this->container = $container;
         $this->definition = $definition;
@@ -312,7 +312,7 @@ abstract class Loader implements LoaderInterface
      */
     public function dbalDatabase()
     {
-        return $this->orm->dbalDatabase($this->schema[ORM::M_DB]);
+        return $this->orm->database($this->schema[ORM::M_DB]);
     }
 
     /**
@@ -344,6 +344,7 @@ abstract class Loader implements LoaderInterface
         if (($position = strpos($relation, '.')) !== false) {
             //Chain of relations provided
             $nested = $this->loader(substr($relation, 0, $position), []);
+
             if (empty($nested) || !$nested instanceof self) {
                 throw new LoaderException(
                     "Only ORM loaders can be used to generate/configure chain of relation loaders."

@@ -8,22 +8,19 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\ConstructorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Singleton;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
 use Spiral\Models\DataEntity;
-use Spiral\Models\IdentifiedInterface;
 use Spiral\Models\SchematicEntity;
+use Spiral\ORM\Configs\ORMConfig;
+use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
-use Spiral\ORM\Entities\Selector;
-use Spiral\ORM\Entities\Source;
 use Spiral\ORM\Exceptions\ORMException;
-use Spiral\Tokenizer\TokenizerInterface;
+use Spiral\Tokenizer\LocatorInterface;
 
 /**
  * ORM component used to manage state of cached Record's schema, record creation and schema
@@ -32,43 +29,34 @@ use Spiral\Tokenizer\TokenizerInterface;
  * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
  * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
  */
-class ORM extends Singleton
+class ORM extends EntityCache implements SingletonInterface
 {
-    /**
-     * Schema building and cache management configuration.
-     */
-    use ConfigurableTrait;
-
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
 
     /**
-     * Configuration section.
-     */
-    const CONFIG = 'orm';
-
-    /**
      * Memory section to store ORM schema.
      */
-    const SCHEMA_SECTION = 'ormSchema';
+    const MEMORY = 'ormSchema';
 
     /**
      * Normalized record constants.
      */
     const M_ROLE_NAME   = 0;
-    const M_TABLE       = 1;
-    const M_DB          = 2;
-    const M_COLUMNS     = 3;
+    const M_SOURCE      = 1;
+    const M_TABLE       = 2;
+    const M_DB          = 3;
     const M_HIDDEN      = SchematicEntity::SH_HIDDEN;
     const M_SECURED     = SchematicEntity::SH_SECURED;
     const M_FILLABLE    = SchematicEntity::SH_FILLABLE;
     const M_MUTATORS    = SchematicEntity::SH_MUTATORS;
     const M_VALIDATES   = SchematicEntity::SH_VALIDATES;
-    const M_NULLABLE    = 9;
-    const M_RELATIONS   = 10;
-    const M_PRIMARY_KEY = 11;
+    const M_COLUMNS     = 9;
+    const M_NULLABLE    = 10;
+    const M_RELATIONS   = 11;
+    const M_PRIMARY_KEY = 12;
 
     /**
      * Normalized relation options.
@@ -85,13 +73,9 @@ class ORM extends Singleton
     const PIVOT_DATA = '@pivot';
 
     /**
-     * In cases when ORM cache is enabled every constructed instance will be stored here, cache used
-     * mainly to ensure the same instance of object, even if was accessed from different spots.
-     * Cache usage increases memory consumption and does not decreases amount of queries being made.
-     *
-     * @var RecordEntity[]
+     * @var ORMConfig
      */
-    private $entityCache = [];
+    protected $config = null;
 
     /**
      * Cached records schema.
@@ -101,15 +85,16 @@ class ORM extends Singleton
     protected $schema = null;
 
     /**
+     * @invisible
      * @var DatabaseManager
      */
     protected $databases = null;
 
     /**
      * @invisible
-     * @var ContainerInterface
+     * @var ConstructorInterface
      */
-    protected $container = null;
+    protected $constructor = null;
 
     /**
      * @invisible
@@ -118,24 +103,25 @@ class ORM extends Singleton
     protected $memory = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
-     * @param HippocampusInterface  $memory
-     * @param DatabaseManager       $databases
+     * @param     ORMConfig        $config
+     * @param HippocampusInterface $memory
+     * @param DatabaseManager      $databases
+     * @param ConstructorInterface $constructor
      */
     public function __construct(
-        ConfiguratorInterface $configurator,
-        ContainerInterface $container,
+        ORMConfig $config,
         HippocampusInterface $memory,
-        DatabaseManager $databases
+        DatabaseManager $databases,
+        ConstructorInterface $constructor
     ) {
-        $this->config = $configurator->getConfig(static::CONFIG);
-        $this->schema = (array)$memory->loadData(static::SCHEMA_SECTION);
+        $this->config = $config;
+        $this->memory = $memory;
+
+        //Loading scheme from memory
+        $this->schema = (array)$memory->loadData(static::MEMORY);
 
         $this->databases = $databases;
-
-        $this->memory = $memory;
-        $this->container = $container;
+        $this->constructor = $constructor;
     }
 
     /**
@@ -144,29 +130,9 @@ class ORM extends Singleton
      * @param string $database
      * @return Database
      */
-    public function dbalDatabase($database)
+    public function database($database)
     {
         return $this->databases->database($database);
-    }
-
-    /**
-     * Get cached schema for specified record by it's name.
-     *
-     * @param string $record
-     * @return array
-     * @throws ORMException
-     */
-    public function getSchema($record)
-    {
-        if (!isset($this->schema[$record])) {
-            $this->updateSchema();
-        }
-
-        if (!isset($this->schema[$record])) {
-            throw new ORMException("Undefined ORM schema item, unknown record '{$record}'.");
-        }
-
-        return $this->schema[$record];
     }
 
     /**
@@ -180,74 +146,101 @@ class ORM extends Singleton
      */
     public function record($class, array $data = [], $cache = true)
     {
-        $schema = $this->getSchema($class);
+        $schema = $this->schema($class);
 
-        if (!$this->config['entityCache']['enabled'] || !$cache) {
+        if (!$this->cacheEnabled() || !$cache) {
             //Entity cache is disabled, we can create record right now
             return new $class($data, !empty($data), $this, $schema);
         }
 
         //We have to find unique object criteria (will work for objects with primary key only)
-        $criteria = null;
-        if (!empty($schema[self::M_PRIMARY_KEY]) && !empty($data[$schema[self::M_PRIMARY_KEY]])) {
-            $criteria = $class . '.' . $data[$schema[self::M_PRIMARY_KEY]];
+        $primaryKey = null;
+
+        if (
+            !empty($schema[self::M_PRIMARY_KEY])
+            && !empty($data[$schema[self::M_PRIMARY_KEY]])
+        ) {
+            $primaryKey = $data[$schema[self::M_PRIMARY_KEY]];
         }
 
-        if (isset($this->entityCache[$criteria])) {
+        if ($this->hasEntity($class, $primaryKey)) {
+            /**
+             * @var RecordInterface $entity
+             */
+            $entity = $this->getEntity($class, $primaryKey);
+
             //Retrieving record from the cache and updates it's context (relations and pivot data)
-            return $this->entityCache[$criteria]->setContext($data);
+            return $entity->setContext($data);
         }
 
-        return $this->registerEntity(new $class($data, !empty($data), $this, $schema));
+        return $this->rememberEntity(
+            new $class($data, !empty($data), $this, $schema)
+        );
     }
 
     /**
-     * Get ORM Selector for given record.
+     * Get ORM source for given class.
      *
      * @param string $class
-     * @return Selector
+     * @return RecordSource
      * @throws ORMException
      */
-    public function ormSelector($class)
+    public function source($class)
     {
-        return new Selector($this, $class);
+        $schema = $this->schema($class);
+        if (empty($source = $schema[self::M_SOURCE])) {
+            //Default source
+            $source = RecordSource::class;
+        }
+
+        return new $source($class, $this);
     }
 
     /**
-     * Get instance of ORM source associated with given model class.
+     * Get cached schema for specified record by it's name.
      *
-     * @param string $class
-     * @return Source
+     * @param string $record
+     * @return array
+     * @throws ORMException
      */
-    public function recordSource($class)
+    public function schema($record)
     {
+        if (!isset($this->schema[$record])) {
+            $this->updateSchema();
+        }
 
+        if (!isset($this->schema[$record])) {
+            throw new ORMException("Undefined ORM schema item, unknown record '{$record}'.");
+        }
+
+        return $this->schema[$record];
     }
 
     /**
      * Create record relation instance by given relation type, parent and definition (options).
      *
-     * @param int          $type
-     * @param RecordEntity $parent
-     * @param array        $definition Relation definition.
-     * @param array        $data
-     * @param bool         $loaded
+     * @param int             $type
+     * @param RecordInterface $parent
+     * @param array           $definition Relation definition.
+     * @param array           $data
+     * @param bool            $loaded
      * @return RelationInterface
      * @throws ORMException
      */
     public function relation(
         $type,
-        RecordEntity $parent,
+        RecordInterface $parent,
         $definition,
         $data = null,
         $loaded = false
     ) {
-        if (!isset($this->config['relations'][$type]['class'])) {
+        if (!$this->config->hasRelation($type, 'class')) {
             throw new ORMException("Undefined relation type '{$type}'.");
         }
 
-        $class = $this->config['relations'][$type]['class'];
+        $class = $this->config->relationClass($type, 'class');
 
+        //For performance reasons class constructed without container
         return new $class($this, $parent, $definition, $data, $loaded);
     }
 
@@ -263,12 +256,13 @@ class ORM extends Singleton
      */
     public function loader($type, $container, array $definition, LoaderInterface $parent = null)
     {
-        if (!isset($this->config['relations'][$type]['loader'])) {
+        if (!$this->config->hasRelation($type, 'loader')) {
             throw new ORMException("Undefined relation loader '{$type}'.");
         }
 
-        $class = $this->config['relations'][$type]['loader'];
+        $class = $this->config->relationClass($type, 'loader');
 
+        //For performance reasons class constructed without container
         return new $class($this, $container, $definition, $parent);
     }
 
@@ -276,24 +270,24 @@ class ORM extends Singleton
      * Update ORM records schema, synchronize declared and database schemas and return instance of
      * SchemaBuilder.
      *
-     * @param SchemaBuilder $builder User specified schema builder.
+     * @param SchemaBuilder    $builder User specified schema builder.
+     * @param LocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null)
+    public function updateSchema(SchemaBuilder $builder = null, LocatorInterface $locator = null)
     {
-        $builder = !empty($builder) ? $builder : $this->schemaBuilder();
-
-        //Casting relations between records
-        $builder->castRelations();
+        if (empty($builder)) {
+            $builder = $this->schemaBuilder($locator);
+        }
 
         //Create all required tables and columns
         $builder->synchronizeSchema();
 
+        //Getting normalized (cached) version of schema
+        $this->schema = $builder->normalizeSchema();
+
         //Saving
-        $this->memory->saveData(
-            static::SCHEMA_SECTION,
-            $this->schema = $builder->normalizeSchema()
-        );
+        $this->memory->saveData(static::MEMORY, $this->schema);
 
         //Let's reinitialize records
         DataEntity::resetInitiated();
@@ -304,15 +298,15 @@ class ORM extends Singleton
     /**
      * Get instance of ORM SchemaBuilder.
      *
-     * @param TokenizerInterface $tokenizer
+     * @param LocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function schemaBuilder(TokenizerInterface $tokenizer = null)
+    public function schemaBuilder(LocatorInterface $locator = null)
     {
-        return $this->container->construct(SchemaBuilder::class, [
-            'config'    => $this->config,
-            'orm'       => $this,
-            'tokenizer' => $tokenizer
+        return $this->constructor->construct(SchemaBuilder::class, [
+            'config'  => $this->config,
+            'orm'     => $this,
+            'locator' => $locator
         ]);
     }
 
@@ -335,110 +329,14 @@ class ORM extends Singleton
         $name,
         array $definition
     ) {
-        if (!isset($this->config['relations'][$type]['schema'])) {
+        if (!$this->config->hasRelation($type, 'schema')) {
             throw new ORMException("Undefined relation schema '{$type}'.");
         }
 
-        return $this->container->construct(
-            $this->config['relations'][$type]['schema'],
+        //Getting needed relation schema builder
+        return $this->constructor->construct(
+            $this->config->relationClass($type, 'schema'),
             compact('builder', 'record', 'name', 'definition')
         );
-    }
-
-    /**
-     * Enable or disable entity cache. Disabling cache will not flush it's values.
-     *
-     * @see $entityCache
-     * @param bool $enabled
-     * @param int  $maxSize
-     * @return $this
-     */
-    public function entityCache($enabled, $maxSize = null)
-    {
-        $this->config['entityCache']['enabled'] = (bool)$enabled;
-        if (!empty($maxSize)) {
-            $this->config['entityCache']['maxSize'] = $maxSize;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Flush content of entity cache.
-     */
-    public function flushCache()
-    {
-        $this->entityCache = [];
-    }
-
-    /**
-     * Add Record to entity cache (only if cache enabled). Primary key is required for caching.
-     *
-     * @param IdentifiedInterface $entity
-     * @param bool                $ignoreLimit Cache overflow will be ignored.
-     * @return RecordEntity
-     */
-    public function registerEntity(IdentifiedInterface $entity, $ignoreLimit = true)
-    {
-        if (empty($entity->primaryKey()) || !$this->config['entityCache']['enabled']) {
-            return $entity;
-        }
-
-        if (!$ignoreLimit && count($this->entityCache) > $this->config['entityCache']['maxSize']) {
-            //We are full
-            return $entity;
-        }
-
-        return $this->entityCache[get_class($entity) . '.' . $entity->primaryKey()] = $entity;
-    }
-
-    /**
-     * Remove Record record from entity cache. Primary key is required for caching.
-     *
-     * @param IdentifiedInterface $entity
-     */
-    public function unregisterEntity(IdentifiedInterface $entity)
-    {
-        if (empty($entity->primaryKey())) {
-            return;
-        }
-
-        unset($this->entityCache[get_class($entity) . '.' . $entity->primaryKey()]);
-    }
-
-    /**
-     * Check if desired entity was already cached.
-     *
-     * @param string $class
-     * @param mixed  $primaryKey
-     * @return bool
-     */
-    public function hasEntity($class, $primaryKey)
-    {
-        return isset($this->entityCache[$class . '.' . $primaryKey]);
-    }
-
-    /**
-     * Fetch entity from cache.
-     *
-     * @param string $class
-     * @param mixed  $primaryKey
-     * @return null|IdentifiedInterface
-     */
-    public function getEntity($class, $primaryKey)
-    {
-        if (empty($this->entityCache[$class . '.' . $primaryKey])) {
-            return null;
-        }
-
-        return $this->entityCache[$class . '.' . $primaryKey];
-    }
-
-    /**
-     * Destructing.
-     */
-    public function __destruct()
-    {
-        $this->entityCache = [];
     }
 }

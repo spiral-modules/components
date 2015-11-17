@@ -8,10 +8,10 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Entities\SynchronizationBus;
+use Spiral\ORM\Configs\ORMConfig;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
-use Spiral\ORM\Exceptions\PassiveTableException;
 use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
@@ -19,7 +19,8 @@ use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
-use Spiral\Tokenizer\TokenizerInterface;
+use Spiral\Tokenizer\LocatorInterface;
+use Zend\Code\Reflection\ClassReflection;
 
 /**
  * Schema builder responsible for static analysis of existed ORM Records, their schemas,
@@ -27,11 +28,6 @@ use Spiral\Tokenizer\TokenizerInterface;
  */
 class SchemaBuilder extends Component
 {
-    /**
-     * Schema builder configuration includes mutators list and etc.
-     */
-    use ConfigurableTrait;
-
     /**
      * @var RecordSchema[]
      */
@@ -43,30 +39,31 @@ class SchemaBuilder extends Component
     private $tables = [];
 
     /**
+     * @var ORMConfig
+     */
+    protected $config = null;
+
+    /**
      * @invisible
      * @var ORM
      */
     protected $orm = null;
 
     /**
-     * @param ORM                $orm
-     * @param array              $config
-     * @param TokenizerInterface $tokenizer
+     * @param ORMConfig        $config
+     * @param ORM              $orm
+     * @param LocatorInterface $locator
      */
-    public function __construct(ORM $orm, array $config, TokenizerInterface $tokenizer)
+    public function __construct(ORMConfig $config, ORM $orm, LocatorInterface $locator)
     {
         $this->config = $config;
         $this->orm = $orm;
 
-        $this->locateRecords($tokenizer);
-    }
+        //Locating all models and sources
+        $this->locateRecords($locator)->locateSources($locator);
 
-    /**
-     * @return ORM
-     */
-    public function getORM()
-    {
-        return $this->orm;
+        //Casting relations
+        $this->castRelations();
     }
 
     /**
@@ -136,37 +133,211 @@ class SchemaBuilder extends Component
     public function declareTable($database, $table)
     {
         $database = $this->resolveDatabase($database);
+
         if (isset($this->tables[$database . '/' . $table])) {
             return $this->tables[$database . '/' . $table];
         }
 
-        $schema = $this->orm->dbalDatabase($database)->table($table)->schema();
+        $schema = $this->orm->database($database)->table($table)->schema();
 
         return $this->tables[$database . '/' . $table] = $schema;
     }
 
     /**
-     * Get list of every declared table schema.
+     * Perform schema reflection to database(s). All declared tables will created or altered. Only
+     * tables linked to non abstract records and record with active schema parameter will be
+     * executed.
      *
-     * @param bool $cascade Sort tables in order of their dependencies.
-     * @return AbstractTable[]
+     * SchemaBuilder will not allow (SchemaException) to create or alter tables columns declared
+     * by abstract or records with ACTIVE_SCHEMA constant set to false. ActiveSchema still can
+     * declare foreign keys and indexes (most of relations automatically request index or foreign
+     * key), but they are going to be ignored.
+     *
+     * Due principals of database schemas and ORM component logic no data or columns will ever be
+     * removed from database. In addition column renaming will cause creation of another column.
+     *
+     * Use database migrations to solve more complex database questions. Or disable ACTIVE_SCHEMA
+     * and live like normal people.
+     *
+     * @throws SchemaException
+     * @throws \Spiral\Database\Exceptions\SchemaException
+     * @throws \Spiral\Database\Exceptions\QueryException
+     * @throws \Spiral\Database\Exceptions\DriverException
      */
-    public function getTables($cascade = true)
+    public function synchronizeSchema()
     {
-        if (!$cascade) {
-            return $this->tables;
-        }
+        $bus = new SynchronizationBus($this->getTables());
+        $bus->syncronize();
+    }
 
-        $tables = $this->tables;
-        uasort($tables, function (AbstractTable $tableA, AbstractTable $tableB) {
-            if (in_array($tableA->getName(), $tableB->getDependencies())) {
-                return true;
+    /**
+     * Resolve real database name using it's alias.
+     *
+     * @see DatabaseProvider
+     * @param string|null $alias
+     * @return string
+     */
+    public function resolveDatabase($alias)
+    {
+        return $this->orm->database($alias)->getName();
+    }
+
+    /**
+     * Get all mutators associated with field type.
+     *
+     * @param string $type Field type.
+     * @return array
+     */
+    public function getMutators($type)
+    {
+        return $this->config->getMutators($type);
+    }
+
+    /**
+     * Get mutator alias if presented. Aliases used to simplify schema (accessors) definition.
+     *
+     * @param string $alias
+     * @return string|array
+     */
+    public function mutatorAlias($alias)
+    {
+        return $this->config->resolveAlias($alias);
+    }
+
+    /**
+     * Normalize record schema in lighter structure to be saved in ORM component memory.
+     *
+     * @return array
+     * @throws SchemaException
+     */
+    public function normalizeSchema()
+    {
+        $result = [];
+        foreach ($this->records as $record) {
+            if ($record->isAbstract()) {
+                continue;
             }
 
-            return count($tableB->getDependencies()) > count($tableA->getDependencies());
-        });
+            $schema = [
+                ORM::M_ROLE_NAME   => $record->getRole(),
+                ORM::M_SOURCE      => $record->getSource(),
+                ORM::M_TABLE       => $record->getTable(),
+                ORM::M_DB          => $record->getDatabase(),
+                ORM::M_PRIMARY_KEY => $record->getPrimaryKey(),
+                ORM::M_HIDDEN      => $record->getHidden(),
+                ORM::M_SECURED     => $record->getSecured(),
+                ORM::M_FILLABLE    => $record->getFillable(),
+                ORM::M_COLUMNS     => $record->getDefaults(),
+                ORM::M_NULLABLE    => $record->getNullable(),
+                ORM::M_MUTATORS    => $record->getMutators(),
+                ORM::M_VALIDATES   => $record->getValidates(),
+                ORM::M_RELATIONS   => $this->packRelations($record)
+            ];
 
-        return array_reverse($tables);
+            ksort($schema);
+            $result[$record->getName()] = $schema;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Create appropriate instance of RelationSchema based on it's definition provided by ORM Record
+     * or manually. Due internal format first definition key will be stated as definition type and
+     * key value as record/entity definition relates too.
+     *
+     * @param RecordSchema $record
+     * @param string       $name
+     * @param array        $definition
+     * @return RelationInterface
+     * @throws SchemaException
+     */
+    public function relationSchema(RecordSchema $record, $name, array $definition)
+    {
+        if (empty($definition)) {
+            throw new SchemaException("Relation definition can not be empty.");
+        }
+
+        reset($definition);
+
+        //Relation type must be provided as first in definition
+        $type = key($definition);
+
+        //We are letting ORM to resolve relation schema using container
+        $relation = $this->orm->relationSchema($type, $this, $record, $name, $definition);
+
+        if ($relation->hasEquivalent()) {
+            //Some relations may declare equivalent relation to be used instead,
+            //used for Morphed relations
+            return $relation->createEquivalent();
+        }
+
+        return $relation;
+    }
+
+    /**
+     * Locate every available Record class.
+     *
+     * @param LocatorInterface $locator
+     * @return $this
+     * @throws SchemaException
+     */
+    protected function locateRecords(LocatorInterface $locator)
+    {
+        //Table names associated with records
+        $tables = [];
+        foreach ($locator->getClasses(RecordEntity::class) as $class => $definition) {
+            if ($class == RecordEntity::class || $class == Record::class) {
+                continue;
+            }
+
+            $this->records[$class] = $record = new RecordSchema($this, $class);
+
+            if (!$record->isAbstract()) {
+                //See comment near exception
+                continue;
+            }
+
+            //Record associated tableID (includes resolved database name)
+            $tableID = $record->getTableID();
+
+            if (isset($tables[$tableID])) {
+                //We are not allowing multiple records talk to same database, unless they one of them
+                //is abstract
+                throw new SchemaException(
+                    "Record '{$record}' associated with "
+                    . "same source table '{$tableID}' as '{$tables[$tableID]}'."
+                );
+            }
+
+            $tables[$tableID] = $record;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Locate ORM entities sources.
+     *
+     * @param LocatorInterface $locator
+     * @return $this
+     */
+    protected function locateSources(LocatorInterface $locator)
+    {
+        foreach ($locator->getClasses(RecordSource::class) as $class => $definition) {
+            $reflection = new ClassReflection($class);
+
+            if ($reflection->isAbstract() || empty($record = $reflection->getConstant('RECORD'))) {
+                continue;
+            }
+
+            if ($this->hasRecord($record)) {
+                //Associating source with record
+                $this->record($record)->setSource($class);
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -177,7 +348,7 @@ class SchemaBuilder extends Component
      * @throws RelationSchemaException
      * @throws RecordSchemaException
      */
-    public function castRelations()
+    protected function castRelations()
     {
         $inversedRelations = [];
         foreach ($this->records as $record) {
@@ -211,205 +382,34 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * Perform schema reflection to database(s). All declared tables will created or altered. Only
-     * tables linked to non abstract records and record with active schema parameter will be
-     * executed.
+     * Get list of tables to be updated, method must automatically check if table actually allowed
+     * to be updated.
      *
-     * SchemaBuilder will not allow (SchemaException) to create or alter tables columns declared
-     * by abstract or records with ACTIVE_SCHEMA constant set to false. ActiveSchema still can
-     * declare foreign keys and indexes (most of relations automatically request index or foreign
-     * key), but they are going to be ignored.
-     *
-     * Due principals of database schemas and ORM component logic no data or columns will ever be
-     * removed from database. In addition column renaming will cause creation of another column.
-     *
-     * Use database migrations to solve more complex database questions. Or disable ACTIVE_SCHEMA
-     * and live like normal people.
-     *
-     * @throws SchemaException
-     * @throws \Spiral\Database\Exceptions\SchemaException
-     * @throws \Spiral\Database\Exceptions\QueryException
-     * @throws \Spiral\Database\Exceptions\DriverException
-     * @throws PassiveTableException
+     * @return AbstractTable[]
      */
-    public function synchronizeSchema()
+    protected function getTables()
     {
-        //We must check for errors first
-        $tables = $this->getTables(true);
-
-        foreach ($tables as $table) {
+        $tables = [];
+        foreach ($this->tables as $table) {
             //We can only alter table columns if record allows us
-            $record = $this->findRelatedRecord($table);
+            $record = $this->findRecord($table);
 
-            if (!empty($record) && $record->isAbstract() || empty($table->getColumns())) {
+            if (empty($record)) {
+                $tables[] = $table;
+
+                //Potentially pivot table, no related records
+                continue;
+            }
+
+            if ($record->isAbstract() || !$record->isActive() || empty($table->getColumns())) {
                 //Abstract tables might declare table schema, but we are going to ignore it
                 continue;
             }
 
-            if (!empty($record) && !$record->isActive()) {
-                if (empty($table->alteredColumns())) {
-                    //Some relations might declare foreign keys and indexes in passive tables,
-                    //we are going to skip them all without any warning
-                    continue;
-                }
-
-                throw new PassiveTableException($table, $record);
-            }
+            $tables[] = $table;
         }
 
-
-        //Dropping foreign keys first
-        $this->saveTables($tables, false, false, true);
-
-        //Dropping indexes
-        $this->saveTables($tables, false, true, true);
-
-        //Dropping all non declared columns (safe to do it now)
-        $this->saveTables($tables, true, true, true);
-    }
-
-    /**
-     * Resolve real database name using it's alias.
-     *
-     * @see DatabaseProvider
-     * @param string|null $alias
-     * @return string
-     */
-    public function resolveDatabase($alias)
-    {
-        return $this->orm->dbalDatabase($alias)->getName();
-    }
-
-    /**
-     * Get all mutators associated with field type.
-     *
-     * @param string $type Field type.
-     * @return array
-     */
-    public function getMutators($type)
-    {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
-    }
-
-    /**
-     * Get mutator alias if presented. Aliases used to simplify schema (accessors) definition.
-     *
-     * @param string $alias
-     * @return string|array
-     */
-    public function mutatorAlias($alias)
-    {
-        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias])) {
-            return $alias;
-        }
-
-        return $this->config['mutatorAliases'][$alias];
-    }
-
-    /**
-     * Normalize record schema in lighter structure to be saved in ORM component memory.
-     *
-     * @return array
-     * @throws SchemaException
-     */
-    public function normalizeSchema()
-    {
-        $result = [];
-        foreach ($this->records as $record) {
-            if ($record->isAbstract()) {
-                continue;
-            }
-
-            $schema = [
-                ORM::M_ROLE_NAME   => $record->getRole(),
-                ORM::M_TABLE       => $record->getTable(),
-                ORM::M_DB          => $record->getDatabase(),
-                ORM::M_PRIMARY_KEY => $record->getPrimaryKey(),
-                ORM::M_COLUMNS     => $record->getDefaults(),
-                ORM::M_HIDDEN      => $record->getHidden(),
-                ORM::M_SECURED     => $record->getSecured(),
-                ORM::M_FILLABLE    => $record->getFillable(),
-                ORM::M_NULLABLE    => $record->getNullable(),
-                ORM::M_MUTATORS    => $record->getMutators(),
-                ORM::M_VALIDATES   => $record->getValidates(),
-                ORM::M_RELATIONS   => $this->packRelations($record)
-            ];
-
-            ksort($schema);
-            $result[$record->getName()] = $schema;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create appropriate instance of RelationSchema based on it's definition provided by ORM Record
-     * or manually. Due internal format first definition key will be stated as definition type and
-     * key value as record/entity definition relates too.
-     *
-     * @param RecordSchema $record
-     * @param string       $name
-     * @param array        $definition
-     * @return RelationInterface
-     * @throws SchemaException
-     */
-    public function relationSchema(RecordSchema $record, $name, array $definition)
-    {
-        if (empty($definition)) {
-            throw new SchemaException("Relation definition can not be empty.");
-        }
-
-        reset($definition);
-        //Relation type must be provided as first in definition
-        $type = key($definition);
-
-        //We are letting ORM to resolve relation schema using container
-        $relation = $this->orm->relationSchema($type, $this, $record, $name, $definition);
-
-        if ($relation->hasEquivalent()) {
-            //Some relations may declare equivalent relation to be used instead, used for Morphed
-            //relations
-            return $relation->createEquivalent();
-        }
-
-        return $relation;
-    }
-
-    /**
-     * Locate every available Record class.
-     *
-     * @param TokenizerInterface $tokenizer
-     * @throws SchemaException
-     */
-    protected function locateRecords(TokenizerInterface $tokenizer)
-    {
-        //Table names associated with records
-        $sources = [];
-        foreach ($tokenizer->getClasses(RecordEntity::class) as $class => $definition) {
-            if ($class == RecordEntity::class || $class == Record::class) {
-                continue;
-            }
-
-            $this->records[$class] = $record = new RecordSchema($this, $class);
-
-            if (!$record->isAbstract()) {
-                //See comment near exception
-                continue;
-            }
-
-            //Record associated tableID (includes resolved database name)
-            $sourceID = $record->getSourceID();
-            if (isset($sources[$sourceID])) {
-                //We are not allowing multiple records talk to same database, unless they one of them
-                //is abstract
-                throw new SchemaException(
-                    "Record '{$record}' associated with "
-                    . "same source table '{$sourceID}' as '{$sources[$sourceID]}'."
-                );
-            }
-
-            $sources[$sourceID] = $record;
-        }
+        return $tables;
     }
 
     /**
@@ -420,7 +420,7 @@ class SchemaBuilder extends Component
      * @param AbstractTable $table
      * @return RecordSchema|null
      */
-    private function findRelatedRecord(AbstractTable $table)
+    private function findRecord(AbstractTable $table)
     {
         foreach ($this->getRecords() as $record) {
             if ($record->tableSchema() === $table) {
@@ -446,28 +446,5 @@ class SchemaBuilder extends Component
         }
 
         return $result;
-    }
-
-    /**
-     * Save tables.
-     *
-     * @param AbstractTable[] $tables
-     * @param bool            $forceColumns  Drop all non declared columns.
-     * @param bool            $forceIndexes  Drop all non declared indexes.
-     * @param bool            $forceForeigns Drop all non declared foreign keys.
-     */
-    private function saveTables(array $tables, $forceColumns, $forceIndexes, $forceForeigns)
-    {
-        foreach ($tables as $name => $table) {
-            //We can only alter table columns if record allows us
-            $record = $this->findRelatedRecord($table);
-
-            if (!empty($record) && $record->isAbstract() || empty($table->getColumns())) {
-                //Abstract tables might declare table schema, but we are going to ignore it
-                continue;
-            }
-
-            $table->save($forceColumns, $forceIndexes, $forceForeigns);
-        }
     }
 }

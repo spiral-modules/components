@@ -47,6 +47,8 @@ class Commander extends AbstractCommander
     public function dropIndex(AbstractTable $table, AbstractIndex $index)
     {
         $this->run("DROP INDEX {$index->getName(true)} ON {$table->getName(true)}");
+
+        return $this;
     }
 
     /**
@@ -71,6 +73,8 @@ class Commander extends AbstractCommander
     public function dropForeign(AbstractTable $table, AbstractReference $foreign)
     {
         $this->run("ALTER TABLE {$table->getName(true)} DROP FOREIGN KEY {$foreign->getName(true)}");
+
+        return $this;
     }
 
     /**

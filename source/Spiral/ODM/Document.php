@@ -14,7 +14,6 @@ use Spiral\ODM\Entities\Collection;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\Traits\FindTrait;
 
 /**
  * DocumentEntity with added ActiveRecord methods and association with collection.
@@ -38,11 +37,6 @@ use Spiral\ODM\Traits\FindTrait;
  */
 abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
-    /**
-     * Static functions.
-     */
-    use FindTrait;
-
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.
@@ -233,7 +227,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
 
         //Every aggregation works thought ODM collection
-        $collection = $this->odm->odmCollection($aggregation[ODM::ARG_CLASS])->query($query);
+        $collection = $this->odm->source($aggregation[ODM::ARG_CLASS])->query($query);
 
         //In future i might need separate class to represent aggregation
         if ($aggregation[ODM::AGR_TYPE] == self::ONE) {

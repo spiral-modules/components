@@ -107,6 +107,8 @@ class Commander extends AbstractCommander
         foreach ($foreignBackup as $foreign) {
             $this->addForeign($table, $foreign);
         }
+
+        return $this;
     }
 
     /**

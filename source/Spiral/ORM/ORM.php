@@ -181,11 +181,12 @@ class ORM extends EntityCache implements SingletonInterface
     /**
      * Get ORM source for given class.
      *
-     * @param string $class
+     * @param string          $class
+     * @param LoaderInterface $loader
      * @return RecordSource
      * @throws ORMException
      */
-    public function source($class)
+    public function source($class, LoaderInterface $loader = null)
     {
         $schema = $this->schema($class);
         if (empty($source = $schema[self::M_SOURCE])) {
@@ -193,7 +194,7 @@ class ORM extends EntityCache implements SingletonInterface
             $source = RecordSource::class;
         }
 
-        return new $source($class, $this);
+        return new $source($class, $this, $loader);
     }
 
     /**

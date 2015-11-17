@@ -8,6 +8,7 @@
 namespace Spiral\Http\Configs;
 
 use Spiral\Core\ArrayConfig;
+use Spiral\Http\Routing\Router;
 
 /**
  * HttpDispatcher configuration.
@@ -29,5 +30,30 @@ class HttpConfig extends ArrayConfig
      * @var array
      */
     protected $config = [
+        'basePath'     => '/',
+        'isolate'      => true,
+        'exposeErrors' => true,
+        'cookies'      => [
+            'domain' => '.%s',
+            'method' => 'encrypt',
+        ],
+        'headers'      => [],
+        'endpoint'     => null,
+        'middlewares'  => [],
+        'router'       => [
+            'class' => Router::class,
+//            'default' => [
+//                'pattern'     => '[<controller>[/<action>[/<id>]]]',
+//                'namespace'   => 'Controllers',
+//                'postfix'     => 'Controller',
+//                'defaults'    => [
+//                    'controller' => 'home'
+//                ],
+//                'controllers' => [
+//                    'index' => Controllers\HomeController::class
+//                ]
+//            ]
+        ],
+        'httpErrors'   => []
     ];
 }

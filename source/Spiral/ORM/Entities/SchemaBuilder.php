@@ -201,7 +201,7 @@ class SchemaBuilder extends Component
      */
     public function mutatorAlias($alias)
     {
-        return $this->config->resolveAlias($alias);
+        return $this->config->mutatorAlias($alias);
     }
 
     /**

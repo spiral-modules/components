@@ -12,6 +12,7 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Entities\Table;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
+use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Exceptions\RecordException;
@@ -861,7 +862,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $record->setFields($fields)->dispatch('created');
+        $record->setFields($fields)->dispatch('created', new EntityEvent($record));
 
         return $record;
     }

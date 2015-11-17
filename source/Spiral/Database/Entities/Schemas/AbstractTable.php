@@ -366,7 +366,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * Drop index by it's forming columns.
      *
      * @param array $columns
-     * @return $this;
+     * @return $this
      */
     public function dropIndex(array $columns)
     {

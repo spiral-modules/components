@@ -203,7 +203,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODM::class);
-        $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->getSchema(static::class);
+        $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->schema(static::class);
         parent::__construct($this->odmSchema);
 
         static::initialize();

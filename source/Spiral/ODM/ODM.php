@@ -7,33 +7,33 @@
  */
 namespace Spiral\ODM;
 
-use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Component;
 use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
-use Spiral\Core\Singleton;
-use Spiral\Core\Traits\ConfigurableTrait;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
 use Spiral\Models\SchematicEntity;
+use Spiral\ODM\Configs\ODMConfig;
 use Spiral\ODM\Entities\Collection;
+use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
-use Spiral\ODM\Entities\Source;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\Tokenizer\TokenizerInterface;
+use Spiral\Tokenizer\LocatorInterface;
 
 /**
  * ODM component used to manage state of cached Document's schema, document creation and schema
  * analysis.
  */
-class ODM extends Singleton implements InjectorInterface
+class ODM extends Component implements SingletonInterface, InjectorInterface
 {
     /**
      * Has it's own configuration, in addition MongoDatabase creation can take some time.
      */
-    use ConfigurableTrait, BenchmarkTrait;
+    use BenchmarkTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -41,14 +41,9 @@ class ODM extends Singleton implements InjectorInterface
     const SINGLETON = self::class;
 
     /**
-     * Configuration section.
-     */
-    const CONFIG = 'odm';
-
-    /**
      * Memory section to store ODM schema.
      */
-    const SCHEMA_SECTION = 'odmSchema';
+    const MEMORY = 'odmSchema';
 
     /**
      * Class definition options.
@@ -59,15 +54,17 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * Normalized document constants.
      */
-    const D_DEFINITION   = self::DEFINITION;
-    const D_COLLECTION   = 1;
-    const D_DB           = 2;
+    const D_DEFINITION = self::DEFINITION;
+    const D_COLLECTION = 1;
+    const D_DB         = 2;
+    const D_SOURCE     = 3;
+    const D_HIDDEN     = SchematicEntity::SH_HIDDEN;
+    const D_SECURED    = SchematicEntity::SH_SECURED;
+    const D_FILLABLE   = SchematicEntity::SH_FILLABLE;
+    const D_MUTATORS   = SchematicEntity::SH_MUTATORS;
+    const D_VALIDATES  = SchematicEntity::SH_VALIDATES;
+
     const D_DEFAULTS     = 3;
-    const D_HIDDEN       = SchematicEntity::SH_HIDDEN;
-    const D_SECURED      = SchematicEntity::SH_SECURED;
-    const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
-    const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
-    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
     const D_AGGREGATIONS = 9;
     const D_COMPOSITIONS = 10;
 
@@ -85,6 +82,11 @@ class ODM extends Singleton implements InjectorInterface
     const CMP_CLASS = 1;
     const CMP_ONE   = 0x111;
     const CMP_MANY  = 0x222;
+
+    /**
+     * @var ODMConfig
+     */
+    protected $config = null;
 
     /**
      * Cached documents and collections schema.
@@ -113,19 +115,20 @@ class ODM extends Singleton implements InjectorInterface
     protected $container = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param HippocampusInterface  $memory
-     * @param ContainerInterface    $container
+     * @param ODMConfig            $config
+     * @param HippocampusInterface $memory
+     * @param ContainerInterface   $container
      */
     public function __construct(
-        ConfiguratorInterface $configurator,
+        ODMConfig $config,
         HippocampusInterface $memory,
         ContainerInterface $container
     ) {
-        $this->config = $configurator->getConfig(static::CONFIG);
-        $this->schema = (array)$memory->loadData(static::SCHEMA_SECTION);
-
+        $this->config = $config;
         $this->memory = $memory;
+
+        //Loading schema from memory
+        $this->schema = (array)$memory->loadData(static::MEMORY);
         $this->container = $container;
     }
 
@@ -133,39 +136,38 @@ class ODM extends Singleton implements InjectorInterface
      * Create specified or select default instance of MongoDatabase.
      *
      * @param string $database Database name (internal).
-     * @param array  $config   Connection options, only required for databases not listed in ODM
-     *                         config.
      * @return MongoDatabase
      * @throws ODMException
      */
-    public function db($database = null, array $config = [])
+    public function database($database = null)
     {
-        $database = !empty($database) ? $database : $this->config['default'];
-        while (isset($this->config['aliases'][$database])) {
-            $database = $this->config['aliases'][$database];
+        if (empty($database)) {
+            $database = $this->config->defaultDatabase();
         }
+
+        //Spiral support ability to link multiple virtual databases together using aliases
+        $database = $this->config->resolveAlias($database);
 
         if (isset($this->databases[$database])) {
             return $this->databases[$database];
         }
 
-        if (empty($config)) {
-            if (!isset($this->config['databases'][$database])) {
-                throw new ODMException(
-                    "Unable to initiate mongo database, no presets for '{$database}' found."
-                );
-            }
-
-            $config = $this->config['databases'][$database];
+        if ($this->config->hasDatabase($database)) {
+            throw new ODMException(
+                "Unable to initiate mongo database, no presets for '{$database}' found."
+            );
         }
 
         $benchmark = $this->benchmark('database', $database);
-        $this->databases[$database] = $this->container->construct(MongoDatabase::class, [
-            'name'   => $database,
-            'config' => $config,
-            'odm'    => $this
-        ]);
-        $this->benchmark($benchmark);
+        try {
+            $this->databases[$database] = $this->container->construct(MongoDatabase::class, [
+                'name'   => $database,
+                'config' => $this->config->databaseConfig($database),
+                'odm'    => $this
+            ]);
+        } finally {
+            $this->benchmark($benchmark);
+        }
 
         return $this->databases[$database];
     }
@@ -173,29 +175,9 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context)
+    public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $this->db($context);
-    }
-
-    /**
-     * Get cached schema data by it's item name (document name, collection name).
-     *
-     * @param string $item
-     * @return array|string
-     * @throws ODMException
-     */
-    public function getSchema($item)
-    {
-        if (!isset($this->schema[$item])) {
-            $this->updateSchema();
-        }
-
-        if (!isset($this->schema[$item])) {
-            throw new ODMException("Undefined ODM schema item '{$item}'.");
-        }
-
-        return $this->schema[$item];
+        return $this->database($context);
     }
 
     /**
@@ -219,11 +201,17 @@ class ODM extends Singleton implements InjectorInterface
      * Get instance of ODM source associated with given model class.
      *
      * @param string $class
-     * @return Source
+     * @return DocumentSource
      */
-    public function documentSource($class)
+    public function source($class)
     {
+        $schema = $this->schema($class);
 
+        if (empty($schema[self::D_DB])) {
+            throw new ODMException("Document '{$class}' does not have any associated collection.");
+        }
+
+        return new Collection($this, $schema[self::D_DB], $schema[self::D_COLLECTION], []);
     }
 
     /**
@@ -238,7 +226,7 @@ class ODM extends Singleton implements InjectorInterface
      */
     public function defineClass($class, $fields, &$schema = [])
     {
-        $schema = $this->getSchema($class);
+        $schema = $this->schema($class);
 
         $definition = $schema[self::D_DEFINITION];
         if (is_string($definition)) {
@@ -277,21 +265,23 @@ class ODM extends Singleton implements InjectorInterface
     }
 
     /**
-     * Instance of ODM Collection associated with specified document class.
+     * Get cached schema data by it's item name (document name, collection name).
      *
-     * @param string $class
-     * @return Collection
+     * @param string $item
+     * @return array|string
      * @throws ODMException
      */
-    public function odmCollection($class)
+    public function schema($item)
     {
-        $schema = $this->getSchema($class);
-
-        if (empty($schema[self::D_DB])) {
-            throw new ODMException("Document '{$class}' does not have any associated collection.");
+        if (!isset($this->schema[$item])) {
+            $this->updateSchema();
         }
 
-        return new Collection($this, $schema[self::D_DB], $schema[self::D_COLLECTION], []);
+        if (!isset($this->schema[$item])) {
+            throw new ODMException("Undefined ODM schema item '{$item}'.");
+        }
+
+        return $this->schema[$item];
     }
 
     /**
@@ -302,29 +292,32 @@ class ODM extends Singleton implements InjectorInterface
      * @param string $collection
      * @return string
      */
-    public function collectionClass($database, $collection)
+    public function primaryDocument($database, $collection)
     {
-        return $this->getSchema($database . '/' . $collection);
+        return $this->schema($database . '/' . $collection);
     }
 
     /**
      * Update ODM documents schema and return instance of SchemaBuilder.
      *
-     * @param SchemaBuilder $builder User specified schema builder.
+     * @param SchemaBuilder    $builder User specified schema builder.
+     * @param LocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null)
+    public function updateSchema(SchemaBuilder $builder = null, LocatorInterface $locator = null)
     {
-        $builder = !empty($builder) ? $builder : $this->schemaBuilder();
+        if (empty($builder)) {
+            $builder = $this->schemaBuilder($locator);
+        }
 
         //We will create all required indexes now
         $builder->createIndexes();
 
+        //Getting cached/normalized schema
+        $this->schema = $builder->normalizeSchema();
+
         //Saving
-        $this->memory->saveData(
-            static::SCHEMA_SECTION,
-            $this->schema = $builder->normalizeSchema()
-        );
+        $this->memory->saveData(static::MEMORY, $this->schema);
 
         //Let's reinitialize models
         DataEntity::resetInitiated();
@@ -335,15 +328,15 @@ class ODM extends Singleton implements InjectorInterface
     /**
      * Get instance of ODM SchemaBuilder.
      *
-     * @param TokenizerInterface $tokenizer
+     * @param LocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function schemaBuilder(TokenizerInterface $tokenizer = null)
+    public function schemaBuilder(LocatorInterface $locator = null)
     {
         return $this->container->construct(SchemaBuilder::class, [
-            'odm'       => $this,
-            'config'    => $this->config['schemas'],
-            'tokenizer' => $tokenizer
+            'odm'     => $this,
+            'config'  => $this->config['schemas'],
+            'locator' => $locator
         ]);
     }
 

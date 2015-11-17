@@ -31,8 +31,7 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method array validate($validate)
  * @method bool|array insert($array_of_fields_OR_object, $options = [])
  * @method mixed batchInsert($documents, $options = [])
- * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options =
- *         [])
+ * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options = [])
  * @method bool|array remove($array_of_fields_OR_object, $options = [])
  * @method bool ensureIndex($key_OR_array_of_keys, $options = [])
  * @method array deleteIndex($string_OR_array_of_keys)
@@ -343,7 +342,7 @@ class Collection extends Component implements
         $cursorReader = new DocumentCursor(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,
-            empty($fields) ? $this->odm->collectionClass($this->database, $this->name) : null,
+            empty($fields) ? $this->odm->primaryDocument($this->database, $this->name) : null,
             $this->sort,
             !empty($limit) ? $limit : $this->limit,
             $this->offset
@@ -394,7 +393,7 @@ class Collection extends Component implements
      */
     protected function mongoDatabase()
     {
-        return $this->odm->db($this->database);
+        return $this->odm->database($this->database);
     }
 
     /**

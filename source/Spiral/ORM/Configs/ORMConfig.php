@@ -54,7 +54,7 @@ class ORMConfig extends ArrayConfig
      * @param string $mutator
      * @return string
      */
-    public function resolveAlias($mutator)
+    public function mutatorAlias($mutator)
     {
         if (!is_string($mutator) || !isset($this->config['mutatorAliases'][$mutator])) {
             return $mutator;

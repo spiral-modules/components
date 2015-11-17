@@ -90,6 +90,6 @@ trait FindTrait
             $odm = self::staticContainer()->get(ODM::class);
         }
 
-        return self::events()->fire('collection', $odm->odmCollection(static::class));
+        return self::events()->fire('collection', $odm->source(static::class));
     }
 }

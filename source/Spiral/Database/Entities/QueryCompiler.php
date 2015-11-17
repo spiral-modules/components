@@ -531,8 +531,13 @@ class QueryCompiler extends Component
      * @param string $operator
      * @return string
      */
-    protected function prepareOperator(ParameterInterface $parameter, $operator)
+    protected function prepareOperator($parameter, $operator)
     {
+        if (!$parameter instanceof ParameterInterface) {
+            //Probably fragment
+            return $operator;
+        }
+
         if ($operator != '=' || is_scalar($parameter->getValue())) {
             //Doing nothing for non equal operators
             return $operator;

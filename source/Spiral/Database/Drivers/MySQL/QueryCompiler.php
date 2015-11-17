@@ -70,8 +70,14 @@ class QueryCompiler extends AbstractCompiler
      * @param string $operator
      * @return string
      */
-    protected function prepareOperator(ParameterInterface $parameter, $operator)
+    protected function prepareOperator($parameter, $operator)
     {
+        if (!$parameter instanceof ParameterInterface) {
+            //Probably fragment
+            return $operator;
+        }
+
+
         if ($parameter->getType() == \PDO::PARAM_NULL) {
             switch ($operator) {
                 case '=':

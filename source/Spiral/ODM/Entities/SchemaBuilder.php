@@ -130,7 +130,7 @@ class SchemaBuilder extends Component
 
             //We can safely create odm Collection here, as we not going to use functionality requires
             //finalized schema
-            $odmCollection = $this->odm->db(
+            $odmCollection = $this->odm->database(
                 $collection->getDatabase()
             )->odmCollection(
                 $collection->getName()

@@ -19,7 +19,7 @@ class RuntimeMemory implements HippocampusInterface
      *
      * @var array
      */
-    protected $data = [];
+    private $data = [];
 
     /**
      * Read data from long memory cache. Will return null if no data presented.

@@ -32,7 +32,7 @@ abstract class Component
     {
         if (
             property_exists($this, 'container')
-            && !empty($this->container)
+            && isset($this->container)
             && $this->container instanceof InteropContainerInterface
         ) {
             return $this->container;

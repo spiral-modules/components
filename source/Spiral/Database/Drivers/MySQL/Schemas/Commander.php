@@ -57,7 +57,7 @@ class Commander extends AbstractCommander
     public function alterIndex(AbstractTable $table, AbstractIndex $initial, AbstractIndex $index)
     {
         $query = \Spiral\interpolate("ALTER TABLE {table} DROP INDEX {index}, ADD {statement}", [
-            'table'     => $this->getName(true),
+            'table'     => $table->getName(true),
             'index'     => $initial->getName(true),
             'statement' => $index->sqlStatement(false)
         ]);

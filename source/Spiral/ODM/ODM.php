@@ -8,9 +8,9 @@
 namespace Spiral\ODM;
 
 use Spiral\Core\Component;
+use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
@@ -108,26 +108,26 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
 
     /**
      * @invisible
-     * @var ContainerInterface
+     * @var ConstructorInterface
      */
-    protected $container = null;
+    protected $constructor = null;
 
     /**
      * @param ODMConfig            $config
      * @param HippocampusInterface $memory
-     * @param ContainerInterface   $container
+     * @param ConstructorInterface $constructor
      */
     public function __construct(
         ODMConfig $config,
         HippocampusInterface $memory,
-        ContainerInterface $container
+        ConstructorInterface $constructor
     ) {
         $this->config = $config;
         $this->memory = $memory;
 
         //Loading schema from memory
         $this->schema = (array)$memory->loadData(static::MEMORY);
-        $this->container = $container;
+        $this->constructor = $constructor;
     }
 
     /**
@@ -158,7 +158,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
 
         $benchmark = $this->benchmark('database', $database);
         try {
-            $this->databases[$database] = $this->container->construct(MongoDatabase::class, [
+            $this->databases[$database] = $this->constructor->construct(MongoDatabase::class, [
                 'name'   => $database,
                 'config' => $this->config->databaseConfig($database),
                 'odm'    => $this
@@ -331,7 +331,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      */
     public function schemaBuilder(LocatorInterface $locator = null)
     {
-        return $this->container->construct(SchemaBuilder::class, [
+        return $this->constructor->construct(SchemaBuilder::class, [
             'odm'     => $this,
             'config'  => $this->config['schemas'],
             'locator' => $locator

@@ -9,8 +9,8 @@ namespace Spiral\Validation;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\InteropContainerInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -85,7 +85,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
 
     /**
      * @invisible
-     * @var ContainerInterface
+     * @var InteropContainerInterface
      */
     protected $container = null;
 
@@ -98,15 +98,15 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      *
-     * @param ValidatorConfig    $config
-     * @param ContainerInterface $container
+     * @param ValidatorConfig           $config
+     * @param InteropContainerInterface $container
      * @throws SugarException
      */
     public function __construct(
         array $rules = [],
         $data = [],
         ValidatorConfig $config = null,
-        ContainerInterface $container = null
+        InteropContainerInterface $container = null
     ) {
         $this->data = $data;
         $this->rules = $rules;
@@ -115,7 +115,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         $this->config = $this->saturate($config, ValidatorConfig::class);
 
         //We can use global container as fallback if no default values were provided
-        $this->container = $this->saturate($container, ContainerInterface::class);
+        $this->container = $this->saturate($container, InteropContainerInterface::class);
     }
 
     /**
@@ -331,7 +331,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             );
         }
 
-        return $this->container->construct($this->config->checkerClass($name));
+        return $this->container->get($this->config->checkerClass($name));
     }
 
     /**

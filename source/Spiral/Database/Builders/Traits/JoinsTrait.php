@@ -9,10 +9,10 @@ namespace Spiral\Database\Builders\Traits;
 
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
+use Spiral\Database\Injections\Expression;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\Expression;
 
 /**
  * Provides ability to generate QueryCompiler JOIN tokens including ON conditions and table/column

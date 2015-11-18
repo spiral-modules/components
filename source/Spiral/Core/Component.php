@@ -18,7 +18,7 @@ abstract class Component
      * Must be used as fallback only, or not used at all. All spiral components can
      * behave well without it.
      *
-     * @var ContainerInterface
+     * @var InteropContainerInterface
      */
     private static $staticContainer = null;
 
@@ -26,14 +26,14 @@ abstract class Component
      * Get instance of container associated with given object, uses global container as fallback
      * if not. Method generally used by traits.
      *
-     * @return ContainerInterface|null
+     * @return InteropContainerInterface|null
      */
     protected function container()
     {
         if (
             property_exists($this, 'container')
             && !empty($this->container)
-            && $this->container instanceof ContainerInterface
+            && $this->container instanceof InteropContainerInterface
         ) {
             return $this->container;
         }
@@ -47,10 +47,10 @@ abstract class Component
      * fallback.
      *
      * @internal Do not use for business logic.
-     * @param ContainerInterface $container
-     * @return ContainerInterface
+     * @param InteropContainerInterface $container
+     * @return InteropContainerInterface
      */
-    final protected static function staticContainer(ContainerInterface $container = null)
+    final protected static function staticContainer(InteropContainerInterface $container = null)
     {
         if (!empty($container)) {
             self::$staticContainer = $container;

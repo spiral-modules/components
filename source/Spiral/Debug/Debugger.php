@@ -10,8 +10,6 @@ namespace Spiral\Debug;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\SingletonInterface;

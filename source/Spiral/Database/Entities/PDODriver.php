@@ -10,7 +10,7 @@ namespace Spiral\Database\Entities;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\DatabaseManager;
@@ -112,18 +112,18 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Container is needed to construct instances of QueryCompiler.
      *
      * @invisible
-     * @var ContainerInterface
+     * @var ConstructorInterface
      */
-    protected $container = null;
+    protected $constructor = null;
 
     /**
-     * @param string             $name
-     * @param array              $config
-     * @param ContainerInterface $container Container is needed to construct instances of
-     *                                      QueryCompiler.
+     * @param string               $name
+     * @param array                $config
+     * @param ConstructorInterface $constructor Container is needed to construct instances of
+     *                                          QueryCompiler.
      * @throws SugarException
      */
-    public function __construct($name, array $config, ContainerInterface $container = null)
+    public function __construct($name, array $config, ConstructorInterface $constructor = null)
     {
         $this->name = $name;
 
@@ -132,7 +132,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         //PDO connection options has to be stored under key "options" of config
         $this->options = $config['options'] + $this->options;
 
-        $this->container = $this->saturate($container, ContainerInterface::class);
+        $this->constructor = $this->saturate($constructor, ConstructorInterface::class);
     }
 
     /**
@@ -332,7 +332,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function query($query, array $parameters = [])
     {
-        return $this->container->construct(static::QUERY_RESULT, [
+        return $this->constructor->construct(static::QUERY_RESULT, [
             'statement'  => $this->statement($query, $parameters),
             'parameters' => $parameters
         ]);
@@ -476,7 +476,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function queryCompiler($prefix = '')
     {
-        return $this->container->construct(static::QUERY_COMPILER, [
+        return $this->constructor->construct(static::QUERY_COMPILER, [
             'driver' => $this,
             'quoter' => new Quoter($this, $prefix)
         ]);

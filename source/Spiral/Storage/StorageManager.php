@@ -8,8 +8,8 @@
 namespace Spiral\Storage;
 
 use Spiral\Core\Component;
+use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\Entities\StorageObject;
@@ -42,23 +42,23 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
 
     /**
      * @invisible
-     * @var ContainerInterface
+     * @var ConstructorInterface
      */
-    protected $container = null;
+    protected $constructor = null;
 
     /**
-     * @param StorageConfig      $config
-     * @param ContainerInterface $container
+     * @param StorageConfig        $config
+     * @param ConstructorInterface $container
      */
-    public function __construct(StorageConfig $config, ContainerInterface $container)
+    public function __construct(StorageConfig $config, ConstructorInterface $container)
     {
         $this->config = $config;
-        $this->container = $container;
+        $this->constructor = $container;
 
         //Loading buckets
         foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->container->construct(
+            $this->buckets[$name] = $this->constructor->construct(
                 StorageBucket::class,
                 ['storage' => $this] + $bucket
             );
@@ -74,7 +74,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
         }
 
-        return $this->buckets[$name] = $this->container->construct(
+        return $this->buckets[$name] = $this->constructor->construct(
             StorageBucket::class,
             ['storage' => $this] + compact('prefix', 'server', 'options')
         );
@@ -144,7 +144,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
 
         $config = $this->config->serverOptions($server);
 
-        return $this->servers[$server] = $this->container->construct($config['class'], $config);
+        return $this->servers[$server] = $this->constructor->construct($config['class'], $config);
     }
 
     /**

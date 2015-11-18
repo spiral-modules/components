@@ -540,7 +540,7 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
             )
         );
     }
-    
+
     /**
      * Create update statement based on WHERE statement and columns set provided by Selector.
      *

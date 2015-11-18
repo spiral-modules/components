@@ -8,9 +8,9 @@
 namespace Spiral\Core\Traits;
 
 use Spiral\Core\Component;
-use Spiral\Core\ContainerInterface;
-use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Exceptions\SingletonException;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\InteropContainerInterface;
 
 /**
  * Expects to be part of Component which has SINGLETON constant.
@@ -24,11 +24,11 @@ trait SingletonTrait
      *
      * Global/static container used as fallback to receive class instance.
      *
-     * @param ContainerInterface $container
+     * @param InteropContainerInterface $container
      * @return static
      * @throws SugarException
      */
-    public static function instance(ContainerInterface $container = null)
+    public static function instance(InteropContainerInterface $container = null)
     {
         if (!is_subclass_of(static::class, Component::class)) {
             throw new SingletonException(

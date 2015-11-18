@@ -10,8 +10,8 @@ namespace Spiral\Database\Entities;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\InteropContainerInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -23,6 +23,7 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 
+
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
  * and use different by table prefix. Databases usually linked to real database or logical portion
@@ -30,7 +31,7 @@ use Spiral\Database\Query\QueryResult;
  */
 class Database extends Component implements DatabaseInterface, InjectableInterface
 {
-   /**
+    /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
      * injections.
      */
@@ -123,22 +124,23 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * Needed to receive cache store on demand.
      *
      * @invisible
-     * @var ContainerInterface
+     * @var InteropContainerInterface
      */
     protected $container = null;
 
     /**
-     * @param Driver             $driver    Driver instance responsible for database connection.
-     * @param string             $name      Internal database name/id.
-     * @param string             $prefix    Default database table prefix, will be used for all
-     *                                      table identifiers.
-     * @param ContainerInterface $container Needed to receive cache store on demand.
+     * @param Driver                    $driver    Driver instance responsible for database
+     *                                            connection.
+     * @param string                    $name      Internal database name/id.
+     * @param string                    $prefix    Default database table prefix, will be used for
+     *                                            all table identifiers.
+     * @param InteropContainerInterface $container Needed to receive cache store on demand.
      */
     public function __construct(
         Driver $driver,
         $name,
         $prefix = '',
-        ContainerInterface $container = null
+        InteropContainerInterface $container = null
     ) {
         $this->driver = $driver;
         $this->name = $name;

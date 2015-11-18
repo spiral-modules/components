@@ -23,7 +23,7 @@ abstract class Driver extends PDODriver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE     = '';
+    const SCHEMA_TABLE = '';
 
     /**
      * Commander used to execute commands. :)
@@ -86,11 +86,11 @@ abstract class Driver extends PDODriver
      */
     public function tableSchema($table, $prefix = '')
     {
-        return $this->container->construct(static::SCHEMA_TABLE, [
+        return $this->constructor->construct(static::SCHEMA_TABLE, [
             'driver'    => $this,
             'name'      => $table,
             'prefix'    => $prefix,
-            'commander' => $this->container->construct(static::COMMANDER, ['driver' => $this])
+            'commander' => $this->constructor->construct(static::COMMANDER, ['driver' => $this])
         ]);
     }
 
@@ -103,7 +103,7 @@ abstract class Driver extends PDODriver
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->construct(InsertQuery::class, [
+        return $this->constructor->construct(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -118,7 +118,7 @@ abstract class Driver extends PDODriver
      */
     public function selectBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->construct(SelectQuery::class, [
+        return $this->constructor->construct(SelectQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -133,7 +133,7 @@ abstract class Driver extends PDODriver
      */
     public function deleteBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->construct(DeleteQuery::class, [
+        return $this->constructor->construct(DeleteQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -148,7 +148,7 @@ abstract class Driver extends PDODriver
      */
     public function updateBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->construct(UpdateQuery::class, [
+        return $this->constructor->construct(UpdateQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);

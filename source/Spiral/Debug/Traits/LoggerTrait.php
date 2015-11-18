@@ -10,7 +10,7 @@ namespace Spiral\Debug\Traits;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\InteropContainerInterface;
 use Spiral\Debug\LogsInterface;
 
 /**
@@ -73,7 +73,7 @@ trait LoggerTrait
     }
 
     /**
-     * @return ContainerInterface
+     * @return InteropContainerInterface
      */
     abstract protected function container();
 }

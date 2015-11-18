@@ -16,10 +16,7 @@ use Spiral\Core\Exceptions\Container\ContainerException;
  * @see InjectorInterface
  * @see SingletonInterface
  */
-interface ContainerInterface extends
-    ConstructorInterface,
-    ResolverInterface,
-    \Interop\Container\ContainerInterface
+interface ContainerInterface extends ConstructorInterface, ResolverInterface, InteropContainerInterface
 {
     /**
      * Bind value resolver to container alias. Resolver can be class name (will be constructed

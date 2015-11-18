@@ -8,8 +8,9 @@
 namespace Spiral\Pagination\Traits;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\InteropContainerInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
@@ -156,8 +157,15 @@ trait PaginatorTrait
             //Let's use default paginator
             $this->paginator = new Paginator($request, $pageParameter);
         } else {
+            //We need constructor
+            if ($container instanceof ConstructorInterface) {
+                $constructor = $container;
+            } else {
+                $constructor = $container->get(ConstructorInterface::class);
+            }
+
             //We can also create paginator using container
-            $this->paginator = $container->construct(Paginator::class, compact(
+            $this->paginator = $constructor->construct(Paginator::class, compact(
                 'request', 'pageParameter'
             ));
         }
@@ -184,7 +192,7 @@ trait PaginatorTrait
     }
 
     /**
-     * @return ContainerInterface
+     * @return InteropContainerInterface
      */
     abstract protected function container();
 }

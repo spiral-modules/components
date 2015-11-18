@@ -21,7 +21,7 @@ class Encrypter extends Component implements
     InjectableInterface,
     SingletonInterface
 {
-     /**
+    /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;

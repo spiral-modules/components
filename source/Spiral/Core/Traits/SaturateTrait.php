@@ -7,8 +7,9 @@
  */
 namespace Spiral\Core\Traits;
 
-use Spiral\Core\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\InteropContainerInterface;
 
 /**
  * Saturate optional constructor or method argument (class) using internal (usually static)
@@ -34,20 +35,20 @@ trait SaturateTrait
             return $default;
         }
 
-        if (empty($this->container())) {
+        //Only when global container is set
+        try {
+            return $this->container()->get($class);
+        } catch (ContainerException $exception) {
             throw new SugarException(
-                "Unable to saturate '{$class}', global container were not set."
+                "Unable to saturate '{$class}': {$exception->getMessage()}", 0, $exception
             );
         }
-
-        //Only when global container is set
-        return $this->container()->get($class);
     }
 
     /**
      * Class specific container.
      *
-     * @return ContainerInterface
+     * @return InteropContainerInterface
      */
     abstract protected function container();
 }

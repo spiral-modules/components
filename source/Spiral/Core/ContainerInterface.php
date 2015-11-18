@@ -7,9 +7,7 @@
  */
 namespace Spiral\Core;
 
-use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\ContainerException;
-use Spiral\Core\Exceptions\Container\InstanceException;
 
 /**
  * Spiral IoC container interface. Used to resolve dependencies and etc.
@@ -18,28 +16,11 @@ use Spiral\Core\Exceptions\Container\InstanceException;
  * @see InjectorInterface
  * @see SingletonInterface
  */
-interface ContainerInterface extends ConstructorInterface, ResolverInterface
+interface ContainerInterface extends
+    ConstructorInterface,
+    ResolverInterface,
+    \Interop\Container\ContainerInterface
 {
-    /**
-     * Check if alias binded.
-     *
-     * @param string $alias
-     * @return bool
-     */
-    public function has($alias);
-
-    /**
-     * Resolve alias into it value. I value pointing to class resolver or singleton an object will
-     * be returned. Method will automatically fallback to construct() if no binding exists.
-     *
-     * @see construct()
-     * @param string $alias
-     * @return mixed|null|object
-     * @throws InstanceException
-     * @throws ArgumentException
-     */
-    public function get($alias);
-
     /**
      * Bind value resolver to container alias. Resolver can be class name (will be constructed
      * every

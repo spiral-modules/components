@@ -17,8 +17,6 @@
     "psr/http-message": "^1.0",
     "doctrine/inflector": "*",
     "guzzlehttp/guzzle": "~6.0",
-    "zendframework/zend-diactoros": "^1.1",
-    "cocur/slugify": "^1.2",
     "monolog/monolog": "^1.17",
     "symfony/finder": "^2.7",
     "symfony/event-dispatcher": "^2.7",

@@ -30,7 +30,16 @@ class Container extends Component implements ContainerInterface
      * @invisible
      * @var array
      */
-    protected $bindings = [];
+    private $bindings = [];
+
+    /**
+     * @param array $bindings Initial set of container bindings in a form target => resolver
+     *                        (strings only).
+     */
+    public function __construct(array $bindings)
+    {
+        $this->bindings = $bindings;
+    }
 
     /**
      * {@inheritdoc}

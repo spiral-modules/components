@@ -11,7 +11,6 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\Traits\SingletonTrait;
 use Spiral\Debug\Dumper\Style;
 use Spiral\Debug\Traits\LoggerTrait;
 
@@ -23,7 +22,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     /**
      * Static method instance(). Used in dump() function.
      */
-    use SingletonTrait, LoggerTrait;
+    use LoggerTrait;
 
     /**
      * Declaring to IoC that class is singleton.

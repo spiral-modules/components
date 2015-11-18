@@ -179,30 +179,38 @@ class Container extends Component implements ContainerInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @return $this
      */
     public function bind($alias, $resolver)
     {
         if (is_array($resolver) || $resolver instanceof \Closure) {
             $this->bindings[$alias] = [$resolver, false];
 
-            return;
+            return $this;
         }
 
         $this->bindings[$alias] = $resolver;
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @return $this
      */
     public function bindSingleton($alias, $resolver)
     {
         if (is_object($resolver) && !$resolver instanceof \Closure) {
             $this->bindings[$alias] = $resolver;
 
-            return;
+            return $this;
         }
 
         $this->bindings[$alias] = [$resolver, true];
+
+        return $this;
     }
 
     /**

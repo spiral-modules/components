@@ -12,7 +12,6 @@ use Spiral\Core\Exceptions\Container\ContainerException;
 /**
  * Spiral IoC container interface. Used to resolve dependencies and etc.
  *
- *
  * @see InjectorInterface
  * @see SingletonInterface
  */

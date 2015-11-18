@@ -130,10 +130,10 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
 
     /**
      * @param Driver                    $driver    Driver instance responsible for database
-     *                                            connection.
+     *                                             connection.
      * @param string                    $name      Internal database name/id.
      * @param string                    $prefix    Default database table prefix, will be used for
-     *                                            all table identifiers.
+     *                                             all table identifiers.
      * @param InteropContainerInterface $container Needed to receive cache store on demand.
      */
     public function __construct(

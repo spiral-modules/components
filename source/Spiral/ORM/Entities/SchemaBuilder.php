@@ -276,6 +276,37 @@ class SchemaBuilder extends Component
     }
 
     /**
+     * Get list of tables to be updated, method must automatically check if table actually allowed
+     * to be updated.
+     *
+     * @return AbstractTable[]
+     */
+    public function getTables()
+    {
+        $tables = [];
+        foreach ($this->tables as $table) {
+            //We can only alter table columns if record allows us
+            $record = $this->findRecord($table);
+
+            if (empty($record)) {
+                $tables[] = $table;
+
+                //Potentially pivot table, no related records
+                continue;
+            }
+
+            if ($record->isAbstract() || !$record->isActive() || empty($table->getColumns())) {
+                //Abstract tables might declare table schema, but we are going to ignore it
+                continue;
+            }
+
+            $tables[] = $table;
+        }
+
+        return $tables;
+    }
+
+    /**
      * Locate every available Record class.
      *
      * @param LocatorInterface $locator
@@ -379,37 +410,6 @@ class SchemaBuilder extends Component
                 $relation->inverseRelation();
             }
         }
-    }
-
-    /**
-     * Get list of tables to be updated, method must automatically check if table actually allowed
-     * to be updated.
-     *
-     * @return AbstractTable[]
-     */
-    protected function getTables()
-    {
-        $tables = [];
-        foreach ($this->tables as $table) {
-            //We can only alter table columns if record allows us
-            $record = $this->findRecord($table);
-
-            if (empty($record)) {
-                $tables[] = $table;
-
-                //Potentially pivot table, no related records
-                continue;
-            }
-
-            if ($record->isAbstract() || !$record->isActive() || empty($table->getColumns())) {
-                //Abstract tables might declare table schema, but we are going to ignore it
-                continue;
-            }
-
-            $tables[] = $table;
-        }
-
-        return $tables;
     }
 
     /**

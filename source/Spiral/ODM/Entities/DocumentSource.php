@@ -8,14 +8,16 @@
 namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Models\SourceInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\ODM;
 use Spiral\ORM\Exceptions\SourceException;
 
 /**
- * Source class associated to one or multiple (default implementation) ODM models.
+ * Source class associated to one or multiple (default implementation) ODM models. Attention,
+ * source can be used only once (clone it if you want to reuse it)!
  */
-class DocumentSource extends Collection
+class DocumentSource extends Collection implements SourceInterface
 {
     /**
      * Sugary!

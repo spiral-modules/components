@@ -13,17 +13,14 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\DispatcherInterface;
-use Spiral\Core\Traits\SingletonTrait;
 use Spiral\Debug\SnapshotInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Http\Configs\HttpConfig;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\ClientExceptions\ServerErrorException;
 use Spiral\Http\Exceptions\HttpException;
-use Spiral\Http\Responses\ExceptionResponse;
-use Spiral\Http\Responses\HtmlResponse;
-use Spiral\Http\Responses\JsonResponse;
 use Spiral\Http\Routing\Traits\RouterTrait;
+use Spiral\Http\Traits\JsonTrait;
 use Spiral\Views\ViewsInterface;
 use Zend\Diactoros\ServerRequestFactory;
 
@@ -39,12 +36,17 @@ class HttpDispatcher extends HttpCore implements
     /**
      * HttpDispatcher has embedded router and log it's errors.
      */
-    use RouterTrait, LoggerTrait, SingletonTrait;
+    use RouterTrait, LoggerTrait, JsonTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
+
+    /**
+     * Format to be used for log messages in cases where http error caused by client request.
+     */
+    const LOGS = "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.";
 
     /**
      * @var HttpConfig
@@ -65,12 +67,7 @@ class HttpDispatcher extends HttpCore implements
     public function __construct(HttpConfig $config, ContainerInterface $container)
     {
         $this->config = $config;
-
-        parent::__construct(
-            $container,
-            $this->config['middlewares'],
-            !empty($this->config['endpoint']) ? $this->config['endpoint'] : null
-        );
+        parent::__construct($container, $config->defaultMiddlewares(), $config->defaultEndpoint());
     }
 
     /**
@@ -94,7 +91,7 @@ class HttpDispatcher extends HttpCore implements
      */
     public function basePath()
     {
-        return $this->config['basePath'];
+        return $this->config->basePath();
     }
 
     /**
@@ -103,11 +100,7 @@ class HttpDispatcher extends HttpCore implements
     public function start()
     {
         //Now we can generate response using request
-        $response = $this->perform(
-            $this->request(),
-            $this->response(),
-            $this->endpoint()
-        );
+        $response = $this->perform($this->request(), $this->response(), $this->endpoint());
 
         if (!empty($response)) {
             //Sending to client
@@ -134,26 +127,19 @@ class HttpDispatcher extends HttpCore implements
         try {
             return parent::perform($request, $response, $endpoint);
         } catch (ClientException $exception) {
-            //Soft exception (TODO: Pass ResponseInterface)
-            return $this->clientException($request, $exception);
+            return $this->clientException($request, $response, $exception);
         } catch (\Exception $exception) {
-            //No isolation, let's throw an exception
-            if (!$request->getAttribute('isolated', false)) {
-                throw $exception;
-            }
-
             /**
+             * Potentially has to be dedicated to specific service.
+             *
              * @var SnapshotInterface $snapshot
              */
-            $snapshot = $this->container->construct(
-                SnapshotInterface::class,
-                compact('exception')
-            );
+            $snapshot = $this->container->construct(SnapshotInterface::class, compact('exception'));
 
             //Snapshot must report about itself
             $snapshot->report();
 
-            return $this->handleSnapshot($snapshot, false, $request);
+            return $this->handleSnapshot($snapshot, false, $request, $response);
         }
     }
 
@@ -162,36 +148,38 @@ class HttpDispatcher extends HttpCore implements
      *
      * @param bool                   $dispatch Snapshot will be automatically dispatched.
      * @param ServerRequestInterface $request  Request caused snapshot.
+     * @param ResponseInterface      $response Response to write anwer into.
      * @return ResponseInterface|null Depends of dispatching were requested.
      */
     public function handleSnapshot(
         SnapshotInterface $snapshot,
         $dispatch = true,
-        ServerRequestInterface $request = null
+        ServerRequestInterface $request = null,
+        ResponseInterface $response = null
     ) {
         if (empty($request)) {
             //Somewhere outside of dispatcher
             $request = $this->request();
         }
 
-        if (!$this->config['exposeErrors']) {
+        if (empty($response)) {
+            $response = $this->response();
+        }
+
+        if (!$this->config->exposeErrors()) {
             //Http was not allowed to show any error snapshot to client
-            $response = $this->exceptionResponse(
-                new ServerErrorException(),
-                $request
-            );
+            $response = $this->writeException($request, $response, new ServerErrorException());
         } else {
+            //Exposing exception
             if ($request->getHeaderLine('Accept') == 'application/json') {
-                $context = ['status' => Response::SERVER_ERROR] + $snapshot->describe();
-                $response = new JsonResponse(
-                    $context,
+                $response = $this->writeJson(
+                    $response,
+                    $snapshot->describe(),
                     Response::SERVER_ERROR
                 );
             } else {
-                $response = new HtmlResponse(
-                    $snapshot->render(),
-                    Response::SERVER_ERROR
-                );
+                $response->getBody()->write($snapshot->render());
+                $response = $response->withStatus(Response::SERVER_ERROR);
             }
         }
 
@@ -206,15 +194,19 @@ class HttpDispatcher extends HttpCore implements
      * Handle ClientException.
      *
      * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      * @param ClientException        $exception
      * @return ResponseInterface
      */
-    protected function clientException(ServerRequestInterface $request, ClientException $exception)
-    {
+    protected function clientException(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        ClientException $exception
+    ) {
         //Logging client error
-        $this->logError($exception, $request);
+        $this->logError($request, $exception);
 
-        return $this->exceptionResponse($exception, $request);
+        return $this->writeException($request, $response, $exception);
     }
 
     /**
@@ -224,13 +216,10 @@ class HttpDispatcher extends HttpCore implements
      */
     protected function request()
     {
-        //Isolation means that MiddlewarePipeline will handle exception using snapshot and not expose
-        //error
-        return $this->request = ServerRequestFactory::fromGlobals(
-            $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
-        )->withAttribute('basePath', $this->basePath())->withAttribute(
-            'isolated', $this->config['isolate']
-        );
+        //Zend code is here
+        $request = ServerRequestFactory::fromGlobals($_SERVER, $_GET, $_POST, $_COOKIE, $_FILES);
+
+        return $request->withAttribute('basePath', $this->basePath());
     }
 
     /**
@@ -239,7 +228,7 @@ class HttpDispatcher extends HttpCore implements
     protected function response()
     {
         $response = parent::response();
-        foreach ($this->config['headers'] as $header => $value) {
+        foreach ($this->config->defaultHeaders() as $header => $value) {
             $response = $response->withHeader($header, $value);
         }
 
@@ -256,6 +245,7 @@ class HttpDispatcher extends HttpCore implements
             return $endpoint;
         }
 
+        //We are using router as default endpoint
         return $this->router();
     }
 
@@ -264,9 +254,9 @@ class HttpDispatcher extends HttpCore implements
      */
     protected function createRouter()
     {
-        return $this->container->construct($this->config['router']['class'], [
-                'basePath' => $this->basePath()
-            ] + $this->config['router']
+        return $this->container->construct(
+            $this->config->routerClass(),
+            $this->config->routerParameters()
         );
     }
 
@@ -277,32 +267,25 @@ class HttpDispatcher extends HttpCore implements
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
-    private function exceptionResponse(
-        ClientException $exception,
-        ServerRequestInterface $request
+    private function writeException(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        ClientException $exception
     ) {
-        if (!empty($request) && $request->getHeaderLine('Accept') == 'application/json') {
-            return new JsonResponse(
-                ['status' => $exception->getCode()],
-                $exception->getCode()
-            );
+        if ($request->getHeaderLine('Accept') == 'application/json') {
+            $response = $this->writeJson($response, ['status' => $exception->getCode()]);
         }
 
-        if (isset($this->config['httpErrors'][$exception->getCode()])) {
-            /**
-             * Exception response will render html content on demand, it gives us ability to handle
-             * response "as exception" somewhere in middleware and do something crazy.
-             */
-            return new ExceptionResponse(
-                $exception,
-                $this->viewManager()->get($this->config['httpErrors'][$exception->getCode()], [
-                    'http'    => $this,
-                    'request' => $request
-                ])
-            );
+        if ($this->config->hasView($exception->getCode())) {
+            $errorView = $this->views()->render($this->config->errorView($exception->getCode()), [
+                'http'    => $this,
+                'request' => $request
+            ]);
+
+            $response->getBody()->write($errorView);
         }
 
-        return new ExceptionResponse($exception);
+        return $response->withStatus($exception->getCode());
     }
 
     /**
@@ -310,7 +293,7 @@ class HttpDispatcher extends HttpCore implements
      *
      * @return ViewsInterface
      */
-    private function viewManager()
+    private function views()
     {
         if (!empty($this->views)) {
             return $this->views;
@@ -322,26 +305,23 @@ class HttpDispatcher extends HttpCore implements
     /**
      * Add error to http log.
      *
-     * @param ClientException        $exception
      * @param ServerRequestInterface $request
+     * @param ClientException        $exception
      */
-    private function logError(ClientException $exception, ServerRequestInterface $request)
+    private function logError(ServerRequestInterface $request, ClientException $exception)
     {
         $remoteAddress = '-undefined-';
         if (!empty($request->getServerParams()['REMOTE_ADDR'])) {
             $remoteAddress = $request->getServerParams()['REMOTE_ADDR'];
         }
 
-        $this->logger()->warning(
-            "{scheme}://{host}{path} caused the error {code} ({message}) by client {remote}.",
-            [
-                'scheme'  => $request->getUri()->getScheme(),
-                'host'    => $request->getUri()->getHost(),
-                'path'    => $request->getUri()->getPath(),
-                'code'    => $exception->getCode(),
-                'message' => $exception->getMessage() ?: '-not specified-',
-                'remote'  => $remoteAddress
-            ]
-        );
+        $this->logger()->warning(static::LOGS, [
+            'scheme'  => $request->getUri()->getScheme(),
+            'host'    => $request->getUri()->getHost(),
+            'path'    => $request->getUri()->getPath(),
+            'code'    => $exception->getCode(),
+            'message' => $exception->getMessage() ?: '-not specified-',
+            'remote'  => $remoteAddress
+        ]);
     }
 }

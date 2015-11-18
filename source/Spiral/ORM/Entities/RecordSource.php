@@ -12,10 +12,10 @@ use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\Exceptions\SourceException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
-use Spiral\ORM\RecordInterface;
 
 /**
- * Source class associated to one or multiple (default implementation) ORM models.
+ * Source class associated to one or multiple (default implementation) ORM models. Attention,
+ * source can be used only once (clone it if you want to reuse it)!
  */
 class RecordSource extends Selector implements SourceInterface
 {

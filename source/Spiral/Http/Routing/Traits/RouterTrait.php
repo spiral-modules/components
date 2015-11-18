@@ -9,7 +9,6 @@ namespace Spiral\Http\Routing\Traits;
 
 use Spiral\Core\ContainerInterface;
 use Spiral\Core\Exceptions\SugarException;
-use Spiral\Http\Routing\Route;
 use Spiral\Http\Routing\RouteInterface;
 use Spiral\Http\Routing\RouterInterface;
 
@@ -64,25 +63,14 @@ trait RouterTrait
     }
 
     /**
-     * Shortcut to register new Route instance in associated router.
+     * Default route is needed as fallback if no other route matched the request.
      *
-     * @see AbstractRoute
-     * @see Route
-     * @param string          $pattern Route pattern.
-     * @param string|callable $target  Route target.
-     * @param array           $defaults
-     * @return Route
+     * @param RouteInterface $route
+     * @return RouteInterface
      */
-    public function route($pattern, $target, array $defaults = [])
+    public function defaultRoute(RouteInterface $route)
     {
-        $route = new Route(
-            is_string($target) ? $target : uniqid('route', true),
-            $pattern,
-            $target,
-            $defaults
-        );
-
-        $this->addRoute($route);
+        $this->router()->defaultRoute($route);
 
         return $route;
     }

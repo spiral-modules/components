@@ -13,6 +13,14 @@ namespace Spiral\Models;
 interface SourceInterface
 {
     /**
+     * Create new entity based on set of provided fields.
+     *
+     * @param array $fields
+     * @return EntityInterface
+     */
+    public function create($fields = []);
+
+    /**
      * Find entity by primary key or return null.
      *
      * @param mixed $primaryKey

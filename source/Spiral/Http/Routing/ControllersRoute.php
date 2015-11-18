@@ -24,7 +24,7 @@ use Spiral\Core\ContainerInterface;
  * Examples:
  * new DirectRoute(
  *      "default",
- *      "(<controller>(/<action>(/<id>)))",
+ *      "[<controller>[/<action>[/<id>]]]",
  *      "Controllers",
  *      "Controller",
  *      ["controller" => "home"]
@@ -33,7 +33,7 @@ use Spiral\Core\ContainerInterface;
  * You can also create host depended routes.
  * $route = new DirectRoute(
  *      "default",
- *      "domain.com(/<controller>(/<action>(/<id>)))",
+ *      "domain.com[/<controller>[/<action>[/<id>]]]",
  *      "Controllers",
  *      "Controller",
  *      ["controller" => "home"]
@@ -43,28 +43,28 @@ use Spiral\Core\ContainerInterface;
  * Attention, controller names are lowercased! If you want to add controller which has multiple
  * words in it's class name - use aliases (last argument).
  */
-class DirectRoute extends AbstractRoute
+class ControllersRoute extends AbstractRoute
 {
     /**
      * Default controllers namespace.
      *
      * @var string
      */
-    protected $namespace = '';
+    private $namespace = '';
 
     /**
      * Default controller postfix.
      *
      * @var string
      */
-    protected $postfix = '';
+    private $postfix = '';
 
     /**
      * Controllers aliased by name, namespace and postfix will be ignored in this case.
      *
      * @var array
      */
-    protected $controllers = [];
+    private $controllers = [];
 
     /**
      * New instance of DirectRoute.
@@ -81,9 +81,9 @@ class DirectRoute extends AbstractRoute
         $name,
         $pattern,
         $namespace,
-        $postfix,
-        array $defaults,
-        array $controllers
+        $postfix = 'Controller',
+        array $defaults = [],
+        array $controllers = []
     ) {
         $this->name = $name;
         $this->pattern = $pattern;

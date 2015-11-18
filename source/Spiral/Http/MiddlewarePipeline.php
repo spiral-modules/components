@@ -9,20 +9,40 @@ namespace Spiral\Http;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Spiral\Core\Component;
 use Spiral\Core\ContainerInterface;
-use Spiral\Http\Responses\JsonResponse;
-use Spiral\Views\ViewInterface;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Http\Traits\JsonTrait;
 
 /**
  * Pipeline used to pass request and response thought the chain of middlewares.
  */
-class MiddlewarePipeline
+class MiddlewarePipeline extends Component
 {
     /**
-     * @invisible
-     * @var ContainerInterface
+     * Sugar.
      */
-    protected $container = null;
+    use SaturateTrait, JsonTrait;
+
+    /**
+     * Pipeline automatically replaces outer request with active instance for internal endpoint.
+     *
+     * @var mixed
+     */
+    private $requestScope = null;
+
+    /**
+     * @var mixed
+     */
+    private $responseScope = null;
+
+    /**
+     * Endpoint should be called at the deepest level of pipeline.
+     *
+     * @var callable
+     */
+    private $target = null;
 
     /**
      * Pipeline middlewares.
@@ -32,20 +52,20 @@ class MiddlewarePipeline
     protected $middlewares = [];
 
     /**
-     * Endpoint should be called at the deepest level of pipeline.
-     *
-     * @var callable
+     * @invisible
+     * @var ContainerInterface
      */
-    protected $target = null;
+    protected $container = null;
 
     /**
-     * @param ContainerInterface               $container
      * @param callable[]|MiddlewareInterface[] $middleware
+     * @param ContainerInterface               $container
+     * @throws SugarException
      */
-    public function __construct(ContainerInterface $container, array $middleware = [])
+    public function __construct(array $middleware = [], ContainerInterface $container = null)
     {
-        $this->container = $container;
         $this->middlewares = $middleware;
+        $this->container = $this->saturate($container, ContainerInterface::class);
     }
 
     /**
@@ -96,28 +116,25 @@ class MiddlewarePipeline
      * @return null|ResponseInterface
      * @throws \Exception
      */
-    protected function next(
-        $position,
-        ServerRequestInterface $request,
-        ResponseInterface $response
-    ) {
+    protected function next($position, ServerRequestInterface $request, ResponseInterface $response)
+    {
         if (!isset($this->middlewares[$position])) {
             //Middleware target endpoint to be called and converted into response
             return $this->createResponse($request, $response);
         }
 
         /**
-         * @var callable $middleware
+         * @var callable $next
          */
-        $middleware = $this->middlewares[$position];
-        $middleware = is_string($middleware)
-            ? $this->container->construct($middleware)
-            : $middleware;
+        $next = $this->middlewares[$position];
+
+        if (is_string($next)) {
+            //Resolve using container
+            $next = $this->container->construct($next);
+        }
 
         //Executing next middleware
-        return $middleware(
-            $request, $response, $this->getNext($position, $request, $response)
-        );
+        return $next($request, $response, $this->getNext($position, $request, $response));
     }
 
     /**
@@ -129,9 +146,7 @@ class MiddlewarePipeline
      */
     protected function createResponse(ServerRequestInterface $request, ResponseInterface $response)
     {
-        //Request scope
-        $outerRequest = $this->container->replace(ServerRequestInterface::class, $request);
-        $outerResponse = $this->container->replace(ResponseInterface::class, $response);
+        $this->openScope($request, $response);
 
         $outputLevel = ob_get_level();
         $output = '';
@@ -146,8 +161,7 @@ class MiddlewarePipeline
             }
 
             //Closing request/response scope
-            $this->container->restore($outerRequest);
-            $this->container->restore($outerResponse);
+            $this->restoreScope();
         }
 
         return $this->wrapResponse($response, $result, ob_get_clean() . $output);
@@ -193,7 +207,7 @@ class MiddlewarePipeline
         }
 
         if (is_array($result) || $result instanceof \JsonSerializable) {
-            return $this->writeJson($response, $result, $output, Response::SUCCESS);
+            return $this->writeJson($response, $result, Response::SUCCESS);
         }
 
         $response->getBody()->write($result . $output);
@@ -231,32 +245,23 @@ class MiddlewarePipeline
     }
 
     /**
-     * Generate JSON response.
+     * Open container scope and share instances of request and response.
      *
-     * @param ResponseInterface $response
-     * @param mixed             $result
-     * @param string            $output
-     * @param int               $code
-     * @return JsonResponse
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface      $response
      */
-    private function writeJson(
-        ResponseInterface $response,
-        $result,
-        $output,
-        $code = Response::SUCCESS
-    ) {
-        if (is_array($result)) {
-            if (!empty($output) && empty($result['output'])) {
-                $result['output'] = $output;
-            }
+    private function openScope(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        $this->requestScope = $this->container->replace(ServerRequestInterface::class, $request);
+        $this->responseScope = $this->container->replace(ResponseInterface::class, $response);
+    }
 
-            if (isset($result['status'])) {
-                $code = $result['status'];
-            }
-        }
-
-        $response->getBody()->write(json_encode($result));
-
-        return $response->withStatus($code)->withHeader('Content-Type', 'application/json');
+    /**
+     * Restore initial (pre pipeline) request and response.
+     */
+    private function restoreScope()
+    {
+        $this->container->restore($this->requestScope);
+        $this->container->restore($this->responseScope);
     }
 }

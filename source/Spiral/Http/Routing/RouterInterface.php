@@ -11,7 +11,6 @@ use Cocur\Slugify\SlugifyInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Spiral\Core\ContainerInterface;
 use Spiral\Http\Exceptions\ClientException;
 use Spiral\Http\Exceptions\RouteException;
 use Spiral\Http\Exceptions\RouterException;
@@ -21,13 +20,6 @@ use Spiral\Http\Exceptions\RouterException;
  */
 interface RouterInterface
 {
-    /**
-     * @param ContainerInterface $container
-     * @param RouteInterface[]   $routes Pre-defined array of routes (if were collected externally).
-     * @param string             $basePath
-     */
-    public function __construct(ContainerInterface $container, array $routes = [], $basePath = '/');
-
     /**
      * Valid endpoint for MiddlewarePipeline.
      *
@@ -44,26 +36,27 @@ interface RouterInterface
     public function addRoute(RouteInterface $route);
 
     /**
-     * Fetch route by it's name.
+     * Default route is needed as fallback if no other route matched the request.
+     *
+     * @param RouteInterface $route
+     */
+    public function defaultRoute(RouteInterface $route);
+
+    /**
+     * Get route by it's name.
      *
      * @param string $name
-     * @return RouteInterface
+     * @return Route
      * @throws RouterException
      */
     public function getRoute($name);
 
     /**
+     * Get all registered routes.
+     *
      * @return RouteInterface[]
      */
     public function getRoutes();
-
-    /**
-     * Route which did match with incoming request will be marked as active and can be fetched using
-     * this method.
-     *
-     * @return RouteInterface
-     */
-    public function activeRoute();
 
     /**
      * Generate valid route URL using route name and set of parameters. Should support controller

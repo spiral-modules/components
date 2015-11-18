@@ -126,7 +126,7 @@ class HttpCore extends Component implements HttpInterface
             throw new HttpException("Unable to execute request without destination endpoint.");
         }
 
-        $pipeline = new MiddlewarePipeline($this->container, $this->middlewares);
+        $pipeline = new MiddlewarePipeline($this->middlewares, $this->container);
 
         $benchmark = $this->benchmark('request', $request->getUri());
         try {

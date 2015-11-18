@@ -71,7 +71,7 @@ class SessionStarter implements MiddlewareInterface
     public function __invoke(
         ServerRequestInterface $request,
         ResponseInterface $response,
-        \Closure $next
+        callable $next
     ) {
         $cookies = $request->getCookieParams();
 

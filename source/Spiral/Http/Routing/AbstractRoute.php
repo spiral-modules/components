@@ -25,18 +25,18 @@ use Spiral\Http\Uri;
  * Routing format (examples given in context of Core->bootstrap() method and Route):
  *
  * Static routes.
- *      $this->http->route('profile-<id>', 'Controllers\UserController::showProfile');
+ * $this->http->route('profile-<id>', 'Controllers\UserController::showProfile');
  *
  * Dynamic actions:
- *      $this->http->route('account/<action>', 'Controllers\AccountController::<action>');
+ * $this->http->route('account/<action>', 'Controllers\AccountController::<action>');
  *
  * Optional segments:
- *      $this->http->route('profile[/<id>]', 'Controllers\UserController::showProfile');
+ * $this->http->route('profile[/<id>]', 'Controllers\UserController::showProfile');
  *
  * This route will react on URL's like /profile/ and /profile/someSegment/
  *
  * To determinate your own pattern for segment use construction <segmentName:pattern>
- *      $this->http->route('profile[/<id:\d+>]', 'Controllers\UserController::showProfile');
+ * $this->http->route('profile[/<id:\d+>]', 'Controllers\UserController::showProfile');
  *
  * Will react only on /profile/ and /profile/1384978/
  *
@@ -127,19 +127,6 @@ abstract class AbstractRoute implements RouteInterface
     }
 
     /**
-     * Set route name. Method should be executed before registering route in router.
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function name($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function getName()
@@ -163,7 +150,7 @@ abstract class AbstractRoute implements RouteInterface
      * @param bool $withHost
      * @return $this
      */
-    public function withHost($withHost = true)
+    public function matchHost($withHost = true)
     {
         $this->withHost = $withHost;
 
@@ -194,7 +181,7 @@ abstract class AbstractRoute implements RouteInterface
      * @param callable|MiddlewareInterface|array $middleware
      * @return $this
      */
-    public function with($middleware)
+    public function middleware($middleware)
     {
         if (is_array($middleware)) {
             $this->middlewares = array_merge($this->middlewares, $middleware);
@@ -248,11 +235,9 @@ abstract class AbstractRoute implements RouteInterface
         ResponseInterface $response,
         ContainerInterface $container
     ) {
-        $pipeline = new MiddlewarePipeline($container, $this->middlewares);
+        $pipeline = new MiddlewarePipeline($this->middlewares, $container);
 
-        return $pipeline->target(
-            $this->createEndpoint($container)
-        )->run($request, $response);
+        return $pipeline->target($this->createEndpoint($container))->run($request, $response);
     }
 
     /**
@@ -355,9 +340,9 @@ abstract class AbstractRoute implements RouteInterface
         $template = preg_replace('/<(\w+):?.*?>/', '<\1>', $this->pattern);
 
         $this->compiled = [
-            'pattern'  => '/^' . strtr($template, $replaces) . '$/iu',
+            'pattern' => '/^' . strtr($template, $replaces) . '$/iu',
             'template' => stripslashes(str_replace('?', '', $template)),
-            'options'  => array_fill_keys($options, null)
+            'options' => array_fill_keys($options, null)
         ];
     }
 }

@@ -10,27 +10,10 @@ namespace Spiral\Views;
 use Spiral\Views\Exceptions\RenderException;
 
 /**
- * Provides ability to configure (implementation specific) and compile specified view.
+ * Generic view interface.
  */
 interface ViewInterface
 {
-    /**
-     * Alter view parameters (should replace existed value).
-     *
-     * @param string $name
-     * @param mixed  $value
-     * @return self
-     */
-    public function set($name, $value);
-
-    /**
-     * Set view data.
-     *
-     * @param array $data
-     * @return self
-     */
-    public function setData(array $data);
-
     /**
      * Render view source using internal logic.
      *

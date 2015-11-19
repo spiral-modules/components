@@ -7,12 +7,12 @@
  */
 namespace Spiral\Validation\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Validation rules and checkers config.
  */
-class ValidatorConfig extends ArrayConfig
+class ValidatorConfig extends InjectableConfig
 {
     /**
      * Configuration section.

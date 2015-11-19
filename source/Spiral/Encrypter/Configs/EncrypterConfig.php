@@ -7,12 +7,12 @@
  */
 namespace Spiral\Encrypter\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Encrypter configuration.
  */
-class EncrypterConfig extends ArrayConfig
+class EncrypterConfig extends InjectableConfig
 {
     /**
      * Configuration section.

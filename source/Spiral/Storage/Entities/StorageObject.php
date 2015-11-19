@@ -51,7 +51,7 @@ class StorageObject extends Component implements ObjectInterface
      *
      * @throws SugarException
      */
-    public function __construct($address, StorageInterface $storage)
+    public function __construct($address, StorageInterface $storage = null)
     {
         $this->storage = $this->saturate($storage, StorageInterface::class);
 

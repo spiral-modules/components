@@ -7,12 +7,12 @@
  */
 namespace Spiral\Storage\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Storage manager configuration.
  */
-class StorageConfig extends ArrayConfig
+class StorageConfig extends InjectableConfig
 {
     /**
      * Configuration section.

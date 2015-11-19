@@ -12,7 +12,7 @@ use Spiral\Core\Exceptions\ConfigException;
 /**
  * Generic implementation of array based configuration.
  */
-class ArrayConfig extends Component implements ConfigInterface, \ArrayAccess, \IteratorAggregate
+class InjectableConfig extends Component implements ConfigInterface, \ArrayAccess, \IteratorAggregate
 {
     /**
      * Spiral provides ability to automatically inject configs using configurator.

@@ -17,10 +17,14 @@ use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\Exceptions\Container\InstanceException;
 
 /**
- * Default implementation of IoC container, support controllable injections and post controller
- * dependencies.
+ * Super simple auto-wiring container with auto SINGLETON and INJECTOR constants integration.
+ * Compatible with Container Interop.
  *
- * There is no way to bind values at this moment.
+ * Container does not support setter injections, private properties and etc. Normally will work with
+ * classes only.
+ *
+ * @see InjectableInterface
+ * @see SingletonInterface
  */
 class Container extends Component implements ContainerInterface
 {
@@ -159,7 +163,7 @@ class Container extends Component implements ContainerInterface
             }
 
             try {
-                //Trying to resolve dependency
+                //Trying to resolve dependency (contextually)
                 $arguments[] = $this->construct($class->getName(), [], $parameter->getName());
 
                 continue;
@@ -275,6 +279,29 @@ class Container extends Component implements ContainerInterface
     }
 
     /**
+     * Check if given class has associated injector.
+     *
+     * @param \ReflectionClass $reflection
+     * @return bool
+     */
+    protected function hasInjector(\ReflectionClass $reflection)
+    {
+        //Custom logic can be applied
+        return $reflection->isSubclassOf(InjectableInterface::class);
+    }
+
+    /**
+     * Get injector associated with given class.
+     *
+     * @param \ReflectionClass $reflection
+     * @return InjectorInterface
+     */
+    protected function getInjector(\ReflectionClass $reflection)
+    {
+        return $this->get($reflection->getConstant('INJECTOR'));
+    }
+
+    /**
      * Create instance of desired class.
      *
      * @param string           $class
@@ -329,27 +356,5 @@ class Container extends Component implements ContainerInterface
         }
 
         return $instance;
-    }
-
-    /**
-     * Check if given class has associated injector.
-     *
-     * @param \ReflectionClass $reflection
-     * @return bool
-     */
-    private function hasInjector(\ReflectionClass $reflection)
-    {
-        return $reflection->isSubclassOf(InjectableInterface::class);
-    }
-
-    /**
-     * Get injector associated with given class.
-     *
-     * @param \ReflectionClass $reflection
-     * @return InjectorInterface
-     */
-    private function getInjector(\ReflectionClass $reflection)
-    {
-        return $this->get($reflection->getConstant('INJECTOR'));
     }
 }

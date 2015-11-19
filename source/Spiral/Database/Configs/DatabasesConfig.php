@@ -7,12 +7,12 @@
  */
 namespace Spiral\Database\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Databases config.
  */
-class DatabasesConfig extends ArrayConfig
+class DatabasesConfig extends InjectableConfig
 {
     /**
      * Configuration section.

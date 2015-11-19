@@ -7,12 +7,12 @@
  */
 namespace Spiral\Cache\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Cache component configuration manager.
  */
-class CacheConfig extends ArrayConfig
+class CacheConfig extends InjectableConfig
 {
     /**
      * Configuration section.

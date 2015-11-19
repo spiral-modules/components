@@ -7,12 +7,12 @@
  */
 namespace Spiral\Debug\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Snapshots.
  */
-class SnapshotConfig extends ArrayConfig
+class SnapshotConfig extends InjectableConfig
 {
     /**
      * Configuration section.

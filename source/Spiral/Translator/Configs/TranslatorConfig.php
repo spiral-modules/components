@@ -7,12 +7,12 @@
  */
 namespace Spiral\Translator\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Translation component configuration.
  */
-class TranslatorConfig extends ArrayConfig
+class TranslatorConfig extends InjectableConfig
 {
     /**
      * Configuration section.

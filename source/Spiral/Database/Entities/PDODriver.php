@@ -196,13 +196,18 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Force driver to connect.
      *
-     * @return bool
+     * @return PDO
      */
     public function connect()
     {
-        $this->getPDO();
+        $benchmark = $this->benchmark('connect', $this->config['connection']);
+        try {
+            $this->pdo = $this->createPDO();
+        } finally {
+            $this->benchmark($benchmark);
+        }
 
-        return !empty($this->getPDO());
+        return $this->pdo;
     }
 
     /**
@@ -247,18 +252,13 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function getPDO()
     {
+        if (!$this->isConnected()) {
+            $this->connect();
+        }
+
         if (!empty($this->pdo)) {
             return $this->pdo;
         }
-
-        $benchmark = $this->benchmark('connect', $this->config['connection']);
-        try {
-            $this->pdo = $this->createPDO();
-        } finally {
-            $this->benchmark($benchmark);
-        }
-
-        return $this->pdo;
     }
 
     /**
@@ -573,8 +573,17 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function prepareDateTime(\DateTime $dateTime)
     {
-        return $dateTime->setTimezone(new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE))->format(
-            static::DATETIME
-        );
+        return $dateTime->setTimezone($this->getTimezone())->format(static::DATETIME);
+    }
+
+    /**
+     * Connection specific timezone, at this moment locked to UTC.
+     *
+     * @todo Support connection specific timezones.
+     * @return \DateTimeZone
+     */
+    protected function getTimezone()
+    {
+        return new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE);
     }
 }

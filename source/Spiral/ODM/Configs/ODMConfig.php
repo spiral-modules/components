@@ -7,12 +7,12 @@
  */
 namespace Spiral\ODM\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Translation component configuration.
  */
-class ODMConfig extends ArrayConfig
+class ODMConfig extends InjectableConfig
 {
     /**
      * Configuration section.

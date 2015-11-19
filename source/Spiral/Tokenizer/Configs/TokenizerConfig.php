@@ -7,12 +7,12 @@
  */
 namespace Spiral\Tokenizer\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Translation component configuration.
  */
-class TokenizerConfig extends ArrayConfig
+class TokenizerConfig extends InjectableConfig
 {
     /**
      * Configuration section.

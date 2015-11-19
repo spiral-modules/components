@@ -7,12 +7,12 @@
  */
 namespace Spiral\Debug\Configs;
 
-use Spiral\Core\ArrayConfig;
+use Spiral\Core\InjectableConfig;
 
 /**
  * Debug component configuration.
  */
-class DebuggerConfig extends ArrayConfig
+class DebuggerConfig extends InjectableConfig
 {
     /**
      * Configuration section.

@@ -7,11 +7,11 @@
  */
 namespace Spiral\Database\Entities;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\InteropContainerInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -124,23 +124,23 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * Needed to receive cache store on demand.
      *
      * @invisible
-     * @var InteropContainerInterface
+     * @var ContainerInterface
      */
     protected $container = null;
 
     /**
-     * @param Driver                    $driver    Driver instance responsible for database
+     * @param Driver             $driver           Driver instance responsible for database
      *                                             connection.
-     * @param string                    $name      Internal database name/id.
-     * @param string                    $prefix    Default database table prefix, will be used for
+     * @param string             $name             Internal database name/id.
+     * @param string             $prefix           Default database table prefix, will be used for
      *                                             all table identifiers.
-     * @param InteropContainerInterface $container Needed to receive cache store on demand.
+     * @param ContainerInterface $container        Needed to receive cache store on demand.
      */
     public function __construct(
         Driver $driver,
         $name,
         $prefix = '',
-        InteropContainerInterface $container = null
+        ContainerInterface $container = null
     ) {
         $this->driver = $driver;
         $this->name = $name;

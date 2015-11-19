@@ -42,6 +42,8 @@ class RootLoader extends Loader
         $this->options['alias'] = $this->schema[ORM::M_ROLE_NAME];
 
         $this->dataColumns = array_keys($this->schema[ORM::M_COLUMNS]);
+
+        //No need to call parent constructor
     }
 
     /**

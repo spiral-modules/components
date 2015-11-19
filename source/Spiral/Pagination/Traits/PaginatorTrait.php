@@ -7,10 +7,10 @@
  */
 namespace Spiral\Pagination\Traits;
 
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\InteropContainerInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
@@ -192,7 +192,7 @@ trait PaginatorTrait
     }
 
     /**
-     * @return InteropContainerInterface
+     * @return ContainerInterface
      */
     abstract protected function container();
 }

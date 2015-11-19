@@ -256,9 +256,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             $this->connect();
         }
 
-        if (!empty($this->pdo)) {
-            return $this->pdo;
-        }
+        return $this->pdo;
     }
 
     /**

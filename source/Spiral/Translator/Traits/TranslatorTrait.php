@@ -7,8 +7,8 @@
  */
 namespace Spiral\Translator\Traits;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Container;
-use Spiral\Core\InteropContainerInterface;
 use Spiral\Translator\TranslatorInterface;
 
 /**
@@ -49,7 +49,7 @@ trait TranslatorTrait
     }
 
     /**
-     * @return InteropContainerInterface
+     * @return ContainerInterface
      */
     abstract protected function container();
 }

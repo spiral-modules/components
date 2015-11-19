@@ -7,7 +7,7 @@
  */
 namespace Spiral\Debug\Traits;
 
-use Spiral\Core\InteropContainerInterface;
+use Interop\Container\ContainerInterface;
 use Spiral\Debug\BenchmarkerInterface;
 
 /**
@@ -57,7 +57,7 @@ trait BenchmarkTrait
     }
 
     /**
-     * @return InteropContainerInterface
+     * @return ContainerInterface
      */
     abstract protected function container();
 }

@@ -7,9 +7,9 @@
  */
 namespace Spiral\Core\Traits;
 
+use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
 use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\InteropContainerInterface;
 
 /**
  * Saturate optional constructor or method argument (class) using internal (usually static)
@@ -48,7 +48,7 @@ trait SaturateTrait
     /**
      * Class specific container.
      *
-     * @return InteropContainerInterface
+     * @return ContainerInterface
      */
     abstract protected function container();
 }

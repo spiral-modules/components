@@ -7,6 +7,8 @@
  */
 namespace Spiral\Core;
 
+use Interop\Container\ContainerInterface;
+
 /**
  * Basic spiral cell. Automatically detects if "container" property are presented in class or uses
  * global container as fallback.
@@ -18,7 +20,7 @@ abstract class Component
      * Must be used as fallback only, or not used at all. All spiral components can
      * behave well without it.
      *
-     * @var InteropContainerInterface
+     * @var ContainerInterface
      */
     private static $staticContainer = null;
 
@@ -26,14 +28,14 @@ abstract class Component
      * Get instance of container associated with given object, uses global container as fallback
      * if not. Method generally used by traits.
      *
-     * @return InteropContainerInterface|null
+     * @return ContainerInterface|null
      */
     protected function container()
     {
         if (
             property_exists($this, 'container')
             && isset($this->container)
-            && $this->container instanceof InteropContainerInterface
+            && $this->container instanceof ContainerInterface
         ) {
             return $this->container;
         }
@@ -47,10 +49,10 @@ abstract class Component
      * fallback.
      *
      * @internal Do not use for business logic.
-     * @param InteropContainerInterface $container
-     * @return InteropContainerInterface
+     * @param ContainerInterface $container
+     * @return ContainerInterface
      */
-    final protected static function staticContainer(InteropContainerInterface $container = null)
+    final protected static function staticContainer(ContainerInterface $container = null)
     {
         if (!empty($container)) {
             self::$staticContainer = $container;

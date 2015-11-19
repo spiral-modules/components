@@ -7,9 +7,9 @@
  */
 namespace Spiral\Validation\Traits;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\InteropContainerInterface;
 use Spiral\Events\Traits\EventsTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
@@ -178,15 +178,15 @@ trait ValidatorTrait
     /**
      * Create instance of ValidatorInterface.
      *
-     * @param array                     $rules     Non empty rules will initiate validator.
-     * @param InteropContainerInterface $container Will fall back to global container.
+     * @param array              $rules     Non empty rules will initiate validator.
+     * @param ContainerInterface $container Will fall back to global container.
      * @return ValidatorInterface
      * @throws SugarException
      * @event validator(ValidatorEvent)
      */
     protected function createValidator(
         array $rules = [],
-        InteropContainerInterface $container = null
+        ContainerInterface $container = null
     ) {
         if (empty($container)) {
             $container = $this->container();

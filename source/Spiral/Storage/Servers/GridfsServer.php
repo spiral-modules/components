@@ -141,7 +141,7 @@ class GridfsServer extends StorageServer
     protected function gridFS(BucketInterface $bucket)
     {
         $gridFs = $this->database->getGridFS($bucket->getOption('collection'));
-        $gridFs->ensureIndex(['filename' => 1]);
+        $gridFs->createIndex(['filename' => 1]);
 
         return $gridFs;
     }

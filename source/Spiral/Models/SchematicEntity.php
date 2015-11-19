@@ -7,7 +7,7 @@
  */
 namespace Spiral\Models;
 
-use Spiral\Core\InteropContainerInterface;
+use Interop\Container\ContainerInterface;
 
 /**
  * Entity which code follows external behaviour schema.
@@ -93,7 +93,7 @@ class SchematicEntity extends DataEntity
      */
     protected function createValidator(
         array $rules = [],
-        InteropContainerInterface $container = null
+        ContainerInterface $container = null
     ) {
         //Initiate validation using rules declared in model schema
         return parent::createValidator(

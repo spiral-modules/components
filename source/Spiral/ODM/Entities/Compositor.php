@@ -8,8 +8,8 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\InteropContainerInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
@@ -764,7 +764,7 @@ class Compositor extends Component implements
     }
 
     /**
-     * @return null|InteropContainerInterface
+     * @return null|ContainerInterface
      */
     protected function container()
     {

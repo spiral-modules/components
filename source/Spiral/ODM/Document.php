@@ -16,6 +16,7 @@ use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\Traits\FindTrait;
 
 /**
  * DocumentEntity with added ActiveRecord methods and association with collection.
@@ -39,6 +40,11 @@ use Spiral\ODM\Exceptions\ODMException;
  */
 abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
+    /**
+     * Find methods.
+     */
+    use FindTrait;
+
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.

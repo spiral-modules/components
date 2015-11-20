@@ -11,12 +11,18 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\ORM\Exceptions\RecordException;
+use Spiral\ORM\Traits\FindTrait;
 
 /**
  * RecordEntity with added active record functionality.
  */
 class Record extends RecordEntity implements ActiveEntityInterface
 {
+    /**
+     * Find methods.
+     */
+    use FindTrait;
+
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.

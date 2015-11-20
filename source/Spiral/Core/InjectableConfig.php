@@ -95,7 +95,7 @@ class InjectableConfig extends Component implements ConfigInterface, \ArrayAcces
     }
 
     /**
-     * Restoring sttae.
+     * Restoring state.
      *
      * @param array $an_array
      * @return static

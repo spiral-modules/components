@@ -4,16 +4,12 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright �2009-2015
  */
 namespace Spiral\ODM\Entities;
 
-use Interop\Container\ContainerInterface;
-use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
-use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -21,10 +17,13 @@ use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
 /**
- * Compositor is responsible for managing set (array) of classes nested to parent DocumentEntity.
- * Compositor can manage Documents and all it's children.
+ * Associative array of documents.
  */
-class Compositor extends Hash
+class Hash extends Component implements
+    CompositableInterface,
+    \IteratorAggregate,
+    \Countable,
+    \ArrayAccess
 {
     /**
      * Optional arguments.
@@ -138,7 +137,7 @@ class Compositor extends Hash
     /**
      * Get composition parent.
      *
-     * @return Document|null
+     * @return DocumentEntity|null
      */
     public function getParent()
     {
@@ -470,7 +469,7 @@ class Compositor extends Hash
     /**
      * Return all composited documents in array form.
      *
-     * @return Document[]
+     * @return DocumentEntity[]
      */
     public function all()
     {
@@ -485,7 +484,7 @@ class Compositor extends Hash
     /**
      * {@inheritdoc}
      *
-     * @return Document[]
+     * @return DocumentEntity[]
      */
     public function getIterator()
     {
@@ -502,7 +501,7 @@ class Compositor extends Hash
      *
      * @param array  $fields
      * @param string $class
-     * @return Document
+     * @return DocumentEntity
      * @throws CompositorException
      * @throws DefinitionException
      * @throws ODMException
@@ -587,122 +586,6 @@ class Compositor extends Hash
         }
 
         return $documents[0];
-    }
-
-    /**
-     * Push new document to end of set. Set second argument to false to keep Compositor in solid
-     * state and save it as one big array of data.
-     *
-     * @param DocumentEntity $document
-     * @param bool           $resetState Set to true to reset compositor solid state.
-     * @return $this|DocumentEntity[]
-     * @throws CompositorException
-     */
-    public function push(DocumentEntity $document, $resetState = true)
-    {
-        if ($resetState) {
-            $this->solidState = false;
-        }
-
-        $this->documents[] = $document->embed($this);
-
-        if ($this->solidState) {
-            $this->changedDirectly = true;
-
-            return $this;
-        }
-
-        if (!empty($this->atomics) && !isset($this->atomics['$push'])) {
-            throw new CompositorException(
-                "Unable to apply multiple atomic operation to one Compositor."
-            );
-        }
-
-        $this->atomics['$push'][] = $document;
-
-        return $this;
-    }
-
-    /**
-     * Pulls document(s) from the set, query should represent document object matched fields. Set
-     * second argument to false to keep Compositor in solid state and save it as one big array of
-     * data.
-     *
-     * @param array|DocumentEntity $query
-     * @param bool                 $resetState Set to true to reset compositor solid state.
-     * @return $this|DocumentEntity[]
-     * @throws CompositorException
-     */
-    public function pull($query, $resetState = true)
-    {
-        if ($resetState) {
-            $this->solidState = false;
-        }
-
-        if ($query instanceof DocumentEntity) {
-            $query = $query->serializeData();
-        }
-
-        foreach ($this->documents as $offset => $document) {
-            //We have to pass document thought model construction to ensure default values
-            $document = $this->getDocument($offset)->serializeData();
-
-            if (array_intersect_assoc($document, $query) == $query) {
-                unset($this->documents[$offset]);
-            }
-        }
-
-        if ($this->solidState) {
-            $this->changedDirectly = true;
-
-            return $this;
-        }
-
-        if (!empty($this->atomics) && !isset($this->atomics['$pull'])) {
-            throw new CompositorException(
-                "Unable to apply multiple atomic operation to composition."
-            );
-        }
-
-        $this->atomics['$pull'][] = $query;
-
-        return $this;
-    }
-
-    /**
-     * Add document to set, only one instance of document must be presented. Set second argument to
-     * false to keep Compositor in solid state and save it as one big array of data.
-     *
-     * @param DocumentEntity $document
-     * @param bool           $resetState Set to true to reset compositor solid state.
-     * @return $this|DocumentEntity[]
-     * @throws CompositorException
-     */
-    public function addToSet(DocumentEntity $document, $resetState = true)
-    {
-        if ($resetState) {
-            $this->solidState = false;
-        }
-
-        if (empty($this->findOne($document))) {
-            $this->documents[] = $document->embed($this);
-        }
-
-        if ($this->solidState) {
-            $this->changedDirectly = true;
-
-            return $this;
-        }
-
-        if (!empty($this->atomics) && !isset($this->atomics['$addToSet'])) {
-            throw new CompositorException(
-                "Unable to apply multiple atomic operation to composition."
-            );
-        }
-
-        $this->atomics['$addToSet'][] = $document;
-
-        return $this;
     }
 
     /**

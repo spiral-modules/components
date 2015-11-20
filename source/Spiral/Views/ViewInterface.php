@@ -17,13 +17,9 @@ interface ViewInterface
     /**
      * Render view source using internal logic.
      *
+     * @param array $context
      * @return string
      * @throws RenderException
      */
-    public function render();
-
-    /**
-     * @return string
-     */
-    public function __toString();
+    public function render(array $context = []);
 }

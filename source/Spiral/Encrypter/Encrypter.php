@@ -9,23 +9,14 @@ namespace Spiral\Encrypter;
 
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\Core\Container\SingletonInterface;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
 
 /**
  * Default implementation of spiral encrypter.
  */
-class Encrypter extends Component implements
-    EncrypterInterface,
-    InjectableInterface,
-    SingletonInterface
+class Encrypter extends Component implements EncrypterInterface, InjectableInterface
 {
-    /**
-     * Declares to Spiral IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
     /**
      * Injection is dedicated to outer class since Encrypter is pretty simple.
      */

@@ -32,6 +32,8 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
 
     /**
      * New File Manager.
+     *
+     * @todo Potentially can be depended on Symfony Filesystem.
      */
     public function __construct()
     {
@@ -64,7 +66,6 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         }
 
         foreach (array_reverse($directoryChain) as $directory) {
-            //Creatin
             if (!mkdir($baseDirectory = $baseDirectory . '/' . $directory)) {
                 return false;
             }

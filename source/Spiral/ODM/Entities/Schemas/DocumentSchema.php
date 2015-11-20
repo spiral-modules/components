@@ -16,6 +16,7 @@ use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\IsolatedDocument;
 use Spiral\ODM\ODM;
 
 /**
@@ -79,7 +80,7 @@ class DocumentSchema extends ReflectionEntity
      */
     public function isEmbeddable()
     {
-        return !$this->isSubclassOf(Document::class);
+        return !$this->isSubclassOf(IsolatedDocument::class);
     }
 
     /**

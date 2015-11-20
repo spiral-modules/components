@@ -16,6 +16,7 @@ use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\IsolatedDocument;
 use Spiral\ODM\ODM;
 use Spiral\Tokenizer\LocatorInterface;
 
@@ -104,7 +105,11 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if ($class == DocumentEntity::class || $class == Document::class) {
+        if (
+            $class == DocumentEntity::class
+            || $class == IsolatedDocument::class
+            || $class == Document::class
+        ) {
             //No need to remember schema for abstract Document
             return new DocumentSchema($this, DocumentEntity::class);
         }
@@ -152,9 +157,9 @@ class SchemaBuilder extends Component
 
             foreach ($indexes as $index) {
                 $options = [];
-                if (isset($index[Document::INDEX_OPTIONS])) {
-                    $options = $index[Document::INDEX_OPTIONS];
-                    unset($index[Document::INDEX_OPTIONS]);
+                if (isset($index[DocumentEntity::INDEX_OPTIONS])) {
+                    $options = $index[DocumentEntity::INDEX_OPTIONS];
+                    unset($index[DocumentEntity::INDEX_OPTIONS]);
                 }
 
                 $odmCollection->createIndex($index, $options);
@@ -240,7 +245,11 @@ class SchemaBuilder extends Component
     protected function locateDocuments(LocatorInterface $locator)
     {
         foreach ($locator->getClasses(DocumentEntity::class) as $class => $definition) {
-            if ($class == DocumentEntity::class || $class == Document::class) {
+            if (
+                $class == DocumentEntity::class
+                || $class == IsolatedDocument::class
+                || $class == Document::class
+            ) {
                 continue;
             }
 

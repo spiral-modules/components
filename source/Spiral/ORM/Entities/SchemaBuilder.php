@@ -20,7 +20,6 @@ use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
 use Spiral\Tokenizer\LocatorInterface;
-use Zend\Code\Reflection\ClassReflection;
 
 /**
  * Schema builder responsible for static analysis of existed ORM Records, their schemas,

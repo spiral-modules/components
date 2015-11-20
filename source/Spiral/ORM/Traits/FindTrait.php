@@ -76,7 +76,6 @@ trait FindTrait
      * @param ORM $orm ORM component, global container will be called if not instance provided.
      * @return RecordSource
      * @throws ORMException
-     * @event selector(Selector $selector)
      */
     public static function source(ORM $orm = null)
     {

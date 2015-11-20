@@ -7,6 +7,7 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\Core\Component;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\IdentifiedInterface;
@@ -23,7 +24,7 @@ use Spiral\ORM\RelationInterface;
  *
  * This abstract implement built to work with ORM Record classes.
  */
-abstract class Relation implements
+abstract class Relation extends Component implements
     RelationInterface,
     \Countable,
     \IteratorAggregate,

@@ -10,6 +10,7 @@ namespace Spiral\ODM\Traits;
 
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\Collection;
+use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
 
@@ -27,7 +28,7 @@ trait FindTrait
      */
     public static function find(array $query = [])
     {
-        return static::odmCollection()->query($query);
+        return static::source()->query($query);
     }
 
     /**
@@ -57,18 +58,16 @@ trait FindTrait
      *
      * @param mixed $mongoID   Valid MongoId, string value must be automatically converted to
      *                         MongoId object.
-     * @param bool  $keepChain Only same class or child must be returned, parent document must be
-     *                         ignored.
      * @return Document|null
      * @throws ODMException
      */
-    public static function findByPK($mongoID, $keepChain = true)
+    public static function findByPK($mongoID)
     {
         if (!$mongoID = ODM::mongoID($mongoID)) {
             return null;
         }
 
-        return static::findOne(['_id' => $mongoID], [], $keepChain);
+        return static::source()->findOne(['_id' => $mongoID]);
     }
 
     /**
@@ -76,20 +75,16 @@ trait FindTrait
      *
      * @see   Component::staticContainer()
      * @param ODM $odm ODM component, global container will be called if not instance provided.
-     * @return Collection
+     * @return DocumentSource|Collection
      * @throws ODMException
-     * @event collection(Collection $collection)
      */
-    public static function odmCollection(ODM $odm = null)
+    public static function source(ODM $odm = null)
     {
-        //Ensure traits
-        static::initialize();
-
         if (empty($odm)) {
             //Using global container as fallback
             $odm = self::staticContainer()->get(ODM::class);
         }
 
-        return self::events()->fire('collection', $odm->source(static::class));
+        return $odm->source(static::class);
     }
 }

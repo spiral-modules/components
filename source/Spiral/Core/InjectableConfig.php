@@ -11,6 +11,10 @@ use Spiral\Core\Exceptions\ConfigException;
 
 /**
  * Generic implementation of array based configuration.
+ *
+ * Attention! Config has to be serialiable and be depdended ONLY on enviroment or runtime
+ * modifications/requests. No custom logic is allowed to initiate config, in other case config cache
+ * will be invalid.
  */
 class InjectableConfig extends Component implements ConfigInterface, \ArrayAccess, \IteratorAggregate
 {

@@ -10,21 +10,14 @@ namespace Spiral\Debug\Configs;
 use Spiral\Core\InjectableConfig;
 
 /**
- * Debug component configuration.
+ * Debug component configuration. Must only contain array of log handlers for monolog channels.
  */
 class DebuggerConfig extends InjectableConfig
 {
     /**
      * Configuration section.
      */
-    const CONFIG = 'debug';
-
-    /**
-     * @var array
-     */
-    protected $config = [
-        'logHandlers' => []
-    ];
+    const CONFIG = 'monolog';
 
     /**
      * @param string $channel
@@ -32,7 +25,7 @@ class DebuggerConfig extends InjectableConfig
      */
     public function hasHandlers($channel)
     {
-        return isset($this->config['logHandlers'][$channel]);
+        return isset($this->config[$channel]);
     }
 
     /**
@@ -41,6 +34,6 @@ class DebuggerConfig extends InjectableConfig
      */
     public function logHandlers($channel)
     {
-        return $this->config['logHandlers'][$channel];
+        return $this->config[$channel];
     }
 }

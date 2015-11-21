@@ -11,9 +11,9 @@ use Monolog\Logger;
 use Spiral\Core\Container\SingletonInterface;
 
 /**
- * DebugLogger used as global system logger to handle errors, debug messages and etc.
+ * SharedLogger used as global system logger to handle errors, debug messages and etc.
  */
-class DebugLogger extends Logger implements SingletonInterface
+class SharedLogger extends Logger implements SingletonInterface
 {
     /**
      * This logger is global for whole application.

@@ -76,6 +76,13 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     private $errors = [];
 
     /**
+     * Errors provided from outside.
+     *
+     * @var array
+     */
+    private $registeredErrors = [];
+
+    /**
      * If rule has no definer error message this text will be used instead. Localizable.
      *
      * @invisible
@@ -161,6 +168,26 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
+    public function registerError($field, $error)
+    {
+        $this->registeredErrors[$field] = $error;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flushRegistered()
+    {
+        $this->registeredErrors = [];
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasErrors()
     {
         return !$this->isValid();
@@ -173,7 +200,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     {
         $this->validate();
 
-        return $this->errors;
+        return $this->registeredErrors + $this->errors;
     }
 
     /**

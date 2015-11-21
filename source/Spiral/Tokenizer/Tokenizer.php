@@ -11,6 +11,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
@@ -25,7 +26,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Required traits.
      */
-    use LoggerTrait;
+    use LoggerTrait, BenchmarkTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.

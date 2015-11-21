@@ -19,7 +19,7 @@ use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * DocumentEntity with added ActiveRecord methods without direct find methods for collection.
+ * DocumentEntity with added ActiveRecord methods without direct find/source methods for collection.
  *
  * Document also provides an ability to specify aggregations using it's schema:
  *

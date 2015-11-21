@@ -406,7 +406,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 $this->isolationLevel($isolationLevel);
             }
 
-            $this->logger()->info('Starting transaction.');
+            $this->logger()->info('Begin transaction');
 
             return $this->getPDO()->beginTransaction();
         }
@@ -425,7 +425,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     {
         $this->transactionLevel--;
         if ($this->transactionLevel == 0) {
-            $this->logger()->info('Committing transaction.');
+            $this->logger()->info('Commit transaction');
 
             return $this->getPDO()->commit();
         }
@@ -445,7 +445,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         $this->transactionLevel--;
 
         if ($this->transactionLevel == 0) {
-            $this->logger()->info('Rolling black transaction.');
+            $this->logger()->info('Rollback transaction');
 
             return $this->getPDO()->rollBack();
         }

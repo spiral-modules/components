@@ -7,133 +7,86 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Database\Exceptions\QueryException;
-use Spiral\Models\ActiveEntityInterface;
-use Spiral\Models\Events\EntityEvent;
-use Spiral\ORM\Exceptions\RecordException;
-use Spiral\ORM\Traits\FindTrait;
+use Spiral\ORM\Entities\RecordSource;
+use Spiral\ORM\Exceptions\ORMException;
 
 /**
- * RecordEntity with added active record functionality.
+ * RecordEntity with added active record functionality and static finders.
  */
-class Record extends RecordEntity implements ActiveEntityInterface
+class Record extends IsolatedRecord
 {
     /**
-     * Find methods.
-     */
-    use FindTrait;
-
-    /**
-     * Indication that save methods must be validated by default, can be altered by calling save
-     * method with user arguments.
-     */
-    const VALIDATE_SAVE = true;
-
-    /**
-     * {@inheritdoc}
+     * Find multiple records based on provided query.
      *
-     * Create or update record data in database. Record will validate all EMBEDDED and loaded
-     * relations.
+     * Example:
+     * User::find(['status' => 'active'], ['profile']);
      *
-     * @see   sourceTable()
-     * @see   updateChriteria()
-     * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
-     *                             disable validation before saving.
-     * @return bool
-     * @throws RecordException
-     * @throws QueryException
-     * @event saving()
-     * @event saved()
-     * @event updating()
-     * @event updated()
+     * @param array|\Closure $where Selection WHERE statement.
+     * @param array          $load  Array or relations to be pre-loaded.
+     * @return RecordSource
      */
-    public function save($validate = null)
+    public static function find($where = [], array $load = [])
     {
-        if (is_null($validate)) {
-            //Using default model behaviour
-            $validate = static::VALIDATE_SAVE;
-        }
-
-        if ($validate && !$this->isValid()) {
-            return false;
-        }
-
-        if (!$this->isLoaded()) {
-            $this->dispatch('saving', new EntityEvent($this));
-
-            //Primary key field name (if any)
-            $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
-
-            //We will need to support records with multiple primary keys in future
-            unset($this->fields[$primaryKey]);
-
-            //Creating
-            $lastID = $this->sourceTable()->insert($this->fields = $this->serializeData());
-            if (!empty($primaryKey)) {
-                //Updating record primary key
-                $this->fields[$primaryKey] = $lastID;
-            }
-
-            $this->loadedState(true)->dispatch('saved', new EntityEvent($this));
-
-            //Saving record to entity cache if we have space for that
-            $this->orm->rememberEntity($this, false);
-
-        } elseif ($this->isSolid() || $this->hasUpdates()) {
-            $this->dispatch('updating', new EntityEvent($this));
-
-            //Updating changed/all field based on model criteria (in usual case primaryKey)
-            $this->sourceTable()->update(
-                $this->compileUpdates(),
-                $this->stateCriteria()
-            )->run();
-
-            $this->dispatch('updated', new EntityEvent($this));
-        }
-
-        $this->flushUpdates();
-        $this->saveRelations($validate);
-
-        return true;
+        return static::source()->load($load)->where($where);
     }
 
     /**
-     * {@inheritdoc}
+     * Fetch one record based on provided query or return null. Use second argument to specify
+     * relations to be loaded.
      *
-     * @event deleting()
-     * @event deleted()
+     * Example:
+     * User::findOne(['name' => 'Wolfy-J'], ['profile'], ['id' => 'DESC']);
+     *
+     * @param array|\Closure $where   Selection WHERE statement.
+     * @param array          $load    Array or relations to be pre-loaded.
+     * @param array          $orderBy Sort by conditions.
+     * @return RecordEntity|null
      */
-    public function delete()
+    public static function findOne($where = [], array $load = [], array $orderBy = [])
     {
-        $this->dispatch('deleting', new EntityEvent($this));
-
-        if ($this->isLoaded()) {
-            $this->sourceTable()->delete($this->stateCriteria())->run();
+        $source = static::find($where, $load);
+        foreach ($orderBy as $column => $direction) {
+            $source->orderBy($column, $direction);
         }
 
-        //We don't really need to delete embedded or loaded relations,
-        //we have foreign keys for that
-
-        $this->fields = $this->ormSchema()[ORM::M_COLUMNS];
-        $this->loadedState(self::DELETED)->dispatch('deleted', new EntityEvent($this));
+        return $source->findOne();
     }
 
     /**
-     * Save embedded relations.
+     * Find record using it's primary key. Relation data can be preloaded with found record.
      *
-     * @param bool $validate
+     * Example:
+     * User::findByID(1, ['profile']);
+     *
+     * @param mixed $primaryKey Primary key.
+     * @param array $load       Array or relations to be pre-loaded.
+     * @return RecordEntity|null
      */
-    private function saveRelations($validate)
+    public static function findByPK($primaryKey, array $load = [])
     {
-        foreach ($this->relations as $name => $relation) {
-            if (!$relation instanceof RelationInterface) {
-                //Was never constructed
-                continue;
-            }
+        return static::source()->load($load)->findByPK($primaryKey);
+    }
 
-            if ($this->isEmbedded($name) && !$relation->saveAssociation($validate)) {
-                throw new RecordException("Unable to save relation '{$name}'.");
-            }
+    /**
+     * Instance of ORM Selector associated with specific document.
+     *
+     * @see   Component::staticContainer()
+     * @param ORM $orm ORM component, global container will be called if not instance provided.
+     * @return RecordSource
+     * @throws ORMException
+     */
+    public static function source(ORM $orm = null)
+    {
+        /**
+         * Using global container as fallback.
+         *
+         * @var ORM $orm
+         */
+        if (empty($orm)) {
+            //Using global container as fallback
+            $orm = self::staticContainer()->get(ORM::class);
         }
+
+        return $orm->source(static::class);
     }
 }

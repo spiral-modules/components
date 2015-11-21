@@ -39,6 +39,22 @@ interface ValidatorInterface
     public function setData($data);
 
     /**
+     * Register outer validation error.
+     *
+     * @param string $field
+     * @param string $error
+     * @return self
+     */
+    public function registerError($field, $error);
+
+    /**
+     * Flush all registered errors.
+     *
+     * @return self
+     */
+    public function flushRegistered();
+
+    /**
      * Check if context data valid accordingly to provided rules.
      *
      * @return bool

@@ -33,7 +33,7 @@ trait LoggerTrait
      *
      * @param LoggerInterface $logger
      */
-    public static function sharedLogger(LoggerInterface $logger)
+    public static function shareLogger(LoggerInterface $logger)
     {
         self::$loggers[static::class] = $logger;
     }

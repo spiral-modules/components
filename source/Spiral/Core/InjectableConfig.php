@@ -8,6 +8,7 @@
 namespace Spiral\Core;
 
 use Spiral\Core\Exceptions\ConfigException;
+use Spiral\Validation\ValidatorInterface;
 
 /**
  * Generic implementation of array based configuration.
@@ -44,6 +45,14 @@ class InjectableConfig extends Component implements ConfigInterface, \ArrayAcces
     public function toArray()
     {
         return $this->config;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validate(ValidatorInterface $validator)
+    {
+        return $validator;
     }
 
     /**

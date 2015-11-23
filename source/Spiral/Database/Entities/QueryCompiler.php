@@ -521,7 +521,11 @@ class QueryCompiler extends Component
             return '';
         }
 
-        return $prefix . ' ' . $expression . $postfix;
+        if ($prefix != "\n") {
+            $prefix .= ' ';
+        }
+
+        return $prefix . $expression . $postfix;
     }
 
     /**

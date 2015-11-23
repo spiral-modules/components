@@ -65,9 +65,8 @@ class DocumentSource extends Component implements SourceInterface, \Countable
         }
 
         $this->class = $class;
-
         $this->odm = $this->saturate($odm, ODM::class);
-        $this->selector = $this->odm->selector($this->class);
+        $this->setSelector($this->odm->selector($this->class));
     }
 
     /**
@@ -130,6 +129,14 @@ class DocumentSource extends Component implements SourceInterface, \Countable
     public function count()
     {
         return $this->find()->count();
+    }
+
+    /**
+     * @param DocumentSelector $selector
+     */
+    protected function setSelector(DocumentSelector $selector)
+    {
+        $this->selector = $selector;
     }
 
     /**

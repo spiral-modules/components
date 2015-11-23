@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Debug\Dumper\Style;
+use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
@@ -22,7 +23,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     /**
      * Static method instance(). Used in dump() function.
      */
-    use LoggerTrait;
+    use LoggerTrait, BenchmarkTrait;
 
     /**
      * Declaring to IoC that class is singleton.
@@ -96,25 +97,32 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
             return null;
         }
 
-        switch ($output) {
-            case self::OUTPUT_ECHO:
-                echo $this->style->mountContainer($this->dumpValue($value, '', 0));
-                break;
+        //Dumping is pretty slow operation, let's record it so we can exclude dump time from application
+        //timeline
+        $benchmark = $this->benchmark('dump');
+        try {
+            switch ($output) {
+                case self::OUTPUT_ECHO:
+                    echo $this->style->mountContainer($this->dumpValue($value, '', 0));
+                    break;
 
-            case self::OUTPUT_RETURN:
-                return $this->style->mountContainer($this->dumpValue($value, '', 0));
-                break;
+                case self::OUTPUT_RETURN:
+                    return $this->style->mountContainer($this->dumpValue($value, '', 0));
+                    break;
 
-            case self::OUTPUT_LOG:
-                $this->logger()->debug(print_r($value, true));
-                break;
+                case self::OUTPUT_LOG:
+                    $this->logger()->debug(print_r($value, true));
+                    break;
 
-            case self::OUTPUT_LOG_NICE:
-                $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
-                break;
+                case self::OUTPUT_LOG_NICE:
+                    $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
+                    break;
+            }
+
+            return null;
+        } finally {
+            $this->benchmark($benchmark);
         }
-
-        return null;
     }
 
     /**

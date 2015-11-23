@@ -40,10 +40,13 @@ class InvocationLocator extends AbstractLocator implements InvocationsInterface
     {
         $invocations = [];
 
+        $signature = strtolower(trim($signature, '\\'));
         foreach ($this->availableReflections() as $reflection) {
-
             foreach ($reflection->getInvocations() as $invocation) {
-                if (!empty($signature) && $invocation->getName() != $signature) {
+                if (
+                    !empty($signature)
+                    && strtolower(trim($invocation->getName(), '\\')) != $signature
+                ) {
                     continue;
                 }
 
@@ -66,9 +69,7 @@ class InvocationLocator extends AbstractLocator implements InvocationsInterface
         \ReflectionFunctionAbstract $function
     ) {
         if ($function instanceof \ReflectionFunction) {
-            if ($invocation->isMethod()) {
-                return false;
-            }
+            return !$invocation->isMethod();
         }
 
         if (empty($class = $this->classReflection($invocation->getClass()))) {

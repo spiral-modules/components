@@ -132,7 +132,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param array  $directories
      * @param array  $exclude
      * @param Finder $finder
-     * @return ClassClasses
+     * @return ClassLocator
      */
     public function classLocator(
         array $directories = [],
@@ -150,7 +150,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         }
 
         //Configuring finder
-        return new ClassClasses(
+        return new ClassLocator(
             $this,
             $finder->files()->in($directories)->exclude($exclude)->name('*.php')
         );
@@ -162,7 +162,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param array  $directories
      * @param array  $exclude
      * @param Finder $finder
-     * @return ClassClasses
+     * @return ClassLocator
      */
     public function invocationLocator(
         array $directories = [],

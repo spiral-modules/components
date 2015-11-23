@@ -61,8 +61,6 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
      */
     protected function availableReflections()
     {
-        $reflections = [];
-
         /**
          * @var SplFileInfo $file
          */
@@ -79,10 +77,8 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
                 continue;
             }
 
-            $reflections[] = $reflection;
+            yield $reflection;
         }
-
-        return $reflections;
     }
 
     /**

@@ -86,7 +86,7 @@ class RecordSource extends Component implements SourceInterface, \Countable
      * Find record by it's primary key.
      *
      * @see findOne()
-     * @param string|\MongoId $id Primary key value.
+     * @param string|int $id Primary key value.
      * @return RecordEntity|null
      */
     public function findByPK($id)

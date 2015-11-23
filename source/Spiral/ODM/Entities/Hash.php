@@ -7,6 +7,8 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Interop\Container\ContainerInterface;
+use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
@@ -19,11 +21,7 @@ use Spiral\ODM\ODM;
 /**
  * Associative array of documents.
  */
-class Hash extends Component implements
-    CompositableInterface,
-    \IteratorAggregate,
-    \Countable,
-    \ArrayAccess
+class Hash extends Component implements CompositableInterface, \IteratorAggregate, \Countable, \ArrayAccess
 {
     /**
      * Optional arguments.
@@ -242,14 +240,7 @@ class Hash extends Component implements
      */
     public function serializeData()
     {
-        $result = [];
-        foreach ($this->documents as $document) {
-            $result[] = $document instanceof CompositableInterface
-                ? $document->serializeData()
-                : $document;
-        }
-
-        return $result;
+        return $this->serializeDocuments($this->documents);
     }
 
     /**
@@ -589,6 +580,70 @@ class Hash extends Component implements
     }
 
     /**
+     * @param string         $key
+     * @param DocumentEntity $document
+     * @param bool           $resetState Set to true to reset compositor solid state.
+     * @return $this|DocumentEntity[]
+     * @throws CompositorException
+     */
+    public function set($key, DocumentEntity $document, $resetState = true)
+    {
+        if ($resetState) {
+            $this->solidState = false;
+        }
+
+        $this->documents[$key] = $document->embed($this);
+
+        if ($this->solidState) {
+            $this->changedDirectly = true;
+
+            return $this;
+        }
+
+        if (!empty($this->atomics) && !isset($this->atomics['$set'])) {
+            throw new CompositorException(
+                "Unable to apply multiple atomic operation to one Compositor."
+            );
+        }
+
+        $this->atomics['$set'][$key] = $document;
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $key        Remove document associated with given key.
+     * @param bool   $resetState Set to true to reset compositor solid state.
+     * @return $this|DocumentEntity[]
+     * @throws CompositorException
+     */
+    public function remove($key, $resetState = true)
+    {
+        if ($resetState) {
+            $this->solidState = false;
+        }
+
+        unset($this->documents[$key]);
+
+        if ($this->solidState) {
+            $this->changedDirectly = true;
+
+            return $this;
+        }
+
+        if (!empty($this->atomics) && !isset($this->atomics['$unset'])) {
+            throw new CompositorException(
+                "Unable to apply multiple atomic operation to composition."
+            );
+        }
+
+        $this->atomics['$unset'][] = $key;
+
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function isValid()
@@ -684,7 +739,7 @@ class Hash extends Component implements
     private function getDocument($offset)
     {
         /**
-         * @var array|Document $document
+         * @var array|DocumentEntity $document
          */
         $document = $this->documents[$offset];
         if ($document instanceof CompositableInterface) {
@@ -704,11 +759,11 @@ class Hash extends Component implements
     private function serializeDocuments(array $documents)
     {
         $result = [];
-        foreach ($documents as $document) {
+        foreach ($documents as $key => $document) {
             if ($document instanceof CompositableInterface) {
                 $document = $document->serializeData();
             }
-            $result[] = $document;
+            $result[$key] = $document;
         }
 
         return $result;

@@ -20,7 +20,7 @@ use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
-use Spiral\Tokenizer\LocatorInterface;
+use Spiral\Tokenizer\ClassesInterface;
 
 /**
  * Schema builder responsible for static analysis of existed ORM Records, their schemas,
@@ -52,9 +52,9 @@ class SchemaBuilder extends Component
     /**
      * @param ORMConfig        $config
      * @param ORM              $orm
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      */
-    public function __construct(ORMConfig $config, ORM $orm, LocatorInterface $locator)
+    public function __construct(ORMConfig $config, ORM $orm, ClassesInterface $locator)
     {
         $this->config = $config;
         $this->orm = $orm;
@@ -309,11 +309,11 @@ class SchemaBuilder extends Component
     /**
      * Locate every available Record class.
      *
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return $this
      * @throws SchemaException
      */
-    protected function locateRecords(LocatorInterface $locator)
+    protected function locateRecords(ClassesInterface $locator)
     {
         //Table names associated with records
         $tables = [];
@@ -354,10 +354,10 @@ class SchemaBuilder extends Component
     /**
      * Locate ORM entities sources.
      *
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return $this
      */
-    protected function locateSources(LocatorInterface $locator)
+    protected function locateSources(ClassesInterface $locator)
     {
         foreach ($locator->getClasses(RecordSource::class) as $class => $definition) {
             $reflection = new \ReflectionClass($class);

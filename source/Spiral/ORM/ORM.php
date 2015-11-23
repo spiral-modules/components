@@ -20,7 +20,7 @@ use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\ORMException;
-use Spiral\Tokenizer\LocatorInterface;
+use Spiral\Tokenizer\ClassesInterface;
 
 /**
  * ORM component used to manage state of cached Record's schema, record creation and schema
@@ -272,10 +272,10 @@ class ORM extends EntityCache implements SingletonInterface
      * SchemaBuilder.
      *
      * @param SchemaBuilder    $builder User specified schema builder.
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null, LocatorInterface $locator = null)
+    public function updateSchema(SchemaBuilder $builder = null, ClassesInterface $locator = null)
     {
         if (empty($builder)) {
             $builder = $this->schemaBuilder($locator);
@@ -299,10 +299,10 @@ class ORM extends EntityCache implements SingletonInterface
     /**
      * Get instance of ORM SchemaBuilder.
      *
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return SchemaBuilder
      */
-    public function schemaBuilder(LocatorInterface $locator = null)
+    public function schemaBuilder(ClassesInterface $locator = null)
     {
         return $this->constructor->construct(SchemaBuilder::class, [
             'config'  => $this->config,

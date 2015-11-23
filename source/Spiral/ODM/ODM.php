@@ -21,7 +21,7 @@ use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\Tokenizer\LocatorInterface;
+use Spiral\Tokenizer\ClassesInterface;
 
 /**
  * ODM component used to manage state of cached Document's schema, document creation and schema
@@ -80,6 +80,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     const CMP_CLASS = 1;
     const CMP_ONE   = 0x111;
     const CMP_MANY  = 0x222;
+    const CMP_HASH  = 0x333;
 
     /**
      * @var ODMConfig
@@ -299,10 +300,10 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      * Update ODM documents schema and return instance of SchemaBuilder.
      *
      * @param SchemaBuilder    $builder User specified schema builder.
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null, LocatorInterface $locator = null)
+    public function updateSchema(SchemaBuilder $builder = null, ClassesInterface $locator = null)
     {
         if (empty($builder)) {
             $builder = $this->schemaBuilder($locator);
@@ -326,10 +327,10 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     /**
      * Get instance of ODM SchemaBuilder.
      *
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return SchemaBuilder
      */
-    public function schemaBuilder(LocatorInterface $locator = null)
+    public function schemaBuilder(ClassesInterface $locator = null)
     {
         return $this->constructor->construct(SchemaBuilder::class, [
             'odm'     => $this,

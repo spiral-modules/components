@@ -5,12 +5,13 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ODM\Exceptions;
 
 /**
- * Errors inside ODM document compositor.
+ * Errors inside ODM hash.
  */
-class CompositorException extends HashException
+class HashException extends AccessorException
 {
 
 }

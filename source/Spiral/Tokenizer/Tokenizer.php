@@ -132,7 +132,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param array  $directories
      * @param array  $exclude
      * @param Finder $finder
-     * @return ClassLocator
+     * @return ClassClasses
      */
     public function classLocator(
         array $directories = [],
@@ -150,7 +150,37 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         }
 
         //Configuring finder
-        return new ClassLocator(
+        return new ClassClasses(
+            $this,
+            $finder->files()->in($directories)->exclude($exclude)->name('*.php')
+        );
+    }
+
+    /**
+     * Get pre-configured invocation locator.
+     *
+     * @param array  $directories
+     * @param array  $exclude
+     * @param Finder $finder
+     * @return ClassClasses
+     */
+    public function invocationLocator(
+        array $directories = [],
+        array $exclude = [],
+        Finder $finder = null
+    ) {
+        $finder = !empty($finder) ?: new Finder();
+
+        if (empty($directories)) {
+            $directories = $this->config->getDirectories();
+        }
+
+        if (empty($exclude)) {
+            $exclude = $this->config->getExcludes();
+        }
+
+        //Configuring finder
+        return new InvocationLocator(
             $this,
             $finder->files()->in($directories)->exclude($exclude)->name('*.php')
         );
@@ -161,6 +191,10 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $this->classLocator();
+        if ($class->isSubclassOf(ClassesInterface::class)) {
+            return $this->classLocator();
+        } else {
+            return $this->invocationLocator();
+        }
     }
 }

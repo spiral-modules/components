@@ -12,7 +12,9 @@ use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
+use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Compositor;
+use Spiral\ODM\Entities\Hash;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
@@ -41,6 +43,18 @@ class DocumentSchema extends ReflectionEntity
      * @var SchemaBuilder
      */
     protected $builder = null;
+
+    /**
+     * Classes to be used for compositions.
+     *
+     * @var array
+     */
+    protected $compositors = [
+        //No need to specify any class, document entity will use ODM to resolve needed entity
+        ODM::CMP_ONE  => ODM::CMP_ONE,
+        ODM::CMP_MANY => Compositor::class,
+        ODM::CMP_HASH => Hash::class
+    ];
 
     /**
      * @param SchemaBuilder $builder Parent ODM schema (all other documents).
@@ -139,7 +153,7 @@ class DocumentSchema extends ReflectionEntity
                 continue;
             }
 
-            if (is_array($type) && empty($type[0])) {
+            if (is_array($type) && empty($type[0]) && empty($type[DocumentEntity::HASH])) {
                 throw new SchemaException("Type definition of {$this}.{$field} is invalid.");
             }
 
@@ -182,7 +196,7 @@ class DocumentSchema extends ReflectionEntity
                 }
             }
 
-            if (isset($accessors[$field])) {
+            if (isset($accessors[$field]) && empty($this->getCompositions()[$field])) {
                 $default = $this->accessorDefaults($accessors[$field], $type, $default);
             }
 
@@ -230,6 +244,19 @@ class DocumentSchema extends ReflectionEntity
                 if ($this->builder->hasDocument($type)) {
                     $compositions[$field] = [
                         'type'  => ODM::CMP_ONE,
+                        'class' => $type
+                    ];
+                }
+
+                continue;
+            }
+
+            if (isset($type[DocumentEntity::HASH])) {
+                //Apparently hash!
+                $type = $type[DocumentEntity::HASH];
+                if ($this->builder->hasDocument($type)) {
+                    $compositions[$field] = [
+                        'type'  => ODM::CMP_HASH,
                         'class' => $type
                     ];
                 }
@@ -316,6 +343,7 @@ class DocumentSchema extends ReflectionEntity
 
             if (
                 is_array($type)
+                && isset($type[0])
                 && is_scalar($type[0])
                 && $filter = $this->builder->getMutators('array::' . $type[0])
             ) {
@@ -351,7 +379,7 @@ class DocumentSchema extends ReflectionEntity
         //Every composition is counted as field accessor :)
         foreach ($this->getCompositions() as $field => $composition) {
             $mutators[self::MUTATOR_ACCESSOR][$field] = [
-                $composition['type'] == ODM::CMP_MANY ? Compositor::class : ODM::CMP_ONE,
+                $this->compositors[$composition['type']],
                 $composition['class']
             ];
         }
@@ -556,10 +584,9 @@ class DocumentSchema extends ReflectionEntity
      */
     private function isAggregation($type)
     {
-        return is_array($type) && (
-            array_key_exists(Document::MANY, $type)
-            || array_key_exists(Document::ONE, $type)
-        );
+        return is_array($type)
+        && !isset($type[DocumentEntity::HASH])
+        && (array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
     }
 
     /**
@@ -614,10 +641,19 @@ class DocumentSchema extends ReflectionEntity
         if ($composition['type'] == ODM::CMP_MANY) {
             if (!empty($default) && $default !== []) {
                 throw new SchemaException(
-                    "Default value of {$this}.{$field} is not compatible with document composition."
+                    "Default value of {$this}.{$field} is not compatible with document composition (array)."
                 );
             }
 
+            return [];
+        }
+
+        if ($composition['type'] == ODM::CMP_HASH) {
+            if (!empty($default)) {
+                return $default;
+            }
+
+            //Default type is empty object
             return [];
         }
 

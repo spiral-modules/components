@@ -13,7 +13,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
-use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -24,7 +23,11 @@ use Spiral\ODM\ODM;
  * Compositor is responsible for managing set (array) of classes nested to parent DocumentEntity.
  * Compositor can manage Documents and all it's children.
  */
-class Compositor extends Hash
+class Compositor extends Component implements
+    CompositableInterface,
+    \IteratorAggregate,
+    \Countable,
+    \ArrayAccess
 {
     /**
      * Optional arguments.
@@ -138,7 +141,7 @@ class Compositor extends Hash
     /**
      * Get composition parent.
      *
-     * @return Document|null
+     * @return DocumentEntity|null
      */
     public function getParent()
     {
@@ -470,7 +473,7 @@ class Compositor extends Hash
     /**
      * Return all composited documents in array form.
      *
-     * @return Document[]
+     * @return DocumentEntity[]
      */
     public function all()
     {
@@ -485,7 +488,7 @@ class Compositor extends Hash
     /**
      * {@inheritdoc}
      *
-     * @return Document[]
+     * @return DocumentEntity[]
      */
     public function getIterator()
     {
@@ -502,7 +505,7 @@ class Compositor extends Hash
      *
      * @param array  $fields
      * @param string $class
-     * @return Document
+     * @return DocumentEntity
      * @throws CompositorException
      * @throws DefinitionException
      * @throws ODMException
@@ -801,7 +804,7 @@ class Compositor extends Hash
     private function getDocument($offset)
     {
         /**
-         * @var array|Document $document
+         * @var array|DocumentEntity $document
          */
         $document = $this->documents[$offset];
         if ($document instanceof CompositableInterface) {

@@ -18,7 +18,7 @@ use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\IsolatedDocument;
 use Spiral\ODM\ODM;
-use Spiral\Tokenizer\LocatorInterface;
+use Spiral\Tokenizer\ClassesInterface;
 
 /**
  * Schema builder responsible for static analysis of existed Documents, their schemas, validations,
@@ -50,9 +50,9 @@ class SchemaBuilder extends Component
     /**
      * @param ODM              $odm
      * @param ODMConfig        $config
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      */
-    public function __construct(ODM $odm, ODMConfig $config, LocatorInterface $locator)
+    public function __construct(ODM $odm, ODMConfig $config, ClassesInterface $locator)
     {
         $this->config = $config;
         $this->odm = $odm;
@@ -239,10 +239,10 @@ class SchemaBuilder extends Component
     /**
      * Locate every available Document class.
      *
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return $this
      */
-    protected function locateDocuments(LocatorInterface $locator)
+    protected function locateDocuments(ClassesInterface $locator)
     {
         foreach ($locator->getClasses(DocumentEntity::class) as $class => $definition) {
             if (
@@ -262,10 +262,10 @@ class SchemaBuilder extends Component
     /**
      * Locate ORM entities sources.
      *
-     * @param LocatorInterface $locator
+     * @param ClassesInterface $locator
      * @return $this
      */
-    protected function locateSources(LocatorInterface $locator)
+    protected function locateSources(ClassesInterface $locator)
     {
         foreach ($locator->getClasses(DocumentSource::class) as $class => $definition) {
             $reflection = new \ReflectionClass($class);

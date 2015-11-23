@@ -11,7 +11,7 @@ namespace Spiral\Tokenizer;
 /**
  * Class locator interface.
  */
-interface ClassesInterface
+interface ClassLocatorInterface
 {
     /**
      * Index all available files and generate list of found classes with their names and filenames.

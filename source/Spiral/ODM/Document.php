@@ -7,12 +7,18 @@
  */
 namespace Spiral\ODM;
 
-use Spiral\ODM\Entities\Collection;
+use Spiral\Models\AccessorInterface;
+use Spiral\Models\ActiveEntityInterface;
+use Spiral\Models\EntityInterface;
+use Spiral\Models\Events\EntityEvent;
+use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
+use Spiral\ODM\Exceptions\DefinitionException;
+use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
- * DocumentEntity with added ActiveRecord methods with direct find methods for collection.
+ * DocumentEntity with added ActiveRecord methods and ability to connect to associated source.
  *
  * Document also provides an ability to specify aggregations using it's schema:
  *
@@ -31,68 +37,236 @@ use Spiral\ODM\Exceptions\ODMException;
  *
  * @var array
  */
-abstract class Document extends IsolatedDocument
+class Document extends DocumentEntity implements ActiveEntityInterface
 {
     /**
-     * Find multiple documents based on provided query. Selection might return parent documents.
-     *
-     * @param mixed $query Fields and conditions to filter by.
-     * @return Collection
-     * @throws ODMException
+     * Indication that save methods must be validated by default, can be altered by calling save
+     * method with user arguments.
      */
-    public static function find(array $query = [])
-    {
-        return static::source()->query($query);
+    const VALIDATE_SAVE = true;
+
+    /**
+     * Collection name where document should be stored into.
+     *
+     * @var string
+     */
+    protected $collection = null;
+
+    /**
+     * Database name/id where document related collection located in.
+     *
+     * @var string|null
+     */
+    protected $database = null;
+
+    /**
+     * Set of indexes to be created for associated collection. Use self::INDEX_OPTIONS or "@options"
+     * for additional parameters.
+     *
+     * Example:
+     * protected $indexes = [
+     *      ['email' => 1, '@options' => ['unique' => true]],
+     *      ['name' => 1]
+     * ];
+     *
+     * @link http://php.net/manual/en/mongocollection.ensureindex.php
+     * @var array
+     */
+    protected $indexes = [];
+
+    /**
+     * @see Component::staticContainer()
+     * @param array           $fields
+     * @param EntityInterface $parent
+     * @param ODM             $odm
+     * @param array           $odmSchema
+     */
+    public function __construct(
+        $fields = [],
+        EntityInterface $parent = null,
+        ODM $odm = null,
+        $odmSchema = null
+    ) {
+        parent::__construct($fields, $parent, $odm, $odmSchema);
+
+        if ((!$this->isLoaded() && !$this->isEmbedded())) {
+            //Document is newly created instance
+            $this->solidState(true)->invalidate();
+        }
     }
 
     /**
-     * Find document using it's primary key.
+     * {@inheritdoc}
      *
-     * @param mixed $mongoID   Valid MongoId, string value must be automatically converted to
-     *                         MongoId object.
-     * @param bool  $keepChain Only same class or child must be returned, parent document must be
-     *                         ignored.
-     * @return Document|null
-     * @throws ODMException
+     * @return \MongoId|null
      */
-    public static function findByPK($mongoID, $keepChain = true)
+    public function primaryKey()
     {
-        if (!$mongoID = ODM::mongoID($mongoID)) {
-            return null;
+        return isset($this->fields['_id']) ? $this->fields['_id'] : null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isLoaded()
+    {
+        return (bool)$this->primaryKey();
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Create or update document data in database.
+     *
+     * @param bool|null $validate Overwrite default option declared in VALIDATE_SAVE to force or
+     *                            disable validation before saving.
+     * @throws DocumentException
+     * @event saving()
+     * @event saved()
+     * @event updating()
+     * @event updated()
+     */
+    public function save($validate = null)
+    {
+        $validate = !is_null($validate) ? $validate : static::VALIDATE_SAVE;
+
+        if ($validate && !$this->isValid()) {
+            //Using default model behaviour
+            return false;
         }
 
-        return static::findOne(['_id' => $mongoID], [], $keepChain);
-    }
-
-    /**
-     * Find one document based on provided query and sorting.
-     *
-     * @param array $query     Fields and conditions to filter by.
-     * @param array $sortBy    Sorting.
-     * @param bool  $keepChain Only same class or child must be returned, parent document must be
-     *                         ignored.
-     * @return Document|null
-     * @throws ODMException
-     */
-    public static function findOne(array $query = [], array $sortBy = [], $keepChain = true)
-    {
-        $document = static::find($query)->sortBy($sortBy)->findOne();
-
-        if ($keepChain && !$document instanceof static) {
-            //Parent document found
-            return null;
+        if ($this->isEmbedded()) {
+            throw new DocumentException(
+                "Embedded document '" . get_class($this) . "' can not be saved into collection."
+            );
         }
 
-        return $document;
+        //Associated collection
+        $collection = $this->mongoCollection();
+
+        if (!$this->isLoaded()) {
+            $this->dispatch('saving', new EntityEvent($this));
+            unset($this->fields['_id']);
+
+            //Create new document
+            $collection->insert($this->fields = $this->serializeData());
+
+            $this->dispatch('saved', new EntityEvent($this));
+        } elseif ($this->isSolid() || $this->hasUpdates()) {
+            $this->dispatch('updating', new EntityEvent($this));
+
+            //Update existed document
+            $collection->update(['_id' => $this->primaryKey()], $this->buildAtomics());
+
+            $this->dispatch('updated', new EntityEvent($this));
+        }
+
+        $this->flushUpdates();
+
+        return true;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @throws DocumentException
+     * @event deleting()
+     * @event deleted()
+     */
+    public function delete()
+    {
+        if ($this->isEmbedded()) {
+            throw new DocumentException(
+                "Embedded document '" . get_class($this) . "' can not be deleted from collection."
+            );
+        }
+
+        $this->dispatch('deleting', new EntityEvent($this));
+        if ($this->isLoaded()) {
+            $this->mongoCollection()->remove(['_id' => $this->primaryKey()]);
+        }
+
+        $this->fields = $this->odmSchema()[ODM::D_DEFAULTS];
+        $this->dispatch('deleted', new EntityEvent($this));
+    }
 
     /**
-     * Instance of ODM Collection associated with specific document.
+     * {@inheritdoc} See DataEntity class.
      *
-     * @see   Component::staticContainer()
+     * ODM: Get instance of Collection or Document associated with described aggregation.
+     *
+     * Example:
+     * $parentGroup = $user->group();
+     * echo $user->posts()->where(['published' => true])->count();
+     *
+     * @return mixed|AccessorInterface|DocumentSelector|Document[]|Document
+     * @throws DocumentException
+     */
+    public function __call($offset, array $arguments)
+    {
+        if (!isset($this->odmSchema()[ODM::D_AGGREGATIONS][$offset])) {
+            //Field getter/setter
+            return parent::__call($offset, $arguments);
+        }
+
+        return $this->aggregate($offset);
+    }
+
+    /**
+     * Get document aggregation.
+     *
+     * @param string $aggregation
+     * @return DocumentSelector|Document
+     */
+    public function aggregate($aggregation)
+    {
+        if (!isset($this->odmSchema()[ODM::D_AGGREGATIONS][$aggregation])) {
+            throw new DocumentException("Undefined aggregation '{$aggregation}'.");
+        }
+
+        $aggregation = $this->odmSchema()[ODM::D_AGGREGATIONS][$aggregation];
+
+        //Query preparations
+        $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
+
+        //Every aggregation works thought ODM collection
+        $selector = $this->odm->selector($aggregation[ODM::ARG_CLASS], $query);
+
+        //In future i might need separate class to represent aggregation
+        if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
+            return $selector->findOne();
+        }
+
+        return $selector;
+    }
+
+    /**
+     * @return Object
+     */
+    public function __debugInfo()
+    {
+        if (empty($this->collection)) {
+            return (object)[
+                'fields'  => $this->getFields(),
+                'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
+                'errors'  => $this->getErrors()
+            ];
+        }
+
+        return (object)[
+            'collection' => $this->odmSchema()[ODM::D_DB] . '/' . $this->collection,
+            'fields'     => $this->getFields(),
+            'atomics'    => $this->hasUpdates() ? $this->buildAtomics() : [],
+            'errors'     => $this->getErrors()
+        ];
+    }
+
+    /**
+     * Instance of ODM Selector associated with specific document.
+     *
+     * @see Component::staticContainer()
      * @param ODM $odm ODM component, global container will be called if not instance provided.
-     * @return DocumentSource|Collection
+     * @return DocumentSource
      * @throws ODMException
      */
     public static function source(ODM $odm = null)
@@ -103,5 +277,99 @@ abstract class Document extends IsolatedDocument
         }
 
         return $odm->source(static::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Accessor options include field type resolved by DocumentSchema.
+     *
+     * @throws ODMException
+     * @throws DefinitionException
+     */
+    protected function createAccessor($accessor, $value)
+    {
+        $accessor = parent::createAccessor($accessor, $value);
+
+        if (
+            $accessor instanceof CompositableInterface
+            && !$this->isLoaded()
+            && !$this->isEmbedded()
+        ) {
+            //Newly created object
+            $accessor->invalidate();
+        }
+
+        return $accessor;
+    }
+
+    /**
+     * Interpolate aggregation query with document values.
+     *
+     * @param array $query
+     * @return array
+     */
+    protected function interpolateQuery(array $query)
+    {
+        $fields = $this->fields;
+        array_walk_recursive($query, function (&$value) use ($fields) {
+            if (strpos($value, 'self::') === 0) {
+                $value = $this->dotGet(substr($value, 6));
+            }
+        });
+
+        return $query;
+    }
+
+    /**
+     * Get field value using dot notation.
+     *
+     * @param string $name
+     * @return mixed|null
+     */
+    private function dotGet($name)
+    {
+        /**
+         * @var EntityInterface|AccessorInterface|array $source
+         */
+        $source = $this;
+
+        $path = explode('.', $name);
+        foreach ($path as $step) {
+            if ($source instanceof EntityInterface) {
+                if (!$source->hasField($step)) {
+                    return null;
+                }
+
+                //Sub entity
+                $source = $source->getField($step);
+                continue;
+            }
+
+            if ($source instanceof AccessorInterface) {
+                $source = $source->serializeData();
+                continue;
+            }
+
+            if (is_array($source) && array_key_exists($step, $source)) {
+                $source = &$source[$step];
+                continue;
+            }
+
+            //Unable to resolve value, an exception required here
+            return null;
+        }
+
+        return $source;
+    }
+
+    /**
+     * Associated mongo collection.
+     *
+     * @return \MongoCollection
+     */
+    private function mongoCollection()
+    {
+        return $this->odm->mongoCollection(static::class);
     }
 }

@@ -13,7 +13,7 @@ use Spiral\Tokenizer\Reflections\ReflectionInvocation;
 /**
  * Can locate invocations in a specified directory. Can only find simple invocations!
  */
-class InvocationLocator extends AbstractLocator implements InvocationsInterface
+class InvocationLocator extends AbstractLocator implements InvocationLocatorInterface
 {
     /**
      * {@inheritdoc}

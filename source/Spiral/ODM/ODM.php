@@ -16,12 +16,13 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Configs\ODMConfig;
+use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\Tokenizer\ClassesInterface;
+use Spiral\Tokenizer\ClassLocatorInterface;
 
 /**
  * ODM component used to manage state of cached Document's schema, document creation and schema
@@ -200,17 +201,43 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      * Get instance of ODM source associated with given model class.
      *
      * @param string $class
-     * @param array  $query
      * @return DocumentSource
      */
-    public function source($class, array $query = [])
+    public function source($class)
     {
         $schema = $this->schema($class);
         if (empty($source = $schema[self::D_SOURCE])) {
             $source = DocumentSource::class;
         }
 
-        return new $source($class, $this, $query);
+        return new $source($class, $this);
+    }
+
+    /**
+     * Mongo collection associated with given model class.
+     *
+     * @param string $class
+     * @return \MongoCollection
+     */
+    public function mongoCollection($class)
+    {
+        $schema = $this->schema($class);
+
+        return $this->database($schema[ODM::D_DB])->selectCollection($schema[ODM::D_COLLECTION]);
+    }
+
+    /**
+     * Get instance of ODM Selector associated with given class.
+     *
+     * @param       $class
+     * @param array $query
+     * @return DocumentSelector
+     */
+    public function selector($class, array $query = [])
+    {
+        $schema = $this->schema($class);
+
+        return new DocumentSelector($this, $schema[ODM::D_DB], $schema[ODM::D_COLLECTION], $query);
     }
 
     /**
@@ -299,12 +326,14 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     /**
      * Update ODM documents schema and return instance of SchemaBuilder.
      *
-     * @param SchemaBuilder    $builder User specified schema builder.
-     * @param ClassesInterface $locator
+     * @param SchemaBuilder         $builder User specified schema builder.
+     * @param ClassLocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null, ClassesInterface $locator = null)
-    {
+    public function updateSchema(
+        SchemaBuilder $builder = null,
+        ClassLocatorInterface $locator = null
+    ) {
         if (empty($builder)) {
             $builder = $this->schemaBuilder($locator);
         }
@@ -327,10 +356,10 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     /**
      * Get instance of ODM SchemaBuilder.
      *
-     * @param ClassesInterface $locator
+     * @param ClassLocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function schemaBuilder(ClassesInterface $locator = null)
+    public function schemaBuilder(ClassLocatorInterface $locator = null)
     {
         return $this->constructor->construct(SchemaBuilder::class, [
             'odm'     => $this,

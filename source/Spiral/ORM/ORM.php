@@ -16,11 +16,12 @@ use Spiral\Database\Entities\Database;
 use Spiral\Models\DataEntity;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Configs\ORMConfig;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\ORMException;
-use Spiral\Tokenizer\ClassesInterface;
+use Spiral\Tokenizer\ClassLocatorInterface;
 
 /**
  * ORM component used to manage state of cached Record's schema, record creation and schema
@@ -181,12 +182,11 @@ class ORM extends EntityCache implements SingletonInterface
     /**
      * Get ORM source for given class.
      *
-     * @param string          $class
-     * @param LoaderInterface $loader
+     * @param string $class
      * @return RecordSource
      * @throws ORMException
      */
-    public function source($class, LoaderInterface $loader = null)
+    public function source($class)
     {
         $schema = $this->schema($class);
         if (empty($source = $schema[self::M_SOURCE])) {
@@ -194,7 +194,19 @@ class ORM extends EntityCache implements SingletonInterface
             $source = RecordSource::class;
         }
 
-        return new $source($class, $this, $loader);
+        return new $source($class, $this);
+    }
+
+    /**
+     * Get ORM selector for given class.
+     *
+     * @param string          $class
+     * @param LoaderInterface $loader
+     * @return RecordSelector
+     */
+    public function selector($class, LoaderInterface $loader = null)
+    {
+        return new RecordSelector($class, $this, $loader);
     }
 
     /**
@@ -271,12 +283,14 @@ class ORM extends EntityCache implements SingletonInterface
      * Update ORM records schema, synchronize declared and database schemas and return instance of
      * SchemaBuilder.
      *
-     * @param SchemaBuilder    $builder User specified schema builder.
-     * @param ClassesInterface $locator
+     * @param SchemaBuilder         $builder User specified schema builder.
+     * @param ClassLocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null, ClassesInterface $locator = null)
-    {
+    public function updateSchema(
+        SchemaBuilder $builder = null,
+        ClassLocatorInterface $locator = null
+    ) {
         if (empty($builder)) {
             $builder = $this->schemaBuilder($locator);
         }
@@ -299,10 +313,10 @@ class ORM extends EntityCache implements SingletonInterface
     /**
      * Get instance of ORM SchemaBuilder.
      *
-     * @param ClassesInterface $locator
+     * @param ClassLocatorInterface $locator
      * @return SchemaBuilder
      */
-    public function schemaBuilder(ClassesInterface $locator = null)
+    public function schemaBuilder(ClassLocatorInterface $locator = null)
     {
         return $this->constructor->construct(SchemaBuilder::class, [
             'config'  => $this->config,

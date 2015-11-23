@@ -500,7 +500,7 @@ abstract class Loader implements LoaderInterface
     /**
      * Create selector dedicated to load data for current loader.
      *
-     * @return Selector|null
+     * @return RecordSelector|null
      */
     public function createSelector()
     {
@@ -534,9 +534,9 @@ abstract class Loader implements LoaderInterface
      *
      * Method called by Selector when loader set as primary selection loader.
      *
-     * @param Selector $selector
+     * @param RecordSelector $selector
      */
-    public function configureSelector(Selector $selector)
+    public function configureSelector(RecordSelector $selector)
     {
         if (!$this->isJoinable()) {
             //Loader can be used not only for loading but purely for filering
@@ -584,9 +584,9 @@ abstract class Loader implements LoaderInterface
      * Implementation specific selector configuration, must create required joins, conditions and
      * etc.
      *
-     * @param Selector $selector
+     * @param RecordSelector $selector
      */
-    abstract protected function clarifySelector(Selector $selector);
+    abstract protected function clarifySelector(RecordSelector $selector);
 
     /**
      * Parse QueryResult provided by parent loaders and populate data tree. Loader must pass parsing
@@ -844,9 +844,9 @@ abstract class Loader implements LoaderInterface
     /**
      * Configure columns required for loader data selection.
      *
-     * @param Selector $selector
+     * @param RecordSelector $selector
      */
-    protected function configureColumns(Selector $selector)
+    protected function configureColumns(RecordSelector $selector)
     {
         if (!$this->isLoadable()) {
             return;

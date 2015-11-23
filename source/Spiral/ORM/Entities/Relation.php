@@ -305,7 +305,7 @@ abstract class Relation extends Component implements
      * Get selector associated with relation.
      *
      * @param array $where
-     * @return Selector
+     * @return RecordSelector
      */
     public function find(array $where = [])
     {
@@ -446,7 +446,7 @@ abstract class Relation extends Component implements
      *
      * Must be redeclarated in child implementations.
      *
-     * @return Selector
+     * @return RecordSelector
      */
     protected function createSelector()
     {

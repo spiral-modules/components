@@ -21,6 +21,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORM;
+use Spiral\ORM\RecordEntity;
 use Spiral\ORM\RecordInterface;
 
 /**
@@ -38,7 +39,7 @@ use Spiral\ORM\RecordInterface;
  * @see LoaderInterface
  * @see AbstractSelect
  */
-class Selector extends AbstractSelect implements LoggerAwareInterface
+class RecordSelector extends AbstractSelect implements LoggerAwareInterface
 {
     /**
      * Selector provides set of profiling functionality helps to understand what is going on with
@@ -328,6 +329,54 @@ class Selector extends AbstractSelect implements LoggerAwareInterface
         $this->loader->joiner($relation, $options);
 
         return $this;
+    }
+
+    /**
+     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
+     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
+     *
+     * @see findOne()
+     * @param mixed $id Primary key value.
+     * @return RecordEntity|null
+     * @throws SelectorException
+     */
+    public function findByPK($id)
+    {
+        $primaryKey = $this->loader->getPrimaryKey();
+
+        if (empty($primaryKey)) {
+            throw new SelectorException(
+                "Unable to fetch data by primary key, no primary key found."
+            );
+        }
+
+        //No limit here
+        return $this->findOne([$primaryKey => $id], false);
+    }
+
+    /**
+     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
+     * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
+     * loading method.
+     *
+     * @see findByPK()
+     * @param array $where     Selection WHERE statement.
+     * @param bool  $withLimit Use limit 1.
+     * @return RecordEntity|null
+     */
+    public function findOne(array $where = [], $withLimit = true)
+    {
+        if (!empty($where)) {
+            $this->where($where);
+        }
+
+        $data = $this->limit($withLimit ? 1 : null)->fetchData();
+        if (empty($data)) {
+            return null;
+        }
+
+        //Letting ORM to do it's job
+        return $this->orm->record($this->class, $data[0]);
     }
 
     /**

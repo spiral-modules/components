@@ -10,15 +10,12 @@ namespace Spiral\ODM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Compositor;
-use Spiral\ODM\Entities\Hash;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
-use Spiral\ODM\IsolatedDocument;
 use Spiral\ODM\ODM;
 
 /**
@@ -29,7 +26,7 @@ class DocumentSchema extends ReflectionEntity
     /**
      * Required to validly merge parent and children attributes.
      */
-    const BASE_CLASS = Document::class;
+    const BASE_CLASS = DocumentEntity::class;
 
     /**
      * Related source class.
@@ -43,18 +40,6 @@ class DocumentSchema extends ReflectionEntity
      * @var SchemaBuilder
      */
     protected $builder = null;
-
-    /**
-     * Classes to be used for compositions.
-     *
-     * @var array
-     */
-    protected $compositors = [
-        //No need to specify any class, document entity will use ODM to resolve needed entity
-        ODM::CMP_ONE  => ODM::CMP_ONE,
-        ODM::CMP_MANY => Compositor::class,
-        ODM::CMP_HASH => Hash::class
-    ];
 
     /**
      * @param SchemaBuilder $builder Parent ODM schema (all other documents).
@@ -94,7 +79,7 @@ class DocumentSchema extends ReflectionEntity
      */
     public function isEmbeddable()
     {
-        return !$this->isSubclassOf(IsolatedDocument::class);
+        return !$this->isSubclassOf(DocumentEntity::class);
     }
 
     /**
@@ -153,7 +138,7 @@ class DocumentSchema extends ReflectionEntity
                 continue;
             }
 
-            if (is_array($type) && empty($type[0]) && empty($type[DocumentEntity::HASH])) {
+            if (is_array($type) && empty($type[0])) {
                 throw new SchemaException("Type definition of {$this}.{$field} is invalid.");
             }
 
@@ -196,7 +181,7 @@ class DocumentSchema extends ReflectionEntity
                 }
             }
 
-            if (isset($accessors[$field]) && empty($this->getCompositions()[$field])) {
+            if (isset($accessors[$field])) {
                 $default = $this->accessorDefaults($accessors[$field], $type, $default);
             }
 
@@ -251,19 +236,6 @@ class DocumentSchema extends ReflectionEntity
                 continue;
             }
 
-            if (isset($type[DocumentEntity::HASH])) {
-                //Apparently hash!
-                $type = $type[DocumentEntity::HASH];
-                if ($this->builder->hasDocument($type)) {
-                    $compositions[$field] = [
-                        'type'  => ODM::CMP_HASH,
-                        'class' => $type
-                    ];
-                }
-
-                continue;
-            }
-
             $type = $type[0];
             if ($this->builder->hasDocument($type)) {
                 $compositions[$field] = [
@@ -292,9 +264,9 @@ class DocumentSchema extends ReflectionEntity
             }
 
             //Class to be aggregated
-            $class = isset($options[Document::MANY])
-                ? $options[Document::MANY]
-                : $options[Document::ONE];
+            $class = isset($options[DocumentEntity::MANY])
+                ? $options[DocumentEntity::MANY]
+                : $options[DocumentEntity::ONE];
 
             if (!$this->builder->hasDocument($class)) {
                 throw new SchemaException(
@@ -310,13 +282,13 @@ class DocumentSchema extends ReflectionEntity
                 );
             }
 
-            if (!empty($options[Document::MANY])) {
+            if (!empty($options[DocumentEntity::MANY])) {
                 //Aggregation may select parent document
                 $class = $document->getParent(true)->getName();
             }
 
             $aggregations[$field] = [
-                'type'       => isset($options[Document::ONE]) ? Document::ONE : Document::MANY,
+                'type'       => isset($options[DocumentEntity::ONE]) ? DocumentEntity::ONE : DocumentEntity::MANY,
                 'class'      => $class,
                 'collection' => $document->getCollection(),
                 'database'   => $document->getDatabase(),
@@ -343,7 +315,6 @@ class DocumentSchema extends ReflectionEntity
 
             if (
                 is_array($type)
-                && isset($type[0])
                 && is_scalar($type[0])
                 && $filter = $this->builder->getMutators('array::' . $type[0])
             ) {
@@ -379,7 +350,7 @@ class DocumentSchema extends ReflectionEntity
         //Every composition is counted as field accessor :)
         foreach ($this->getCompositions() as $field => $composition) {
             $mutators[self::MUTATOR_ACCESSOR][$field] = [
-                $this->compositors[$composition['type']],
+                $composition['type'] == ODM::CMP_MANY ? Compositor::class : ODM::CMP_ONE,
                 $composition['class']
             ];
         }
@@ -482,17 +453,17 @@ class DocumentSchema extends ReflectionEntity
             return $this->getName();
         }
 
-        if ($this->getConstant('DEFINITION') == Document::DEFINITION_LOGICAL) {
+        if ($this->getConstant('DEFINITION') == DocumentEntity::DEFINITION_LOGICAL) {
             //Class definition will be performed using method with custom logic
             return [
-                'type'    => Document::DEFINITION_LOGICAL,
+                'type'    => DocumentEntity::DEFINITION_LOGICAL,
                 'options' => [$this->getName(), 'defineClass']
             ];
         }
 
         //Definition will be performed using field = class association
         $definition = [
-            'type'    => Document::DEFINITION_FIELDS,
+            'type'    => DocumentEntity::DEFINITION_FIELDS,
             'options' => []
         ];
 
@@ -584,9 +555,10 @@ class DocumentSchema extends ReflectionEntity
      */
     private function isAggregation($type)
     {
-        return is_array($type)
-        && !isset($type[DocumentEntity::HASH])
-        && (array_key_exists(Document::MANY, $type) || array_key_exists(Document::ONE, $type));
+        return is_array($type) && (
+            array_key_exists(DocumentEntity::MANY, $type)
+            || array_key_exists(DocumentEntity::ONE, $type)
+        );
     }
 
     /**
@@ -641,19 +613,10 @@ class DocumentSchema extends ReflectionEntity
         if ($composition['type'] == ODM::CMP_MANY) {
             if (!empty($default) && $default !== []) {
                 throw new SchemaException(
-                    "Default value of {$this}.{$field} is not compatible with document composition (array)."
+                    "Default value of {$this}.{$field} is not compatible with document composition."
                 );
             }
 
-            return [];
-        }
-
-        if ($composition['type'] == ODM::CMP_HASH) {
-            if (!empty($default)) {
-                return $default;
-            }
-
-            //Default type is empty object
             return [];
         }
 

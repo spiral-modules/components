@@ -7,29 +7,54 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\Core\Component;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SourceInterface;
-use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\Exceptions\SourceException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
 
 /**
- * Source class associated to one or multiple (default implementation) ORM models. Attention,
- * source can be used only once (clone it if you want to reuse it)!
+ * Source class associated to one or multiple (default implementation) ORM models. Source can be
+ * used to write your own custom find method or change default selection.
  */
-class RecordSource extends Selector implements SourceInterface
+class RecordSource extends Component implements SourceInterface
 {
     /**
-     * Related record class name.
+     * Sugary!
+     */
+    use SaturateTrait;
+
+    /**
+     * Linked document model. ODM can automatically index and link user sources to models based on
+     * value of this constant.
      */
     const RECORD = null;
 
     /**
+     * Associated document class.
+     *
+     * @var string
+     */
+    private $class = null;
+
+    /**
+     * @var RecordSelector
+     */
+    private $selector = null;
+
+    /**
+     * @invisible
+     * @var ORM
+     */
+    protected $orm = null;
+
+    /**
      * @param string $class
      * @param ORM    $orm
-     * @param Loader $loader
+     * @throws SourceException
      */
-    public function __construct($class = null, ORM $orm = null, Loader $loader = null)
+    public function __construct($class = null, ORM $orm = null)
     {
         if (empty($class)) {
             if (empty(static::RECORD)) {
@@ -39,7 +64,10 @@ class RecordSource extends Selector implements SourceInterface
             $class = static::RECORD;
         }
 
-        parent::__construct($class, $orm, $loader);
+        $this->class = $class;
+
+        $this->orm = $this->saturate($orm, ORM::class);
+        $this->selector = $this->orm->selector($this->class);
     }
 
     /**
@@ -56,50 +84,54 @@ class RecordSource extends Selector implements SourceInterface
     }
 
     /**
-     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
-     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
+     * Find record by it's primary key.
      *
      * @see findOne()
-     * @param mixed $id Primary key value.
+     * @param string|\MongoId $id Primary key value.
      * @return RecordEntity|null
-     * @throws SelectorException
      */
     public function findByPK($id)
     {
-        $primaryKey = $this->loader->getPrimaryKey();
-
-        if (empty($primaryKey)) {
-            throw new SelectorException(
-                "Unable to fetch data by primary key, no primary key found."
-            );
-        }
-
-        //No limit here
-        return $this->findOne([$primaryKey => $id], false);
+        return $this->find()->findByPK($id);
     }
 
     /**
-     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
-     * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
-     * loading method.
+     * Select one record from mongo collection.
      *
-     * @see findByPK()
-     * @param array $where     Selection WHERE statement.
-     * @param bool  $withLimit Use limit 1.
+     * @param array $where   Where conditions in array form.
+     * @param array $orderBy In a form of [key => direction].
      * @return RecordEntity|null
      */
-    public function findOne(array $where = [], $withLimit = true)
+    public function findOne(array $where = [], array $orderBy = [])
     {
-        if (!empty($where)) {
-            $this->where($where);
-        }
+        return $this->find()->orderBy($orderBy)->findOne($where);
+    }
 
-        $data = $this->limit($withLimit ? 1 : null)->fetchData();
-        if (empty($data)) {
-            return null;
-        }
+    /**
+     * Get associated record selection with pre-configured query (if any).
+     *
+     * @param array $where Where conditions in array form.
+     * @return RecordSelector
+     */
+    public function find(array $where = [])
+    {
+        return $this->selector()->where($where);
+    }
 
-        //Letting ORM to do it's job
-        return $this->orm->record($this->class, $data[0]);
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return $this->find()->count();
+    }
+
+    /**
+     * @return RecordSelector
+     */
+    final protected function selector()
+    {
+        //Has to be cloned every time to prevent query collisions
+        return clone $this->selector;
     }
 }

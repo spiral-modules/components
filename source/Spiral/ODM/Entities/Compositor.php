@@ -13,6 +13,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
+use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -141,7 +142,7 @@ class Compositor extends Component implements
     /**
      * Get composition parent.
      *
-     * @return DocumentEntity|null
+     * @return Document|null
      */
     public function getParent()
     {
@@ -473,7 +474,7 @@ class Compositor extends Component implements
     /**
      * Return all composited documents in array form.
      *
-     * @return DocumentEntity[]
+     * @return Document[]
      */
     public function all()
     {
@@ -488,7 +489,7 @@ class Compositor extends Component implements
     /**
      * {@inheritdoc}
      *
-     * @return DocumentEntity[]
+     * @return Document[]
      */
     public function getIterator()
     {
@@ -505,7 +506,7 @@ class Compositor extends Component implements
      *
      * @param array  $fields
      * @param string $class
-     * @return DocumentEntity
+     * @return Document
      * @throws CompositorException
      * @throws DefinitionException
      * @throws ODMException
@@ -804,7 +805,7 @@ class Compositor extends Component implements
     private function getDocument($offset)
     {
         /**
-         * @var array|DocumentEntity $document
+         * @var array|Document $document
          */
         $document = $this->documents[$offset];
         if ($document instanceof CompositableInterface) {

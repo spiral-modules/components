@@ -11,6 +11,7 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ODM\Document;
+use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\ODM;
 use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
@@ -31,7 +32,7 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method array validate($validate)
  * @method bool|array insert($array_of_fields_OR_object, $options = [])
  * @method mixed batchInsert($documents, $options = [])
- * @method bool update($old_array_of_fields_OR_object, $new_array_of_fields_OR_object, $options = [])
+ * @method bool update($old_array_of_fields_OR_object, $new_fields_OR_object, $options = [])
  * @method bool|array remove($array_of_fields_OR_object, $options = [])
  * @method bool ensureIndex($key_OR_array_of_keys, $options = [])
  * @method array deleteIndex($string_OR_array_of_keys)
@@ -44,7 +45,7 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  * @method bool|array distinct($key, $query)
  * @method array aggregate(array $pipeline, array $op, array $pipelineOperators)
  */
-class Collection extends Component implements
+class DocumentSelector extends Component implements
     \Countable,
     \IteratorAggregate,
     PaginableInterface,
@@ -186,6 +187,30 @@ class Collection extends Component implements
     public function find(array $query = [])
     {
         return $this->query($query);
+    }
+
+    /**
+     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
+     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
+     *
+     * @see findOne()
+     * @param mixed $id Primary key value.
+     * @return DocumentEntity|null
+     */
+    public function findByPK($id)
+    {
+        return $this->findOne(['_id' => $this->odm->mongoID($id)]);
+    }
+
+    /**
+     * Select one document or it's fields from collection.
+     *
+     * @param array $query Fields and conditions to query by.
+     * @return DocumentEntity|array
+     */
+    public function findOne(array $query = [])
+    {
+        return $this->createCursor($query, [], 1)->getNext();
     }
 
     /**

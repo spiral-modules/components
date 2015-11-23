@@ -5,66 +5,114 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ORM;
 
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Models\ActiveEntityInterface;
+use Spiral\Models\Events\EntityEvent;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
+use Spiral\ORM\Exceptions\RecordException;
 
 /**
- * RecordEntity with added active record functionality and static finders.
+ * Entity with ability to be saved and direct access to source.
  */
-class Record extends IsolatedRecord
+class Record extends RecordEntity implements ActiveEntityInterface
 {
     /**
-     * Find multiple records based on provided query.
-     *
-     * Example:
-     * User::find(['status' => 'active'], ['profile']);
-     *
-     * @param array|\Closure $where Selection WHERE statement.
-     * @param array          $load  Array or relations to be pre-loaded.
-     * @return RecordSource
+     * Indication that save methods must be validated by default, can be altered by calling save
+     * method with user arguments.
      */
-    public static function find($where = [], array $load = [])
-    {
-        return static::source()->load($load)->where($where);
-    }
+    const VALIDATE_SAVE = true;
 
     /**
-     * Fetch one record based on provided query or return null. Use second argument to specify
-     * relations to be loaded.
+     * {@inheritdoc}
      *
-     * Example:
-     * User::findOne(['name' => 'Wolfy-J'], ['profile'], ['id' => 'DESC']);
+     * Create or update record data in database. Record will validate all EMBEDDED and loaded
+     * relations.
      *
-     * @param array|\Closure $where   Selection WHERE statement.
-     * @param array          $load    Array or relations to be pre-loaded.
-     * @param array          $orderBy Sort by conditions.
-     * @return RecordEntity|null
+     * @see   sourceTable()
+     * @see   updateChriteria()
+     * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
+     *                             disable validation before saving.
+     * @return bool
+     * @throws RecordException
+     * @throws QueryException
+     * @event saving()
+     * @event saved()
+     * @event updating()
+     * @event updated()
      */
-    public static function findOne($where = [], array $load = [], array $orderBy = [])
+    public function save($validate = null)
     {
-        $source = static::find($where, $load);
-        foreach ($orderBy as $column => $direction) {
-            $source->orderBy($column, $direction);
+        if (is_null($validate)) {
+            //Using default model behaviour
+            $validate = static::VALIDATE_SAVE;
         }
 
-        return $source->findOne();
+        if ($validate && !$this->isValid()) {
+            return false;
+        }
+
+        if (!$this->isLoaded()) {
+            $this->dispatch('saving', new EntityEvent($this));
+
+            //Primary key field name (if any)
+            $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
+
+            //We will need to support records with multiple primary keys in future
+            unset($this->fields[$primaryKey]);
+
+            //Creating
+            $lastID = $this->sourceTable()->insert($this->fields = $this->serializeData());
+            if (!empty($primaryKey)) {
+                //Updating record primary key
+                $this->fields[$primaryKey] = $lastID;
+            }
+
+            $this->loadedState(true)->dispatch('saved', new EntityEvent($this));
+
+            //Saving record to entity cache if we have space for that
+            $this->orm->rememberEntity($this, false);
+
+        } elseif ($this->isSolid() || $this->hasUpdates()) {
+            $this->dispatch('updating', new EntityEvent($this));
+
+            //Updating changed/all field based on model criteria (in usual case primaryKey)
+            $this->sourceTable()->update(
+                $this->compileUpdates(),
+                $this->stateCriteria()
+            )->run();
+
+            $this->dispatch('updated', new EntityEvent($this));
+        }
+
+        $this->flushUpdates();
+        $this->saveRelations($validate);
+
+        return true;
     }
 
     /**
-     * Find record using it's primary key. Relation data can be preloaded with found record.
+     * {@inheritdoc}
      *
-     * Example:
-     * User::findByID(1, ['profile']);
-     *
-     * @param mixed $primaryKey Primary key.
-     * @param array $load       Array or relations to be pre-loaded.
-     * @return RecordEntity|null
+     * @event deleting()
+     * @event deleted()
      */
-    public static function findByPK($primaryKey, array $load = [])
+    public function delete()
     {
-        return static::source()->load($load)->findByPK($primaryKey);
+        $this->dispatch('deleting', new EntityEvent($this));
+
+        if ($this->isLoaded()) {
+            $this->sourceTable()->delete($this->stateCriteria())->run();
+        }
+
+        //We don't really need to delete embedded or loaded relations,
+        //we have foreign keys for that
+
+        $this->fields = $this->ormSchema()[ORM::M_COLUMNS];
+        $this->loadedState(self::DELETED)->dispatch('deleted', new EntityEvent($this));
     }
 
     /**
@@ -88,5 +136,24 @@ class Record extends IsolatedRecord
         }
 
         return $orm->source(static::class);
+    }
+
+    /**
+     * Save embedded relations.
+     *
+     * @param bool $validate
+     */
+    private function saveRelations($validate)
+    {
+        foreach ($this->relations as $name => $relation) {
+            if (!$relation instanceof RelationInterface) {
+                //Was never constructed
+                continue;
+            }
+
+            if ($this->isEmbedded($name) && !$relation->saveAssociation($validate)) {
+                throw new RecordException("Unable to save relation '{$name}'.");
+            }
+        }
     }
 }

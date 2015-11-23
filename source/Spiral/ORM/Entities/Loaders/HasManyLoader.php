@@ -7,7 +7,7 @@
  */
 namespace Spiral\ORM\Entities\Loaders;
 
-use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\WhereDecorator;
 use Spiral\ORM\RecordEntity;
 
@@ -40,7 +40,7 @@ class HasManyLoader extends HasOneLoader
      * Where conditions will be mounted using WhereDecorator to unify logic between POSTLOAD and
      * INLOAD methods.
      */
-    protected function mountConditions(Selector $selector)
+    protected function mountConditions(RecordSelector $selector)
     {
         $selector = parent::mountConditions($selector);
 

@@ -16,9 +16,8 @@ use Spiral\ODM\Entities\Schemas\CollectionSchema;
 use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
-use Spiral\ODM\IsolatedDocument;
 use Spiral\ODM\ODM;
-use Spiral\Tokenizer\ClassesInterface;
+use Spiral\Tokenizer\ClassLocatorInterface;
 
 /**
  * Schema builder responsible for static analysis of existed Documents, their schemas, validations,
@@ -48,11 +47,11 @@ class SchemaBuilder extends Component
     protected $odm = null;
 
     /**
-     * @param ODM              $odm
-     * @param ODMConfig        $config
-     * @param ClassesInterface $locator
+     * @param ODM                   $odm
+     * @param ODMConfig             $config
+     * @param ClassLocatorInterface $locator
      */
-    public function __construct(ODM $odm, ODMConfig $config, ClassesInterface $locator)
+    public function __construct(ODM $odm, ODMConfig $config, ClassLocatorInterface $locator)
     {
         $this->config = $config;
         $this->odm = $odm;
@@ -105,11 +104,7 @@ class SchemaBuilder extends Component
      */
     public function document($class)
     {
-        if (
-            $class == DocumentEntity::class
-            || $class == IsolatedDocument::class
-            || $class == Document::class
-        ) {
+        if ($class == DocumentEntity::class || $class == Document::class) {
             //No need to remember schema for abstract Document
             return new DocumentSchema($this, DocumentEntity::class);
         }
@@ -239,17 +234,13 @@ class SchemaBuilder extends Component
     /**
      * Locate every available Document class.
      *
-     * @param ClassesInterface $locator
+     * @param ClassLocatorInterface $locator
      * @return $this
      */
-    protected function locateDocuments(ClassesInterface $locator)
+    protected function locateDocuments(ClassLocatorInterface $locator)
     {
         foreach ($locator->getClasses(DocumentEntity::class) as $class => $definition) {
-            if (
-                $class == DocumentEntity::class
-                || $class == IsolatedDocument::class
-                || $class == Document::class
-            ) {
+            if ($class == DocumentEntity::class || $class == Document::class) {
                 continue;
             }
 
@@ -262,10 +253,10 @@ class SchemaBuilder extends Component
     /**
      * Locate ORM entities sources.
      *
-     * @param ClassesInterface $locator
+     * @param ClassLocatorInterface $locator
      * @return $this
      */
-    protected function locateSources(ClassesInterface $locator)
+    protected function locateSources(ClassLocatorInterface $locator)
     {
         foreach ($locator->getClasses(DocumentSource::class) as $class => $definition) {
             $reflection = new \ReflectionClass($class);

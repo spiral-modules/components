@@ -7,17 +7,18 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SourceInterface;
 use Spiral\ODM\DocumentEntity;
+use Spiral\ODM\Exceptions\SourceException;
 use Spiral\ODM\ODM;
-use Spiral\ORM\Exceptions\SourceException;
 
 /**
- * Source class associated to one or multiple (default implementation) ODM models. Attention,
- * source can be used only once (clone it if you want to reuse it)!
+ * Source class associated to one or multiple (default implementation) ODM models. Source can be
+ * used to write your own custom find method or change default selection.
  */
-class DocumentSource extends Collection implements SourceInterface
+class DocumentSource extends Component implements SourceInterface, \Countable
 {
     /**
      * Sugary!
@@ -25,25 +26,35 @@ class DocumentSource extends Collection implements SourceInterface
     use SaturateTrait;
 
     /**
-     * Linked document model.
+     * Linked document model. ODM can automatically index and link user sources to models based on
+     * value of this constant.
      */
     const DOCUMENT = null;
 
     /**
-     * Associated document class. Attention, collection might return parent class on document
-     * construction!
+     * Associated document class.
      *
      * @var string
      */
     private $class = null;
 
     /**
+     * @var DocumentSelector
+     */
+    private $selector = null;
+
+    /**
+     * @invisible
+     * @var ODM
+     */
+    protected $odm = null;
+
+    /**
      * @param string $class
      * @param ODM    $odm
-     * @param array  $query
      * @throws SourceException
      */
-    public function __construct($class = null, ODM $odm = null, array $query = [])
+    public function __construct($class = null, ODM $odm = null)
     {
         if (empty($class)) {
             if (empty(static::DOCUMENT)) {
@@ -55,49 +66,78 @@ class DocumentSource extends Collection implements SourceInterface
 
         $this->class = $class;
 
-        if (empty($odm)) {
-            $odm = $this->saturate($odm, ODM::class);
-        }
-
-        //We can fetch collection and database from associated schema
-        $schema = $odm->schema($this->class);
-        parent::__construct($odm, $schema[ODM::D_DB], $schema[ODM::D_COLLECTION], $query);
+        $this->odm = $this->saturate($odm, ODM::class);
+        $this->selector = $this->odm->selector($this->class);
     }
 
     /**
-     * Create new Record based on set of provided fields.
+     * Create new DocumentEntity based on set of provided fields.
      *
      * @final Change static method of entity, not this one.
-     * @param array $fields
+     * @param array  $fields
+     * @param string $class Due ODM models can be inherited you can use this argument to specify
+     *                      custom model class.
      * @return DocumentEntity
      */
-    final public function create($fields = [])
+    final public function create($fields = [], $class = null)
     {
+        if (empty($class)) {
+            $class = $this->class;
+        }
+
         //Letting entity to create itself (needed
-        return call_user_func([$this->class, 'create'], $fields, $this->odm);
+        return call_user_func([$class, 'create'], $fields, $this->odm);
     }
 
     /**
-     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
-     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
+     * Find document by it's primary key.
      *
      * @see findOne()
-     * @param mixed $id Primary key value.
+     * @param string|\MongoId $id Primary key value.
      * @return DocumentEntity|null
      */
     public function findByPK($id)
     {
-        return $this->findOne(['_id' => $this->odm->mongoID($id)]);
+        return $this->find()->findByPK($id);
     }
 
     /**
-     * Select one document or it's fields from collection.
+     * Select one document from mongo collection.
      *
      * @param array $query Fields and conditions to query by.
-     * @return DocumentEntity|array
+     * @param array $sortBy
+     * @return DocumentEntity|null
      */
-    public function findOne(array $query = [])
+    public function findOne(array $query = [], array $sortBy = [])
     {
-        return $this->createCursor($query, [], 1)->getNext();
+        return $this->find()->sortBy($sortBy)->findOne($query);
+    }
+
+    /**
+     * Get associated document selection with pre-configured query (if any).
+     *
+     * @param array $query
+     * @return DocumentSelector
+     */
+    public function find(array $query = [])
+    {
+        return $this->selector()->query($query);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return $this->find()->count();
+    }
+
+    /**
+     * @return DocumentSelector
+     */
+    final protected function selector()
+    {
+        //Has to be cloned every time to prevent query collisions
+        return clone $this->selector;
     }
 }

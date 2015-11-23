@@ -107,11 +107,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     const ONE  = 899;
 
     /**
-     * Use such key to define hash type composition.
-     */
-    const HASH = 8990;
-
-    /**
      * Errors in nested documents and acessors.
      *
      * @var array
@@ -161,12 +156,10 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      * Compositions:
      * protected $schema = [
      *     ...,
-     *     'child'       => Child::class,                //One document are composited, for example
-     *                                                   //user Profile
-     *     'many'        => [Child::class]               //Compositor accessor will be applied,
-     *                                                   //allows to composite many document
-     *                                                   //instances
-     *     'associative' => [self::HASH => Child::class] //Associative array of documents
+     *     'child'       => Child::class,   //One document are composited, for example user Profile
+     *     'many'        => [Child::class]  //Compositor accessor will be applied, allows to
+     *     composite
+     *                                      //many document instances
      * ];
      *
      * Documents can extend each other, in this case schema will also be inherited.

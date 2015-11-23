@@ -15,12 +15,11 @@ use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\RecordSchemaException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Exceptions\SchemaException;
-use Spiral\ORM\IsolatedRecord;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\RelationInterface;
-use Spiral\Tokenizer\ClassesInterface;
+use Spiral\Tokenizer\ClassLocatorInterface;
 
 /**
  * Schema builder responsible for static analysis of existed ORM Records, their schemas,
@@ -50,11 +49,11 @@ class SchemaBuilder extends Component
     protected $orm = null;
 
     /**
-     * @param ORMConfig        $config
-     * @param ORM              $orm
-     * @param ClassesInterface $locator
+     * @param ORMConfig             $config
+     * @param ORM                   $orm
+     * @param ClassLocatorInterface $locator
      */
-    public function __construct(ORMConfig $config, ORM $orm, ClassesInterface $locator)
+    public function __construct(ORMConfig $config, ORM $orm, ClassLocatorInterface $locator)
     {
         $this->config = $config;
         $this->orm = $orm;
@@ -87,7 +86,7 @@ class SchemaBuilder extends Component
      */
     public function record($class)
     {
-        if ($class == RecordEntity::class || $class == IsolatedRecord::class || $class == Record::class) {
+        if ($class == RecordEntity::class || $class == Record::class) {
             //No need to remember schema for abstract Document
             return new RecordSchema($this, RecordEntity::class);
         }
@@ -309,20 +308,16 @@ class SchemaBuilder extends Component
     /**
      * Locate every available Record class.
      *
-     * @param ClassesInterface $locator
+     * @param ClassLocatorInterface $locator
      * @return $this
      * @throws SchemaException
      */
-    protected function locateRecords(ClassesInterface $locator)
+    protected function locateRecords(ClassLocatorInterface $locator)
     {
         //Table names associated with records
         $tables = [];
         foreach ($locator->getClasses(RecordEntity::class) as $class => $definition) {
-            if (
-                $class == RecordEntity::class
-                || $class == IsolatedRecord::class
-                || $class == Record::class
-            ) {
+            if ($class == RecordEntity::class || $class == Record::class) {
                 continue;
             }
 
@@ -354,10 +349,10 @@ class SchemaBuilder extends Component
     /**
      * Locate ORM entities sources.
      *
-     * @param ClassesInterface $locator
+     * @param ClassLocatorInterface $locator
      * @return $this
      */
-    protected function locateSources(ClassesInterface $locator)
+    protected function locateSources(ClassLocatorInterface $locator)
     {
         foreach ($locator->getClasses(RecordSource::class) as $class => $definition) {
             $reflection = new \ReflectionClass($class);

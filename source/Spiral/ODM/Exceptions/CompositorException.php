@@ -10,7 +10,7 @@ namespace Spiral\ODM\Exceptions;
 /**
  * Errors inside ODM document compositor.
  */
-class CompositorException extends HashException
+class CompositorException extends AccessorException
 {
 
 }

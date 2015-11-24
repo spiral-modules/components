@@ -614,22 +614,34 @@ class DataEntity extends Component implements
     }
 
     /**
-     * Initiate associated model traits. System will look for static method with "init" prefix.
+     * Initiate associated model traits. System will look for static method with "__init__" prefix.
+     * Attention, trait must
      *
-     * @param bool $analysis Must be set to true while static analysis.
+     * @param bool $analysis Must be set to true while static reflection analysis.
      */
     protected static function initialize($analysis = false)
     {
-        if (isset(self::$initiated[$class = static::class]) && !$analysis) {
+        $state = $class = static::class;
+
+        if ($analysis) {
+            //Normal and initialization for analysis must load different methods
+            $state = "{$class}~";
+            $prefix = '__describe__';
+        } else {
+            $prefix = '__init__';
+        }
+
+        if (isset(self::$initiated[$state])) {
+            //Already initiated (not for analysis)
             return;
         }
 
         foreach (get_class_methods($class) as $method) {
-            if (substr($method, 0, 4) === 'init' && $method != 'initialize') {
-                forward_static_call(['static', $method], $analysis);
+            if (strpos($method, $prefix) === 0) {
+                forward_static_call(['static', $method]);
             }
         }
 
-        self::$initiated[$class] = true;
+        self::$initiated[$state] = true;
     }
 }

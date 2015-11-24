@@ -21,6 +21,8 @@ use Spiral\Views\ViewsInterface;
 /**
  * Spiral implementation of SnapshotInterface with ability to render exception explanation using
  * ViewsInterface.
+ *
+ * TODO: REWRITE OR REMOVE THAT?
  */
 class Snapshot extends Component implements SnapshotInterface, LoggerAwareInterface
 {

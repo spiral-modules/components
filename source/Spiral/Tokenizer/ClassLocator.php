@@ -79,6 +79,6 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
         }
 
         //Checking using traits
-        return !in_array($target->getName(), $this->getTraits($class->getName()));
+        return in_array($target->getName(), $this->getTraits($class->getName()));
     }
 }

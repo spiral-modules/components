@@ -26,7 +26,7 @@ class RecordSource extends Component implements SourceInterface, \Countable
     use SaturateTrait;
 
     /**
-     * Linked document model. ODM can automatically index and link user sources to models based on
+     * Linked document model. ORM can automatically index and link user sources to models based on
      * value of this constant.
      */
     const RECORD = null;

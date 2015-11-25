@@ -87,35 +87,26 @@ class TableSchema extends AbstractTable
             return parent::synchroniseSchema();
         }
 
-        $this->driver->beginTransaction();
+        $this->logger()->info("Rebuilding table {table} to apply required modifications.", [
+            'table' => $this->getName(true)
+        ]);
 
-        try {
-            $this->logger()->info("Rebuilding table {table} to apply required modifications.", [
-                'table' => $this->getName(true)
-            ]);
+        //Temporary table is required to copy data over
+        $temporary = $this->createTemporary();
 
-            //Temporary table is required to copy data over
-            $temporary = $this->createTemporary();
+        //Moving data over
+        $this->copyData($temporary, $this->columnsMapping(true));
 
-            //Moving data over
-            $this->copyData($temporary, $this->columnsMapping(true));
+        //Dropping current table
+        $this->commander->dropTable($this->initial->getName());
 
-            //Dropping current table
-            $this->commander->dropTable($this->initial->getName());
+        //Renaming temporary table (should automatically handle table renaming)
+        $this->commander->renameTable($temporary->getName(), $this->getName());
 
-            //Renaming temporary table (should automatically handle table renaming)
-            $this->commander->renameTable($temporary->getName(), $this->getName());
-
-            //We can create needed indexes now
-            foreach ($this->getIndexes() as $index) {
-                $this->commander->addIndex($this, $index);
-            }
-        } catch (\Exception $exception) {
-            $this->driver->rollbackTransaction();
-            throw $exception;
+        //We can create needed indexes now
+        foreach ($this->getIndexes() as $index) {
+            $this->commander->addIndex($this, $index);
         }
-
-        $this->driver->commitTransaction();
 
         return $this;
     }

@@ -144,7 +144,7 @@ class LocalServer extends StorageServer
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 
         //Pre-enshuring location
-        $this->files->ensureLocation(dirname($destination), $mode);
+        $this->files->ensureDirectory(dirname($destination), $mode);
 
         if (!$this->files->move($filename, $destination)) {
             throw new ServerException("Unable to move '{$filename}' to '{$destination}'.");
@@ -171,7 +171,7 @@ class LocalServer extends StorageServer
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 
         //Pre-ensuring location
-        $this->files->ensureLocation(dirname($destination), $mode);
+        $this->files->ensureDirectory(dirname($destination), $mode);
 
         if (!$this->files->copy($filename, $destination)) {
             throw new ServerException("Unable to copy '{$filename}' to '{$destination}'.");

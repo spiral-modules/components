@@ -46,21 +46,21 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @param bool $recursive Every created directory will get specified permissions.
      */
-    public function ensureLocation($location, $mode = self::RUNTIME, $recursive = true)
+    public function ensureDirectory($directory, $mode = self::RUNTIME, $recursive = true)
     {
         $mode = $mode | 0111;
-        if (is_dir($location)) {
+        if (is_dir($directory)) {
             //Exists :(
-            return $this->setPermissions($location, $mode);
+            return $this->setPermissions($directory, $mode);
         }
 
         if (!$recursive) {
-            return mkdir($location, $mode, true);
+            return mkdir($directory, $mode, true);
         }
 
-        $directoryChain = [basename($location)];
+        $directoryChain = [basename($directory)];
 
-        $baseDirectory = $location;
+        $baseDirectory = $directory;
         while (!is_dir($baseDirectory = dirname($baseDirectory))) {
             $directoryChain[] = basename($baseDirectory);
         }
@@ -93,11 +93,11 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @param bool $append To append data at the end of existed file.
      */
-    public function write($filename, $data, $mode = null, $ensureLocation = false, $append = false)
+    public function write($filename, $data, $mode = null, $ensureDirectory = false, $append = false)
     {
         try {
-            if ($ensureLocation) {
-                $this->ensureLocation(dirname($filename), $mode);
+            if ($ensureDirectory) {
+                $this->ensureDirectory(dirname($filename), $mode);
             }
 
             if (!empty($mode) && $this->exists($filename)) {
@@ -127,9 +127,9 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function append($filename, $data, $mode = null, $ensureLocation = false)
+    public function append($filename, $data, $mode = null, $ensureDirectory = false)
     {
-        return $this->write($filename, $data, $mode, $ensureLocation, true);
+        return $this->write($filename, $data, $mode, $ensureDirectory, true);
     }
 
     /**

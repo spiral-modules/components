@@ -40,11 +40,11 @@ interface FilesInterface
     /**
      * Ensure location (directory) existence with specified mode.
      *
-     * @param string $location
+     * @param string $directory
      * @param int    $mode
      * @return bool
      */
-    public function ensureLocation($location, $mode = self::RUNTIME);
+    public function ensureDirectory($directory, $mode = self::RUNTIME);
 
     /**
      * Read file content into string.
@@ -61,12 +61,12 @@ interface FilesInterface
      *
      * @param string $filename
      * @param string $data
-     * @param int    $mode           One of mode constants.
-     * @param bool   $ensureLocation Ensure final destination!
+     * @param int    $mode            One of mode constants.
+     * @param bool   $ensureDirectory Ensure final destination!
      * @return bool
      * @throws WriteErrorException
      */
-    public function write($filename, $data, $mode = null, $ensureLocation = false);
+    public function write($filename, $data, $mode = null, $ensureDirectory = false);
 
     /**
      * Same as write method with will append data at the end of existed file without replacing it.
@@ -75,11 +75,11 @@ interface FilesInterface
      * @param string $filename
      * @param string $data
      * @param int    $mode
-     * @param bool   $ensureLocation
+     * @param bool   $ensureDirectory
      * @return bool
      * @throws WriteErrorException
      */
-    public function append($filename, $data, $mode = null, $ensureLocation = false);
+    public function append($filename, $data, $mode = null, $ensureDirectory = false);
 
     /**
      * Method has to return local uri which can be used in require and include statements.
@@ -188,6 +188,8 @@ interface FilesInterface
 
     /**
      * Flat list of every file in every sub location. Locations must be normalized.
+     *
+     * Note: not a generator yet, waiting for PHP7.
      *
      * @param string $location Location for search.
      * @param string $pattern  Extension pattern.

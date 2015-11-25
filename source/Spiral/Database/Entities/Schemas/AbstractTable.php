@@ -518,15 +518,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     {
         $this->logger()->info("Creating new table {table}.", ['table' => $this->getName(true)]);
 
-        $this->driver->beginTransaction();
-        try {
-            $this->commander->createTable($this);
-        } catch (\Exception $exception) {
-            $this->driver->rollbackTransaction();
-            throw $exception;
-        }
-
-        $this->driver->commitTransaction();
+        $this->commander->createTable($this);
     }
 
     /**
@@ -539,19 +531,11 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
             $this->commander->renameTable($this->initial->getName(), $this->getName());
         }
 
-        $this->driver->beginTransaction();
-        try {
-            //Some data has to be dropped before column updates
-            $this->dropForeigns()->dropIndexes();
+        //Some data has to be dropped before column updates
+        $this->dropForeigns()->dropIndexes();
 
-            //Generate update flow
-            $this->synchroniseColumns()->synchroniseIndexes()->synchroniseForeigns();
-        } catch (\Exception $exception) {
-            $this->driver->rollbackTransaction();
-            throw $exception;
-        }
-
-        $this->driver->commitTransaction();
+        //Generate update flow
+        $this->synchroniseColumns()->synchroniseIndexes()->synchroniseForeigns();
     }
 
     /**

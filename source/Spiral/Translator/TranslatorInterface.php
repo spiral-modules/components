@@ -71,4 +71,22 @@ interface TranslatorInterface
      * @throws TranslatorException
      */
     public function pluralize($phrase, $number, $format = true);
+
+    /**
+     * Check if given string known to translator.
+     *
+     * @param string $bundle
+     * @param string $string
+     * @return bool
+     */
+    public function knows($bundle, $string);
+
+    /**
+     * Set string translation in specified bundle.
+     *
+     * @param string       $bundle
+     * @param string       $string
+     * @param string|array $translation Must contain array of phrase forms for plural phrases.
+     */
+    public function set($bundle, $string, $translation = '');
 }

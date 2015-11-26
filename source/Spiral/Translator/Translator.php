@@ -12,6 +12,7 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
 use Spiral\Translator\Exceptions\LanguageException;
+use Spiral\Translator\Exceptions\TranslatorException;
 
 /**
  * Default spiral translator implementation.
@@ -136,7 +137,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         $format = true,
         PluralizerInterface $pluralizer = null
     ) {
-        $this->loadBundle($bundle = $this->config['plurals']);
+        $this->loadBundle($bundle = $this->config->pluralsBundle());
 
         if (empty($pluralizer)) {
             //Active pluralizer
@@ -182,16 +183,34 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     }
 
     /**
-     * Set string translation in specified bundle.
-     *
-     * @param string $bundle
-     * @param string $string
-     * @param string $translation
+     * {@inheritdoc}
+     */
+    public function knows($bundle, $string)
+    {
+        $this->loadBundle($bundle);
+
+        return isset($this->bundles[$bundle][$string]);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function set($bundle, $string, $translation = '')
     {
+        if (empty($translation)) {
+            $translation = $string;
+        }
+
+        if ($bundle == $this->config->pluralsBundle()) {
+            if (!is_array($translation) || count($translation) != $this->pluralizer()->countForms()) {
+                throw new TranslatorException(
+                    "Translation for plural phrases must include all phrase forms."
+                );
+            }
+        }
+
         $this->loadBundle($bundle);
-        $this->bundles[$bundle][$string] = func_num_args() == 2 ? $translation : $string;
+        $this->bundles[$bundle][$string] = $translation;
         $this->saveBundle($bundle);
     }
 

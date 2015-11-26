@@ -37,6 +37,14 @@ class TranslatorConfig extends InjectableConfig
     }
 
     /**
+     * @return string
+     */
+    public function pluralsBundle()
+    {
+        return $this->config['plurals'];
+    }
+
+    /**
      * @param string $language
      * @return bool
      */

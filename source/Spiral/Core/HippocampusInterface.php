@@ -37,5 +37,5 @@ interface HippocampusInterface
      * @param string $location
      * @return array
      */
-    public function memorySections($location = null);
+    public function getSections($location = null);
 }

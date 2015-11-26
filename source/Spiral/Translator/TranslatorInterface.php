@@ -7,7 +7,7 @@
  */
 namespace Spiral\Translator;
 
-use Spiral\Translator\Exceptions\LanguageException;
+use Spiral\Translator\Exceptions\LocaleException;
 use Spiral\Translator\Exceptions\TranslatorException;
 
 /**
@@ -30,32 +30,31 @@ interface TranslatorInterface
      * Change language.
      *
      * @param string $language
-     * @throws LanguageException
+     * @throws LocaleException
      */
-    public function setLanguage($language);
+    public function setLocale($language);
 
     /**
      * Get current language.
      *
      * @return string
      */
-    public function getLanguage();
+    public function getLocate();
 
     /**
-     * Translate value using active language. Method must support message interpolation using
-     * interpolate method and sptrinf.
+     * Translate value using active language. Method must support message interpolation.
      *
      * Examples:
      * $translator->translate('bundle', 'Some Message');
-     * $translator->translate('bundle', 'Hello %s', $name);
+     * $translator->translate('bundle', 'Hello {name}', ['name' => $name]);
      *
-     * @param string      $bundle
-     * @param string      $string
-     * @param array|mixed $options Interpolation options.
+     * @param string $bundle
+     * @param string $string
+     * @param array  $options Interpolation options.
      * @return string
      * @throws TranslatorException
      */
-    public function translate($bundle, $string, $options = []);
+    public function translate($bundle, $string, array $options = []);
 
     /**
      * Pluralize string using language pluralization options and specified numeric value. Number
@@ -66,27 +65,9 @@ interface TranslatorInterface
      *
      * @param string $phrase Should include {n} as placeholder.
      * @param int    $number
-     * @param bool   $format Format number.
+     * @param bool   $format Format number using number_format function.
      * @return string
      * @throws TranslatorException
      */
     public function pluralize($phrase, $number, $format = true);
-
-    /**
-     * Check if given string known to translator.
-     *
-     * @param string $bundle
-     * @param string $string
-     * @return bool
-     */
-    public function knows($bundle, $string);
-
-    /**
-     * Set string translation in specified bundle.
-     *
-     * @param string       $bundle
-     * @param string       $string
-     * @param string|array $translation Must contain array of phrase forms for plural phrases.
-     */
-    public function set($bundle, $string, $translation = '');
 }

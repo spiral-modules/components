@@ -8,9 +8,9 @@
 namespace Spiral\Translator\Exceptions;
 
 /**
- * Invalid or unknown language.
+ * Invalid or unknown locale.
  */
-class LanguageException extends TranslatorException
+class LocaleException extends TranslatorException
 {
 
 }

@@ -39,7 +39,7 @@ interface TranslatorInterface
      *
      * @return string
      */
-    public function getLocate();
+    public function getLocale();
 
     /**
      * Translate value using active language. Method must support message interpolation.

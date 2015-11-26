@@ -516,7 +516,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      */
     protected function createSchema()
     {
-        $this->logger()->info("Creating new table {table}.", ['table' => $this->getName(true)]);
+        $this->logger()->debug("Creating new table {table}.", ['table' => $this->getName(true)]);
 
         $this->commander->createTable($this);
     }
@@ -546,7 +546,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     protected function synchroniseColumns()
     {
         foreach ($this->comparator->droppedColumns() as $column) {
-            $this->logger()->info("Dropping column [{statement}] from table {table}.", [
+            $this->logger()->debug("Dropping column [{statement}] from table {table}.", [
                 'statement' => $column->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);
@@ -555,7 +555,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
         }
 
         foreach ($this->comparator->addedColumns() as $column) {
-            $this->logger()->info("Adding column [{statement}] into table {table}.", [
+            $this->logger()->debug("Adding column [{statement}] into table {table}.", [
                 'statement' => $column->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);
@@ -570,7 +570,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
              */
             list($current, $initial) = $pair;
 
-            $this->logger()->info("Altering column [{statement}] to [{new}] in table {table}.", [
+            $this->logger()->debug("Altering column [{statement}] to [{new}] in table {table}.", [
                 'statement' => $initial->sqlStatement(),
                 'new'       => $current->sqlStatement(),
                 'table'     => $this->getName(true)
@@ -590,7 +590,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     protected function dropIndexes()
     {
         foreach ($this->comparator->droppedIndexes() as $index) {
-            $this->logger()->info("Dropping index [{statement}] from table {table}.", [
+            $this->logger()->debug("Dropping index [{statement}] from table {table}.", [
                 'statement' => $index->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);
@@ -609,7 +609,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     protected function synchroniseIndexes()
     {
         foreach ($this->comparator->addedIndexes() as $index) {
-            $this->logger()->info("Adding index [{statement}] into table {table}.", [
+            $this->logger()->debug("Adding index [{statement}] into table {table}.", [
                 'statement' => $index->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);
@@ -624,7 +624,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
              */
             list($current, $initial) = $pair;
 
-            $this->logger()->info("Altering index [{statement}] to [{new}] in table {table}.", [
+            $this->logger()->debug("Altering index [{statement}] to [{new}] in table {table}.", [
                 'statement' => $initial->sqlStatement(),
                 'new'       => $current->sqlStatement(),
                 'table'     => $this->getName(true)
@@ -644,7 +644,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     protected function dropForeigns()
     {
         foreach ($this->comparator->droppedForeigns() as $foreign) {
-            $this->logger()->info("Dropping foreign key [{statement}] from table {table}.", [
+            $this->logger()->debug("Dropping foreign key [{statement}] from table {table}.", [
                 'statement' => $foreign->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);
@@ -663,7 +663,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     protected function synchroniseForeigns()
     {
         foreach ($this->comparator->addedForeigns() as $foreign) {
-            $this->logger()->info("Adding foreign key [{statement}] into table {table}.", [
+            $this->logger()->debug("Adding foreign key [{statement}] into table {table}.", [
                 'statement' => $foreign->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);
@@ -678,7 +678,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
              */
             list($current, $initial) = $pair;
 
-            $this->logger()->info("Altering foreign key [{statement}] to [{new}] in {table}.", [
+            $this->logger()->debug("Altering foreign key [{statement}] to [{new}] in {table}.", [
                 'statement' => $initial->sqlStatement(),
                 'table'     => $this->getName(true)
             ]);

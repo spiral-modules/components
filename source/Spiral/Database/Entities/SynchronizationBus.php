@@ -123,7 +123,7 @@ class SynchronizationBus extends Component
      */
     protected function beginTransaction()
     {
-        $this->logger()->info("Begin transaction");
+        $this->logger()->debug("Begin transaction");
         foreach ($this->drivers as $driver) {
             $driver->beginTransaction();
         }
@@ -134,7 +134,7 @@ class SynchronizationBus extends Component
      */
     protected function commitTransaction()
     {
-        $this->logger()->info("Commit transaction");
+        $this->logger()->debug("Commit transaction");
         foreach ($this->drivers as $driver) {
             $driver->commitTransaction();
         }
@@ -145,7 +145,7 @@ class SynchronizationBus extends Component
      */
     protected function rollbackTransaction()
     {
-        $this->logger()->info("Roll back transaction");
+        $this->logger()->warning("Roll back transaction");
         foreach ($this->drivers as $driver) {
             $driver->rollbackTransaction();
         }

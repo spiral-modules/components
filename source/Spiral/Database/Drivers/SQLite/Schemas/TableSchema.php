@@ -87,7 +87,7 @@ class TableSchema extends AbstractTable
             return parent::synchroniseSchema();
         }
 
-        $this->logger()->info("Rebuilding table {table} to apply required modifications.", [
+        $this->logger()->debug("Rebuilding table {table} to apply required modifications.", [
             'table' => $this->getName(true)
         ]);
 
@@ -184,7 +184,7 @@ class TableSchema extends AbstractTable
      */
     private function copyData(AbstractTable $temporary, array $mapping)
     {
-        $this->logger()->info(
+        $this->logger()->debug(
             "Copying table data from {source} to {table} using mapping ({columns}) => ({target}).",
             [
                 'source'  => $this->driver->identifier($this->initial->getName()),

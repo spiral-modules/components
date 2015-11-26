@@ -197,16 +197,20 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      */
     public function set($bundle, $string, $translation = '')
     {
-        if (empty($translation)) {
-            $translation = $string;
-        }
-
         if ($bundle == $this->config->pluralsBundle()) {
+            if (empty($translation)) {
+                $translation = array_fill(0, $this->pluralizer()->countForms(), $string);
+            }
+
             if (!is_array($translation) || count($translation) != $this->pluralizer()->countForms()) {
                 throw new TranslatorException(
                     "Translation for plural phrases must include all phrase forms."
                 );
             }
+        }
+
+        if (empty($translation)) {
+            $translation = $string;
         }
 
         $this->loadBundle($bundle);

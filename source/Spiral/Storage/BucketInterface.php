@@ -21,20 +21,36 @@ use Spiral\Storage\Exceptions\StorageException;
 interface BucketInterface
 {
     /**
-     * @param string           $server  Responsible server id or name. Server will be requested on
-     *                                  demand.
+     * @param string           $name
      * @param string           $prefix  Bucket prefix.
      * @param array            $options Server related options.
+     * @param ServerInterface  $server
      * @param StorageInterface $storage
      * @param FilesInterface   $files
      */
     public function __construct(
-        $server,
+        $name,
         $prefix,
         array $options,
+        ServerInterface $server,
         StorageInterface $storage,
         FilesInterface $files
     );
+
+    /**
+     * Bucker name.
+     *
+     * @return string
+     */
+    public function getName();
+
+    /**
+     * Associated storage server instance.
+     *
+     * @return ServerInterface
+     * @throws StorageException
+     */
+    public function server();
 
     /**
      * Get server specific bucket option or return default value.
@@ -44,21 +60,6 @@ interface BucketInterface
      * @return mixed
      */
     public function getOption($name, $default = null);
-
-    /**
-     * Get server name or ID associated with bucket.
-     *
-     * @return string
-     */
-    public function getServerID();
-
-    /**
-     * Associated storage server instance.
-     *
-     * @return ServerInterface
-     * @throws StorageException
-     */
-    public function server();
 
     /**
      * Get bucket prefix.

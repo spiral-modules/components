@@ -8,8 +8,8 @@
 namespace Spiral\Storage;
 
 use Spiral\Core\Component;
-use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\Entities\StorageObject;
@@ -58,10 +58,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         //Loading buckets
         foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->factory->make(
-                StorageBucket::class,
-                ['storage' => $this] + $bucket
-            );
+            $this->buckets[$name] = $this->createBucket($name, $bucket);
         }
     }
 
@@ -163,5 +160,34 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     public function open($address)
     {
         return new StorageObject($address, $this);
+    }
+
+    /**
+     * Create bucket based configuration settings.
+     *
+     * @param string $name
+     * @param array  $bucket
+     * @return BucketInterface
+     */
+    private function createBucket($name, array $bucket)
+    {
+        $parameters = $bucket + compact('name');
+
+        if (!array_key_exists('options', $bucket)) {
+            throw new StorageException("Bucket configuration must include options.");
+        }
+
+        if (!array_key_exists('prefix', $bucket)) {
+            throw new StorageException("Bucket configuration must include prefix.");
+        }
+
+        if (!array_key_exists('server', $bucket)) {
+            throw new StorageException("Bucket configuration must include server id.");
+        }
+
+        $parameters['server'] = $this->server($bucket['server']);
+        $parameters['storage'] = $this;
+
+        return $this->factory->make(StorageBucket::class, $parameters);
     }
 }

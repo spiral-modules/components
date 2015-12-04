@@ -16,6 +16,8 @@ use Spiral\Tokenizer\TokenizerInterface;
  * File reflections can fetch information about classes, interfaces, functions and traits declared
  * in file. In addition file reflection provides ability to fetch and describe every method/function
  * call.
+ * 
+ * @todo built using tokenizer, try ast
  */
 class ReflectionFile extends Component implements ReflectionFileInterface
 {

@@ -10,7 +10,7 @@ namespace Spiral\Core\Exceptions\Container;
 /**
  * Unable to resolve argument value.
  */
-class ArgumentException extends ContainerException
+class ArgumentException extends AutowireException
 {
     /**
      * Parameter caused error.

@@ -16,6 +16,9 @@ use Spiral\Database\Injections\ParameterInterface;
 /**
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
+ *
+ * @todo Need a way to use prepared query statement. Can be done using parameters (they all objects
+ * @todo and linked to values, but query builder should keep an instance of prepared statement.
  */
 abstract class QueryBuilder extends Component implements ExpressionInterface
 {
@@ -45,6 +48,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
      * Get ordered list of builder parameters. Attention, this method WILL return only
      * ParameterInterface instances in future as scalar parameters will be dropped.
      *
+     * @deprecated scalar values
      * @param QueryCompiler $compiler
      * @return array|ParameterInterface[]
      * @throws BuilderException

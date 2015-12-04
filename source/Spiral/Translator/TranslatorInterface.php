@@ -7,18 +7,17 @@
  */
 namespace Spiral\Translator;
 
-use Spiral\Translator\Exceptions\LocaleException;
-use Spiral\Translator\Exceptions\TranslatorException;
-
 /**
- * Provides bundle based string translations.
+ * Spiral translation built at top of symfony Translator and provides ability to route multiple
+ * string sets (bundles) into one bigger domain. Such technique provides ability to collect and
+ * generate location files based on application source without extra code.
  */
-interface TranslatorInterface
+interface TranslatorInterface extends \Symfony\Component\Translation\TranslatorInterface
 {
     /**
      * Default translation bundle.
      */
-    const DEFAULT_BUNDLE = 'default';
+    const DEFAULT_DOMAIN = 'messages';
 
     /**
      * Default set of braces to be used in classes or views for indication of translatable content.
@@ -27,47 +26,10 @@ interface TranslatorInterface
     const I18N_POSTFIX = ']]';
 
     /**
-     * Change language.
-     *
-     * @param string $language
-     * @throws LocaleException
-     */
-    public function setLocale($language);
-
-    /**
-     * Get current language.
-     *
-     * @return string
-     */
-    public function getLocale();
-
-    /**
-     * Translate value using active language. Method must support message interpolation.
-     *
-     * Examples:
-     * $translator->translate('bundle', 'Some Message');
-     * $translator->translate('bundle', 'Hello {name}', ['name' => $name]);
+     * Resolve domain name for given bundle.
      *
      * @param string $bundle
-     * @param string $string
-     * @param array  $options Interpolation options.
      * @return string
-     * @throws TranslatorException
      */
-    public function translate($bundle, $string, array $options = []);
-
-    /**
-     * Pluralize string using language pluralization options and specified numeric value. Number
-     * has to be ingested at place of {n} placeholder.
-     *
-     * Examples:
-     * $translator->pluralize("{n} user", $users);
-     *
-     * @param string $phrase Should include {n} as placeholder.
-     * @param int    $number
-     * @param bool   $format Format number using number_format function.
-     * @return string
-     * @throws TranslatorException
-     */
-    public function pluralize($phrase, $number, $format = true);
+    public function resolveDomain($bundle);
 }

@@ -11,10 +11,12 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 use Spiral\Core\Component;
-use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Debug\Configs\DebuggerConfig;
 use Spiral\Debug\Exceptions\BenchmarkException;
+use Spiral\Debug\Exceptions\DebuggerException;
+use Spiral\Debug\Logger\SharedHandler;
 
 /**
  * Debugger is responsible for global log, benchmarking and configuring Monolog loggers.
@@ -33,6 +35,7 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
     private $benchmarks = [];
 
     /**
+     * @todo array of handlers?
      * @var HandlerInterface
      */
     protected $sharedHandler = null;
@@ -46,18 +49,18 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
      * Container is needed to construct log handlers.
      *
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
-     * @param DebuggerConfig       $config
-     * @param ConstructorInterface $constructor
+     * @param DebuggerConfig   $config
+     * @param FactoryInterface $factory
      */
-    public function __construct(DebuggerConfig $config, ConstructorInterface $constructor)
+    public function __construct(DebuggerConfig $config, FactoryInterface $factory)
     {
         $this->config = $config;
-        $this->constructor = $constructor;
+        $this->factory = $factory;
     }
 
     /**
@@ -90,7 +93,7 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
             /**
              * @var HandlerInterface $instance
              */
-            $handlers[] = $instance = $this->constructor->construct(
+            $handlers[] = $instance = $this->factory->make(
                 $handler['handler'],
                 $handler['options']
             );
@@ -109,10 +112,37 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
      * To remove existed handler set it argument as null.
      *
      * @param HandlerInterface $handler
+     * @return SharedHandler|null Returns previously set handler.
      */
     public function shareHandler(HandlerInterface $handler = null)
     {
+        $previous = $this->sharedHandler;
         $this->sharedHandler = $handler;
+
+        return $previous;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasSharedHandler()
+    {
+        return !empty($this->sharedHandler);
+    }
+
+    /**
+     * Get currently associated shared handler.
+     *
+     * @return HandlerInterface
+     * @throws DebuggerException When no handler being set.
+     */
+    public function getSharedHandler()
+    {
+        if (empty($this->sharedHandler)) {
+            throw new DebuggerException("Unable to receive shared handler.");
+        }
+
+        return $this->sharedHandler;
     }
 
     /**

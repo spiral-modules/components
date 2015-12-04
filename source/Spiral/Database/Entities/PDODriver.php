@@ -10,8 +10,8 @@ namespace Spiral\Database\Entities;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ConstructorInterface;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
@@ -112,18 +112,17 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Container is needed to construct instances of QueryCompiler.
      *
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
-     * @param string               $name
-     * @param array                $config
-     * @param ConstructorInterface $constructor Container is needed to construct instances of
-     *                                          QueryCompiler.
+     * @param string           $name
+     * @param array            $config
+     * @param FactoryInterface $factory Container is needed to construct instances of QueryCompiler.
      * @throws SugarException
      */
-    public function __construct($name, array $config, ConstructorInterface $constructor = null)
+    public function __construct($name, array $config, FactoryInterface $factory = null)
     {
         $this->name = $name;
 
@@ -132,7 +131,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         //PDO connection options has to be stored under key "options" of config
         $this->options = $config['options'] + $this->options;
 
-        $this->constructor = $this->saturate($constructor, ConstructorInterface::class);
+        $this->factory = $this->saturate($factory, FactoryInterface::class);
     }
 
     /**
@@ -271,6 +270,23 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
+     * Execute sql statement and wrap resulted rows using driver specific or default instance of
+     * QueryResult.
+     *
+     * @param string $query
+     * @param array  $parameters Parameters to be binded into query.
+     * @return QueryResult
+     * @throws QueryException
+     */
+    public function query($query, array $parameters = [])
+    {
+        return $this->factory->make(static::QUERY_RESULT, [
+            'statement'  => $this->statement($query, $parameters),
+            'parameters' => $parameters
+        ]);
+    }
+
+    /**
      * Create instance of PDOStatement using provided SQL query and set of parameters.
      *
      * @param string $query
@@ -287,7 +303,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             }
 
             //Prepared statement
-            $pdoStatement = $this->getPDO()->prepare($query);
+            $pdoStatement = $this->prepare($query);
 
             foreach ($this->flattenParameters($parameters) as $index => $parameter) {
                 //Let's mount statement parameters
@@ -320,20 +336,14 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Execute sql statement and wrap resulted rows using driver specific or default instance of
-     * QueryResult.
+     * Get prepared PDO statement.
      *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     * @return QueryResult
-     * @throws QueryException
+     * @param string $statement
+     * @return \PDOStatement
      */
-    public function query($query, array $parameters = [])
+    public function prepare($statement)
     {
-        return $this->constructor->construct(static::QUERY_RESULT, [
-            'statement'  => $this->statement($query, $parameters),
-            'parameters' => $parameters
-        ]);
+        return $this->getPDO()->prepare($statement);
     }
 
     /**
@@ -474,7 +484,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function queryCompiler($prefix = '')
     {
-        return $this->constructor->construct(static::QUERY_COMPILER, [
+        return $this->factory->make(static::QUERY_COMPILER, [
             'driver' => $this,
             'quoter' => new Quoter($this, $prefix)
         ]);

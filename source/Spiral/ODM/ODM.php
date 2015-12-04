@@ -8,7 +8,7 @@
 namespace Spiral\ODM;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
@@ -110,26 +110,26 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
 
     /**
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
      * @param ODMConfig            $config
      * @param HippocampusInterface $memory
-     * @param ConstructorInterface $constructor
+     * @param FactoryInterface     $factory
      */
     public function __construct(
         ODMConfig $config,
         HippocampusInterface $memory,
-        ConstructorInterface $constructor
+        FactoryInterface $factory
     ) {
         $this->config = $config;
         $this->memory = $memory;
 
         //Loading schema from memory
         $this->schema = (array)$memory->loadData(static::MEMORY);
-        $this->constructor = $constructor;
+        $this->factory = $factory;
     }
 
     /**
@@ -160,7 +160,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
 
         $benchmark = $this->benchmark('database', $database);
         try {
-            $this->databases[$database] = $this->constructor->construct(MongoDatabase::class, [
+            $this->databases[$database] = $this->factory->make(MongoDatabase::class, [
                 'name'   => $database,
                 'config' => $this->config->databaseConfig($database),
                 'odm'    => $this
@@ -361,7 +361,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      */
     public function schemaBuilder(ClassLocatorInterface $locator = null)
     {
-        return $this->constructor->construct(SchemaBuilder::class, [
+        return $this->factory->make(SchemaBuilder::class, [
             'odm'     => $this,
             'config'  => $this->config['schemas'],
             'locator' => $locator

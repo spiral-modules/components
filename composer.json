@@ -20,7 +20,8 @@
     "monolog/monolog": "^1.17",
     "symfony/finder": "^2.7",
     "symfony/event-dispatcher": "^2.7",
-    "container-interop/container-interop": "^1.1"
+    "container-interop/container-interop": "^1.1",
+    "symfony/translation": "^2.7"
   },
   "autoload": {
     "files": [

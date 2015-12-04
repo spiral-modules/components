@@ -139,6 +139,16 @@ class Record extends RecordEntity implements ActiveEntityInterface
     }
 
     /**
+     * Just an alias.
+     *
+     * @return RecordSource
+     */
+    public static function find()
+    {
+        return static::source();
+    }
+
+    /**
      * Save embedded relations.
      *
      * @param bool $validate

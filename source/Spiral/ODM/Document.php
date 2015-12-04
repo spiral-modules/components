@@ -280,6 +280,16 @@ class Document extends DocumentEntity implements ActiveEntityInterface
     }
 
     /**
+     * Just an alias.
+     *
+     * @return DocumentSource
+     */
+    public static function find()
+    {
+        return static::source();
+    }
+
+    /**
      * {@inheritdoc}
      *
      * Accessor options include field type resolved by DocumentSchema.

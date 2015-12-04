@@ -59,8 +59,6 @@ class Isolator extends Component
     private $replaces = [];
 
     /**
-     * New php isolator.
-     *
      * @param string $prefix    Replaced block prefix, -php by default.
      * @param string $postfix   Replaced block postfix, block- by default.
      * @param bool   $shortTags Handle short tags. This is not required if short_tags are enabled.
@@ -78,6 +76,7 @@ class Isolator extends Component
 
     /**
      * Isolates all returned PHP blocks with a defined pattern. Method uses token_get_all function.
+     * Returned source have all php blocks replaces with non executable placeholder.
      *
      * @param string $source
      * @return string

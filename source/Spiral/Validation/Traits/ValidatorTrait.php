@@ -8,7 +8,7 @@
 namespace Spiral\Validation\Traits;
 
 use Interop\Container\ContainerInterface;
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Events\Traits\EventsTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -104,7 +104,7 @@ trait ValidatorTrait
                 && substr($error, -2) == Translator::I18N_POSTFIX
             ) {
                 //We will localize only messages embraced with [[ and ]]
-                $error = $this->translate($error);
+                $error = $this->say($error);
             }
 
             $errors[$field] = $error;
@@ -200,10 +200,10 @@ trait ValidatorTrait
         }
 
         //We need constructor
-        if ($container instanceof ConstructorInterface) {
+        if ($container instanceof FactoryInterface) {
             $constructor = $container;
         } else {
-            $constructor = $container->get(ConstructorInterface::class);
+            $constructor = $container->get(FactoryInterface::class);
         }
 
         //Receiving instance of validator from container

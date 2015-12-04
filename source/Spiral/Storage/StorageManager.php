@@ -8,7 +8,7 @@
 namespace Spiral\Storage;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\Entities\StorageBucket;
@@ -42,23 +42,23 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
 
     /**
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
-     * @param StorageConfig        $config
-     * @param ConstructorInterface $container
+     * @param StorageConfig    $config
+     * @param FactoryInterface $factory
      */
-    public function __construct(StorageConfig $config, ConstructorInterface $container)
+    public function __construct(StorageConfig $config, FactoryInterface $factory)
     {
         $this->config = $config;
-        $this->constructor = $container;
+        $this->factory = $factory;
 
         //Loading buckets
         foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->constructor->construct(
+            $this->buckets[$name] = $this->factory->make(
                 StorageBucket::class,
                 ['storage' => $this] + $bucket
             );
@@ -74,7 +74,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
         }
 
-        return $this->buckets[$name] = $this->constructor->construct(
+        return $this->buckets[$name] = $this->factory->make(
             StorageBucket::class,
             ['storage' => $this] + compact('prefix', 'server', 'options')
         );
@@ -144,7 +144,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
 
         $config = $this->config->serverOptions($server);
 
-        return $this->servers[$server] = $this->constructor->construct($config['class'], $config);
+        return $this->servers[$server] = $this->factory->make($config['class'], $config);
     }
 
     /**

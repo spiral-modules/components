@@ -8,7 +8,7 @@
 namespace Spiral\Database;
 
 use Spiral\Core\Component;
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\Entities\Database;
@@ -49,18 +49,18 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
 
     /**
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
-     * @param DatabasesConfig      $config
-     * @param ConstructorInterface $constructor
+     * @param DatabasesConfig  $config
+     * @param FactoryInterface $factory
      */
-    public function __construct(DatabasesConfig $config, ConstructorInterface $constructor)
+    public function __construct(DatabasesConfig $config, FactoryInterface $factory)
     {
         $this->config = $config;
-        $this->constructor = $constructor;
+        $this->factory = $factory;
     }
 
     /**
@@ -88,7 +88,7 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
         }
 
         //No need to benchmark here, due connection will happen later
-        $this->databases[$database] = $this->constructor->construct(Database::class, [
+        $this->databases[$database] = $this->factory->make(Database::class, [
             'name'   => $database,
             'driver' => $this->driver($this->config->databaseConnection($database)),
             'prefix' => $this->config->databasePrefix($database)
@@ -117,7 +117,7 @@ class DatabaseManager extends Component implements InjectorInterface, DatabasesI
             );
         }
 
-        $this->drivers[$connection] = $this->constructor->construct(
+        $this->drivers[$connection] = $this->factory->make(
             $this->config->connectionDriver($connection),
             [
                 'name'   => $connection,

@@ -10,7 +10,7 @@ namespace Spiral\Cache;
 use Spiral\Cache\Configs\CacheConfig;
 use Spiral\Cache\Exceptions\CacheException;
 use Spiral\Core\Component;
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
@@ -44,18 +44,18 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
 
     /**
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
-     * @param CacheConfig          $config
-     * @param ConstructorInterface $constructor
+     * @param CacheConfig      $config
+     * @param FactoryInterface $factory
      */
-    public function __construct(CacheConfig $config, ConstructorInterface $constructor)
+    public function __construct(CacheConfig $config, FactoryInterface $factory)
     {
         $this->config = $config;
-        $this->constructor = $constructor;
+        $this->factory = $factory;
     }
 
     /**
@@ -73,7 +73,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
         $benchmark = $this->benchmark('store', $class);
         try {
             //Constructing cache instance
-            $this->stores[$class] = $this->constructor->construct(
+            $this->stores[$class] = $this->factory->make(
                 $class,
                 $this->config->storeOptions($class)
             );

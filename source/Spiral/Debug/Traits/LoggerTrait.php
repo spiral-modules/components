@@ -8,7 +8,6 @@
 namespace Spiral\Debug\Traits;
 
 use Interop\Container\ContainerInterface;
-use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Spiral\Debug\LogsInterface;
@@ -19,14 +18,26 @@ use Spiral\Debug\LogsInterface;
 trait LoggerTrait
 {
     /**
-     * Set logger method.
-     */
-    use LoggerAwareTrait;
-
-    /**
      * @var LoggerInterface[]
      */
-    protected static $loggers = [];
+    private static $loggers = [];
+
+    /**
+     * Private and null.
+     *
+     * @var LoggerInterface|null
+     */
+    private $logger = null;
+
+    /**
+     * Sets a logger.
+     *
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * Set class specific logger (associated with every instance).

@@ -271,7 +271,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                 }
 
                 //Default message
-                $message = $this->translate($this->defaultMessage);
+                $message = $this->say($this->defaultMessage);
 
                 //Recording error message
                 $this->addMessage(

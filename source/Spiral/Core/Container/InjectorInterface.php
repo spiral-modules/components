@@ -10,8 +10,9 @@ namespace Spiral\Core\Container;
 use Spiral\Core\Exceptions\Container\ContainerException;
 
 /**
- * Magic spiral interface used to resolve dependencies based on their context. Container MUST
- * execute such method if INJECTOR constant found in requested class.
+ * Magic spiral interface used to resolve dependencies based on their context. Container may
+ * execute such method if INJECTOR constant found in requested class. Potentially changed to
+ * lazy binding in spiral container.
  */
 interface InjectorInterface
 {

@@ -7,7 +7,7 @@
  */
 namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\Postgres\Schemas\Commander;
@@ -66,16 +66,16 @@ class PostgresDriver extends Driver
      * {@inheritdoc}
      * @param string               $name
      * @param array                $config
-     * @param ConstructorInterface $constructor
+     * @param FactoryInterface     $factory
      * @param HippocampusInterface $memory
      */
     public function __construct(
         $name,
         array $config,
-        ConstructorInterface $constructor = null,
+        FactoryInterface $factory = null,
         HippocampusInterface $memory = null
     ) {
-        parent::__construct($name, $config, $constructor);
+        parent::__construct($name, $config, $factory);
 
         $this->memory = $memory;
     }
@@ -151,7 +151,7 @@ class PostgresDriver extends Driver
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return $this->constructor->construct(InsertQuery::class, [
+        return $this->factory->make(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);

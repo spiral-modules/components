@@ -71,10 +71,10 @@ abstract class Checker extends Component
             $messages = $reflection->getDefaultProperties()['messages'];
             if (isset($messages[$method])) {
                 //We are inheriting parent messages
-                return $this->translate($messages[$method]);
+                return $this->say($messages[$method]);
             }
         } elseif (isset($this->messages[$method])) {
-            return $this->translate($this->messages[$method]);
+            return $this->say($this->messages[$method]);
         }
 
         //Looking for message in parent realization

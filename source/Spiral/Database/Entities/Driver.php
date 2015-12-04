@@ -86,11 +86,11 @@ abstract class Driver extends PDODriver
      */
     public function tableSchema($table, $prefix = '')
     {
-        return $this->constructor->construct(static::SCHEMA_TABLE, [
+        return $this->factory->make(static::SCHEMA_TABLE, [
             'driver'    => $this,
             'name'      => $table,
             'prefix'    => $prefix,
-            'commander' => $this->constructor->construct(static::COMMANDER, ['driver' => $this])
+            'commander' => $this->factory->make(static::COMMANDER, ['driver' => $this])
         ]);
     }
 
@@ -103,7 +103,7 @@ abstract class Driver extends PDODriver
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return $this->constructor->construct(InsertQuery::class, [
+        return $this->factory->make(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -118,7 +118,7 @@ abstract class Driver extends PDODriver
      */
     public function selectBuilder(Database $database, array $parameters = [])
     {
-        return $this->constructor->construct(SelectQuery::class, [
+        return $this->factory->make(SelectQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -133,7 +133,7 @@ abstract class Driver extends PDODriver
      */
     public function deleteBuilder(Database $database, array $parameters = [])
     {
-        return $this->constructor->construct(DeleteQuery::class, [
+        return $this->factory->make(DeleteQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);
@@ -148,7 +148,7 @@ abstract class Driver extends PDODriver
      */
     public function updateBuilder(Database $database, array $parameters = [])
     {
-        return $this->constructor->construct(UpdateQuery::class, [
+        return $this->factory->make(UpdateQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);

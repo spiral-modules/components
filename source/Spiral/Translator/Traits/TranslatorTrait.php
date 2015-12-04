@@ -22,13 +22,13 @@ trait TranslatorTrait
      * Translate message using parent class as bundle name. Method will remove string braces ([[ and
      * ]]) if specified.
      *
-     * Example: $this->translate("User account is invalid.");
+     * Example: $this->say("User account is invalid.");
      *
      * @param string $string
      * @param array  $options Interpolation options.
      * @return string
      */
-    protected function translate($string, array $options = [])
+    protected function say($string, array $options = [])
     {
         if (
             substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
@@ -43,9 +43,16 @@ trait TranslatorTrait
             return $string;
         }
 
-        return $container->get(TranslatorInterface::class)->translate(
-            static::class, $string, $options
-        );
+        /**
+         * Potentially can be downgraded to Symfony\TranslatorInterface but without domains map
+         * feature
+         *
+         * @var TranslatorInterface $translator
+         */
+        $translator = $container->get(TranslatorInterface::class);
+
+        //Translate class string using automatically resolved message domain
+        return $translator->trans($string, $options, $translator->resolveDomain(static::class));
     }
 
     /**

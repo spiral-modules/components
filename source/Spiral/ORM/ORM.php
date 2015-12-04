@@ -8,7 +8,7 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Core\ConstructorInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseManager;
@@ -93,9 +93,9 @@ class ORM extends EntityCache implements SingletonInterface
 
     /**
      * @invisible
-     * @var ConstructorInterface
+     * @var FactoryInterface
      */
-    protected $constructor = null;
+    protected $factory = null;
 
     /**
      * @invisible
@@ -107,13 +107,13 @@ class ORM extends EntityCache implements SingletonInterface
      * @param     ORMConfig        $config
      * @param HippocampusInterface $memory
      * @param DatabaseManager      $databases
-     * @param ConstructorInterface $constructor
+     * @param FactoryInterface     $factory
      */
     public function __construct(
         ORMConfig $config,
         HippocampusInterface $memory,
         DatabaseManager $databases,
-        ConstructorInterface $constructor
+        FactoryInterface $factory
     ) {
         $this->config = $config;
         $this->memory = $memory;
@@ -122,7 +122,7 @@ class ORM extends EntityCache implements SingletonInterface
         $this->schema = (array)$memory->loadData(static::MEMORY);
 
         $this->databases = $databases;
-        $this->constructor = $constructor;
+        $this->factory = $factory;
     }
 
     /**
@@ -318,7 +318,7 @@ class ORM extends EntityCache implements SingletonInterface
      */
     public function schemaBuilder(ClassLocatorInterface $locator = null)
     {
-        return $this->constructor->construct(SchemaBuilder::class, [
+        return $this->factory->make(SchemaBuilder::class, [
             'config'  => $this->config,
             'orm'     => $this,
             'locator' => $locator
@@ -349,7 +349,7 @@ class ORM extends EntityCache implements SingletonInterface
         }
 
         //Getting needed relation schema builder
-        return $this->constructor->construct(
+        return $this->factory->make(
             $this->config->relationClass($type, 'schema'),
             compact('builder', 'record', 'name', 'definition')
         );

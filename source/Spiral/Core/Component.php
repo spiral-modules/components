@@ -49,15 +49,20 @@ abstract class Component
      * fallback.
      *
      * @internal Do not use for business logic.
-     * @param ContainerInterface $container
-     * @return ContainerInterface
+     * @param ContainerInterface $container Can be set to null.
+     * @return ContainerInterface|null
      */
     final protected static function staticContainer(ContainerInterface $container = null)
     {
-        if (!empty($container)) {
-            self::$staticContainer = $container;
+        if (func_num_args() === 0) {
+            return self::$staticContainer;
         }
 
-        return self::$staticContainer;
+        $outer = self::$staticContainer;
+
+        self::$staticContainer = $container;
+
+        //Return previous container or null
+        return $outer;
     }
 }

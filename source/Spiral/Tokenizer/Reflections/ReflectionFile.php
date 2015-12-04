@@ -16,8 +16,6 @@ use Spiral\Tokenizer\TokenizerInterface;
  * File reflections can fetch information about classes, interfaces, functions and traits declared
  * in file. In addition file reflection provides ability to fetch and describe every method/function
  * call.
- * 
- * @todo built using tokenizer, try ast
  */
 class ReflectionFile extends Component implements ReflectionFileInterface
 {
@@ -470,6 +468,9 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         //Multiple "(" and ")" statements nested.
         $level = 0;
 
+        //Inside array arguments
+        $arrayLevel = 0;
+
         //Skip all tokens until next function
         $ignore = false;
 
@@ -507,7 +508,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
             }
 
             //We are inside function, and there is "(", indexing arguments.
-            if (!empty($invocationTID) && $tokenType == '(') {
+            if (!empty($invocationTID) && ($tokenType == '(' || $tokenType == '[')) {
                 if (empty($argumentsTID)) {
                     $argumentsTID = $tokenID;
                 }
@@ -522,7 +523,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
             }
 
             //We are inside function arguments and ")" met.
-            if (!empty($invocationTID) && $tokenType == ')') {
+            if (!empty($invocationTID) && ($tokenType == ')' || $tokenType == ']')) {
                 $level--;
                 if ($level == -1) {
                     $invocationTID = false;

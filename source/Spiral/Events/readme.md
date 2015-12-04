@@ -1,1 +1,1 @@
-Purely based on Symfony Events.
+Purely based on Symfony Events. Only helper trait presented.

@@ -345,6 +345,7 @@ abstract class Loader implements LoaderInterface
             //Chain of relations provided
             $nested = $this->loader(substr($relation, 0, $position), []);
             if (empty($nested) || !$nested instanceof self) {
+                //todo: Think about the options
                 throw new LoaderException(
                     "Only ORM loaders can be used to generate/configure chain of relation loaders."
                 );
@@ -387,6 +388,7 @@ abstract class Loader implements LoaderInterface
         );
 
         if (!empty($options) && !$loader instanceof self) {
+            //todo: think about alternatives again
             throw new LoaderException(
                 "Only ORM loaders can be used to generate/configure chain of relation loaders."
             );
@@ -426,6 +428,7 @@ abstract class Loader implements LoaderInterface
             //Chain of relations provided
             $nested = $this->joiner(substr($relation, 0, $position), []);
             if (empty($nested) || !$nested instanceof self) {
+                //todo: DRY
                 throw new LoaderException(
                     "Only ORM loaders can be used to generate/configure chain of relation joiners."
                 );
@@ -458,6 +461,7 @@ abstract class Loader implements LoaderInterface
         );
 
         if (!$joiner instanceof self) {
+            //todo: DRY
             throw new LoaderException(
                 "Only ORM loaders can be used to generate/configure chain of relation joiners."
             );
@@ -771,8 +775,7 @@ abstract class Loader implements LoaderInterface
      * tree are built using php references.
      *
      * Method will return true if data is unique handled before and false in opposite case.
-     * Provided
-     * data array will be automatically linked with it's unique state using references.
+     * Provided data array will be automatically linked with it's unique state using references.
      *
      * @param array $data Reference to parsed record data, reference will be pointed to valid and
      *                    existed data segment if such data was already parsed.
@@ -878,7 +881,7 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * Parse single result row to generate data tree. Must pass parsing to evert nested loader.
+     * Parse single result row to generate data tree. Must pass parsing to every nested loader.
      *
      * @param array $row
      * @return bool
@@ -948,7 +951,7 @@ abstract class Loader implements LoaderInterface
      * "id" as reference key, every record will create following structure:
      * $this->references[id][ID_VALUE] = ITEM
      *
-     * Only deduplicate data must be collected!
+     * Only deduplicated data must be collected!
      *
      * @see deduplicate()
      * @param array $data

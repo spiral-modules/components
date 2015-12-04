@@ -579,7 +579,6 @@ abstract class Loader implements LoaderInterface
         }
     }
 
-
     /**
      * Implementation specific selector configuration, must create required joins, conditions and
      * etc.

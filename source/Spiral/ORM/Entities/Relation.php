@@ -19,7 +19,8 @@ use Spiral\ORM\RelationInterface;
 
 /**
  * Abstract implementation of ORM Relations, provides access to associated instances, use ORM entity
- * cache and record iterators. In additional can be serialized into json, or iterated when needed.
+ * cache and record iterators. In additional, relation can be serialized into json, or iterated when 
+ * needed.
  *
  * This abstract implement built to work with ORM Record classes.
  */

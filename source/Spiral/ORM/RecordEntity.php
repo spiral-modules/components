@@ -490,15 +490,14 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function setField($name, $value, $filter = true)
     {
-        if (!$this->hasField($name)) {
+        if (!array_key_exists($name, $this->fields)) {
             throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
-        //Original values with no filters
-        $original = parent::getField($name, null, false);
+        $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
         if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
             //We must bypass setters and accessors when null value assigned to nullable column
-            $this->setField($name, null, false);
+            $this->fields[$name] = null;
         } else {
             parent::setField($name, $value, $filter);
         }
@@ -517,7 +516,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function getField($name, $default = null, $filter = true)
     {
-        if (!$this) {
+        if (!array_key_exists($name, $this->fields)) {
             throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 

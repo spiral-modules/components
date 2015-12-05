@@ -241,7 +241,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
         $column = $this->columnSchema($name)->declared(true);
 
         //Registering (without adding to initial schema)
-        return parent::registerColumn($column);
+        return $this->registerColumn($column);
     }
 
     /**
@@ -267,7 +267,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
         $index = $this->indexSchema(null)->declared(true);
         $index->columns($columns)->unique(false);
 
-        return parent::registerIndex($index);
+        return $this->registerIndex($index);
     }
 
     /**
@@ -305,7 +305,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
         $foreign = $this->referenceSchema(null)->declared(true);
         $foreign->column($column);
 
-        return parent::registerReference($foreign);
+        return $this->registerReference($foreign);
     }
 
     /**

@@ -31,10 +31,12 @@ class SchematicEntity extends DataEntity
     private $schema = [];
 
     /**
+     * @param array $fields
      * @param array $schema
      */
-    public function __construct(array $schema)
+    public function __construct(array $fields, array $schema)
     {
+        parent::__construct($fields);
         $this->schema = $schema;
         static::initialize();
     }

@@ -8,11 +8,11 @@
 namespace Spiral\Validation\Traits;
 
 use Interop\Container\ContainerInterface;
-use Spiral\Core\FactoryInterface;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\FactoryInterface;
 use Spiral\Events\Traits\EventsTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Translator\Translator;
+use Spiral\Translator\TranslatorInterface;
 use Spiral\Validation\Events\ValidatedEvent;
 use Spiral\Validation\Events\ValidatorEvent;
 use Spiral\Validation\Exceptions\ValidationException;
@@ -34,6 +34,12 @@ trait ValidatorTrait
     private $validator = null;
 
     /**
+     * @whatif private
+     * @var array
+     */
+    protected $errors = [];
+
+    /**
      * Fields (data) to be validated. Named like that for convenience.
      *
      * @whatif private
@@ -47,12 +53,6 @@ trait ValidatorTrait
      * @var array
      */
     protected $validates = [];
-
-    /**
-     * @whatif private
-     * @var array
-     */
-    protected $errors = [];
 
     /**
      * Attach custom validator to model.
@@ -100,8 +100,8 @@ trait ValidatorTrait
         foreach ($this->errors as $field => $error) {
             if (
                 is_string($error)
-                && substr($error, 0, 2) == Translator::I18N_PREFIX
-                && substr($error, -2) == Translator::I18N_POSTFIX
+                && substr($error, 0, 2) == TranslatorInterface::I18N_PREFIX
+                && substr($error, -2) == TranslatorInterface::I18N_POSTFIX
             ) {
                 //We will localize only messages embraced with [[ and ]]
                 $error = $this->say($error);

@@ -16,7 +16,7 @@ use Spiral\Validation\ValidatesInterface;
 interface EntityInterface extends ValidatesInterface
 {
     /**
-     * Check if entity has field by it's name.
+     * Check if field known to entity, field value can be null!
      *
      * @param string $name
      * @return bool

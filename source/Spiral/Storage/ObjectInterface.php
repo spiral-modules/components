@@ -19,13 +19,6 @@ use Spiral\Storage\Exceptions\ServerException;
 interface ObjectInterface extends StreamableInterface
 {
     /**
-     * @param string           $address Full object address.
-     * @param StorageInterface $storage Storage component.
-     * @throws ObjectException
-     */
-    public function __construct($address, StorageInterface $storage);
-
-    /**
      * Get object name inside parent bucket.
      *
      * @return string

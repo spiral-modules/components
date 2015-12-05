@@ -108,6 +108,14 @@ class DataEntity extends Component implements
     protected $accessors = [];
 
     /**
+     * @param array $fields
+     */
+    public function __construct(array $fields)
+    {
+        $this->fields = $fields;
+    }
+
+    /**
      * Routes user function in format of (get|set)FieldName into (get|set)Field(fieldName, value).
      *
      * @see getFeld()
@@ -572,7 +580,7 @@ class DataEntity extends Component implements
      */
     public static function create($fields = [])
     {
-        $entity = new static();
+        $entity = new static([]);
         $entity->setFields($fields);
         $entity->dispatch('created', new EntityEvent($entity));
 

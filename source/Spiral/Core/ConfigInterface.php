@@ -16,11 +16,6 @@ use Spiral\Validation\ValidatorInterface;
 interface ConfigInterface extends InjectableInterface
 {
     /**
-     * @param array $config
-     */
-    public function __construct(array $config);
-
-    /**
      * Must populate validator rules or errors to be validated.
      *
      * @todo supply container instance as well?

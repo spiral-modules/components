@@ -313,7 +313,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->orm = $this->saturate($orm, ORM::class);
 
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->schema(static::class);
-        parent::__construct($this->ormSchema);
 
         if (isset($data[ORM::PIVOT_DATA])) {
             $this->pivotData = $data[ORM::PIVOT_DATA];
@@ -326,8 +325,8 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             unset($data[$name]);
         }
 
-        //Merging with default values
-        $this->fields = $data + $this->ormSchema[ORM::M_COLUMNS];
+        //Data is initiated as default values and non default
+        parent::__construct($data + $this->ormSchema[ORM::M_COLUMNS], $this->ormSchema);
 
         if (!$this->isLoaded()) {
             //Non loaded records should be in solid state by default and require initial validation
@@ -491,14 +490,15 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function setField($name, $value, $filter = true)
     {
-        if (!array_key_exists($name, $this->fields)) {
+        if (!$this->hasField($name)) {
             throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
-        $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
+        //Original values with no filters
+        $original = parent::getField($name, null, false);
         if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
             //We must bypass setters and accessors when null value assigned to nullable column
-            $this->fields[$name] = null;
+            $this->setField($name, null, false);
         } else {
             parent::setField($name, $value, $filter);
         }
@@ -517,7 +517,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function getField($name, $default = null, $filter = true)
     {
-        if (!array_key_exists($name, $this->fields)) {
+        if (!$this) {
             throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 

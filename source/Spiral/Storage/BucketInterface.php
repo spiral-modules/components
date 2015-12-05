@@ -8,7 +8,6 @@
 namespace Spiral\Storage;
 
 use Psr\Http\Message\StreamInterface;
-use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\Exceptions\BucketException;
 use Spiral\Storage\Exceptions\ServerException;
@@ -20,23 +19,6 @@ use Spiral\Storage\Exceptions\StorageException;
  */
 interface BucketInterface
 {
-    /**
-     * @param string           $name
-     * @param string           $prefix  Bucket prefix.
-     * @param array            $options Server related options.
-     * @param ServerInterface  $server
-     * @param StorageInterface $storage
-     * @param FilesInterface   $files
-     */
-    public function __construct(
-        $name,
-        $prefix,
-        array $options,
-        ServerInterface $server,
-        StorageInterface $storage,
-        FilesInterface $files
-    );
-
     /**
      * Bucker name.
      *

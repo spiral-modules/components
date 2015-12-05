@@ -8,14 +8,15 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
 use Spiral\Models\DataEntity;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Configs\ORMConfig;
+use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Entities\SchemaBuilder;
@@ -260,14 +261,14 @@ class ORM extends EntityCache implements SingletonInterface
     /**
      * Get instance of relation/selection loader based on relation type and definition.
      *
-     * @param int             $type       Relation type.
-     * @param string          $container  Container related to parent loader.
-     * @param array           $definition Relation definition.
-     * @param LoaderInterface $parent     Parent loader (if presented).
+     * @param int    $type       Relation type.
+     * @param string $container  Container related to parent loader.
+     * @param array  $definition Relation definition.
+     * @param Loader $parent     Parent loader (if presented).
      * @return LoaderInterface
      * @throws ORMException
      */
-    public function loader($type, $container, array $definition, LoaderInterface $parent = null)
+    public function loader($type, $container, array $definition, Loader $parent = null)
     {
         if (!$this->config->hasRelation($type, 'loader')) {
             throw new ORMException("Undefined relation loader '{$type}'.");

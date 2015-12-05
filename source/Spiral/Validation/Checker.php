@@ -9,6 +9,7 @@ namespace Spiral\Validation;
 
 use Spiral\Core\Component;
 use Spiral\Translator\Traits\TranslatorTrait;
+use Spiral\Validation\Exceptions\ValidationException;
 
 /**
  * Checkers used to group set of validation rules under one roof.
@@ -26,6 +27,11 @@ abstract class Checker extends Component
     const INHERIT_TRANSLATIONS = true;
 
     /**
+     * @var Validator
+     */
+    private $validator = null;
+
+    /**
      * Default error messages associated with checker method by name.
      *
      * @var array
@@ -33,18 +39,12 @@ abstract class Checker extends Component
     protected $messages = [];
 
     /**
-     * @var Validator
-     */
-    protected $validator = null;
-
-    /**
      * Check value using checker method.
      *
      * @param string    $method
      * @param mixed     $value
      * @param array     $arguments
-     * @param Validator $validator Parent validator. Attention, singleton checkers ignore parent
-     *                             validator and keep reference to first validator.
+     * @param Validator $validator Parent validator.
      * @return mixed
      */
     public function check($method, $value, array $arguments = [], Validator $validator = null)
@@ -52,8 +52,11 @@ abstract class Checker extends Component
         array_unshift($arguments, $value);
 
         $this->validator = $validator;
-        $result = call_user_func_array([$this, $method], $arguments);
-        $this->validator = null;
+        try {
+            $result = call_user_func_array([$this, $method], $arguments);
+        } finally {
+            $this->validator = null;
+        }
 
         return $result;
     }
@@ -84,5 +87,19 @@ abstract class Checker extends Component
         }
 
         return '';
+    }
+
+    /**
+     * Currently active validator instance.
+     *
+     * @return Validator
+     */
+    protected function validator()
+    {
+        if (empty($this->validator)) {
+            throw new ValidationException("Unable to receive parent checker validator.");
+        }
+
+        return $this->validator;
     }
 }

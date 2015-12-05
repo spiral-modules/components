@@ -45,7 +45,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($with as $field) {
-            if ($this->validator->field($field)) {
+            if ($this->validator()->field($field)) {
                 //Some value presented
                 return false;
             }
@@ -68,7 +68,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($with as $field) {
-            if (!$this->validator->field($field)) {
+            if (!$this->validator()->field($field)) {
                 return Validator::STOP_VALIDATION;
             }
         }
@@ -90,7 +90,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($without as $field) {
-            if (empty($this->validator->field($field))) {
+            if (empty($this->validator()->field($field))) {
                 //Some value presented
                 return false;
             }
@@ -113,7 +113,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($without as $field) {
-            if ($this->validator->field($field)) {
+            if ($this->validator()->field($field)) {
                 return Validator::STOP_VALIDATION;
             }
         }

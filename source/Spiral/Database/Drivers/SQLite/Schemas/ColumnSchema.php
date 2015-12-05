@@ -134,8 +134,8 @@ class ColumnSchema extends AbstractColumn
             $this->defaultValue = substr($this->defaultValue, 1, -1);
         }
 
-        if (!preg_match('/^(?P<type>[a-z]+) *(?:\((?P<options>[^\)]+)\))?/', $this->type,
-            $matches)
+        if (
+        !preg_match('/^(?P<type>[a-z]+) *(?:\((?P<options>[^\)]+)\))?/', $this->type, $matches)
         ) {
             return;
         }
@@ -173,7 +173,7 @@ class ColumnSchema extends AbstractColumn
 
         if (count($options) > 1) {
             list($this->precision, $this->scale) = $options;
-        } elseif ($options) {
+        } elseif (!empty($options)) {
             $this->size = $options[0];
         }
     }

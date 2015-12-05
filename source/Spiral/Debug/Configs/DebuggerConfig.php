@@ -20,6 +20,11 @@ class DebuggerConfig extends InjectableConfig
     const CONFIG = 'monolog';
 
     /**
+     * @var array
+     */
+    protected $config = [];
+
+    /**
      * @param string $channel
      * @return array
      */

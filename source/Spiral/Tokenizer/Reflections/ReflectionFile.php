@@ -468,9 +468,6 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         //Multiple "(" and ")" statements nested.
         $level = 0;
 
-        //Inside array arguments
-        $arrayLevel = 0;
-
         //Skip all tokens until next function
         $ignore = false;
 

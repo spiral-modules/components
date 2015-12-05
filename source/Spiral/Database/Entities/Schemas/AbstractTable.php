@@ -253,11 +253,10 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * $table->index('key', 'key2');
      * $table->index(['key', 'key2']);
      *
-     * @param mixed $columns   Column name, or array of columns.
-     * @param bool  $forceType Force index in non-unique state.
+     * @param mixed $columns Column name, or array of columns.
      * @return AbstractIndex
      */
-    public function index($columns, $forceType = true)
+    public function index($columns)
     {
         $columns = is_array($columns) ? $columns : func_get_args();
         if (!empty($index = $this->findIndex($columns))) {

@@ -62,7 +62,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     {
         if ($declared && $this->table->hasIndex([$this->column])) {
             //Some databases require index for each foreign key
-            $this->table->index([$this->column], false)->declared(true);
+            $this->table->index([$this->column])->declared(true);
         }
 
         return parent::declared($declared);

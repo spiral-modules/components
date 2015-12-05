@@ -35,7 +35,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * Stempler syntax options, syntax and names. Every option is required.
      *
-     * @todo Something with DTD? Generally feels compatible, maybe no widgets.
+     * @todo Something with DTD? Seems compatible.
      * @var array
      */
     protected $constructions = [

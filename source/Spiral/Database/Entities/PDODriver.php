@@ -119,7 +119,8 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * @param string           $name
      * @param array            $config
-     * @param FactoryInterface $factory Container is needed to construct instances of QueryCompiler.
+     * @param FactoryInterface $factory Factory is needed to construct instances of QueryCompiler.
+     *                                  Sugared using static container.
      * @throws SugarException
      */
     public function __construct($name, array $config, FactoryInterface $factory = null)

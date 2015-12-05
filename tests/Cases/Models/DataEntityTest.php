@@ -39,4 +39,16 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($entity->hasField('abc'));
     }
+
+    public function testSerialize()
+    {
+        $data = [
+            'a' => 123,
+            'b' => null,
+            'c' => 'test'
+        ];
+
+        $entity = new DataEntity($data);
+        $this->assertEquals($data, $entity->serializeData());
+    }
 }

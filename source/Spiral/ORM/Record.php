@@ -14,12 +14,18 @@ use Spiral\Models\Events\EntityEvent;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RecordException;
+use Spiral\ORM\Traits\FindTrait;
 
 /**
  * Entity with ability to be saved and direct access to source.
  */
 class Record extends RecordEntity implements ActiveEntityInterface
 {
+    /**
+     * Static find methods.
+     */
+    use FindTrait;
+
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.
@@ -136,16 +142,6 @@ class Record extends RecordEntity implements ActiveEntityInterface
         }
 
         return $orm->source(static::class);
-    }
-
-    /**
-     * Just an alias.
-     *
-     * @return RecordSource
-     */
-    public static function find()
-    {
-        return static::source();
     }
 
     /**

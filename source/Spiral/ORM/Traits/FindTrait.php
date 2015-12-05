@@ -7,6 +7,7 @@
  */
 namespace Spiral\ORM\Traits;
 
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORM;
@@ -25,11 +26,11 @@ trait FindTrait
      *
      * @param array|\Closure $where Selection WHERE statement.
      * @param array          $load  Array or relations to be pre-loaded.
-     * @return RecordSource
+     * @return RecordSelector
      */
     public static function find($where = [], array $load = [])
     {
-        return static::source()->load($load)->where($where);
+        return static::source()->find($where)->load($load);
     }
 
     /**
@@ -66,7 +67,7 @@ trait FindTrait
      */
     public static function findByPK($primaryKey, array $load = [])
     {
-        return static::source()->load($load)->findByPK($primaryKey);
+        return static::source()->find()->load($load)->findByPK($primaryKey);
     }
 
     /**

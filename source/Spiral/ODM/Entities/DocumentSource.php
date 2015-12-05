@@ -132,19 +132,19 @@ class DocumentSource extends Component implements SourceInterface, \Countable
     }
 
     /**
-     * @param DocumentSelector $selector
-     */
-    protected function setSelector(DocumentSelector $selector)
-    {
-        $this->selector = $selector;
-    }
-
-    /**
      * @return DocumentSelector
      */
     final protected function selector()
     {
         //Has to be cloned every time to prevent query collisions
         return clone $this->selector;
+    }
+
+    /**
+     * @param DocumentSelector $selector
+     */
+    protected function setSelector(DocumentSelector $selector)
+    {
+        $this->selector = $selector;
     }
 }

@@ -126,19 +126,19 @@ class RecordSource extends Component implements SourceInterface, \Countable
     }
 
     /**
-     * @param RecordSelector $selector
-     */
-    protected function setSelector(RecordSelector $selector)
-    {
-        $this->selector = $selector;
-    }
-
-    /**
      * @return RecordSelector
      */
     final protected function selector()
     {
         //Has to be cloned every time to prevent query collisions
         return clone $this->selector;
+    }
+
+    /**
+     * @param RecordSelector $selector
+     */
+    protected function setSelector(RecordSelector $selector)
+    {
+        $this->selector = $selector;
     }
 }

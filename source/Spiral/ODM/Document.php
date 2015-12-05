@@ -16,6 +16,7 @@ use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\Traits\FindTrait;
 
 /**
  * DocumentEntity with added ActiveRecord methods and ability to connect to associated source.
@@ -39,6 +40,11 @@ use Spiral\ODM\Exceptions\ODMException;
  */
 class Document extends DocumentEntity implements ActiveEntityInterface
 {
+    /**
+     * Static find method.
+     */
+    use FindTrait;
+
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.
@@ -277,16 +283,6 @@ class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         return $odm->source(static::class);
-    }
-
-    /**
-     * Just an alias.
-     *
-     * @return DocumentSource
-     */
-    public static function find()
-    {
-        return static::source();
     }
 
     /**

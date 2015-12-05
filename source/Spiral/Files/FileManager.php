@@ -244,6 +244,22 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
+    public function isDirectory($filename)
+    {
+        return is_dir($filename);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isFile($filename)
+    {
+        return is_file($filename);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getPermissions($filename)
     {
         if (!$this->exists($filename)) {
@@ -261,6 +277,8 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         if (is_dir($filename)) {
             $mode |= 0111;
         }
+
+        print_r($filename . " " . ($mode) . "\n");
 
         return $this->getPermissions($filename) == $mode || chmod($filename, $mode);
     }

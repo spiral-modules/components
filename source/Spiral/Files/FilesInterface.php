@@ -171,6 +171,18 @@ interface FilesInterface
     public function time($filename);
 
     /**
+     * @param string $filename
+     * @return bool
+     */
+    public function isDirectory($filename);
+
+    /**
+     * @param string $filename
+     * @return bool
+     */
+    public function isFile($filename);
+
+    /**
      * Current file permissions (if exists).
      *
      * @param string $filename

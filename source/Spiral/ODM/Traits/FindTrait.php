@@ -25,7 +25,7 @@ trait FindTrait
      * Example:
      * User::find(['status' => 'active'], ['profile']);
      *
-     * @param array|\Closure $where Selection WHERE statement.
+     * @param array $where Selection WHERE statement.
      * @return DocumentSelector
      */
     public static function find($where = [])
@@ -40,8 +40,8 @@ trait FindTrait
      * Example:
      * User::findOne(['name' => 'Wolfy-J'], ['profile'], ['id' => 'DESC']);
      *
-     * @param array|\Closure $where  Selection WHERE statement.
-     * @param array          $sortBy Sort by.
+     * @param array $where  Selection WHERE statement.
+     * @param array $sortBy Sort by.
      * @return RecordEntity|null
      */
     public static function findOne($where = [], array $sortBy = [])

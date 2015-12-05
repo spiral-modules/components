@@ -20,7 +20,7 @@ use Spiral\Stempler\SyntaxInterface;
 /**
  * Default Stempler syntax - Woo. Provides ability to define blocks, extends and includes.
  */
-class WooSyntax implements SyntaxInterface
+class DarkSyntax implements SyntaxInterface
 {
     /**
      * Path attribute in extends and other nodes.
@@ -43,10 +43,10 @@ class WooSyntax implements SyntaxInterface
         self::TYPE_EXTENDS  => [
             'extends:',
             'extends',
-            'woo:extends',
+            'dark:extends',
             'layout:extends'
         ],
-        self::TYPE_IMPORTER => ['woo:use', 'use', 'node:use', 'stempler:use']
+        self::TYPE_IMPORTER => ['dark:use', 'use', 'node:use', 'stempler:use']
     ];
 
     /**
@@ -115,7 +115,7 @@ class WooSyntax implements SyntaxInterface
         }
 
         /**
-         * <woo:use bundle="path-to-bundle"/>
+         * <dark:use bundle="path-to-bundle"/>
          */
         if (isset($attributes['bundle'])) {
             $path = $attributes['bundle'];
@@ -124,8 +124,8 @@ class WooSyntax implements SyntaxInterface
         }
 
         /**
-         * <woo:use path="path-to-element" as="tag"/>
-         * <woo:use path="path-to-element" element="tag"/>
+         * <dark:use path="path-to-element" as="tag"/>
+         * <dark:use path="path-to-element" element="tag"/>
          */
         if (isset($attributes['element']) || isset($attributes['as'])) {
             $alias = isset($attributes['element']) ? $attributes['element'] : $attributes['as'];

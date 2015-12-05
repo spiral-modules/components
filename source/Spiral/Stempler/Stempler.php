@@ -7,7 +7,7 @@
  */
 namespace Spiral\Stempler;
 
-use Spiral\Stempler\Syntaxes\WooSyntax;
+use Spiral\Stempler\Syntaxes\DarkSyntax;
 
 /**
  * Provides ability to compose multiple html files together.
@@ -34,7 +34,7 @@ class Stempler
      * @param string          $syntax Syntax class to be used.
      * @param array           $options
      */
-    public function __construct($loader, $syntax = WooSyntax::class, array $options = [])
+    public function __construct($loader, $syntax = DarkSyntax::class, array $options = [])
     {
         $this->loader = $loader;
         $this->syntax = new $syntax(!empty($options['strict']));

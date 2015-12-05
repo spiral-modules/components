@@ -4,11 +4,9 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 
 /**
@@ -48,18 +46,16 @@ class TableSchema extends AbstractTable
     protected function loadColumns()
     {
         //Required for constraints fetch
-        $tableOID = $this->driver->query("SELECT oid FROM pg_class WHERE relname = ?",
-            [$this->name])
-            ->fetchColumn();
+        $tableOID = $this->driver->query("SELECT oid FROM pg_class WHERE relname = ?", [
+            $this->getName()
+        ])->fetchColumn();
 
         //Collecting all candidates
         $query = "SELECT * FROM information_schema.columns "
-            . "JOIN pg_type ON (pg_type.typname = columns.udt_name) "
-            . "WHERE table_name = ?";
+            . "JOIN pg_type ON (pg_type.typname = columns.udt_name) WHERE table_name = ?";
 
-        $columns = $this->driver->query($query, [$this->name])->bind('column_name', $columnName);
-
-        foreach ($columns as $column) {
+        $columnsQuery = $this->driver->query($query, [$this->getName()]);
+        foreach ($columnsQuery->bind('column_name', $columnName) as $column) {
             if (preg_match(
                 '/^nextval\([\'"]([a-z0-9_"]+)[\'"](?:::regclass)?\)$/i',
                 $column['column_default'],
@@ -68,8 +64,12 @@ class TableSchema extends AbstractTable
                 $this->sequences[$columnName] = $matches[1];
             }
 
-            $this->registerColumn($columnName, $column + ['tableOID' => $tableOID]);
+            $this->registerColumn(
+                $this->columnSchema($columnName, $column + ['tableOID' => $tableOID])
+            );
         }
+
+        return $this;
     }
 
     /**
@@ -78,19 +78,24 @@ class TableSchema extends AbstractTable
     protected function loadIndexes()
     {
         $query = "SELECT * FROM pg_indexes WHERE schemaname = 'public' AND tablename = ?";
-        foreach ($this->driver->query($query, [$this->name]) as $index) {
-            $index = $this->registerIndex($index['indexname'], $index['indexdef']);
+        foreach ($this->driver->query($query, [$this->getName()]) as $index) {
+            $index = $this->registerIndex(
+                $this->indexSchema($index['indexname'], $index['indexdef'])
+            );
 
-            $conType = $this->driver
-                ->query("SELECT contype FROM pg_constraint WHERE conname = ?", [$index->getName()])
-                ->fetchColumn();
+            $conType = $this->driver->query(
+                "SELECT contype FROM pg_constraint WHERE conname = ?", [$index->getName()]
+            )->fetchColumn();
 
             if ($conType == 'p') {
-                $this->primaryKeys = $this->dbPrimaryKeys = $index->getColumns();
-                unset($this->indexes[$index->getName()], $this->dbIndexes[$index->getName()]);
+                $this->setPrimaryKeys($index->getColumns());
+
+                //We don't need primary index in this form
+                $this->forgetIndex($index);
 
                 if (is_array($this->primarySequence) && count($index->getColumns()) === 1) {
                     $column = $index->getColumns()[0];
+
                     if (isset($this->sequences[$column])) {
                         //We found our primary sequence
                         $this->primarySequence = $this->sequences[$column];
@@ -98,6 +103,8 @@ class TableSchema extends AbstractTable
                 }
             }
         }
+
+        return $this;
     }
 
     /**
@@ -105,57 +112,49 @@ class TableSchema extends AbstractTable
      */
     protected function loadReferences()
     {
-        $query = "SELECT tc.constraint_name, tc.table_name, kcu.column_name, rc.update_rule,
-                  rc.delete_rule, ccu.table_name AS foreign_table_name,
-                  ccu.column_name AS foreign_column_name
-                  FROM information_schema.table_constraints AS tc
-                  JOIN information_schema.key_column_usage AS kcu
-                      ON tc.constraint_name = kcu.constraint_name
-                  JOIN information_schema.constraint_column_usage AS ccu
-                      ON ccu.constraint_name = tc.constraint_name
-                  JOIN information_schema.referential_constraints AS rc
-                      ON rc.constraint_name = tc.constraint_name
-                  WHERE constraint_type = 'FOREIGN KEY' AND tc.table_name=?";
+        //Mindblowing
+        $query = "SELECT tc.constraint_name, tc.table_name, kcu.column_name, rc.update_rule, "
+            . "rc.delete_rule, ccu.table_name AS foreign_table_name, "
+            . "ccu.column_name AS foreign_column_name\n"
+            . "FROM information_schema.table_constraints AS tc\n"
+            . "JOIN information_schema.key_column_usage AS kcu\n"
+            . "   ON tc.constraint_name = kcu.constraint_name\n"
+            . "JOIN information_schema.constraint_column_usage AS ccu\n"
+            . "   ON ccu.constraint_name = tc.constraint_name\n"
+            . "JOIN information_schema.referential_constraints AS rc\n"
+            . "   ON rc.constraint_name = tc.constraint_name\n"
+            . "WHERE constraint_type = 'FOREIGN KEY' AND tc.table_name=?";
 
-        foreach ($this->driver->query($query, [$this->name]) as $reference) {
-            $this->registerReference($reference['constraint_name'], $reference);
+        foreach ($this->driver->query($query, [$this->getName()]) as $reference) {
+            $this->registerReference(
+                $this->referenceSchema($reference['constraint_name'], $reference)
+            );
         }
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
+    protected function columnSchema($name, $schema = null)
     {
-        /**
-         * @var ColumnSchema $column
-         */
+        return new ColumnSchema($this, $name, $schema);
+    }
 
-        //Rename is separate operation
-        if ($column->getName() != $dbColumn->getName()) {
-            $this->driver->statement(\Spiral\interpolate(
-                'ALTER TABLE {table} RENAME COLUMN {original} TO {column}',
-                [
-                    'table'    => $this->getName(true),
-                    'column'   => $column->getName(true),
-                    'original' => $dbColumn->getName(true)
-                ]
-            ));
+    /**
+     * {@inheritdoc}
+     */
+    protected function indexSchema($name, $schema = null)
+    {
+        return new IndexSchema($this, $name, $schema);
+    }
 
-            $column->setName($dbColumn->getName());
-        }
-
-        //Postgres columns should be altered using set of operations
-        if (!$operations = $column->alterOperations($dbColumn)) {
-            return;
-        }
-
-        //Postgres columns should be altered using set of operations
-        $query = \Spiral\interpolate('ALTER TABLE {table} {operations}', [
-            'table'      => $this->getName(true),
-            'operations' => trim(join(', ', $operations), ', ')
-        ]);
-
-        $this->driver->statement($query);
+    /**
+     * {@inheritdoc}
+     */
+    protected function referenceSchema($name, $schema = null)
+    {
+        return new ReferenceSchema($this, $name, $schema);
     }
 }

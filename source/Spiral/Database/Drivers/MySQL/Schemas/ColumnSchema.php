@@ -10,7 +10,7 @@ namespace Spiral\Database\Drivers\MySQL\Schemas;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Injections\SQLFragment;
+use Spiral\Database\Injections\Fragment;
 
 /**
  * MySQL column schema.
@@ -34,26 +34,34 @@ class ColumnSchema extends AbstractColumn
             'autoIncrement' => true,
             'nullable'      => false
         ],
+
         //Enum type (mapped via method)
         'enum'        => 'enum',
+
         //Logical types
         'boolean'     => ['type' => 'tinyint', 'size' => 1],
+
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => ['type' => 'int', 'size' => 11],
         'tinyInteger' => ['type' => 'tinyint', 'size' => 4],
         'bigInteger'  => ['type' => 'bigint', 'size' => 20],
+
         //String with specified length (mapped via method)
         'string'      => 'varchar',
+
         //Generic types
         'text'        => 'text',
         'tinyText'    => 'tinytext',
         'longText'    => 'longtext',
+
         //Real types
         'double'      => 'double',
         'float'       => 'float',
+
         //Decimal type (mapped via method)
         'decimal'     => 'decimal',
+
         //Date and Time types
         'datetime'    => 'datetime',
         'date'        => 'date',
@@ -62,10 +70,12 @@ class ColumnSchema extends AbstractColumn
             'type'         => 'timestamp',
             'defaultValue' => MySQLDriver::DEFAULT_DATETIME
         ],
+
         //Binary types
         'binary'      => 'blob',
         'tinyBinary'  => 'tinyblob',
         'longBinary'  => 'longblob',
+
         //Additional types
         'json'        => 'text'
     ];
@@ -139,6 +149,7 @@ class ColumnSchema extends AbstractColumn
     public function sqlStatement()
     {
         $defaultValue = $this->defaultValue;
+
         if (in_array($this->type, $this->forbiddenDefaults)) {
             //Flushing default value for forbidden types
             $this->defaultValue = null;
@@ -176,6 +187,8 @@ class ColumnSchema extends AbstractColumn
         }
 
         if ($this->abstractType() == 'enum') {
+
+            //Fetching enum values
             $this->enumValues = array_map(function ($value) {
                 return trim($value, $value[0]);
             }, explode(',', $options));
@@ -196,7 +209,7 @@ class ColumnSchema extends AbstractColumn
         //Default value conversions
         if ($this->type == 'bit' && $this->hasDefaultValue()) {
             //Cutting b\ and '
-            $this->defaultValue = new SQLFragment($this->defaultValue);
+            $this->defaultValue = new Fragment($this->defaultValue);
         }
 
         if ($this->abstractType() == 'timestamp' && $this->defaultValue == '0000-00-00 00:00:00') {

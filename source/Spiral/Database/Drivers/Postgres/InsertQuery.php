@@ -28,21 +28,30 @@ class InsertQuery extends \Spiral\Database\Builders\InsertQuery
     public function sqlStatement(AbstractCompiler $compiler = null)
     {
         $driver = $this->database->driver();
-        if (!$driver instanceof PostgresDriver || (!empty($compiler) && !$compiler instanceof PostgresCompiler)) {
-            throw new BuilderException("Postgres InsertQuery can be used only with Postgres driver and compiler.");
+        if (
+            !$driver instanceof PostgresDriver
+            || (!empty($compiler) && !$compiler instanceof PostgresCompiler)
+        ) {
+            throw new BuilderException(
+                "Postgres InsertQuery can be used only with Postgres driver and compiler."
+            );
         }
 
         if ($primary = $driver->getPrimary($this->database->getPrefix() . $this->table)) {
             $this->logger()->debug(
-                "Primary key '{sequence}' automatically resolved for table '{table}'.", [
-                'table'    => $this->table,
-                'sequence' => $primary
-            ]);
+                "Primary key '{sequence}' automatically resolved for table '{table}'.",
+                [
+                    'table'    => $this->table,
+                    'sequence' => $primary
+                ]
+            );
         }
 
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
-        return $compiler->insert($this->table, $this->columns, $this->rowsets, $primary);
+        return $compiler->compileInsert($this->table, $this->columns, $this->rowsets, $primary);
     }
 
     /**

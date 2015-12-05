@@ -8,9 +8,7 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLite\Schemas\ColumnSchema;
-use Spiral\Database\Drivers\SQLite\Schemas\IndexSchema;
-use Spiral\Database\Drivers\SQLite\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\Commander;
 use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
@@ -28,10 +26,12 @@ class SQLiteDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE     = TableSchema::class;
-    const SCHEMA_COLUMN    = ColumnSchema::class;
-    const SCHEMA_INDEX     = IndexSchema::class;
-    const SCHEMA_REFERENCE = ReferenceSchema::class;
+    const SCHEMA_TABLE = TableSchema::class;
+
+    /**
+     * Commander used to execute commands. :)
+     */
+    const COMMANDER = Commander::class;
 
     /**
      * Query compiler class.
@@ -91,9 +91,9 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    protected function setIsolationLevel($level)
+    protected function isolationLevel($level)
     {
-        $this->logger()->error(
+        $this->logger()->alert(
             "Transaction isolation level is not fully supported by SQLite ({level}).",
             compact('level')
         );

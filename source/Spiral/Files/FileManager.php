@@ -7,14 +7,16 @@
  */
 namespace Spiral\Files;
 
-use Spiral\Core\Singleton;
+use Spiral\Core\Component;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\Exceptions\FileNotFoundException;
 use Spiral\Files\Exceptions\WriteErrorException;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Default files storage, points to local hard drive.
  */
-class FileManager extends Singleton implements FilesInterface
+class FileManager extends Component implements SingletonInterface, FilesInterface
 {
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -30,6 +32,8 @@ class FileManager extends Singleton implements FilesInterface
 
     /**
      * New File Manager.
+     *
+     * @todo Potentially can be depended on Symfony Filesystem.
      */
     public function __construct()
     {
@@ -42,21 +46,21 @@ class FileManager extends Singleton implements FilesInterface
      *
      * @param bool $recursive Every created directory will get specified permissions.
      */
-    public function ensureLocation($location, $mode = self::RUNTIME, $recursive = true)
+    public function ensureDirectory($directory, $mode = self::RUNTIME, $recursive = true)
     {
         $mode = $mode | 0111;
-        if (is_dir($location)) {
+        if (is_dir($directory)) {
             //Exists :(
-            return $this->setPermissions($location, $mode);
+            return $this->setPermissions($directory, $mode);
         }
 
         if (!$recursive) {
-            return mkdir($location, $mode, true);
+            return mkdir($directory, $mode, true);
         }
 
-        $directoryChain = [basename($location)];
+        $directoryChain = [basename($directory)];
 
-        $baseDirectory = $location;
+        $baseDirectory = $directory;
         while (!is_dir($baseDirectory = dirname($baseDirectory))) {
             $directoryChain[] = basename($baseDirectory);
         }
@@ -89,10 +93,12 @@ class FileManager extends Singleton implements FilesInterface
      *
      * @param bool $append To append data at the end of existed file.
      */
-    public function write($filename, $data, $mode = null, $ensureLocation = false, $append = false)
+    public function write($filename, $data, $mode = null, $ensureDirectory = false, $append = false)
     {
         try {
-            $ensureLocation && $this->ensureLocation(dirname($filename), $mode);
+            if ($ensureDirectory) {
+                $this->ensureDirectory(dirname($filename), $mode);
+            }
 
             if (!empty($mode) && $this->exists($filename)) {
                 //Forcing mode for existed file
@@ -107,7 +113,7 @@ class FileManager extends Singleton implements FilesInterface
                 //Forcing mode after file creation
                 $this->setPermissions($filename, $mode);
             }
-        } catch (\Exception $exception) {
+        } catch (\ErrorException $exception) {
             throw new WriteErrorException(
                 $exception->getMessage(),
                 $exception->getCode(),
@@ -121,9 +127,22 @@ class FileManager extends Singleton implements FilesInterface
     /**
      * {@inheritdoc}
      */
-    public function append($filename, $data, $mode = null, $ensureLocation = false)
+    public function append($filename, $data, $mode = null, $ensureDirectory = false)
     {
-        return $this->write($filename, $data, $mode, $ensureLocation, true);
+        return $this->write($filename, $data, $mode, $ensureDirectory, true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function localUri($filename)
+    {
+        if (!$this->exists($filename)) {
+            throw new FileNotFoundException($filename);
+        }
+
+        //Since default implementation is local we are allowed to do that
+        return $filename;
     }
 
     /**
@@ -225,6 +244,22 @@ class FileManager extends Singleton implements FilesInterface
     /**
      * {@inheritdoc}
      */
+    public function isDirectory($filename)
+    {
+        return is_dir($filename);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isFile($filename)
+    {
+        return is_file($filename);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getPermissions($filename)
     {
         if (!$this->exists($filename)) {
@@ -248,26 +283,24 @@ class FileManager extends Singleton implements FilesInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param Finder $finder Optional initial finder.
      */
-    public function getFiles($location, $extension = null, &$result = [])
+    public function getFiles($location, $pattern = null, Finder $finder = null)
     {
-        if (is_string($extension)) {
-            $extension = [$extension];
+        if (empty($finder)) {
+            $finder = new Finder();
         }
 
-        $location = $this->normalizePath($location) . static::SEPARATOR;
+        $finder->files()->in($location);
 
-        foreach (glob($location . '*') as $item) {
-            if (is_dir($item)) {
-                $this->getFiles($item . static::SEPARATOR, $extension, $result);
-                continue;
-            }
+        if (!empty($pattern)) {
+            $finder->name($pattern);
+        }
 
-            if (!empty($extension) && !in_array($this->extension($item), $extension)) {
-                continue;
-            }
-
-            $result[] = $this->normalizePath($item);
+        $result = [];
+        foreach ($finder->getIterator() as $file) {
+            $result[] = $this->normalizePath((string)$file);
         }
 
         return $result;
@@ -309,25 +342,25 @@ class FileManager extends Singleton implements FilesInterface
      *
      * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
      */
-    public function relativePath($path, $directory)
+    public function relativePath($path, $from)
     {
         $path = $this->normalizePath($path);
-        $directory = $this->normalizePath($directory);
+        $from = $this->normalizePath($from);
 
-        $directory = explode('/', $directory);
+        $from = explode('/', $from);
         $path = explode('/', $path);
         $relative = $path;
 
-        foreach ($directory as $depth => $dir) {
+        foreach ($from as $depth => $dir) {
             //Find first non-matching dir
             if ($dir === $path[$depth]) {
                 //Ignore this directory
                 array_shift($relative);
             } else {
                 //Get number of remaining dirs to $from
-                $remaining = count($directory) - $depth;
+                $remaining = count($from) - $depth;
                 if ($remaining > 1) {
-                    //Add traversals up to first matching dir
+                    //Add traversals up to first matching directory
                     $padLength = (count($relative) + $remaining - 1) * -1;
                     $relative = array_pad($relative, $padLength, '..');
                     break;

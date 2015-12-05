@@ -10,13 +10,17 @@ namespace Spiral\Database\Entities;
 use Spiral\Core\Component;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\ParameterInterface;
 
 /**
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
+ *
+ * @todo Need a way to use prepared query statement. Can be done using parameters (they all objects
+ * @todo and linked to values, but query builder should keep an instance of prepared statement.
  */
-abstract class QueryBuilder extends Component
+abstract class QueryBuilder extends Component implements ExpressionInterface
 {
     /**
      * @invisible
@@ -44,6 +48,7 @@ abstract class QueryBuilder extends Component
      * Get ordered list of builder parameters. Attention, this method WILL return only
      * ParameterInterface instances in future as scalar parameters will be dropped.
      *
+     * @deprecated scalar values
      * @param QueryCompiler $compiler
      * @return array|ParameterInterface[]
      * @throws BuilderException
@@ -74,10 +79,7 @@ abstract class QueryBuilder extends Component
      */
     public function queryString()
     {
-        return $this->compiler->interpolate(
-            $this->sqlStatement(),
-            $this->database->driver()->prepareParameters($this->getParameters())
-        );
+        return QueryInterpolator::interpolate($this->sqlStatement(), $this->getParameters());
     }
 
     /**

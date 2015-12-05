@@ -8,9 +8,7 @@
 namespace Spiral\Database;
 
 /**
- * Must represent single query result.
- *
- * Must decorate or extend methods of PDOStatement.
+ * Must represent single query result. Has to decorate or extend methods of PDOStatement.
  */
 interface ResultInterface extends \Countable, \Iterator
 {

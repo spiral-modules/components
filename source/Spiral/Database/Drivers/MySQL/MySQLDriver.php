@@ -4,15 +4,12 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\MySQL;
 
 use PDO;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\MySQL\Schemas\ColumnSchema;
-use Spiral\Database\Drivers\MySQL\Schemas\IndexSchema;
-use Spiral\Database\Drivers\MySQL\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\Commander;
 use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 
@@ -29,10 +26,12 @@ class MySQLDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE     = TableSchema::class;
-    const SCHEMA_COLUMN    = ColumnSchema::class;
-    const SCHEMA_INDEX     = IndexSchema::class;
-    const SCHEMA_REFERENCE = ReferenceSchema::class;
+    const SCHEMA_TABLE = TableSchema::class;
+
+    /**
+     * Commander used to execute commands. :)
+     */
+    const COMMANDER = Commander::class;
 
     /**
      * Query compiler class.

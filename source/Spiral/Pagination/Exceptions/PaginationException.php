@@ -10,7 +10,7 @@ namespace Spiral\Pagination\Exceptions;
 use Spiral\Core\Exceptions\RuntimeException;
 
 /**
- * General pagination error.
+ * Generic pagination error.
  */
 class PaginationException extends RuntimeException
 {

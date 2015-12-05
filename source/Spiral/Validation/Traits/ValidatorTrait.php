@@ -7,11 +7,14 @@
  */
 namespace Spiral\Validation\Traits;
 
-use Spiral\Core\ContainerInterface;
-use Spiral\Core\Exceptions\MissingContainerException;
+use Interop\Container\ContainerInterface;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\FactoryInterface;
 use Spiral\Events\Traits\EventsTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Translator\Translator;
+use Spiral\Translator\TranslatorInterface;
+use Spiral\Validation\Events\ValidatedEvent;
+use Spiral\Validation\Events\ValidatorEvent;
 use Spiral\Validation\Exceptions\ValidationException;
 use Spiral\Validation\ValidatorInterface;
 
@@ -31,8 +34,15 @@ trait ValidatorTrait
     private $validator = null;
 
     /**
+     * @whatif private
+     * @var array
+     */
+    protected $errors = [];
+
+    /**
      * Fields (data) to be validated. Named like that for convenience.
      *
+     * @whatif private
      * @var array
      */
     protected $fields = [];
@@ -45,11 +55,6 @@ trait ValidatorTrait
     protected $validates = [];
 
     /**
-     * @var array
-     */
-    protected $errors = [];
-
-    /**
      * Attach custom validator to model.
      *
      * @param ValidatorInterface $validator
@@ -57,41 +62,6 @@ trait ValidatorTrait
     public function setValidator(ValidatorInterface $validator)
     {
         $this->validator = $validator;
-    }
-
-    /**
-     * Get associated instance of ValidatorInterface or create new using Container.
-     *
-     * @param array              $rules
-     * @param ContainerInterface $container Will fall back to global container.
-     * @return ValidatorInterface
-     * @throws MissingContainerException
-     */
-    public function validator(array $rules = [], ContainerInterface $container = null)
-    {
-        if (!empty($this->validator)) {
-            //Refreshing data
-            $validator = $this->validator->setData($this->fields);
-            !empty($rules) && $validator->setRules($rules);
-
-            return $validator;
-        }
-
-        if (empty($container)) {
-            $container = $this->container();
-        }
-
-        if (empty($container) || !$container->has(ValidatorInterface::class)) {
-            //We can't create default validation without any rule, this is not secure
-            throw new MissingContainerException(
-                "Unable to create Validator instance, no global container set or binding is missing."
-            );
-        }
-
-        return $this->validator = $container->construct(ValidatorInterface::class, [
-            'data'  => $this->fields,
-            'rules' => !empty($rules) ? $rules : $this->validates
-        ]);
     }
 
     /**
@@ -125,15 +95,16 @@ trait ValidatorTrait
     public function getErrors($reset = false)
     {
         $this->validate($reset);
+
         $errors = [];
         foreach ($this->errors as $field => $error) {
             if (
                 is_string($error)
-                && substr($error, 0, 2) == Translator::I18N_PREFIX
-                && substr($error, -2) == Translator::I18N_POSTFIX
+                && substr($error, 0, 2) == TranslatorInterface::I18N_PREFIX
+                && substr($error, -2) == TranslatorInterface::I18N_POSTFIX
             ) {
                 //We will localize only messages embraced with [[ and ]]
-                $error = $this->translate($error);
+                $error = $this->say($error);
             }
 
             $errors[$field] = $error;
@@ -143,22 +114,43 @@ trait ValidatorTrait
     }
 
     /**
+     * Get associated instance of validator or return new one.
+     *
+     * @return ValidatorInterface
+     * @throws SugarException
+     */
+    protected function validator()
+    {
+        if (!empty($this->validator)) {
+            return $this->validator;
+        }
+
+        return $this->validator = $this->createValidator();
+    }
+
+    /**
      * Validate data using associated validator.
      *
-     * @param bool $reset
+     * @param bool $reset Implementation might reset validation if needed.
      * @return bool
      * @throws ValidationException
-     * @throws MissingContainerException
-     * @event validation()
-     * @event validated($errors)
+     * @throws SugarException
+     * @event validated(ValidatedEvent)
      */
     protected function validate($reset = false)
     {
-        $this->fire('validation');
-        $this->errors = $this->validator()->getErrors();
-        $this->validator->setData([]);
+        //Refreshing validation fields
+        $this->validator()->setData($this->fields);
 
-        return empty($this->errors = (array)$this->fire('validated', $this->errors));
+        /**
+         * @var ValidatedEvent $validatedEvent
+         */
+        $validatedEvent = $this->dispatch('validated', new ValidatedEvent(
+            $this->validator()->getErrors()
+        ));
+
+        //Collecting errors if any
+        return empty($this->errors = $validatedEvent->getErrors());
     }
 
     /**
@@ -184,7 +176,47 @@ trait ValidatorTrait
     }
 
     /**
-     * @return ContainerInterface
+     * Create instance of ValidatorInterface.
+     *
+     * @param array              $rules     Non empty rules will initiate validator.
+     * @param ContainerInterface $container Will fall back to global container.
+     * @return ValidatorInterface
+     * @throws SugarException
+     * @event validator(ValidatorEvent)
      */
-    abstract protected function container();
+    protected function createValidator(
+        array $rules = [],
+        ContainerInterface $container = null
+    ) {
+        if (empty($container)) {
+            $container = $this->container();
+        }
+
+        if (empty($container) || !$container->has(ValidatorInterface::class)) {
+            //We can't create default validation without any rule, this is not secure
+            throw new SugarException(
+                "Unable to create Validator, no global container set or binding is missing."
+            );
+        }
+
+        //We need constructor
+        if ($container instanceof FactoryInterface) {
+            $constructor = $container;
+        } else {
+            $constructor = $container->get(FactoryInterface::class);
+        }
+
+        //Receiving instance of validator from container
+        $validator = $constructor->construct(ValidatorInterface::class, [
+            'data'  => $this->fields,
+            'rules' => !empty($rules) ? $rules : $this->validates
+        ]);
+
+        /**
+         * @var ValidatorEvent $validatorEvent
+         */
+        $validatorEvent = $this->dispatch('validator', new ValidatorEvent($validator));
+
+        return $validatorEvent->validator();
+    }
 }

@@ -7,7 +7,6 @@
  */
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheProvider;
 use Spiral\Cache\CacheStore;
 use Spiral\Files\FilesInterface;
 
@@ -17,31 +16,31 @@ use Spiral\Files\FilesInterface;
 class FileStore extends CacheStore
 {
     /**
-     * {@inheritdoc}
+     * @var string
      */
-    const STORE = 'file';
+    private $directory = '';
 
     /**
-     * {@inheritdoc}
+     * @var string
      */
-    protected $options = [
-        'directory' => null,
-        'extension' => 'cache'
-    ];
+    private $extension = 'cache';
 
     /**
+     * @invisible
      * @var FilesInterface
      */
     protected $files = null;
 
     /**
-     * {@inheritdoc}
-     *
      * @param FilesInterface $files
+     * @param string         $directory
+     * @param string         $extension
      */
-    public function __construct(CacheProvider $cache, FilesInterface $files)
+    public function __construct(FilesInterface $files, $directory, $extension = 'cache')
     {
-        parent::__construct($cache);
+        $this->directory = $files->normalizePath($directory);
+        $this->extension = $extension;
+
         $this->files = $files;
     }
 
@@ -130,6 +129,7 @@ class FileStore extends CacheStore
     public function increment($name, $delta = 1)
     {
         $value = $this->get($name, $expiration) + $delta;
+
         $this->set($name, $value, $expiration - time());
 
         return $value;
@@ -141,6 +141,7 @@ class FileStore extends CacheStore
     public function decrement($name, $delta = 1)
     {
         $value = $this->get($name, $expiration) - $delta;
+
         $this->set($name, $value, $expiration - time());
 
         return $value;
@@ -151,12 +152,9 @@ class FileStore extends CacheStore
      */
     public function flush()
     {
-        $files = $this->files->getFiles($this->options['directory'], $this->options['extension']);
-        foreach ($files as $filename) {
+        foreach ($this->files->getFiles($this->directory, $this->extension) as $filename) {
             $this->files->delete($filename);
         }
-
-        return count($files);
     }
 
     /**
@@ -167,6 +165,6 @@ class FileStore extends CacheStore
      */
     protected function makeFilename($name)
     {
-        return $this->options['directory'] . '/' . md5($name) . '.' . $this->options['extension'];
+        return $this->directory . '/' . md5($name) . '.' . $this->extension;
     }
 }

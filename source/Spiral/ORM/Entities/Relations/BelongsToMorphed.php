@@ -8,7 +8,7 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Models\EntityInterface;
-use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\RecordEntity;
 
@@ -48,10 +48,10 @@ class BelongsToMorphed extends BelongsTo
     protected function createSelector()
     {
         //To prevent morph key being added as where
-        $selector = new Selector($this->orm, $this->getClass());
+        $selector = new RecordSelector($this->orm, $this->getClass());
 
         return $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
+            $selector->primaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
             $this->parent->getField($this->definition[RecordEntity::INNER_KEY], false)
         );
     }

@@ -9,6 +9,7 @@ namespace Spiral\Validation;
 
 use Spiral\Core\Component;
 use Spiral\Translator\Traits\TranslatorTrait;
+use Spiral\Validation\Exceptions\ValidationException;
 
 /**
  * Checkers used to group set of validation rules under one roof.
@@ -26,16 +27,16 @@ abstract class Checker extends Component
     const INHERIT_TRANSLATIONS = true;
 
     /**
+     * @var Validator
+     */
+    private $validator = null;
+
+    /**
      * Default error messages associated with checker method by name.
      *
      * @var array
      */
     protected $messages = [];
-
-    /**
-     * @var Validator
-     */
-    protected $validator = null;
 
     /**
      * Check value using checker method.
@@ -51,8 +52,11 @@ abstract class Checker extends Component
         array_unshift($arguments, $value);
 
         $this->validator = $validator;
-        $result = call_user_func_array([$this, $method], $arguments);
-        $this->validator = null;
+        try {
+            $result = call_user_func_array([$this, $method], $arguments);
+        } finally {
+            $this->validator = null;
+        }
 
         return $result;
     }
@@ -70,10 +74,10 @@ abstract class Checker extends Component
             $messages = $reflection->getDefaultProperties()['messages'];
             if (isset($messages[$method])) {
                 //We are inheriting parent messages
-                return $this->translate($messages[$method]);
+                return $this->say($messages[$method]);
             }
         } elseif (isset($this->messages[$method])) {
-            return $this->translate($this->messages[$method]);
+            return $this->say($this->messages[$method]);
         }
 
         //Looking for message in parent realization
@@ -83,5 +87,19 @@ abstract class Checker extends Component
         }
 
         return '';
+    }
+
+    /**
+     * Currently active validator instance.
+     *
+     * @return Validator
+     */
+    protected function validator()
+    {
+        if (empty($this->validator)) {
+            throw new ValidationException("Unable to receive parent checker validator.");
+        }
+
+        return $this->validator;
     }
 }

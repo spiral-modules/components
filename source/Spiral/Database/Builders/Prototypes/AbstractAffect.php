@@ -45,7 +45,10 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
         parent::__construct($database, $compiler);
 
         $this->table = $table;
-        !empty($where) && $this->where($where);
+
+        if (!empty($where)) {
+            $this->where($where);
+        }
     }
 
     /**

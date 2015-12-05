@@ -96,7 +96,10 @@ class FileChecker extends Checker implements SingletonInterface
         }
 
         if ($filename instanceof UploadedFileInterface) {
-            return in_array($this->files->extension($filename->getClientFilename()), $extensions);
+            return in_array(
+                $this->files->extension($filename->getClientFilename()),
+                $extensions
+            );
         }
 
         return in_array($this->files->extension($filename), $extensions);
@@ -115,7 +118,10 @@ class FileChecker extends Checker implements SingletonInterface
             return false;
         }
 
-        if ($filename instanceof UploadedFileInterface || $filename instanceof StreamableInterface) {
+        if (
+            $filename instanceof UploadedFileInterface
+            || $filename instanceof StreamableInterface
+        ) {
             return StreamWrapper::getUri($filename->getStream());
         }
 

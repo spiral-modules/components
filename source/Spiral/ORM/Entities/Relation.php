@@ -7,6 +7,7 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\Core\Component;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\IdentifiedInterface;
@@ -24,7 +25,7 @@ use Spiral\ORM\RelationInterface;
  *
  * This abstract implement built to work with ORM Record classes.
  */
-abstract class Relation implements
+abstract class Relation extends Component implements
     RelationInterface,
     \Countable,
     \IteratorAggregate,
@@ -305,7 +306,7 @@ abstract class Relation implements
      * Get selector associated with relation.
      *
      * @param array $where
-     * @return Selector
+     * @return RecordSelector
      */
     public function find(array $where = [])
     {
@@ -446,11 +447,11 @@ abstract class Relation implements
      *
      * Must be redeclarated in child implementations.
      *
-     * @return Selector
+     * @return RecordSelector
      */
     protected function createSelector()
     {
-        return $this->orm->ormSelector($this->getClass());
+        return $this->orm->source($this->getClass());
     }
 
     /**
@@ -476,7 +477,7 @@ abstract class Relation implements
         }
 
         if ($entity instanceof IdentifiedInterface) {
-            $this->orm->registerEntity($entity);
+            $this->orm->rememberEntity($entity);
         }
 
         return true;

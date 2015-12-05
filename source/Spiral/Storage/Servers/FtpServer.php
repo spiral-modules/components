@@ -101,8 +101,8 @@ class FtpServer extends StorageServer
         //File should be removed after processing
         $tempFilename = $this->files->tempFilename($this->files->extension($name));
 
-        if (!ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name),
-            FTP_BINARY)
+        if (
+        !ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY)
         ) {
             throw new ServerException("Unable to create local filename for '{$name}'.");
         }
@@ -116,7 +116,9 @@ class FtpServer extends StorageServer
     public function allocateStream(BucketInterface $bucket, $name)
     {
         if (!$filename = $this->allocateFilename($bucket, $name)) {
-            throw new ServerException("Unable to create stream for '{$name}', object does not exists.");
+            throw new ServerException(
+                "Unable to create stream for '{$name}', object does not exists."
+            );
         }
 
         return \GuzzleHttp\Psr7\stream_for(fopen($filename, 'rb'));

@@ -8,7 +8,7 @@
 namespace Spiral\Tokenizer\Reflections;
 
 /**
- * Represent argument using in method or function call with it's type and value.
+ * Represent argument using in method or function invocation with it's type and value.
  */
 class ReflectionArgument
 {
@@ -74,15 +74,15 @@ class ReflectionArgument
     }
 
     /**
-     * Create Argument reflections based on provided set of tokens (call inner part)
+     * Create Argument reflections based on provided set of tokens (fetched from invoke).
      *
      * @param array $tokens
      * @return self[]
      */
-    public static function fetchArguments(array $tokens)
+    public static function locateArguments(array $tokens)
     {
         $definition = null;
-        $parenthesisLevel = 0;
+        $level = 0;
 
         $result = [];
         foreach ($tokens as $token) {
@@ -94,19 +94,25 @@ class ReflectionArgument
                 $definition = ['type' => self::EXPRESSION, 'value' => '', 'tokens' => []];
             }
 
-            if ($token[ReflectionFile::TOKEN_TYPE] == '(') {
-                $parenthesisLevel++;
+            if (
+                $token[ReflectionFile::TOKEN_TYPE] == '('
+                || $token[ReflectionFile::TOKEN_TYPE] == '['
+            ) {
+                $level++;
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
 
-            if ($token[ReflectionFile::TOKEN_TYPE] == ')') {
-                $parenthesisLevel--;
+            if (
+                $token[ReflectionFile::TOKEN_TYPE] == ')'
+                || $token[ReflectionFile::TOKEN_TYPE] == ']'
+            ) {
+                $level--;
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
 
-            if ($parenthesisLevel) {
+            if ($level) {
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
@@ -135,7 +141,7 @@ class ReflectionArgument
     /**
      * Create Argument reflection using token definition. Internal method.
      *
-     * @see fetchArguments
+     * @see locateArguments
      * @param array $definition
      * @return static
      */

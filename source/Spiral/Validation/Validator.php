@@ -7,19 +7,19 @@
  */
 namespace Spiral\Validation;
 
+use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ConfiguratorInterface;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
-use Spiral\Validation\Exceptions\InvalidArgumentException;
+use Spiral\Validation\Configs\ValidatorConfig;
 use Spiral\Validation\Exceptions\ValidationException;
 
 /**
  * Validator is default implementation of ValidatorInterface. Class support functional rules with
- * user parameters. In addition part of validation rules moved into validation checkers used to
+ * user parameters. In addition, part of validation rules moved into validation checkers used to
  * simplify adding new rules, checkers are resolved using container and can be rebinded in
  * application.
  *
@@ -52,17 +52,6 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     use LoggerTrait, TranslatorTrait, SaturateTrait;
 
     /**
-     * Configuration section.
-     */
-    const CONFIG = 'validation';
-
-    /**
-     * Errors added manually to validator using addError() method. This is only placeholder for
-     * condition value (see defaultMessage).
-     */
-    const FORCED_ERROR = "forced";
-
-    /**
      * Return from validation rule to stop any future field validations. Internal contract.
      */
     const STOP_VALIDATION = -99;
@@ -87,8 +76,16 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     private $errors = [];
 
     /**
+     * Errors provided from outside.
+     *
+     * @var array
+     */
+    private $registeredErrors = [];
+
+    /**
      * If rule has no definer error message this text will be used instead. Localizable.
      *
+     * @invisible
      * @var string
      */
     protected $defaultMessage = "[[Condition '{condition}' does not meet.]]";
@@ -100,51 +97,32 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     protected $container = null;
 
     /**
-     * @var array
+     * @invisible
+     * @var ValidatorConfig
      */
-    protected $options = [
-        'names'           => true, //Interpolate names
-        'emptyConditions' => [],   //If met - validator will stop field validation on empty value
-        'checkers'        => [],   //Set of validation checker (to dedicate validation)
-        'aliases'         => []    //Set of validation rule aliases
-    ];
+    protected $config = null;
 
     /**
      * {@inheritdoc}
      *
-     * @param ContainerInterface    $container
-     * @param ConfiguratorInterface $configurator
+     * @param ValidatorConfig    $config
+     * @param ContainerInterface $container
+     * @throws SugarException
      */
     public function __construct(
-        $data = [],
         array $rules = [],
-        ContainerInterface $container = null,
-        ConfiguratorInterface $configurator = null
+        $data = [],
+        ValidatorConfig $config = null,
+        ContainerInterface $container = null
     ) {
         $this->data = $data;
         $this->rules = $rules;
 
+        //Let's get validation from shared container if none provided
+        $this->config = $this->saturate($config, ValidatorConfig::class);
+
         //We can use global container as fallback if no default values were provided
         $this->container = $this->saturate($container, ContainerInterface::class);
-        $this->options = array_merge(
-            $this->options,
-            $this->saturate($configurator, ConfiguratorInterface::class)->getConfig(self::CONFIG)
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setData($data)
-    {
-        if ($this->data == $data) {
-            return $this;
-        }
-
-        $this->data = $data;
-        $this->errors = [];
-
-        return $this;
     }
 
     /**
@@ -165,11 +143,46 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
+    public function setData($data)
+    {
+        if ($this->data == $data) {
+            return $this;
+        }
+
+        $this->data = $data;
+        $this->errors = [];
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function isValid()
     {
         $this->validate();
 
         return empty($this->errors);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function registerError($field, $error)
+    {
+        $this->registeredErrors[$field] = $error;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flushRegistered()
+    {
+        $this->registeredErrors = [];
+
+        return $this;
     }
 
     /**
@@ -187,7 +200,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     {
         $this->validate();
 
-        return $this->errors;
+        return $this->registeredErrors + $this->errors;
     }
 
     /**
@@ -220,10 +233,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                 //Condition either rule itself or first array element
                 $condition = is_string($rule) ? $rule : $rule[0];
 
-                if (
-                    empty($this->field($field))
-                    && !in_array($condition, $this->options['emptyConditions'])
-                ) {
+                if (empty($this->field($field)) && !$this->config->emptyCondition($condition)) {
                     //There is no need to validate empty field except for special conditions
                     break;
                 }
@@ -261,7 +271,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                 }
 
                 //Default message
-                $message = $this->translate($this->defaultMessage);
+                $message = $this->say($this->defaultMessage);
 
                 //Recording error message
                 $this->addMessage(
@@ -284,19 +294,15 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param array  $arguments Rule arguments if any.
      * @return bool|Checker
      * @throws ValidationException
-     * @throws InvalidArgumentException
      */
     protected function check($field, $value, &$condition, array $arguments = [])
     {
-        if (is_string($condition) && isset($this->options['aliases'][$condition])) {
-            //Condition were aliased
-            $condition = $this->options['aliases'][$condition];
-        }
+        $condition = $this->config->resolveCondition($condition);
 
         try {
             if (strpos($condition, '::')) {
                 $condition = explode('::', $condition);
-                if (isset($this->options['checkers'][$condition[0]])) {
+                if ($this->config->hasChecker($condition[0])) {
                     $checker = $this->checker($condition[0]);
                     if (!$result = $checker->check($condition[1], $value, $arguments, $this)) {
                         //To let validation() method know that message should be handled via Checker
@@ -308,7 +314,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             }
 
             if (is_array($condition)) {
-                //We are going to resolve class using container
+                //We are going to resolve class using constructor
                 $condition[0] = is_object($condition[0])
                     ? $condition[0]
                     : $this->container->get($condition[0]);
@@ -346,13 +352,13 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      */
     protected function checker($name)
     {
-        if (!isset($this->options['checkers'][$name])) {
+        if (!$this->config->hasChecker($name)) {
             throw new ValidationException(
                 "Unable to create validation checker defined by '{$name}' name."
             );
         }
 
-        return $this->container->get($this->options['checkers'][$name]);
+        return $this->container->get($this->config->checkerClass($name));
     }
 
     /**
@@ -408,16 +414,9 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             $condition = join('::', $condition);
         }
 
-        if ($this->options['names']) {
-            $this->errors[$field] = \Spiral\interpolate(
-                $message,
-                compact('field', 'condition') + $arguments
-            );
-        } else {
-            $this->errors[$field] = \Spiral\interpolate(
-                $message,
-                compact('condition') + $arguments
-            );
-        }
+        $this->errors[$field] = \Spiral\interpolate(
+            $message,
+            compact('field', 'condition') + $arguments
+        );
     }
 }

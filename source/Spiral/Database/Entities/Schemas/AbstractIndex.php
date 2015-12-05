@@ -7,27 +7,20 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
-use Spiral\Database\Exceptions\SchemaException;
+use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Schemas\IndexInterface;
 
 /**
  * Abstract index schema with read (see IndexInterface) and write abilities. Must be implemented
  * by driver to support DBMS specific syntax and creation rules.
  */
-abstract class AbstractIndex implements IndexInterface
+abstract class AbstractIndex extends AbstractElement implements IndexInterface
 {
     /**
      * Index types.
      */
     const NORMAL = 'INDEX';
     const UNIQUE = 'UNIQUE';
-
-    /**
-     * Index name.
-     *
-     * @var string
-     */
-    protected $name = '';
 
     /**
      * Index type, by default NORMAL and UNIQUE indexes supported, additional types can be
@@ -45,43 +38,17 @@ abstract class AbstractIndex implements IndexInterface
     protected $columns = [];
 
     /**
-     * @invisible
-     * @var AbstractTable
-     */
-    protected $table = null;
-
-    /**
-     * @param AbstractTable $table
-     * @param string        $name
-     * @param mixed         $schema Driver specific index information.
-     */
-    public function __construct(AbstractTable $table, $name, $schema = null)
-    {
-        $this->name = $name;
-        $this->table = $table;
-
-        !empty($schema) && $this->resolveSchema($schema);
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @param bool $quoted Quote name.
      */
     public function getName($quoted = false)
     {
-        $name = $this->name;
-        if (empty($this->name)) {
-            $name = $this->table->getName() . '_index_' . join('_',
-                    $this->columns) . '_' . uniqid();
+        if (empty(parent::getName())) {
+            $this->setName($this->generateName());
         }
 
-        if (strlen($name) > 64) {
-            //Many dbs has limitations on identifier length
-            $name = md5($name);
-        }
-
-        return $quoted ? $this->table->driver()->identifier($name) : $name;
+        return parent::getName($quoted);
     }
 
     /**
@@ -98,20 +65,6 @@ abstract class AbstractIndex implements IndexInterface
     public function getColumns()
     {
         return $this->columns;
-    }
-
-    /**
-     * Set index name. It's recommended to use AbstractTable->renameIndex() to safely rename
-     * indexes.
-     *
-     * @param string $name New index name.
-     * @return $this
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -133,7 +86,7 @@ abstract class AbstractIndex implements IndexInterface
      * Example:
      * $index->columns('key');
      * $index->columns('key', 'key2');
-     * $index->columns(array('key', 'key2'));
+     * $index->columns(['key', 'key2']);
      *
      * @param string|array $columns Columns array or comma separated list of parameters.
      * @return $this
@@ -150,25 +103,6 @@ abstract class AbstractIndex implements IndexInterface
     }
 
     /**
-     * Schedule index drop when parent table schema will be saved.
-     */
-    public function drop()
-    {
-        $this->table->dropIndex($this->getName());
-    }
-
-    /**
-     * Must compare two instances of AbstractIndex.
-     *
-     * @param AbstractIndex $original
-     * @return bool
-     */
-    public function compare(AbstractIndex $original)
-    {
-        return $this == $original;
-    }
-
-    /**
      * Index sql creation syntax.
      *
      * @param bool $includeTable Include table ON statement (not required for inline index
@@ -177,35 +111,55 @@ abstract class AbstractIndex implements IndexInterface
      */
     public function sqlStatement($includeTable = true)
     {
-        $statement = [];
-        $statement[] = $this->type . ($this->type == self::UNIQUE ? ' INDEX' : '');
+        $statement = [$this->type];
+
+        if ($this->isUnique()) {
+            //UNIQUE INDEX
+            $statement[] = 'INDEX';
+        }
+
         $statement[] = $this->getName(true);
 
         if ($includeTable) {
-            $statement[] = 'ON ' . $this->table->getName(true);
+            $statement[] = "ON {$this->table->getName(true)}";
         }
 
-        $statement[] = '(' . join(', ', array_map(
-                [$this->table->driver(), 'identifier'],
-                $this->columns
-            )) . ')';
+        //Wrapping column names
+        $columns = join(', ', array_map([$this->table->driver(), 'identifier'], $this->columns));
+        $statement[] = "({$columns})";
 
         return join(' ', $statement);
     }
 
     /**
-     * @return string
+     * Compare two elements together.
+     *
+     * @param self $initial
+     * @return bool
      */
-    public function __toString()
+    public function compare(self $initial)
     {
-        return $this->sqlStatement();
+        $normalized = clone $initial;
+        $normalized->declared = $this->declared;
+
+        return $this == $normalized;
     }
 
     /**
-     * Parse driver specific schema information and populate schema fields.
+     * Generate unique index name.
      *
-     * @param mixed $schema
-     * @throws SchemaException
+     * @return string
      */
-    abstract protected function resolveSchema($schema);
+    protected function generateName()
+    {
+        //We can generate name
+        $name = $this->table->getName() . '_index_' . join('_', $this->columns) . '_' . uniqid();
+
+        if (strlen($name) > 64) {
+            //Many dbs has limitations on identifier length
+            $name = md5($name);
+        }
+
+        return $name;
+    }
 }

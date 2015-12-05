@@ -9,7 +9,7 @@
 namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
-use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\ODM\Configs\ODMConfig;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Schemas\CollectionSchema;
@@ -17,7 +17,7 @@ use Spiral\ODM\Entities\Schemas\DocumentSchema;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\ODM;
-use Spiral\Tokenizer\TokenizerInterface;
+use Spiral\Tokenizer\ClassLocatorInterface;
 
 /**
  * Schema builder responsible for static analysis of existed Documents, their schemas, validations,
@@ -25,11 +25,6 @@ use Spiral\Tokenizer\TokenizerInterface;
  */
 class SchemaBuilder extends Component
 {
-    /**
-     * Schema builder configuration includes mutators list and etc.
-     */
-    use ConfigurableTrait;
-
     /**
      * @var DocumentSchema[]
      */
@@ -41,31 +36,52 @@ class SchemaBuilder extends Component
     private $collections = [];
 
     /**
+     * @var ODMConfig
+     */
+    protected $config = null;
+
+    /**
      * @invisible
      * @var ODM
      */
     protected $odm = null;
 
     /**
-     * @param ODM                $odm
-     * @param array              $config
-     * @param TokenizerInterface $tokenizer
+     * @param ODM                   $odm
+     * @param ODMConfig             $config
+     * @param ClassLocatorInterface $locator
      */
-    public function __construct(ODM $odm, array $config, TokenizerInterface $tokenizer)
+    public function __construct(ODM $odm, ODMConfig $config, ClassLocatorInterface $locator)
     {
         $this->config = $config;
         $this->odm = $odm;
 
-        $this->locateDocuments($tokenizer);
+        $this->locateDocuments($locator)->locateSources($locator);
         $this->describeCollections();
     }
 
     /**
      * @return ODM
      */
-    public function getODM()
+    public function odm()
     {
         return $this->odm;
+    }
+
+    /**
+     * Resolve database alias.
+     *
+     * @param string $database
+     * @return string
+     */
+    public function databaseAlias($database)
+    {
+        if (empty($database)) {
+            $database = $this->config->defaultDatabase();
+        }
+
+        //Spiral support ability to link multiple virtual databases together using aliases
+        return $this->config->resolveAlias($database);
     }
 
     /**
@@ -128,22 +144,20 @@ class SchemaBuilder extends Component
                 continue;
             }
 
-            //We can safely create odm Collection here, as we not going to use functionality requires
-            //finalized schema
-            $odmCollection = $this->odm->db(
+            $odmCollection = $this->odm->database(
                 $collection->getDatabase()
-            )->odmCollection(
+            )->selectCollection(
                 $collection->getName()
             );
 
             foreach ($indexes as $index) {
                 $options = [];
-                if (isset($index[Document::INDEX_OPTIONS])) {
-                    $options = $index[Document::INDEX_OPTIONS];
-                    unset($index[Document::INDEX_OPTIONS]);
+                if (isset($index[DocumentEntity::INDEX_OPTIONS])) {
+                    $options = $index[DocumentEntity::INDEX_OPTIONS];
+                    unset($index[DocumentEntity::INDEX_OPTIONS]);
                 }
 
-                $odmCollection->ensureIndex($index, $options);
+                $odmCollection->createIndex($index, $options);
             }
         }
     }
@@ -158,6 +172,8 @@ class SchemaBuilder extends Component
     public function normalizeSchema()
     {
         $result = [];
+
+        //Pre-packing collections
         foreach ($this->getCollections() as $collection) {
             $name = $collection->getDatabase() . '/' . $collection->getName();
             $result[$name] = $collection->getParent()->getName();
@@ -170,12 +186,13 @@ class SchemaBuilder extends Component
 
             $schema = [
                 ODM::D_DEFINITION   => $this->packDefinition($document->classDefinition()),
-                ODM::D_DEFAULTS     => $document->getDefaults(),
+                ODM::D_SOURCE       => $document->getSource(),
                 ODM::D_HIDDEN       => $document->getHidden(),
                 ODM::D_SECURED      => $document->getSecured(),
                 ODM::D_FILLABLE     => $document->getFillable(),
                 ODM::D_MUTATORS     => $document->getMutators(),
                 ODM::D_VALIDATES    => $document->getValidates(),
+                ODM::D_DEFAULTS     => $document->getDefaults(),
                 ODM::D_AGGREGATIONS => $this->packAggregations($document->getAggregations()),
                 ODM::D_COMPOSITIONS => array_keys($document->getCompositions())
             ];
@@ -200,7 +217,7 @@ class SchemaBuilder extends Component
      */
     public function getMutators($type)
     {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+        return $this->config->getMutators($type);
     }
 
     /**
@@ -211,27 +228,53 @@ class SchemaBuilder extends Component
      */
     public function mutatorAlias($alias)
     {
-        if (!is_string($alias) || !isset($this->config['mutatorAliases'][$alias])) {
-            return $alias;
-        }
-
-        return $this->config['mutatorAliases'][$alias];
+        return $this->config->mutatorAlias($alias);
     }
 
     /**
      * Locate every available Document class.
      *
-     * @param TokenizerInterface $tokenizer
+     * @param ClassLocatorInterface $locator
+     * @return $this
      */
-    protected function locateDocuments(TokenizerInterface $tokenizer)
+    protected function locateDocuments(ClassLocatorInterface $locator)
     {
-        foreach ($tokenizer->getClasses(DocumentEntity::class) as $class => $definition) {
+        foreach ($locator->getClasses(DocumentEntity::class) as $class => $definition) {
             if ($class == DocumentEntity::class || $class == Document::class) {
                 continue;
             }
 
             $this->documents[$class] = new DocumentSchema($this, $class);
         }
+
+        return $this;
+    }
+
+    /**
+     * Locate ORM entities sources.
+     *
+     * @param ClassLocatorInterface $locator
+     * @return $this
+     */
+    protected function locateSources(ClassLocatorInterface $locator)
+    {
+        foreach ($locator->getClasses(DocumentSource::class) as $class => $definition) {
+            $reflection = new \ReflectionClass($class);
+
+            if (
+                $reflection->isAbstract()
+                || empty($document = $reflection->getConstant('DOCUMENT'))
+            ) {
+                continue;
+            }
+
+            if ($this->hasDocument($document)) {
+                //Associating source with record
+                $this->document($document)->setSource($class);
+            }
+        }
+
+        return $this;
     }
 
     /**

@@ -21,7 +21,7 @@ class DeleteQuery extends AbstractAffect
      * @param string $into Table name without prefix.
      * @return $this
      */
-    public function table($into)
+    public function from($into)
     {
         $this->table = $into;
 
@@ -33,9 +33,11 @@ class DeleteQuery extends AbstractAffect
      */
     public function getParameters(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler;
+        if (empty($compiler)) {
+            $compiler = $this->compiler;
+        }
 
-        return $this->flattenParameters($compiler->prepareParameters(
+        return $this->flattenParameters($compiler->orderParameters(
             QueryCompiler::DELETE_QUERY, $this->whereParameters
         ));
     }
@@ -45,8 +47,10 @@ class DeleteQuery extends AbstractAffect
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
-        return $compiler->delete($this->table, $this->whereTokens);
+        return $compiler->compileDelete($this->table, $this->whereTokens);
     }
 }

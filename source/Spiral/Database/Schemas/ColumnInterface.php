@@ -8,20 +8,10 @@
 namespace Spiral\Database\Schemas;
 
 /**
- * Must represent table schema column abstraction.
- *
- * TODO: I might want to include abstractType here.
+ * Represents table schema column abstraction.
  */
 interface ColumnInterface
 {
-    /**
-     * PHP types for phpType() method.
-     */
-    const INT    = 'int';
-    const BOOL   = 'bool';
-    const STRING = 'string';
-    const FLOAT  = 'float';
-
     /**
      * Column name.
      *

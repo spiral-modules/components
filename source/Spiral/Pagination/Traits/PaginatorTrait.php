@@ -7,8 +7,10 @@
  */
 namespace Spiral\Pagination\Traits;
 
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\FactoryInterface;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Pagination\Exceptions\PaginationException;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
@@ -16,6 +18,8 @@ use Spiral\Pagination\PaginatorInterface;
 /**
  * Provides ability to paginate associated instance. Will work with default Paginator or fetch one
  * from container.
+ *
+ * Compatible with PaginatorAwareInterface.
  */
 trait PaginatorTrait
 {
@@ -85,44 +89,6 @@ trait PaginatorTrait
     }
 
     /**
-     * Paginate current selection using Paginator class.
-     *
-     * @param int                    $limit         Pagination limit.
-     * @param string                 $pageParameter Name of parameter in request query which is
-     *                                              used to store the current page number. "page"
-     *                                              by default.
-     * @param ServerRequestInterface $request       Has to be specified if no global container set.
-     * @return $this
-     * @throws PaginationException
-     */
-    public function paginate(
-        $limit = Paginator::DEFAULT_LIMIT,
-        $pageParameter = Paginator::DEFAULT_PARAMETER,
-        ServerRequestInterface $request = null
-    ) {
-        if (empty($container = $this->container()) && empty($request)) {
-            throw new PaginationException("Unable to create pagination without specified request.");
-        }
-
-        //If no request provided we can try to fetch it from container
-        $request = !empty($request) ? $request : $container->get(ServerRequestInterface::class);
-
-        if (empty($container) || !$container->has(PaginatorInterface::class)) {
-            //Let's use default paginator
-            $this->paginator = new Paginator($request, $pageParameter);
-        } else {
-            //We can also create paginator using container
-            $this->paginator = $container->construct(Paginator::class, compact(
-                'request', 'pageParameter'
-            ));
-        }
-
-        $this->paginator->setLimit($limit);
-
-        return $this;
-    }
-
-    /**
      * Manually set paginator instance for specific object.
      *
      * @param PaginatorInterface $paginator
@@ -133,16 +99,6 @@ trait PaginatorTrait
         $this->paginator = $paginator;
 
         return $this;
-    }
-
-    /**
-     * Indication that object was paginated.
-     *
-     * @return bool
-     */
-    public function isPaginated()
-    {
-        return !empty($this->paginator);
     }
 
     /**
@@ -158,6 +114,68 @@ trait PaginatorTrait
     }
 
     /**
+     * Indication that object was paginated.
+     *
+     * @return bool
+     */
+    public function isPaginated()
+    {
+        return !empty($this->paginator);
+    }
+
+    /**
+     * Paginate current selection using Paginator class.
+     *
+     * @param int                    $limit         Pagination limit.
+     * @param string                 $pageParameter Name of parameter in request query which is
+     *                                              used to store the current page number. "page"
+     *                                              by default.
+     * @param ServerRequestInterface $request       Has to be specified if no global container set.
+     * @return $this
+     * @throws PaginationException
+     */
+    public function paginate(
+        $limit = Paginator::DEFAULT_LIMIT,
+        $pageParameter = Paginator::DEFAULT_PARAMETER,
+        ServerRequestInterface $request = null
+    ) {
+        //Will be used in two places
+        $container = $this->container();
+
+        if (empty($request)) {
+            if (empty($container) || !$container->has(ServerRequestInterface::class)) {
+                throw new SugarException(
+                    "Unable to create pagination without specified request."
+                );
+            }
+
+            //Getting request from container scope
+            $request = $container->get(ServerRequestInterface::class);
+        }
+
+        if (empty($container) || !$container->has(Paginator::class)) {
+            //Let's use default paginator
+            $this->paginator = new Paginator($request, $pageParameter);
+        } else {
+            //We need constructor
+            if ($container instanceof FactoryInterface) {
+                $constructor = $container;
+            } else {
+                $constructor = $container->get(FactoryInterface::class);
+            }
+
+            //We can also create paginator using container
+            $this->paginator = $constructor->make(Paginator::class, compact(
+                'request', 'pageParameter'
+            ));
+        }
+
+        $this->paginator->setLimit($limit);
+
+        return $this;
+    }
+
+    /**
      * Apply pagination to current object. Will be applied only if internal paginator already
      * constructed.
      *
@@ -170,7 +188,7 @@ trait PaginatorTrait
             return $this;
         }
 
-        return $this->paginator->paginateObject($this);
+        return $this->paginator->paginate($this);
     }
 
     /**

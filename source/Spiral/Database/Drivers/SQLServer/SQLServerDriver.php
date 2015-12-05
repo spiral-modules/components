@@ -4,15 +4,12 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\SQLServer;
 
 use PDO;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLServer\Schemas\ColumnSchema;
-use Spiral\Database\Drivers\SQLServer\Schemas\IndexSchema;
-use Spiral\Database\Drivers\SQLServer\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\SQLServer\Schemas\Commander;
 use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 
@@ -29,10 +26,12 @@ class SQLServerDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE     = TableSchema::class;
-    const SCHEMA_COLUMN    = ColumnSchema::class;
-    const SCHEMA_INDEX     = IndexSchema::class;
-    const SCHEMA_REFERENCE = ReferenceSchema::class;
+    const SCHEMA_TABLE = TableSchema::class;
+
+    /**
+     * Commander used to execute commands. :)
+     */
+    const COMMANDER = Commander::class;
 
     /**
      * Query result class.
@@ -91,8 +90,8 @@ class SQLServerDriver extends Driver
      */
     public function hasTable($name)
     {
-        $query = 'SELECT COUNT(*) FROM information_schema.tables '
-            . 'WHERE table_type = \'BASE TABLE\' AND table_name = ?';
+        $query = "SELECT COUNT(*) FROM information_schema.tables "
+            . "WHERE table_type = 'BASE TABLE' AND table_name = ?";
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }
@@ -102,7 +101,7 @@ class SQLServerDriver extends Driver
      */
     public function tableNames()
     {
-        $query = 'SELECT table_name FROM information_schema.tables WHERE table_type = \'BASE TABLE\'';
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE'";
 
         $tables = [];
         foreach ($this->query($query)->fetchMode(PDO::FETCH_NUM) as $row) {
@@ -118,7 +117,7 @@ class SQLServerDriver extends Driver
      * @link http://stackoverflow.com/questions/2135418/equivalent-of-limit-and-offset-for-sql-server
      * @return int
      */
-    public function getServerVersion()
+    public function serverVersion()
     {
         if (empty($this->serverVersion)) {
             $this->serverVersion = (int)$this->getPDO()->getAttribute(\PDO::ATTR_SERVER_VERSION);

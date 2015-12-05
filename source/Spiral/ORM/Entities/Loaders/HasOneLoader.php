@@ -8,7 +8,7 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
 
@@ -67,7 +67,7 @@ class HasOneLoader extends Loader
     /**
      * {@inheritdoc}
      */
-    protected function clarifySelector(Selector $selector)
+    protected function clarifySelector(RecordSelector $selector)
     {
         $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
             $this->getKey(RecordEntity::OUTER_KEY) => $this->getParentKey()
@@ -80,10 +80,10 @@ class HasOneLoader extends Loader
      * Mount additional (not related to parent key) conditions, extended by child loaders
      * (HAS_MANY, BELONGS_TO).
      *
-     * @param Selector $selector
-     * @return Selector
+     * @param RecordSelector $selector
+     * @return RecordSelector
      */
-    protected function mountConditions(Selector $selector)
+    protected function mountConditions(RecordSelector $selector)
     {
         //We only going to mount morph key as additional condition
         if (!empty($morphKey = $this->getKey(RecordEntity::MORPH_KEY))) {

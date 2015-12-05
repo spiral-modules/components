@@ -18,33 +18,7 @@ abstract class CacheStore implements StoreInterface, InjectableInterface
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
      * injections.
      */
-    const INJECTOR = CacheProvider::class;
-
-    /**
-     * Internal store name. Used to read configs in reverse way.
-     */
-    const STORE = '';
-
-    /**
-     * @var array
-     */
-    protected $options = [];
-
-    /**
-     * @var string
-     */
-    protected $prefix = '';
-
-    /**
-     * New CacheStore. Logic of receiving configuration is reverted for controllable injections in
-     * spiral application.
-     *
-     * @param CacheProvider $cache CacheFacade component.
-     */
-    public function __construct(CacheProvider $cache)
-    {
-        $this->options = $cache->storeOptions(static::STORE) + $this->options;
-    }
+    const INJECTOR = CacheManager::class;
 
     /**
      * {@inheritdoc}

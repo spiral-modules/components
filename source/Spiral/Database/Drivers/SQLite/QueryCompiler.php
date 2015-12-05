@@ -4,36 +4,28 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\SQLite;
 
-use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * SQLite specific syntax compiler.
  */
-class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
+class QueryCompiler extends AbstractCompiler
 {
-    /**
-     * There is few warnings while rendering sql code for SQLite database.
-     */
-    use LoggerTrait;
-
     /**
      * {@inheritdoc}
      */
-    public function insert($table, array $columns, array $rowsets)
+    public function compileInsert($table, array $columns, array $rowsets)
     {
         if (count($rowsets) == 1) {
-            return parent::insert($table, $columns, $rowsets);
+            return parent::compileInsert($table, $columns, $rowsets);
         }
 
         //SQLite uses alternative syntax
         $statement = [];
-        $statement[] = "INSERT INTO {$this->quote($table, true)} ({$this->columns($columns)})";
+        $statement[] = "INSERT INTO {$this->quote($table, true)} ({$this->prepareColumns($columns)})";
 
         foreach ($rowsets as $rowset) {
             if (count($statement) == 1) {
@@ -56,15 +48,19 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      *
      * @link http://stackoverflow.com/questions/10491492/sqllite-with-skip-offset-only-not-limit
      */
-    protected function limit($limit, $offset)
+    protected function compileLimit($limit, $offset)
     {
+        if (empty($limit) && empty($offset)) {
+            return '';
+        }
+
         $statement = '';
 
-        if ($limit || $offset) {
+        if (!empty($limit) || !empty($offset)) {
             $statement = "LIMIT " . ($limit ?: '-1') . " ";
         }
 
-        if ($offset) {
+        if (!empty($offset)) {
             $statement .= "OFFSET {$offset}";
         }
 

@@ -8,7 +8,7 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\WhereDecorator;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORM;
@@ -80,7 +80,7 @@ class ManyToManyLoader extends Loader
      *
      * @return string
      */
-    public function getPivotTable()
+    public function pivotTable()
     {
         return $this->definition[RecordEntity::PIVOT_TABLE];
     }
@@ -90,7 +90,7 @@ class ManyToManyLoader extends Loader
      *
      * @return string
      */
-    public function getPivotAlias()
+    public function pivotAlias()
     {
         if (!empty($this->options['pivotAlias'])) {
             return $this->options['pivotAlias'];
@@ -113,7 +113,7 @@ class ManyToManyLoader extends Loader
 
         //Pivot table joining (INNER in post selection)
         $pivotOuterKey = $this->getPivotKey(RecordEntity::THOUGHT_OUTER_KEY);
-        $selector->innerJoin($this->getPivotTable() . ' AS ' . $this->getPivotAlias(), [
+        $selector->innerJoin($this->pivotTable() . ' AS ' . $this->pivotAlias(), [
             $pivotOuterKey => $this->getKey(RecordEntity::OUTER_KEY)
         ]);
 
@@ -149,11 +149,11 @@ class ManyToManyLoader extends Loader
     /**
      * {@inheritdoc}
      */
-    protected function clarifySelector(Selector $selector)
+    protected function clarifySelector(RecordSelector $selector)
     {
         $selector->join(
             $this->joinType(),
-            $this->getPivotTable() . ' AS ' . $this->getPivotAlias(),
+            $this->pivotTable() . ' AS ' . $this->pivotAlias(),
             [$this->getPivotKey(RecordEntity::THOUGHT_INNER_KEY) => $this->getParentKey()]
         );
 
@@ -172,7 +172,7 @@ class ManyToManyLoader extends Loader
      *
      * Pivot table columns will be included.
      */
-    protected function configureColumns(Selector $selector)
+    protected function configureColumns(RecordSelector $selector)
     {
         if (!$this->isLoadable()) {
             return;
@@ -184,7 +184,7 @@ class ManyToManyLoader extends Loader
         );
 
         $this->pivotOffset = $selector->generateColumns(
-            $this->getPivotAlias(),
+            $this->pivotAlias(),
             $this->pivotColumns
         );
     }
@@ -202,20 +202,20 @@ class ManyToManyLoader extends Loader
             return null;
         }
 
-        return $this->getPivotAlias() . '.' . $this->definition[$key];
+        return $this->pivotAlias() . '.' . $this->definition[$key];
     }
 
     /**
      * Mounting pivot table conditions including user defined and morph key.
      *
-     * @param Selector $selector
-     * @param string   $parentRole
-     * @return Selector
+     * @param RecordSelector $selector
+     * @param string         $parentRole
+     * @return RecordSelector
      */
-    protected function pivotConditions(Selector $selector, $parentRole = '')
+    protected function pivotConditions(RecordSelector $selector, $parentRole = '')
     {
         //We have to route all conditions to ON statement
-        $router = new WhereDecorator($selector, 'onWhere', $this->getPivotAlias());
+        $router = new WhereDecorator($selector, 'onWhere', $this->pivotAlias());
 
         if (!empty($morphKey = $this->getPivotKey(RecordEntity::MORPH_KEY))) {
             $router->where(
@@ -236,10 +236,10 @@ class ManyToManyLoader extends Loader
     /**
      * Set relational and user conditions.
      *
-     * @param Selector $selector
-     * @return Selector
+     * @param RecordSelector $selector
+     * @return RecordSelector
      */
-    protected function mountConditions(Selector $selector)
+    protected function mountConditions(RecordSelector $selector)
     {
         //Let's use where decorator to set conditions, it will automatically route tokens to valid
         //destination (JOIN or WHERE)

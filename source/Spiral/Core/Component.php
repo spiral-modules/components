@@ -7,6 +7,8 @@
  */
 namespace Spiral\Core;
 
+use Interop\Container\ContainerInterface;
+
 /**
  * Basic spiral cell. Automatically detects if "container" property are presented in class or uses
  * global container as fallback.
@@ -32,7 +34,7 @@ abstract class Component
     {
         if (
             property_exists($this, 'container')
-            && !empty($this->container)
+            && isset($this->container)
             && $this->container instanceof ContainerInterface
         ) {
             return $this->container;
@@ -47,15 +49,20 @@ abstract class Component
      * fallback.
      *
      * @internal Do not use for business logic.
-     * @param ContainerInterface $container
-     * @return ContainerInterface
+     * @param ContainerInterface $container Can be set to null.
+     * @return ContainerInterface|null
      */
     final protected static function staticContainer(ContainerInterface $container = null)
     {
-        if (!empty($container)) {
-            self::$staticContainer = $container;
+        if (func_num_args() === 0) {
+            return self::$staticContainer;
         }
 
-        return self::$staticContainer;
+        $outer = self::$staticContainer;
+
+        self::$staticContainer = $container;
+
+        //Return previous container or null
+        return $outer;
     }
 }

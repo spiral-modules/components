@@ -274,8 +274,9 @@ class ManyToMorphed implements RelationInterface
 
         if (
             !isset($this->definition[RecordEntity::MORPHED_ALIASES][$alias])
-            && !empty($reversed = array_search($alias,
-                $this->definition[RecordEntity::MORPHED_ALIASES]))
+            && !empty(
+            $reversed = array_search($alias, $this->definition[RecordEntity::MORPHED_ALIASES])
+            )
         ) {
             //Requested by singular form of role name, let's reverse mapping
             $alias = $reversed;
@@ -309,7 +310,7 @@ class ManyToMorphed implements RelationInterface
      */
     protected function pivotTable()
     {
-        return $this->orm->dbalDatabase($this->definition[ORM::R_DATABASE])->table(
+        return $this->orm->database($this->definition[ORM::R_DATABASE])->table(
             $this->definition[RecordEntity::PIVOT_TABLE]
         );
     }

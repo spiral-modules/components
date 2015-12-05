@@ -23,7 +23,7 @@ interface TableInterface extends \Countable
     public function schema();
 
     /**
-     * Table name in a context of parent database.
+     * Table name in a context of parent database (no prefix included).
      *
      * @return string
      */

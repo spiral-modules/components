@@ -10,14 +10,15 @@ namespace Spiral\ODM;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\EntityInterface;
-use Spiral\ODM\Entities\Collection;
+use Spiral\Models\Events\EntityEvent;
+use Spiral\ODM\Entities\DocumentSelector;
+use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\Traits\FindTrait;
 
 /**
- * DocumentEntity with added ActiveRecord methods and association with collection.
+ * DocumentEntity with added ActiveRecord methods and ability to connect to associated source.
  *
  * Document also provides an ability to specify aggregations using it's schema:
  *
@@ -36,13 +37,8 @@ use Spiral\ODM\Traits\FindTrait;
  *
  * @var array
  */
-abstract class Document extends DocumentEntity implements ActiveEntityInterface
+class Document extends DocumentEntity implements ActiveEntityInterface
 {
-    /**
-     * Static functions.
-     */
-    use FindTrait;
-
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.
@@ -145,24 +141,24 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             );
         }
 
+        //Associated collection
+        $collection = $this->mongoCollection();
+
         if (!$this->isLoaded()) {
-            $this->fire('saving');
+            $this->dispatch('saving', new EntityEvent($this));
             unset($this->fields['_id']);
 
             //Create new document
-            $this->odmCollection($this->odm)->insert($this->fields = $this->serializeData());
+            $collection->insert($this->fields = $this->serializeData());
 
-            $this->fire('saved');
+            $this->dispatch('saved', new EntityEvent($this));
         } elseif ($this->isSolid() || $this->hasUpdates()) {
-            $this->fire('updating');
+            $this->dispatch('updating', new EntityEvent($this));
 
             //Update existed document
-            $this->odmCollection($this->odm)->update(
-                ['_id' => $this->primaryKey()],
-                $this->buildAtomics()
-            );
+            $collection->update(['_id' => $this->primaryKey()], $this->buildAtomics());
 
-            $this->fire('updated');
+            $this->dispatch('updated', new EntityEvent($this));
         }
 
         $this->flushUpdates();
@@ -185,12 +181,13 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             );
         }
 
-        $this->fire('deleting');
+        $this->dispatch('deleting', new EntityEvent($this));
         if ($this->isLoaded()) {
-            $this->odmCollection($this->odm)->remove(['_id' => $this->primaryKey()]);
+            $this->mongoCollection()->remove(['_id' => $this->primaryKey()]);
         }
+
         $this->fields = $this->odmSchema()[ODM::D_DEFAULTS];
-        $this->fire('deleted');
+        $this->dispatch('deleted', new EntityEvent($this));
     }
 
     /**
@@ -202,7 +199,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * $parentGroup = $user->group();
      * echo $user->posts()->where(['published' => true])->count();
      *
-     * @return mixed|AccessorInterface|Collection|Document[]|Document
+     * @return mixed|AccessorInterface|DocumentSelector|Document[]|Document
      * @throws DocumentException
      */
     public function __call($offset, array $arguments)
@@ -219,7 +216,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * Get document aggregation.
      *
      * @param string $aggregation
-     * @return Collection|Document
+     * @return DocumentSelector|Document
      */
     public function aggregate($aggregation)
     {
@@ -233,14 +230,14 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         $query = $this->interpolateQuery($aggregation[ODM::AGR_QUERY]);
 
         //Every aggregation works thought ODM collection
-        $collection = $this->odm->odmCollection($aggregation[ODM::ARG_CLASS])->query($query);
+        $selector = $this->odm->selector($aggregation[ODM::ARG_CLASS], $query);
 
         //In future i might need separate class to represent aggregation
         if ($aggregation[ODM::AGR_TYPE] == self::ONE) {
-            return $collection->findOne();
+            return $selector->findOne();
         }
 
-        return $collection;
+        return $selector;
     }
 
     /**
@@ -265,6 +262,34 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     }
 
     /**
+     * Instance of ODM Selector associated with specific document.
+     *
+     * @see Component::staticContainer()
+     * @param ODM $odm ODM component, global container will be called if not instance provided.
+     * @return DocumentSource
+     * @throws ODMException
+     */
+    public static function source(ODM $odm = null)
+    {
+        if (empty($odm)) {
+            //Using global container as fallback
+            $odm = self::staticContainer()->get(ODM::class);
+        }
+
+        return $odm->source(static::class);
+    }
+
+    /**
+     * Just an alias.
+     *
+     * @return DocumentSource
+     */
+    public static function find()
+    {
+        return static::source();
+    }
+
+    /**
      * {@inheritdoc}
      *
      * Accessor options include field type resolved by DocumentSchema.
@@ -276,7 +301,11 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     {
         $accessor = parent::createAccessor($accessor, $value);
 
-        if ($accessor instanceof CompositableInterface && !$this->isLoaded() && !$this->isEmbedded()) {
+        if (
+            $accessor instanceof CompositableInterface
+            && !$this->isLoaded()
+            && !$this->isEmbedded()
+        ) {
             //Newly created object
             $accessor->invalidate();
         }
@@ -342,5 +371,15 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         return $source;
+    }
+
+    /**
+     * Associated mongo collection.
+     *
+     * @return \MongoCollection
+     */
+    private function mongoCollection()
+    {
+        return $this->odm->mongoCollection(static::class);
     }
 }

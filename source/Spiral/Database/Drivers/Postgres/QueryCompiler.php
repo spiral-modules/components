@@ -17,9 +17,9 @@ class QueryCompiler extends AbstractCompiler
     /**
      * {@inheritdoc}
      */
-    public function insert($table, array $columns, array $rowsets, $primaryKey = '')
+    public function compileInsert($table, array $columns, array $rowsets, $primaryKey = '')
     {
-        return parent::insert($table, $columns, $rowsets) . (!empty($primaryKey)
+        return parent::compileInsert($table, $columns, $rowsets) . (!empty($primaryKey)
             ? ' RETURNING ' . $this->quote($primaryKey)
             : ''
         );
@@ -28,7 +28,7 @@ class QueryCompiler extends AbstractCompiler
     /**
      * {@inheritdoc}
      */
-    protected function distinct($distinct)
+    protected function compileDistinct($distinct)
     {
         if (empty($distinct)) {
             return '';

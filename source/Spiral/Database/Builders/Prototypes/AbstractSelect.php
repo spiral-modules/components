@@ -13,9 +13,9 @@ use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Injections\SQLFragmentInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Pagination\PaginableInterface;
@@ -84,14 +84,14 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @var array
      */
-    protected $orderBy = [];
+    protected $ordering = [];
 
     /**
      * Columns/expressions to group by.
      *
      * @var array
      */
-    protected $groupBy = [];
+    protected $grouping = [];
 
     /**
      * Associated cache store.
@@ -119,14 +119,19 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function getParameters(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler;
+        if (empty($compiler)) {
+            //Using associated compiler
+            $compiler = $this->compiler;
+        }
 
-        return $this->flattenParameters($compiler->prepareParameters(
-            QueryCompiler::SELECT_QUERY,
-            $this->whereParameters,
-            $this->onParameters,
-            $this->havingParameters
-        ));
+        return $this->flattenParameters(
+            $compiler->orderParameters(
+                QueryCompiler::SELECT_QUERY,
+                $this->whereParameters,
+                $this->onParameters,
+                $this->havingParameters
+            )
+        );
     }
 
     /**
@@ -212,13 +217,13 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function orderBy($expression, $direction = self::SORT_ASC)
     {
         if (!is_array($expression)) {
-            $this->orderBy[] = [$expression, $direction];
+            $this->ordering[] = [$expression, $direction];
 
             return $this;
         }
 
         foreach ($expression as $nested => $direction) {
-            $this->orderBy[] = [$nested, $direction];
+            $this->ordering[] = [$nested, $direction];
         }
 
         return $this;
@@ -232,7 +237,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function groupBy($expression)
     {
-        $this->groupBy[] = $expression;
+        $this->grouping[] = $expression;
 
         return $this;
     }
@@ -274,7 +279,10 @@ abstract class AbstractSelect extends AbstractWhere implements
         }
 
         if (empty($this->cacheLifetime)) {
-            $result = $this->database->query($this->sqlStatement(), $this->getParameters());
+            $result = $this->database->query(
+                $this->sqlStatement(),
+                $this->getParameters()
+            );
         } else {
             $result = $this->database->cached(
                 $this->cacheLifetime,
@@ -295,8 +303,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Iterate thought result using smaller data chinks with defined size and walk function.
      *
      * Example:
-     * $select->chunked(100, function(QueryResult $result, $offset, $count)
-     * {
+     * $select->chunked(100, function(QueryResult $result, $offset, $count) {
      *      dump($result);
      * });
      *
@@ -313,8 +320,12 @@ abstract class AbstractSelect extends AbstractWhere implements
         $offset = 0;
 
         while ($offset + $limit <= $count) {
-            $result = call_user_func($callback, $this->offset($offset)->getIterator(), $offset,
-                $count);
+            $result = call_user_func_array($callback, [
+                $this->offset($offset)->getIterator(),
+                $offset,
+                $count
+            ]);
+
             if ($result === false) {
                 //Stop iteration
                 return;
@@ -335,15 +346,15 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function count($column = '*')
     {
-        $backup = [$this->columns, $this->orderBy, $this->groupBy, $this->limit, $this->offset];
+        $backup = [$this->columns, $this->ordering, $this->grouping, $this->limit, $this->offset];
         $this->columns = ["COUNT({$column})"];
 
         //Can not be used with COUNT()
-        $this->orderBy = $this->groupBy = [];
+        $this->ordering = $this->grouping = [];
         $this->limit = $this->offset = 0;
 
         $result = $this->run(false)->fetchColumn();
-        list($this->columns, $this->orderBy, $this->groupBy, $this->limit, $this->offset) = $backup;
+        list($this->columns, $this->ordering, $this->grouping, $this->limit, $this->offset) = $backup;
 
         return (int)$result;
     }
@@ -407,20 +418,17 @@ abstract class AbstractSelect extends AbstractWhere implements
     private function havingWrapper()
     {
         return function ($parameter) {
-            if (!$parameter instanceof ParameterInterface && is_array($parameter)) {
-                //Convert every parameter into object!
-                $parameter = new Parameter($parameter);
+            if ($parameter instanceof FragmentInterface) {
+                //We are only not creating bindings for plan fragments
+                if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
+                    return $parameter;
+                }
             }
 
-            if
-            (
-                $parameter instanceof SQLFragmentInterface
-                && !$parameter instanceof ParameterInterface
-                && !$parameter instanceof QueryBuilder
-            ) {
-                return $parameter;
-            }
+            //Wrapping all values with ParameterInterface
+            $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);;
 
+            //Let's store to sent to driver when needed
             $this->havingParameters[] = $parameter;
 
             return $parameter;

@@ -10,17 +10,16 @@ namespace Spiral\Database;
 use Spiral\Database\Exceptions\DatabaseException;
 
 /**
- * Databases factory.
+ * Databases factory/manager.
  */
 interface DatabasesInterface
 {
     /**
      * Create specified or select default instance of DatabaseInterface.
      *
-     * @param string $database
-     * @param array  $config Custom db configuration.
+     * @param string $database Database alias.
      * @return DatabaseInterface
      * @throws DatabaseException
      */
-    public function db($database = null, array $config = []);
+    public function database($database = null);
 }

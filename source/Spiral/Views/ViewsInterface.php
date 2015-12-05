@@ -7,7 +7,7 @@
  */
 namespace Spiral\Views;
 
-use Spiral\Views\Exceptions\ViewException;
+use Spiral\Views\Exceptions\ViewsException;
 
 /**
  * Provides access to views functionality.
@@ -27,21 +27,20 @@ interface ViewsInterface
     /**
      * Get instance of view class associated with view path (path can include namespace).
      *
-     * @param string $path  View path, CAN include separated namespace and view, or only view name
-     *                      in this case default namespace should be used.
-     * @param array  $data  View specific dataset transferred in form of array.
+     * @param string $path    View path, CAN include separated namespace and view, or only view name
+     *                        in this case default namespace should be used.
      * @return ViewInterface
      */
-    public function get($path, array $data = []);
+    public function get($path);
 
     /**
      * Compile desired view path into string. Just a shortcut.
      *
      * @see get()
      * @param string $path
-     * @param array  $data View specific dataset transferred in form of array.
+     * @param array  $context View specific dataset transferred in form of array.
      * @return string
-     * @throws ViewException
+     * @throws ViewsException
      */
-    public function render($path, array $data = []);
+    public function render($path, array $context = []);
 }

@@ -7,22 +7,16 @@
  */
 namespace Spiral\Database\Entities\Schemas;
 
-use Spiral\Database\Exceptions\SchemaException;
+use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Schemas\ReferenceInterface;
+use Spiral\ODM\Exceptions\SchemaException;
 
 /**
  * Abstract foreign schema with read (see ReferenceInterface) and write abilities. Must be
  * implemented by driver to support DBMS specific syntax and creation rules.
  */
-abstract class AbstractReference implements ReferenceInterface
+abstract class AbstractReference extends AbstractElement implements ReferenceInterface
 {
-    /**
-     * Constraint name.
-     *
-     * @var string
-     */
-    protected $name = '';
-
     /**
      * Local column name (key name).
      *
@@ -59,22 +53,34 @@ abstract class AbstractReference implements ReferenceInterface
     protected $updateRule = self::NO_ACTION;
 
     /**
-     * @invisible
-     * @var AbstractTable
+     * Mark schema entity as declared, it will be kept in final diff.
+     *
+     * @param bool $declared
+     * @return $this
      */
-    protected $table = null;
+    public function declared($declared = true)
+    {
+        if ($declared && $this->table->hasIndex([$this->column])) {
+            //Some databases require index for each foreign key
+            $this->table->index([$this->column], false)->declared(true);
+        }
+
+        return parent::declared($declared);
+    }
 
     /**
-     * @param AbstractTable $table
-     * @param string        $name
-     * @param mixed         $schema
+     * {@inheritdoc}
+     *
+     * @param string $name
+     * @return $this
      */
-    public function __construct(AbstractTable $table, $name, $schema = null)
+    public function setName($name)
     {
-        $this->name = $name;
-        $this->table = $table;
+        if (!empty($this->name)) {
+            throw new SchemaException("Changing reference name is not allowed.");
+        }
 
-        !empty($schema) && $this->resolveSchema($schema);
+        return parent::setName($name);
     }
 
     /**
@@ -84,17 +90,11 @@ abstract class AbstractReference implements ReferenceInterface
      */
     public function getName($quoted = false)
     {
-        $name = $this->name;
         if (empty($this->name)) {
-            $name = $this->table->getName() . '_foreign_' . $this->column . '_' . uniqid();
+            $this->setName($this->generateName());
         }
 
-        if (strlen($name) > 64) {
-            //Many dbs has limitations on identifier length
-            $name = md5($name);
-        }
-
-        return $quoted ? $this->table->driver()->identifier($name) : $name;
+        return parent::getName($quoted);
     }
 
     /**
@@ -162,7 +162,7 @@ abstract class AbstractReference implements ReferenceInterface
      */
     public function references($table, $column = 'id')
     {
-        $this->foreignTable = $this->table->getTablePrefix() . $table;
+        $this->foreignTable = $this->table->getPrefix() . $table;
         $this->foreignKey = $column;
 
         return $this;
@@ -195,25 +195,6 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * Schedule foreign key drop when parent table schema will be saved.
-     */
-    public function drop()
-    {
-        $this->table->dropForeign($this->getColumn());
-    }
-
-    /**
-     * Must compare two instances of AbstractReference.
-     *
-     * @param AbstractReference $original
-     * @return bool
-     */
-    public function compare(AbstractReference $original)
-    {
-        return $this == $original;
-    }
-
-    /**
      * Foreign key creation syntax.
      *
      * @return string
@@ -237,18 +218,33 @@ abstract class AbstractReference implements ReferenceInterface
     }
 
     /**
-     * @return string
+     * Compare two elements together.
+     *
+     * @param self $initial
+     * @return bool
      */
-    public function __toString()
+    public function compare(self $initial)
     {
-        return $this->sqlStatement();
+        $normalized = clone $initial;
+        $normalized->declared = $this->declared;
+
+        return $this == $normalized;
     }
 
     /**
-     * Parse driver specific schema information and populate schema fields.
+     * Generate unique foreign key name.
      *
-     * @param mixed $schema
-     * @throws SchemaException
+     * @return string
      */
-    abstract protected function resolveSchema($schema);
+    protected function generateName()
+    {
+        $name = $this->table->getName() . '_foreign_' . $this->column . '_' . uniqid();
+
+        if (strlen($name) > 64) {
+            //Many dbs has limitations on identifier length
+            $name = md5($name);
+        }
+
+        return $name;
+    }
 }

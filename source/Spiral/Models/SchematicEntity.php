@@ -7,7 +7,7 @@
  */
 namespace Spiral\Models;
 
-use Spiral\Core\ContainerInterface;
+use Interop\Container\ContainerInterface;
 
 /**
  * Entity which code follows external behaviour schema.
@@ -31,11 +31,14 @@ class SchematicEntity extends DataEntity
     private $schema = [];
 
     /**
+     * @param array $fields
      * @param array $schema
      */
-    public function __construct(array $schema)
+    public function __construct(array $fields, array $schema)
     {
+        parent::__construct($fields);
         $this->schema = $schema;
+        static::initialize();
     }
 
     /**
@@ -56,19 +59,7 @@ class SchematicEntity extends DataEntity
             $result[$field] = $value;
         }
 
-        return $this->fire('publicFields', $result);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validator(array $rules = [], ContainerInterface $container = null)
-    {
-        //Initiate validation using rules declared in odmSchema
-        return parent::validator(
-            !empty($rules) ? $rules : $this->schema[self::SH_VALIDATES],
-            $container
-        );
+        return $result;
     }
 
     /**
@@ -97,5 +88,19 @@ class SchematicEntity extends DataEntity
         }
 
         return null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createValidator(
+        array $rules = [],
+        ContainerInterface $container = null
+    ) {
+        //Initiate validation using rules declared in model schema
+        return parent::createValidator(
+            !empty($rules) ? $rules : $this->schema[self::SH_VALIDATES],
+            $container
+        );
     }
 }

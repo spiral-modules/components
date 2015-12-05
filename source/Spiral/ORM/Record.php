@@ -5,23 +5,21 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ORM;
 
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Models\ActiveEntityInterface;
+use Spiral\Models\Events\EntityEvent;
+use Spiral\ORM\Entities\RecordSource;
+use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RecordException;
-use Spiral\ORM\Traits\FindTrait;
 
 /**
- * RecordEntity with added active record functionality.
+ * Entity with ability to be saved and direct access to source.
  */
 class Record extends RecordEntity implements ActiveEntityInterface
 {
-    /**
-     * Static find methods.
-     */
-    use FindTrait;
-
     /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.
@@ -58,7 +56,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
         }
 
         if (!$this->isLoaded()) {
-            $this->fire('saving');
+            $this->dispatch('saving', new EntityEvent($this));
 
             //Primary key field name (if any)
             $primaryKey = $this->ormSchema()[ORM::M_PRIMARY_KEY];
@@ -73,13 +71,13 @@ class Record extends RecordEntity implements ActiveEntityInterface
                 $this->fields[$primaryKey] = $lastID;
             }
 
-            $this->loadedState(true)->fire('saved');
+            $this->loadedState(true)->dispatch('saved', new EntityEvent($this));
 
             //Saving record to entity cache if we have space for that
-            $this->orm->registerEntity($this, false);
+            $this->orm->rememberEntity($this, false);
 
         } elseif ($this->isSolid() || $this->hasUpdates()) {
-            $this->fire('updating');
+            $this->dispatch('updating', new EntityEvent($this));
 
             //Updating changed/all field based on model criteria (in usual case primaryKey)
             $this->sourceTable()->update(
@@ -87,7 +85,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
                 $this->stateCriteria()
             )->run();
 
-            $this->fire('updated');
+            $this->dispatch('updated', new EntityEvent($this));
         }
 
         $this->flushUpdates();
@@ -104,7 +102,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
      */
     public function delete()
     {
-        $this->fire('deleting');
+        $this->dispatch('deleting', new EntityEvent($this));
 
         if ($this->isLoaded()) {
             $this->sourceTable()->delete($this->stateCriteria())->run();
@@ -114,7 +112,40 @@ class Record extends RecordEntity implements ActiveEntityInterface
         //we have foreign keys for that
 
         $this->fields = $this->ormSchema()[ORM::M_COLUMNS];
-        $this->loadedState(self::DELETED)->fire('deleted');
+        $this->loadedState(self::DELETED)->dispatch('deleted', new EntityEvent($this));
+    }
+
+    /**
+     * Instance of ORM Selector associated with specific document.
+     *
+     * @see   Component::staticContainer()
+     * @param ORM $orm ORM component, global container will be called if not instance provided.
+     * @return RecordSource
+     * @throws ORMException
+     */
+    public static function source(ORM $orm = null)
+    {
+        /**
+         * Using global container as fallback.
+         *
+         * @var ORM $orm
+         */
+        if (empty($orm)) {
+            //Using global container as fallback
+            $orm = self::staticContainer()->get(ORM::class);
+        }
+
+        return $orm->source(static::class);
+    }
+
+    /**
+     * Just an alias.
+     *
+     * @return RecordSource
+     */
+    public static function find()
+    {
+        return static::source();
     }
 
     /**

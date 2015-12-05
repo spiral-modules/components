@@ -7,12 +7,13 @@
  */
 namespace Spiral\Core\Traits;
 
-use Spiral\Core\ContainerInterface;
-use Spiral\Core\Exceptions\MissingContainerException;
+use Interop\Container\ContainerInterface;
+use Interop\Container\Exception\ContainerException;
+use Spiral\Core\Exceptions\SugarException;
 
 /**
- * Saturate optional constructor or method argument (class) using internal container.
- * In most of cases trait is doing nothing since spiral Container populates even
+ * Saturate optional constructor or method argument (class) using internal (usually static)
+ * container. In most of cases trait is doing nothing since spiral Container populates even
  * optional class dependencies.
  *
  * Avoid using this trait in custom code, it's only a development sugar.
@@ -20,20 +21,13 @@ use Spiral\Core\Exceptions\MissingContainerException;
 trait SaturateTrait
 {
     /**
-     * Class specific container.
-     *
-     * @return ContainerInterface
-     */
-    abstract protected function container();
-
-    /**
      * Must be used only to resolve optional constructor arguments. Use in classes which are
      * generally resolved using Container. Default value MUST always be supplied from outside.
      *
-     * @internal Do not use for business logic.
      * @param mixed  $default Default value.
      * @param string $class   Requested class.
      * @return mixed|null|object
+     * @throws SugarException
      */
     private function saturate($default, $class)
     {
@@ -41,13 +35,20 @@ trait SaturateTrait
             return $default;
         }
 
-        if (empty($this->container())) {
-            throw new MissingContainerException(
-                "Unable to saturate '{$class}', global container were not set."
+        //Only when global container is set
+        try {
+            return $this->container()->get($class);
+        } catch (ContainerException $exception) {
+            throw new SugarException(
+                "Unable to saturate '{$class}': {$exception->getMessage()}", 0, $exception
             );
         }
-
-        //Only when global container is set
-        return $this->container()->get($class);
     }
+
+    /**
+     * Class specific container.
+     *
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

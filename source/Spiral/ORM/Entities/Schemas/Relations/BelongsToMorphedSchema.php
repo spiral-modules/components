@@ -90,16 +90,13 @@ class BelongsToMorphedSchema extends MorphedSchema
         $inversed = $this->definition[RecordEntity::INVERSE];
         foreach ($this->outerRecords() as $record) {
             if (!$record->hasRelation($inversed[1])) {
-                $record->addRelation(
-                    $inversed[1],
-                    [
-                        $inversed[0]            => $this->record->getName(),
-                        RecordEntity::OUTER_KEY => $this->definition[RecordEntity::INNER_KEY],
-                        RecordEntity::INNER_KEY => $this->definition[RecordEntity::OUTER_KEY],
-                        RecordEntity::MORPH_KEY => $this->definition[RecordEntity::MORPH_KEY],
-                        RecordEntity::NULLABLE  => $this->definition[RecordEntity::NULLABLE]
-                    ]
-                );
+                $record->addRelation($inversed[1], [
+                    $inversed[0]            => $this->record->getName(),
+                    RecordEntity::OUTER_KEY => $this->definition[RecordEntity::INNER_KEY],
+                    RecordEntity::INNER_KEY => $this->definition[RecordEntity::OUTER_KEY],
+                    RecordEntity::MORPH_KEY => $this->definition[RecordEntity::MORPH_KEY],
+                    RecordEntity::NULLABLE  => $this->definition[RecordEntity::NULLABLE]
+                ]);
             }
         }
     }

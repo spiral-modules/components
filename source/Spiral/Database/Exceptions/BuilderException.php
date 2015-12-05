@@ -10,7 +10,7 @@ namespace Spiral\Database\Exceptions;
 use Spiral\Core\Exceptions\RuntimeException;
 
 /**
- * Exception raised by query builder.
+ * Exception raised by query builders.
  */
 class BuilderException extends RuntimeException
 {

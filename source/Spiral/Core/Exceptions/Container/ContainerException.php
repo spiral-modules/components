@@ -7,12 +7,13 @@
  */
 namespace Spiral\Core\Exceptions\Container;
 
-use Spiral\Core\Exceptions\CoreException;
+use Interop\Container\Exception\ContainerException as ContainerExceptionInterface;
+use Spiral\Core\Exceptions\DependencyException;
 
 /**
  * Something inside container.
  */
-class ContainerException extends CoreException
+class ContainerException extends DependencyException implements ContainerExceptionInterface
 {
 
 }

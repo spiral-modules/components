@@ -8,7 +8,7 @@
 namespace Spiral\Database\Schemas;
 
 /**
- * Represent single table index associated with set of columns.
+ * Represents single table index associated with set of columns.
  */
 interface IndexInterface
 {

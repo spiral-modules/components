@@ -135,9 +135,7 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
 
         //Let's ask ORM to create needed record
         return $this->instances[$this->position] = $this->orm->record(
-            $this->class,
-            $data,
-            $this->cache
+            $this->class, $data, $this->cache
         );
     }
 

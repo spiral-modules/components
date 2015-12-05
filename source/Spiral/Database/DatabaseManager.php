@@ -7,11 +7,10 @@
  */
 namespace Spiral\Database;
 
-use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Component;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\ContainerInterface;
-use Spiral\Core\Singleton;
-use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DatabaseException;
@@ -19,27 +18,17 @@ use Spiral\Database\Exceptions\DatabaseException;
 /**
  * DatabaseManager responsible for database creation, configuration storage and drivers factory.
  */
-class DatabaseManager extends Singleton implements InjectorInterface, DatabasesInterface
+class DatabaseManager extends Component implements InjectorInterface, DatabasesInterface
 {
-    /**
-     * Configuration.
-     */
-    use ConfigurableTrait;
-
     /**
      * Declares to Spiral IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
 
     /**
-     * Configuration section.
-     */
-    const CONFIG = 'database';
-
-    /**
      * By default spiral will force time conversion into single timezone before storing in
      * database, it will help us to ensure that we have no problems with switching timezones and
-     * save a lot of time while development. :)
+     * save a lot of time while development (potentially).
      */
     const DEFAULT_TIMEZONE = 'UTC';
 
@@ -54,93 +43,89 @@ class DatabaseManager extends Singleton implements InjectorInterface, DatabasesI
     private $drivers = [];
 
     /**
-     * @invisible
-     * @var ContainerInterface
+     * @var DatabasesConfig
      */
-    protected $container = null;
+    protected $config = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
+     * @invisible
+     * @var FactoryInterface
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    protected $factory = null;
+
+    /**
+     * @param DatabasesConfig  $config
+     * @param FactoryInterface $factory
+     */
+    public function __construct(DatabasesConfig $config, FactoryInterface $factory)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
-        $this->container = $container;
+        $this->config = $config;
+        $this->factory = $factory;
     }
 
     /**
      * {@inheritdoc}
      *
-     * Use third argument to link multiple databases to one driver.
-     *
-     * @param Driver $driver Custom driver.
      * @return Database
      */
-    public function db($database = null, array $config = [], Driver $driver = null)
+    public function database($database = null)
     {
-        $database = !empty($database) ? $database : $this->config['default'];
-        while (isset($this->config['aliases'][$database])) {
-            $database = $this->config['aliases'][$database];
+        if (empty($database)) {
+            $database = $this->config->defaultDatabase();
         }
+
+        //Spiral support ability to link multiple virtual databases together using aliases
+        $database = $this->config->resolveAlias($database);
 
         if (isset($this->databases[$database])) {
             return $this->databases[$database];
         }
 
-        if (empty($config)) {
-            if (!isset($this->config['databases'][$database])) {
-                throw new DatabaseException(
-                    "Unable to create database, no presets for '{$database}' found."
-                );
-            }
-
-            $config = $this->config['databases'][$database];
-        }
-
-        if (empty($driver)) {
-            $driver = $this->driver($config['connection']);
+        if (!$this->config->hasDatabase($database)) {
+            throw new DatabaseException(
+                "Unable to create database, no presets for '{$database}' found."
+            );
         }
 
         //No need to benchmark here, due connection will happen later
-        $this->databases[$database] = $this->container->construct(Database::class, [
-            'name'        => $database,
-            'driver'      => $driver,
-            'tablePrefix' => isset($config['tablePrefix']) ? $config['tablePrefix'] : ''
+        $this->databases[$database] = $this->factory->make(Database::class, [
+            'name'   => $database,
+            'driver' => $this->driver($this->config->databaseConnection($database)),
+            'prefix' => $this->config->databasePrefix($database)
         ]);
 
         return $this->databases[$database];
     }
 
     /**
-     * Get driver by it's name.
+     * Get driver by it's name. Every driver associated with configured connection, there is minor
+     * de-sync in naming due legacy code.
      *
-     * @param string $name
-     * @param array  $config Custom driver options and class.
+     * @param string $connection
      * @return Driver
      * @throws DatabaseException
      */
-    public function driver($name, array $config = [])
+    public function driver($connection)
     {
-        if (isset($this->drivers[$name])) {
-            return $this->drivers[$name];
+        if (isset($this->drivers[$connection])) {
+            return $this->drivers[$connection];
         }
 
-        if (empty($config)) {
-            if (!isset($this->config['connections'][$name])) {
-                throw new DatabaseException(
-                    "Unable to create Driver, no presets for '{$name}' found."
-                );
-            }
-
-            $config = $this->config['connections'][$name];
+        if (!$this->config->hasConnection($connection)) {
+            throw new DatabaseException(
+                "Unable to create Driver, no presets for '{$connection}' found."
+            );
         }
 
-        $this->drivers[$name] = $this->container->construct(
-            $config['driver'], compact('name', 'config')
+        $this->drivers[$connection] = $this->factory->make(
+            $this->config->connectionDriver($connection),
+            [
+                'name'   => $connection,
+                'config' => $this->config->connectionConfig($connection)
+            ]
         );
 
-        return $this->drivers[$name];
+        return $this->drivers[$connection];
     }
 
     /**
@@ -152,15 +137,15 @@ class DatabaseManager extends Singleton implements InjectorInterface, DatabasesI
     public function getDatabases()
     {
         $result = [];
-        foreach ($this->config['databases'] as $name => $config) {
-            $result[] = $this->db($name);
+        foreach ($this->config->databaseNames() as $name) {
+            $result[] = $this->database($name);
         }
 
         return $result;
     }
 
     /**
-     * Get instance of every available driver.
+     * Get instance of every available driver/connection.
      *
      * @return Driver[]
      * @throws DatabaseException
@@ -168,7 +153,7 @@ class DatabaseManager extends Singleton implements InjectorInterface, DatabasesI
     public function getDrivers()
     {
         $result = [];
-        foreach ($this->config['connections'] as $name => $config) {
+        foreach ($this->config->connectionNames() as $name) {
             $result[] = $this->driver($name);
         }
 
@@ -178,8 +163,9 @@ class DatabaseManager extends Singleton implements InjectorInterface, DatabasesI
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context)
+    public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $this->db($context);
+        //If context is empty default database will be returned
+        return $this->database($context);
     }
 }

@@ -10,12 +10,13 @@ namespace Spiral\Core\Exceptions;
 /**
  * Unable to perform user action or find controller.
  */
-class ControllerException extends RuntimeException
+class ControllerException extends RuntimeException implements ClientExceptionInterface
 {
     /**
-     * Different controller errors.
+     * Pre-defined controller error codes.
      */
     const NOT_FOUND    = 0;
     const BAD_ACTION   = 1;
     const BAD_ARGUMENT = 2;
+    const FORBIDDEN    = 3;
 }

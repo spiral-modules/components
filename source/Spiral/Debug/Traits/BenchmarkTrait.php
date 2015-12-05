@@ -7,7 +7,7 @@
  */
 namespace Spiral\Debug\Traits;
 
-use Spiral\Core\ContainerInterface;
+use Interop\Container\ContainerInterface;
 use Spiral\Debug\BenchmarkerInterface;
 
 /**
@@ -43,10 +43,8 @@ trait BenchmarkTrait
     protected function benchmark($record, $context = '')
     {
         if (empty($this->benchmarker)) {
-
             if (
-                empty($container = $this->container())
-                || !$container->has(BenchmarkerInterface::class)
+                empty($container = $this->container()) || !$container->has(BenchmarkerInterface::class)
             ) {
                 //Nothing to do
                 return false;

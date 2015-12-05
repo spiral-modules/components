@@ -4,14 +4,10 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractReference;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\Exceptions\SchemaException;
 
 /**
  * SQLIte specific table schema, some alter operations emulated using temporary tables.
@@ -24,8 +20,7 @@ class TableSchema extends AbstractTable
     protected function loadColumns()
     {
         $tableSQL = $this->driver->query(
-            "SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?",
-            [$this->name]
+            "SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?", [$this->getName()]
         )->fetchColumn();
 
         /**
@@ -35,17 +30,21 @@ class TableSchema extends AbstractTable
          */
         $tableStatement = explode("\n", $tableSQL);
 
-        foreach ($this->driver->query("PRAGMA TABLE_INFO({$this->getName(true)})") as $column) {
+        $columnsQuery = $this->driver->query("PRAGMA TABLE_INFO({$this->getName(true)})");
+
+        $primaryKeys = [];
+        foreach ($columnsQuery as $column) {
             if (!empty($column['pk'])) {
-                $this->primaryKeys[] = $column['name'];
-                $this->dbPrimaryKeys[] = $column['name'];
+                $primaryKeys[] = $column['name'];
             }
 
             $column['tableStatement'] = $tableStatement;
-            $this->registerColumn($column['name'], $column);
+            $this->registerColumn($this->columnSchema($column['name'], $column));
         }
 
-        return true;
+        $this->setPrimaryKeys($primaryKeys);
+
+        return $this;
     }
 
     /**
@@ -53,12 +52,16 @@ class TableSchema extends AbstractTable
      */
     protected function loadIndexes()
     {
-        foreach ($this->driver->query("PRAGMA index_list({$this->getName(true)})") as $index) {
-            $index = $this->registerIndex($index['name'], $index);
-            if ($index->getColumns() == $this->primaryKeys) {
-                unset($this->indexes[$index->getName()], $this->dbIndexes[$index->getName()]);
+        $indexesQuery = $this->driver->query("PRAGMA index_list({$this->getName(true)})");
+        foreach ($indexesQuery as $index) {
+            $index = $this->registerIndex($this->indexSchema($index['name'], $index));
+
+            if ($index->getColumns() == $this->getPrimaryKeys()) {
+                $this->forgetIndex($index);
             }
         }
+
+        return $this;
     }
 
     /**
@@ -66,184 +69,163 @@ class TableSchema extends AbstractTable
      */
     protected function loadReferences()
     {
-        foreach ($this->driver->query("PRAGMA foreign_key_list({$this->getName(true)})") as
-                 $reference) {
-            $this->registerReference($reference['id'], $reference);
+        $foreignsQuery = $this->driver->query("PRAGMA foreign_key_list({$this->getName(true)})");
+        foreach ($foreignsQuery as $reference) {
+            $this->registerReference($this->referenceSchema($reference['id'], $reference));
         }
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function updateSchema()
+    protected function synchroniseSchema()
     {
-        if ($this->primaryKeys != $this->dbPrimaryKeys) {
-            throw new SchemaException(
-                "Primary keys can not be changed for already exists table ({$this->getName()})."
-            );
+        if (!$this->requiresRebuild()) {
+            //Probably some index changed or table renamed
+            return parent::synchroniseSchema();
         }
 
-        $this->driver->beginTransaction();
+        $this->logger()->debug("Rebuilding table {table} to apply required modifications.", [
+            'table' => $this->getName(true)
+        ]);
 
-        try {
-            $rebuildRequired = false;
-            if ($this->alteredColumns() || $this->alteredReferences()) {
-                $rebuildRequired = true;
+        //Temporary table is required to copy data over
+        $temporary = $this->createTemporary();
+
+        //Moving data over
+        $this->copyData($temporary, $this->columnsMapping(true));
+
+        //Dropping current table
+        $this->commander->dropTable($this->initial->getName());
+
+        //Renaming temporary table (should automatically handle table renaming)
+        $this->commander->renameTable($temporary->getName(), $this->getName());
+
+        //We can create needed indexes now
+        foreach ($this->getIndexes() as $index) {
+            $this->commander->addIndex($this, $index);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function columnSchema($name, $schema = null)
+    {
+        return new ColumnSchema($this, $name, $schema);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function indexSchema($name, $schema = null)
+    {
+        return new IndexSchema($this, $name, $schema);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function referenceSchema($name, $schema = null)
+    {
+        return new ReferenceSchema($this, $name, $schema);
+    }
+
+    /**
+     * Rebuild is required when columns or foreign keys are altered.
+     *
+     * @return bool
+     */
+    private function requiresRebuild()
+    {
+        $difference = [
+            count($this->comparator->addedColumns()),
+            count($this->comparator->droppedColumns()),
+            count($this->comparator->alteredColumns()),
+            count($this->comparator->addedForeigns()),
+            count($this->comparator->droppedForeigns()),
+            count($this->comparator->alteredForeigns())
+        ];
+
+        return array_sum($difference) != 0;
+    }
+
+    /**
+     * Temporary table.
+     *
+     * @return TableSchema
+     */
+    private function createTemporary()
+    {
+        //Temporary table is required to copy data over
+        $temporary = clone $this;
+        $temporary->setName('spiral_temp_' . $this->getName() . '_' . uniqid());
+
+        //We don't need any index in temporary table
+        foreach ($temporary->getIndexes() as $index) {
+            $temporary->forgetIndex($index);
+        }
+
+        $this->commander->createTable($temporary);
+
+        return $temporary;
+    }
+
+    /**
+     * Copy table data to another location.
+     *
+     * @see http://stackoverflow.com/questions/4007014/alter-column-in-sqlite
+     * @param AbstractTable $temporary
+     * @param array         $mapping Association between old and new columns (quoted).
+     */
+    private function copyData(AbstractTable $temporary, array $mapping)
+    {
+        $this->logger()->debug(
+            "Copying table data from {source} to {table} using mapping ({columns}) => ({target}).",
+            [
+                'source'  => $this->driver->identifier($this->initial->getName()),
+                'table'   => $temporary->getName(true),
+                'columns' => join(', ', $mapping),
+                'target'  => join(', ', array_keys($mapping))
+            ]
+        );
+
+        $query = \Spiral\interpolate(
+            "INSERT INTO {table} ({target}) SELECT {columns} FROM {source}",
+            [
+                'source'  => $this->driver->identifier($this->initial->getName()),
+                'table'   => $temporary->getName(true),
+                'columns' => join(', ', $mapping),
+                'target'  => join(', ', array_keys($mapping))
+            ]
+        );
+
+        //Let's go
+        $this->driver->statement($query);
+    }
+
+    /**
+     * Get mapping between new and initial columns.
+     *
+     * @param bool $quoted
+     * @return array
+     */
+    private function columnsMapping($quoted = false)
+    {
+        $current = $this->getColumns();
+        $initial = $this->initial->getColumns();
+
+        $mapping = [];
+        foreach ($current as $name => $column) {
+            if (isset($initial[$name])) {
+                $mapping[$column->getName($quoted)] = $initial[$name]->getName($quoted);
             }
-
-            if (!$rebuildRequired) {
-                foreach ($this->alteredIndexes() as $name => $schema) {
-                    $dbIndex = isset($this->dbIndexes[$name]) ? $this->dbIndexes[$name] : null;
-
-                    if (!$schema) {
-                        $this->logger()->info(
-                            "Dropping index [{statement}] from table {table}.", [
-                            'statement' => $dbIndex->sqlStatement(true),
-                            'table'     => $this->getName(true)
-                        ]);
-
-                        $this->doIndexDrop($dbIndex);
-                        continue;
-                    }
-
-                    if (!$dbIndex) {
-                        $this->logger()->info(
-                            "Adding index [{statement}] into table {table}.", [
-                            'statement' => $schema->sqlStatement(false),
-                            'table'     => $this->getName(true)
-                        ]);
-
-                        $this->doIndexAdd($schema);
-                        continue;
-                    }
-
-                    //Altering
-                    $this->logger()->info(
-                        "Altering index [{statement}] to [{new}] in table {table}.", [
-                        'statement' => $dbIndex->sqlStatement(false),
-                        'new'       => $schema->sqlStatement(false),
-                        'table'     => $this->getName(true)
-                    ]);
-
-                    $this->doIndexChange($schema, $dbIndex);
-                }
-            } else {
-                $this->logger()->info(
-                    "Rebuilding table {table} to apply required modifications.", [
-                    'table' => $this->getName(true)
-                ]);
-
-                //To be renamed later
-                $tableName = $this->name;
-
-                $this->name = 'spiral_temp_' . $this->name . '_' . uniqid();
-
-                //SQLite index names are global
-                $indexes = $this->indexes;
-                $this->indexes = [];
-
-                //Creating temporary table
-                $this->createSchema();
-
-                //Mapping columns
-                $mapping = [];
-                foreach ($this->columns as $name => $schema) {
-                    if (isset($this->dbColumns[$name])) {
-                        $mapping[$schema->getName(true)] = $this->dbColumns[$name]->getName(true);
-                    }
-                }
-
-                $this->logger()->info(
-                    "Migrating table data from {source} to {table} with columns mappings ({columns}) => ({target}).",
-                    [
-                        'source'  => $this->driver->identifier($tableName),
-                        'table'   => $this->getName(true),
-                        'columns' => join(', ', $mapping),
-                        'target'  => join(', ', array_keys($mapping))
-                    ]
-                );
-
-                //http://stackoverflow.com/questions/4007014/alter-column-in-sqlite
-                $query = \Spiral\interpolate(
-                    "INSERT INTO {table} ({target}) SELECT {columns} FROM {source}",
-                    [
-                        'source'  => $this->driver->identifier($tableName),
-                        'table'   => $this->getName(true),
-                        'columns' => join(', ', $mapping),
-                        'target'  => join(', ', array_keys($mapping))
-                    ]
-                );
-
-                $this->driver->statement($query);
-
-                //Dropping original table
-                $this->driver->statement(
-                    'DROP TABLE ' . $this->driver->identifier($tableName)
-                );
-
-                //Renaming (without prefix)
-                $this->rename(substr($tableName, strlen($this->tablePrefix)));
-
-                //Restoring indexes, we can create them now
-                $this->indexes = $indexes;
-                foreach ($this->indexes as $index) {
-                    $this->doIndexAdd($index);
-                }
-            }
-        } catch (\Exception $exception) {
-            $this->driver->rollbackTransaction();
-            throw $exception;
         }
 
-        $this->driver->commitTransaction();
-    }
-
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doColumnAdd(AbstractColumn $column)
-    {
-        //Not supported
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doColumnDrop(AbstractColumn $column)
-    {
-        //Not supported
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
-    {
-        //Not supported
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doForeignAdd(AbstractReference $foreign)
-    {
-        //Not supported
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doForeignDrop(AbstractReference $foreign)
-    {
-        //Not supported
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doForeignChange(AbstractReference $foreign, AbstractReference $dbForeign)
-    {
-        //Not supported
+        return $mapping;
     }
 }

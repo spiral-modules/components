@@ -135,7 +135,7 @@ class InsertQuery extends QueryBuilder
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
-        return $this->flattenParameters($compiler->prepareParameters(
+        return $this->flattenParameters($compiler->orderParameters(
             QueryCompiler::INSERT_QUERY, [], [], [], $this->rowsets
         ));
     }
@@ -145,9 +145,11 @@ class InsertQuery extends QueryBuilder
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler->reset();
+        if (empty($compiler)) {
+            $compiler = $this->compiler->resetQuoter();
+        }
 
-        return $compiler->insert($this->table, $this->columns, $this->rowsets);
+        return $compiler->compileInsert($this->table, $this->columns, $this->rowsets);
     }
 
     /**

@@ -57,7 +57,7 @@ interface ServerInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
-     * @return string|bool
+     * @return string
      * @throws ServerException
      */
     public function allocateFilename(BucketInterface $bucket, $name);

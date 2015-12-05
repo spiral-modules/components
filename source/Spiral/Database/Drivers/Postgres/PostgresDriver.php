@@ -7,17 +7,14 @@
  */
 namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Core\ContainerInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\Postgres\Schemas\ColumnSchema;
-use Spiral\Database\Drivers\Postgres\Schemas\IndexSchema;
-use Spiral\Database\Drivers\Postgres\Schemas\ReferenceSchema;
+use Spiral\Database\Drivers\Postgres\Schemas\Commander;
 use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
-use Spiral\Database\Injections\Parameter;
 
 /**
  * Talks to postgres databases.
@@ -32,10 +29,12 @@ class PostgresDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE     = TableSchema::class;
-    const SCHEMA_COLUMN    = ColumnSchema::class;
-    const SCHEMA_INDEX     = IndexSchema::class;
-    const SCHEMA_REFERENCE = ReferenceSchema::class;
+    const SCHEMA_TABLE = TableSchema::class;
+
+    /**
+     * Commander used to execute commands. :)
+     */
+    const COMMANDER = Commander::class;
 
     /**
      * Query compiler class.
@@ -56,6 +55,8 @@ class PostgresDriver extends Driver
     private $primaryKeys = [];
 
     /**
+     * Needed to remember table primary keys.
+     *
      * @invisible
      * @var HippocampusInterface
      */
@@ -63,35 +64,20 @@ class PostgresDriver extends Driver
 
     /**
      * {@inheritdoc}
-     * @param ContainerInterface   $container
-     * @param HippocampusInterface $memory
      * @param string               $name
      * @param array                $config
+     * @param FactoryInterface     $factory
+     * @param HippocampusInterface $memory
      */
     public function __construct(
-        ContainerInterface $container,
-        HippocampusInterface $memory,
         $name,
-        array $config
+        array $config,
+        FactoryInterface $factory = null,
+        HippocampusInterface $memory = null
     ) {
-        parent::__construct($container, $name, $config);
+        parent::__construct($name, $config, $factory);
+
         $this->memory = $memory;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function prepareParameters(array $parameters)
-    {
-        $result = parent::prepareParameters($parameters);
-
-        array_walk($result, function (&$value) {
-            if (is_bool($value)) {
-                $value = new Parameter($value, \PDO::PARAM_BOOL);
-            }
-        });
-
-        return $result;
     }
 
     /**
@@ -100,8 +86,7 @@ class PostgresDriver extends Driver
     public function hasTable($name)
     {
         $query = 'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' '
-            . 'AND "table_name" = ?';
+            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?';
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }
@@ -131,7 +116,7 @@ class PostgresDriver extends Driver
      */
     public function getPrimary($table)
     {
-        if (empty($this->primaryKeys)) {
+        if (!empty($this->memory) && empty($this->primaryKeys)) {
             $this->primaryKeys = $this->memory->loadData($this->getSource() . '-primary');
         }
 
@@ -154,7 +139,9 @@ class PostgresDriver extends Driver
         }
 
         //Caching
-        $this->memory->saveData($this->getSource() . '-primary', $this->primaryKeys);
+        if (!empty($this->memory)) {
+            $this->memory->saveData($this->getSource() . '-primary', $this->primaryKeys);
+        }
 
         return $this->primaryKeys[$table];
     }
@@ -164,7 +151,7 @@ class PostgresDriver extends Driver
      */
     public function insertBuilder(Database $database, array $parameters = [])
     {
-        return $this->container->construct(InsertQuery::class, [
+        return $this->factory->make(InsertQuery::class, [
                 'database' => $database,
                 'compiler' => $this->queryCompiler($database->getPrefix())
             ] + $parameters);

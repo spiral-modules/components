@@ -201,7 +201,7 @@ abstract class Loader implements LoaderInterface
         $this->orm = $orm;
 
         //Related record schema
-        $this->schema = $orm->getSchema($definition[static::RELATION_TYPE]);
+        $this->schema = $orm->schema($definition[static::RELATION_TYPE]);
 
         $this->container = $container;
         $this->definition = $definition;
@@ -312,7 +312,7 @@ abstract class Loader implements LoaderInterface
      */
     public function dbalDatabase()
     {
-        return $this->orm->dbalDatabase($this->schema[ORM::M_DB]);
+        return $this->orm->database($this->schema[ORM::M_DB]);
     }
 
     /**
@@ -344,6 +344,7 @@ abstract class Loader implements LoaderInterface
         if (($position = strpos($relation, '.')) !== false) {
             //Chain of relations provided
             $nested = $this->loader(substr($relation, 0, $position), []);
+
             if (empty($nested) || !$nested instanceof self) {
                 //todo: Think about the options
                 throw new LoaderException(
@@ -503,7 +504,7 @@ abstract class Loader implements LoaderInterface
     /**
      * Create selector dedicated to load data for current loader.
      *
-     * @return Selector|null
+     * @return RecordSelector|null
      */
     public function createSelector()
     {
@@ -511,7 +512,7 @@ abstract class Loader implements LoaderInterface
             return null;
         }
 
-        $selector = new Selector($this->orm, $this->definition[static::RELATION_TYPE], $this);
+        $selector = $this->orm->source($this->definition[static::RELATION_TYPE], $this);
 
         //Setting columns to be loaded
         $this->configureColumns($selector);
@@ -537,9 +538,9 @@ abstract class Loader implements LoaderInterface
      *
      * Method called by Selector when loader set as primary selection loader.
      *
-     * @param Selector $selector
+     * @param RecordSelector $selector
      */
-    public function configureSelector(Selector $selector)
+    public function configureSelector(RecordSelector $selector)
     {
         if (!$this->isJoinable()) {
             //Loader can be used not only for loading but purely for filering
@@ -582,14 +583,13 @@ abstract class Loader implements LoaderInterface
         }
     }
 
-
     /**
      * Implementation specific selector configuration, must create required joins, conditions and
      * etc.
      *
-     * @param Selector $selector
+     * @param RecordSelector $selector
      */
-    abstract protected function clarifySelector(Selector $selector);
+    abstract protected function clarifySelector(RecordSelector $selector);
 
     /**
      * Parse QueryResult provided by parent loaders and populate data tree. Loader must pass parsing
@@ -846,9 +846,9 @@ abstract class Loader implements LoaderInterface
     /**
      * Configure columns required for loader data selection.
      *
-     * @param Selector $selector
+     * @param RecordSelector $selector
      */
-    protected function configureColumns(Selector $selector)
+    protected function configureColumns(RecordSelector $selector)
     {
         if (!$this->isLoadable()) {
             return;

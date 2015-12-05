@@ -27,7 +27,7 @@ class QueryException extends RuntimeException
     /**
      * @return \PDOException
      */
-    public function getPDOException()
+    public function pdoException()
     {
         return $this->getPrevious();
     }

@@ -7,14 +7,13 @@
  */
 namespace Spiral\Tests\Cases\Encrypter;
 
-use Spiral\Core\Configurator;
 use Spiral\Encrypter\Encrypter;
 
 class EncryptionTest extends \PHPUnit_Framework_TestCase
 {
     public function testEncryption()
     {
-        $encrypter = $this->encrypter();
+        $encrypter = $this->makeEncrypter();
 
         $encrypted = $encrypter->encrypt('test string');
         $this->assertNotEquals('test string', $encrypted);
@@ -37,7 +36,7 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
      */
     public function testBadData()
     {
-        $encrypter = $this->encrypter();
+        $encrypter = $this->makeEncrypter();
 
         $encrypted = $encrypter->encrypt('test string');
         $this->assertNotEquals('test string', $encrypted);
@@ -51,7 +50,7 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
      */
     public function testBadSignature()
     {
-        $encrypter = $this->encrypter();
+        $encrypter = $this->makeEncrypter();
 
         $encrypted = $encrypter->encrypt('test string');
         $this->assertNotEquals('test string', $encrypted);
@@ -67,11 +66,11 @@ class EncryptionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param array $config
+     * @param string $key
      * @return Encrypter
      */
-    protected function encrypter($config = ['key' => '1234567890123456'])
+    protected function makeEncrypter($key = '1234567890123456')
     {
-        return new Encrypter(new Configurator($config));
+        return new Encrypter($key);
     }
 }

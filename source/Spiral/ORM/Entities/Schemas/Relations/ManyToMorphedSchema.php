@@ -119,22 +119,19 @@ class ManyToMorphedSchema extends MorphedSchema
         //WHERE conditions can not be inversed
         foreach ($this->outerRecords() as $record) {
             if (!$record->hasRelation($this->definition[RecordEntity::INVERSE])) {
-                $record->addRelation(
-                    $this->definition[RecordEntity::INVERSE],
-                    [
-                        RecordEntity::MANY_TO_MANY      => $this->record->getName(),
-                        RecordEntity::PIVOT_TABLE       => $this->definition[RecordEntity::PIVOT_TABLE],
-                        RecordEntity::OUTER_KEY         => $this->definition[RecordEntity::INNER_KEY],
-                        RecordEntity::INNER_KEY         => $this->definition[RecordEntity::OUTER_KEY],
-                        RecordEntity::THOUGHT_INNER_KEY => $this->definition[RecordEntity::THOUGHT_OUTER_KEY],
-                        RecordEntity::THOUGHT_OUTER_KEY => $this->definition[RecordEntity::THOUGHT_INNER_KEY],
-                        RecordEntity::MORPH_KEY         => $this->definition[RecordEntity::MORPH_KEY],
-                        RecordEntity::CREATE_INDEXES    => $this->definition[RecordEntity::CREATE_INDEXES],
-                        RecordEntity::CREATE_PIVOT      => $this->definition[RecordEntity::CREATE_PIVOT],
-                        RecordEntity::PIVOT_COLUMNS     => $this->definition[RecordEntity::PIVOT_COLUMNS],
-                        RecordEntity::WHERE_PIVOT       => $this->definition[RecordEntity::WHERE_PIVOT]
-                    ]
-                );
+                $record->addRelation($this->definition[RecordEntity::INVERSE], [
+                    RecordEntity::MANY_TO_MANY      => $this->record->getName(),
+                    RecordEntity::PIVOT_TABLE       => $this->definition[RecordEntity::PIVOT_TABLE],
+                    RecordEntity::OUTER_KEY         => $this->definition[RecordEntity::INNER_KEY],
+                    RecordEntity::INNER_KEY         => $this->definition[RecordEntity::OUTER_KEY],
+                    RecordEntity::THOUGHT_INNER_KEY => $this->definition[RecordEntity::THOUGHT_OUTER_KEY],
+                    RecordEntity::THOUGHT_OUTER_KEY => $this->definition[RecordEntity::THOUGHT_INNER_KEY],
+                    RecordEntity::MORPH_KEY         => $this->definition[RecordEntity::MORPH_KEY],
+                    RecordEntity::CREATE_INDEXES    => $this->definition[RecordEntity::CREATE_INDEXES],
+                    RecordEntity::CREATE_PIVOT      => $this->definition[RecordEntity::CREATE_PIVOT],
+                    RecordEntity::PIVOT_COLUMNS     => $this->definition[RecordEntity::PIVOT_COLUMNS],
+                    RecordEntity::WHERE_PIVOT       => $this->definition[RecordEntity::WHERE_PIVOT]
+                ]);
             }
         }
     }

@@ -164,7 +164,8 @@ abstract class ReflectionEntity extends \ReflectionClass
     abstract protected function parentSchema();
 
     /**
-     * Read default model property value, will read "protected" and "private" properties.
+     * Read default model property value, will read "protected" and "private" properties. Method
+     * raises entity event "describe" to allow it traits modify needed values.
      *
      * @param string $property Property name.
      * @param bool   $merge    If true value will be merged with all parent declarations.
@@ -173,21 +174,23 @@ abstract class ReflectionEntity extends \ReflectionClass
     final protected function property($property, $merge = false)
     {
         if (isset($this->cache[$property])) {
+            //Property merging and trait events are pretty slow
             return $this->cache[$property];
         }
 
-        $defaults = $this->getDefaultProperties();
-        if (isset($defaults[$property])) {
-            $value = $defaults[$property];
+        $properties = $this->getDefaultProperties();
+        if (isset($properties[$property])) {
+            $value = $properties[$property];
         } else {
             return null;
         }
 
+        //Merge with parent value requested
         if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS)) {
-            if (is_array($value)) {
-                if (!empty($parent = $this->parentSchema())) {
-                    $value = array_merge($parent->property($property, $merge), $value);
-                }
+
+            //For the reasons we can merge only arrays
+            if (is_array($value) && !empty($parent = $this->parentSchema())) {
+                $value = array_merge($parent->property($property, $merge), $value);
             }
         }
 

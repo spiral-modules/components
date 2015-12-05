@@ -94,13 +94,13 @@ class HasOne extends Relation
         //We are going to clarify selector manually (without loaders), that's easy relation
         if (isset($this->definition[RecordEntity::MORPH_KEY])) {
             $selector->where(
-                $selector->getPrimaryAlias() . '.' . $this->definition[RecordEntity::MORPH_KEY],
+                $selector->primaryAlias() . '.' . $this->definition[RecordEntity::MORPH_KEY],
                 $this->parent->recordRole()
             );
         }
 
         $selector->where(
-            $selector->getPrimaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
+            $selector->primaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],
             $this->parent->getField($this->definition[RecordEntity::INNER_KEY], false)
         );
 

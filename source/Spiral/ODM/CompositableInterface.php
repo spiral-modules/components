@@ -15,9 +15,7 @@ use Spiral\Models\EntityInterface;
  *
  * Compositable instance is primary entity type for ODM.
  */
-interface CompositableInterface extends
-    EntityInterface,
-    AtomicAccessorInterface
+interface CompositableInterface extends EntityInterface, DocumentAccessorInterface
 {
     /**
      * {@inheritdoc}
@@ -26,7 +24,7 @@ interface CompositableInterface extends
      * @param mixed $options Implementation specific options. In ODM will always contain field type.
      */
     public function __construct(
-        $data,
+        $value,
         EntityInterface $parent = null,
         ODM $odm = null,
         $options = null

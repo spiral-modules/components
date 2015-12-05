@@ -7,11 +7,10 @@
  */
 namespace Spiral\Storage;
 
-use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\Component;
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\ContainerInterface;
-use Spiral\Core\Singleton;
-use Spiral\Core\Traits\ConfigurableTrait;
+use Spiral\Core\FactoryInterface;
+use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\Entities\StorageObject;
 use Spiral\Storage\Exceptions\StorageException;
@@ -19,22 +18,12 @@ use Spiral\Storage\Exceptions\StorageException;
 /**
  * Default implementation of StorageInterface.
  */
-class StorageManager extends Singleton implements StorageInterface, InjectorInterface
+class StorageManager extends Component implements StorageInterface, InjectorInterface
 {
-    /**
-     * Runtime configuration editing + some logging.
-     */
-    use ConfigurableTrait;
-
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
     const SINGLETON = self::class;
-
-    /**
-     * Configuration section.
-     */
-    const CONFIG = 'storage';
 
     /**
      * @var BucketInterface[]
@@ -47,27 +36,29 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     private $servers = [];
 
     /**
-     * @invisible
-     * @var ContainerInterface
+     * @var StorageConfig
      */
-    protected $container = null;
+    protected $config = null;
 
     /**
-     * @param ConfiguratorInterface $configurator
-     * @param ContainerInterface    $container
+     * @invisible
+     * @var FactoryInterface
      */
-    public function __construct(ConfiguratorInterface $configurator, ContainerInterface $container)
+    protected $factory = null;
+
+    /**
+     * @param StorageConfig    $config
+     * @param FactoryInterface $factory
+     */
+    public function __construct(StorageConfig $config, FactoryInterface $factory)
     {
-        $this->config = $configurator->getConfig(static::CONFIG);
-        $this->container = $container;
+        $this->config = $config;
+        $this->factory = $factory;
 
         //Loading buckets
-        foreach ($this->config['buckets'] as $name => $bucket) {
+        foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
-                    'storage' => $this
-                ] + $bucket
-            );
+            $this->buckets[$name] = $this->createBucket($name, $bucket);
         }
     }
 
@@ -80,9 +71,9 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
         }
 
-        return $this->buckets[$name] = $this->container->construct(StorageBucket::class, [
-                'storage' => $this
-            ] + compact('prefix', 'server', 'options')
+        return $this->buckets[$name] = $this->factory->make(
+            StorageBucket::class,
+            ['storage' => $this] + compact('prefix', 'server', 'options')
         );
     }
 
@@ -105,8 +96,12 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context)
+    public function createInjection(\ReflectionClass $class, $context = null)
     {
+        if (empty($context)) {
+            throw new StorageException("Storage bucket can be requested without specified context.");
+        }
+
         return $this->bucket($context);
     }
 
@@ -134,23 +129,19 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function server($server, array $options = [])
+    public function server($server)
     {
         if (isset($this->servers[$server])) {
             return $this->servers[$server];
         }
 
-        if (!empty($options)) {
-            $this->config['servers'][$server] = $options;
-        }
-
-        if (!array_key_exists($server, $this->config['servers'])) {
+        if (!$this->config->hasServer($server)) {
             throw new StorageException("Undefined storage server '{$server}'.");
         }
 
-        $config = $this->config['servers'][$server];
+        $config = $this->config->serverOptions($server);
 
-        return $this->servers[$server] = $this->container->construct($config['class'], $config);
+        return $this->servers[$server] = $this->factory->make($config['class'], $config);
     }
 
     /**
@@ -169,5 +160,34 @@ class StorageManager extends Singleton implements StorageInterface, InjectorInte
     public function open($address)
     {
         return new StorageObject($address, $this);
+    }
+
+    /**
+     * Create bucket based configuration settings.
+     *
+     * @param string $name
+     * @param array  $bucket
+     * @return BucketInterface
+     */
+    private function createBucket($name, array $bucket)
+    {
+        $parameters = $bucket + compact('name');
+
+        if (!array_key_exists('options', $bucket)) {
+            throw new StorageException("Bucket configuration must include options.");
+        }
+
+        if (!array_key_exists('prefix', $bucket)) {
+            throw new StorageException("Bucket configuration must include prefix.");
+        }
+
+        if (!array_key_exists('server', $bucket)) {
+            throw new StorageException("Bucket configuration must include server id.");
+        }
+
+        $parameters['server'] = $this->server($bucket['server']);
+        $parameters['storage'] = $this;
+
+        return $this->factory->make(StorageBucket::class, $parameters);
     }
 }

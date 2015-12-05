@@ -67,9 +67,9 @@ class MixedChecker extends Checker implements SingletonInterface
     public function match($value, $field, $strict = false)
     {
         if ($strict) {
-            return $value === $this->validator->field($field, null);
+            return $value === $this->validator()->field($field, null);
         }
 
-        return $value == $this->validator->field($field, null);
+        return $value == $this->validator()->field($field, null);
     }
 }

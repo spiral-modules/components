@@ -8,10 +8,11 @@
 namespace Spiral\Database\Entities\Schemas;
 
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Exceptions\InvalidArgumentException;
 use Spiral\Database\Exceptions\SchemaException;
-use Spiral\Database\Injections\SQLFragment;
-use Spiral\Database\Injections\SQLFragmentInterface;
+use Spiral\Database\Injections\Fragment;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Schemas\ColumnInterface;
 
 /**
@@ -43,8 +44,16 @@ use Spiral\Database\Schemas\ColumnInterface;
  *
  * @method AbstractColumn|$this json()
  */
-abstract class AbstractColumn implements ColumnInterface
+abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 {
+    /**
+     * PHP types for phpType() method.
+     */
+    const INT    = 'int';
+    const BOOL   = 'bool';
+    const STRING = 'string';
+    const FLOAT  = 'float';
+
     /**
      * Abstract type aliases (for consistency).
      *
@@ -89,35 +98,45 @@ abstract class AbstractColumn implements ColumnInterface
         //Primary sequences
         'primary'     => null,
         'bigPrimary'  => null,
+
         //Enum type (mapped via method)
         'enum'        => null,
+
         //Logical types
         'boolean'     => null,
+
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger
         'integer'     => null,
         'tinyInteger' => null,
         'bigInteger'  => null,
+
         //String with specified length (mapped via method)
         'string'      => null,
+
         //Generic types
         'text'        => null,
         'tinyText'    => null,
         'longText'    => null,
+
         //Real types
         'double'      => null,
         'float'       => null,
+
         //Decimal type (mapped via method)
         'decimal'     => null,
+
         //Date and Time types
         'datetime'    => null,
         'date'        => null,
         'time'        => null,
         'timestamp'   => null,
+
         //Binary types
         'binary'      => null,
         'tinyBinary'  => null,
         'longBinary'  => null,
+
         //Additional types
         'json'        => null
     ];
@@ -153,13 +172,6 @@ abstract class AbstractColumn implements ColumnInterface
         'longBinary'  => [],
         'json'        => []
     ];
-
-    /**
-     * Column name.
-     *
-     * @var string
-     */
-    protected $name = '';
 
     /**
      * DBMS specific column type.
@@ -210,35 +222,6 @@ abstract class AbstractColumn implements ColumnInterface
      * @var array
      */
     protected $enumValues = [];
-
-    /**
-     * @invisible
-     * @var AbstractTable
-     */
-    protected $table = null;
-
-    /**
-     * @param AbstractTable $table
-     * @param string        $name
-     * @param mixed         $schema Driver specific column information.
-     */
-    public function __construct(AbstractTable $table, $name, $schema = null)
-    {
-        $this->name = $name;
-        $this->table = $table;
-
-        !empty($schema) && $this->resolveSchema($schema);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param bool $quoted Quote name.
-     */
-    public function getName($quoted = false)
-    {
-        return $quoted ? $this->table->driver()->identifier($this->name) : $this->name;
-    }
 
     /**
      * {@inheritdoc}
@@ -312,13 +295,15 @@ abstract class AbstractColumn implements ColumnInterface
             return null;
         }
 
-        if ($this->defaultValue instanceof SQLFragmentInterface) {
+        if ($this->defaultValue instanceof FragmentInterface) {
             return $this->defaultValue;
         }
 
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
-            if (strtolower($this->defaultValue) == strtolower($this->table->driver()->timestampNow())) {
-                return new SQLFragment($this->defaultValue);
+            if (
+                strtolower($this->defaultValue) == strtolower($this->table->driver()->nowExpression())
+            ) {
+                return new Fragment($this->defaultValue);
             }
         }
 
@@ -398,20 +383,6 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Set column name. It's recommended to use AbstractTable->renameColumn() to safely rename
-     * columns.
-     *
-     * @param string $name New column name.
-     * @return $this
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
      * Give column new abstract type. DBMS specific implementation must map provided type into one
      * of internal database values.
      *
@@ -477,7 +448,7 @@ abstract class AbstractColumn implements ColumnInterface
             $this->abstractType() == 'timestamp'
             && strtolower($value) == strtolower(Database::TIMESTAMP_NOW)
         ) {
-            $this->defaultValue = $this->table->driver()->timestampNow();
+            $this->defaultValue = $this->table->driver()->nowExpression();
         }
 
         return $this;
@@ -629,48 +600,6 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Schedule column drop when parent table schema will be saved.
-     */
-    public function drop()
-    {
-        $this->table->dropColumn($this->getName());
-    }
-
-    /**
-     * Must compare two instances of AbstractColumn.
-     *
-     * @param AbstractColumn $original
-     * @return bool
-     */
-    public function compare(AbstractColumn $original)
-    {
-        if ($this == $original) {
-            return true;
-        }
-
-        $columnVars = get_object_vars($this);
-        $dbColumnVars = get_object_vars($original);
-
-        $difference = [];
-        foreach ($columnVars as $name => $value) {
-            //Default values has to compared using type-casted value
-            if ($name == 'defaultValue') {
-                if ($this->getDefaultValue() != $original->getDefaultValue()) {
-                    $difference[] = $name;
-                }
-
-                continue;
-            }
-
-            if ($value != $dbColumnVars[$name]) {
-                $difference[] = $name;
-            }
-        }
-
-        return empty($difference);
-    }
-
-    /**
      * Compile column create statement.
      *
      * @return string
@@ -700,6 +629,43 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
+     * Must compare two instances of AbstractColumn.
+     *
+     * @param self $initial
+     * @return bool
+     */
+    public function compare(self $initial)
+    {
+        $normalized = clone $initial;
+        $normalized->declared = $this->declared;
+
+        if ($this == $normalized) {
+            return true;
+        }
+
+        $columnVars = get_object_vars($this);
+        $dbColumnVars = get_object_vars($normalized);
+
+        $difference = [];
+        foreach ($columnVars as $name => $value) {
+            if ($name == 'defaultValue') {
+                //Default values has to compared using type-casted value
+                if ($this->getDefaultValue() != $initial->getDefaultValue()) {
+                    $difference[] = $name;
+                }
+
+                continue;
+            }
+
+            if ($value != $dbColumnVars[$name]) {
+                $difference[] = $name;
+            }
+        }
+
+        return empty($difference);
+    }
+
+    /**
      * Shortcut for AbstractColumn->type() method.
      *
      * @param string $type      Abstract type.
@@ -712,14 +678,6 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->sqlStatement();
-    }
-
-    /**
      * Simplified way to dump information.
      *
      * @return object
@@ -727,8 +685,9 @@ abstract class AbstractColumn implements ColumnInterface
     public function __debugInfo()
     {
         $column = [
-            'name' => $this->name,
-            'type' => [
+            'name'     => $this->name,
+            'declared' => $this->declared,
+            'type'     => [
                 'database' => $this->type,
                 'schema'   => $this->abstractType(),
                 'php'      => $this->phpType()
@@ -760,14 +719,6 @@ abstract class AbstractColumn implements ColumnInterface
     }
 
     /**
-     * Parse driver specific schema information and populate schema fields.
-     *
-     * @param mixed $schema
-     * @throws SchemaException
-     */
-    abstract protected function resolveSchema($schema);
-
-    /**
      * Get database specific enum type definition options.
      *
      * @return string.
@@ -797,7 +748,7 @@ abstract class AbstractColumn implements ColumnInterface
             return 'NULL';
         }
 
-        if ($defaultValue instanceof SQLFragmentInterface) {
+        if ($defaultValue instanceof FragmentInterface) {
             return $defaultValue->sqlStatement();
         }
 

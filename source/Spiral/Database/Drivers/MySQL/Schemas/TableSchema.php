@@ -4,14 +4,13 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
-
  */
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractIndex;
-use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Entities\Driver;
+use Spiral\Database\Entities\Schemas\AbstractCommander;
 use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Exceptions\SchemaException;
 
 /**
  * MySQL table schema.
@@ -33,6 +32,23 @@ class TableSchema extends AbstractTable
     private $engine = self::ENGINE_INNODB;
 
     /**
+     * @param Driver            $driver Parent driver.
+     * @param AbstractCommander $commander
+     * @param string            $name   Table name, must include table prefix.
+     * @param string            $prefix Database specific table prefix.
+     */
+    public function __construct(Driver $driver, AbstractCommander $commander, $name, $prefix)
+    {
+        parent::__construct($driver, $commander, $name, $prefix);
+
+        //Let's load table type, just for fun
+        if ($this->exists()) {
+            $query = $driver->query('SHOW TABLE STATUS WHERE Name = ?', [$name]);
+            $this->engine = $query->fetch()['Engine'];
+        }
+    }
+
+    /**
      * Change table engine. Such operation will be applied only at moment of table creation.
      *
      * @param string $engine
@@ -40,9 +56,21 @@ class TableSchema extends AbstractTable
      */
     public function setEngine($engine)
     {
+        if ($this->exists()) {
+            throw new SchemaException("Table engine can be set only at moment of creation.");
+        }
+
         $this->engine = $engine;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEngine()
+    {
+        return $this->engine;
     }
 
     /**
@@ -50,13 +78,13 @@ class TableSchema extends AbstractTable
      */
     protected function loadColumns()
     {
-        $query = \Spiral\interpolate(
-            "SHOW FULL COLUMNS FROM {table}", ['table' => $this->getName(true)]
-        );
+        $query = "SHOW FULL COLUMNS FROM {$this->getName(true)}";
 
-        foreach ($this->driver->query($query)->bind(0, $columnName) as $column) {
-            $this->registerColumn($columnName, $column);
+        foreach ($this->driver->query($query)->bind(0, $name) as $column) {
+            $this->registerColumn($this->columnSchema($name, $column));
         }
+
+        return $this;
     }
 
     /**
@@ -64,22 +92,26 @@ class TableSchema extends AbstractTable
      */
     protected function loadIndexes()
     {
+        $query = "SHOW INDEXES FROM {$this->getName(true)}";
+
         $indexes = [];
-        $query = \Spiral\interpolate("SHOW INDEXES FROM {table}",
-            ['table' => $this->getName(true)]);
+        $primaryKeys = [];
         foreach ($this->driver->query($query) as $index) {
             if ($index['Key_name'] == 'PRIMARY') {
-                $this->primaryKeys[] = $index['Column_name'];
-                $this->dbPrimaryKeys[] = $index['Column_name'];
+                $primaryKeys[] = $index['Column_name'];
                 continue;
             }
 
             $indexes[$index['Key_name']][] = $index;
         }
 
-        foreach ($indexes as $index => $schema) {
-            $this->registerIndex($index, $schema);
+        $this->setPrimaryKeys($primaryKeys);
+
+        foreach ($indexes as $name => $schema) {
+            $this->registerIndex($this->indexSchema($name, $schema));
         }
+
+        return $this;
     }
 
     /**
@@ -90,86 +122,46 @@ class TableSchema extends AbstractTable
         $query = "SELECT * FROM information_schema.referential_constraints "
             . "WHERE constraint_schema = ? AND table_name = ?";
 
-        $references = $this->driver->query($query, [$this->driver->getSource(), $this->name]);
+        $references = $this->driver->query($query, [$this->driver->getSource(), $this->getName()]);
 
-        foreach ($references as $reference) {
+        foreach ($references->all() as $reference) {
             $query = "SELECT * FROM information_schema.key_column_usage "
                 . "WHERE constraint_name = ? AND table_schema = ? AND table_name = ?";
 
-            $column = $this->driver->query($query, [
-                $reference['CONSTRAINT_NAME'],
-                $this->driver->getSource(),
-                $this->name
-            ])->fetch();
+            $column = $this->driver->query(
+                $query,
+                [$reference['CONSTRAINT_NAME'], $this->driver->getSource(), $this->getName()]
+            )->fetch();
 
-            $this->registerReference($reference['CONSTRAINT_NAME'], $reference + $column);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function createSchema($execute = true)
-    {
-        $statement = parent::createSchema(false);
-
-        //Additional table options
-        $options = "ENGINE = {engine}";
-        $statement = $statement . ' ' . \Spiral\interpolate($options, ['engine' => $this->engine]);
-
-        if ($execute) {
-            $this->driver->statement($statement);
-
-            //Not all databases support adding index while table creation, so we can do it after
-            foreach ($this->indexes as $index) {
-                $this->doIndexAdd($index);
-            }
+            $this->registerReference(
+                $this->referenceSchema($reference['CONSTRAINT_NAME'], $reference + $column)
+            );
         }
 
-        return $statement;
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function doColumnChange(AbstractColumn $column, AbstractColumn $dbColumn)
+    protected function columnSchema($name, $schema = null)
     {
-        $query = \Spiral\interpolate("ALTER TABLE {table} CHANGE {column} {statement}", [
-            'table'     => $this->getName(true),
-            'column'    => $dbColumn->getName(true),
-            'statement' => $column->sqlStatement()
-        ]);
-
-        $this->driver->statement($query);
+        return new ColumnSchema($this, $name, $schema);
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function doIndexDrop(AbstractIndex $index)
+    protected function indexSchema($name, $schema = null)
     {
-        $this->driver->statement("DROP INDEX {$index->getName(true)} ON {$this->getName(true)}");
+        return new IndexSchema($this, $name, $schema);
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function doIndexChange(AbstractIndex $index, AbstractIndex $dbIndex)
+    protected function referenceSchema($name, $schema = null)
     {
-        $query = \Spiral\interpolate("ALTER TABLE {table} DROP INDEX {original}, ADD {statement}", [
-            'table'     => $this->getName(true),
-            'original'  => $dbIndex->getName(true),
-            'statement' => $index->sqlStatement(false)
-        ]);
-
-        $this->driver->statement($query);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doForeignDrop(AbstractReference $foreign)
-    {
-        $this->driver->statement("ALTER TABLE {$this->getName(true)} DROP FOREIGN KEY {$foreign->getName(true)}");
+        return new ReferenceSchema($this, $name, $schema);
     }
 }

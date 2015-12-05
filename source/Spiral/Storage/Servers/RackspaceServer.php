@@ -80,8 +80,13 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         $this->store = $store;
 
         if ($this->options['cache']) {
-            $this->authToken = $this->store->get($this->options['username'] . '@rackspace-token');
-            $this->regions = (array)$this->store->get($this->options['username'] . '@rackspace-regions');
+            $this->authToken = $this->store->get(
+                $this->options['username'] . '@rackspace-token'
+            );
+
+            $this->regions = (array)$this->store->get(
+                $this->options['username'] . '@rackspace-regions'
+            );
         }
 
         //This code is going to use additional abstraction layer to connect storage and guzzle
@@ -142,15 +147,10 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         }
 
         try {
-            $request = $this->buildRequest(
-                'PUT',
-                $bucket,
-                $name,
-                [
-                    'Content-Type' => $mimetype,
-                    'Etag'         => md5_file($this->castFilename($source))
-                ]
-            );
+            $request = $this->buildRequest('PUT', $bucket, $name, [
+                'Content-Type' => $mimetype,
+                'Etag'         => md5_file($this->castFilename($source))
+            ]);
 
             $this->client->send($request->withBody($this->castStream($source)));
         } catch (ClientException $exception) {
@@ -211,15 +211,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         try {
-            $this->client->send($this->buildRequest(
-                'PUT',
-                $bucket,
-                $newname,
-                [
-                    'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldname),
-                    'Content-Length' => 0
-                ]
-            ));
+            $request = $this->buildRequest('PUT', $bucket, $newname, [
+                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldname),
+                'Content-Length' => 0
+            ]);
+
+            $this->client->send($request);
         } catch (ClientException $exception) {
             if ($exception->getCode() == 401) {
                 $this->reconnect();
@@ -251,15 +248,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         }
 
         try {
-            $this->client->send($this->buildRequest(
-                'PUT',
-                $destination,
-                $name,
-                [
-                    'X-Copy-From'    => '/' . $bucket->getOPtion('container') . '/' . rawurlencode($name),
-                    'Content-Length' => 0
-                ]
-            ));
+            $request = $this->buildRequest('PUT', $destination, $name, [
+                'X-Copy-From'    => '/' . $bucket->getOPtion('container') . '/' . rawurlencode($name),
+                'Content-Length' => 0
+            ]);
+
+            $this->client->send($request);
         } catch (ClientException $exception) {
             if ($exception->getCode() == 401) {
                 $this->reconnect();

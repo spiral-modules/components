@@ -7,13 +7,14 @@
  */
 namespace Spiral\Translator\Traits;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Translator\TranslatorInterface;
 
 /**
  * Add bundle specific translation functionality, class name will be used as translation bundle.
  * In addition every default string message declared in class using [[]] braces can be indexed by
- * spiral application. Use translate() method statically to make it indexable by spiral.
+ * spiral application.
  */
 trait TranslatorTrait
 {
@@ -21,14 +22,13 @@ trait TranslatorTrait
      * Translate message using parent class as bundle name. Method will remove string braces ([[ and
      * ]]) if specified.
      *
-     * Example: User::translate("User account is invalid.");
+     * Example: $this->say("User account is invalid.");
      *
-     * @see Component::staticContainer()
      * @param string $string
      * @param array  $options Interpolation options.
      * @return string
      */
-    protected static function translate($string, array $options = [])
+    protected function say($string, array $options = [])
     {
         if (
             substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
@@ -38,11 +38,25 @@ trait TranslatorTrait
             $string = substr($string, 2, -2);
         }
 
-        if (!TraitSupport::hasTranslator()) {
-            //No translator defined
+        if (empty($container = $this->container()) || !$container->has(TranslatorInterface::class)) {
+            //No translator available
             return $string;
         }
 
-        return TraitSupport::getTranslator()->translate(static::class, $string, $options);
+        /**
+         * Potentially can be downgraded to Symfony\TranslatorInterface but without domains map
+         * feature
+         *
+         * @var TranslatorInterface $translator
+         */
+        $translator = $container->get(TranslatorInterface::class);
+
+        //Translate class string using automatically resolved message domain
+        return $translator->trans($string, $options, $translator->resolveDomain(static::class));
     }
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
 }

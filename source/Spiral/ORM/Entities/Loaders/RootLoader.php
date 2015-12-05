@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\Selector;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORM;
 
@@ -42,12 +42,14 @@ class RootLoader extends Loader
         $this->options['alias'] = $this->schema[ORM::M_ROLE_NAME];
 
         $this->dataColumns = array_keys($this->schema[ORM::M_COLUMNS]);
+
+        //No need to call parent constructor
     }
 
     /**
      * {@inheritdoc}
      */
-    public function configureSelector(Selector $selector)
+    public function configureSelector(RecordSelector $selector)
     {
         if (empty($this->loaders) && empty($this->joiners)) {
             //No need to create any column aliases
@@ -60,7 +62,7 @@ class RootLoader extends Loader
     /**
      * {@inheritdoc}
      */
-    protected function clarifySelector(Selector $selector)
+    protected function clarifySelector(RecordSelector $selector)
     {
         //Nothing to do for root loader, no conditions required
     }

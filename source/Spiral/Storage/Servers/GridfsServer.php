@@ -39,7 +39,7 @@ class GridfsServer extends StorageServer
     public function __construct(FilesInterface $files, ODM $odm, array $options)
     {
         parent::__construct($files, $options);
-        $this->database = $odm->db($this->options['database']);
+        $this->database = $odm->database($this->options['database']);
     }
 
     /**
@@ -141,7 +141,7 @@ class GridfsServer extends StorageServer
     protected function gridFS(BucketInterface $bucket)
     {
         $gridFs = $this->database->getGridFS($bucket->getOption('collection'));
-        $gridFs->ensureIndex(['filename' => 1]);
+        $gridFs->createIndex(['filename' => 1]);
 
         return $gridFs;
     }

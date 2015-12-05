@@ -7,13 +7,24 @@
  */
 namespace Spiral\Debug;
 
-use Spiral\Core\Singleton;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+use Spiral\Core\Component;
+use Spiral\Core\Container\SingletonInterface;
+use Spiral\Debug\Dumper\Style;
+use Spiral\Debug\Traits\BenchmarkTrait;
+use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * One of the oldest spiral parts, used to dump variables content in user friendly way.
  */
-class Dumper extends Singleton
+class Dumper extends Component implements SingletonInterface, LoggerAwareInterface
 {
+    /**
+     * Static method instance(). Used in dump() function.
+     */
+    use LoggerTrait, BenchmarkTrait;
+
     /**
      * Declaring to IoC that class is singleton.
      */
@@ -28,74 +39,48 @@ class Dumper extends Singleton
     const OUTPUT_LOG_NICE = 3;
 
     /**
-     * @var array
-     */
-    private $options = [
-        'maxLevel'  => 10,
-        'container' => '<pre style="background-color: white; font-family: monospace;">{dump}</pre>',
-        'element'   => "<span style='color: {style};'>{element}</span>",
-        'indent'    => '&middot;    ',
-        'styles'    => [
-            'common'           => 'black',
-            'name'             => 'black',
-            'indent'           => 'gray',
-            'indent-('         => 'black',
-            'indent-)'         => 'black',
-            'recursion'        => '#ff9900',
-            'value-string'     => 'green',
-            'value-integer'    => 'red',
-            'value-double'     => 'red',
-            'value-boolean'    => 'purple; font-weight: bold',
-            'type'             => '#666',
-            'type-object'      => '#333',
-            'type-array'       => '#333',
-            'type-null'        => '#666; font-weight: bold',
-            'type-resource'    => '#666; font-weight: bold',
-            'access'           => '#666',
-            'access-public'    => '#8dc17d',
-            'access-private'   => '#c18c7d',
-            'access-protected' => '#7d95c1'
-        ]
-    ];
-
-    /**
-     * @var Debugger
-     */
-    protected $debugger = null;
-
-    /**
-     * @param Debugger $debugger
-     * @param array    $options
-     */
-    public function __construct(Debugger $debugger = null, array $options = [])
-    {
-        $this->debugger = $debugger;
-        $this->options = $options + $this->options;
-    }
-
-    /**
-     * Update dumping styles with new values.
+     * Deepest level to be dumped.
      *
-     * @param array $options
+     * @var int
      */
-    public function setOptions(array $options)
-    {
-        $this->options = $options;
+    private $maxLevel = 10;
+
+    /**
+     * @invisible
+     * @var Style
+     */
+    private $style = null;
+
+    /**
+     * @param int             $maxLevel
+     * @param Style           $styler Light styler to be used by default.
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        $maxLevel = 10,
+        Style $styler = null,
+        LoggerInterface $logger = null
+    ) {
+        $this->maxLevel = $maxLevel;
+        $this->style = !empty($styler) ? $styler : new Style();
+        $this->logger = $logger;
     }
 
     /**
-     * Dumping options.
+     * Set dump styler.
      *
-     * @return array
+     * @param Style $style
+     * @return $this
      */
-    public function options()
+    public function setStyle(Style $style)
     {
-        return $this->options;
+        $this->style = $style;
+
+        return $this;
     }
 
     /**
-     * Dump value content into specified output.
-     **
+     * Dump specified value.
      *
      * @param mixed $value
      * @param int   $output
@@ -103,7 +88,7 @@ class Dumper extends Singleton
      */
     public function dump($value, $output = self::OUTPUT_ECHO)
     {
-        if (php_sapi_name() === 'cli' && $output != self::OUTPUT_LOG) {
+        if (php_sapi_name() === 'cli' && $output == self::OUTPUT_ECHO) {
             print_r($value);
             if (is_scalar($value)) {
                 echo "\n";
@@ -112,104 +97,85 @@ class Dumper extends Singleton
             return null;
         }
 
-        $result = \Spiral\interpolate($this->options['container'], [
-            'dump' => $this->dumpValue($value, '', 0)
-        ]);
+        //Dumping is pretty slow operation, let's record it so we can exclude dump time from application
+        //timeline
+        $benchmark = $this->benchmark('dump');
+        try {
+            switch ($output) {
+                case self::OUTPUT_ECHO:
+                    echo $this->style->mountContainer($this->dumpValue($value, '', 0));
+                    break;
 
-        switch ($output) {
-            case self::OUTPUT_ECHO:
-                echo $result;
-                break;
+                case self::OUTPUT_RETURN:
+                    return $this->style->mountContainer($this->dumpValue($value, '', 0));
+                    break;
 
-            case self::OUTPUT_RETURN:
-                return $result;
+                case self::OUTPUT_LOG:
+                    $this->logger()->debug(print_r($value, true));
+                    break;
 
-            case self::OUTPUT_LOG:
-                if (!empty($this->debugger)) {
-                    $this->debugger->logger()->debug(
-                        print_r($value, true)
-                    );
-                }
-                break;
+                case self::OUTPUT_LOG_NICE:
+                    $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
+                    break;
+            }
 
-            case self::OUTPUT_LOG_NICE:
-                if (!empty($this->debugger)) {
-                    $this->debugger->logger()->debug(
-                        $this->dump($value, self::OUTPUT_RETURN)
-                    );
-                }
-                break;
+            return null;
+        } finally {
+            $this->benchmark($benchmark);
         }
-
-        return null;
-    }
-
-    /**
-     * Stylize content using pre-defined style.
-     *
-     * @param string $element
-     * @param string $type
-     * @param string $subType
-     * @return string
-     */
-    public function style($element, $type, $subType = '')
-    {
-        if (isset($this->options['styles'][$type . '-' . $subType])) {
-            $style = $this->options['styles'][$type . '-' . $subType];
-        } elseif (isset($this->options['styles'][$type])) {
-            $style = $this->options['styles'][$type];
-        } else {
-            $style = $this->options['styles']['common'];
-        }
-
-        if (!empty($style)) {
-            $element = \Spiral\interpolate($this->options['element'], compact('style', 'element'));
-        }
-
-        return $element;
     }
 
     /**
      * Variable dumper. This is the oldest spiral function, it was originally written in 2007. :)
      *
      * @param mixed  $value
-     * @param string $name     Variable name, internal.
-     * @param int    $level    Dumping level, internal.
-     * @param bool   $hideType Hide array/object header, internal.
+     * @param string $name       Variable name, internal.
+     * @param int    $level      Dumping level, internal.
+     * @param bool   $hideHeader Hide array/object header, internal.
      * @return string
      */
-    private function dumpValue($value, $name = '', $level = 0, $hideType = false)
+    private function dumpValue($value, $name = '', $level = 0, $hideHeader = false)
     {
-        $result = $indent = $this->indent($level);
-        if (!$hideType && !empty($name)) {
-            $result .= $this->style($name, "name") . $this->style(" = ", "indent", "equal");
+        //Any dump starts with initial indent (level based)
+        $indent = $this->style->indent($level);
+
+        if (!$hideHeader && !empty($name)) {
+            //Showing element name (if any provided)
+            $header = $indent . $this->style->style($name, "name");
+
+            //Showing equal sing
+            $header .= $this->style->style(" = ", "syntax", "=");
+        } else {
+            $header = $indent;
         }
 
-        if ($level > $this->options['maxLevel']) {
-            return $indent . $this->style('-possible recursion-', 'recursion') . "\n";
+        if ($level > $this->maxLevel) {
+            //Dumper is not reference based, we can't dump too deep values
+            return $indent . $this->style->style('-too deep-', 'maxLevel') . "\n";
         }
 
         $type = strtolower(gettype($value));
 
         if ($type == 'array') {
-            return $result . $this->dumpArray($value, $level, $hideType);
+            return $header . $this->dumpArray($value, $level, $hideHeader);
         }
 
         if ($type == 'object') {
-            return $result . $this->dumpObject($value, $level, $hideType);
+            return $header . $this->dumpObject($value, $level, $hideHeader);
         }
 
         if ($type == 'resource') {
-            $result .= $this->style(
-                    get_resource_type($value) . " resource ",
-                    "type",
-                    "resource"
-                ) . "\n";
+            //No need to dump resource value
+            $element = get_resource_type($value) . " resource ";
 
-            return $result;
+            return $header . $this->style->style($element, "type", "resource") . "\n";
         }
 
-        $result .= $this->style($type . "(" . strlen($value) . ")", "type", $type);
+        //Value length
+        $length = strlen($value);
+
+        //Including type size
+        $header .= $this->style->style("{$type}({$length})", "type", $type);
 
         $element = null;
         switch ($type) {
@@ -228,130 +194,146 @@ class Dumper extends Singleton
                 }
         }
 
-        return $result . " " . $this->style($element, "value", $type) . "\n";
+        //Including value
+        return $header . " " . $this->style->style($element, "value", $type) . "\n";
     }
 
     /**
      * @param array $array
      * @param int   $level
-     * @param bool  $hideType
+     * @param bool  $hideHeader
      * @return string
      */
-    private function dumpArray($array, $level, $hideType)
+    private function dumpArray(array $array, $level, $hideHeader = false)
     {
-        $result = '';
-        $indent = $this->indent($level);
-        if (!$hideType) {
+        $indent = $this->style->indent($level);
+
+        if (!$hideHeader) {
             $count = count($array);
-            $result .= $this->style("array({$count})", "type", "array")
-                . "\n" . $indent . $this->style("(", "indent", "(") . "\n";
+
+            //Array size and scope
+            $output = $this->style->style("array({$count})", "type", "array") . "\n";
+            $output .= $indent . $this->style->style("[", "syntax", "[") . "\n";
+        } else {
+            $output = '';
         }
 
-        foreach ($array as $name => $value) {
-            if (!is_numeric($name)) {
-                if (is_string($name)) {
-                    $name = htmlspecialchars($name);
+        foreach ($array as $key => $value) {
+            if (!is_numeric($key)) {
+                if (is_string($key)) {
+                    $key = htmlspecialchars($key);
                 }
-                $name = "'" . $name . "'";
+
+                $key = "'{$key}'";
             }
 
-            $result .= $this->dumpValue($value, "[{$name}]", $level + 1);
+            $output .= $this->dumpValue($value, "[{$key}]", $level + 1);
         }
 
-        if (!$hideType) {
-            $result .= $indent . $this->style(")", "indent", ")") . "\n";
+        if (!$hideHeader) {
+            //Closing array scope
+            $output .= $indent . $this->style->style("]", "syntax", "]") . "\n";
         }
 
-        return $result;
+        return $output;
     }
 
     /**
      * @param object $object
      * @param int    $level
-     * @param bool   $hideType
+     * @param bool   $hideHeader
      * @param string $class
      * @return string
      */
-    private function dumpObject($object, $level, $hideType, $class = '')
+    private function dumpObject($object, $level, $hideHeader = false, $class = '')
     {
-        $result = '';
-        $indent = $this->indent($level);
-        if (!$hideType) {
+        $indent = $this->style->indent($level);
+
+        if (!$hideHeader) {
             $type = ($class ?: get_class($object)) . " object ";
 
-            $result .= $this->style($type, "type", "object") .
-                "\n" . $indent . $this->style("(", "indent", "(") . "\n";
+            $header = $this->style->style($type, "type", "object") . "\n";
+            $header .= $indent . $this->style->style("(", "syntax", "(") . "\n";
+        } else {
+            $header = '';
         }
 
+        //Let's use method specifically created for dumping
         if (method_exists($object, '__debugInfo')) {
             $debugInfo = $object->__debugInfo();
 
             if (is_object($debugInfo)) {
+                //We are not including syntax elements here
                 return $this->dumpObject($debugInfo, $level, false, get_class($object));
             }
 
-            $result .= $this->dumpValue(
-                $debugInfo,
-                '',
-                $level + (is_scalar($object)),
-                true
-            );
-
-            return $result . $indent . $this->style(")", "parentheses") . "\n";
+            return $header
+            . $this->dumpValue($debugInfo, '', $level + (is_scalar($object)), true)
+            . $indent . $this->style->style(")", "syntax", ")") . "\n";
         }
 
         $refection = new \ReflectionObject($object);
+
+        $output = '';
         foreach ($refection->getProperties() as $property) {
-            if ($property->isStatic()) {
-                continue;
-            }
-
-            //Memory loop while reading doc comment for stdClass variables?
-            if (
-                !($object instanceof \stdClass)
-                && strpos($property->getDocComment(), '@invisible') !== false
-            ) {
-                /**
-                 * Report a PHP bug about treating comment INSIDE property declaration as doc comment.
-                 */
-                continue;
-            }
-
-            $access = "public";
-            if ($property->isPrivate()) {
-                $access = "private";
-            } elseif ($property->isProtected()) {
-                $access = "protected";
-            }
-            $property->setAccessible(true);
-
-            if ($object instanceof \stdClass) {
-                $access = 'dynamic';
-            }
-
-            $value = $property->getValue($object);
-            $result .= $this->dumpValue(
-                $value,
-                $property->getName() . $this->style(":" . $access, "access", $access),
-                $level + 1
-            );
+            $output .= $this->dumpProperty($object, $property, $level);
         }
 
-        return $result . $indent . $this->style(")", "parentheses") . "\n";
+        //Header, content, footer
+        return $header . $output . $indent . $this->style->style(")", "syntax", ")") . "\n";
     }
 
     /**
-     * Set indent to line based on it's level, internal.
-     *
-     * @param int $level
+     * @param object              $object
+     * @param \ReflectionProperty $property
+     * @param int                 $level
      * @return string
      */
-    private function indent($level)
+    private function dumpProperty($object, \ReflectionProperty $property, $level)
     {
-        if ($level == 0) {
+        if ($property->isStatic()) {
             return '';
         }
 
-        return $this->style(str_repeat($this->options["indent"], $level), "indent");
+        if (
+            !($object instanceof \stdClass)
+            && strpos($property->getDocComment(), '@invisible') !== false
+        ) {
+            //Memory loop while reading doc comment for stdClass variables?
+            //Report a PHP bug about treating comment INSIDE property declaration as doc comment.
+            return '';
+        }
+
+        //Property access level
+        $access = $this->getAccess($property);
+
+        //To read private and protected properties
+        $property->setAccessible(true);
+
+        if ($object instanceof \stdClass) {
+            $access = 'dynamic';
+        }
+
+        //Property name includes access level
+        $name = $property->getName() . $this->style->style(":" . $access, "access", $access);
+
+        return $this->dumpValue($property->getValue($object), $name, $level + 1);
+    }
+
+    /**
+     * Property access level label.
+     *
+     * @param \ReflectionProperty $property
+     * @return string
+     */
+    private function getAccess(\ReflectionProperty $property)
+    {
+        if ($property->isPrivate()) {
+            return 'private';
+        } elseif ($property->isProtected()) {
+            return 'protected';
+        }
+
+        return 'public';
     }
 }

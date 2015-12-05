@@ -9,7 +9,7 @@ namespace Spiral\Database\Query;
 
 use PDO;
 use Spiral\Cache\StoreInterface;
-use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Entities\QueryInterpolator;
 use Spiral\Database\Exceptions\ResultException;
 
 /**
@@ -77,6 +77,8 @@ class CachedResult extends QueryResult
         $this->data = $data;
         $this->count = count($data);
         $this->cursor = 0;
+
+        //No need to call parent constructor
     }
 
     /**
@@ -84,7 +86,7 @@ class CachedResult extends QueryResult
      */
     public function queryString()
     {
-        return QueryCompiler::interpolate($this->queryString, $this->parameters);
+        return QueryInterpolator::interpolate($this->queryString, $this->parameters);
     }
 
     /**
@@ -171,7 +173,9 @@ class CachedResult extends QueryResult
             throw new ResultException("No such index '{$columnID}' in the result columns.");
         } else {
             if (!isset($this->data[0][$columnID])) {
-                throw new ResultException("No such column name '{$columnID}' in the result columns.");
+                throw new ResultException(
+                    "No such column name '{$columnID}' in the result columns."
+                );
             }
 
             $this->bindings[$columnID] = &$variable;

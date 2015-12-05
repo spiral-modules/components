@@ -8,8 +8,8 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\ContainerInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
@@ -97,7 +97,7 @@ class Compositor extends Component implements
      * @param string $class Primary class being composited.
      */
     public function __construct(
-        $data,
+        $value,
         EntityInterface $parent = null,
         ODM $odm = null,
         $class = null
@@ -105,23 +105,19 @@ class Compositor extends Component implements
         $this->parent = $parent;
         $this->class = $class;
 
-        if (!empty($data) && is_array($data)) {
-            $this->documents = $data;
+        if (!empty($value) && is_array($value)) {
+            $this->documents = $value;
         }
 
         if (empty($this->class)) {
-            throw new CompositorException(
-                "Compositor requires to know it's primary class name."
-            );
+            throw new CompositorException("Compositor requires to know it's primary class name.");
         }
 
         //Allowed only when global container is set
         $this->odm = $this->saturate($odm, ODM::class);
 
         if (empty($this->odm)) {
-            throw new CompositorException(
-                "ODM instance if required for Compositor to work properly."
-            );
+            throw new CompositorException("ODM instance if required for Compositor to work properly.");
         }
     }
 
@@ -527,11 +523,9 @@ class Compositor extends Component implements
         $class = !empty($class) ? $class : $this->class;
 
         $this->changedDirectly = true;
-        $this->documents[] = $document = call_user_func(
-            [$class, 'create'],
-            $fields,
-            $this->odm
-        )->embed($this);
+
+        $document = call_user_func([$class, 'create'], $fields, $this->odm)->embed($this);
+        $this->documents[] = $document;
 
         return $document;
     }

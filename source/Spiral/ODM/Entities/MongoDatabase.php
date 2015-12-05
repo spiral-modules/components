@@ -41,9 +41,7 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
     /**
      * @var array
      */
-    protected $config = [
-        'profiling' => self::PROFILE_DISABLED
-    ];
+    protected $config = ['profiling' => self::PROFILE_DISABLED];
 
     /**
      * @invisible
@@ -113,17 +111,5 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
     public function getProfiling()
     {
         return $this->config['profiling'];
-    }
-
-    /**
-     * ODM collection associated with current database.
-     *
-     * @param string $name  Collection name.
-     * @param array  $query Initial collection query.
-     * @return Collection
-     */
-    public function odmCollection($name, array $query = [])
-    {
-        return new Collection($this->odm, $this->name, $name, $query);
     }
 }

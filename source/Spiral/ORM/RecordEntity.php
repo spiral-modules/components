@@ -7,10 +7,12 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Entities\Table;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
+use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Exceptions\RecordException;
@@ -253,6 +255,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * You can easily combine table and relations definition in one schema:
      * protected $schema = [
+     *
      *      //Table schema
      *      'id'          => 'bigPrimary',
      *      'name'        => 'string',
@@ -291,12 +294,12 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      * Due setContext() method and entity cache of ORM any custom initiation code in constructor
      * must not depends on database data.
      *
-     * @see Component::staticContainer()
      * @see setContext
      * @param array      $data
      * @param bool|false $loaded
      * @param ORM|null   $orm
      * @param array      $ormSchema
+     * @throws SugarException
      */
     public function __construct(
         array $data = [],
@@ -308,10 +311,8 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         //We can use global container as fallback if no default values were provided
         $this->orm = $this->saturate($orm, ORM::class);
-        $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->getSchema(static::class);
-        parent::__construct($this->ormSchema);
 
-        static::initialize();
+        $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->schema(static::class);
 
         if (isset($data[ORM::PIVOT_DATA])) {
             $this->pivotData = $data[ORM::PIVOT_DATA];
@@ -324,8 +325,8 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             unset($data[$name]);
         }
 
-        //Merging with default values
-        $this->fields = $data + $this->ormSchema[ORM::M_COLUMNS];
+        //Data is initiated as default values and non default
+        parent::__construct($data + $this->ormSchema[ORM::M_COLUMNS], $this->ormSchema);
 
         if (!$this->isLoaded()) {
             //Non loaded records should be in solid state by default and require initial validation
@@ -489,14 +490,15 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function setField($name, $value, $filter = true)
     {
-        if (!array_key_exists($name, $this->fields)) {
+        if (!$this->hasField($name)) {
             throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
-        $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
+        //Original values with no filters
+        $original = parent::getField($name, null, false);
         if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
             //We must bypass setters and accessors when null value assigned to nullable column
-            $this->fields[$name] = null;
+            $this->setField($name, null, false);
         } else {
             parent::setField($name, $value, $filter);
         }
@@ -515,7 +517,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function getField($name, $default = null, $filter = true)
     {
-        if (!array_key_exists($name, $this->fields)) {
+        if (!$this) {
             throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
@@ -566,11 +568,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $relation = $this->ormSchema[ORM::M_RELATIONS][$name];
 
         return $this->relations[$name] = $this->orm->relation(
-            $relation[ORM::R_TYPE],
-            $this,
-            $relation[ORM::R_DEFINITION],
-            $data,
-            $loaded
+            $relation[ORM::R_TYPE], $this, $relation[ORM::R_DEFINITION], $data, $loaded
         );
     }
 
@@ -587,7 +585,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             }
 
             foreach ($this->fields as $field => $value) {
-                if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
+                if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                     return true;
                 }
             }
@@ -600,7 +598,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         $value = $this->getField($field);
-        if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
+        if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
             return true;
         }
 
@@ -615,7 +613,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->updates = [];
 
         foreach ($this->fields as $value) {
-            if ($value instanceof ActiveAccessorInterface) {
+            if ($value instanceof RecordAccessorInterface) {
                 $value->flushUpdates();
             }
         }
@@ -739,7 +737,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     protected function sourceTable()
     {
-        return $this->orm->dbalDatabase($this->ormSchema[ORM::M_DB])->table(
+        return $this->orm->database($this->ormSchema[ORM::M_DB])->table(
             $this->ormSchema[ORM::M_TABLE]
         );
     }
@@ -790,7 +788,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         $updates = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof ActiveAccessorInterface) {
+            if ($value instanceof RecordAccessorInterface) {
                 if ($value->hasUpdates()) {
                     $updates[$field] = $value->compileUpdates($field);
                     continue;
@@ -857,7 +855,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $record = new static([], false, $orm);
 
         //Forcing validation (empty set of fields is not valid set of fields)
-        $record->setFields($fields)->fire('created');
+        $record->setFields($fields)->dispatch('created', new EntityEvent($record));
 
         return $record;
     }
@@ -907,7 +905,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     {
         $updates = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof ActiveAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                 if ($value->hasUpdates()) {
                     $updates[$field] = $value->compileUpdates($field);
                 } else {

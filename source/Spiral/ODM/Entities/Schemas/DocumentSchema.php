@@ -10,8 +10,8 @@ namespace Spiral\ODM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\AtomicAccessorInterface;
-use Spiral\ODM\Document;
+use Spiral\ODM\DocumentAccessorInterface;
+use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Compositor;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -26,7 +26,14 @@ class DocumentSchema extends ReflectionEntity
     /**
      * Required to validly merge parent and children attributes.
      */
-    const BASE_CLASS = Document::class;
+    const BASE_CLASS = DocumentEntity::class;
+
+    /**
+     * Related source class.
+     *
+     * @var string
+     */
+    private $source = null;
 
     /**
      * @invisible
@@ -46,13 +53,33 @@ class DocumentSchema extends ReflectionEntity
     }
 
     /**
+     * Associate source class.
+     *
+     * @param string $class
+     */
+    public function setSource($class)
+    {
+        $this->source = $class;
+    }
+
+    /**
+     * Related source class.
+     *
+     * @return string|null
+     */
+    public function getSource()
+    {
+        return $this->source;
+    }
+
+    /**
      * Document has not collection and only be embedded.
      *
      * @return bool
      */
     public function isEmbeddable()
     {
-        return !$this->isSubclassOf(Document::class);
+        return !$this->isSubclassOf(DocumentEntity::class);
     }
 
     /**
@@ -93,22 +120,7 @@ class DocumentSchema extends ReflectionEntity
             return null;
         }
 
-        $database = $this->property('database');
-        if (empty($database)) {
-            if ($this->parentSchema()) {
-                //Using parent database
-                return $this->parentSchema()->getDatabase();
-            }
-
-            $database = $this->builder->getODM()->config()['default'];
-        }
-
-        $aliases = $this->builder->getODM()->config()['aliases'];
-        while (isset($aliases[$database])) {
-            $database = $aliases[$database];
-        }
-
-        return $database;
+        return $this->builder->databaseAlias($this->property('database'));
     }
 
     /**
@@ -252,9 +264,9 @@ class DocumentSchema extends ReflectionEntity
             }
 
             //Class to be aggregated
-            $class = isset($options[Document::MANY])
-                ? $options[Document::MANY]
-                : $options[Document::ONE];
+            $class = isset($options[DocumentEntity::MANY])
+                ? $options[DocumentEntity::MANY]
+                : $options[DocumentEntity::ONE];
 
             if (!$this->builder->hasDocument($class)) {
                 throw new SchemaException(
@@ -270,13 +282,13 @@ class DocumentSchema extends ReflectionEntity
                 );
             }
 
-            if (!empty($options[Document::MANY])) {
+            if (!empty($options[DocumentEntity::MANY])) {
                 //Aggregation may select parent document
                 $class = $document->getParent(true)->getName();
             }
 
             $aggregations[$field] = [
-                'type'       => isset($options[Document::ONE]) ? Document::ONE : Document::MANY,
+                'type'       => isset($options[DocumentEntity::ONE]) ? DocumentEntity::ONE : DocumentEntity::MANY,
                 'class'      => $class,
                 'collection' => $document->getCollection(),
                 'database'   => $document->getDatabase(),
@@ -441,17 +453,17 @@ class DocumentSchema extends ReflectionEntity
             return $this->getName();
         }
 
-        if ($this->getConstant('DEFINITION') == Document::DEFINITION_LOGICAL) {
+        if ($this->getConstant('DEFINITION') == DocumentEntity::DEFINITION_LOGICAL) {
             //Class definition will be performed using method with custom logic
             return [
-                'type'    => Document::DEFINITION_LOGICAL,
+                'type'    => DocumentEntity::DEFINITION_LOGICAL,
                 'options' => [$this->getName(), 'defineClass']
             ];
         }
 
         //Definition will be performed using field = class association
         $definition = [
-            'type'    => Document::DEFINITION_FIELDS,
+            'type'    => DocumentEntity::DEFINITION_FIELDS,
             'options' => []
         ];
 
@@ -544,8 +556,8 @@ class DocumentSchema extends ReflectionEntity
     private function isAggregation($type)
     {
         return is_array($type) && (
-            array_key_exists(Document::MANY, $type)
-            || array_key_exists(Document::ONE, $type)
+            array_key_exists(DocumentEntity::MANY, $type)
+            || array_key_exists(DocumentEntity::ONE, $type)
         );
     }
 
@@ -578,9 +590,9 @@ class DocumentSchema extends ReflectionEntity
 
         if ($accessor != ODM::CMP_ONE) {
             //Not an accessor but composited class
-            $accessor = new $accessor($default, null, $this->builder->getODM(), $options);
+            $accessor = new $accessor($default, null, $this->builder->odm(), $options);
 
-            if ($accessor instanceof AtomicAccessorInterface) {
+            if ($accessor instanceof DocumentAccessorInterface) {
                 return $accessor->defaultValue();
             }
         }

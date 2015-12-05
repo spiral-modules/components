@@ -13,7 +13,7 @@ use Psr\Http\Message\UriInterface;
 /**
  * Default paginator implementation, uses active server request Uri to generate page urls.
  */
-class Paginator implements PaginatorInterface, \Countable
+class Paginator implements PredictableInterface, \Countable
 {
     /**
      * Default limit value.
@@ -177,7 +177,10 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * {@inheritdoc}
+     * Set pagination limit.
+     *
+     * @param int $limit
+     * @return $this
      */
     public function setLimit($limit)
     {
@@ -192,7 +195,9 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * {@inheritdoc}
+     * Get pagination limit (items per page).
+     *
+     * @return int
      */
     public function getLimit()
     {
@@ -211,9 +216,7 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * The current page number.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function getPage()
     {
@@ -229,7 +232,9 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * {@inheritdoc}
+     * Get pagination offset.
+     *
+     * @return int
      */
     public function getOffset()
     {
@@ -247,10 +252,7 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * The count or records displayed on current page can vary from 0 to any limit value. Only the
-     * last page can have less records than is specified in the limit.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function countDisplayed()
     {
@@ -262,10 +264,7 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * Does paginator needed to be applied? Should return false if all records can be shown on one
-     * page.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function isRequired()
     {
@@ -273,9 +272,7 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * Next page number. Should return will be false if the current page is the last page.
-     *
-     * @return bool|int
+     * {@inheritdoc}
      */
     public function nextPage()
     {
@@ -287,9 +284,7 @@ class Paginator implements PaginatorInterface, \Countable
     }
 
     /**
-     * Previous page number. Should return false if the current page is first page.
-     *
-     * @return bool|int
+     * {@inheritdoc}
      */
     public function previousPage()
     {
@@ -303,25 +298,14 @@ class Paginator implements PaginatorInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function paginateArray(array $haystack)
+    public function paginate(PaginableInterface $paginable)
     {
-        $this->setCount(count($haystack));
+        $this->setCount($paginable->count());
 
-        return array_slice($haystack, $this->getOffset(), $this->limit);
-    }
+        $paginable->offset($this->getOffset());
+        $paginable->limit($this->getLimit());
 
-    /**
-     * {@inheritdoc}
-     */
-    public function paginateObject(PaginableInterface $object)
-    {
-        $this->setCount($object->count());
-        $object->setPaginator($this);
-
-        $object->offset($this->getOffset());
-        $object->limit($this->getLimit());
-
-        return $object;
+        return $paginable;
     }
 
     /**

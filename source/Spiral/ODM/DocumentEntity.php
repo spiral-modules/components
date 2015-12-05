@@ -209,19 +209,18 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             ? $odmSchema
             : $this->odm->schema(static::class);
 
-        parent::__construct($this->odmSchema);
 
         if (empty($fields)) {
             $this->invalidate();
         }
 
-        $this->fields = is_array($fields) ? $fields : [];
+        $fields = is_array($fields) ? $fields : [];
         if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
-            $this->fields = array_replace_recursive(
-                $this->odmSchema[ODM::D_DEFAULTS],
-                $this->fields
-            );
+            //Merging with default values
+            $fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
         }
+
+        parent::__construct($fields, $this->odmSchema);
     }
 
     /**

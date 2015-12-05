@@ -37,7 +37,7 @@ class APCStore extends CacheStore
      */
     public function __construct($prefix = 'spiral:')
     {
-        $this->prefix;
+        $this->prefix = $prefix;
 
         $this->driver = function_exists('apcu_store')
             ? self::APCU_DRIVER

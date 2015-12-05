@@ -512,7 +512,7 @@ abstract class Loader implements LoaderInterface
             return null;
         }
 
-        $selector = $this->orm->source($this->definition[static::RELATION_TYPE], $this);
+        $selector = $this->orm->selector($this->definition[static::RELATION_TYPE], $this);
 
         //Setting columns to be loaded
         $this->configureColumns($selector);

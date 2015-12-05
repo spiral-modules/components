@@ -47,8 +47,8 @@ class StorageObject extends Component implements ObjectInterface
     protected $storage = null;
 
     /**
-     * {@inheritdoc}
-     *
+     * @param string                $address
+     * @param StorageInterface|null $storage
      * @throws SugarException
      */
     public function __construct($address, StorageInterface $storage = null)

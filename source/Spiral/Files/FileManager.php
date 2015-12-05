@@ -278,8 +278,6 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
             $mode |= 0111;
         }
 
-        print_r($filename . " " . ($mode) . "\n");
-
         return $this->getPermissions($filename) == $mode || chmod($filename, $mode);
     }
 

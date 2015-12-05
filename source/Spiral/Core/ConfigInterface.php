@@ -18,7 +18,6 @@ interface ConfigInterface extends InjectableInterface
     /**
      * Must populate validator rules or errors to be validated.
      *
-     * @todo supply container instance as well?
      * @param ValidatorInterface $validator
      * @return ValidatorInterface
      */

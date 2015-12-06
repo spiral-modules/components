@@ -68,7 +68,11 @@ class Debugger extends Component implements BenchmarkerInterface, LogsInterface,
      */
     public function getLogger($name)
     {
-        return new Logger($name, $this->logHandlers($name));
+        //Monolog by default
+        return $this->factory->make(Logger::class, [
+            'name'     => $name,
+            'handlers' => $this->logHandlers($name)
+        ]);
     }
 
     /**

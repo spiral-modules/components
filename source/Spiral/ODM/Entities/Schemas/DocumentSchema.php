@@ -10,6 +10,7 @@ namespace Spiral\ODM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\Reflections\ReflectionEntity;
+use Spiral\ODM\Document;
 use Spiral\ODM\DocumentAccessorInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\Compositor;
@@ -79,7 +80,7 @@ class DocumentSchema extends ReflectionEntity
      */
     public function isEmbeddable()
     {
-        return !$this->isSubclassOf(DocumentEntity::class);
+        return !$this->isSubclassOf(Document::class);
     }
 
     /**

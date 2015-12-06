@@ -54,6 +54,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     protected $injectors = [];
 
     /**
+     * @todo see has()
      * @param ContainerInterface $parent
      */
     public function __construct(ContainerInterface $parent = null)
@@ -67,7 +68,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     public function has($alias)
     {
         if (!empty($this->parent) && $this->parent->has($alias)) {
-            //Following parent
+            //Following parent (move call here? extra constructor option?)
             return true;
         }
 

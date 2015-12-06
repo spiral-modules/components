@@ -19,6 +19,7 @@ use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Pagination\PaginableInterface;
+use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
 /**
@@ -35,6 +36,7 @@ use Spiral\Pagination\Traits\PaginatorTrait;
 abstract class AbstractSelect extends AbstractWhere implements
     \IteratorAggregate,
     PaginableInterface,
+    PaginatorAwareInterface,
     \JsonSerializable
 {
     /**

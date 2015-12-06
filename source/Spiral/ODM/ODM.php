@@ -43,7 +43,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     /**
      * Memory section to store ODM schema.
      */
-    const MEMORY = 'odmSchema';
+    const MEMORY = 'odm.schema';
 
     /**
      * Class definition options.

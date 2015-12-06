@@ -41,7 +41,7 @@ class ORM extends EntityCache implements SingletonInterface
     /**
      * Memory section to store ORM schema.
      */
-    const MEMORY = 'ormSchema';
+    const MEMORY = 'orm.schema';
 
     /**
      * Normalized record constants.

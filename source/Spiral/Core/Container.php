@@ -106,6 +106,11 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             return $this->autowire($class, $parameters, $context);
         }
 
+        if ($class == ContainerInterface::class && empty($parameters)) {
+            //self wrapping
+            return $this;
+        }
+
         if (is_object($binding = $this->bindings[$class])) {
             //Singleton
             return $binding;
@@ -118,7 +123,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
 
         if (is_array($binding)) {
             if (is_string($binding[0])) {
-                //Just a class name
+                //Class name
                 $instance = $this->make($binding[0], $parameters, $context);
             } elseif ($binding[0] instanceof \Closure) {
                 $reflection = new \ReflectionFunction($binding[0]);

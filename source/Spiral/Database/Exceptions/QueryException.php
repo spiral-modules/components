@@ -11,6 +11,8 @@ use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * Query specific exception (bad parameters, database failure).
+ *
+ * @todo change hierarchy?
  */
 class QueryException extends RuntimeException
 {

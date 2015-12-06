@@ -319,6 +319,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 }
             }
 
+            //Only exists if profiling on
             if (!empty($queryString)) {
                 $this->logger()->info($queryString, compact('query', 'parameters'));
             }

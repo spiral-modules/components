@@ -37,5 +37,4 @@ trait TokensTrait
 
         return $tokens;
     }
-
 }

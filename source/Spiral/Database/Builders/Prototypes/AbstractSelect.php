@@ -432,7 +432,9 @@ abstract class AbstractSelect extends AbstractWhere implements
             }
 
             //Wrapping all values with ParameterInterface
-            $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);;
+            if (!$parameter instanceof ParameterInterface) {
+                $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
+            };
 
             //Let's store to sent to driver when needed
             $this->havingParameters[] = $parameter;

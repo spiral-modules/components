@@ -340,6 +340,8 @@ trait JoinsTrait
                 if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
                     return $parameter;
                 }
+
+                return $parameter;
             }
 
             if (is_array($parameter)) {
@@ -347,7 +349,9 @@ trait JoinsTrait
             }
 
             //Wrapping all values with ParameterInterface
-            $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);;
+            if (!$parameter instanceof ParameterInterface) {
+                $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
+            };
 
             //Let's store to sent to driver when needed
             $this->onParameters[] = $parameter;

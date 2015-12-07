@@ -32,4 +32,11 @@ interface TranslatorInterface extends \Symfony\Component\Translation\TranslatorI
      * @return string
      */
     public function resolveDomain($bundle);
+
+    /**
+     * Get list of supported locales.
+     *
+     * @return array
+     */
+    public function getLocales();
 }

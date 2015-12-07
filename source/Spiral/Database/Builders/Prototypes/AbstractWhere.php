@@ -352,6 +352,10 @@ abstract class AbstractWhere extends QueryBuilder
                 }
             }
 
+            if (!is_array($parameter)) {
+                throw new BuilderException("Arrays must be wrapped with Parameter instance.");
+            }
+
             //Wrapping all values with ParameterInterface
             $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);;
 

@@ -7,6 +7,7 @@
  */
 namespace Spiral\ORM\Entities\Loaders;
 
+use Spiral\Database\Injections\Parameter;
 use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\ORM;
@@ -59,7 +60,11 @@ class HasOneLoader extends Loader
         }
 
         //Adding condition
-        $selector->where($this->getKey(RecordEntity::OUTER_KEY), 'IN', $aggregatedKeys);
+        $selector->where(
+            $this->getKey(RecordEntity::OUTER_KEY),
+            'IN',
+            new Parameter($aggregatedKeys)
+        );
 
         return $selector;
     }

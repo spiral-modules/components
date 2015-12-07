@@ -142,7 +142,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
 
     /**
      * @param string             $filename
-     * @param TokenizerInterface $tokenizer
+     * @param TokenizerInterface $tokenizer Possibly remove this dependency.
      * @param array              $cache     Tokenizer can construct reflection with pre-created
      *                                      cache to speed up indexation.
      */

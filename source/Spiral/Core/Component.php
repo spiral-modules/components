@@ -8,6 +8,7 @@
 namespace Spiral\Core;
 
 use Interop\Container\ContainerInterface;
+use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * Basic spiral cell. Automatically detects if "container" property are presented in class or uses

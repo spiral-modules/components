@@ -41,19 +41,13 @@ class Highlighter extends Component
     private $highlighted = '';
 
     /**
-     * @param string                  $filename
-     * @param Style|null              $style
-     * @param TokenizerInterface|null $tokenizer
+     * @param string     $source
+     * @param Style|null $style
      */
-    public function __construct(
-        $filename,
-        Style $style = null,
-        TokenizerInterface $tokenizer = null
-    ) {
+    public function __construct($source, Style $style = null)
+    {
         $this->style = !empty($style) ? $style : new Style();
-        $this->tokens = $this->saturate($tokenizer, TokenizerInterface::class)->fetchTokens(
-            $filename
-        );
+        $this->tokens = token_get_all($source);
     }
 
     /**

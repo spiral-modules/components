@@ -16,6 +16,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
+use Spiral\Tokenizer\Traits\TokensTrait;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -26,7 +27,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Required traits.
      */
-    use LoggerTrait, BenchmarkTrait;
+    use LoggerTrait, BenchmarkTrait, TokensTrait;
 
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -87,22 +88,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      */
     public function fetchTokens($filename)
     {
-        $tokens = token_get_all($this->files->read($filename));
-
-        $line = 0;
-        foreach ($tokens as &$token) {
-            if (isset($token[self::LINE])) {
-                $line = $token[self::LINE];
-            }
-
-            if (!is_array($token)) {
-                $token = [$token, $token, $line];
-            }
-
-            unset($token);
-        }
-
-        return $tokens;
+        return $this->normalizeTokens(token_get_all($this->files->read($filename)));
     }
 
     /**

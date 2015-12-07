@@ -8,18 +8,15 @@
 namespace Spiral\Tokenizer;
 
 use Spiral\Core\Component;
-use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Tokenizer\Highlighter\Style;
+use Spiral\Tokenizer\Traits\TokensTrait;
 
 /**
  * Highlights php file using specified style.
  */
 class Highlighter extends Component
 {
-    /**
-     * Sugaring.
-     */
-    use SaturateTrait;
+    use TokensTrait;
 
     /**
      * @invisible
@@ -47,7 +44,7 @@ class Highlighter extends Component
     public function __construct($source, Style $style = null)
     {
         $this->style = !empty($style) ? $style : new Style();
-        $this->tokens = token_get_all($source);
+        $this->tokens = $this->normalizeTokens(token_get_all($source));
     }
 
     /**

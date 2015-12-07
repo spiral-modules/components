@@ -427,7 +427,7 @@ abstract class AbstractSelect extends AbstractWhere implements
                 }
             }
 
-            if (!is_array($parameter)) {
+            if (is_array($parameter)) {
                 throw new BuilderException("Arrays must be wrapped with Parameter instance.");
             }
 

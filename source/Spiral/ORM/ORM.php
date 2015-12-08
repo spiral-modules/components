@@ -284,20 +284,20 @@ class ORM extends EntityCache implements SingletonInterface
      * Update ORM records schema, synchronize declared and database schemas and return instance of
      * SchemaBuilder.
      *
-     * @param SchemaBuilder         $builder User specified schema builder.
-     * @param ClassLocatorInterface $locator
+     * @param SchemaBuilder $builder    User specified schema builder.
+     * @param bool          $syncronize Create all required tables and columns
      * @return SchemaBuilder
      */
-    public function updateSchema(
-        SchemaBuilder $builder = null,
-        ClassLocatorInterface $locator = null
-    ) {
+    public function updateSchema(SchemaBuilder $builder = null, $syncronize = true)
+    {
         if (empty($builder)) {
-            $builder = $this->schemaBuilder($locator);
+            $builder = $this->schemaBuilder();
         }
 
         //Create all required tables and columns
-        $builder->synchronizeSchema();
+        if ($syncronize) {
+            $builder->synchronizeSchema();
+        }
 
         //Getting normalized (cached) version of schema
         $this->schema = $builder->normalizeSchema();

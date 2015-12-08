@@ -8,9 +8,9 @@
 namespace Spiral\ODM;
 
 use Spiral\Core\Component;
-use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
@@ -326,20 +326,20 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     /**
      * Update ODM documents schema and return instance of SchemaBuilder.
      *
-     * @param SchemaBuilder         $builder User specified schema builder.
-     * @param ClassLocatorInterface $locator
+     * @param SchemaBuilder $builder User specified schema builder.
+     * @param bool          $createIndexes
      * @return SchemaBuilder
      */
-    public function updateSchema(
-        SchemaBuilder $builder = null,
-        ClassLocatorInterface $locator = null
-    ) {
+    public function updateSchema(SchemaBuilder $builder = null, $createIndexes = true)
+    {
         if (empty($builder)) {
-            $builder = $this->schemaBuilder($locator);
+            $builder = $this->schemaBuilder();
         }
 
         //We will create all required indexes now
-        $builder->createIndexes();
+        if ($createIndexes) {
+            $builder->createIndexes();
+        }
 
         //Getting cached/normalized schema
         $this->schema = $builder->normalizeSchema();

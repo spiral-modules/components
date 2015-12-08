@@ -85,6 +85,8 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated this method creates looped dependencies, drop it
      */
     public function fetchTokens($filename)
     {

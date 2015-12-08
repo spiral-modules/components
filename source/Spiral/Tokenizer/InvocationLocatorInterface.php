@@ -12,6 +12,8 @@ use Spiral\Tokenizer\Reflections\ReflectionInvocation;
 /**
  * Analog of LocatorInterface for method/function invocations. Can only work with simple invocations
  * such as $this->method, self::method, static::method, or ClassName::method.
+ *
+ * @todo use AST
  */
 interface InvocationLocatorInterface
 {

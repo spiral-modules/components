@@ -12,6 +12,8 @@ use Spiral\Tokenizer\Reflections\ReflectionInvocation;
 
 /**
  * Can locate invocations in a specified directory. Can only find simple invocations!
+ *
+ * @todo use ast
  */
 class InvocationLocator extends AbstractLocator implements InvocationLocatorInterface
 {
@@ -42,6 +44,9 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
 
         $signature = strtolower(trim($signature, '\\'));
         foreach ($this->availableReflections() as $reflection) {
+            /**
+             * @var ReflectionFileInterface $reflection
+             */
             foreach ($reflection->getInvocations() as $invocation) {
                 if (
                     !empty($signature)

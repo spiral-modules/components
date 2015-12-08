@@ -57,7 +57,8 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     /**
      * Available file reflections. Generator.
      *
-     * @generate ReflectionFile
+     *
+     * @generate ReflectionFile[]
      */
     protected function availableReflections()
     {
@@ -77,6 +78,9 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
                 continue;
             }
 
+            /**
+             * @var ReflectionFile $reflection
+             */
             yield $reflection;
         }
     }

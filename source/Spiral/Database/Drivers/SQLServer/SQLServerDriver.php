@@ -15,6 +15,8 @@ use Spiral\Database\Entities\Driver;
 
 /**
  * Talk to microsoft sql server databases.
+ *
+ * @todo UTF8?
  */
 class SQLServerDriver extends Driver
 {

@@ -12,8 +12,6 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\MySQL\Schemas\Commander;
 use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Exceptions\ConstrainException;
-use Spiral\Database\Exceptions\QueryException;
 
 /**
  * Talks to mysql databases.
@@ -67,8 +65,7 @@ class MySQLDriver extends Driver
      */
     public function hasTable($name)
     {
-        $query = 'SELECT COUNT(*) FROM information_schema.tables '
-            . 'WHERE table_schema = ? AND table_name = ?';
+        $query = 'SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?';
 
         return (bool)$this->query($query, [$this->getSource(), $name])->fetchColumn();
     }

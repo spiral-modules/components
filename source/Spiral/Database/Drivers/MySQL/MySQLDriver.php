@@ -12,6 +12,8 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\MySQL\Schemas\Commander;
 use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Exceptions\ConstrainException;
+use Spiral\Database\Exceptions\QueryException;
 
 /**
  * Talks to mysql databases.

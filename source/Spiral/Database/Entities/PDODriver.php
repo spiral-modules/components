@@ -14,6 +14,7 @@ use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Exceptions\ConstrainException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\Parameter;
@@ -290,6 +291,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Create instance of PDOStatement using provided SQL query and set of parameters.
      *
+     * @todo more exceptions to be thrown
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      * @return \PDOStatement
@@ -302,6 +304,10 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
                 $benchmark = $this->benchmark($this->name, $queryString);
             }
+
+            /**
+             * This core requires minor improvements to support prepared statements on user level.
+             */
 
             //Prepared statement
             $pdoStatement = $this->prepare($query);
@@ -330,8 +336,8 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
             $this->logger()->error($queryString, compact('query', 'parameters'));
 
-            //Consistency
-            throw new QueryException($exception);
+            //Converting exception into query or integrity exception
+            return $this->clarifyException($exception);
         }
 
         return $pdoStatement;
@@ -345,6 +351,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function prepare($statement)
     {
+        //todo: what about caching prepared statements?
         return $this->getPDO()->prepare($statement);
     }
 
@@ -518,6 +525,17 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             $this->config['password'],
             $this->options
         );
+    }
+
+    /**
+     * Convert PDO exception into query or integrity exception.
+     *
+     * @param \PDOException $exception
+     * @return QueryException|ConstrainException
+     */
+    protected function clarifyException(\PDOException $exception)
+    {
+        return new QueryException($exception);
     }
 
     /**

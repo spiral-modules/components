@@ -184,10 +184,8 @@ trait ValidatorTrait
      * @throws SugarException
      * @event validator(ValidatorEvent)
      */
-    protected function createValidator(
-        array $rules = [],
-        ContainerInterface $container = null
-    ) {
+    protected function createValidator(array $rules = [], ContainerInterface $container = null)
+    {
         if (empty($container)) {
             $container = $this->container();
         }
@@ -199,15 +197,15 @@ trait ValidatorTrait
             );
         }
 
-        //We need constructor
+        //We need factory to create validator
         if ($container instanceof FactoryInterface) {
-            $constructor = $container;
+            $factory = $container;
         } else {
-            $constructor = $container->get(FactoryInterface::class);
+            $factory = $container->get(FactoryInterface::class);
         }
 
         //Receiving instance of validator from container
-        $validator = $constructor->construct(ValidatorInterface::class, [
+        $validator = $factory->make(ValidatorInterface::class, [
             'data'  => $this->fields,
             'rules' => !empty($rules) ? $rules : $this->validates
         ]);

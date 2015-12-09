@@ -13,6 +13,8 @@ use Spiral\ORM\Exceptions\CacheException;
 
 /**
  * Entity cache support. Used to share same model instance across it's child or related objects.
+ *
+ * @todo Interface is needed
  */
 class EntityCache extends Component
 {

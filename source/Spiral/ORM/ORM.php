@@ -314,7 +314,7 @@ class ORM extends Component implements SingletonInterface
      * @param bool          $syncronize Create all required tables and columns
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null, $syncronize = true)
+    public function updateSchema(SchemaBuilder $builder = null, $syncronize = false)
     {
         if (empty($builder)) {
             $builder = $this->schemaBuilder();

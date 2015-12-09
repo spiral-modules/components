@@ -330,7 +330,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      * @param bool          $createIndexes
      * @return SchemaBuilder
      */
-    public function updateSchema(SchemaBuilder $builder = null, $createIndexes = true)
+    public function updateSchema(SchemaBuilder $builder = null, $createIndexes = false)
     {
         if (empty($builder)) {
             $builder = $this->schemaBuilder();

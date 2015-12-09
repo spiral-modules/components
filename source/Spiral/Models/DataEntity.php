@@ -113,6 +113,7 @@ class DataEntity extends Component implements
     public function __construct(array $fields = [])
     {
         $this->fields = $fields;
+        self::initialize();
     }
 
     /**

@@ -36,9 +36,8 @@ class SchematicEntity extends DataEntity
      */
     public function __construct(array $fields, array $schema)
     {
-        parent::__construct($fields);
         $this->schema = $schema;
-        static::initialize();
+        parent::__construct($fields);
     }
 
     /**

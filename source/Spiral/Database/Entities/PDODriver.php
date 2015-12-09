@@ -337,7 +337,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             $this->logger()->error($queryString, compact('query', 'parameters'));
 
             //Converting exception into query or integrity exception
-            return $this->clarifyException($exception);
+            throw $this->clarifyException($exception);
         }
 
         return $pdoStatement;

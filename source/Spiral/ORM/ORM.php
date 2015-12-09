@@ -8,6 +8,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
@@ -31,7 +32,7 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
  * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
  */
-class ORM extends EntityCache implements SingletonInterface
+class ORM extends Component implements SingletonInterface
 {
     /**
      * Declares to IoC that component instance should be treated as singleton.
@@ -74,6 +75,8 @@ class ORM extends EntityCache implements SingletonInterface
      */
     const PIVOT_DATA = '@pivot';
 
+    private $cache = null;
+
     /**
      * @var ORMConfig
      */
@@ -105,13 +108,15 @@ class ORM extends EntityCache implements SingletonInterface
     protected $memory = null;
 
     /**
-     * @param     ORMConfig        $config
+     * @param ORMConfig            $config
+     * @param EntityCache          $cache
      * @param HippocampusInterface $memory
      * @param DatabaseManager      $databases
      * @param FactoryInterface     $factory
      */
     public function __construct(
         ORMConfig $config,
+        EntityCache $cache,
         HippocampusInterface $memory,
         DatabaseManager $databases,
         FactoryInterface $factory
@@ -119,11 +124,32 @@ class ORM extends EntityCache implements SingletonInterface
         $this->config = $config;
         $this->memory = $memory;
 
+        $this->cache = $cache;
+
         //Loading scheme from memory
         $this->schema = (array)$memory->loadData(static::MEMORY);
 
         $this->databases = $databases;
         $this->factory = $factory;
+    }
+
+    /**
+     * @param EntityCache $cache \
+     * @return $this
+     */
+    public function setCache(EntityCache $cache)
+    {
+        $this->cache = $cache;
+
+        return $this;
+    }
+
+    /**
+     * @return EntityCache
+     */
+    public function cache()
+    {
+        return $this->cache;
     }
 
     /**
@@ -150,7 +176,7 @@ class ORM extends EntityCache implements SingletonInterface
     {
         $schema = $this->schema($class);
 
-        if (!$this->cacheEnabled() || !$cache) {
+        if (!$this->cache->cacheEnabled() || !$cache) {
             //Entity cache is disabled, we can create record right now
             return new $class($data, !empty($data), $this, $schema);
         }
@@ -165,17 +191,17 @@ class ORM extends EntityCache implements SingletonInterface
             $primaryKey = $data[$schema[self::M_PRIMARY_KEY]];
         }
 
-        if ($this->hasEntity($class, $primaryKey)) {
+        if ($this->cache->hasEntity($class, $primaryKey)) {
             /**
              * @var RecordInterface $entity
              */
-            $entity = $this->getEntity($class, $primaryKey);
+            $entity = $this->cache->getEntity($class, $primaryKey);
 
             //Retrieving record from the cache and updates it's context (relations and pivot data)
             return $entity->setContext($data);
         }
 
-        return $this->rememberEntity(
+        return $this->cache->rememberEntity(
             new $class($data, !empty($data), $this, $schema)
         );
     }

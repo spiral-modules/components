@@ -73,7 +73,7 @@ class ManyToMany extends Relation
      */
     public function has($outer)
     {
-        $selectQuery = $this->pivotTable()->where($this->wherePivot(
+        $selectQuery = $this->pivotTable()->select()->where($this->wherePivot(
             $this->parentKey(),
             $this->prepareRecords($outer)
         ));

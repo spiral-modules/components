@@ -477,7 +477,7 @@ abstract class Relation extends Component implements
         }
 
         if ($entity instanceof IdentifiedInterface) {
-            $this->orm->rememberEntity($entity);
+            $this->orm->cache()->rememberEntity($entity);
         }
 
         return true;

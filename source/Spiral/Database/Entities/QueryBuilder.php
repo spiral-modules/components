@@ -48,7 +48,6 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
      * Get ordered list of builder parameters. Attention, this method WILL return only
      * ParameterInterface instances in future as scalar parameters will be dropped.
      *
-     * @deprecated scalar values
      * @param QueryCompiler $compiler
      * @return array|ParameterInterface[]
      * @throws BuilderException

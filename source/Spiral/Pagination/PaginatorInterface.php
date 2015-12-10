@@ -40,7 +40,7 @@ interface PaginatorInterface
      * @param int $pageNumber
      * @return UriInterface
      */
-    public function createUri($pageNumber);
+    public function uri($pageNumber);
 
     /**
      * Apply paginator to paginable object.

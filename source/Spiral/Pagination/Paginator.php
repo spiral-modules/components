@@ -311,7 +311,7 @@ class Paginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function createUri($pageNumber)
+    public function uri($pageNumber)
     {
         return $this->uri->withQuery(http_build_query(
             $this->getQuery() + [$this->pageParameter => $pageNumber]

@@ -25,8 +25,10 @@ use Spiral\Core\Exceptions\Container\InjectionException;
  * Container does not support setter injections, private properties and etc. Normally it will work
  * with classes only.
  *
- * @see InjectableInterface
- * @see SingletonInterface
+ * @see  InjectableInterface
+ * @see  SingletonInterface
+ *
+ * @todo polish parent usage in make method
  */
 class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {
@@ -205,7 +207,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
 
             try {
                 //Trying to resolve dependency (contextually)
-                $arguments[] = $this->make($class->getName(), [], $parameter->getName());
+                $arguments[] = $this->get($class->getName(), $parameter->getName());
 
                 continue;
             } catch (AutowireException $exception) {

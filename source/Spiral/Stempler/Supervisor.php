@@ -11,7 +11,7 @@ namespace Spiral\Stempler;
 use Spiral\Stempler\Behaviours\BlockBehaviour;
 use Spiral\Stempler\Behaviours\ExtendsBehaviour;
 use Spiral\Stempler\Behaviours\IncludeBehaviour;
-use Spiral\Stempler\Exceptions\LoaderException;
+use Spiral\Stempler\Exceptions\LoaderExceptionInterface;
 use Spiral\Stempler\Exceptions\StemplerException;
 use Spiral\Stempler\Importers\Stopper;
 
@@ -157,7 +157,7 @@ class Supervisor implements SupervisorInterface
 
         try {
             $source = $this->loader->getSource($path);
-        } catch (LoaderException $exception) {
+        } catch (LoaderExceptionInterface $exception) {
             throw new StemplerException($exception->getMessage(), $token, 0, $exception);
         }
 

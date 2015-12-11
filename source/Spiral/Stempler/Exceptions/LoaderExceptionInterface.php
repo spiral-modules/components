@@ -7,12 +7,10 @@
  */
 namespace Spiral\Stempler\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Loading exceptions.
  */
-class LoaderException extends RuntimeException
+interface LoaderExceptionInterface
 {
 
 }

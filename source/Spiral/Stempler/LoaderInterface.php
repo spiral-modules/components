@@ -7,7 +7,7 @@
  */
 namespace Spiral\Stempler;
 
-use Spiral\Stempler\Exceptions\LoaderException;
+use Spiral\Stempler\Exceptions\LoaderExceptionInterface;
 
 /**
  * View loader interface. Pretty simple class which is compatible with Twig loader.
@@ -19,7 +19,7 @@ interface LoaderInterface
      *
      * @param string $path
      * @return string
-     * @throws LoaderException
+     * @throws LoaderExceptionInterface
      */
     public function localFilename($path);
 
@@ -28,7 +28,7 @@ interface LoaderInterface
      *
      * @param string $path
      * @return string
-     * @throws LoaderException
+     * @throws LoaderExceptionInterface
      */
     public function getSource($path);
 }

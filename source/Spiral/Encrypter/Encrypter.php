@@ -14,6 +14,8 @@ use Spiral\Encrypter\Exceptions\EncrypterException;
 
 /**
  * Default implementation of spiral encrypter.
+ * 
+ * @todo found some references to old mcrypt, to remove them
  */
 class Encrypter extends Component implements EncrypterInterface, InjectableInterface
 {

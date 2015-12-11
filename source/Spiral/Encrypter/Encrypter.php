@@ -196,6 +196,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
      */
     public function sign($string, $salt = null)
     {
+        //todo: double check if this is good idea
         return hash_hmac('sha256', $string . ($salt ? ':' . $salt : ''), $this->key);
     }
 

@@ -35,7 +35,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
     private $key = '';
 
     /**
-     * One of the MCRYPT_CIPERNAME constants, or the name of the algorithm as string.
+     * One of the openssl cipher values, or the name of the algorithm as string.
      *
      * @var string
      */

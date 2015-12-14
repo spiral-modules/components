@@ -14,6 +14,8 @@ use Spiral\Encrypter\Exceptions\EncrypterException;
 
 /**
  * Default implementation of spiral encrypter.
+ * 
+ * @todo found some references to old mcrypt, to remove them
  */
 class Encrypter extends Component implements EncrypterInterface, InjectableInterface
 {
@@ -35,7 +37,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
     private $key = '';
 
     /**
-     * One of the MCRYPT_CIPERNAME constants, or the name of the algorithm as string.
+     * One of the openssl cipher values, or the name of the algorithm as string.
      *
      * @var string
      */
@@ -196,6 +198,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
      */
     public function sign($string, $salt = null)
     {
+        //todo: double check if this is good idea
         return hash_hmac('sha256', $string . ($salt ? ':' . $salt : ''), $this->key);
     }
 

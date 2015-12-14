@@ -227,11 +227,11 @@ class ORM extends Component implements SingletonInterface
     /**
      * Get ORM selector for given class.
      *
-     * @param string          $class
-     * @param LoaderInterface $loader
+     * @param string $class
+     * @param Loader $loader
      * @return RecordSelector
      */
-    public function selector($class, LoaderInterface $loader = null)
+    public function selector($class, Loader $loader = null)
     {
         return new RecordSelector($class, $this, $loader);
     }

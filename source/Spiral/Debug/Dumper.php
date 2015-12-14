@@ -20,9 +20,6 @@ use Spiral\Debug\Traits\LoggerTrait;
  */
 class Dumper extends Component implements SingletonInterface, LoggerAwareInterface
 {
-    /**
-     * Static method instance(). Used in dump() function.
-     */
     use LoggerTrait, BenchmarkTrait;
 
     /**
@@ -126,7 +123,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     }
 
     /**
-     * Variable dumper. This is the oldest spiral function, it was originally written in 2007. :)
+     * Variable dumper. This is the oldest spiral function originally written in 2007. :)
      *
      * @param mixed  $value
      * @param string $name       Variable name, internal.

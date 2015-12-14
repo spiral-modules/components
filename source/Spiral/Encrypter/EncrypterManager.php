@@ -12,7 +12,7 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Encrypter\Configs\EncrypterConfig;
 
 /**
- * Only manages encrypter injections.
+ * Only manages encrypter injections (factory).
  */
 class EncrypterManager implements InjectorInterface, SingletonInterface
 {

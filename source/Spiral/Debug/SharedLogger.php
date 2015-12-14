@@ -12,6 +12,8 @@ use Spiral\Core\Container\SingletonInterface;
 
 /**
  * SharedLogger used as global system logger to handle errors, debug messages and etc.
+ *
+ * This is "default" logger in spiral environment.
  */
 class SharedLogger extends Logger implements SingletonInterface
 {

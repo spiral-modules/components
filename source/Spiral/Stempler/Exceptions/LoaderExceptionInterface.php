@@ -10,7 +10,7 @@ namespace Spiral\Stempler\Exceptions;
 /**
  * Loading exceptions.
  */
-interface LoaderExceptionInterface
+interface LoaderExceptionInterface //extends \Throwable
 {
 
 }

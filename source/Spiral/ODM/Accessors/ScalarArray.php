@@ -200,7 +200,7 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      */
     public function hasUpdates()
     {
-        return $this->updated || $this->atomics;
+        return $this->updated || !empty($this->atomics);
     }
 
     /**

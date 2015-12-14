@@ -198,7 +198,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function all()
     {
-        return $this->run();
+        return $this->select()->all();
     }
 
     /**
@@ -206,7 +206,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      */
     public function jsonSerialize()
     {
-        return $this->run()->jsonSerialize();
+        return $this->select()->jsonSerialize();
     }
 
     /**

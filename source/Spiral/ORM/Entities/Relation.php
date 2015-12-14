@@ -66,7 +66,7 @@ abstract class Relation extends Component implements
      * Instance of constructed EntityInterface of RecordIterator.
      *
      * @invisible
-     * @var EntityInterface|RecordIterator
+     * @var mixed|EntityInterface|RecordIterator
      */
     protected $instance = null;
 
@@ -158,7 +158,13 @@ abstract class Relation extends Component implements
             return static::MULTIPLE ? $this->createIterator() : null;
         }
 
-        return $this->instance = (static::MULTIPLE ? $this->createIterator() : $this->createRecord());
+        if (static::MULTIPLE) {
+            $instance = $this->createIterator();
+        } else {
+            $instance = $this->createRecord();
+        }
+
+        return $this->instance = $instance;
     }
 
     /**

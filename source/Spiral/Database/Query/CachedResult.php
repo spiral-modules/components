@@ -156,7 +156,7 @@ class CachedResult extends QueryResult
      */
     public function bind($columnID, &$variable)
     {
-        if (!$this->data) {
+        if (empty($this->data)) {
             return $this;
         }
 

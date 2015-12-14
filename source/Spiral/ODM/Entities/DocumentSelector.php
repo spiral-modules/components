@@ -355,6 +355,7 @@ class DocumentSelector extends Component implements
     {
         $this->query($query);
         $this->applyPagination();
+
         $cursorReader = new DocumentCursor(
             $this->mongoCollection()->find($this->query, $fields),
             $this->odm,

@@ -70,7 +70,7 @@ class StreamWrapper
      * Open pre-mocked StreamInterface by it's unique uri.
      *
      * @param string $path
-     * @param string $mode
+     * @param int    $mode
      * @param int    $options
      * @param string &$opened_path
      * @return bool

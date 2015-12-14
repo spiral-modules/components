@@ -78,7 +78,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
             );
         }
 
-        if ($ordering) {
+        if (!empty($ordering)) {
             $ordering = "ORDER BY {$this->compileOrdering($ordering)}";
         } else {
             $ordering = "ORDER BY (SELECT NULL)";

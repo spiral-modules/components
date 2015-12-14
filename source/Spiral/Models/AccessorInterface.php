@@ -12,6 +12,8 @@ use Spiral\Validation\ValueInterface;
 
 /**
  * Accessors used to mock access to model field, control value setting, serializing and etc.
+ *
+ * @todo think about constructor unification?
  */
 interface AccessorInterface extends ValueInterface, \JsonSerializable
 {

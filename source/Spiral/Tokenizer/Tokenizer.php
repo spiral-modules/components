@@ -100,7 +100,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         $reflection = new ReflectionFile($filename, $this);
 
         //Let's save to cache
-        $this->memory->saveData($reflection->exportSchema(), $fileMD5, static::MEMORY_LOCATION);
+        $this->memory->saveData($fileMD5, $reflection->exportSchema(), static::MEMORY_LOCATION);
 
         return $reflection;
     }

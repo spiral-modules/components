@@ -21,16 +21,16 @@ use Spiral\Storage\Exceptions\StorageException;
 interface StorageInterface
 {
     /**
-     * Register new bucket using it's options, server id and prefix.
+     * Register new bucket using it's options, server and prefix.
      *
-     * @param string $name
-     * @param string $prefix
-     * @param string $server
-     * @param array  $options
+     * @param string          $name
+     * @param string          $prefix
+     * @param array           $options
+     * @param ServerInterface $server
      * @return BucketInterface
      * @throws StorageException
      */
-    public function registerBucket($name, $prefix, $server, array $options = []);
+    public function registerBucket($name, $prefix, array $options = [], ServerInterface $server);
 
     /**
      * Get bucket by it's name.

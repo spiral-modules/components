@@ -65,7 +65,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function registerBucket($name, $prefix, $server, array $options = [])
+    public function registerBucket($name, $prefix, array $options = [], ServerInterface $server)
     {
         if (isset($this->buckets[$name])) {
             throw new StorageException("Unable to create bucket '{$name}', name already taken.");
@@ -73,7 +73,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
 
         return $this->buckets[$name] = $this->factory->make(
             StorageBucket::class,
-            ['storage' => $this] + compact('prefix', 'server', 'options')
+            ['storage' => $this] + compact('prefix', 'options', 'server')
         );
     }
 

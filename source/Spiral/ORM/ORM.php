@@ -29,6 +29,8 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  * ORM component used to manage state of cached Record's schema, record creation and schema
  * analysis.
  *
+ * Attention, do not forget to reset cache between requests.
+ *
  * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
  * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
  */

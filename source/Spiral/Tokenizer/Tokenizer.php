@@ -37,15 +37,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Memory section.
      */
-    const MEMORY = 'tokenizer';
-
-    /**
-     * Cache of already processed file reflections, used to speed up lookup.
-     *
-     * @invisible
-     * @var array
-     */
-    private $cache = [];
+    const MEMORY_LOCATION = 'tokenizer';
 
     /**
      * @var TokenizerConfig
@@ -79,8 +71,6 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         $this->files = $files;
         $this->config = $config;
         $this->memory = $runtime;
-
-        $this->cache = $this->memory->loadData(static::MEMORY);
     }
 
     /**
@@ -100,16 +90,17 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     {
         $fileMD5 = $this->files->md5($filename = $this->files->normalizePath($filename));
 
-        if (isset($this->cache[$filename]) && $this->cache[$filename]['md5'] == $fileMD5) {
+        $schema = $this->memory->loadData($fileMD5, self::MEMORY_LOCATION);
+
+        if (!empty($schema)) {
             //We can speed up reflection via tokenization cache
-            return new ReflectionFile($filename, $this, $this->cache[$filename]);
+            return new ReflectionFile($filename, $this, $schema);
         }
 
         $reflection = new ReflectionFile($filename, $this);
 
         //Let's save to cache
-        $this->cache[$filename] = ['md5' => $fileMD5] + $reflection->exportSchema();
-        $this->memory->saveData(static::MEMORY, $this->cache);
+        $this->memory->saveData($reflection->exportSchema(), $fileMD5, static::MEMORY_LOCATION);
 
         return $reflection;
     }

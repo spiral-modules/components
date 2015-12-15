@@ -7,6 +7,7 @@
  */
 namespace Spiral\ODM;
 
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\Models\EntityInterface;
@@ -274,10 +275,15 @@ class Document extends DocumentEntity implements ActiveEntityInterface
      * @param ODM $odm ODM component, global container will be called if not instance provided.
      * @return DocumentSource
      * @throws ODMException
+     * @throws SugarException
      */
     public static function source(ODM $odm = null)
     {
         if (empty($odm)) {
+            if (empty(self::staticContainer())) {
+                throw new SugarException("Unable to get document source, no shared container found.");
+            }
+
             //Using global container as fallback
             $odm = self::staticContainer()->get(ODM::class);
         }

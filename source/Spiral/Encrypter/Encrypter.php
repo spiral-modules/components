@@ -124,6 +124,8 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
 
     /**
      * {@inheritdoc}
+     * 
+     * Data encoded using json_encode method, only supported formats are allowed!
      */
     public function encrypt($data)
     {
@@ -133,8 +135,14 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
 
         $vector = $this->createIV(openssl_cipher_iv_length($this->cipher));
 
+        try{
+                $serialized = json_encode($data);
+        } catch (\ErrorException $e){
+            throw new EncrypterException("Unsupported data format", null, $e);
+        }
+        
         $encrypted = openssl_encrypt(
-            serialize($data),
+            $serialized,
             $this->cipher,
             $this->key,
             false,
@@ -152,6 +160,8 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
 
     /**
      * {@inheritdoc}
+     * 
+     * json_decode with assoc flag set to true
      */
     public function decrypt($payload)
     {
@@ -183,7 +193,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
                 hex2bin($payload[self::IV])
             );
 
-            return unserialize($decrypted);
+            return json_decode($decrypted, true);
         } catch (\ErrorException $exception) {
             throw new DecryptException($exception->getMessage(), $exception->getCode());
         }

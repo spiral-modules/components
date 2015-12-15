@@ -33,13 +33,6 @@ use Spiral\Core\Exceptions\Container\InjectionException;
 class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {
     /**
-     * Parent container if any.
-     *
-     * @var ContainerInterface
-     */
-    private $parent = null;
-
-    /**
      * IoC bindings.
      *
      * @invisible
@@ -56,24 +49,10 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     protected $injectors = [];
 
     /**
-     * @todo see has()
-     * @param ContainerInterface $parent
-     */
-    public function __construct(ContainerInterface $parent = null)
-    {
-        $this->parent = $parent;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function has($alias)
     {
-        if (!empty($this->parent) && $this->parent->has($alias)) {
-            //Following parent (move call here? extra constructor option?)
-            return true;
-        }
-
         return isset($this->bindings[$alias]);
     }
 
@@ -88,11 +67,6 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     public function get($alias, $context = null)
     {
-        if (!empty($this->parent) && $this->parent->has($alias)) {
-            //Following parent
-            return $this->parent->get($alias);
-        }
-
         //Direct bypass to construct, i might think about this option... or not.
         return $this->make($alias, [], $context);
     }

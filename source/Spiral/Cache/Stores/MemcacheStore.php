@@ -135,17 +135,17 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function increment($name, $delta = 1)
+    public function inc($name, $delta = 1)
     {
-        return $this->driver->increment($this->prefix . $name);
+        return $this->driver->inc($this->prefix . $name);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decrement($name, $delta = 1)
+    public function dec($name, $delta = 1)
     {
-        return $this->driver->decrement($this->prefix . $name, $delta);
+        return $this->driver->dec($this->prefix . $name, $delta);
     }
 
     /**

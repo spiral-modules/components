@@ -78,7 +78,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function increment($name, $delta = 1)
+    public function inc($name, $delta = 1)
     {
         return xcache_inc($this->prefix . $name, $delta);
     }
@@ -86,7 +86,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function decrement($name, $delta = 1)
+    public function dec($name, $delta = 1)
     {
         return xcache_dec($this->prefix . $name, $delta);
     }

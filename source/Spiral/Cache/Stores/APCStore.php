@@ -123,7 +123,7 @@ class APCStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function increment($name, $delta = 1)
+    public function inc($name, $delta = 1)
     {
         if ($this->driver == self::APCU_DRIVER) {
             return apcu_inc($this->prefix . $name, $delta);
@@ -135,7 +135,7 @@ class APCStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function decrement($name, $delta = 1)
+    public function dec($name, $delta = 1)
     {
         if ($this->driver == self::APCU_DRIVER) {
             return apcu_dec($this->prefix . $name, $delta);

@@ -126,7 +126,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function increment($name, $delta = 1)
+    public function inc($name, $delta = 1)
     {
         $value = $this->get($name, $expiration) + $delta;
 
@@ -138,7 +138,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function decrement($name, $delta = 1)
+    public function dec($name, $delta = 1)
     {
         $value = $this->get($name, $expiration) - $delta;
 

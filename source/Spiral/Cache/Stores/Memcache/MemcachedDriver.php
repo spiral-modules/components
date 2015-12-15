@@ -93,7 +93,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function increment($name, $delta = 1)
+    public function inc($name, $delta = 1)
     {
         if (!$this->has($name)) {
             $this->forever($name, $delta);
@@ -107,7 +107,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function decrement($name, $delta = 1)
+    public function dec($name, $delta = 1)
     {
         return $this->driver->decrement($name, $delta);
     }

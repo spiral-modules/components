@@ -761,10 +761,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     protected function container()
     {
-        if (empty($this->orm)) {
-            return parent::container();
-        }
-
         return $this->orm->container();
     }
 

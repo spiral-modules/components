@@ -4,7 +4,6 @@
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
- * @copyright �2009-2015
  */
 namespace Spiral\ORM;
 
@@ -77,6 +76,9 @@ class ORM extends Component implements SingletonInterface
      */
     const PIVOT_DATA = '@pivot';
 
+    /**
+     * @var EntityCache
+     */ 
     private $cache = null;
 
     /**
@@ -128,7 +130,6 @@ class ORM extends Component implements SingletonInterface
 
         $this->cache = $cache;
 
-        //Loading scheme from memory
         $this->schema = (array)$memory->loadData(static::MEMORY);
 
         $this->databases = $databases;
@@ -136,7 +137,7 @@ class ORM extends Component implements SingletonInterface
     }
 
     /**
-     * @param EntityCache $cache \
+     * @param EntityCache $cache 
      * @return $this
      */
     public function setCache(EntityCache $cache)
@@ -155,7 +156,7 @@ class ORM extends Component implements SingletonInterface
     }
 
     /**
-     * Get database by it's name from DatabaseProvider associated with ORM component.
+     * Get database by it's name from DatabaseManager associated with ORM component.
      *
      * @param string $database
      * @return Database

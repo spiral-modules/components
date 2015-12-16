@@ -22,7 +22,7 @@ use Spiral\Validation\ValidatesInterface;
 /**
  * Record is base data entity for ORM component, it used to describe related table schema,
  * filters, validations and relations to other records. You can count Record class as ActiveRecord
- * pattern. ORM component will automatically analyze existed Documents and create cached version of
+ * pattern. ORM component will automatically analyze existed Records and create cached version of
  * their schema.
  *
  * @TODO: Add ability to set primary key manually, for example fpr uuid like fields.

@@ -8,12 +8,15 @@
 namespace Spiral\Cache\Configs;
 
 use Spiral\Core\InjectableConfig;
+use Spiral\Core\Traits\Config\AliasTrait;
 
 /**
  * Cache component configuration manager.
  */
 class CacheConfig extends InjectableConfig
 {
+    use AliasTrait;
+
     /**
      * Configuration section.
      */
@@ -34,6 +37,20 @@ class CacheConfig extends InjectableConfig
     public function hasStore($store)
     {
         return isset($this->config['stores'][$store]);
+    }
+
+    /**
+     * @param string $store
+     * @return string
+     */
+    public function storeClass($store)
+    {
+        if (class_exists($store)) {
+            //Legacy format support
+            return $store;
+        }
+
+        return $this->config['stores'][$store]['class'];
     }
 
     /**

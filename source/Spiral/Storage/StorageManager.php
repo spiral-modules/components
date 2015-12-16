@@ -86,6 +86,8 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Unable to fetch bucket, name can not be empty.");
         }
 
+        $bucket = $this->config->resolveAlias($bucket);
+
         if (isset($this->buckets[$bucket])) {
             return $this->buckets[$bucket];
         }
@@ -139,9 +141,10 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Undefined storage server '{$server}'.");
         }
 
-        $config = $this->config->serverOptions($server);
-
-        return $this->servers[$server] = $this->factory->make($config['class'], $config);
+        return $this->servers[$server] = $this->factory->make(
+            $this->config->serverClass($server),
+            $this->config->serverOptions($server)
+        );
     }
 
     /**

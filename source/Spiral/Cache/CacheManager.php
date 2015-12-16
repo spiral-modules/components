@@ -10,9 +10,9 @@ namespace Spiral\Cache;
 use Spiral\Cache\Configs\CacheConfig;
 use Spiral\Cache\Exceptions\CacheException;
 use Spiral\Core\Component;
-use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 
 /**
@@ -61,33 +61,35 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     /**
      * {@inheritdoc}
      */
-    public function store($class = null)
+    public function store($store = null)
     {
         //Default store class
-        $class = $class ?: $this->config['store'];
+        $store = !empty($store) ? $store : $this->config['store'];
 
-        if (isset($this->stores[$class])) {
-            return $this->stores[$class];
+        $store = $this->config->resolveAlias($store);
+
+        if (isset($this->stores[$store])) {
+            return $this->stores[$store];
         }
 
-        $benchmark = $this->benchmark('store', $class);
+        $benchmark = $this->benchmark('store', $store);
         try {
             //Constructing cache instance
-            $this->stores[$class] = $this->factory->make(
-                $class,
-                $this->config->storeOptions($class)
+            $this->stores[$store] = $this->factory->make(
+                $this->config->storeClass($store),
+                $this->config->storeOptions($store)
             );
         } finally {
             $this->benchmark($benchmark);
         }
 
-        if ($class == $this->config['store'] && !$this->stores[$class]->isAvailable()) {
+        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
             throw new CacheException(
-                "Unable to use default store '{$class}', driver is unavailable."
+                "Unable to use default store '{$store}', driver is unavailable."
             );
         }
 
-        return $this->stores[$class];
+        return $this->stores[$store];
     }
 
     /**

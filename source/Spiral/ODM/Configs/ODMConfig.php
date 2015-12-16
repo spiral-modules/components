@@ -8,12 +8,15 @@
 namespace Spiral\ODM\Configs;
 
 use Spiral\Core\InjectableConfig;
+use Spiral\Core\Traits\Config\AliasTrait;
 
 /**
  * Translation component configuration.
  */
 class ODMConfig extends InjectableConfig
 {
+    use AliasTrait;
+
     /**
      * Configuration section.
      */
@@ -38,20 +41,6 @@ class ODMConfig extends InjectableConfig
     public function defaultDatabase()
     {
         return $this->config['default'];
-    }
-
-    /**
-     * @param string $alias
-     * @return string
-     */
-    public function resolveAlias($alias)
-    {
-        while (isset($this->config['aliases'][$alias])) {
-            //Resolving database alias
-            $alias = $this->config['aliases'][$alias];
-        }
-
-        return $alias;
     }
 
     /**

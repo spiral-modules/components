@@ -297,7 +297,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      */
     protected function check($field, $value, &$condition, array $arguments = [])
     {
-        $condition = $this->config->resolveCondition($condition);
+        $condition = $this->config->resolveAlias($condition);
 
         try {
             if (strpos($condition, '::')) {

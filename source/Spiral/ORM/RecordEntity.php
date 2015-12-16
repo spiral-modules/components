@@ -324,7 +324,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             unset($data[$name]);
         }
 
-        //Data is initiated as default values and non default
         parent::__construct($data + $this->ormSchema[ORM::M_COLUMNS], $this->ormSchema);
 
         if (!$this->isLoaded()) {

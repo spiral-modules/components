@@ -10,6 +10,7 @@ namespace Spiral\Files;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\Exceptions\FileNotFoundException;
+use Spiral\Files\Exceptions\FilesException;
 use Spiral\Files\Exceptions\WriteErrorException;
 use Symfony\Component\Finder\Finder;
 
@@ -155,6 +156,26 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         }
 
         return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function deleteDirectory($directory, $clean = false)
+    {
+        if (!$this->isDirectory($directory)) {
+            throw new FilesException(
+                "Unable to remove directory '{$directory}', invalid identifier."
+            );
+        }
+
+        if ($clean) {
+            foreach ($this->getFiles($directory) as $filename) {
+                $this->delete($filename);
+            }
+        }
+
+        return rmdir($directory);
     }
 
     /**

@@ -14,6 +14,7 @@ use Spiral\Files\Exceptions\WriteErrorException;
  * Access to hard drive or local store. Does not provide full filesystem abstractions.
  *
  * @todo more methods needed?
+ * @todo remove directory
  */
 interface FilesInterface
 {
@@ -98,6 +99,16 @@ interface FilesInterface
      * @param string $filename
      */
     public function delete($filename);
+
+    /**
+     * Remove directory and all it's content (if clean flag set to true).
+     *
+     * @param string $directory
+     * @param bool   $clean
+     * @return bool
+     * @throws FileNotFoundException
+     */
+    public function deleteDirectory($directory, $clean = false);
 
     /**
      * Move file from one location to another. Location must exist.

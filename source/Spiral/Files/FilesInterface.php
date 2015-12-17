@@ -101,16 +101,6 @@ interface FilesInterface
     public function delete($filename);
 
     /**
-     * Remove directory and all it's content (if clean flag set to true).
-     *
-     * @param string $directory
-     * @param bool   $clean
-     * @return bool
-     * @throws FileNotFoundException
-     */
-    public function deleteDirectory($directory, $clean = false);
-
-    /**
      * Move file from one location to another. Location must exist.
      *
      * @param string $filename

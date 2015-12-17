@@ -161,26 +161,6 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function deleteDirectory($directory, $clean = false)
-    {
-        if (!$this->isDirectory($directory)) {
-            throw new FilesException(
-                "Unable to remove directory '{$directory}', invalid identifier."
-            );
-        }
-
-        if ($clean) {
-            foreach ($this->getFiles($directory) as $filename) {
-                $this->delete($filename);
-            }
-        }
-
-        return rmdir($directory);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function move($filename, $destination)
     {
         if (!$this->exists($filename)) {

@@ -33,7 +33,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     /**
      * Already constructed cache adapters.
      *
-     * @var CacheStore[]
+     * @var StoreInterface[]
      */
     private $stores = false;
 

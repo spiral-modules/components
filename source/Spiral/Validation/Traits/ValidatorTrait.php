@@ -34,6 +34,7 @@ trait ValidatorTrait
     private $validator = null;
 
     /**
+     * @internal DO NOT USE
      * @whatif private
      * @var array
      */
@@ -42,6 +43,7 @@ trait ValidatorTrait
     /**
      * Fields (data) to be validated. Named like that for convenience.
      *
+     * @internal DO NOT USE
      * @whatif private
      * @var array
      */

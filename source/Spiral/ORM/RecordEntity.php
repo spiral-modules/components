@@ -319,7 +319,8 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             unset($data[ORM::PIVOT_DATA]);
         }
 
-        foreach (array_intersect_key($data, $this->ormSchema[ORM::M_RELATIONS]) as $name => $relation) {
+        foreach (array_intersect_key($data,
+            $this->ormSchema[ORM::M_RELATIONS]) as $name => $relation) {
             $this->relations[$name] = $relation;
             unset($data[$name]);
         }
@@ -761,6 +762,10 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     protected function container()
     {
+        if (empty($this->orm)) {
+            return parent::container();
+        }
+
         return $this->orm->container();
     }
 

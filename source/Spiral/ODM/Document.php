@@ -248,19 +248,19 @@ class Document extends DocumentEntity implements ActiveEntityInterface
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
         if (empty($this->collection)) {
-            return (object)[
+            return [
                 'fields'  => $this->getFields(),
                 'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
                 'errors'  => $this->getErrors()
             ];
         }
 
-        return (object)[
+        return [
             'collection' => $this->odmSchema()[ODM::D_DB] . '/' . $this->collection,
             'fields'     => $this->getFields(),
             'atomics'    => $this->hasUpdates() ? $this->buildAtomics() : [],

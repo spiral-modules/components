@@ -462,11 +462,11 @@ class DataEntity extends Component implements
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'fields' => $this->getFields(),
             'errors' => $this->getErrors()
         ];

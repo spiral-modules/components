@@ -750,13 +750,13 @@ class Compositor extends Component implements
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
         $this->validate();
 
-        return (object)[
+        return [
             'data'    => $this->serializeData(),
             'atomics' => $this->buildAtomics('@compositor'),
             'errors'  => $this->getErrors()

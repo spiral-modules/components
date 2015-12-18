@@ -393,11 +393,11 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'data'    => $this->serializeData(),
             'type'    => $this->getType(),
             'atomics' => $this->buildAtomics('@scalarArray')

@@ -71,11 +71,11 @@ class ODMConfig extends InjectableConfig
      */
     public function mutatorAlias($mutator)
     {
-        if (!is_string($mutator) || !isset($this->config['mutatorAliases'][$mutator])) {
+        if (!is_string($mutator) || !isset($this->config['schemas']['mutatorAliases'][$mutator])) {
             return $mutator;
         }
 
-        return $this->config['mutatorAliases'][$mutator];
+        return $this->config['schemas']['mutatorAliases'][$mutator];
     }
 
     /**
@@ -86,6 +86,8 @@ class ODMConfig extends InjectableConfig
      */
     public function getMutators($type)
     {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+        return isset($this->config['schemas']['mutators'][$type])
+            ? $this->config['schemas']['mutators'][$type]
+            : [];
     }
 }

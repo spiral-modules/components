@@ -123,11 +123,11 @@ class Parameter implements ParameterInterface
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'statement' => $this->sqlStatement(),
             'value'     => $this->value
         ];

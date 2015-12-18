@@ -226,11 +226,11 @@ class Comparator extends Component
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'name'        => [
                 'initial' => $this->initial->getName(),
                 'current' => $this->current->getName()

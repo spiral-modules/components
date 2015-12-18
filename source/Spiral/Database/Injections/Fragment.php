@@ -49,10 +49,10 @@ class Fragment implements FragmentInterface
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)['statement' => $this->sqlStatement()];
+        return ['statement' => $this->sqlStatement()];
     }
 }

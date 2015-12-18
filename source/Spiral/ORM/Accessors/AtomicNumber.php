@@ -183,11 +183,11 @@ class AtomicNumber implements RecordAccessorInterface
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'value' => $this->value,
             'delta' => $this->delta
         ];

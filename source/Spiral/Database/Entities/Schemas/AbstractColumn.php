@@ -680,7 +680,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * Simplified way to dump information.
      *
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
@@ -715,7 +715,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             $column['scale'] = $this->scale;
         }
 
-        return (object)$column;
+        return $column;
     }
 
     /**

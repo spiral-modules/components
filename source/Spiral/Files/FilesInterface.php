@@ -14,6 +14,7 @@ use Spiral\Files\Exceptions\WriteErrorException;
  * Access to hard drive or local store. Does not provide full filesystem abstractions.
  *
  * @todo more methods needed?
+ * @todo remove directory
  */
 interface FilesInterface
 {

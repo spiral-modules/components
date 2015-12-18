@@ -10,6 +10,7 @@ namespace Spiral\Files;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\Exceptions\FileNotFoundException;
+use Spiral\Files\Exceptions\FilesException;
 use Spiral\Files\Exceptions\WriteErrorException;
 use Symfony\Component\Finder\Finder;
 

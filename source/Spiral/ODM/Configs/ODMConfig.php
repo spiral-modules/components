@@ -8,12 +8,15 @@
 namespace Spiral\ODM\Configs;
 
 use Spiral\Core\InjectableConfig;
+use Spiral\Core\Traits\Config\AliasTrait;
 
 /**
  * Translation component configuration.
  */
 class ODMConfig extends InjectableConfig
 {
+    use AliasTrait;
+
     /**
      * Configuration section.
      */
@@ -38,20 +41,6 @@ class ODMConfig extends InjectableConfig
     public function defaultDatabase()
     {
         return $this->config['default'];
-    }
-
-    /**
-     * @param string $alias
-     * @return string
-     */
-    public function resolveAlias($alias)
-    {
-        while (isset($this->config['aliases'][$alias])) {
-            //Resolving database alias
-            $alias = $this->config['aliases'][$alias];
-        }
-
-        return $alias;
     }
 
     /**
@@ -82,11 +71,11 @@ class ODMConfig extends InjectableConfig
      */
     public function mutatorAlias($mutator)
     {
-        if (!is_string($mutator) || !isset($this->config['mutatorAliases'][$mutator])) {
+        if (!is_string($mutator) || !isset($this->config['schemas']['mutatorAliases'][$mutator])) {
             return $mutator;
         }
 
-        return $this->config['mutatorAliases'][$mutator];
+        return $this->config['schemas']['mutatorAliases'][$mutator];
     }
 
     /**
@@ -97,6 +86,8 @@ class ODMConfig extends InjectableConfig
      */
     public function getMutators($type)
     {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+        return isset($this->config['schemas']['mutators'][$type])
+            ? $this->config['schemas']['mutators'][$type]
+            : [];
     }
 }

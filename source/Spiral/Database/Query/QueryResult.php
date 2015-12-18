@@ -263,11 +263,11 @@ class QueryResult implements ResultInterface, \JsonSerializable
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'statement' => $this->queryString(),
             'count'     => $this->count,
             'rows'      => $this->count > static::DUMP_LIMIT

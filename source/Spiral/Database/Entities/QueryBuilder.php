@@ -90,7 +90,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
@@ -106,7 +106,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
             'database'  => $this->database
         ];
 
-        return (object)$debugInfo;
+        return $debugInfo;
     }
 
     /**

@@ -558,11 +558,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'fields'  => $this->getFields(),
             'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
             'errors'  => $this->getErrors()

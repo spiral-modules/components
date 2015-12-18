@@ -329,11 +329,11 @@ class DocumentSelector extends Component implements
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'collection' => $this->database . '/' . $this->name,
             'query'      => $this->query,
             'limit'      => $this->limit,

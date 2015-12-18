@@ -8,12 +8,15 @@
 namespace Spiral\Validation\Configs;
 
 use Spiral\Core\InjectableConfig;
+use Spiral\Core\Traits\Config\AliasTrait;
 
 /**
  * Validation rules and checkers config.
  */
 class ValidatorConfig extends InjectableConfig
 {
+    use AliasTrait;
+
     /**
      * Configuration section.
      */
@@ -35,20 +38,6 @@ class ValidatorConfig extends InjectableConfig
     public function emptyCondition($condition)
     {
         return in_array($condition, $this->config['emptyConditions']);
-    }
-
-    /**
-     * @param mixed $condition
-     * @return mixed
-     */
-    public function resolveCondition($condition)
-    {
-        if (is_string($condition) && isset($this->config['aliases'][$condition])) {
-            //Condition were aliased
-            $condition = $this->config['aliases'][$condition];
-        }
-
-        return $condition;
     }
 
     /**

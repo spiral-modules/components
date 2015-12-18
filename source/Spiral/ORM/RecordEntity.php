@@ -708,7 +708,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
-     * @return Object
+     * @return array
      */
     public function __debugInfo()
     {
@@ -723,7 +723,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             unset($info['pivotData']);
         }
 
-        return (object)$info;
+        return $info;
     }
 
     /**

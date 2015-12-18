@@ -8,12 +8,15 @@
 namespace Spiral\Database\Configs;
 
 use Spiral\Core\InjectableConfig;
+use Spiral\Core\Traits\Config\AliasTrait;
 
 /**
  * Databases config.
  */
 class DatabasesConfig extends InjectableConfig
 {
+    use AliasTrait;
+
     /**
      * Configuration section.
      */
@@ -35,20 +38,6 @@ class DatabasesConfig extends InjectableConfig
     public function defaultDatabase()
     {
         return $this->config['default'];
-    }
-
-    /**
-     * @param string $alias
-     * @return string
-     */
-    public function resolveAlias($alias)
-    {
-        while (isset($this->config['aliases'][$alias])) {
-            //Resolving database alias
-            $alias = $this->config['aliases'][$alias];
-        }
-
-        return $alias;
     }
 
     /**

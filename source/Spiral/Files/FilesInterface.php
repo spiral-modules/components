@@ -13,8 +13,7 @@ use Spiral\Files\Exceptions\WriteErrorException;
 /**
  * Access to hard drive or local store. Does not provide full filesystem abstractions.
  *
- * @todo more methods needed?
- * @todo remove directory
+ * @todo more methods needed? access to finder?
  */
 interface FilesInterface
 {
@@ -99,6 +98,14 @@ interface FilesInterface
      * @param string $filename
      */
     public function delete($filename);
+
+    /**
+     * Delete directory all content in it.
+     *
+     * @param string $directory
+     * @param bool   $contentOnly
+     */
+    public function deleteDirectory($directory, $contentOnly = false);
 
     /**
      * Move file from one location to another. Location must exist.

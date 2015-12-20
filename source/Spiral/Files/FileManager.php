@@ -13,6 +13,7 @@ use Spiral\Files\Exceptions\FileNotFoundException;
 use Spiral\Files\Exceptions\FilesException;
 use Spiral\Files\Exceptions\WriteErrorException;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 /**
  * Default files storage, points to local hard drive.
@@ -156,6 +157,38 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         }
 
         return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @see http://stackoverflow.com/questions/3349753/delete-directory-with-files-in-it
+     * @param string $directory
+     * @param bool   $contentOnly
+     * @throws FilesException
+     */
+    public function deleteDirectory($directory, $contentOnly = false)
+    {
+        if (!$this->isDirectory($directory)) {
+            throw new FilesException("Undefined or invalid directory {$directory}");
+        }
+
+        $files = new \RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getRealPath());
+            } else {
+                $this->delete($file->getRealPath());
+            }
+        }
+
+        if (!$contentOnly) {
+            rmdir($directory);
+        }
     }
 
     /**

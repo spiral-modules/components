@@ -135,21 +135,13 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     private $invocations = [];
 
     /**
-     * @invisible
-     * @var TokenizerInterface
+     * @param array $tokens
+     * @param array $cache Tokenizer can construct reflection with pre-created cache to speed up
+     *                     indexation.
      */
-    protected $tokenizer = null;
-
-    /**
-     * @param string             $filename
-     * @param TokenizerInterface $tokenizer Possibly remove this dependency.
-     * @param array              $cache     Tokenizer can construct reflection with pre-created
-     *                                      cache to speed up indexation.
-     */
-    public function __construct($filename, TokenizerInterface $tokenizer = null, array $cache = [])
+    public function __construct(array $tokens, array $cache = [])
     {
-        $this->filename = $filename;
-        $this->tokenizer = $this->saturate($tokenizer, TokenizerInterface::class);
+        $this->tokens = $tokens;
 
         if (!empty($cache)) {
             //Locating file schema from file, can speed up class location a LOT
@@ -160,14 +152,6 @@ class ReflectionFile extends Component implements ReflectionFileInterface
 
         //Looking for declarations
         $this->locateDeclarations();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getFilename()
-    {
-        return $this->filename;
     }
 
     /**
@@ -221,12 +205,6 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      */
     public function getTokens()
     {
-        if (empty($this->tokens)) {
-            //Happens when reflection created from cache
-            $this->tokens = $this->tokenizer->fetchTokens($this->filename);
-            $this->countTokens = count($this->tokens);
-        }
-
         return $this->tokens;
     }
 

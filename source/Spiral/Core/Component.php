@@ -33,6 +33,7 @@ abstract class Component
      */
     protected function container()
     {
+        //TODO: combine with local container
         if (
             property_exists($this, 'container')
             && isset($this->container)

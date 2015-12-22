@@ -46,10 +46,10 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
     /**
      * Encrypter constructor.
      *
-     * @param string      $key
-     * @param string|null $cipher
+     * @param string $key
+     * @param string $cipher
      */
-    public function __construct($key, $cipher = null)
+    public function __construct($key, $cipher = 'aes-256-cbc')
     {
         $this->setKey($key);
 

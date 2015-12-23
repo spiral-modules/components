@@ -15,13 +15,6 @@ use Spiral\Tokenizer\Reflections\ReflectionInvocation;
 interface ReflectionFileInterface
 {
     /**
-     * Reflection filename.
-     *
-     * @return string
-     */
-    public function getFilename();
-
-    /**
      * List of declared function names.
      *
      * @return array

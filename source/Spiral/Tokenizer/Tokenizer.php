@@ -90,14 +90,10 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     {
         $fileMD5 = $this->files->md5($filename = $this->files->normalizePath($filename));
 
-        $schema = $this->memory->loadData($fileMD5, self::MEMORY_LOCATION);
-
-        if (!empty($schema)) {
-            //We can speed up reflection via tokenization cache
-            return new ReflectionFile($filename, $this, $schema);
-        }
-
-        $reflection = new ReflectionFile($filename, $this);
+        $reflection = new ReflectionFile(
+            $this->fetchTokens($filename),
+            (array)$this->memory->loadData($fileMD5, self::MEMORY_LOCATION)
+        );
 
         //Let's save to cache
         $this->memory->saveData($fileMD5, $reflection->exportSchema(), static::MEMORY_LOCATION);

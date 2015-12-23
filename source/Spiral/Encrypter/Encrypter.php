@@ -46,10 +46,10 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
     /**
      * Encrypter constructor.
      *
-     * @param string      $key
-     * @param string|null $cipher
+     * @param string $key
+     * @param string $cipher
      */
-    public function __construct($key, $cipher = null)
+    public function __construct($key, $cipher = 'aes-256-cbc')
     {
         $this->setKey($key);
 
@@ -215,12 +215,11 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
     /**
      * Create an initialization vector (IV) from a random source with specified size.
      *
-     * @link http://php.net/manual/en/function.mcrypt-create-iv.php
      * @param int $length
      * @return string
      */
     private function createIV($length = 16)
     {
-        return $length ? $this->random($length, false) : '';
+        return !empty($length) ? $this->random($length, false) : '';
     }
 }

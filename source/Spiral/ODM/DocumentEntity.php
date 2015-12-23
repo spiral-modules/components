@@ -15,6 +15,7 @@ use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
+use Spiral\ODM\Exceptions\FieldException;
 use Spiral\ODM\Exceptions\ODMException;
 
 /**
@@ -303,7 +304,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function setField($name, $value, $filter = true)
     {
         if (!array_key_exists($name, $this->fields)) {
-            throw new DocumentException("Undefined field '{$name}' in '" . static::class . "'.");
+            throw new FieldException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
         $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
@@ -350,7 +351,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function set($field, $value)
     {
         if ($this->hasUpdates($field, true)) {
-            throw new DocumentException(
+            throw new FieldException(
                 "Unable to apply multiple atomic operation to field '{$field}'."
             );
         }
@@ -372,7 +373,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function inc($field, $value)
     {
         if ($this->hasUpdates($field, true) && !isset($this->atomics['$inc'][$field])) {
-            throw new DocumentException(
+            throw new FieldException(
                 "Unable to apply multiple atomic operation to field '{$field}'."
             );
         }

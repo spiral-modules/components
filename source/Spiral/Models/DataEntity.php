@@ -14,6 +14,7 @@ use Spiral\Models\Events\DescribeEvent;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\FieldExceptionInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Events\ValidatedEvent;
 use Spiral\Validation\Exceptions\ValidationException;
@@ -191,7 +192,11 @@ class DataEntity extends Component implements
 
         foreach ($fields as $name => $value) {
             if ($all || $this->isFillable($name)) {
-                $this->setField($name, $value, true);
+                try {
+                    $this->setField($name, $value, true);
+                } catch (FieldExceptionInterface $e) {
+                    //We are supressing field setting exceptions
+                }
             }
         }
 

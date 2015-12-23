@@ -15,6 +15,7 @@ use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\SchematicEntity;
+use Spiral\ORM\Exceptions\FieldException;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\Validation\ValidatesInterface;
@@ -491,7 +492,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     public function setField($name, $value, $filter = true)
     {
         if (!array_key_exists($name, $this->fields)) {
-            throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
+            throw new FieldException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
         $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
@@ -517,7 +518,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     public function getField($name, $default = null, $filter = true)
     {
         if (!array_key_exists($name, $this->fields)) {
-            throw new RecordException("Undefined field '{$name}' in '" . static::class . "'.");
+            throw new FieldException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
         $value = $this->fields[$name];
@@ -655,7 +656,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function __unset($offset)
     {
-        throw new RecordException("Records fields can not be unsetted.");
+        throw new FieldException("Records fields can not be unsetted.");
     }
 
     /**

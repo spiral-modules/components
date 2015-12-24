@@ -198,7 +198,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     {
         $tables = [];
         foreach ($this->getForeigns() as $foreign) {
-            $tables[] = substr($foreign->getForeignTable(), strlen($this->prefix));
+            $tables[] = $foreign->getForeignTable();
         }
 
         return $tables;

@@ -42,6 +42,14 @@ abstract class Component
             return $this->container;
         }
 
+        /**
+         * Technically your code can work without ever being using fallback container, all
+         * spiral components can do that and only few traits will require few extra parameters.
+         * 
+         * I'm planning one day to run spiral as worker and later in async mode (few app processes
+         * in memory), memory schemas might help a lot by minimizing runtime code by using 
+         * pre-calculated behaviours.
+         */ 
         return self::$staticContainer;
     }
 

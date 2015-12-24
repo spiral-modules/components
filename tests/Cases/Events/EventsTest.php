@@ -24,7 +24,7 @@ class EventsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($dispatcher, self::events());
 
         /**
-         * The rest is verified by Symfony.
+         * The rest is verified by Symfony... i hope.
          */
     }
 }

@@ -55,7 +55,7 @@ class SchematicEntity extends DataEntity
                 continue;
             }
 
-            $result[$field] = $value;
+            $result[$field] = $this->getField($field);
         }
 
         return $result;

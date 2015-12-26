@@ -247,15 +247,15 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
         $key = '',
         StoreInterface $store = null
     ) {
-        if (empty($store) && empty($this->container)) {
+        if (empty($store) && empty($this->container())) {
             throw new SugarException(
-                "Unable to receive cache 'StoreInterface', no container set of user store provided."
+                "Unable to receive cache 'StoreInterface', no container set or user store provided."
             );
         }
 
         if (empty($store)) {
             //We can request store from container
-            $store = $this->container->get(StoreInterface::class);
+            $store = $this->container()->get(StoreInterface::class);
         }
 
         if (empty($key)) {

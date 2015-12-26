@@ -306,7 +306,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             }
 
             /**
-             * This core requires minor improvements to support prepared statements on user level.
+             * This code requires minor improvements to support prepared statements on user level.
              */
 
             //Prepared statement

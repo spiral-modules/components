@@ -23,7 +23,7 @@ class EntityCache extends Component
      *
      * @var bool
      */
-    private $cacheEnabled = true;
+    private $enabled = false;
 
     /**
      * Maximum entity cache size.
@@ -46,9 +46,22 @@ class EntityCache extends Component
      *
      * @return bool
      */
-    public function cacheEnabled()
+    public function isEnabled()
     {
-        return $this->cacheEnabled;
+        return $this->enabled;
+    }
+
+    /**
+     * Enable or disable entity cache. Disabling cache will not flush it's values.
+     *
+     * @deprecated see configure
+     * @param bool $enabled
+     * @param int  $maxSize
+     * @return $this
+     */
+    public function configureCache($enabled, $maxSize = null)
+    {
+        return $this->configure($enabled, $maxSize);
     }
 
     /**
@@ -58,9 +71,9 @@ class EntityCache extends Component
      * @param int  $maxSize
      * @return $this
      */
-    public function configureCache($enabled, $maxSize = null)
+    public function configure($enabled, $maxSize = null)
     {
-        $this->cacheEnabled = (bool)$enabled;
+        $this->enabled = (bool)$enabled;
         if (!empty($maxSize)) {
             $this->cacheSize = $maxSize;
         }
@@ -78,7 +91,7 @@ class EntityCache extends Component
      */
     public function rememberEntity(IdentifiedInterface $entity, $ignoreLimit = true)
     {
-        if (empty($entity->primaryKey()) || !$this->cacheEnabled) {
+        if (empty($entity->primaryKey()) || !$this->enabled) {
             return $entity;
         }
 

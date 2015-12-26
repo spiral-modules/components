@@ -179,7 +179,7 @@ class ORM extends Component implements SingletonInterface
     {
         $schema = $this->schema($class);
 
-        if (!$this->cache->cacheEnabled() || !$cache) {
+        if (!$this->cache->isEnabled() || !$cache) {
             //Entity cache is disabled, we can create record right now
             return new $class($data, !empty($data), $this, $schema);
         }

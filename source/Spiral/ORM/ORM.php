@@ -13,6 +13,7 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
+use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\DataEntity;
 use Spiral\Models\SchematicEntity;
 use Spiral\ORM\Configs\ORMConfig;
@@ -35,6 +36,8 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  */
 class ORM extends Component implements SingletonInterface
 {
+    use LoggerTrait;
+
     /**
      * Declares to IoC that component instance should be treated as singleton.
      */
@@ -78,7 +81,7 @@ class ORM extends Component implements SingletonInterface
 
     /**
      * @var EntityCache
-     */ 
+     */
     private $cache = null;
 
     /**
@@ -137,7 +140,7 @@ class ORM extends Component implements SingletonInterface
     }
 
     /**
-     * @param EntityCache $cache 
+     * @param EntityCache $cache
      * @return $this
      */
     public function setCache(EntityCache $cache)
@@ -153,6 +156,21 @@ class ORM extends Component implements SingletonInterface
     public function cache()
     {
         return $this->cache;
+    }
+
+    /**
+     * When ORM is cloned we are automatically flushing it's cache and creating new isolated area.
+     * Basically we have cache enabled per selection.
+     *
+     * @see RecordSelector::getIterator()
+     */
+    public function __clone()
+    {
+        $this->cache = clone $this->cache;
+
+        if (!$this->cache->isEnabled()) {
+            $this->logger()->warning("ORM are cloned in disabled state.");
+        }
     }
 
     /**
@@ -194,17 +212,17 @@ class ORM extends Component implements SingletonInterface
             $primaryKey = $data[$schema[self::M_PRIMARY_KEY]];
         }
 
-        if ($this->cache->hasEntity($class, $primaryKey)) {
+        if ($this->cache->has($class, $primaryKey)) {
             /**
              * @var RecordInterface $entity
              */
-            $entity = $this->cache->getEntity($class, $primaryKey);
+            $entity = $this->cache->get($class, $primaryKey);
 
             //Retrieving record from the cache and updates it's context (relations and pivot data)
             return $entity->setContext($data);
         }
 
-        return $this->cache->rememberEntity(
+        return $this->cache->remember(
             new $class($data, !empty($data), $this, $schema)
         );
     }

@@ -426,7 +426,16 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
             return $this->run();
         }
 
-        return new RecordIterator($this->orm, $this->class, $this->fetchData(), true, $callbacks);
+        /*
+         * We are getting copy of ORM with cloned cache, so all our entities are isolated in it.
+         */
+        return new RecordIterator(
+            clone $this->orm,
+            $this->class,
+            $this->fetchData(),
+            true,
+            $callbacks
+        );
     }
 
     /**

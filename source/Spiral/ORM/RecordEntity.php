@@ -360,8 +360,8 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         /**
-         * We are not going to update record fields. TODO: potentially an exception
-         * has to be throwns if fields do not match.
+         * We are not going to update record fields.
+         * todo: potentially an exception has to be thrown if fields do not match.
          */
 
         return $this;

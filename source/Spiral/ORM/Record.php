@@ -78,10 +78,6 @@ class Record extends RecordEntity implements ActiveEntityInterface
             }
 
             $this->loadedState(true)->dispatch('saved', new EntityEvent($this));
-
-            //Saving record to entity cache if we have space for that
-            $this->orm->cache()->rememberEntity($this, false);
-
         } elseif ($this->isSolid() || $this->hasUpdates()) {
             $this->dispatch('updating', new EntityEvent($this));
 

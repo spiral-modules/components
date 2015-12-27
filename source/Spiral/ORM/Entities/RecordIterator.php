@@ -247,4 +247,14 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     {
         return $this->all();
     }
+
+    /**
+     * Flushing references.
+     */
+    public function __destruct()
+    {
+        $this->data = [];
+        $this->instances = [];
+        $this->orm = null;
+    }
 }

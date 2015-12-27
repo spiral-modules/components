@@ -238,7 +238,7 @@ class QueryResult implements ResultInterface, \JsonSerializable
      */
     public function close()
     {
-        return $this->statement && $this->statement->closeCursor();
+        return !empty($this->statement) && $this->statement->closeCursor();
     }
 
     /**

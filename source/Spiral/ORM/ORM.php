@@ -33,6 +33,8 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  *
  * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
  * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
+ *
+ * @todo think about entity cache and potential use cases when model can be accessed from outside
  */
 class ORM extends Component implements SingletonInterface
 {

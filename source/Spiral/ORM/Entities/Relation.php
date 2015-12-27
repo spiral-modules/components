@@ -130,11 +130,6 @@ abstract class Relation extends Component implements
     public function getRelated()
     {
         if (!empty($this->instance)) {
-            if ($this->instance instanceof RecordInterface && !empty($this->data)) {
-                //We have to keep record relation context (pivot data and pre-loaded relations)
-                $this->instance->setContext($this->data);
-            }
-
             //RecordIterator will update context automatically
             return $this->instance;
         }

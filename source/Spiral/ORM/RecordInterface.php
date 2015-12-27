@@ -33,16 +33,6 @@ interface RecordInterface extends IdentifiedInterface
     );
 
     /**
-     * RecordInterface context must be updated in cases where single record instance can be
-     * accessed from multiple places, context must not change record fields but might overwrite
-     * pivot data or clarify loaded relations. Must be supplied in array form.
-     *
-     * @param array $context
-     * @return $this
-     */
-    public function setContext(array $context);
-
-    /**
      * Indication that record data was deleted.
      *
      * @return bool

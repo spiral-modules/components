@@ -126,16 +126,17 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
      */
     public function current()
     {
-        $data = $this->data[$this->position];
         if (isset($this->instances[$this->position])) {
             //Due record was pre-constructed we must update it's context to force values for relations
             //and pivot fields
-            return $this->instances[$this->position]->setContext($data);
+            return $this->instances[$this->position];
         }
 
         //Let's ask ORM to create needed record
         return $this->instances[$this->position] = $this->orm->record(
-            $this->class, $data, $this->cache
+            $this->class,
+            $this->data[$this->position],
+            $this->cache
         );
     }
 

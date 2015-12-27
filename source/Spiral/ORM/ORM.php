@@ -216,10 +216,7 @@ class ORM extends Component implements SingletonInterface
             /**
              * @var RecordInterface $entity
              */
-            $entity = $this->cache->get($class, $primaryKey);
-
-            //Retrieving record from the cache and updates it's context (relations and pivot data)
-            return $entity->setContext($data);
+            return $this->cache->get($class, $primaryKey);
         }
 
         return $this->cache->remember(

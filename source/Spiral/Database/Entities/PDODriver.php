@@ -507,6 +507,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         return (object)[
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
+            'profiling'  => $this->isProfiling(),
             'database'   => $this->getSource(),
             'options'    => $this->options
         ];

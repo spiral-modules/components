@@ -169,7 +169,7 @@ class ORM extends Component implements SingletonInterface
         $this->cache = clone $this->cache;
 
         if (!$this->cache->isEnabled()) {
-            $this->logger()->warning("ORM are cloned in disabled state.");
+            $this->logger()->warning("ORM are cloned with disabled state.");
         }
     }
 

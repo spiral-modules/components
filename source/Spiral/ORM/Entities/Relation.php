@@ -391,7 +391,7 @@ abstract class Relation extends Component implements
      */
     protected function createIterator()
     {
-        return new RecordIterator($this->orm, $this->getClass(), $this->data);
+        return new RecordIterator($this->orm, $this->getClass(), (array)$this->data);
     }
 
     /**
@@ -401,7 +401,7 @@ abstract class Relation extends Component implements
      */
     protected function createRecord()
     {
-        return $this->orm->record($this->getClass(), $this->data);
+        return $this->orm->record($this->getClass(), (array)$this->data);
     }
 
     /**

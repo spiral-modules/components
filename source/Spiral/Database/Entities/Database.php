@@ -129,6 +129,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     protected $container = null;
 
     /**
+     * @todo replace container with factory?
      * @param Driver             $driver           Driver instance responsible for database
      *                                             connection.
      * @param string             $name             Internal database name/id.

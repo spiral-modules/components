@@ -706,6 +706,8 @@ abstract class Loader implements LoaderInterface
     public function __destruct()
     {
         $this->clean();
+        $this->loaders = [];
+        $this->joiners = [];
     }
 
     /**

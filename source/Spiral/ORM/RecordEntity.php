@@ -335,39 +335,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
-     * Record context must be updated in cases where single record instance can be accessed from
-     * multiple places, context will not change record fields but might overwrite pivot data or
-     * clarify loaded relations.
-     *
-     * @param array $context
-     * @return $this
-     */
-    public function setContext(array $context)
-    {
-        //Mounting context pivot data
-        $this->pivotData = isset($context[ORM::PIVOT_DATA]) ? $context[ORM::PIVOT_DATA] : [];
-
-        $relations = array_intersect_key($context, $this->ormSchema[ORM::M_RELATIONS]);
-        foreach ($relations as $name => $relation) {
-            if (!isset($this->relations[$name]) || is_array($this->relations[$name])) {
-                //Does not exists and never requested before
-                $this->relations[$name] = $relation;
-                continue;
-            }
-
-            //We have to reset relation state to update context
-            $this->relations[$name]->reset($relation, true);
-        }
-
-        /**
-         * We are not going to update record fields. TODO: potentially an exception
-         * has to be throwns if fields do not match.
-         */
-
-        return $this;
-    }
-
-    /**
      * Change record solid state. SolidState will force record data to be saved as one big update
      * set without any generating separate update statements for changed columns.
      *

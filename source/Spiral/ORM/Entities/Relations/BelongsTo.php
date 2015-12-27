@@ -158,7 +158,7 @@ class BelongsTo extends HasOne
             return;
         }
 
-        if (empty($entity = $this->orm->cache()->getEntity($this->getClass(), $innerKey))) {
+        if (empty($entity = $this->orm->cache()->get($this->getClass(), $innerKey))) {
             return;
         }
 

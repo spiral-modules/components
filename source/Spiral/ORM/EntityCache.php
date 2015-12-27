@@ -23,14 +23,14 @@ class EntityCache extends Component
      *
      * @var bool
      */
-    private $cacheEnabled = true;
+    private $enabled = true;
 
     /**
-     * Maximum entity cache size.
+     * Maximum entity cache size. Null is unlimited.
      *
-     * @var int
+     * @var int|null
      */
-    private $cacheSize = 1000;
+    private $cacheSize = null;
 
     /**
      * In cases when ORM cache is enabled every constructed instance will be stored here, cache used
@@ -46,24 +46,39 @@ class EntityCache extends Component
      *
      * @return bool
      */
-    public function cacheEnabled()
+    public function isEnabled()
     {
-        return $this->cacheEnabled;
+        return $this->enabled;
     }
 
     /**
      * Enable or disable entity cache. Disabling cache will not flush it's values.
      *
-     * @param bool $enabled
-     * @param int  $maxSize
+     * @deprecated see configure
+     * @param bool     $enabled
+     * @param int|null $maxSize Null = unlimited.
      * @return $this
      */
     public function configureCache($enabled, $maxSize = null)
     {
-        $this->cacheEnabled = (bool)$enabled;
-        if (!empty($maxSize)) {
-            $this->cacheSize = $maxSize;
+        return $this->configure($enabled, $maxSize);
+    }
+
+    /**
+     * Enable or disable entity cache. Disabling cache will not flush it's values.
+     *
+     * @param bool     $enabled
+     * @param int|null $maxSize Null = unlimited.
+     * @return $this
+     */
+    public function configure($enabled, $maxSize = null)
+    {
+        $this->enabled = (bool)$enabled;
+        if (!is_null($maxSize) && !is_int($maxSize)) {
+            throw new \InvalidArgumentException("Cache size value has to be null or integer.");
         }
+
+        $this->cacheSize = $maxSize;
 
         return $this;
     }
@@ -76,9 +91,9 @@ class EntityCache extends Component
      * @return IdentifiedInterface
      * @throws CacheException
      */
-    public function rememberEntity(IdentifiedInterface $entity, $ignoreLimit = true)
+    public function remember(IdentifiedInterface $entity, $ignoreLimit = true)
     {
-        if (empty($entity->primaryKey()) || !$this->cacheEnabled) {
+        if (empty($entity->primaryKey()) || !$this->enabled) {
             return $entity;
         }
 
@@ -94,7 +109,7 @@ class EntityCache extends Component
      *
      * @param IdentifiedInterface $entity
      */
-    public function forgetEntity(IdentifiedInterface $entity)
+    public function forget(IdentifiedInterface $entity)
     {
         if (empty($entity->primaryKey())) {
             return;
@@ -110,7 +125,7 @@ class EntityCache extends Component
      * @param mixed  $primaryKey
      * @return bool
      */
-    public function hasEntity($class, $primaryKey)
+    public function has($class, $primaryKey)
     {
         return isset($this->cache[$class . '.' . $primaryKey]);
     }
@@ -122,7 +137,7 @@ class EntityCache extends Component
      * @param mixed  $primaryKey
      * @return null|IdentifiedInterface
      */
-    public function getEntity($class, $primaryKey)
+    public function get($class, $primaryKey)
     {
         if (empty($this->cache[$class . '.' . $primaryKey])) {
             return null;

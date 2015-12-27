@@ -426,7 +426,16 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
             return $this->run();
         }
 
-        return new RecordIterator($this->orm, $this->class, $this->fetchData(), true, $callbacks);
+        /*
+         * We are getting copy of ORM with cloned cache, so all our entities are isolated in it.
+         */
+        return new RecordIterator(
+            clone $this->orm,
+            $this->class,
+            $this->fetchData(),
+            true,
+            $callbacks
+        );
     }
 
     /**
@@ -504,128 +513,5 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         }
 
         return $data;
-    }
-
-    /**
-     * Update all matched records with provided columns set. You are no allowed to use join
-     * conditions or with() method, you can update your records manually in cases like that.
-     *
-     * @param array $update Array of columns to be updated, compatible with UpdateQuery.
-     * @return int
-     * @throws SelectorException
-     */
-    public function update(array $update)
-    {
-        if (!empty($this->havingTokens)) {
-            throw new SelectorException(
-                "Unable to build UPDATE statement using select, HAVING statement not supported."
-            );
-        }
-
-        if (!empty($this->joinTokens)) {
-            throw new SelectorException(
-                "Unable to build UPDATE statement using select, JOINS statement not supported."
-            );
-        }
-
-        $statement = $this->updateStatement($update);
-
-        $normalized = [];
-        foreach ($update as $value) {
-            if ($value instanceof QueryBuilder) {
-                foreach ($value->getParameters() as $parameter) {
-                    $normalized[] = $parameter;
-                }
-
-                continue;
-            }
-
-            if ($value instanceof FragmentInterface && !$value instanceof ParameterInterface) {
-                continue;
-            }
-
-            $normalized[] = $value;
-        }
-
-        return $this->database->execute(
-            $statement,
-            $this->compiler->orderParameters(
-                QueryCompiler::UPDATE_QUERY,
-                $this->whereParameters,
-                $this->onParameters,
-                [],
-                $normalized
-            )
-        );
-    }
-
-    /**
-     * Delete all matched records and return count of affected rows. You are no allowed to use join
-     * conditions or with() method, you can delete your records manually in cases like that.
-     *
-     * @return int
-     * @throws SelectorException
-     */
-    public function delete()
-    {
-        if (!empty($this->havingTokens)) {
-            throw new SelectorException(
-                "Unable to build DELETE statement using select, HAVING statement not supported."
-            );
-        }
-
-        if (!empty($this->joinTokens)) {
-            throw new SelectorException(
-                "Unable to build DELETE statement using select, JOINS statement not supported."
-            );
-        }
-
-        return $this->database->execute(
-            $this->deleteStatement(),
-            $this->compiler->orderParameters(
-                QueryCompiler::DELETE_QUERY,
-                $this->whereParameters,
-                $this->onParameters
-            )
-        );
-    }
-
-    /**
-     * Create update statement based on WHERE statement and columns set provided by Selector.
-     *
-     * @param array         $columns
-     * @param QueryCompiler $compiler
-     * @return string
-     */
-    protected function updateStatement(array $columns, QueryCompiler $compiler = null)
-    {
-        if (empty($compiler)) {
-            $compiler = $this->compiler->resetQuoter();
-        }
-
-        $this->loader->configureSelector($this, false);
-
-        return $compiler->compileUpdate(
-            "{$this->primaryTable()} AS {$this->primaryAlias()}", $columns, $this->whereTokens
-        );
-    }
-
-    /**
-     * Create delete statement based on WHERE statement provided by Selector.
-     *
-     * @param QueryCompiler $compiler
-     * @return string
-     */
-    protected function deleteStatement(QueryCompiler $compiler = null)
-    {
-        if (empty($compiler)) {
-            $compiler = $this->compiler->resetQuoter();
-        }
-
-        $this->loader->configureSelector($this, false);
-
-        return $compiler->compileDelete(
-            "{$this->primaryTable()} AS {$this->primaryAlias()}", $this->whereTokens
-        );
     }
 }

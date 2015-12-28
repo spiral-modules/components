@@ -13,6 +13,7 @@ use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
@@ -432,7 +433,7 @@ abstract class AbstractSelect extends AbstractWhere implements
             }
 
             //Wrapping all values with ParameterInterface
-            if (!$parameter instanceof ParameterInterface) {
+            if (!$parameter instanceof ParameterInterface && !$parameter instanceof ExpressionInterface) {
                 $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
             };
 

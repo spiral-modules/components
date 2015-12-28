@@ -10,6 +10,7 @@ namespace Spiral\Database\Builders\Traits;
 use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Expression;
+use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
@@ -349,7 +350,7 @@ trait JoinsTrait
             }
 
             //Wrapping all values with ParameterInterface
-            if (!$parameter instanceof ParameterInterface) {
+            if (!$parameter instanceof ParameterInterface && !$parameter instanceof ExpressionInterface) {
                 $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
             };
 

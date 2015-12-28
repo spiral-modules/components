@@ -269,11 +269,16 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
             . $indent . $this->style->style(")", "syntax", ")") . "\n";
         }
 
-        $refection = new \ReflectionObject($object);
+        if ($object instanceof \Closure) {
+            //todo: dump source code of closure
+            $output = '';
+        } else {
+            $refection = new \ReflectionObject($object);
 
-        $output = '';
-        foreach ($refection->getProperties() as $property) {
-            $output .= $this->dumpProperty($object, $property, $level);
+            $output = '';
+            foreach ($refection->getProperties() as $property) {
+                $output .= $this->dumpProperty($object, $property, $level);
+            }
         }
 
         //Header, content, footer

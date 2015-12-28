@@ -50,7 +50,7 @@ class SorterTest extends \PHPUnit_Framework_TestCase
             ],
             [
                 [
-                    'a' => ['c', 'b', 'd'],
+                    'a' => ['c', 'b'],
                     'b' => ['c'],
                     'c' => [],
                     'd' => ['a'],

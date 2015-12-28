@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Support\DFSSorter;
 
 /**
  * Saves multiple linked tables at once but treating their cross dependency.
@@ -57,15 +58,16 @@ class SynchronizationBus extends Component
     public function sortedTables()
     {
         $tables = $this->tables;
-        uasort($tables, function (AbstractTable $tableA, AbstractTable $tableB) {
-            if (in_array($tableA->getName(), $tableB->getDependencies())) {
-                return true;
-            }
 
-            return count($tableB->getDependencies()) > count($tableA->getDependencies());
-        });
+        /*
+         * Tables has to be sorted using topological graph to execute operations in a valid order.
+         */
+        $sorter = new DFSSorter();
+        foreach ($tables as $table) {
+            $sorter->addItem($table->getName(), $table, $table->getDependencies());
+        }
 
-        return array_reverse($tables);
+        return $sorter->sort();
     }
 
     /**

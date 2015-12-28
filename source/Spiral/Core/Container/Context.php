@@ -53,4 +53,16 @@ final class Context
     {
         return $this->parameter;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getName()
+    {
+        if (empty($this->parameter)) {
+            return null;
+        }
+
+        return $this->parameter->getName();
+    }
 }

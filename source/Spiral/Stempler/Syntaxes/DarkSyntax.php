@@ -39,14 +39,20 @@ class DarkSyntax implements SyntaxInterface
      * @var array
      */
     protected $constructions = [
-        self::TYPE_BLOCK    => ['block:', 'section:', 'yield:', 'define:'],
-        self::TYPE_EXTENDS  => [
+        self::TYPE_BLOCK     => ['block:', 'section:', 'yield:', 'define:'],
+        self::TYPE_EXTENDS   => [
             'extends:',
             'extends',
             'dark:extends',
             'layout:extends'
         ],
-        self::TYPE_IMPORTER => ['dark:use', 'use', 'node:use', 'stempler:use']
+        self::PATH_ATTRIBUTE => [
+            'path',
+            'layout',
+            'dark:path',
+            'dark:layout'
+        ],
+        self::TYPE_IMPORTER  => ['dark:use', 'use', 'node:use', 'stempler:use']
     ];
 
     /**
@@ -82,16 +88,16 @@ class DarkSyntax implements SyntaxInterface
      */
     public function resolvePath(array $token)
     {
-        $type = $this->tokenType($token, $name);
+        //Needed to fetch token name
+        $this->tokenType($token, $name);
 
-        if (isset($token[HtmlTokenizer::TOKEN_ATTRIBUTES][static::PATH_ATTRIBUTE])) {
-            return $token[HtmlTokenizer::TOKEN_ATTRIBUTES][static::PATH_ATTRIBUTE];
+        foreach ($this->constructions[self::PATH_ATTRIBUTE] as $attribute) {
+            if (isset($token[HtmlTokenizer::TOKEN_ATTRIBUTES][$attribute])) {
+                return $token[HtmlTokenizer::TOKEN_ATTRIBUTES][$attribute];
+            }
         }
 
-        if ($type == self::TYPE_EXTENDS && isset($token[HtmlTokenizer::TOKEN_ATTRIBUTES]['layout'])) {
-            return $token[HtmlTokenizer::TOKEN_ATTRIBUTES]['layout'];
-        }
-
+        //By default we can count token name as needed path
         return $name;
     }
 

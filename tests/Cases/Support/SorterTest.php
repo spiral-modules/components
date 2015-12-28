@@ -36,7 +36,7 @@ class SorterTest extends \PHPUnit_Framework_TestCase
                 [
                     'a' => ['c'],
                     'b' => ['a'],
-                    'c' => []
+                    'c' => [],
                 ],
                 ['c', 'a', 'b']
             ],
@@ -44,9 +44,18 @@ class SorterTest extends \PHPUnit_Framework_TestCase
                 [
                     'a' => ['c', 'b'],
                     'b' => ['c'],
-                    'c' => []
+                    'c' => [],
                 ],
                 ['c', 'b', 'a']
+            ],
+            [
+                [
+                    'a' => ['c', 'b'],
+                    'b' => ['c'],
+                    'c' => [],
+                    'd' => ['a'],
+                ],
+                ['c', 'b', 'a', 'd']
             ]
         ];
     }

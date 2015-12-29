@@ -25,6 +25,9 @@ use Spiral\Validation\ValidatorInterface;
  * DataEntity in spiral used to represent basic data set with validation rules, filters and
  * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity.  In addition
  * it creates magic set of getters and setters for every field name (see validator trait) in model.
+ * 
+ * Attention, some entity fields created inside ValidatorTrait, this has to be fixed.
+ * @todo move fields from trait
  */
 class DataEntity extends Component implements
     EntityInterface,

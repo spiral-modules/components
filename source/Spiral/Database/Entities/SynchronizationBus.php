@@ -26,12 +26,12 @@ class SynchronizationBus extends Component
     /**
      * @var AbstractTable[]
      */
-    protected $tables = [];
+    private $tables = [];
 
     /**
      * @var Driver[]
      */
-    protected $drivers = [];
+    private $drivers = [];
 
     /**
      * @param AbstractTable[] $tables

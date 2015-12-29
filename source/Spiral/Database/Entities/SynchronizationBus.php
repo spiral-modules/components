@@ -57,13 +57,11 @@ class SynchronizationBus extends Component
      */
     public function sortedTables()
     {
-        $tables = $this->tables;
-
         /*
          * Tables has to be sorted using topological graph to execute operations in a valid order.
          */
         $sorter = new DFSSorter();
-        foreach ($tables as $table) {
+        foreach ($this->tables as $table) {
             $sorter->addItem($table->getName(), $table, $table->getDependencies());
         }
 

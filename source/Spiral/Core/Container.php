@@ -27,8 +27,6 @@ use Spiral\Core\Exceptions\Container\InjectionException;
  *
  * @see  InjectableInterface
  * @see  SingletonInterface
- *
- * @todo polish parent usage in make method
  */
 class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {

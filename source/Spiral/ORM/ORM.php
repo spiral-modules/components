@@ -94,6 +94,7 @@ class ORM extends Component implements SingletonInterface
     /**
      * Cached records schema.
      *
+     * @whatif private
      * @var array|null
      */
     protected $schema = null;

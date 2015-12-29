@@ -33,10 +33,6 @@ class EntityCache extends Component
     private $cacheSize = null;
 
     /**
-     * In cases when ORM cache is enabled every constructed instance will be stored here, cache used
-     * mainly to ensure the same instance of object, even if was accessed from different spots.
-     * Cache usage increases memory consumption and does not decreases amount of queries being made.
-     *
      * @var RecordEntity[]
      */
     private $cache = [];

@@ -108,7 +108,8 @@ class Encrypter implements EncrypterInterface, InjectableInterface
             throw new EncrypterException("Random string length should be at least 1 byte long.");
         }
 
-        if (!$result = openssl_random_pseudo_bytes($length, $cryptoStrong)) {
+        $result = openssl_random_pseudo_bytes($length, $cryptoStrong);
+        if ($result === false) {
             throw new EncrypterException(
                 "Unable to generate pseudo-random string with {$length} length."
             );

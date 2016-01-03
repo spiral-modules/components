@@ -100,21 +100,6 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        if (isset($this->stores[$class->getName()])) {
-            return $this->stores[$class->getName()];
-        }
-
-        if (!$class->isInstantiable()) {
-            //Default store
-            return $this->store();
-        }
-
-        if (!$this->config->hasStore($class->getName())) {
-            throw new CacheException(
-                "Unable construct cache store '{$class}', no options found."
-            );
-        }
-
-        return $this->store($class->getName());
+        return $this->store($context);
     }
 }

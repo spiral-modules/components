@@ -7,7 +7,6 @@
  */
 namespace Spiral\Encrypter;
 
-use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
@@ -17,7 +16,7 @@ use Spiral\Encrypter\Exceptions\EncrypterException;
  * 
  * @todo found some references to old mcrypt, to remove them
  */
-class Encrypter extends Component implements EncrypterInterface, InjectableInterface
+class Encrypter implements EncrypterInterface, InjectableInterface
 {
     /**
      * Injection is dedicated to outer class since Encrypter is pretty simple.

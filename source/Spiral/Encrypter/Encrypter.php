@@ -220,6 +220,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
      */
     private function createIV($length = 16)
     {
+        //todo: do we need to worry when length is 0
         return !empty($length) ? $this->random($length, false) : '';
     }
 }

@@ -136,7 +136,7 @@ class Encrypter implements EncrypterInterface, InjectableInterface
         $vector = $this->createIV(openssl_cipher_iv_length($this->cipher));
 
         try{
-                $serialized = json_encode($data);
+            $serialized = json_encode($data);
         } catch (\ErrorException $e){
             throw new EncrypterException("Unsupported data format", null, $e);
         }

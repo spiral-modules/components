@@ -51,7 +51,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     public function has($alias)
     {
-        return isset($this->bindings[$alias]);
+        return array_key_exists($alias, $this->bindings);
     }
 
     /**
@@ -124,7 +124,11 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                 $this->bindings[$class] = $instance;
             }
 
-            return $instance;
+            return $this->registerInstance(
+                $instance,
+                new \ReflectionObject($instance),
+                $parameters
+            );
         }
 
         return null;
@@ -338,27 +342,13 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
         //OK, we can create class by ourselves
         $instance = $this->createInstance($class, $parameters, $context, $reflector);
 
-        /**
-         * Only for classes which are constructed using autowiring, SINGLETON logic can be rewritten
-         * or disabled using custom binding or factory.
-         *
-         * @var \ReflectionClass $reflector
-         */
-        if (
-            $instance instanceof SingletonInterface
-            && !empty($singleton = $reflector->getConstant('SINGLETON'))
-        ) {
-            //Component declared SINGLETON constant, binding as constant value and class name.
-            $this->bindings[$singleton] = $instance;
-        }
-
-        return $instance;
-
+        return $this->registerInstance($instance, $reflector, $parameters);
     }
 
     /**
      * Check if given class has associated injector.
      *
+     * @todo replace with Context on demand
      * @param \ReflectionClass $reflection
      * @return bool
      */
@@ -374,6 +364,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     /**
      * Get injector associated with given class.
      *
+     * @todo replace with Context on demand
      * @param \ReflectionClass $reflection
      * @return InjectorInterface
      */
@@ -424,7 +415,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             }
 
             //todo: potentially to be replaced with direct call logic (when method is specified
-            //todo: instead of class/binding name)
+            //todo: instead of class/binding name) (see Context class)
             return $instance;
         }
 
@@ -441,6 +432,32 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             //No constructor specified
             $instance = $reflection->newInstance();
         }
+
+        return $instance;
+    }
+
+
+    /**
+     * Make sure instance conditions are met
+     *
+     * @param object           $instance
+     * @param \ReflectionClass $reflector
+     * @param array            $parameters
+     * @return object
+     */
+    private function registerInstance($instance, \ReflectionClass $reflector, array $parameters)
+    {
+        if (
+            empty($parameters)
+            && $instance instanceof SingletonInterface
+            && !empty($singleton = $reflector->getConstant('SINGLETON'))
+        ) {
+            if (!$this->has($singleton)) {
+                $this->bindSingleton($singleton, $instance);
+            }
+        }
+
+        //todo: additional registration operations?
 
         return $instance;
     }

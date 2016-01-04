@@ -15,6 +15,8 @@ use Spiral\Database\ResultInterface;
  * Query result iteration class.
  *
  * Decorates PDOStatement.
+ * 
+ * @todo bad namespace choise?
  */
 class QueryResult implements ResultInterface, \JsonSerializable
 {

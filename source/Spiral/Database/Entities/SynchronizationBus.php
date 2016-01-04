@@ -26,12 +26,12 @@ class SynchronizationBus extends Component
     /**
      * @var AbstractTable[]
      */
-    protected $tables = [];
+    private $tables = [];
 
     /**
      * @var Driver[]
      */
-    protected $drivers = [];
+    private $drivers = [];
 
     /**
      * @param AbstractTable[] $tables
@@ -57,13 +57,11 @@ class SynchronizationBus extends Component
      */
     public function sortedTables()
     {
-        $tables = $this->tables;
-
         /*
          * Tables has to be sorted using topological graph to execute operations in a valid order.
          */
         $sorter = new DFSSorter();
-        foreach ($tables as $table) {
+        foreach ($this->tables as $table) {
             $sorter->addItem($table->getName(), $table, $table->getDependencies());
         }
 
@@ -109,18 +107,6 @@ class SynchronizationBus extends Component
     }
 
     /**
-     * Collecting all involved drivers.
-     */
-    protected function collectDrivers()
-    {
-        foreach ($this->tables as $table) {
-            if (!in_array($table->driver(), $this->drivers, true)) {
-                $this->drivers[] = $table->driver();
-            }
-        }
-    }
-
-    /**
      * Begin mass transaction.
      */
     protected function beginTransaction()
@@ -150,6 +136,18 @@ class SynchronizationBus extends Component
         $this->logger()->warning("Roll back transaction");
         foreach ($this->drivers as $driver) {
             $driver->rollbackTransaction();
+        }
+    }
+    
+    /**
+     * Collecting all involved drivers.
+     */
+    private function collectDrivers()
+    {
+        foreach ($this->tables as $table) {
+            if (!in_array($table->driver(), $this->drivers, true)) {
+                $this->drivers[] = $table->driver();
+            }
         }
     }
 }

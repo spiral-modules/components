@@ -94,6 +94,7 @@ class ORM extends Component implements SingletonInterface
     /**
      * Cached records schema.
      *
+     * @whatif private
      * @var array|null
      */
     protected $schema = null;
@@ -161,8 +162,8 @@ class ORM extends Component implements SingletonInterface
     }
 
     /**
-     * When ORM is cloned we are automatically flushing it's cache and creating new isolated area.
-     * Basically we have cache enabled per selection.
+     * When ORM is cloned we are automatically cloning it's cache as well to create 
+     * new isolated area. Basically we have cache enabled per selection.
      *
      * @see RecordSelector::getIterator()
      */

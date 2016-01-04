@@ -7,7 +7,6 @@
  */
 namespace Spiral\Encrypter;
 
-use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
@@ -17,7 +16,7 @@ use Spiral\Encrypter\Exceptions\EncrypterException;
  * 
  * @todo found some references to old mcrypt, to remove them
  */
-class Encrypter extends Component implements EncrypterInterface, InjectableInterface
+class Encrypter implements EncrypterInterface, InjectableInterface
 {
     /**
      * Injection is dedicated to outer class since Encrypter is pretty simple.
@@ -109,7 +108,8 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
             throw new EncrypterException("Random string length should be at least 1 byte long.");
         }
 
-        if (!$result = openssl_random_pseudo_bytes($length, $cryptoStrong)) {
+        $result = openssl_random_pseudo_bytes($length, $cryptoStrong);
+        if ($result === false) {
             throw new EncrypterException(
                 "Unable to generate pseudo-random string with {$length} length."
             );
@@ -136,7 +136,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
         $vector = $this->createIV(openssl_cipher_iv_length($this->cipher));
 
         try{
-                $serialized = json_encode($data);
+            $serialized = json_encode($data);
         } catch (\ErrorException $e){
             throw new EncrypterException("Unsupported data format", null, $e);
         }
@@ -220,6 +220,7 @@ class Encrypter extends Component implements EncrypterInterface, InjectableInter
      */
     private function createIV($length = 16)
     {
+        //todo: do we need to worry when length is 0
         return !empty($length) ? $this->random($length, false) : '';
     }
 }

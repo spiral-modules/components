@@ -452,8 +452,8 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             && $instance instanceof SingletonInterface
             && !empty($singleton = $reflector->getConstant('SINGLETON'))
         ) {
-            if (!$this->has($singleton)) {
-                $this->bindSingleton($singleton, $instance);
+            if (!isset($this->bindings[$singleton])) {
+                $this->bindings[$singleton] = $instance;
             }
         }
 

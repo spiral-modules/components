@@ -501,7 +501,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      */
     public function __debugInfo()
     {
-        return [
+        return (object)[
             'name'        => $this->getName(),
             'primaryKeys' => $this->getPrimaryKeys(),
             'columns'     => array_values($this->getColumns()),

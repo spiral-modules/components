@@ -18,6 +18,8 @@ use Spiral\ORM\Traits\FindTrait;
 
 /**
  * Entity with ability to be saved and direct access to source.
+ * 
+ * @todo potentially dedicate save operation to SourceEntirelly, OR expose compileUpdates method
  */
 class Record extends RecordEntity implements ActiveEntityInterface
 {

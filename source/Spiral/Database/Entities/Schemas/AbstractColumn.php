@@ -715,7 +715,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             $column['scale'] = $this->scale;
         }
 
-        return (object)$column;
+        return $column;
     }
 
     /**

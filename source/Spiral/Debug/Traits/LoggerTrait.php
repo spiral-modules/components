@@ -14,10 +14,13 @@ use Spiral\Debug\LogsInterface;
 
 /**
  * On demand logger creation. Allows class to share same logger between instances.
+ * 
+ * @todo create logger using container intstance registration (see Container::registerInstance)
  */
 trait LoggerTrait
 {
     /**
+     * @internal
      * @var LoggerInterface[]
      */
     private static $loggers = [];
@@ -25,6 +28,7 @@ trait LoggerTrait
     /**
      * Private and null.
      *
+     * @internal
      * @var LoggerInterface|null
      */
     private $logger = null;

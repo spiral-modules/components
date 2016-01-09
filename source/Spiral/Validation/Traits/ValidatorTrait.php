@@ -29,6 +29,7 @@ trait ValidatorTrait
     use TranslatorTrait, EventsTrait;
 
     /**
+     * @internal DO NOT USE
      * @var ValidatorInterface
      */
     private $validator = null;

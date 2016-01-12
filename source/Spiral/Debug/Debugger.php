@@ -20,6 +20,9 @@ use Spiral\Debug\Logger\SharedHandler;
 
 /**
  * Debugger is responsible for global log, benchmarking and configuring Monolog loggers.
+ *
+ * @todo detach monolog and connect thought PSR-3, for now can be solved via factory
+ * @todo potentially move this implementation to framework
  */
 class Debugger extends Component implements BenchmarkerInterface, LogsInterface, SingletonInterface
 {

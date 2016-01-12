@@ -740,6 +740,9 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Create set of fields to be sent to UPDATE statement.
      *
+     * @internal
+     * @todo make public, move to Record?
+     * @todo create compileInsert twin?
      * @see save()
      * @return array
      */
@@ -843,6 +846,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Related and cached ORM schema.
      *
+     * @internal
      * @return array
      */
     protected function ormSchema()
@@ -853,6 +857,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Check if relation is embedded.
      *
+     * @internal
      * @param string $relation
      * @return bool
      */

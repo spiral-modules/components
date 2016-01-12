@@ -201,6 +201,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function connect()
     {
+        //todo: exception if alread connected
         $benchmark = $this->benchmark('connect', $this->config['connection']);
         try {
             $this->pdo = $this->createPDO();

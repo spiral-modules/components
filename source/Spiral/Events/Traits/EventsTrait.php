@@ -17,6 +17,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 trait EventsTrait
 {
     /**
+     * @internal
      * @var EventDispatcherInterface[]
      */
     private static $dispatchers = [];

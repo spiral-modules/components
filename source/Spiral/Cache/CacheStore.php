@@ -11,6 +11,8 @@ use Spiral\Core\Container\InjectableInterface;
 
 /**
  * AbstractStore named like that for convenience and mapping.
+ * 
+ * @todo rename to AbstractStore?
  */
 abstract class CacheStore implements StoreInterface, InjectableInterface
 {

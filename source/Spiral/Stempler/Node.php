@@ -15,6 +15,8 @@ use Spiral\Stempler\Exceptions\StrictModeException;
 /**
  * Stempler Node represents simple XML like tree of blocks defined by behaviours provided by it's
  * supervisor. Node utilizes HtmlTokenizer to create set of tokens being feeded to supervisor.
+ * 
+ * @todo move shortTags to syntax! ASAP!
  */
 class Node
 {

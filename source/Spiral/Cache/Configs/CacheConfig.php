@@ -31,6 +31,14 @@ class CacheConfig extends InjectableConfig
     ];
 
     /**
+     * @return string
+     */
+    public function defaultStore()
+    {
+        return $this->config['store'];
+    }
+
+    /**
      * @param string $store
      * @return bool
      */
@@ -60,5 +68,22 @@ class CacheConfig extends InjectableConfig
     public function storeOptions($store)
     {
         return $this->config['stores'][$store];
+    }
+
+    /**
+     * Detect store ID based on provided store class.
+     *
+     * @param \ReflectionClass $class
+     * @return string|null
+     */
+    public function detectStore(\ReflectionClass $class)
+    {
+        foreach ($this->config['stores'] as $store => $options) {
+            if ($options['class'] == $class->getName()) {
+                return $store;
+            }
+        }
+
+        return null;
     }
 }

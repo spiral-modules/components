@@ -184,6 +184,7 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
      * Create instance of document by given class name and set of fields, ODM component must
      * automatically find appropriate class to be used as ODM support model inheritance.
      *
+     * @todo hydrate external class type!
      * @param string                $class
      * @param array                 $fields
      * @param CompositableInterface $parent

@@ -113,5 +113,4 @@ class DatabasesConfig extends InjectableConfig
     {
         return $this->config['connections'][$connection];
     }
-
 }

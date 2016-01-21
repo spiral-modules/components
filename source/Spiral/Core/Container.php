@@ -127,6 +127,11 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                 $this->bindings[$class] = $instance;
             }
 
+            if (!is_object($instance)) {
+                //Non object bindings are allowed
+                return $instance;
+            }
+
             return $this->registerInstance(
                 $instance,
                 new \ReflectionObject($instance),

@@ -191,6 +191,7 @@ class ORM extends Component implements SingletonInterface
      * Construct instance of Record or receive it from cache (if enabled). Only records with
      * declared primary key can be cached.
      *
+     * @todo hydrate external class type!
      * @param string $class Record class name.
      * @param array  $data
      * @param bool   $cache Add record to entity cache if enabled.

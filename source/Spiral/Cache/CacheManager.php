@@ -64,8 +64,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     public function store($store = null)
     {
         //Default store class
-        //todo: default store like in db manager
-        $store = !empty($store) ? $store : $this->config['store'];
+        $store = !empty($store) ? $store : $this->config->defaultStore();
 
         $store = $this->config->resolveAlias($store);
 
@@ -100,6 +99,8 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $this->store($context);
+        return $this->store(
+            $this->config->detectStore($class)
+        );
     }
 }

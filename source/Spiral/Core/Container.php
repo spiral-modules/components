@@ -95,6 +95,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             return $this->make($binding, $parameters, $context);
         }
 
+        //todo: unify using InvokerInterface
         if (is_array($binding)) {
             if (is_string($binding[0])) {
                 //Class name
@@ -110,7 +111,9 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                 //In a form of resolver and method
                 list($resolver, $method) = $binding[0];
 
-                $method = new \ReflectionMethod($resolver = $this->get($resolver), $method);
+                $resolver = $this->get($resolver);
+                $method = new \ReflectionMethod($resolver, $method);
+                $method->setAccessible(true);
 
                 $instance = $method->invokeArgs(
                     $resolver, $this->resolveArguments($method, $parameters)

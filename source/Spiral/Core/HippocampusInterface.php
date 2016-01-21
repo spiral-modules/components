@@ -9,6 +9,8 @@ namespace Spiral\Core;
 
 /**
  * Long memory cache. Something very fast on read and slow on write!
+ *
+ * @todo needed NeuronInterface [remember(data), forget()] or something similar
  */
 interface HippocampusInterface
 {

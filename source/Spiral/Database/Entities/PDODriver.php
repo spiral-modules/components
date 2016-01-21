@@ -201,6 +201,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function connect()
     {
+        //todo: exception if already connected
         $benchmark = $this->benchmark('connect', $this->config['connection']);
         try {
             $this->pdo = $this->createPDO();
@@ -230,7 +231,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function isConnected()
     {
-        return (bool)$this->pdo;
+        return !empty($this->pdo);
     }
 
     /**

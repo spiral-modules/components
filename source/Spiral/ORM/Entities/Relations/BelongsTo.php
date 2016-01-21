@@ -139,6 +139,16 @@ class BelongsTo extends HasOne
     }
 
     /**
+     * Loadable when parent is loaded as well.
+     *
+     * @return bool
+     */
+    protected function isLoadable()
+    {
+        return true;
+    }
+
+    /**
      * Try to fetch outer model using entity cache.
      */
     private function fromCache()

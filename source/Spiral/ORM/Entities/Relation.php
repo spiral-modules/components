@@ -424,7 +424,7 @@ abstract class Relation extends Component implements
      */
     protected function loadData()
     {
-        if (!$this->parent->isLoaded()) {
+        if (!$this->isLoadable()) {
             //Nothing to load for unloaded parents
             return null;
         }
@@ -456,6 +456,16 @@ abstract class Relation extends Component implements
     }
 
     /**
+     * Loadable when parent is loaded as well.
+     *
+     * @return bool
+     */
+    protected function isLoadable()
+    {
+        return $this->parent->isLoaded();
+    }
+
+    /**
      * Save simple related entity.
      *
      * @param EntityInterface $entity
@@ -484,3 +494,4 @@ abstract class Relation extends Component implements
         return true;
     }
 }
+

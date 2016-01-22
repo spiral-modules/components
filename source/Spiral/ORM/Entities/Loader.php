@@ -701,6 +701,20 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
+     * Cloning selector presets
+     */
+    public function __clone()
+    {
+        foreach ($this->loaders as $name => $loader) {
+            $this->loaders[$name] = clone $loader;
+        }
+
+        foreach ($this->joiners as $name => $loader) {
+            $this->joiners[$name] = clone $loader;
+        }
+    }
+
+    /**
      * Destruct loader.
      */
     public function __destruct()

@@ -705,8 +705,6 @@ abstract class Loader implements LoaderInterface
      */
     public function __clone()
     {
-        $this->orm = clone $this->orm;
-
         foreach ($this->loaders as $name => $loader) {
             $this->loaders[$name] = clone $loader;
         }

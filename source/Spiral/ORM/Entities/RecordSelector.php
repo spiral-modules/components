@@ -518,7 +518,6 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      */
     public function __clone()
     {
-        $this->orm = clone $this->orm;
         $this->loader = clone $this->loader;
     }
 }

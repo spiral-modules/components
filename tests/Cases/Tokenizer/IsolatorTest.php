@@ -33,35 +33,35 @@ class IsolatorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($source, $restored);
     }
 
-//    public function testReplacement()
-//    {
-//        $source = '<?php echo 1, 2 ? > hello world <?= $var ? >';
-//
-//        $isolator = new Isolator();
-//        $isolated = $isolator->isolatePHP($source);
-//
-//        $keys = array_keys($isolator->getBlocks());
-//        $isolator->setBlock($keys[0], '<?php echo 2, 1 ? >');
-//        $isolator->setBlock($keys[1], '<?= e($var) ? >');
-//
-//        $blocks = array_values($isolator->getBlocks());
-//        $this->assertEquals('<?php echo 2, 1 ? >', $blocks[0]);
-//        $this->assertEquals('<?= e($var) ? >', $blocks[1]);
-//
-//        $restored = $isolator->repairPHP($isolated);
-//
-//        $this->assertEquals('<?php echo 2, 1 ? > hello world <?= e($var) ? >', $restored);
-//    }
-//
-//    /**
-//     * @expectedException \WolfyJ\Escaper\Exceptions\IsolatorException
-//     */
-//    public function testBadBlock()
-//    {
-//        $source = '<?php echo 1 ? > hello world <?= $var ? >';
-//
-//        $isolator = new Isolator();
-//        $isolator->isolatePHP($source);
-//        //$isolator->setBlock('abc', 'value');
-//    }
+    public function testReplacement()
+    {
+        $source = '<?php echo 1, 2 ?> hello world <?= $var ?>';
+
+        $isolator = new Isolator();
+        $isolated = $isolator->isolatePHP($source);
+
+        $keys = array_keys($isolator->getBlocks());
+        $isolator->setBlock($keys[0], '<?php echo 2, 1 ?>');
+        $isolator->setBlock($keys[1], '<?= e($var) ?>');
+
+        $blocks = array_values($isolator->getBlocks());
+        $this->assertEquals('<?php echo 2, 1 ?>', $blocks[0]);
+        $this->assertEquals('<?= e($var) ?>', $blocks[1]);
+
+        $restored = $isolator->repairPHP($isolated);
+
+        $this->assertEquals('<?php echo 2, 1 ?> hello world <?= e($var) ?>', $restored);
+    }
+
+    /**
+     * @expectedException \Spiral\Tokenizer\Exceptions\IsolatorException
+     */
+    public function testBadBlock()
+    {
+        $source = '<?php echo 1 ? > hello world <?= $var ?>';
+
+        $isolator = new Isolator();
+        $isolator->isolatePHP($source);
+        $isolator->setBlock('abc', 'value');
+    }
 }

@@ -36,6 +36,7 @@ interface PaginatorInterface
     /**
      * Set initial paginator uri
      *
+     * @internal to be moved to UriPaginator
      * @param UriInterface $uri
      */
     public function setUri(UriInterface $uri);
@@ -44,6 +45,7 @@ interface PaginatorInterface
      * Create page URL using specific page number. No domain or schema information included by
      * default, starts with path.
      *
+     * @internal to be moved to UriPaginator
      * @param int $pageNumber
      * @return UriInterface
      */

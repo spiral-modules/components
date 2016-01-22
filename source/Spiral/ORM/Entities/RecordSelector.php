@@ -11,10 +11,7 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Cache\CacheInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
-use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Injections\FragmentInterface;
-use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -429,6 +426,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         /*
          * We are getting copy of ORM with cloned cache, so all our entities are isolated in it.
          */
+
         return new RecordIterator(
             clone $this->orm,
             $this->class,
@@ -513,5 +511,14 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         }
 
         return $data;
+    }
+
+    /**
+     * Cloning selector presets
+     */
+    public function __clone()
+    {
+        $this->orm = clone $this->orm;
+        $this->loader = clone $this->loader;
     }
 }

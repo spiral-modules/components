@@ -132,11 +132,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                 return $instance;
             }
 
-            return $this->registerInstance(
-                $instance,
-                new \ReflectionObject($instance),
-                $parameters
-            );
+            return $instance;
         }
 
         return null;
@@ -455,11 +451,8 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     private function registerInstance($instance, \ReflectionClass $reflector, array $parameters)
     {
-        if (
-            empty($parameters)
-            && $instance instanceof SingletonInterface
-            && !empty($singleton = $reflector->getConstant('SINGLETON'))
-        ) {
+        if (empty($parameters) && $instance instanceof SingletonInterface) {
+            $singleton = get_class($instance);
             if (!isset($this->bindings[$singleton])) {
                 $this->bindings[$singleton] = $instance;
             }

@@ -21,11 +21,6 @@ use Spiral\Database\Exceptions\DatabaseException;
 class DatabaseManager extends Component implements InjectorInterface, DatabasesInterface
 {
     /**
-     * Declares to Spiral IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * By default spiral will force time conversion into single timezone before storing in
      * database, it will help us to ensure that we have no problems with switching timezones and
      * save a lot of time while development (potentially).

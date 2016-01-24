@@ -23,11 +23,6 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     use LoggerTrait, BenchmarkTrait;
 
     /**
-     * Declaring to IoC that class is singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * Options for dump() function to specify output.
      */
     const OUTPUT_ECHO     = 0;

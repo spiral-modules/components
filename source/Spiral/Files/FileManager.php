@@ -21,11 +21,6 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 class FileManager extends Component implements SingletonInterface, FilesInterface
 {
     /**
-     * Declares to IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * Files to be removed when component destructed.
      *
      * @var array

@@ -7,21 +7,14 @@
  */
 namespace Spiral\Tokenizer;
 
-use Spiral\Core\Component;
+use Spiral\Tokenizer\Exceptions\IsolatorException;
 
 /**
- * Isolators used to find and replace php blocks in given source. Can be used by view processors,
- * or to remove php code from some string.
+ * Isolators used to find and replace php blocks in given source. Can
+ * be used by view processors, or to remove php code from some string.
  */
-class Isolator extends Component
+class Isolator
 {
-    /**
-     * Unique block id, required to generate unique placeholders.
-     *
-     * @var int
-     */
-    private static $blockID = 0;
-
     /**
      * Found PHP blocks to be replaced.
      *
@@ -30,141 +23,102 @@ class Isolator extends Component
     private $phpBlocks = [];
 
     /**
-     * Isolation prefix. Use any values that will not corrupt HTML or other source.
+     * Isolation prefix. Use any values that will not corrupt HTML or
+     * other source.
      *
      * @var string
      */
     private $prefix = '';
 
     /**
-     * Isolation postfix. Use any values that will not corrupt HTML or other source.
+     * Isolation postfix. Use any values that will not corrupt HTML
+     * or other source.
      *
      * @var string
      */
     private $postfix = '';
 
     /**
-     * Set of patterns to convert "disabled" php blocks into catchable (in terms of token_get_all)
-     * code. Will fix short tags using regular expressions. Legacy.
-     *
-     * @var array
+     * @param string $prefix  Replaced block prefix, -php by default.
+     * @param string $postfix Replaced block postfix, block- by default.
      */
-    private $patterns = [];
-
-    /**
-     * Temporary block replaces. Used to "enable" php blocks.
-     *
-     * @var array
-     */
-    private $replaces = [];
-
-    /**
-     * @param string $prefix    Replaced block prefix, -php by default.
-     * @param string $postfix   Replaced block postfix, block- by default.
-     * @param bool   $shortTags Handle short tags. This is not required if short_tags are enabled.
-     */
-    public function __construct($prefix = '-php-', $postfix = '-block-', $shortTags = true)
+    public function __construct($prefix = '-php-', $postfix = '-block-')
     {
         $this->prefix = $prefix;
         $this->postfix = $postfix;
-
-        if ($shortTags) {
-            $this->addPattern('<?=', false, "<?php /*%s*/ echo ");
-            $this->addPattern('<?', '/<\?(?!php)/is');
-        }
     }
 
     /**
-     * Isolates all returned PHP blocks with a defined pattern. Method uses token_get_all function.
-     * Returned source have all php blocks replaces with non executable placeholder.
+     * Isolates all returned PHP blocks with a defined pattern. Method uses
+     * token_get_all function. Resulted source have all php blocks replaced
+     * with non executable placeholder.
      *
      * @param string $source
      * @return string
      */
     public function isolatePHP($source)
     {
-        //Replacing all
-        $source = $this->replaceTags($source);
-        $tokens = token_get_all($source);
-
-        $this->phpBlocks = [];
         $phpBlock = false;
-        $blockID = 0;
 
-        $source = '';
-        foreach ($tokens as $token) {
-            if ($token[0] == T_OPEN_TAG || $token[0] == T_OPEN_TAG_WITH_ECHO) {
+        $isolated = '';
+        foreach (token_get_all($source) as $token) {
+            if ($this->isOpenTag($token)) {
                 $phpBlock = $token[1];
+
                 continue;
             }
 
-            if ($token[0] == T_CLOSE_TAG) {
-                $phpBlock .= $token[1];
-                $this->phpBlocks[$blockID] = $phpBlock;
+            if ($this->isCloseTag($token)) {
+                $blockID = $this->uniqueID();
+
+                $this->phpBlocks[$blockID] = $phpBlock . $token[1];
+                $isolated .= $this->placeholder($blockID);
+
                 $phpBlock = '';
 
-                $source .= $this->prefix . ($blockID++) . $this->postfix;
-
                 continue;
             }
 
+            $tokenContent = is_array($token) ? $token[1] : $token;
             if (!empty($phpBlock)) {
-                $phpBlock .= is_array($token) ? $token[1] : $token;
+                $phpBlock .= $tokenContent;
             } else {
-                $source .= is_array($token) ? $token[1] : $token;
+                $isolated .= $tokenContent;
             }
         }
 
-        foreach ($this->phpBlocks as &$phpBlock) {
-            //Will repair php source with correct (original) tags
-            $phpBlock = $this->restoreTags($phpBlock);
-            unset($phpBlock);
+        return $isolated;
+    }
+
+    /**
+     * Set block content by id.
+     *
+     * @param string $blockID
+     * @param string $source
+     * @return $this
+     * @throws IsolatorException
+     */
+    public function setBlock($blockID, $source)
+    {
+        if (!isset($this->phpBlocks[$blockID])) {
+            throw new IsolatorException("Undefined block {$blockID}");
         }
 
-        //Will restore tags which were replaced but weren't handled by php (for example string
-        //contents)
-        return $this->restoreTags($source);
+        $this->phpBlocks[$blockID] = $source;
+
+        return $this;
     }
 
     /**
-     * Restore PHP blocks position in isolated source (isolatePHP() must be already called).
+     * Replace every isolated block.
      *
-     * @param string $source
-     * @return string
-     */
-    public function repairPHP($source)
-    {
-        return preg_replace_callback(
-            '/' . preg_quote($this->prefix) . '(?P<id>[0-9]+)' . preg_quote($this->postfix) . '/',
-            [$this, 'getBlock'],
-            $source
-        );
-    }
-
-    /**
-     * Remove PHP blocks from isolated source (isolatePHP() must be already called).
-     *
-     * @param string $isolatedSource
-     * @return string
-     */
-    public function removePHP($isolatedSource)
-    {
-        return preg_replace(
-            '/' . preg_quote($this->prefix) . '(?P<id>[0-9]+)' . preg_quote($this->postfix) . '/',
-            '',
-            $isolatedSource
-        );
-    }
-
-    /**
-     * Update isolator php blocks.
-     *
-     * @param array $phpBlocks
+     * @deprecated Use setBlock instead!
+     * @param array $blocks
      * @return $this
      */
-    public function setBlocks($phpBlocks)
+    public function setBlocks(array $blocks)
     {
-        $this->phpBlocks = $phpBlocks;
+        $this->phpBlocks = $blocks;
 
         return $this;
     }
@@ -180,108 +134,104 @@ class Isolator extends Component
     }
 
     /**
+     * Restore PHP blocks position in isolated source (isolatePHP() must
+     * be already called).
+     *
+     * @param string $source
+     * @return string
+     */
+    public function repairPHP($source)
+    {
+        return preg_replace_callback(
+            $this->blockRegex(),
+            function ($match) {
+                if (!isset($this->phpBlocks[$match['id']])) {
+                    return $match[0];
+                }
+
+                return $this->phpBlocks[$match['id']];
+            },
+            $source
+        );
+    }
+
+    /**
+     * Remove PHP blocks from isolated source (isolatePHP() must be
+     * already called).
+     *
+     * @param string $isolatedSource
+     * @return string
+     */
+    public function removePHP($isolatedSource)
+    {
+        return preg_replace($this->blockRegex(), '', $isolatedSource);
+    }
+
+    /**
      * Reset isolator state.
      */
     public function reset()
     {
-        $this->phpBlocks = $this->replaces = [];
+        $this->phpBlocks = [];
     }
 
     /**
-     * New pattern to fix untrackable blocks.
-     *
-     * @param string $name
-     * @param string $regexp
-     * @param string $replace
+     * @return string
      */
-    protected function addPattern($name, $regexp = null, $replace = "<?php /*%s*/")
+    private function blockRegex()
     {
-        $this->patterns[$name] = [
-            'regexp'  => $regexp,
-            'replace' => $replace
-        ];
+        return '/' .
+        preg_quote($this->prefix)
+        . '(?P<id>[0-9a-z]+)'
+        . preg_quote($this->postfix)
+        . '/';
     }
 
     /**
-     * Get PHP block by it's ID.
-     *
+     * @return string
+     */
+    private function uniqueID()
+    {
+        return md5(count($this->phpBlocks) . uniqid(true));
+    }
+
+    /**
      * @param int $blockID
-     * @return mixed
+     * @return string
      */
-    protected function getBlock($blockID)
+    private function placeholder($blockID)
     {
-        if (!isset($this->phpBlocks[$blockID['id']])) {
-            return $blockID[0];
+        return $this->prefix . $blockID . $this->postfix;
+    }
+
+    /**
+     * @param mixed $token
+     * @return bool
+     */
+    private function isOpenTag($token)
+    {
+        if (!is_array($token)) {
+            return false;
         }
 
-        return $this->phpBlocks[$blockID['id']];
-    }
-
-    /**
-     * Replace all matched tags with their <?php equivalent. These tags will be detected and parsed
-     * by token_get_all() function even if there isn't a directive in php.ini file.
-     *
-     * @param string $source
-     * @return string
-     */
-    private function replaceTags($source)
-    {
-        $replaces = &$this->replaces;
-        foreach ($this->patterns as $tag => $pattern) {
-            if (empty($pattern['regexp'])) {
-                if ($replace = array_search($tag, $replaces)) {
-                    $source = str_replace($tag, $replace, $source);
-                    continue;
-                }
-
-                $replace = sprintf($pattern['replace'], $this->getPlaceholder());
-                $replaces[$replace] = $tag;
-
-                //Replacing
-                $source = str_replace($tag, $replace, $source);
-                continue;
-            }
-
-            $source = preg_replace_callback(
-                $pattern['regexp'],
-                function ($tag) use (&$replaces, $pattern) {
-                    $tag = $tag[0];
-
-                    if ($key = array_search($tag, $replaces)) {
-                        return $key;
-                    }
-
-                    $replace = sprintf($pattern['replace'], $this->getPlaceholder());
-                    $replaces[$replace] = $tag;
-
-                    return $replace;
-                },
-                $source
-            );
+        if ($token[0] == T_ECHO && $token[1] == '<?=') {
+            //todo Find out why HHVM behaves differently or create issue
+            return true;
         }
 
-        return $source;
+        return $token[0] == T_OPEN_TAG || $token[0] == T_OPEN_TAG_WITH_ECHO;
     }
 
     /**
-     * Fix blocks altered by replaceTags() method.
-     *
-     * @see replaceTags()
-     * @param string $source
-     * @return string
+     * @param mixed $token
+     * @return bool
      */
-    private function restoreTags($source)
+    public function isCloseTag($token)
     {
-        return strtr($source, $this->replaces);
-    }
+        if (!is_array($token)) {
+            return false;
+        }
 
-    /**
-     * Get unique block placeholder for replacement.
-     *
-     * @return string
-     */
-    private function getPlaceholder()
-    {
-        return md5(self::$blockID++ . '-' . uniqid('', true));
+        return $token[0] == T_CLOSE_TAG;
     }
 }

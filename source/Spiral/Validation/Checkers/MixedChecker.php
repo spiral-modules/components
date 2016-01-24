@@ -16,11 +16,6 @@ use Spiral\Validation\Checker;
 class MixedChecker extends Checker implements SingletonInterface
 {
     /**
-     * Declaring to IoC to construct class only once.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * {@inheritdoc}
      */
     protected $messages = [

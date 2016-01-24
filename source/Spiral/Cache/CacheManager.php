@@ -26,11 +26,6 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     use BenchmarkTrait;
 
     /**
-     * Declares to Spiral IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * Already constructed cache adapters.
      *
      * @var StoreInterface[]

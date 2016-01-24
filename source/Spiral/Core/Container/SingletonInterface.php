@@ -8,10 +8,7 @@
 namespace Spiral\Core\Container;
 
 /**
- * Class treated as singleton MAY be saved as reference in IoC bindings - this is spiral Container
- * specific class. Must declare SINGLETON constant.
- *
- * @todo potentially deprecated
+ * Class treated as singleton will only be constructed once in spiral IoC.
  */
 interface SingletonInterface
 {

@@ -17,11 +17,6 @@ use Spiral\Encrypter\Configs\EncrypterConfig;
 class EncrypterManager implements InjectorInterface, SingletonInterface
 {
     /**
-     * To be constructed only once.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * @var EncrypterConfig
      */
     protected $config = null;

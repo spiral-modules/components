@@ -27,11 +27,6 @@ use Spiral\Debug\Logger\SharedHandler;
 class Debugger extends Component implements BenchmarkerInterface, LogsInterface, SingletonInterface
 {
     /**
-     * Declares to IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * @invisible
      * @var array
      */

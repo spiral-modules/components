@@ -21,11 +21,6 @@ use Spiral\Storage\Exceptions\StorageException;
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {
     /**
-     * Declares to IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * @var BucketInterface[]
      */
     private $buckets = [];

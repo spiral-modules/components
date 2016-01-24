@@ -17,11 +17,6 @@ use Spiral\Validation\Validator;
 class RequiredChecker extends Checker implements SingletonInterface
 {
     /**
-     * Declaring to IoC to construct class only once.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * {@inheritdoc}
      */
     protected $messages = [

@@ -30,11 +30,6 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     use LoggerTrait, BenchmarkTrait, TokensTrait;
 
     /**
-     * Declares to IoC that component instance should be treated as singleton.
-     */
-    const SINGLETON = self::class;
-
-    /**
      * Memory section.
      */
     const MEMORY_LOCATION = 'tokenizer';

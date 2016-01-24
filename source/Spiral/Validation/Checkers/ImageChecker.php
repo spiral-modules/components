@@ -14,12 +14,7 @@ use Spiral\Core\Container\SingletonInterface;
  */
 class ImageChecker extends FileChecker implements SingletonInterface
 {
-    /**
-     * Declaring to IoC to construct class only once.
-     */
-    const SINGLETON = self::class;
-
-    /**
+      /**
      * Getimagesize constants.
      */
     const WIDTH      = 0;

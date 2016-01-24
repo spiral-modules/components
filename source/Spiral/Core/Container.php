@@ -19,20 +19,21 @@ use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InjectionException;
 
 /**
- * Super simple auto-wiring container with auto SINGLETON and INJECTOR constants integration.
+ * Super simple auto-wiring container with declarative singletons and injectors integration.
  * Compatible with Container Interop.
  *
  * Container does not support setter injections, private properties and etc. Normally it will work
- * with classes only.
+ * with classes only to be as much invisible as possible.
  *
- * @see  InjectableInterface
- * @see  SingletonInterface
+ * @see InjectableInterface
+ * @see SingletonInterface
  */
 class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {
     /**
      * IoC bindings.
      *
+     * @what-if private
      * @invisible
      * @var array
      */
@@ -41,6 +42,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     /**
      * Registered injectors.
      *
+     * @what-if private
      * @invisible
      * @var array
      */

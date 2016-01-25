@@ -9,6 +9,7 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Injections\Parameter;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
@@ -276,7 +277,7 @@ class ManyToMany extends Relation
 
         if (!empty($outerKey)) {
             $query[$this->definition[RecordEntity::THOUGHT_OUTER_KEY]] = is_array($outerKey)
-                ? ['IN' => $outerKey]
+                ? ['IN' => new Parameter($outerKey)]
                 : $outerKey;
         }
 
@@ -387,7 +388,7 @@ class ManyToMany extends Relation
      */
     protected function linkedIDs(array $outerIDs)
     {
-        $selectQuery = $this->pivotTable()->where(
+        $selectQuery = $this->pivotTable()->select()->where(
             $this->wherePivot($this->parentKey(), $outerIDs)
         );
 
@@ -401,5 +402,4 @@ class ManyToMany extends Relation
 
         return $result;
     }
-
 }

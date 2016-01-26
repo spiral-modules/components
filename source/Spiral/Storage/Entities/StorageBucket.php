@@ -232,7 +232,7 @@ class StorageBucket extends Component implements
     public function allocateStream($name)
     {
         $this->logger()->info(
-            "Get stream for '{$this->buildAddress($name)}' at '{$this->server}' server."
+            "Get stream for '{$this->buildAddress($name)}' at '{$this->getName()}' server."
         );
 
         $benchmark = $this->benchmark(
@@ -252,7 +252,7 @@ class StorageBucket extends Component implements
     public function delete($name)
     {
         $this->logger()->info(
-            "Delete '{$this->buildAddress($name)}' at '{$this->server}' server."
+            "Delete '{$this->buildAddress($name)}' at '{$this->getName()}' server."
         );
 
         $benchmark = $this->benchmark(
@@ -306,7 +306,7 @@ class StorageBucket extends Component implements
         if ($this->server() === $destination->server()) {
             $this->logger()->info(
                 "Internal copy of '{$this->buildAddress($name)}' "
-                . "to '{$destination->buildAddress($name)}' at '{$this->server}' server."
+                . "to '{$destination->buildAddress($name)}' at '{$this->getName()}' server."
             );
 
             $benchmark = $this->benchmark(

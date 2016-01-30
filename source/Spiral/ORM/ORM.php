@@ -327,6 +327,9 @@ class ORM extends Component implements SingletonInterface
      * Update ORM records schema, synchronize declared and database schemas and return instance of
      * SchemaBuilder.
      *
+     * Attention, syncronize option to be deprecated in a future releases in order to automatically
+     * generate migrations (Phinx for example) based on declared table difference. See guide.
+     * 
      * @param SchemaBuilder $builder    User specified schema builder.
      * @param bool          $syncronize Create all required tables and columns
      * @return SchemaBuilder

@@ -166,6 +166,7 @@ class SchemaBuilder extends Component
     public function synchronizeSchema()
     {
         //As aternative you can get access to TableSchemas and generate needed migrations
+        //@todo Phinx exporter module is needed
         $bus = new SynchronizationBus($this->getTables());
         $bus->syncronize();
     }

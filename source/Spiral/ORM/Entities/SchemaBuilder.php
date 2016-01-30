@@ -165,6 +165,7 @@ class SchemaBuilder extends Component
      */
     public function synchronizeSchema()
     {
+        //As aternative you can get access to TableSchemas and generate needed migrations
         $bus = new SynchronizationBus($this->getTables());
         $bus->syncronize();
     }

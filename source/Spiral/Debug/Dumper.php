@@ -25,10 +25,9 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     /**
      * Options for dump() function to specify output.
      */
-    const OUTPUT_ECHO     = 0;
-    const OUTPUT_RETURN   = 1;
-    const OUTPUT_LOG      = 2;
-    const OUTPUT_LOG_NICE = 3;
+    const OUTPUT_ECHO   = 0;
+    const OUTPUT_RETURN = 1;
+    const OUTPUT_LOG    = 2;
 
     /**
      * Deepest level to be dumped.
@@ -94,10 +93,6 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
                     break;
 
                 case self::OUTPUT_LOG:
-                    $this->logger()->debug(print_r($value, true));
-                    break;
-
-                case self::OUTPUT_LOG_NICE:
                     $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
                     break;
             }

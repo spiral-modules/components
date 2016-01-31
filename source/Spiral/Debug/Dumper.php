@@ -81,6 +81,10 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     public function dump($value, $output = self::OUTPUT_ECHO)
     {
         if (php_sapi_name() === 'cli' && $output == self::OUTPUT_ECHO) {
+            if (is_object($value) && method_exists($value, '__debugInfo')) {
+                $value = $value->__debugInfo();
+            }
+
             print_r($value);
             if (is_scalar($value)) {
                 echo "\n";
@@ -253,6 +257,11 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         //Let's use method specifically created for dumping
         if (method_exists($object, '__debugInfo')) {
             $debugInfo = $object->__debugInfo();
+
+            if (is_array($debugInfo)) {
+                //Pretty view
+                $debugInfo = (object)$debugInfo;
+            }
 
             if (is_object($debugInfo)) {
                 //We are not including syntax elements here

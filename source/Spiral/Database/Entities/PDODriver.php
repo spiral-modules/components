@@ -501,11 +501,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'connection' => $this->config['connection'],
             'connected'  => $this->isConnected(),
             'profiling'  => $this->isProfiling(),

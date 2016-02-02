@@ -62,7 +62,7 @@ class SchemaBuilder extends Component
         $this->locateRecords($locator)->locateSources($locator);
 
         //Casting relations
-        $this->castRelations();
+        $this->castSchemas();
     }
 
     /**
@@ -373,14 +373,14 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * SchemaBuilder will request every located RecordSchema to declare it's relations. In addition
-     * this methods will create inversed set of relations.
+     * SchemaBuilder will request every located RecordSchema to declare it's schemas and relations.
+     * In addition this methods will create inversed set of relations.
      *
      * @throws SchemaException
      * @throws RelationSchemaException
      * @throws RecordSchemaException
      */
-    protected function castRelations()
+    protected function castSchemas()
     {
         $inversedRelations = [];
         foreach ($this->records as $record) {
@@ -389,6 +389,7 @@ class SchemaBuilder extends Component
                 continue;
             }
 
+            $record->castSchema();
             $record->castRelations();
 
             foreach ($record->getRelations() as $relation) {

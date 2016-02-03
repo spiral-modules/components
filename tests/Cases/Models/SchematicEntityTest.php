@@ -19,7 +19,7 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
 
         $entity = new SchematicEntity([], $schema);
         $entity->setFields($data);
-        $this->assertEquals($data, $entity->getFields());
+        $this->assertSame($data, $entity->getFields());
     }
 
     public function testSecured()
@@ -30,7 +30,7 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
 
         $entity = new SchematicEntity([], $schema);
         $entity->setFields($data);
-        $this->assertEquals([], $entity->getFields());
+        $this->assertSame([], $entity->getFields());
     }
 
     public function testPartiallySecured()
@@ -44,7 +44,7 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
 
         $entity = new SchematicEntity([], $schema);
         $entity->setFields($data);
-        $this->assertEquals(['a' => 1, 'b' => 2], $entity->getFields());
+        $this->assertSame(['a' => 1, 'b' => 2], $entity->getFields());
     }
 
     public function getSetters()
@@ -59,15 +59,15 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
         $entity->setField('a', '123');
 
         $this->assertInternalType('int', $entity->getField('a'));
-        $this->assertEquals(123, $entity->getField('a'));
+        $this->assertSame(123, $entity->getField('a'));
 
         $entity->a = '800';
         $this->assertInternalType('int', $entity->a);
-        $this->assertEquals(800, $entity->a);
+        $this->assertSame(800, $entity->a);
 
         $entity->setA('400');
         $this->assertInternalType('int', $entity->getA());
-        $this->assertEquals(400, $entity->getA());
+        $this->assertSame(400, $entity->getA());
     }
 
     public function testGetters()

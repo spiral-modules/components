@@ -382,6 +382,10 @@ class SchemaBuilder extends Component
      */
     protected function castSchemas()
     {
+        foreach ($this->records as $record) {
+            $record->castSchema();
+        }
+        
         $inversedRelations = [];
         foreach ($this->records as $record) {
             if ($record->isAbstract()) {
@@ -389,7 +393,6 @@ class SchemaBuilder extends Component
                 continue;
             }
 
-            $record->castSchema();
             $record->castRelations();
 
             foreach ($record->getRelations() as $relation) {

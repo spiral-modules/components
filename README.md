@@ -8,6 +8,7 @@ Spiral Core Components
 Components to be splitted
 -------------------------
 Following component are currently looselly coupled to spiral infrastructure and planned to be splitted into separate projects:
+* Core interfaces and spiral container
 * Stempler and Dark
 * Storage Manager
 * DBAL + Pagiantion

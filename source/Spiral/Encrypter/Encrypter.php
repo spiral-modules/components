@@ -16,7 +16,7 @@ use Spiral\Encrypter\Exceptions\EncryptException;
  * Default implementation of spiral encrypter. Sugary implementation at top of defuse/php-encryption
  *
  * @todo move to 2.x when ready
- * @see https://github.com/defuse/php-encryption
+ * @see  https://github.com/defuse/php-encryption
  */
 class Encrypter implements EncrypterInterface, InjectableInterface
 {
@@ -95,7 +95,9 @@ class Encrypter implements EncrypterInterface, InjectableInterface
         $packed = json_encode($data);
 
         try {
-            return \Crypto::Encrypt($packed, $this->key);
+            return base64_encode(
+                \Crypto::Encrypt($packed, $this->key)
+            );
         } catch (\CannotPerformOperationException $e) {
             throw new EncryptException($e->getMessage(), $e->getCode(), $e);
         } catch (\CryptoTestFailedException $e) {
@@ -111,7 +113,10 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     public function decrypt($payload)
     {
         try {
-            $result = \Crypto::Decrypt($payload, $this->key);
+            $result = \Crypto::Decrypt(
+                base64_decode($payload),
+                $this->key
+            );
 
             return json_decode($result, true);
         } catch (\InvalidCiphertextException $e) {

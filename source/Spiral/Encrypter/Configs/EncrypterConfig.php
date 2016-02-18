@@ -20,16 +20,10 @@ class EncrypterConfig extends InjectableConfig
     const CONFIG = 'encrypter';
 
     /**
-     * Default algorythm.
-     */
-    const DEFAULT_CIPHER = 'aes-256-cbc';
-
-    /**
      * @var array
      */
     protected $config = [
-        'key'    => '',
-        'cipher' => ''
+        'key'    => ''
     ];
 
     /**
@@ -38,17 +32,5 @@ class EncrypterConfig extends InjectableConfig
     public function getKey()
     {
         return $this->config['key'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getCipher()
-    {
-        if (empty($this->config['cipher'])) {
-            return static::DEFAULT_CIPHER;
-        }
-
-        return $this->config['cipher'];
     }
 }

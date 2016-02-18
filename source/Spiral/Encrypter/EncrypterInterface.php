@@ -17,13 +17,13 @@ use Spiral\Encrypter\Exceptions\EncryptException;
 interface EncrypterInterface
 {
     /**
-     * Update encryption key.
+     * Create and encrypter instance with new key.
      *
      * @param string $key
      * @return self
      * @throws EncrypterException
      */
-    public function setKey($key);
+    public function withKey($key);
 
     /**
      * Encryption ket value. Sensitive data!

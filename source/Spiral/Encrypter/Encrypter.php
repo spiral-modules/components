@@ -10,11 +10,12 @@ namespace Spiral\Encrypter;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
+use Spiral\Encrypter\Exceptions\EncryptException;
 
 /**
- * Default implementation of spiral encrypter.
- * 
- * @todo found some references to old mcrypt, to remove them
+ * Default implementation of spiral encrypter. Sugary implementation at top of defuse/php-encryption
+ *
+ * @see https://github.com/defuse/php-encryption
  */
 class Encrypter implements EncrypterInterface, InjectableInterface
 {
@@ -24,48 +25,29 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     const INJECTOR = EncrypterManager::class;
 
     /**
-     * Keys to use in packed data. This is internal constants.
-     */
-    const IV        = 'a';
-    const DATA      = 'b';
-    const SIGNATURE = 'c';
-
-    /**
      * @var string
      */
     private $key = '';
 
     /**
-     * One of the openssl cipher values, or the name of the algorithm as string.
-     *
-     * @var string
-     */
-    private $cipher = 'aes-256-cbc';
-
-    /**
      * Encrypter constructor.
      *
      * @param string $key
-     * @param string $cipher
      */
-    public function __construct($key, $cipher = 'aes-256-cbc')
+    public function __construct($key)
     {
-        $this->setKey($key);
-
-        if (!empty($cipher)) {
-            //We are allowing to skip definition of cipher to be used
-            $this->cipher = $cipher;
-        }
+        $this->key = $key;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setKey($key)
+    public function withKey($key)
     {
-        $this->key = (string)$key;
+        $encrypter = clone $this;
+        $encrypter->key = (string)$key;
 
-        return $this;
+        return $encrypter;
     }
 
     /**
@@ -77,29 +59,9 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     }
 
     /**
-     * Change encryption method. One of MCRYPT_CIPERNAME constants.
-     *
-     * @param  string $cipher
-     * @return $this
-     */
-    public function setCipher($cipher)
-    {
-        $this->cipher = $cipher;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCipher()
-    {
-        return $this->cipher;
-    }
-
-    /**
      * {@inheritdoc}
      *
+     * @todo double check
      * @param bool $passWeak Do not throw an exception if result is "weak". Not recommended.
      */
     public function random($length, $passWeak = false)
@@ -124,103 +86,39 @@ class Encrypter implements EncrypterInterface, InjectableInterface
 
     /**
      * {@inheritdoc}
-     * 
+     *
      * Data encoded using json_encode method, only supported formats are allowed!
      */
     public function encrypt($data)
     {
-        if (empty($this->key)) {
-            throw new EncrypterException("Encryption key should not be empty.");
+        $packed = json_encode($data);
+
+        try {
+            return \Crypto::Encrypt($packed, $this->key);
+        } catch (\CannotPerformOperationException $e) {
+            throw new EncryptException($e->getMessage(), $e->getCode(), $e);
+        } catch (\CryptoTestFailedException $e) {
+            throw new EncrypterException($e->getMessage(), $e->getCode(), $e);
         }
-
-        $vector = $this->createIV(openssl_cipher_iv_length($this->cipher));
-
-        try{
-            $serialized = json_encode($data);
-        } catch (\ErrorException $e){
-            throw new EncrypterException("Unsupported data format", null, $e);
-        }
-        
-        $encrypted = openssl_encrypt(
-            $serialized,
-            $this->cipher,
-            $this->key,
-            false,
-            $vector
-        );
-
-        $result = json_encode([
-            self::IV        => ($vector = bin2hex($vector)),
-            self::DATA      => $encrypted,
-            self::SIGNATURE => $this->sign($encrypted, $vector)
-        ]);
-
-        return base64_encode($result);
     }
 
     /**
      * {@inheritdoc}
-     * 
+     *
      * json_decode with assoc flag set to true
      */
     public function decrypt($payload)
     {
         try {
-            $payload = json_decode(base64_decode($payload), true);
+            $result = \Crypto::Decrypt($payload, $this->key);
 
-            if (empty($payload) || !is_array($payload)) {
-                throw new DecryptException("Invalid dataset.");
-            }
-
-            assert(!empty($payload[self::IV]));
-            assert(!empty($payload[self::DATA]));
-            assert(!empty($payload[self::SIGNATURE]));
-        } catch (\ErrorException $exception) {
-            throw new DecryptException("Unable to unpack provided data.");
+            return json_decode($result, true);
+        } catch (\InvalidCiphertextException $e) {
+            throw new DecryptException($e->getMessage(), $e->getCode(), $e);
+        } catch (\CannotPerformOperationException $e) {
+            throw new DecryptException($e->getMessage(), $e->getCode(), $e);
+        } catch (\CryptoTestFailedException $e) {
+            throw new EncrypterException($e->getMessage(), $e->getCode(), $e);
         }
-
-        //Verifying signature
-        if ($payload[self::SIGNATURE] !== $this->sign($payload[self::DATA], $payload[self::IV])) {
-            throw new DecryptException("Encrypted data does not have valid signature.");
-        }
-
-        try {
-            $decrypted = openssl_decrypt(
-                base64_decode($payload[self::DATA]),
-                $this->cipher,
-                $this->key,
-                true,
-                hex2bin($payload[self::IV])
-            );
-
-            return json_decode($decrypted, true);
-        } catch (\ErrorException $exception) {
-            throw new DecryptException($exception->getMessage(), $exception->getCode());
-        }
-    }
-
-    /**
-     * Sign string using private key.
-     *
-     * @param string $string
-     * @param string $salt
-     * @return string
-     */
-    public function sign($string, $salt = null)
-    {
-        //todo: double check if this is good idea
-        return hash_hmac('sha256', $string . ($salt ? ':' . $salt : ''), $this->key);
-    }
-
-    /**
-     * Create an initialization vector (IV) from a random source with specified size.
-     *
-     * @param int $length
-     * @return string
-     */
-    private function createIV($length = 16)
-    {
-        //todo: do we need to worry when length is 0
-        return !empty($length) ? $this->random($length, false) : '';
     }
 }

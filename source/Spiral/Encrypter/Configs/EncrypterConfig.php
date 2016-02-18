@@ -23,14 +23,16 @@ class EncrypterConfig extends InjectableConfig
      * @var array
      */
     protected $config = [
-        'key'    => ''
+        'key' => ''
     ];
 
     /**
+     * Attention, key has to be stored in base64 format.
+     *
      * @return string
      */
     public function getKey()
     {
-        return $this->config['key'];
+        return base64_decode($this->config['key']);
     }
 }

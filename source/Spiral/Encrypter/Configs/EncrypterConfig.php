@@ -33,6 +33,6 @@ class EncrypterConfig extends InjectableConfig
      */
     public function getKey()
     {
-        return base64_decode($this->config['key']);
+        return $this->config['key'];
     }
 }

@@ -44,6 +44,6 @@ class EncrypterManager implements InjectorInterface, SingletonInterface
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $class->newInstance($this->config->getKey());
+        return $class->newInstance(base64_decode($this->config->getKey()));
     }
 }

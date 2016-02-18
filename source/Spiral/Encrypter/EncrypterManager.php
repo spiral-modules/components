@@ -30,6 +30,16 @@ class EncrypterManager implements InjectorInterface, SingletonInterface
     }
 
     /**
+     * Generate new random encryption key (binary format).
+     *
+     * @return string
+     */
+    public function generateKey()
+    {
+        return \Crypto::CreateNewRandomKey();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function createInjection(\ReflectionClass $class, $context = null)

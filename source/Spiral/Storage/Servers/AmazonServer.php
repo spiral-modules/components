@@ -9,6 +9,7 @@
 namespace Spiral\Storage\Servers;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
@@ -36,7 +37,8 @@ class AmazonServer extends StorageServer
     ];
 
     /**
-     * @var Client
+     * @todo DI in constructor
+     * @var ClientInterface
      */
     protected $client = null;
 
@@ -49,6 +51,17 @@ class AmazonServer extends StorageServer
 
         //This code is going to use additional abstraction layer to connect storage and guzzle
         $this->client = new Client($this->options);
+    }
+
+    /**
+     * @param ClientInterface $client
+     * @return $this
+     */
+    public function setClient(ClientInterface $client)
+    {
+        $this->client = $client;
+
+        return $this;
     }
 
     /**

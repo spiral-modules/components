@@ -8,6 +8,7 @@
 namespace Spiral\Storage\Servers;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
@@ -65,7 +66,8 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     protected $store = null;
 
     /**
-     * @var Client
+     * @todo DI in constructor
+     * @var ClientInterface
      */
     protected $client = null;
 
@@ -92,6 +94,17 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         //This code is going to use additional abstraction layer to connect storage and guzzle
         $this->client = new Client($this->options);
         $this->connect();
+    }
+
+    /**
+     * @param ClientInterface $client
+     * @return $this
+     */
+    public function setClient(ClientInterface $client)
+    {
+        $this->client = $client;
+
+        return $this;
     }
 
     /**

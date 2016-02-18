@@ -15,6 +15,7 @@ use Spiral\Encrypter\Exceptions\EncryptException;
 /**
  * Default implementation of spiral encrypter. Sugary implementation at top of defuse/php-encryption
  *
+ * @todo move to 2.x when ready
  * @see https://github.com/defuse/php-encryption
  */
 class Encrypter implements EncrypterInterface, InjectableInterface

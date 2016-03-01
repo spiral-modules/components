@@ -11,7 +11,7 @@ Following component are currently looselly coupled to spiral infrastructure and 
 * Core interfaces and spiral DI container
 * Stempler and Dark
 * Storage Manager
-* DBAL + Pagiantion
+* DBAL + Pagination
 * ORM
 * ODM
 * Cache (potentially replaced with community packages)

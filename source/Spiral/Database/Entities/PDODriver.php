@@ -172,6 +172,17 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
+     * Connection specific timezone, at this moment locked to UTC.
+     *
+     * @todo Support connection specific timezones.
+     * @return \DateTimeZone
+     */
+    public function getTimezone()
+    {
+        return new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE);
+    }
+
+    /**
      * Enabled profiling will raise set of log messages and benchmarks associated with PDO queries.
      *
      * @param bool $enabled Enable or disable driver profiling.
@@ -604,16 +615,5 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     protected function prepareDateTime(\DateTime $dateTime)
     {
         return $dateTime->setTimezone($this->getTimezone())->format(static::DATETIME);
-    }
-
-    /**
-     * Connection specific timezone, at this moment locked to UTC.
-     *
-     * @todo Support connection specific timezones.
-     * @return \DateTimeZone
-     */
-    protected function getTimezone()
-    {
-        return new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE);
     }
 }

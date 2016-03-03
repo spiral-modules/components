@@ -140,4 +140,4 @@ abstract class StorageServer extends Component implements ServerInterface
 
         return \GuzzleHttp\Psr7\stream_for($source);
     }
-} 
+}

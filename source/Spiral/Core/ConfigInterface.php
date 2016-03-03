@@ -12,7 +12,7 @@ use Spiral\Core\Container\InjectableInterface;
 /**
  * Simple Spiral components config interface.
  */
-interface ConfigInterface extends InjectableInterface
+interface ConfigInterface extends InjectableInterface, \ArrayAccess
 {
     /**
      * Serialize config into array.

@@ -95,12 +95,11 @@ abstract class StorageServer extends Component implements ServerInterface
         }
 
         if (is_string($source)) {
-            if (!$this->files->exists($source)) {
-                //This code is going to use additional abstraction layer to connect storage and guzzle
+            if ($this->files->exists($source)) {
+                return $source;
+            } else {
                 return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for($source));
             }
-
-            return $source;
         }
 
         if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface) {
@@ -133,6 +132,10 @@ abstract class StorageServer extends Component implements ServerInterface
         if (empty($source)) {
             //This code is going to use additional abstraction layer to connect storage and guzzle
             return \GuzzleHttp\Psr7\stream_for('');
+        }
+
+        if (is_string($source) && $this->files->exists($source)) {
+            $source = fopen($source, 'rb');
         }
 
         return \GuzzleHttp\Psr7\stream_for($source);

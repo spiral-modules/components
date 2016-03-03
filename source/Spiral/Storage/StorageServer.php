@@ -90,10 +90,14 @@ abstract class StorageServer extends Component implements ServerInterface
      */
     protected function castFilename($source)
     {
-        if (empty($source) || is_string($source)) {
+        if (empty($source)) {
+            return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
+        }
+
+        if (is_string($source)) {
             if (!$this->files->exists($source)) {
                 //This code is going to use additional abstraction layer to connect storage and guzzle
-                return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
+                return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for($source));
             }
 
             return $source;

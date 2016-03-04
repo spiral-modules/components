@@ -280,7 +280,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
 
         if (!empty($resolver)) {
             //Restoring original value
-            $this->bindings[$alias] = $replacePayload;
+            $this->bindings[$alias] = $resolver;
         }
     }
 

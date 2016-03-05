@@ -13,7 +13,7 @@ Following component are currently looselly coupled to spiral infrastructure and 
 * Translator Component
 * Validation Component
 * Models and Events
-* Encrypter (why not?)
+* Encrypter - **DONE**
 * Stempler and Dark
 * Storage Manager
 * DBAL + Pagination

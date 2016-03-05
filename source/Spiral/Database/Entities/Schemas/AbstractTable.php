@@ -446,6 +446,38 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     }
 
     /**
+     * Calculate difference (removed columns, indexes and foreign keys).
+     *
+     * @param bool $forgetColumns
+     * @param bool $forgetIndexes
+     * @param bool $forgetForeigns
+     */
+    public function forgetUndeclared($forgetColumns, $forgetIndexes, $forgetForeigns)
+    {
+        //We don't need to worry about changed or created columns, indexes and foreign keys here
+        //as it already handled, we only have to drop columns which were not listed in schema
+
+        foreach ($this->getColumns() as $column) {
+            if ($forgetColumns && !$column->isDeclared()) {
+                $this->forgetColumn($column);
+                $this->removeDependent($column);
+            }
+        }
+
+        foreach ($this->getIndexes() as $index) {
+            if ($forgetIndexes && !$index->isDeclared()) {
+                $this->forgetIndex($index);
+            }
+        }
+
+        foreach ($this->getForeigns() as $foreign) {
+            if ($forgetForeigns && !$foreign->isDeclared()) {
+                $this->forgetForeign($foreign);
+            }
+        }
+    }
+
+    /**
      * Save table schema including every column, index, foreign key creation/altering. If table does
      * not exist it must be created.
      *
@@ -749,38 +781,6 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     protected function hasChanges()
     {
         return $this->comparator->hasChanges();
-    }
-
-    /**
-     * Calculate difference (removed columns, indexes and foreign keys).
-     *
-     * @param bool $forgetColumns
-     * @param bool $forgetIndexes
-     * @param bool $forgetForeigns
-     */
-    protected function forgetUndeclared($forgetColumns, $forgetIndexes, $forgetForeigns)
-    {
-        //We don't need to worry about changed or created columns, indexes and foreign keys here
-        //as it already handled, we only have to drop columns which were not listed in schema
-
-        foreach ($this->getColumns() as $column) {
-            if ($forgetColumns && !$column->isDeclared()) {
-                $this->forgetColumn($column);
-                $this->removeDependent($column);
-            }
-        }
-
-        foreach ($this->getIndexes() as $index) {
-            if ($forgetIndexes && !$index->isDeclared()) {
-                $this->forgetIndex($index);
-            }
-        }
-
-        foreach ($this->getForeigns() as $foreign) {
-            if ($forgetForeigns && !$foreign->isDeclared()) {
-                $this->forgetForeign($foreign);
-            }
-        }
     }
 
     /**

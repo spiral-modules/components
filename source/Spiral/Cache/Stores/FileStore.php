@@ -9,8 +9,7 @@
 namespace Spiral\Cache\Stores;
 
 use Spiral\Cache\CacheStore;
-
-us  Spiral\Files\FilesInterface;
+use Spiral\Files\FilesInterface;
 
 /**
  * Serializes data to file. Usually points to runtime directory.
@@ -83,14 +82,14 @@ class FileStore extends CacheStore
     public function get($name, &$expiration = null)
     {
         if (!$this->files->exists($filename = $this->makeFilename($name))) {
-            return;
+            return null;
         }
 
         $cacheData = unserialize($this->files->read($filename));
         if (!empty($cacheData[0]) && $cacheData[0] < time()) {
             $this->delete($name);
 
-            return;
+            return null;
         }
 
         return $cacheData[1];

@@ -8,11 +8,9 @@
 
 namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
-
 /**
  * Generic database exception.
  */
-class DatabaseException extends LogicException
+class DatabaseException extends \RuntimeException
 {
 }

@@ -8,15 +8,13 @@
 
 namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Query specific exception (bad parameters, database failure).
  *
  * @todo change hierarchy?
  * @todo add ConstrainException
  */
-class QueryException extends RuntimeException
+class QueryException extends DatabaseException
 {
     /**
      * {@inheritdoc}

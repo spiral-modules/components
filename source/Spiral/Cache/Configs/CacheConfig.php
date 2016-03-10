@@ -8,9 +8,9 @@
 
 namespace Spiral\Cache\Configs;
 
+use Spiral\Cache\Exceptions\ConfigException;
 use Spiral\Core\InjectableConfig;
-
-us  Spiral\Core\Traits\Config\AliasTrait;
+use Spiral\Core\Traits\Config\AliasTrait;
 
 /**
  * Cache component configuration manager.
@@ -81,8 +81,10 @@ class CacheConfig extends InjectableConfig
      * @param \ReflectionClass $class
      *
      * @return string|null
+     *
+     * @throws ConfigException
      */
-    public function detectStore(\ReflectionClass $class)
+    public function resolveStore(\ReflectionClass $class)
     {
         foreach ($this->config['stores'] as $store => $options) {
             if ($options['class'] == $class->getName()) {
@@ -90,6 +92,8 @@ class CacheConfig extends InjectableConfig
             }
         }
 
-        return;
+        throw new ConfigException(
+            "Unable to detect store options for cache store '{$class->getName()}'."
+        );
     }
 }

@@ -14,4 +14,4 @@ mb_internal_encoding('UTF-8');
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 //File component fixtures
-define('FIXTURE_DIRECTORY', __DIR__ . '/fixtures/');
+define('FIXTURE_DIRECTORY', __DIR__ . '/Files/fixtures/');

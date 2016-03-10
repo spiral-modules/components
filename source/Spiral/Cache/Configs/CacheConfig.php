@@ -72,7 +72,15 @@ class CacheConfig extends InjectableConfig
      */
     public function storeOptions($store)
     {
-        return $this->config['stores'][$store];
+        if (isset($this->config['stores'][$store]['options'])) {
+            return $this->config['stores'][$store]['options'];
+
+        }
+
+        $options = $this->config['stores'][$store];
+        unset($options['class']);
+
+        return $options;
     }
 
     /**
@@ -93,7 +101,7 @@ class CacheConfig extends InjectableConfig
         }
 
         throw new ConfigException(
-            "Unable to detect store options for cache store '{$class->getName()}'."
+            "Unable to detect store options for cache store '{$class->getName()}'"
         );
     }
 }

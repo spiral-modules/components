@@ -40,7 +40,7 @@ class FileStore extends CacheStore
      */
     public function __construct(FilesInterface $files, $directory, $extension = 'cache')
     {
-        $this->directory = $files->normalizePath($directory);
+        $this->directory = $files->normalizePath($directory, true);
         $this->extension = $extension;
 
         $this->files = $files;
@@ -132,7 +132,11 @@ class FileStore extends CacheStore
     {
         $value = $this->get($name, $expiration) + $delta;
 
-        $this->set($name, $value, $expiration - time());
+        if (empty($expiration)) {
+            $this->forever($name, $value);
+        } else {
+            $this->set($name, $value, $expiration - time());
+        }
 
         return $value;
     }
@@ -144,7 +148,11 @@ class FileStore extends CacheStore
     {
         $value = $this->get($name, $expiration) - $delta;
 
-        $this->set($name, $value, $expiration - time());
+        if (empty($expiration)) {
+            $this->forever($name, $value);
+        } else {
+            $this->set($name, $value, $expiration - time());
+        }
 
         return $value;
     }
@@ -168,6 +176,6 @@ class FileStore extends CacheStore
      */
     protected function makeFilename($name)
     {
-        return $this->directory . '/' . md5($name) . '.' . $this->extension;
+        return $this->directory . md5($name) . '.' . $this->extension;
     }
 }

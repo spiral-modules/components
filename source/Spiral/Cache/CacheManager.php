@@ -80,9 +80,9 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
             $this->benchmark($benchmark);
         }
 
-        if ($store == $this->config['store'] && !$this->stores[$store]->isAvailable()) {
+        if ($store == $this->config->defaultStore() && !$this->stores[$store]->isAvailable()) {
             throw new CacheException(
-                "Unable to use default store '{$store}', driver is unavailable."
+                "Unable to use default store '{$store}', driver is unavailable"
             );
         }
 

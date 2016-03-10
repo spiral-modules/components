@@ -292,7 +292,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
             return $this->fallbackCatalogue->get($domain, $string);
         }
 
-        if ($this->config->autoRegistration()) {
+        if ($this->config->registerMessages()) {
             /*
              * Automatic message registration.
              */

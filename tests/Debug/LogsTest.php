@@ -65,7 +65,6 @@ class LogsTest extends \PHPUnit_Framework_TestCase
 
         $logs->shouldReceive('getLogger')->with(LoggedClass::class)->andReturn($logger);
 
-        //Sharing container
         SampleComponent::shareContainer($container);
 
         $class = new LoggedClass();

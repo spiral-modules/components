@@ -14,7 +14,7 @@ use Spiral\Core\Exceptions\SugarException;
 use Spiral\Models\Events\DescribeEvent;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
-use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\Exception;
 use Spiral\Models\Exceptions\FieldExceptionInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\Validation\Events\ValidatedEvent;
@@ -142,19 +142,19 @@ class DataEntity extends Component implements
      *
      * @return $this|mixed|null|AccessorInterface
      *
-     * @throws EntityException
+     * @throws Exception
      */
     public function __call($method, array $arguments)
     {
         if (method_exists($this, $method)) {
-            throw new EntityException(
+            throw new Exception(
                 "Method name '{$method}' is ambiguous and can not be used as magic setter."
             );
         }
 
         if (strlen($method) <= 3) {
             //Get/set needs exactly 0-1 argument
-            throw new EntityException("Undefined method {$method}.");
+            throw new Exception("Undefined method {$method}.");
         }
 
         $field = substr($method, 3);
@@ -167,7 +167,7 @@ class DataEntity extends Component implements
                 $field = Inflector::tableize($field);
                 break;
             default:
-                throw new EntityException(
+                throw new Exception(
                     "Undefined field format '" . static::FIELD_FORMAT . "'."
                 );
         }
@@ -184,7 +184,7 @@ class DataEntity extends Component implements
                 }
         }
 
-        throw new EntityException("Undefined method {$method}.");
+        throw new Exception("Undefined method {$method}.");
     }
 
     /**
@@ -581,7 +581,7 @@ class DataEntity extends Component implements
      *
      * @return mixed|null
      *
-     * @throws EntityException
+     * @throws Exception
      */
     protected function getMutator($field, $mutator)
     {

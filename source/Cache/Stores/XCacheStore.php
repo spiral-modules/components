@@ -10,9 +10,8 @@ namespace Spiral\Cache\Stores;
 
 use Spiral\Cache\CacheStore;
 
-/ *
-*
-Talks to xcache functions .
+/**
+ * Talks to xcache functions.
  */
 class XCacheStore extends CacheStore
 {

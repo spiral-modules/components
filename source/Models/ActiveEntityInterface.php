@@ -8,7 +8,7 @@
 
 namespace Spiral\Models;
 
-use Spiral\Models\Exceptions\EntityExceptionInterface;
+use Spiral\Models\Exceptions\ExceptionInterface;
 
 /**
  * Represents generic "ActiveRecord" like patten.
@@ -22,7 +22,7 @@ interface ActiveEntityInterface extends IdentifiedInterface
      *
      * @return bool
      *
-     * @throws EntityExceptionInterface
+     * @throws ExceptionInterface
      */
     public function save($validate = null);
 

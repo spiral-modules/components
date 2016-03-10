@@ -10,9 +10,8 @@ namespace Spiral\Cache\Stores;
 
 use Spiral\Cache\CacheStore;
 
-/ *
-*
-Talks to apc and apcu driver .
+/**
+ * Talks to apc and apcu driver.
  */
 class APCStore extends CacheStore
 {

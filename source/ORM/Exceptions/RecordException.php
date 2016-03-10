@@ -8,11 +8,11 @@
 
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\Exception;
 
 /**
  * Record related exception.
  */
-class RecordException extends EntityException
+class RecordException extends Exception
 {
 }

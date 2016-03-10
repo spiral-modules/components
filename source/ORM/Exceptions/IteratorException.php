@@ -10,9 +10,8 @@ namespace Spiral\ORM\Exceptions;
 
 use Spiral\Core\Exceptions\RuntimeException;
 
-/ *
-*
-Error by RecordIterator .
+/**
+ * Error by RecordIterator .
  */
 class IteratorException extends RuntimeException
 {

@@ -10,9 +10,8 @@ namespace Spiral\Models\Reflections;
 
 use Spiral\Models\DataEntity;
 
-/ *
-*
-Reflection associated with one specific DataEntity class.
+/**
+ * Reflection associated with one specific DataEntity class.
  */
 abstract class ReflectionEntity extends \ReflectionClass
 {

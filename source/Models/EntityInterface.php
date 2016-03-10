@@ -8,7 +8,7 @@
 
 namespace Spiral\Models;
 
-use Spiral\Models\Exceptions\EntityExceptionInterface;
+use Spiral\Models\Exceptions\ExceptionInterface;
 use Spiral\Validation\ValidatesInterface;
 
 /**
@@ -31,7 +31,7 @@ interface EntityInterface extends ValidatesInterface
      * @param string $name
      * @param mixed  $value
      *
-     * @throws EntityExceptionInterface
+     * @throws ExceptionInterface
      */
     public function setField($name, $value);
 
@@ -43,7 +43,7 @@ interface EntityInterface extends ValidatesInterface
      *
      * @return mixed|AccessorInterface
      *
-     * @throws EntityExceptionInterface
+     * @throws ExceptionInterface
      */
     public function getField($name, $default = null);
 
@@ -52,7 +52,7 @@ interface EntityInterface extends ValidatesInterface
      *
      * @param array|\Traversable $fields
      *
-     * @throws EntityExceptionInterface
+     * @throws ExceptionInterface
      */
     public function setFields($fields = []);
 
@@ -61,7 +61,7 @@ interface EntityInterface extends ValidatesInterface
      *
      * @return array
      *
-     * @throws EntityExceptionInterface
+     * @throws ExceptionInterface
      */
     public function getFields();
 }

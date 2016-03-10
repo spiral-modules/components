@@ -51,7 +51,7 @@ trait LoggerTrait
      *
      * @param LoggerInterface $logger
      */
-    public static function shareLogger(LoggerInterface $logger)
+    public static function shareLogger(LoggerInterface $logger = null)
     {
         self::$loggers[static::class] = $logger;
     }
@@ -82,7 +82,8 @@ trait LoggerTrait
      */
     private function createLogger()
     {
-        if (empty($container = $this->container()) || !$container->has(LogsInterface::class)) {
+        $container = $this->container();
+        if (empty($container) || !$container->has(LogsInterface::class)) {
             return new NullLogger();
         }
 

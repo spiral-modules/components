@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Tests\Cache;
+namespace Spiral\Tests\Debug;
 
-class ConfigTest
+class BenchmarksTest
 {
 
 }

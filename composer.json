@@ -33,7 +33,7 @@
       "source/functions.php"
     ],
     "psr-4": {
-      "Spiral\\": "source/",
+      "Spiral\\Spiral\\": "source/",
       "Spiral\\Tests\\": "tests/"
     }
   }

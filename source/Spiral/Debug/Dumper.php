@@ -9,19 +9,19 @@
 namespace Spiral\Debug;
 
 use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Debug\Dumper\Style;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * One of the oldest spiral parts, used to dump variables content in user friendly way.
  */
 class Dumper extends Component implements SingletonInterface, LoggerAwareInterface
 {
-    use LoggerTrait, BenchmarkTrait;
+    use LoggerAwareTrait, BenchmarkTrait;
 
     /**
      * Options for dump() function to specify output.
@@ -56,7 +56,8 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     ) {
         $this->maxLevel = $maxLevel;
         $this->style = !empty($styler) ? $styler : new Style();
-        $this->logger = $logger;
+        
+        $this->setLogger($logger);
     }
 
     /**

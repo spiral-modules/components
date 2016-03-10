@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Spiral Framework.
  *
@@ -6,7 +7,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\tests\Cases\Support;
+namespace Spiral\Tests\Support;
 
 use Spiral\Support\DFSSorter;
 

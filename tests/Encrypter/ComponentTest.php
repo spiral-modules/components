@@ -12,7 +12,7 @@ use Spiral\Encrypter\Configs\EncrypterConfig;
 use Spiral\Encrypter\Encrypter;
 use Spiral\Encrypter\EncrypterInterface;
 
-class ManagerTest extends \PHPUnit_Framework_TestCase
+class ComponentTest extends \PHPUnit_Framework_TestCase
 {
     public function testInjection()
     {

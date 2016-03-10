@@ -6,12 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2011
  */
+
 namespace Spiral\Translator\Exceptions;
 
 /**
- * Source related exceptions.
+ * When locale contain invalid pluralization string.
  */
-class SourceException extends TranslatorException
+class PluralizationException extends LocaleException
 {
 
 } 

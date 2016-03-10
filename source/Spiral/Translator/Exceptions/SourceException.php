@@ -6,12 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2011
  */
+
 namespace Spiral\Translator\Exceptions;
 
 /**
- * When catalogue requested for unknown string.
+ * Source related exceptions.
  */
-class CatalogueException extends TranslatorException
+class SourceException extends TranslatorException
 {
 
 } 

@@ -1,11 +1,11 @@
 <?php
-
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Translator\Loaders;
 
 use Symfony\Component\Translation\Exception\InvalidResourceException;
@@ -23,8 +23,9 @@ class PhpFileLoader extends ArrayLoader
     public function load($resource, $locale, $domain = 'messages')
     {
         if (!stream_is_local($resource)) {
-            throw new InvalidResourceException(sprintf('This is not a local file "%s".',
-                $resource));
+            throw new InvalidResourceException(
+                sprintf('This is not a local file "%s".', $resource)
+            );
         }
 
         if (!file_exists($resource)) {

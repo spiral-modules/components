@@ -6,12 +6,13 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2011
  */
+
 namespace Spiral\Translator\Exceptions;
 
 /**
- * When locale contain invalid pluralization string.
+ * When catalogue requested for unknown string.
  */
-class PluralizationException extends LocaleException
+class CatalogueException extends TranslatorException
 {
 
 } 

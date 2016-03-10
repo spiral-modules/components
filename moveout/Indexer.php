@@ -236,7 +236,7 @@ class Indexer extends Component
     }
 
     /**
-     * Check if string has translation braces [[ and ]]/
+     * Check if string has translation braces [[ and ]].
      *
      * @param string $string
      * @return bool

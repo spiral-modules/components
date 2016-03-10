@@ -10,6 +10,7 @@ namespace Spiral\Translator\Traits;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Container;
+use Spiral\Translator\Translator;
 use Spiral\Translator\TranslatorInterface;
 
 /**
@@ -32,29 +33,28 @@ trait TranslatorTrait
      */
     protected function say($string, array $options = [])
     {
-        if (
-            substr($string, 0, 2) === TranslatorInterface::I18N_PREFIX
-            && substr($string, -2) === TranslatorInterface::I18N_POSTFIX
-        ) {
+        if (Translator::isMessage($string)) {
             //This string was defined in class attributes
             $string = substr($string, 2, -2);
         }
 
-        if (empty($container = $this->container()) || !$container->has(TranslatorInterface::class)) {
-            //No translator available
+        $container = $this->container();
+        if (empty($container) || !$container->has(TranslatorInterface::class)) {
+            //No translator is available
             return $string;
         }
 
         /**
-         * Potentially can be downgraded to Symfony\TranslatorInterface but without domains map
-         * feature.
-         *
          * @var TranslatorInterface
          */
         $translator = $container->get(TranslatorInterface::class);
 
         //Translate class string using automatically resolved message domain
-        return $translator->trans($string, $options, $translator->resolveDomain(static::class));
+        return $translator->trans(
+            $string,
+            $options,
+            $translator->resolveDomain(static::class)
+        );
     }
 
     /**

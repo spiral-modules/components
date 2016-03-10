@@ -6,8 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\tests\Cases\Database;
+namespace Spiral\Tests\Database;
 
+use Mockery as m;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Drivers\SQLServer\SQLServerDriver;
 use Spiral\Database\Entities\PDODriver;
@@ -353,10 +354,7 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
         /**
          * @var PDODriver
          */
-        $driver = $this->getMockBuilder($driver)
-            ->disableOriginalConstructor()
-            ->setMethods(null)
-            ->getMock();
+        $driver = m::mock($driver . '[identifier]');
 
         return new Quoter($driver, $prefix);
     }

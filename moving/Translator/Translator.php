@@ -355,4 +355,16 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
 
         return $this->source->hasLocale($locale);
     }
+
+    /**
+     * Check if string has translation braces [[ and ]].
+     *
+     * @param string $string
+     * @return bool
+     */
+    public static function isMessage($string)
+    {
+        return substr($string, 0, 2) == self::I18N_PREFIX
+        && substr($string, -2) == self::I18N_POSTFIX;
+    }
 }

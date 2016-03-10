@@ -18,7 +18,6 @@
     "container-interop/container-interop": "^1.1",
     "doctrine/inflector": "*",
     "guzzlehttp/guzzle": "~6.0",
-    "monolog/monolog": "^1.11",
     "symfony/finder": "^2.7",
     "symfony/event-dispatcher": "^2.7",
     "symfony/translation": "^2.7",
@@ -33,7 +32,11 @@
       "source/functions.php"
     ],
     "psr-4": {
-      "Spiral\\Spiral\\": "source/",
+      "Spiral\\": "source/Spiral/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "Spiral\\Tests\\": "tests/"
     }
   }

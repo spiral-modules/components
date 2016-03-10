@@ -33,7 +33,7 @@ class SaturateTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Core\Exceptions\SugarException
-     * @expectedExceptionMessage Unable to saturate 'Spiral\Tests\Fixtures\SampleClass': no
+     * @expectedExceptionMessage Unable to saturate 'Spiral\Tests\Core\Fixtures\SampleClass': no
      *                           container available
      */
     public function testMissingContainer()
@@ -57,8 +57,8 @@ class SaturateTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Core\Exceptions\SugarException
-     * @expectedExceptionMessage Unable to saturate 'Spiral\Tests\Fixtures\SampleClass': unable to
-     *                           create SampleClass
+     * @expectedExceptionMessage Unable to saturate 'Spiral\Tests\Core\Fixtures\SampleClass':
+     *                           unable to create SampleClass
      */
     public function testFailedSaturation()
     {

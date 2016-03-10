@@ -29,8 +29,9 @@ class InjectableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Core\Exceptions\Container\InjectionException
-     * @expectedExceptionMessage Class 'Spiral\Tests\Fixtures\InvalidInjector' must be an instance
-     *                           of InjectorInterface for 'Spiral\Tests\Fixtures\TestConfig'
+     * @expectedExceptionMessage Class 'Spiral\Tests\Core\Fixtures\InvalidInjector' must be an
+     *                           instance of InjectorInterface for
+     *                           'Spiral\Tests\Core\Fixtures\TestConfig'
      */
     public function testInvalidInjector()
     {
@@ -54,8 +55,9 @@ class InjectableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Core\Exceptions\Container\InjectionException
-     * @expectedExceptionMessage Class 'Spiral\Tests\Fixtures\InvalidInjector' must be an instance
-     *                           of InjectorInterface for 'Spiral\Tests\Fixtures\TestConfig'
+     * @expectedExceptionMessage Class 'Spiral\Tests\Core\Fixtures\InvalidInjector' must be an
+     *                           instance of InjectorInterface for
+     *                           'Spiral\Tests\Core\Fixtures\TestConfig'
      */
     public function testInvalidRuntimeInjector()
     {
@@ -107,7 +109,8 @@ class InjectableTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Core\Exceptions\Container\InjectionException
-     * @expectedExceptionMessage Invalid injection response for 'Spiral\Tests\Fixtures\TestConfig'
+     * @expectedExceptionMessage Invalid injection response for
+     *                           'Spiral\Tests\Core\Fixtures\TestConfig'
      */
     public function testInvalidInjection()
     {

@@ -9,6 +9,7 @@
 namespace Spiral\Tests\Core;
 
 use Spiral\Core\Container;
+use Spiral\Core\ScoperInterface;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 
 class ScopingTest extends \PHPUnit_Framework_TestCase
@@ -16,6 +17,7 @@ class ScopingTest extends \PHPUnit_Framework_TestCase
     public function testScoping()
     {
         $container = new Container();
+        $this->assertInstanceOf(ScoperInterface::class, $container);
 
         $container->bind(SampleClass::class, $sample = new SampleClass());
         $this->assertSame($sample, $container->get(SampleClass::class));

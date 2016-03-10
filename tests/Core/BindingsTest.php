@@ -8,6 +8,7 @@
 
 namespace Spiral\Tests\Core;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 
@@ -16,6 +17,7 @@ class BindingsTest extends \PHPUnit_Framework_TestCase
     public function testBasicBinding()
     {
         $container = new Container();
+        $this->assertInstanceOf(ContainerInterface::class, $container);
 
         $this->assertFalse($container->has('abc'));
 

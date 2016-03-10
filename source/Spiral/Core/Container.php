@@ -28,7 +28,11 @@ use Spiral\Core\Exceptions\Container\InjectionException;
  * @see  InjectableInterface
  * @see  SingletonInterface
  */
-class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
+class Container extends Component implements
+    ContainerInterface,
+    FactoryInterface,
+    ResolverInterface,
+    ScoperInterface
 {
     /**
      * IoC bindings.
@@ -140,7 +144,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             return $instance;
         }
 
-        return;
+        return null;
     }
 
     /**
@@ -274,15 +278,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     }
 
     /**
-     * Replace existed binding and return payload (implementation specific data) of previous
-     * binding, previous binding can be restored using restore() method and such payload.
-     *
-     * @see restore()
-     *
-     * @param string                $alias
-     * @param string|array|callable $resolver
-     *
-     * @return mixed Scope payload.
+     * {@inheritdoc}
      */
     public function replace($alias, $resolver)
     {
@@ -297,14 +293,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     }
 
     /**
-     * Restore previously pulled binding value using implementation specific payload. Method should
-     * only accept result of replace() method.
-     *
-     * @see replace
-     *
-     * @param mixed $replacePayload
-     *
-     * @throws ContainerException
+     * {@inheritdoc}
      */
     public function restore($replacePayload)
     {

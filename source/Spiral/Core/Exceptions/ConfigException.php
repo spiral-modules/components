@@ -11,6 +11,6 @@ namespace Spiral\Core\Exceptions;
 /**
  * Raised when non allowed operations applied to configuration data.
  */
-class ConfigException extends CoreException
+class ConfigException extends \RuntimeException
 {
 }

@@ -170,14 +170,9 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
 
         try {
             $pluralized = $this->selector->choose($translation, $number, $locale);
-        } catch (\InvalidArgumentException $exception) {
-
+        } catch (\InvalidArgumentException $e) {
             //Wrapping into more explanatory exception
-            throw new PluralizationException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+            throw new PluralizationException($e->getMessage(), $e->getCode(), $e);
         }
 
         return \Spiral\interpolate($pluralized, $parameters);

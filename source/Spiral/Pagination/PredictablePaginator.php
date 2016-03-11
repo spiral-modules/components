@@ -11,7 +11,7 @@ namespace Spiral\Pagination;
 /**
  * Simple, manually driven and size aware paginator.
  */
-class DirectPaginator implements PaginatorInterface
+class PredictablePaginator implements PredictableInterface
 {
     /**
      * @var int
@@ -35,9 +35,11 @@ class DirectPaginator implements PaginatorInterface
 
     /**
      * @param int $limit
+     * @param int $count
      */
-    public function __construct($limit = 25)
+    public function __construct($limit = 25, $count = 0)
     {
         $this->setLimit($limit);
+        $this->setCount($count);
     }
 }

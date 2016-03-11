@@ -42,7 +42,7 @@ interface PaginatorInterface
     public function setLimit($limit);
 
     /**
-     * Get pagintion limit.
+     * Get pagination limit.
      *
      * @return int
      */

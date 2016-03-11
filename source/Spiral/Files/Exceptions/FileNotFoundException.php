@@ -18,6 +18,6 @@ class FileNotFoundException extends FilesException
      */
     public function __construct($filename)
     {
-        parent::__construct("File '{$filename}' not found.");
+        parent::__construct("File '{$filename}' not found");
     }
 }

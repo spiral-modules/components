@@ -35,7 +35,7 @@ class InformationTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testTimeMissingFile()
     {
@@ -57,7 +57,7 @@ class InformationTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testMD5MissingFile()
     {
@@ -103,7 +103,7 @@ class InformationTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testSizeMissingFile()
     {
@@ -126,7 +126,7 @@ class InformationTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testLocalUriMissingFile()
     {

@@ -119,12 +119,8 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
                 //Forcing mode after file creation
                 $this->setPermissions($filename, $mode);
             }
-        } catch (\ErrorException $exception) {
-            throw new WriteErrorException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+        } catch (\ErrorException $e) {
+            throw new WriteErrorException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $result;

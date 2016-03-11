@@ -47,10 +47,8 @@ trait SaturateTrait
         //Only when global container is set
         try {
             return $container->get($class);
-        } catch (ContainerException $exception) {
-            throw new SugarException(
-                "Unable to saturate '{$class}': {$exception->getMessage()}", 0, $exception
-            );
+        } catch (ContainerException $e) {
+            throw new SugarException("Unable to saturate '{$class}': {$e->getMessage()}", 0, $e);
         }
     }
 

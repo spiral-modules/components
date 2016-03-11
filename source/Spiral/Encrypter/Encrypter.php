@@ -68,7 +68,7 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     public function random($length, $passWeak = false)
     {
         if ($length < 1) {
-            throw new EncrypterException("Random string length should be at least 1 byte long.");
+            throw new EncrypterException("Random string length should be at least 1 byte long");
         }
 
         $result = openssl_random_pseudo_bytes($length, $cryptoStrong);
@@ -79,7 +79,7 @@ class Encrypter implements EncrypterInterface, InjectableInterface
         }
 
         if (!$passWeak && !(bool)$cryptoStrong) {
-            throw new EncrypterException("Weak random result received.");
+            throw new EncrypterException("Weak random result received");
         }
 
         return $result;

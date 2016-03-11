@@ -72,7 +72,7 @@ class IOTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testReadMissingFile()
     {
@@ -179,7 +179,7 @@ class IOTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testCopyMissingFile()
     {
@@ -214,7 +214,7 @@ class IOTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Spiral\Files\Exceptions\FileNotFoundException
-     * @expectedExceptionMessageRegExp /File '.*test.txt' not found./
+     * @expectedExceptionMessageRegExp /File '.*test.txt' not found/
      */
     public function testMoveMissingFile()
     {

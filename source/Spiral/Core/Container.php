@@ -163,12 +163,8 @@ class Container extends Component implements
 
             try {
                 $class = $parameter->getClass();
-            } catch (\ReflectionException $exception) {
-                throw new ContainerException(
-                    $exception->getMessage(),
-                    $exception->getCode(),
-                    $exception
-                );
+            } catch (\ReflectionException $e) {
+                throw new ContainerException($e->getMessage(), $e->getCode(), $e);
             }
 
             if (empty($class)) {
@@ -199,14 +195,14 @@ class Container extends Component implements
                 $arguments[] = $this->get($class->getName(), $parameter->getName());
 
                 continue;
-            } catch (AutowireException $exception) {
+            } catch (AutowireException $e) {
                 if ($parameter->isDefaultValueAvailable()) {
                     //Let's try to use default value instead
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
                 }
 
-                throw $exception;
+                throw $e;
             }
         }
 
@@ -441,10 +437,8 @@ class Container extends Component implements
     ) {
         try {
             $reflection = new \ReflectionClass($class);
-        } catch (\ReflectionException $exception) {
-            throw new ContainerException(
-                $exception->getMessage(), $exception->getCode(), $exception
-            );
+        } catch (\ReflectionException $e) {
+            throw new ContainerException($e->getMessage(), $e->getCode(), $e);
         }
 
         //We have to construct class using external injector

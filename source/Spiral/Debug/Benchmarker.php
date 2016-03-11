@@ -42,7 +42,7 @@ class Benchmarker extends Component implements BenchmarkerInterface, SingletonIn
         }
 
         if (!isset($this->benchmarks[$benchmarkID])) {
-            throw new BenchmarkException("Unpaired benchmark record '{$benchmarkID}'.");
+            throw new BenchmarkException("Unpaired benchmark record '{$benchmarkID}'");
         }
 
         $this->benchmarks[$benchmarkID][4] = microtime(true);

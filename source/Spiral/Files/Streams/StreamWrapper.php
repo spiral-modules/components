@@ -258,7 +258,7 @@ class StreamWrapper
         }
 
         if (empty($mode)) {
-            throw new WrapperException("Stream is not available in read or write modes.");
+            throw new WrapperException("Stream is not available in read or write modes");
         }
 
         return fopen(self::getUri($stream), $mode);

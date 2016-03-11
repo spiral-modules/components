@@ -43,7 +43,7 @@ class ArgumentException extends AutowireException
             $name = $context->class . '::' . $name;
         }
 
-        parent::__construct("Unable to resolve '{$parameter->name}' argument in '{$name}'.");
+        parent::__construct("Unable to resolve '{$parameter->name}' argument in '{$name}'");
     }
 
     /**

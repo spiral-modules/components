@@ -8,11 +8,9 @@
 
 namespace Spiral\Tokenizer\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * Generic tokenizer exception.
  */
-class TokenizerException extends RuntimeException
+class TokenizerException extends \RuntimeException
 {
 }

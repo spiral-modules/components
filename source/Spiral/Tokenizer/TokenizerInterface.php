@@ -11,7 +11,7 @@ use Spiral\Tokenizer\Exceptions\ReflectionException;
 use Spiral\Tokenizer\Exceptions\TokenizerException;
 
 /**
- * Simple wrapper at top of token_get_all.
+ * Provides ability to get file reflections and fetch normalized tokens for a specified filename.
  */
 interface TokenizerInterface
 {
@@ -27,6 +27,7 @@ interface TokenizerInterface
      * token MUST be converted into array.
      *
      * @param string $filename
+     *
      * @return array
      */
     public function fetchTokens($filename);
@@ -35,7 +36,9 @@ interface TokenizerInterface
      * Get file reflection for given filename.
      *
      * @param string $filename
+     *
      * @return ReflectionFileInterface
+     *
      * @throws TokenizerException
      * @throws ReflectionException
      */

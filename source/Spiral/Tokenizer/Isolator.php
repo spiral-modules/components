@@ -82,6 +82,7 @@ class Isolator
             }
 
             $tokenContent = is_array($token) ? $token[1] : $token;
+
             if (!empty($phpBlock)) {
                 $phpBlock .= $tokenContent;
             } else {
@@ -90,6 +91,22 @@ class Isolator
         }
 
         return $isolated;
+    }
+
+    /**
+     * Replace every isolated block.
+     *
+     * @deprecated Use setBlock instead!
+     *
+     * @param array $blocks
+     *
+     * @return $this
+     */
+    public function setBlocks(array $blocks)
+    {
+        $this->phpBlocks = $blocks;
+
+        return $this;
     }
 
     /**
@@ -109,22 +126,6 @@ class Isolator
         }
 
         $this->phpBlocks[$blockID] = $source;
-
-        return $this;
-    }
-
-    /**
-     * Replace every isolated block.
-     *
-     * @deprecated Use setBlock instead!
-     *
-     * @param array $blocks
-     *
-     * @return $this
-     */
-    public function setBlocks(array $blocks)
-    {
-        $this->phpBlocks = $blocks;
 
         return $this;
     }

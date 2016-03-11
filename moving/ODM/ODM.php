@@ -31,9 +31,6 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  */
 class ODM extends Component implements SingletonInterface, InjectorInterface
 {
-    /*
-     * Has it's own configuration, in addition MongoDatabase creation can take some time.
-     */
     use BenchmarkTrait;
 
     /**

@@ -7,14 +7,10 @@
  */
 namespace Spiral\Pagination;
 
-use Psr\Http\Message\UriInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 
 /**
- * Paginates objects and arrays. Theoretically i should create another interface
- * SimplePaginatorInterface without count related methods and extend this interface from simple
- * one. Right now you can simply set count manually, in any scenario it's up to view how to render
- * it.
+ * Generic paginator interface with ability to set/get page and limit values.
  */
 interface PaginatorInterface
 {
@@ -42,29 +38,11 @@ interface PaginatorInterface
     public function setLimit($limit);
 
     /**
-     * Get pagintion limit.
+     * Get pagination limit.
      *
      * @return int
      */
     public function getLimit();
-
-    /**
-     * Set initial paginator uri
-     *
-     * @internal to be moved to UriPaginator
-     * @param UriInterface $uri
-     */
-    public function setUri(UriInterface $uri);
-
-    /**
-     * Create page URL using specific page number. No domain or schema information included by
-     * default, starts with path.
-     *
-     * @internal to be moved to UriPaginator
-     * @param int $pageNumber
-     * @return UriInterface
-     */
-    public function uri($pageNumber);
 
     /**
      * Apply paginator to paginable object.

@@ -33,7 +33,7 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
 
         $store->shouldReceive('isAvailable')->andReturn(true);
 
-        $this->assertSame($store, $manager->store());
+        $this->assertSame($store, $manager->getStore());
     }
 
     /**
@@ -58,7 +58,7 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
 
         $store->shouldReceive('isAvailable')->andReturn(false);
 
-        $this->assertSame($store, $manager->store());
+        $this->assertSame($store, $manager->getStore());
     }
 
     public function testStoreWithName()
@@ -79,7 +79,7 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultStore')->andReturn('file');
         $store->shouldReceive('isAvailable')->andReturn(true);
 
-        $this->assertSame($store, $manager->store('file'));
+        $this->assertSame($store, $manager->getStore('file'));
     }
 
     public function testInjection()

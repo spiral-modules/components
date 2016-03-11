@@ -261,7 +261,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
 
         if (empty($store)) {
             //todo use different stores for different dbs
-            $store = $this->cache->store();
+            $store = $this->cache->getStore();
         }
 
         if (empty($key)) {

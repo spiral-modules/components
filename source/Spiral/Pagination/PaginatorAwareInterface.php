@@ -8,6 +8,8 @@
 
 namespace Spiral\Pagination;
 
+use Spiral\Pagination\Exceptions\PaginationException;
+
 /**
  * Provides ability to associate paginator and execute pagination when needed.
  */
@@ -23,13 +25,19 @@ interface PaginatorAwareInterface extends PaginableInterface
     public function setPaginator(PaginatorInterface $paginator);
 
     /**
-     * Get paginator for the current selection. Paginate method should be already called.
+     * Get paginator for the current selection. Paginate method should be already called or
+     * paginator must be previously set.
+     *
+     * Potentially to be renamed to getPaginator method since this method does not create paginator
+     * automatically.
      *
      * @see paginate()
      *
      * @return PaginatorInterface
+     *
+     * @throws PaginationException
      */
-    public function paginator();
+    public function getPaginator();
 
     /**
      * Indication that object was paginated.

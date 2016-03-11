@@ -58,7 +58,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     /**
      * {@inheritdoc}
      */
-    public function store($store = null)
+    public function getStore($store = null)
     {
         //Default store class
         $store = !empty($store) ? $store : $this->config->defaultStore();
@@ -90,13 +90,24 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     }
 
     /**
+     * Alias for getStore.
+     *
+     * @param string|null $store
+     * @return StoreInterface
+     */
+    public function store($store = null)
+    {
+        return $this->getStore($store);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @throws CacheException
      */
     public function createInjection(\ReflectionClass $class, $context = null)
     {
-        return $this->store(
+        return $this->getStore(
             $this->config->resolveStore($class)
         );
     }

@@ -15,7 +15,6 @@ use Spiral\Files\FilesInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Translation\Loader\ArrayLoader;
 use Symfony\Component\Translation\Loader\LoaderInterface;
 use Symfony\Component\Translation\MessageCatalogue;
 
@@ -24,15 +23,12 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class TranslationSource extends Component implements SourceInterface
 {
-    /**
-     * Log messages.
-     */
     use LoggerTrait;
 
     /**
      * @var TranslatorConfig
      */
-    protected $config = null;
+    private $config = null;
 
     /**
      * @var FilesInterface
@@ -68,6 +64,7 @@ class TranslationSource extends Component implements SourceInterface
         $finder->in($this->config->localesDirectory())->directories();
 
         $locales = [];
+
         /**
          * @var SplFileInfo $directory
          */
@@ -92,6 +89,7 @@ class TranslationSource extends Component implements SourceInterface
          * @var SplFileInfo $file
          */
         foreach ($finder->getIterator() as $file) {
+
             $this->logger()->info("Found locale domain file '{file}'", [
                 'file' => $file->getFilename()
             ]);
@@ -102,6 +100,10 @@ class TranslationSource extends Component implements SourceInterface
             if ($this->config->hasLoader($file->getExtension())) {
                 $loader = $this->config->loaderClass($file->getExtension());
                 $domains[$domain] = $this->loadCatalogue($locale, $domain, $file, new $loader());
+            } else {
+                $this->logger()->warning("Unable to load domain file '{file}', no loader found", [
+                    'file' => $file->getFilename()
+                ]);
             }
         }
 
@@ -115,6 +117,7 @@ class TranslationSource extends Component implements SourceInterface
      * @param string          $domain
      * @param SplFileInfo     $file
      * @param LoaderInterface $loader
+     *
      * @return MessageCatalogue
      */
     protected function loadCatalogue($locale, $domain, SplFileInfo $file, LoaderInterface $loader)

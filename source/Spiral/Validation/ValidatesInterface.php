@@ -5,7 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Validation;
+
+use Spiral\Validation\Exceptions\ValidationException;
 
 /**
  * Declares ability to be validated and raise error messages on failure.
@@ -29,8 +32,11 @@ interface ValidatesInterface
     /**
      * List of errors associated with parent field, every field must have only one error assigned.
      *
-     * @param bool $reset Force re-validation.
+     * @param bool $reset Force re-validation
+     *
      * @return array
+     *
+     * @throws ValidationException
      */
     public function getErrors($reset = false);
 }

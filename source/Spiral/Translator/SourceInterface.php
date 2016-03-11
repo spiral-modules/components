@@ -28,7 +28,9 @@ interface SourceInterface
      * Load and return all locale messages aggregated by their domain.
      *
      * @param string $locale
+     *
      * @return MessageCatalogue[]
+     *
      * @throws SourceException
      */
     public function loadLocale($locale);

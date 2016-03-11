@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Translator;
 
 use Spiral\Core\Component;
@@ -102,17 +103,17 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         $this->source = $source;
         $this->selector = $selector;
 
+        $this->locale = $this->config->defaultLocale();
+
         //List of known and loaded locales
         $this->loadedLocales = (array)$this->memory->loadData(static::MEMORY);
-
-        $this->locale = $this->config->defaultLocale();
         $this->fallbackCatalogue = $this->loadCatalogue($this->config->fallbackLocale());
     }
 
     /**
      * @return SourceInterface
      */
-    public function source()
+    public function getSource()
     {
         return $this->source;
     }
@@ -151,6 +152,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * braces. In addition you can use forced parameter {n} which contain formatted number value.
      *
      * @throws LocaleException
+     * @throws PluralizationException
      */
     public function transChoice(
         $id,
@@ -169,6 +171,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         try {
             $pluralized = $this->selector->choose($translation, $number, $locale);
         } catch (\InvalidArgumentException $exception) {
+
             //Wrapping into more explanatory exception
             throw new PluralizationException(
                 $exception->getMessage(),
@@ -184,12 +187,13 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * {@inheritdoc}
      *
      * @return $this
+     *
      * @throws LocaleException
      */
     public function setLocale($locale)
     {
         if (!$this->hasLocale($locale)) {
-            throw new LocaleException("Undefined locale '{$locale}'.");
+            throw new LocaleException("Undefined locale '{$locale}'");
         }
 
         $this->locale = $locale;
@@ -226,6 +230,8 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      *
      * @param string $locale
      * @return Catalogue
+     *
+     * @throws LocaleException
      */
     public function getCatalogue($locale = null)
     {
@@ -234,7 +240,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         }
 
         if (!$this->hasLocale($locale)) {
-            throw new LocaleException("Undefined locale '{$locale}'.");
+            throw new LocaleException("Undefined locale '{$locale}'");
         }
 
         if (!isset($this->catalogues[$locale])) {
@@ -242,23 +248,6 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         }
 
         return $this->catalogues[$locale];
-    }
-
-    /**
-     * Flush all loaded locales data.
-     *
-     * @return $this
-     */
-    public function flushLocales()
-    {
-        $this->loadedLocales = [];
-        $this->catalogues = [];
-        $this->memory->saveData(static::MEMORY, []);
-
-        //Reloading fallback locale
-        $this->fallbackCatalogue = $this->loadCatalogue($this->config->fallbackLocale());
-
-        return $this;
     }
 
     /**
@@ -276,29 +265,47 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     }
 
     /**
+     * Flush all loaded locales data.
+     *
+     * @return $this
+     */
+    public function flushLocales()
+    {
+        $this->loadedLocales = [];
+        $this->catalogues = [];
+
+        $this->memory->saveData(static::MEMORY, []);
+
+        //Reloading fallback locale
+        $this->fallbackCatalogue = $this->loadCatalogue($this->config->fallbackLocale());
+
+        return $this;
+    }
+
+    /**
      * Get message from specific locale, add it into fallback locale cache (to be later exported) if
      * enabled (see TranslatorConfig) and no translations found.
      *
      * @param string $domain
      * @param string $string
      * @param string $locale
+     *
      * @return string
      */
     protected function get($domain, $string, $locale)
     {
+        //Active language first
         if ($this->getCatalogue($locale)->has($domain, $string)) {
             return $this->getCatalogue($locale)->get($domain, $string);
-        } elseif ($this->fallbackCatalogue->has($domain, $string)) {
+        }
+
+        if ($this->fallbackCatalogue->has($domain, $string)) {
             return $this->fallbackCatalogue->get($domain, $string);
         }
 
+        //Automatic message registration.
         if ($this->config->registerMessages()) {
-            /*
-             * Automatic message registration.
-             */
             $this->fallbackCatalogue->set($domain, $string, $string);
-
-            //Into memory
             $this->fallbackCatalogue->saveDomains();
         }
 
@@ -323,6 +330,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
 
         $benchmark = $this->benchmark('load', $locale);
         try {
+
             //Loading catalogue data from source
             foreach ($this->source->loadLocale($locale) as $messageCatalogue) {
                 $catalogue->mergeFrom($messageCatalogue);

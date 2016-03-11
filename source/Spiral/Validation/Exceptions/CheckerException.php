@@ -8,11 +8,10 @@
 
 namespace Spiral\Validation\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
- * Generic validation exception.
+ * Checker specific exception.
  */
-class ValidationException extends RuntimeException
+class CheckerException extends ValidationException
 {
+
 }

@@ -36,7 +36,7 @@ class ValidatorEvent extends Event
      */
     public function setValidator(ValidatorInterface $validator)
     {
-        $this->$validator = $validator;
+        $this->validator = $validator;
     }
 
     /**

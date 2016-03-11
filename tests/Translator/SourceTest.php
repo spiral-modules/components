@@ -5,9 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tests\Pagination;
 
-class TraitTest //extends \PHPUnit_Framework_TestCase
+namespace Spiral\Tests\Translator;
+
+class SourceTest extends \PHPUnit_Framework_TestCase
 {
 
 }

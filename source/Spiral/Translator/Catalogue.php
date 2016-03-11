@@ -8,23 +8,16 @@
  */
 namespace Spiral\Translator;
 
-use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Translator\Exceptions\CatalogueException;
 use Symfony\Component\Translation\MessageCatalogue;
 
 /**
  * Similar to Symfony catalogue, however this one does not operate with fallback locale.
- *
- * @todo improve
+ * Provides ability to cache domains in memory.
  */
 class Catalogue
 {
-    /**
-     * Prefix for memory sections.
-     */
-    const MEMORY_LOCATION = "translator";
-
     /**
      * Locale name.
      *
@@ -70,7 +63,9 @@ class Catalogue
     public function getDomains()
     {
         $domains = array_keys($this->domains);
-        foreach ($this->memory->getSections(static::MEMORY_LOCATION) as $section) {
+        foreach ($this->memory->getSections(Translator::MEMORY) as $section) {
+
+            //Check if this cache section related to current locale
             if (strpos($section, "{$this->locale}-") === 0) {
                 $domains[] = substr($section, strlen("{$this->locale}-"));
             }
@@ -84,6 +79,7 @@ class Catalogue
      *
      * @param string $domain
      * @param string $string
+     *
      * @return bool
      */
     public function has($domain, $string)
@@ -98,13 +94,15 @@ class Catalogue
      *
      * @param string $domain
      * @param string $string
+     *
      * @return string
+     *
      * @throws CatalogueException
      */
     public function get($domain, $string)
     {
         if (!$this->has($domain, $string)) {
-            throw new CatalogueException("Undefined string in domain {$domain}.");
+            throw new CatalogueException("Undefined string in domain {$domain}");
         }
 
         return $this->domains[$domain][$string];
@@ -130,6 +128,7 @@ class Catalogue
     public function mergeFrom(MessageCatalogue $catalogue, $follow = true)
     {
         foreach ($catalogue->all() as $domain => $messages) {
+
             if (!isset($this->domains[$domain])) {
                 $this->domains[$domain] = [];
             }
@@ -184,7 +183,7 @@ class Catalogue
      */
     protected function loadDomain($domain)
     {
-        $data = $this->memory->loadData("{$this->locale}-{$domain}", static::MEMORY_LOCATION);
+        $data = $this->memory->loadData($this->domainSection($domain), Translator::MEMORY);
 
         if (empty($data)) {
             $data = [];
@@ -201,6 +200,17 @@ class Catalogue
      */
     protected function saveDomain($domain, $data)
     {
-        $this->memory->saveData("{$this->locale}-{$domain}", $data, static::MEMORY_LOCATION);
+        $this->memory->saveData($this->domainSection($domain), $data, Translator::MEMORY);
+    }
+
+    /**
+     * Memory section to store domain data in memory
+     *
+     * @param string $domain
+     * @return string
+     */
+    private function domainSection($domain)
+    {
+        return "{$this->locale}-{$domain}";
     }
 }

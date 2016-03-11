@@ -105,8 +105,8 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      *
-     * @param ValidatorConfig    $config
-     * @param ContainerInterface $container
+     * @param ValidatorConfig    $config    Saturated using shared container
+     * @param ContainerInterface $container Saturated using shared container
      * @throws SugarException
      */
     public function __construct(

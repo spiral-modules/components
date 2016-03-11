@@ -11,7 +11,7 @@ namespace Spiral\Tokenizer\Configs;
 use Spiral\Core\InjectableConfig;
 
 /**
- * Translation component configuration.
+ * Tokenizer component configuration.
  */
 class TokenizerConfig extends InjectableConfig
 {

@@ -5,9 +5,9 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tests\Pagination;
+namespace Spiral\Tests\Validation;
 
-class TraitTest //extends \PHPUnit_Framework_TestCase
+class ConfigTest //extends \PHPUnit_Framework_TestCase
 {
 
 }

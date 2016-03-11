@@ -13,15 +13,11 @@ use Spiral\Validation\Exceptions\ValidationException;
 /**
  * Validators responsible for data validations. Validation rules are implementation dependent but
  * should always be specified in array form relative to validator implementation.
+ *
+ * @todo make immutable?
  */
 interface ValidatorInterface
 {
-    /**
-     * @param array              $rules Validation rules.
-     * @param array|\ArrayAccess $data  Data to be validated.
-     */
-    //public function __construct(array $rules = [], $data = []);
-
     /**
      * Update validation rules.
      *

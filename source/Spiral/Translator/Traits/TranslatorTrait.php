@@ -10,6 +10,7 @@ namespace Spiral\Translator\Traits;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Container;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Translator\Translator;
 use Spiral\Translator\TranslatorInterface;
 
@@ -30,6 +31,8 @@ trait TranslatorTrait
      * @param array  $options Interpolation options.
      *
      * @return string
+     *
+     * @throws SugarException
      */
     protected function say($string, array $options = [])
     {
@@ -40,8 +43,7 @@ trait TranslatorTrait
 
         $container = $this->container();
         if (empty($container) || !$container->has(TranslatorInterface::class)) {
-            //No translator is available
-            return $string;
+            throw new SugarException("Unable to get instance of 'TranslatorInterface'");
         }
 
         /**

@@ -16,7 +16,8 @@ interface PaginatorsInterface
      * Create paginator for a given parameter, scope request must be resolved automatically.
      *
      * @param string $parameter
+     * @param int    $limit Pagination limit
      * @return PaginatorInterface
      */
-    public function getPaginator($parameter);
+    public function getPaginator($parameter, $limit = 25);
 }

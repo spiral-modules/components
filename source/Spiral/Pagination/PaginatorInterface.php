@@ -15,36 +15,6 @@ use Spiral\Pagination\Exceptions\PaginationException;
 interface PaginatorInterface
 {
     /**
-     * Set page number.
-     *
-     * @param int $number
-     * @return int Normalized page number.
-     */
-    public function setPage($number);
-
-    /**
-     * Get current page number.
-     *
-     * @return int
-     */
-    public function getPage();
-
-    /**
-     * Set pagination limit.
-     *
-     * @param int $limit
-     * @return int
-     */
-    public function setLimit($limit);
-
-    /**
-     * Get pagination limit.
-     *
-     * @return int
-     */
-    public function getLimit();
-
-    /**
      * Apply paginator to paginable object.
      *
      * @param PaginableInterface $paginable

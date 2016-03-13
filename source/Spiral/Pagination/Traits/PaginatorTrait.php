@@ -26,7 +26,7 @@ trait PaginatorTrait
     /**
      * @internal
      *
-     * @var PaginatorInterface
+     * @var PaginatorInterface|null
      */
     private $paginator = null;
 
@@ -113,7 +113,7 @@ trait PaginatorTrait
      * @see isPaginated()
      * @see paginate()
      *
-     * @return PaginatorInterface|Paginator|null
+     * @return PaginatorInterface
      */
     public function getPaginator()
     {
@@ -129,7 +129,7 @@ trait PaginatorTrait
      * request so getPaginator call is more obvious.
      *
      * @deprecated Use getPaginator() instead.
-     * @return null|Paginator|PaginatorInterface
+     * @return PaginatorInterface
      */
     public function paginator()
     {
@@ -166,12 +166,10 @@ trait PaginatorTrait
             );
         }
 
-        /**
-         * @var PaginatorInterface $paginator
-         */
-        $this->paginator = $container->get(PaginatorsInterface::class)->getPaginator($parameter);
-
-        $this->paginator->setLimit($limit);
+        $this->paginator = $container->get(PaginatorsInterface::class)->getPaginator(
+            $parameter,
+            $limit
+        );
 
         return $this;
     }

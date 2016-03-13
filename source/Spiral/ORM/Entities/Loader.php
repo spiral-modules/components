@@ -711,10 +711,12 @@ abstract class Loader implements LoaderInterface
     {
         foreach ($this->loaders as $name => $loader) {
             $this->loaders[$name] = clone $loader;
+            $this->loaders[$name]->parent = $this;
         }
 
         foreach ($this->joiners as $name => $loader) {
             $this->joiners[$name] = clone $loader;
+            $this->joiners[$name]->parent = $this;
         }
     }
 

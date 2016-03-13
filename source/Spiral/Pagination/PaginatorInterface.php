@@ -34,12 +34,27 @@ interface PaginatorInterface
     public function getPage();
 
     /**
+     * Set pagination limit.
+     *
+     * @param int $limit
+     * @return $this
+     */
+    public function setLimit($limit);
+
+    /**
+     * Get pagination limit (items per page).
+     *
+     * @return int
+     */
+    public function getLimit();
+
+    /**
      * Set initial paginator uri
      *
      * @internal to be moved to UriPaginator
      * @param UriInterface $uri
      */
-    public function setUri(UriInterface $uri);
+    //public function setUri(UriInterface $uri);
 
     /**
      * Create page URL using specific page number. No domain or schema information included by
@@ -49,7 +64,7 @@ interface PaginatorInterface
      * @param int $pageNumber
      * @return UriInterface
      */
-    public function uri($pageNumber);
+    //public function uri($pageNumber);
 
     /**
      * Apply paginator to paginable object.

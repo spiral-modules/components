@@ -240,11 +240,11 @@ class CachedResult extends QueryResult
     }
 
     /**
-     * @return object
+     * @return array
      */
     public function __debugInfo()
     {
-        return (object)[
+        return [
             'store'     => get_class($this->store),
             'cacheKey'  => $this->key,
             'statement' => $this->queryString(),

@@ -38,6 +38,13 @@ class SchemaBuilder extends Component
     private $tables = [];
 
     /**
+     * Associations between tables and their database and original table aliases.
+     *
+     * @var array
+     */
+    private $aliases = [];
+
+    /**
      * @var ORMConfig
      */
     protected $config = null;
@@ -62,7 +69,7 @@ class SchemaBuilder extends Component
         $this->locateRecords($locator)->locateSources($locator);
 
         //Casting relations
-        $this->castRelations();
+        $this->castSchemas();
     }
 
     /**
@@ -131,15 +138,57 @@ class SchemaBuilder extends Component
      */
     public function declareTable($database, $table)
     {
-        $database = $this->resolveDatabase($database);
+        $normalizedDatabase = $this->resolveDatabase($database);
 
-        if (isset($this->tables[$database . '/' . $table])) {
-            return $this->tables[$database . '/' . $table];
+        if (isset($this->tables[$normalizedDatabase . '/' . $table])) {
+            return $this->tables[$normalizedDatabase . '/' . $table];
         }
 
-        $schema = $this->orm->database($database)->table($table)->schema();
+        $schema = $this->orm->database($normalizedDatabase)->table($table)->schema();
 
-        return $this->tables[$database . '/' . $table] = $schema;
+        $this->aliases[] = [
+            'schema'   => $schema,
+            'database' => $database,
+            'table'    => $table
+        ];
+
+        return $this->tables[$normalizedDatabase . '/' . $table] = $schema;
+    }
+
+    /**
+     * Database aliases associated with given table schema.
+     *
+     * @param AbstractTable $table
+     * @return string
+     * @throws SchemaException
+     */
+    public function databaseAlias(AbstractTable $table)
+    {
+        foreach ($this->aliases as $item) {
+            if ($item['schema'] === $table) {
+                return $item['database'];
+            }
+        }
+
+        throw new SchemaException("Unable to resolve database alias for table '{$table->getName()}'");
+    }
+
+    /**
+     * Table aliases associated with given table schema.
+     *
+     * @param AbstractTable $table
+     * @return string
+     * @throws SchemaException
+     */
+    public function tableAlias(AbstractTable $table)
+    {
+        foreach ($this->aliases as $item) {
+            if ($item['schema'] === $table) {
+                return $item['table'];
+            }
+        }
+
+        throw new SchemaException("Unable to resolve table alias for table '{$table->getName()}'");
     }
 
     /**
@@ -165,6 +214,8 @@ class SchemaBuilder extends Component
      */
     public function synchronizeSchema()
     {
+        //As aternative you can get access to TableSchemas and generate needed migrations
+        //@todo Phinx exporter module is needed
         $bus = new SynchronizationBus($this->getTables());
         $bus->syncronize();
     }
@@ -371,15 +422,19 @@ class SchemaBuilder extends Component
     }
 
     /**
-     * SchemaBuilder will request every located RecordSchema to declare it's relations. In addition
-     * this methods will create inversed set of relations.
+     * SchemaBuilder will request every located RecordSchema to declare it's schemas and relations.
+     * In addition this methods will create inversed set of relations.
      *
      * @throws SchemaException
      * @throws RelationSchemaException
      * @throws RecordSchemaException
      */
-    protected function castRelations()
+    protected function castSchemas()
     {
+        foreach ($this->records as $record) {
+            $record->castSchema();
+        }
+
         $inversedRelations = [];
         foreach ($this->records as $record) {
             if ($record->isAbstract()) {

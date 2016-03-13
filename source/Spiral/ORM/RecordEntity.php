@@ -502,6 +502,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Get or create record relation by it's name and pre-loaded (optional) set of data.
      *
+     * @todo hasRelation?
      * @param string $name
      * @param mixed  $data
      * @param bool   $loaded

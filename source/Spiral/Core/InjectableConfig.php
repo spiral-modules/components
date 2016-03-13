@@ -8,7 +8,6 @@
 namespace Spiral\Core;
 
 use Spiral\Core\Exceptions\ConfigException;
-use Spiral\Validation\ValidatorInterface;
 
 /**
  * Generic implementation of array based configuration.
@@ -17,7 +16,7 @@ use Spiral\Validation\ValidatorInterface;
  * modifications/requests. No custom logic is allowed to initiate config, in other case config cache
  * will be invalid.
  */
-class InjectableConfig extends Component implements ConfigInterface, \ArrayAccess, \IteratorAggregate
+class InjectableConfig extends Component implements ConfigInterface, \IteratorAggregate
 {
     /**
      * Spiral provides ability to automatically inject configs using configurator.
@@ -47,14 +46,6 @@ class InjectableConfig extends Component implements ConfigInterface, \ArrayAcces
     public function toArray()
     {
         return $this->config;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validate(ValidatorInterface $validator)
-    {
-        return $validator;
     }
 
     /**

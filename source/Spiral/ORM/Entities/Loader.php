@@ -39,9 +39,10 @@ abstract class Loader implements LoaderInterface
     /**
      * Default loading methods for ORM loaders.
      */
-    const INLOAD   = 1;
-    const POSTLOAD = 2;
-    const JOIN     = 3;
+    const INLOAD    = 1;
+    const POSTLOAD  = 2;
+    const JOIN      = 3;
+    const LEFT_JOIN = 4;
 
     /**
      * Relation type is required to correctly resolve foreign record class based on relation
@@ -90,6 +91,7 @@ abstract class Loader implements LoaderInterface
      */
     protected $options = [
         'method' => null,
+        'join'   => 'INNER',
         'alias'  => null,
         'using'  => null,
         'where'  => null
@@ -422,8 +424,10 @@ abstract class Loader implements LoaderInterface
      */
     public function joiner($relation, array $options = [])
     {
-        //We have to force joining method for full chain
-        $options['method'] = self::JOIN;
+        if (empty($options['method'])) {
+            //We have to force joining method for full chain
+            $options['method'] = self::JOIN;
+        }
 
         if (($position = strpos($relation, '.')) !== false) {
             //Chain of relations provided
@@ -736,7 +740,8 @@ abstract class Loader implements LoaderInterface
             return false;
         }
 
-        return $this->options['method'] !== self::JOIN;
+        return $this->options['method'] !== self::JOIN
+        && $this->options['method'] !== self::LEFT_JOIN;
     }
 
     /**
@@ -750,7 +755,7 @@ abstract class Loader implements LoaderInterface
             return true;
         }
 
-        return in_array($this->options['method'], [self::INLOAD, self::JOIN]);
+        return in_array($this->options['method'], [self::INLOAD, self::JOIN, self::LEFT_JOIN]);
     }
 
     /**
@@ -766,7 +771,11 @@ abstract class Loader implements LoaderInterface
             throw new LoaderException("Unable to resolve Loader join type, Loader is not joinable.");
         }
 
-        return $this->options['method'] == self::JOIN ? 'INNER' : 'LEFT';
+        if ($this->options['method'] == self::JOIN) {
+            return 'INNER';
+        }
+
+        return 'LEFT';
     }
 
     /**

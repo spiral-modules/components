@@ -25,10 +25,9 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     /**
      * Options for dump() function to specify output.
      */
-    const OUTPUT_ECHO     = 0;
-    const OUTPUT_RETURN   = 1;
-    const OUTPUT_LOG      = 2;
-    const OUTPUT_LOG_NICE = 3;
+    const OUTPUT_ECHO   = 0;
+    const OUTPUT_RETURN = 1;
+    const OUTPUT_LOG    = 2;
 
     /**
      * Deepest level to be dumped.
@@ -80,15 +79,6 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      */
     public function dump($value, $output = self::OUTPUT_ECHO)
     {
-        if (php_sapi_name() === 'cli' && $output == self::OUTPUT_ECHO) {
-            print_r($value);
-            if (is_scalar($value)) {
-                echo "\n";
-            }
-
-            return null;
-        }
-
         //Dumping is pretty slow operation, let's record it so we can exclude dump time from application
         //timeline
         $benchmark = $this->benchmark('dump');
@@ -103,10 +93,6 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
                     break;
 
                 case self::OUTPUT_LOG:
-                    $this->logger()->debug(print_r($value, true));
-                    break;
-
-                case self::OUTPUT_LOG_NICE:
                     $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
                     break;
             }
@@ -253,6 +239,11 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         //Let's use method specifically created for dumping
         if (method_exists($object, '__debugInfo')) {
             $debugInfo = $object->__debugInfo();
+
+            if (is_array($debugInfo)) {
+                //Pretty view
+                $debugInfo = (object)$debugInfo;
+            }
 
             if (is_object($debugInfo)) {
                 //We are not including syntax elements here

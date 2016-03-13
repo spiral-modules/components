@@ -7,7 +7,7 @@
  */
 namespace Spiral\Database\Entities;
 
-use Interop\Container\ContainerInterface;
+use Spiral\Cache\CacheInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
@@ -121,34 +121,32 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     private $prefix = '';
 
     /**
-     * Needed to receive cache store on demand.
-     *
      * @invisible
-     * @var ContainerInterface
+     * @var CacheInterface
      */
-    protected $container = null;
+    protected $cache = null;
 
     /**
      * @todo replace container with factory?
-     * @param Driver             $driver           Driver instance responsible for database
+     * @param Driver         $driver               Driver instance responsible for database
      *                                             connection.
-     * @param string             $name             Internal database name/id.
-     * @param string             $prefix           Default database table prefix, will be used for
+     * @param string         $name                 Internal database name/id.
+     * @param string         $prefix               Default database table prefix, will be used for
      *                                             all table identifiers.
-     * @param ContainerInterface $container        Needed to receive cache store on demand.
+     * @param CacheInterface $cache                Needed to receive cache store on demand.
      */
     public function __construct(
         Driver $driver,
         $name,
         $prefix = '',
-        ContainerInterface $container = null
+        CacheInterface $cache = null
     ) {
         $this->driver = $driver;
         $this->name = $name;
         $this->setPrefix($prefix);
 
-        //No saturation here as container is not mandratory
-        $this->container = $container;
+        //Not mandratory
+        $this->cache = $cache;
     }
 
     /**
@@ -248,15 +246,15 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
         $key = '',
         StoreInterface $store = null
     ) {
-        if (empty($store) && empty($this->container())) {
+        if (empty($store) && empty($this->cache)) {
             throw new SugarException(
-                "Unable to receive cache 'StoreInterface', no container set or user store provided."
+                "Unable to receive cache 'StoreInterface', no cache provider or user store provided."
             );
         }
 
         if (empty($store)) {
-            //We can request store from container
-            $store = $this->container()->get(StoreInterface::class);
+            //todo use different stores for different dbs
+            $store = $this->cache->store();
         }
 
         if (empty($key)) {
@@ -340,6 +338,9 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
 
             return $result;
         } catch (\Exception $exception) {
+            $this->rollBack();
+            throw $exception;
+        } catch (\Throwable $exception) {
             $this->rollBack();
             throw $exception;
         }

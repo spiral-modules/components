@@ -77,12 +77,6 @@ class RecordSchema extends ReflectionEntity
 
         //Associated table
         $this->tableSchema = $this->builder->declareTable($this->getDatabase(), $this->getTable());
-
-        /**
-         * Use record schema (property) to declare table indexes, columns and default values.
-         * No relations has to be declared at this point.
-         */
-        $this->castSchema();
     }
 
     /**
@@ -311,6 +305,40 @@ class RecordSchema extends ReflectionEntity
     }
 
     /**
+     * Method utilizes value of record schema property to generate table columns. Property "indexes"
+     * going to feed table indexes.
+     *
+     * @see Record::$schema
+     * @throws DefinitionException
+     * @throws \Spiral\Database\Exceptions\SchemaException
+     */
+    public function castSchema()
+    {
+        //Default values fetched from record, system will try to use this values as default
+        //values for associated table column
+        $defaults = $this->property('defaults', true);
+
+        foreach ($this->property('schema', true) as $name => $definition) {
+            if (is_array($definition)) {
+                //Relation or something else
+                continue;
+            }
+
+            //Let's cast table column using it's name, declared definition and default value (if any)
+            $this->castColumn(
+                $this->tableSchema->column($name),
+                $definition,
+                isset($defaults[$name]) ? $defaults[$name] : null
+            );
+        }
+
+        //Casting declared record indexes
+        foreach ($this->getIndexes() as $definition) {
+            $this->castIndex($definition);
+        }
+    }
+
+    /**
      * Record will utilize it's schema definition to create set of relations to other records and
      * entities (for example ODM).
      *
@@ -418,40 +446,6 @@ class RecordSchema extends ReflectionEntity
         }
 
         return $mutators;
-    }
-
-    /**
-     * Method utilizes value of record schema property to generate table columns. Property "indexes"
-     * going to feed table indexes.
-     *
-     * @see Record::$schema
-     * @throws DefinitionException
-     * @throws \Spiral\Database\Exceptions\SchemaException
-     */
-    protected function castSchema()
-    {
-        //Default values fetched from record, system will try to use this values as default
-        //values for associated table column
-        $defaults = $this->property('defaults', true);
-
-        foreach ($this->property('schema', true) as $name => $definition) {
-            if (is_array($definition)) {
-                //Relation or something else
-                continue;
-            }
-
-            //Let's cast table column using it's name, declared definition and default value (if any)
-            $this->castColumn(
-                $this->tableSchema->column($name),
-                $definition,
-                isset($defaults[$name]) ? $defaults[$name] : null
-            );
-        }
-
-        //Casting declared record indexes
-        foreach ($this->getIndexes() as $definition) {
-            $this->castIndex($definition);
-        }
     }
 
     /**

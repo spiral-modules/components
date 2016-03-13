@@ -46,6 +46,16 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
+     * Related table database.
+     *
+     * @return Database
+     */
+    public function database()
+    {
+        return $this->database;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @return AbstractTable

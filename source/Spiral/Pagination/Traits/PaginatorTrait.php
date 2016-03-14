@@ -115,6 +115,18 @@ trait PaginatorTrait
     }
 
     /**
+     * Get paginator for the current selection. Paginate method should be already called.
+     *
+     * @see isPaginated()
+     * @see paginate()
+     * @return PaginatorInterface|Paginator|null
+     */
+    public function getPaginator()
+    {
+        return $this->paginator;
+    }
+
+    /**
      * Indication that object was paginated.
      *
      * @return bool

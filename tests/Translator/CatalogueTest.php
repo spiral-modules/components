@@ -11,6 +11,7 @@ namespace Spiral\Tests\Translator;
 use Mockery as m;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Translator\Catalogue;
+use Symfony\Component\Translation\MessageCatalogue;
 
 class CatalogueTest extends \PHPUnit_Framework_TestCase
 {
@@ -93,6 +94,19 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($catalogue->has('other-domain', 'message'));
     }
 
+    /**
+     * @expectedException \Spiral\Translator\Exceptions\CatalogueException
+     * @expectedExceptionMessage Undefined string in domain 'domain'
+     */
+    public function testUndefinedString()
+    {
+        $memory = m::mock(HippocampusInterface::class);
+        $catalogue = new Catalogue('ru', $memory);
+
+        $memory->shouldReceive('loadData')->with('ru-domain', 'translator')->andReturn(null);
+        $catalogue->get('domain', 'message');
+    }
+
     public function testLoadAndGet()
     {
         $memory = m::mock(HippocampusInterface::class);
@@ -158,6 +172,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
+        $memory->shouldReceive('getSections')->with('translator')->andReturn(['ru-test']);
         $memory->shouldReceive('loadData')->with('ru-test', 'translator')->andReturn([
             'existed' => 'Value'
         ]);
@@ -171,7 +186,37 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
             'translator'
         );
 
+        $catalogue->loadDomains();
+
         $catalogue->set('test', 'message', 'Some Test Message');
         $catalogue->saveDomains();
+    }
+
+    public function testMergeSymfonyAndFollow()
+    {
+        $memory = m::mock(HippocampusInterface::class);
+        $catalogue = new Catalogue('ru', $memory);
+
+        $catalogue->set('domain', 'message', 'Original Translation');
+        $this->assertSame('Original Translation', $catalogue->get('domain', 'message'));
+
+        $messageCatalogue = new MessageCatalogue('ru', ['domain' => ['message' => 'Translation']]);
+        $catalogue->mergeFrom($messageCatalogue, true);
+
+        $this->assertSame('Original Translation', $catalogue->get('domain', 'message'));
+    }
+
+    public function testMergeSymfonyAndReplace()
+    {
+        $memory = m::mock(HippocampusInterface::class);
+        $catalogue = new Catalogue('ru', $memory);
+
+        $catalogue->set('domain', 'message', 'Original Translation');
+        $this->assertSame('Original Translation', $catalogue->get('domain', 'message'));
+
+        $messageCatalogue = new MessageCatalogue('ru', ['domain' => ['message' => 'Translation']]);
+        $catalogue->mergeFrom($messageCatalogue, false);
+
+        $this->assertSame('Translation', $catalogue->get('domain', 'message'));
     }
 }

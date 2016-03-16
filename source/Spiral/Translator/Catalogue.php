@@ -101,8 +101,8 @@ class Catalogue
      */
     public function get($domain, $string)
     {
-        if (!$this->has($domain, $string)) {
-            throw new CatalogueException("Undefined string in domain {$domain}");
+        if (!isset($this->domains[$domain][$string]) && !$this->has($domain, $string)) {
+            throw new CatalogueException("Undefined string in domain '{$domain}'");
         }
 
         return $this->domains[$domain][$string];
@@ -117,8 +117,6 @@ class Catalogue
      */
     public function set($domain, $string, $value)
     {
-        $this->loadDomain($domain);
-
         $this->domains[$domain][$string] = $value;
     }
 

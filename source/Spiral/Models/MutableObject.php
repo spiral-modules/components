@@ -12,7 +12,7 @@ use Spiral\Models\Traits\EventsTrait;
 /**
  * Entity with ability to alter it's behaviour using set of statically assigned events.
  */
-class MutableObject
+abstract class MutableObject
 {
     use EventsTrait;
 

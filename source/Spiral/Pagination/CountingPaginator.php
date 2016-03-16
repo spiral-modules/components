@@ -100,10 +100,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     {
         $this->setCount($paginable->count());
 
-        $paginable->offset($this->getOffset());
-        $paginable->limit($this->getLimit());
-
-        return $paginable;
+        return $paginable->offset($this->getOffset())->limit($this->getLimit());
     }
 
     /**

@@ -18,7 +18,7 @@ interface PaginableInterface extends \Countable
      *
      * @param int $limit
      *
-     * @return mixed
+     * @return self
      */
     public function limit($limit = 0);
 
@@ -32,7 +32,7 @@ interface PaginableInterface extends \Countable
      *
      * @param int $offset
      *
-     * @return mixed
+     * @return self
      */
     public function offset($offset = 0);
 

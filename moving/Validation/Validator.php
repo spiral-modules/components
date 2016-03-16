@@ -24,25 +24,26 @@ use Spiral\Validation\Exceptions\ValidationException;
  * application.
  *
  * Examples:
- *
- * "status" => [
- *      ["notEmpty"],
- *      ["string::shorter", 10, "error" => "Your string is too short."],
- *      [["MyClass","myMethod"], "error" => "Custom validation failed."]
- * [,
- * "email" => [
- *      ["notEmpty", "error" => "Please enter your email address."],
- *      ["email", "error" => "Email is not valid."]
- * [,
- * "pin" => [
- *      ["string::regexp", "/[0-9]{5}/", "error" => "Invalid pin format, if you don't know your
- *                                                   pin, please skip this field."]
- * [,
- * "flag" => ["notEmpty", "boolean"]
+ *      "status" => [
+ *           ["notEmpty"],
+ *           ["string::shorter", 10, "error" => "Your string is too short."],
+ *           [["MyClass","myMethod"], "error" => "Custom validation failed."]
+ *      ],
+ *      "email" => [
+ *           ["notEmpty", "error" => "Please enter your email address."],
+ *           ["email", "error" => "Email is not valid."]
+ *      ],
+ *      "pin" => [
+ *           ["string::regexp", "/[0-9]{5}/", "error" => "Invalid pin format, if you don't know your
+ *                                                           pin, please skip this field."]
+ *      ],
+ *      "flag" => ["notEmpty", "boolean"]
  *
  * In cases where you don't need custom message or check parameters you can use simplified
  * rule syntax:
- * "flag" => ["notEmpty", "boolean"]
+ *      "flag" => ["notEmpty", "boolean"]
+ *
+ * Future updates: it's planned to make validator immutable in very far future.
  */
 class Validator extends Component implements ValidatorInterface, LoggerAwareInterface
 {
@@ -55,6 +56,12 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * Return from validation rule to stop any future field validations. Internal contract.
      */
     const STOP_VALIDATION = -99;
+
+    /**
+     * @invisible
+     * @var ValidatorConfig
+     */
+    private $config = null;
 
     /**
      * @var array|\ArrayAccess
@@ -95,12 +102,6 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @var ContainerInterface
      */
     protected $container = null;
-
-    /**
-     * @invisible
-     * @var ValidatorConfig
-     */
-    protected $config = null;
 
     /**
      * {@inheritdoc}

@@ -19,5 +19,5 @@ interface PaginatorsInterface
      * @param int    $limit Pagination limit
      * @return PaginatorInterface
      */
-    public function getPaginator($parameter, $limit = 25);
+    public function createPaginator($parameter, $limit = 25);
 }

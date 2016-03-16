@@ -117,7 +117,7 @@ class TraitTest extends \PHPUnit_Framework_TestCase
             $paginators = m::mock(PaginatorsInterface::class)
         );
 
-        $paginators->shouldReceive('getPaginator')->with('page', 25)->andReturn($paginator);
+        $paginators->shouldReceive('createPaginator')->with('page', 25)->andReturn($paginator);
 
         $paginable->paginate(25, 'page');
 

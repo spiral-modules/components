@@ -157,7 +157,7 @@ trait PaginatorTrait
             );
         }
 
-        $this->paginator = $container->get(PaginatorsInterface::class)->getPaginator(
+        $this->paginator = $container->get(PaginatorsInterface::class)->createPaginator(
             $parameter,
             $limit
         );

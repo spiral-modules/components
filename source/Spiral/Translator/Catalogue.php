@@ -117,6 +117,8 @@ class Catalogue
      */
     public function set($domain, $string, $value)
     {
+        $this->loadDomain($domain);
+
         $this->domains[$domain][$string] = $value;
     }
 
@@ -189,7 +191,11 @@ class Catalogue
             $data = [];
         }
 
-        $this->domains[$domain] = $data;
+        if (!empty($this->domains[$domain])) {
+            $this->domains[$domain] = array_merge($this->domains[$domain], $data);
+        } else {
+            $this->domains[$domain] = $data;
+        }
     }
 
     /**

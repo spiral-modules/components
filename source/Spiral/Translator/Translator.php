@@ -32,6 +32,11 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     const MEMORY = 'translator';
 
     /**
+     * @var TranslatorConfig
+     */
+    private $config = null;
+
+    /**
      * Symfony selection logic is little
      *
      * @var MessageSelector
@@ -63,11 +68,6 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * @var array
      */
     private $loadedLocales = [];
-
-    /**
-     * @var TranslatorConfig
-     */
-    protected $config = null;
 
     /**
      * @var array

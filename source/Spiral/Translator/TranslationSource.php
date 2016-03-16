@@ -52,7 +52,7 @@ class TranslationSource extends Component implements SourceInterface
     {
         $locale = preg_replace("/[^a-zA-Z_]/", '', mb_strtolower($locale));
 
-        return $this->files->exists($this->config->localeDirectory($locale));
+        return $this->files->isDirectory($this->config->localeDirectory($locale));
     }
 
     /**

@@ -153,7 +153,7 @@ trait PaginatorTrait
 
         if (empty($container) || !$container->has(PaginatorsInterface::class)) {
             throw new SugarException(
-                'Unable to create paginator, PaginatorsInterface binding is missing or container is set.'
+                'Unable to create paginator, PaginatorsInterface binding is missing or container is set'
             );
         }
 

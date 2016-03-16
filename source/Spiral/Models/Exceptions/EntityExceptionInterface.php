@@ -9,8 +9,8 @@
 namespace Spiral\Models\Exceptions;
 
 /**
- * Errors raised by data entity accessors.
+ * Exception related to error while working with DataEntity .
  */
-interface AccessorExceptionInterface extends ExceptionInterface
+interface EntityExceptionInterface
 {
 }

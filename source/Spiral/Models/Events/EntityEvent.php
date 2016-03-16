@@ -9,8 +9,7 @@
 namespace Spiral\Models\Events;
 
 use Spiral\Models\EntityInterface;
-
-us  Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Entity specific event.
@@ -33,8 +32,19 @@ class EntityEvent extends Event
     /**
      * @return null|EntityInterface
      */
-    public function entity()
+    public function getEntity()
     {
         return $this->entity;
+    }
+
+    /**
+     * Alias for getEntity(), deprecated!
+     *
+     * @deprecated Use getEntity() instead.
+     * @return null|EntityInterface
+     */
+    public function entity()
+    {
+        return $this->getEntity();
     }
 }

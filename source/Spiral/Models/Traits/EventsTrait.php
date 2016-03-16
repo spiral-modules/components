@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Events\Traits;
+namespace Spiral\Models\Traits;
 
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -14,8 +14,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Event trait utilized Symfony\Events dispatcher to add class (not instance) specific dispatcher.
- *
- * @todo isolate thought shared container scope and dispather manager!
  */
 trait EventsTrait
 {

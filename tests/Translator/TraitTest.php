@@ -7,11 +7,14 @@
  */
 namespace Spiral\Tests\Translator;
 
+use Mockery as m;
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Tests\Core\Fixtures\SampleComponent;
 use Spiral\Translator\Traits\TranslatorTrait;
+use Spiral\Translator\TranslatorInterface;
 
-class TraitTest //extends \PHPUnit_Framework_TestCase
+class TraitTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {
@@ -27,12 +30,55 @@ class TraitTest //extends \PHPUnit_Framework_TestCase
         $class = new SayClass();
         $class->saySomething();
     }
+
+    public function testSayWithContainer()
+    {
+        $container = new Container();
+        $container->bind(
+            TranslatorInterface::class,
+            $translator = m::mock(TranslatorInterface::class)
+        );
+
+        SampleComponent::shareContainer($container);
+
+        $translator->shouldReceive('resolveDomain')->with(SayClass::class)->andReturn('say-class');
+        $translator->shouldReceive('trans')->with('Something', [], 'say-class')->andReturn(
+            'Translated Something'
+        );
+
+        $class = new SayClass();
+        $this->assertSame('Translated Something', $class->saySomething());
+    }
+
+    public function testMessageWithContainer()
+    {
+        $container = new Container();
+        $container->bind(
+            TranslatorInterface::class,
+            $translator = m::mock(TranslatorInterface::class)
+        );
+
+        SampleComponent::shareContainer($container);
+
+        $translator->shouldReceive('resolveDomain')->with(SayClass::class)->andReturn('say-class');
+        $translator->shouldReceive('trans')->with(
+            'Hello, {name}!',
+            ['name' => 'Anton'],
+            'say-class'
+        )->andReturn('Hello, Anton?');
+
+        $class = new SayClass();
+        $this->assertSame('Hello, Anton?', $class->sayMessage('Anton'));
+    }
 }
 
 class SayClass extends Component
 {
     use TranslatorTrait;
 
+    /**
+     * Static message.
+     */
     const MESSAGE = '[[Hello, {name}!]]';
 
     /**

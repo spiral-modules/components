@@ -84,6 +84,10 @@ class Catalogue
      */
     public function has($domain, $string)
     {
+        if (!empty($this->domains[$domain]) && array_key_exists($string, $this->domains[$domain])) {
+            return true;
+        }
+
         $this->loadDomain($domain);
 
         return array_key_exists($string, $this->domains[$domain]);
@@ -101,7 +105,7 @@ class Catalogue
      */
     public function get($domain, $string)
     {
-        if (!isset($this->domains[$domain][$string]) && !$this->has($domain, $string)) {
+        if (!$this->has($domain, $string)) {
             throw new CatalogueException("Undefined string in domain '{$domain}'");
         }
 

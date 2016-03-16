@@ -41,15 +41,6 @@ trait PaginatorTrait
     protected $offset = 0;
 
     /**
-     * Count elements of an object.
-     *
-     * @link http://php.net/manual/en/countable.count.php
-     *
-     * @return int
-     */
-    abstract public function count();
-
-    /**
      * Set selection limit.
      *
      * @param int $limit
@@ -175,6 +166,20 @@ trait PaginatorTrait
     }
 
     /**
+     * Count elements of an object.
+     *
+     * @link http://php.net/manual/en/countable.count.php
+     *
+     * @return int
+     */
+    abstract public function count();
+
+    /**
+     * @return ContainerInterface
+     */
+    abstract protected function container();
+
+    /**
      * Apply pagination to current object. Will be applied only if internal paginator already
      * constructed.
      *
@@ -190,9 +195,4 @@ trait PaginatorTrait
 
         return $this->paginator->paginate($this);
     }
-
-    /**
-     * @return ContainerInterface
-     */
-    abstract protected function container();
 }

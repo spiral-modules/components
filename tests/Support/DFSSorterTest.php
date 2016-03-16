@@ -10,7 +10,7 @@ namespace Spiral\Tests\Support;
 
 use Spiral\Support\DFSSorter;
 
-class SorterTest extends \PHPUnit_Framework_TestCase
+class DFSSorterTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider stackProvider

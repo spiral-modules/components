@@ -119,11 +119,8 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         $this->data = $data;
         $this->rules = $rules;
 
-        //Let's get validation from shared container if none provided
-        $this->config = $this->saturate($config, ValidatorConfig::class);
-
-        //We can use global container as fallback if no default values were provided
         $this->container = $this->saturate($container, ContainerInterface::class);
+        $this->config = $this->saturate($config, ValidatorConfig::class);
     }
 
     /**
@@ -386,11 +383,11 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     private function fetchMessage(array $rule, $message)
     {
         if (isset($rule['message'])) {
-            $message = $rule['message'];
+            return $rule['message'];
         }
 
         if (isset($rule['error'])) {
-            $message = $rule['error'];
+            return $rule['error'];
         }
 
         return $message;

@@ -42,13 +42,15 @@ class CountingPaginator implements PredictableInterface, \Countable
 
     /**
      * {@inheritdoc}
+     *
+     * @return $this
      */
     public function setPage($number)
     {
         $this->pageNumber = abs(intval($number));
 
         //Real page number
-        return $this->getPage();
+        return $this;
     }
 
     /**
@@ -69,10 +71,14 @@ class CountingPaginator implements PredictableInterface, \Countable
 
     /**
      * {@inheritdoc}
+     *
+     * @return $this
      */
     public function setLimit($limit)
     {
         $this->limit = $limit;
+
+        return $this;
     }
 
     /**
@@ -105,17 +111,29 @@ class CountingPaginator implements PredictableInterface, \Countable
 
     /**
      * {@inheritdoc}
+     *
+     * @return $this
      */
     public function setCount($count)
     {
         $this->count = abs(intval($count));
         if ($this->count > 0) {
-            $this->countPages = ceil($this->count / $this->limit);
+            $this->countPages = (int)ceil($this->count / $this->limit);
         } else {
             $this->countPages = 1;
         }
 
         return $this;
+    }
+
+    /**
+     * Alias for count.
+     *
+     * @return int
+     */
+    public function getCount()
+    {
+        return $this->count;
     }
 
     /**

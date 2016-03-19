@@ -11,6 +11,7 @@ namespace Spiral\Tests\Translator;
 use Mockery as m;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Translator\Catalogue;
+use Spiral\Translator\Translator;
 use Symfony\Component\Translation\MessageCatalogue;
 
 class CatalogueTest extends \PHPUnit_Framework_TestCase
@@ -23,18 +24,12 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('ru', $catalogue->getLocale());
     }
 
-    public function testGetDomainsFromMemory()
+    public function testGetEmptyDomains()
     {
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
-        $memory->shouldReceive('getSections')->with('translator')->andReturn([
-            'ru-messages',
-            'ru-views',
-            'en-sample'
-        ]);
-
-        $this->assertSame(['messages', 'views'], $catalogue->getDomains());
+        $this->assertSame([], $catalogue->loadedDomains());
     }
 
     public function testLoadDomainsFromMemory()
@@ -42,23 +37,17 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
-        $memory->shouldReceive('getSections')->with('translator')->andReturn([
-            'ru-messages',
-            'ru-views',
-            'en-sample'
-        ]);
-
-        $this->assertSame(['messages', 'views'], $catalogue->getDomains());
-
-        $memory->shouldReceive('loadData')->with('ru-messages', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
             'message' => 'Russian Translation'
         ]);
 
-        $memory->shouldReceive('loadData')->with('ru-views', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-views', Translator::MEMORY)->andReturn([
             'view' => 'Russian View'
         ]);
 
-        $catalogue->loadDomains();
+        $catalogue->loadDomains(['messages', 'views']);
+
+        $this->assertSame(['messages', 'views'], $catalogue->loadedDomains());
     }
 
     public function testLoadAndHas()
@@ -66,31 +55,27 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
-        $memory->shouldReceive('getSections')->with('translator')->andReturn([
-            'ru-messages',
-            'ru-views',
-            'en-sample'
-        ]);
-
-        $this->assertSame(['messages', 'views'], $catalogue->getDomains());
-
-        $memory->shouldReceive('loadData')->with('ru-messages', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
             'message' => 'Russian Translation'
         ]);
 
-        $memory->shouldReceive('loadData')->with('ru-views', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-views', Translator::MEMORY)->andReturn([
             'view' => 'Russian View'
         ]);
 
-        //Invalid domain
-        $memory->shouldReceive('loadData')->with('ru-other-domain', 'translator')->andReturn(null);
+        $catalogue->loadDomains(['messages', 'views']);
 
-        $catalogue->loadDomains();
+        $this->assertSame(['messages', 'views'], $catalogue->loadedDomains());
 
         $this->assertTrue($catalogue->has('messages', 'message'));
         $this->assertTrue($catalogue->has('views', 'view'));
 
         $this->assertFalse($catalogue->has('messages', 'another-message'));
+
+        $memory->shouldReceive('loadData')->with('ru-other-domain', Translator::MEMORY)->andReturn(
+            null
+        );
+
         $this->assertFalse($catalogue->has('other-domain', 'message'));
     }
 
@@ -103,7 +88,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
-        $memory->shouldReceive('loadData')->with('ru-domain', 'translator')->andReturn(null);
+        $memory->shouldReceive('loadData')->with('ru-domain', Translator::MEMORY)->andReturn(null);
         $catalogue->get('domain', 'message');
     }
 
@@ -112,23 +97,17 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
-        $memory->shouldReceive('getSections')->with('translator')->andReturn([
-            'ru-messages',
-            'ru-views',
-            'en-sample'
-        ]);
-
-        $this->assertSame(['messages', 'views'], $catalogue->getDomains());
-
-        $memory->shouldReceive('loadData')->with('ru-messages', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
             'message' => 'Russian Translation'
         ]);
 
-        $memory->shouldReceive('loadData')->with('ru-views', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-views', Translator::MEMORY)->andReturn([
             'view' => 'Russian View'
         ]);
 
-        $catalogue->loadDomains();
+        $catalogue->loadDomains(['messages', 'views']);
+
+        $this->assertSame(['messages', 'views'], $catalogue->loadedDomains());
 
         $this->assertSame('Russian Translation', $catalogue->get('messages', 'message'));
         $this->assertSame('Russian View', $catalogue->get('views', 'view'));
@@ -138,24 +117,17 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
     {
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
-
-        $memory->shouldReceive('getSections')->with('translator')->andReturn([
-            'ru-messages',
-            'ru-views',
-            'en-sample'
-        ]);
-
-        $this->assertSame(['messages', 'views'], $catalogue->getDomains());
-
-        $memory->shouldReceive('loadData')->with('ru-messages', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
             'message' => 'Russian Translation'
         ]);
 
-        $memory->shouldReceive('loadData')->with('ru-views', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-views', Translator::MEMORY)->andReturn([
             'view' => 'Russian View'
         ]);
 
-        $catalogue->loadDomains();
+        $catalogue->loadDomains(['messages', 'views']);
+
+        $this->assertSame(['messages', 'views'], $catalogue->loadedDomains());
 
         $this->assertSame('Russian Translation', $catalogue->get('messages', 'message'));
         $this->assertSame('Russian View', $catalogue->get('views', 'view'));
@@ -172,10 +144,12 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(HippocampusInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
-        $memory->shouldReceive('getSections')->with('translator')->andReturn(['ru-test']);
-        $memory->shouldReceive('loadData')->with('ru-test', 'translator')->andReturn([
+        $memory->shouldReceive('loadData')->with('ru-test', Translator::MEMORY)->andReturn([
             'existed' => 'Value'
         ]);
+
+        $catalogue->loadDomains(['test']);
+        $catalogue->set('test', 'message', 'Some Test Message');
 
         $memory->shouldReceive('saveData')->with(
             'ru-test',
@@ -186,9 +160,6 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
             'translator'
         );
 
-        $catalogue->loadDomains();
-
-        $catalogue->set('test', 'message', 'Some Test Message');
         $catalogue->saveDomains();
     }
 

@@ -15,6 +15,8 @@ use Symfony\Component\Translation\MessageCatalogue;
 /**
  * Similar to Symfony catalogue, however this one does not operate with fallback locale.
  * Provides ability to cache domains in memory.
+ *
+ * @todo bad incapsulation?
  */
 class Catalogue
 {
@@ -56,22 +58,13 @@ class Catalogue
     }
 
     /**
-     * Locale domains.
+     * List of loaded domains
      *
      * @return array
      */
-    public function getDomains()
+    public function loadedDomains()
     {
-        $domains = array_keys($this->domains);
-        foreach ($this->memory->getSections(Translator::MEMORY) as $section) {
-
-            //Check if this cache section related to current locale
-            if (strpos($section, "{$this->locale}-") === 0) {
-                $domains[] = substr($section, strlen("{$this->locale}-"));
-            }
-        }
-
-        return array_unique($domains);
+        return array_keys($this->domains);
     }
 
     /**
@@ -159,11 +152,12 @@ class Catalogue
     /**
      * Load all catalogue domains.
      *
+     * @param array $domains Domains to be loaded
      * @return $this
      */
-    public function loadDomains()
+    public function loadDomains(array $domains = [])
     {
-        foreach ($this->getDomains() as $domain) {
+        foreach ($domains as $domain) {
             $this->loadDomain($domain);
         }
 
@@ -171,7 +165,7 @@ class Catalogue
     }
 
     /**
-     * Save catalogue into memory.
+     * Save catalogue domains into memory (all domains to be saved)
      */
     public function saveDomains()
     {

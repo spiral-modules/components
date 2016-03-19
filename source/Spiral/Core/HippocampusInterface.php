@@ -33,14 +33,4 @@ interface HippocampusInterface
      * @param string       $location Specific memory location.
      */
     public function saveData($section, $data, $location = null);
-
-    /**
-     * Get all memory sections belongs to given memory location (default location to be used if
-     * none specified).
-     *
-     * @param string $location
-     *
-     * @return array
-     */
-    public function getSections($location = null);
 }

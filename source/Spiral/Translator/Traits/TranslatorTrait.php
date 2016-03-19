@@ -29,12 +29,13 @@ trait TranslatorTrait
      *
      * @param string $string
      * @param array  $options Interpolation options.
+     * @param string $bundle  Translation bundle, by default current class name.
      *
      * @return string
      *
      * @throws SugarException
      */
-    protected function say($string, array $options = [])
+    protected function say($string, array $options = [], $bundle = null)
     {
         if (Translator::isMessage($string)) {
             //This string was defined in class attributes
@@ -51,12 +52,12 @@ trait TranslatorTrait
          */
         $translator = $container->get(TranslatorInterface::class);
 
+        if (empty($bundle)) {
+            $bundle = $translator->resolveDomain(static::class);
+        }
+
         //Translate class string using automatically resolved message domain
-        return $translator->trans(
-            $string,
-            $options,
-            $translator->resolveDomain(static::class)
-        );
+        return $translator->trans($string, $options, $bundle);
     }
 
     /**

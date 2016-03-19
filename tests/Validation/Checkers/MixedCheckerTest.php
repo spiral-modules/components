@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\tests\Cases\Validation\Checkers;
+namespace Spiral\Tests\Validation\Checkers;
 
 use Spiral\Validation\Checkers\MixedChecker;
 use Spiral\Validation\Validator;
@@ -28,7 +28,7 @@ class MixedCheckerTest extends \PHPUnit_Framework_TestCase
         $checker = new MixedChecker();
 
         $mock = $this->getMockBuilder(Validator::class)->disableOriginalConstructor()->getMock();
-        $mock->method('field')->with('abc')->will($this->returnValue(123));
+        $mock->method('getValue')->with('abc')->will($this->returnValue(123));
 
         $this->assertTrue($checker->check('match', 123, ['abc'], $mock));
         $this->assertFalse($checker->check('match', 234, ['abc'], $mock));

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Validation;
 
 use Interop\Container\ContainerInterface;
@@ -47,9 +48,6 @@ use Spiral\Validation\Exceptions\ValidationException;
  */
 class Validator extends Component implements ValidatorInterface, LoggerAwareInterface
 {
-    /**
-     * Validator will translate default errors and throw log messages when validation rule fails.
-     */
     use LoggerTrait, TranslatorTrait, SaturateTrait;
 
     /**
@@ -133,7 +131,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         }
 
         $this->rules = $rules;
-        $this->errors = [];
+        $this->reset();
 
         return $this;
     }
@@ -148,7 +146,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         }
 
         $this->data = $data;
-        $this->errors = [];
+        $this->reset();
 
         return $this;
     }
@@ -208,11 +206,20 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param mixed  $default
      * @return mixed
      */
-    public function field($field, $default = null)
+    public function getValue($field, $default = null)
     {
         $value = isset($this->data[$field]) ? $this->data[$field] : $default;
 
         return $value instanceof ValueInterface ? $value->serializeData() : $value;
+    }
+
+    /**
+     * Reset validation state.
+     */
+    public function reset()
+    {
+        $this->errors = [];
+        $this->registeredErrors = [];
     }
 
     /**
@@ -228,17 +235,17 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                     continue;
                 }
 
-                //Condition either rule itself or first array element
+                //Condition is either rule itself or first array element
                 $condition = is_string($rule) ? $rule : $rule[0];
 
-                if (empty($this->field($field)) && !$this->config->emptyCondition($condition)) {
+                if (empty($this->getValue($field)) && !$this->config->emptyCondition($condition)) {
                     //There is no need to validate empty field except for special conditions
                     break;
                 }
 
                 $result = $this->check(
                     $field,
-                    $this->field($field),
+                    $this->getValue($field),
                     $condition,
                     $arguments = is_string($rule) ? [] : $this->fetchArguments($rule)
                 );
@@ -253,9 +260,10 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                     break;
                 }
 
-                if ($result instanceof Checker) {
+                if ($result instanceof CheckerInterface) {
                     //Failed inside checker, this is implementation agreement
                     if ($message = $result->getMessage($condition[1])) {
+
                         //Checker provides it's own message for condition
                         $this->addMessage(
                             $field,
@@ -290,7 +298,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param mixed  $value
      * @param mixed  $condition Reference, can be altered if alias exists.
      * @param array  $arguments Rule arguments if any.
-     * @return bool|Checker
+     * @return bool|CheckerInterface
      * @throws ValidationException
      */
     protected function check($field, $value, &$condition, array $arguments = [])
@@ -301,6 +309,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             if (strpos($condition, '::')) {
                 $condition = explode('::', $condition);
                 if ($this->config->hasChecker($condition[0])) {
+
                     $checker = $this->checker($condition[0]);
                     if (!$result = $checker->check($condition[1], $value, $arguments, $this)) {
                         //To let validation() method know that message should be handled via Checker
@@ -345,7 +354,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * Get or create instance of validation checker.
      *
      * @param string $name
-     * @return Checker
+     * @return AbstractChecker
      * @throws ValidationException
      */
     protected function checker($name)

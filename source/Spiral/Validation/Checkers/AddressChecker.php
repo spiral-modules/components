@@ -9,12 +9,12 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\Checker;
+use Spiral\Validation\AbstractChecker;
 
 /**
  * Validate different addresses: email, url and etc.
  */
-class AddressChecker extends Checker implements SingletonInterface
+class AddressChecker extends AbstractChecker implements SingletonInterface
 {
     /**
      * {@inheritdoc}

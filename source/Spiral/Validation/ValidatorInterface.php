@@ -28,7 +28,7 @@ interface ValidatorInterface
     public function setRules(array $rules);
 
     /**
-     * Update validation data (context).
+     * Update validation data (context). Data change must reset validation state and all errors.
      *
      * @param array|\ArrayAccess $data
      *
@@ -39,7 +39,8 @@ interface ValidatorInterface
     public function setData($data);
 
     /**
-     * Register outer validation error.
+     * Register outer validation error. Registered error persists until context data are changed
+     * or flushRegistered method not called.
      *
      * @param string $field
      * @param string $error

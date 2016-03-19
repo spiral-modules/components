@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\tests\Cases\Validation\Checkers;
+namespace Spiral\Tests\Validation\Checkers;
 
 use Spiral\Validation\Checkers\TypeChecker;
 

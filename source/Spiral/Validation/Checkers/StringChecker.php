@@ -9,12 +9,12 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\Checker;
+use Spiral\Validation\AbstractChecker;
 
 /**
  * String validations.
  */
-class StringChecker extends Checker implements SingletonInterface
+class StringChecker extends AbstractChecker implements SingletonInterface
 {
     /**
      * {@inheritdoc}

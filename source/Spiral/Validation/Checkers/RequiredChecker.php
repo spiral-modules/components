@@ -9,13 +9,13 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\Checker;
+use Spiral\Validation\AbstractChecker;
 use Spiral\Validation\Validator;
 
 /**
  * Validations based dependencies between fields.
  */
-class RequiredChecker extends Checker implements SingletonInterface
+class RequiredChecker extends AbstractChecker implements SingletonInterface
 {
     /**
      * {@inheritdoc}
@@ -42,7 +42,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($with as $field) {
-            if ($this->validator()->field($field)) {
+            if ($this->getValidator()->getValue($field)) {
                 //Some value presented
                 return false;
             }
@@ -66,7 +66,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($with as $field) {
-            if (!$this->validator()->field($field)) {
+            if (!$this->getValidator()->getValue($field)) {
                 return Validator::STOP_VALIDATION;
             }
         }
@@ -89,7 +89,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($without as $field) {
-            if (empty($this->validator()->field($field))) {
+            if (empty($this->getValidator()->getValue($field))) {
                 //Some value presented
                 return false;
             }
@@ -113,7 +113,7 @@ class RequiredChecker extends Checker implements SingletonInterface
         }
 
         foreach ($without as $field) {
-            if ($this->validator()->field($field)) {
+            if ($this->getValidator()->getValue($field)) {
                 return Validator::STOP_VALIDATION;
             }
         }

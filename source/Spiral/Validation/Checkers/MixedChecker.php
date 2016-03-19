@@ -9,12 +9,12 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\Checker;
+use Spiral\Validation\AbstractChecker;
 
 /**
  * Validations can't be fitted to any other checker.
  */
-class MixedChecker extends Checker implements SingletonInterface
+class MixedChecker extends AbstractChecker implements SingletonInterface
 {
     /**
      * {@inheritdoc}
@@ -66,9 +66,9 @@ class MixedChecker extends Checker implements SingletonInterface
     public function match($value, $field, $strict = false)
     {
         if ($strict) {
-            return $value === $this->validator()->field($field, null);
+            return $value === $this->getValidator()->getValue($field, null);
         }
 
-        return $value == $this->validator()->field($field, null);
+        return $value == $this->getValidator()->getValue($field, null);
     }
 }

@@ -13,9 +13,9 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Files\Streams\StreamWrapper;
-use Spiral\Validation\Checker;
+use Spiral\Validation\AbstractChecker;
 
-class FileChecker extends Checker implements SingletonInterface
+class FileChecker extends AbstractChecker implements SingletonInterface
 {
     /**
      * {@inheritdoc}

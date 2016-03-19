@@ -57,7 +57,6 @@ class MutableObjectTest extends \PHPUnit_Framework_TestCase
         $class = new MutableClass();
         $this->assertInstanceOf(GenericEvent::class, $class->doSomething());
         $this->assertSame('out subject', $class->doSomething()->getSubject());
-
     }
 }
 

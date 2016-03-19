@@ -10,11 +10,10 @@ namespace Spiral\Tests\Models;
 use Mockery as m;
 use Spiral\Models\MutableObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\GenericEvent;
 
-class MutableObjectTest //extends \PHPUnit_Framework_TestCase
+class MutableObjectTest extends \PHPUnit_Framework_TestCase
 {
-    //TODO: finish it
-
     public function testEventsDispatcher()
     {
         $this->assertInstanceOf(EventDispatcherInterface::class, MutableClass::events());
@@ -40,9 +39,34 @@ class MutableObjectTest //extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(EventDispatcherInterface::class, $class->events());
         $this->assertNotSame($events, $class->events());
     }
+
+    public function testFireEvent()
+    {
+        $events = m::mock(EventDispatcherInterface::class);
+        MutableClass::setEvents($events);
+
+        $events->shouldReceive('dispatch')->with(
+            'test',
+            m::on(function (GenericEvent $event) {
+                return $event->getSubject() == 'subject';
+            })
+        )->andReturn(
+            new GenericEvent('out subject')
+        );
+
+        $class = new MutableClass();
+        $this->assertInstanceOf(GenericEvent::class, $class->doSomething());
+        $this->assertSame('out subject', $class->doSomething()->getSubject());
+
+    }
 }
 
 class MutableClass extends MutableObject
 {
-
+    public function doSomething()
+    {
+        return $this->dispatch('test', new GenericEvent(
+            'subject'
+        ));
+    }
 }

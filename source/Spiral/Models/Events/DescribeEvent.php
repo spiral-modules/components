@@ -9,8 +9,7 @@
 namespace Spiral\Models\Events;
 
 use Spiral\Models\Reflections\ReflectionEntity;
-
-us  Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Raised while entity analysis to allow traits and other listeners apply changed to entity schema.

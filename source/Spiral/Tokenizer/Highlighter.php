@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer;
 
 use Spiral\Core\Component;
@@ -12,7 +13,7 @@ use Spiral\Tokenizer\Highlighter\Style;
 use Spiral\Tokenizer\Traits\TokensTrait;
 
 /**
- * Highlights php file using specified style.
+ * Highlights php file using specified style. For debug purposes only.
  */
 class Highlighter extends Component
 {
@@ -41,10 +42,24 @@ class Highlighter extends Component
      * @param string     $source
      * @param Style|null $style
      */
-    public function __construct($source, Style $style = null)
+    public function __construct($source = '', Style $style = null)
     {
         $this->style = !empty($style) ? $style : new Style();
         $this->tokens = $this->normalizeTokens(token_get_all($source));
+    }
+
+    /**
+     * Get highlighter with different source.
+     *
+     * @param string $source
+     * @return Highlighter
+     */
+    public function withSource($source)
+    {
+        $highlighter = clone $this;
+        $highlighter->tokens = $this->normalizeTokens(token_get_all($source));
+
+        return $highlighter;
     }
 
     /**

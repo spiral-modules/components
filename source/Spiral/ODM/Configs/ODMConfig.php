@@ -83,7 +83,7 @@ class ODMConfig extends InjectableConfig
     }
 
     /**
-     * Get list of mutators associated with given type.
+     * Get list of mutators associated with given field type.
      *
      * @param string $type
      *

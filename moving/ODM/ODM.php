@@ -241,8 +241,12 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     {
         $schema = $this->schema($class);
 
-        return new DocumentSelector($this, $schema[self::D_DB], $schema[self::D_COLLECTION],
-            $query);
+        return new DocumentSelector(
+            $this,
+            $schema[self::D_DB],
+            $schema[self::D_COLLECTION],
+            $query
+        );
     }
 
     /**
@@ -391,19 +395,19 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
     public static function mongoID($mongoID)
     {
         if (empty($mongoID)) {
-            return;
+            return null;
         }
 
         if (!is_object($mongoID)) {
             //Old versions of mongo api does not throws exception on invalid mongo id (1.2.1)
             if (!is_string($mongoID) || !preg_match('/[0-9a-f]{24}/', $mongoID)) {
-                return;
+                return null;
             }
 
             try {
                 $mongoID = new \MongoId($mongoID);
             } catch (\Exception $exception) {
-                return;
+                return null;
             }
         }
 

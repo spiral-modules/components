@@ -75,9 +75,9 @@ trait FindTrait
     }
 
     /**
-     * Instance of ORM Selector associated with specific document.
+     * Instance of RecordSource associated with specific record.
      *
-     * @see   Component::staticContainer()
+     * @see Component::staticContainer()
      *
      * @param ORM $orm ORM component, global container will be called if not instance provided.
      *

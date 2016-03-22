@@ -68,7 +68,7 @@ class ORMConfig extends InjectableConfig
     }
 
     /**
-     * Get list of mutators associated with given type.
+     * Get list of mutators associated with given field type.
      *
      * @param string $type
      *
@@ -76,6 +76,8 @@ class ORMConfig extends InjectableConfig
      */
     public function getMutators($type)
     {
-        return isset($this->config['mutators'][$type]) ? $this->config['mutators'][$type] : [];
+        return isset($this->config['mutators'][$type])
+            ? $this->config['mutators'][$type]
+            : [];
     }
 }

@@ -45,7 +45,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * @param array $fields
      */
-    public function __construct(array $fields)
+    public function __construct(array $fields = [])
     {
         $this->fields = $fields;
         parent::__construct();

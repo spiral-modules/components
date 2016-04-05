@@ -18,7 +18,7 @@ use Spiral\Validation\ValidatorInterface;
  */
 class SchematicEntity extends AbstractEntity implements ValidatesInterface
 {
-    use ValidatorTrait, ValidatorTrait;
+    use ValidatorTrait;
 
     /**
      * Schema constants. Starts with 4, but why not?

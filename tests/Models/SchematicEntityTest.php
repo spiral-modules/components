@@ -10,6 +10,7 @@ namespace Spiral\tests\Cases\Models;
 
 use Spiral\Models\SchematicEntity;
 
+//todo: improve coverage
 class SchematicEntityTest extends \PHPUnit_Framework_TestCase
 {
     public function testFillable()

@@ -22,7 +22,7 @@ use Spiral\Validation\ValidatorInterface;
  */
 class DataEntity extends AbstractEntity implements ValidatesInterface
 {
-    use ValidatorTrait, ValidatorTrait;
+    use ValidatorTrait;
 
     /**
      * List of fields must be hidden from publicFields() method.

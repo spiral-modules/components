@@ -11,6 +11,12 @@ use Spiral\Models\Traits\EventsTrait;
 
 /**
  * Entity with ability to alter it's behaviour using set of statically assigned events.
+ *
+ * You can create special set of functions inside this class which are going to be automatically
+ * initialized on class level.
+ *
+ * Simply define method with name: __init__... you can get access to self::events() inside it.
+ * Traits can be used to define such methods.
  */
 abstract class MutableObject
 {
@@ -42,11 +48,11 @@ abstract class MutableObject
 
     /**
      * Initiate associated model traits. System will look for static method with "__init__" prefix.
-     * Attention, trait must.
+     * You can also define __describe__ methods for model analysis (see SchematicEntity).
      *
      * @param bool $analysis Must be set to true while static reflection analysis.
      */
-    protected static function initialize($analysis = false)
+    final protected static function initialize($analysis = false)
     {
         $state = $class = static::class;
 

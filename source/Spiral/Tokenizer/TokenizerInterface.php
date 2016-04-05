@@ -9,6 +9,7 @@ namespace Spiral\Tokenizer;
 
 use Spiral\Tokenizer\Exceptions\ReflectionException;
 use Spiral\Tokenizer\Exceptions\TokenizerException;
+use Spiral\Tokenizer\Reflections\ReflectionFile;
 
 /**
  * Provides ability to get file reflections and fetch normalized tokens for a specified filename.
@@ -37,7 +38,7 @@ interface TokenizerInterface
      *
      * @param string $filename
      *
-     * @return ReflectionFileInterface
+     * @return ReflectionFile
      *
      * @throws TokenizerException
      * @throws ReflectionException

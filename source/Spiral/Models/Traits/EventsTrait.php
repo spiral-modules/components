@@ -18,8 +18,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 trait EventsTrait
 {
     /**
-     * @internal
-     *
+     * @internal Internal functionality, might be moved to external service.
      * @var EventDispatcherInterface[]
      */
     private static $dispatchers = [];

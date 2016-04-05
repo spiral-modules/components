@@ -10,7 +10,6 @@ namespace Spiral\Tokenizer\Reflections;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Tokenizer\ReflectionFileInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
@@ -18,7 +17,7 @@ use Spiral\Tokenizer\TokenizerInterface;
  * in file. In addition file reflection provides ability to fetch and describe every method/function
  * call.
  */
-class ReflectionFile extends Component implements ReflectionFileInterface
+class ReflectionFile extends Component
 {
     /*
      * Development sugar.
@@ -163,7 +162,9 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared function names
+     *
+     * @return array
      */
     public function getFunctions()
     {
@@ -171,7 +172,9 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared class names
+     *
+     * @return array
      */
     public function getClasses()
     {
@@ -183,7 +186,9 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared trait names
+     *
+     * @return array
      */
     public function getTraits()
     {
@@ -195,7 +200,9 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared interface names
+     *
+     * @return array
      */
     public function getInterfaces()
     {
@@ -217,7 +224,9 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Indication that file contains require/include statements
+     *
+     * @return bool
      */
     public function hasIncludes()
     {
@@ -225,7 +234,10 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Locate and return list of every method or function call in specified file. Only static and
+     * $this calls will be indexed
+     *
+     * @return ReflectionInvocation[]
      */
     public function getInvocations()
     {

@@ -44,9 +44,6 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
 
         $signature = strtolower(trim($signature, '\\'));
         foreach ($this->availableReflections() as $reflection) {
-            /**
-             * @var ReflectionFileInterface $reflection
-             */
             foreach ($reflection->getInvocations() as $invocation) {
                 if (
                     !empty($signature)

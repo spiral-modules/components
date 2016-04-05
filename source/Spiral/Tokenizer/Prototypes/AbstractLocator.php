@@ -23,9 +23,6 @@ use Symfony\Component\Finder\SplFileInfo;
  */
 class AbstractLocator extends Component implements InjectableInterface, LoggerAwareInterface
 {
-    /*
-     * Injection over constant.
-     */
     use LoggerTrait;
 
     /**
@@ -58,7 +55,6 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     /**
      * Available file reflections. Generator.
      *
-     *
      * @generate ReflectionFile[]
      */
     protected function availableReflections()
@@ -72,7 +68,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
             //We are not analyzing files which has includes, it's not safe to require such reflections
             if ($reflection->hasIncludes()) {
                 $this->logger()->warning(
-                    "File '{filename}' has includes and will be excluded from analysis.",
+                    "File '{filename}' has includes and will be excluded from analysis",
                     ['filename' => (string)$file]
                 );
 
@@ -97,7 +93,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     protected function classReflection($class)
     {
         $loader = function ($class) {
-            throw new LocatorException("Class '{$class}' can not be loaded.");
+            throw new LocatorException("Class '{$class}' can not be loaded");
         };
 
         //To suspend class dependency exception
@@ -107,7 +103,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
             return new \ReflectionClass($class);
         } catch (\Exception $exception) {
             $this->logger()->error(
-                "Unable to resolve class '{class}', error '{message}'.",
+                "Unable to resolve class '{class}', error '{message}'",
                 ['class' => $class, 'message' => $exception->getMessage()]
             );
 

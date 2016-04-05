@@ -342,7 +342,7 @@ abstract class AbstractEntity extends MutableObject implements
             if ($value instanceof ValueInterface) {
                 $result[$field] = $value->serializeData();
             } else {
-                $result[] = $value;
+                $result[$field] = $value;
             }
         }
 

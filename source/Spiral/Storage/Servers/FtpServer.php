@@ -47,7 +47,7 @@ class FtpServer extends StorageServer
 
         if (!extension_loaded('ftp')) {
             throw new ServerException(
-                "Unable to initialize ftp storage server, extension 'ftp' not found."
+                "Unable to initialize ftp storage server, extension 'ftp' not found"
             );
         }
 
@@ -81,7 +81,7 @@ class FtpServer extends StorageServer
     {
         $location = $this->ensureLocation($bucket, $name);
         if (!ftp_put($this->connection, $location, $this->castFilename($source), FTP_BINARY)) {
-            throw new ServerException("Unable to put '{$name}' to FTP server.");
+            throw new ServerException("Unable to put '{$name}' to FTP server");
         }
 
         return $this->refreshPermissions($bucket, $name);
@@ -94,7 +94,7 @@ class FtpServer extends StorageServer
     {
         if (!$this->exists($bucket, $name)) {
             throw new ServerException(
-                "Unable to create local filename for '{$name}', object does not exists."
+                "Unable to create local filename for '{$name}', object does not exists"
             );
         }
 
@@ -104,7 +104,7 @@ class FtpServer extends StorageServer
         if (
         !ftp_get($this->connection, $tempFilename, $this->getPath($bucket, $name), FTP_BINARY)
         ) {
-            throw new ServerException("Unable to create local filename for '{$name}'.");
+            throw new ServerException("Unable to create local filename for '{$name}'");
         }
 
         return $tempFilename;
@@ -117,7 +117,7 @@ class FtpServer extends StorageServer
     {
         if (!$filename = $this->allocateFilename($bucket, $name)) {
             throw new ServerException(
-                "Unable to create stream for '{$name}', object does not exists."
+                "Unable to create stream for '{$name}', object does not exists"
             );
         }
 
@@ -140,7 +140,7 @@ class FtpServer extends StorageServer
     public function rename(BucketInterface $bucket, $oldname, $newname)
     {
         if (!$this->exists($bucket, $oldname)) {
-            throw new ServerException("Unable to rename '{$oldname}', object does not exists.");
+            throw new ServerException("Unable to rename '{$oldname}', object does not exists");
         }
 
         $location = $this->ensureLocation($bucket, $newname);
@@ -157,7 +157,7 @@ class FtpServer extends StorageServer
     public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
     {
         if (!$this->exists($bucket, $name)) {
-            throw new ServerException("Unable to replace '{$name}', object does not exists.");
+            throw new ServerException("Unable to replace '{$name}', object does not exists");
         }
 
         $location = $this->ensureLocation($bucket, $name);
@@ -183,19 +183,19 @@ class FtpServer extends StorageServer
 
         if (empty($this->connection)) {
             throw new ServerException(
-                "Unable to connect to remote FTP server '{$this->options['host']}'."
+                "Unable to connect to remote FTP server '{$this->options['host']}'"
             );
         }
 
         if (!ftp_login($this->connection, $this->options['login'], $this->options['password'])) {
             throw new ServerException(
-                "Unable to connect to remote FTP server '{$this->options['host']}'."
+                "Unable to connect to remote FTP server '{$this->options['host']}'"
             );
         }
 
         if (!ftp_pasv($this->connection, $this->options['passive'])) {
             throw new ServerException(
-                "Unable to set passive mode at remote FTP server '{$this->options['host']}'."
+                "Unable to set passive mode at remote FTP server '{$this->options['host']}'"
             );
         }
 

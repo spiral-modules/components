@@ -16,6 +16,8 @@ use Spiral\Storage\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in GridFS storage.
+ *
+ * Attention, server depends on ODM!
  */
 class GridfsServer extends StorageServer
 {
@@ -89,7 +91,7 @@ class GridfsServer extends StorageServer
         copy($this->castFilename($source), $tempFilename);
 
         if (!$this->gridFS($bucket)->storeFile($tempFilename, ['filename' => $name])) {
-            throw new ServerException("Unable to store {$name} in GridFS server.");
+            throw new ServerException("Unable to store {$name} in GridFS server");
         }
 
         $this->files->delete($tempFilename);
@@ -104,7 +106,7 @@ class GridfsServer extends StorageServer
     {
         if (!$file = $this->exists($bucket, $name)) {
             throw new ServerException(
-                "Unable to create stream for '{$name}', object does not exists."
+                "Unable to create stream for '{$name}', object does not exists"
             );
         }
 

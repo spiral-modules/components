@@ -123,7 +123,7 @@ class AmazonServer extends StorageServer
 
         $response = $this->client->send($request->withBody($this->castStream($source)));
         if ($response->getStatusCode() != 200) {
-            throw new ServerException("Unable to put '{$name}' to Amazon server.");
+            throw new ServerException("Unable to put '{$name}' to Amazon server");
         }
     }
 

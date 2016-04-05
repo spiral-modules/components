@@ -52,7 +52,7 @@ abstract class StorageServer extends Component implements ServerInterface
     public function allocateFilename(BucketInterface $bucket, $name)
     {
         if (empty($stream = $this->allocateStream($bucket, $name))) {
-            throw new ServerException("Unable to allocate local filename for '{$name}'.");
+            throw new ServerException("Unable to allocate local filename for '{$name}'");
         }
 
         //Default implementation will use stream to create temporary filename, such filename
@@ -79,7 +79,7 @@ abstract class StorageServer extends Component implements ServerInterface
             return true;
         }
 
-        throw new ServerException("Unable to copy '{$name}' to new bucket.");
+        throw new ServerException("Unable to copy '{$name}' to new bucket");
     }
 
     /**
@@ -110,7 +110,7 @@ abstract class StorageServer extends Component implements ServerInterface
             return StreamWrapper::getUri($source);
         }
 
-        throw new ServerException("Unable to get filename for non Stream instance.");
+        throw new ServerException("Unable to get filename for non Stream instance");
     }
 
     /**

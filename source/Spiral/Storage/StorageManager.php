@@ -37,6 +37,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
 
     /**
      * @invisible
+     *
      * @var FactoryInterface
      */
     protected $factory = null;
@@ -63,7 +64,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     public function registerBucket($name, $prefix, array $options = [], ServerInterface $server)
     {
         if (isset($this->buckets[$name])) {
-            throw new StorageException("Unable to create bucket '{$name}', name already taken.");
+            throw new StorageException("Unable to create bucket '{$name}', name already taken");
         }
 
         return $this->buckets[$name] = $this->factory->make(
@@ -78,7 +79,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     public function bucket($bucket)
     {
         if (empty($bucket)) {
-            throw new StorageException("Unable to fetch bucket, name can not be empty.");
+            throw new StorageException("Unable to fetch bucket, name can not be empty");
         }
 
         $bucket = $this->config->resolveAlias($bucket);
@@ -87,7 +88,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             return $this->buckets[$bucket];
         }
 
-        throw new StorageException("Unable to fetch bucket '{$bucket}', no presets found.");
+        throw new StorageException("Unable to fetch bucket '{$bucket}', no presets found");
     }
 
     /**
@@ -96,7 +97,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     public function createInjection(\ReflectionClass $class, $context = null)
     {
         if (empty($context)) {
-            throw new StorageException("Storage bucket can be requested without specified context.");
+            throw new StorageException("Storage bucket can be requested without specified context");
         }
 
         return $this->bucket($context);
@@ -133,7 +134,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         }
 
         if (!$this->config->hasServer($server)) {
-            throw new StorageException("Undefined storage server '{$server}'.");
+            throw new StorageException("Undefined storage server '{$server}'");
         }
 
         return $this->servers[$server] = $this->factory->make(
@@ -172,15 +173,15 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         $parameters = $bucket + compact('name');
 
         if (!array_key_exists('options', $bucket)) {
-            throw new StorageException("Bucket configuration must include options.");
+            throw new StorageException("Bucket configuration must include options");
         }
 
         if (!array_key_exists('prefix', $bucket)) {
-            throw new StorageException("Bucket configuration must include prefix.");
+            throw new StorageException("Bucket configuration must include prefix");
         }
 
         if (!array_key_exists('server', $bucket)) {
-            throw new StorageException("Bucket configuration must include server id.");
+            throw new StorageException("Bucket configuration must include server id");
         }
 
         $parameters['server'] = $this->server($bucket['server']);

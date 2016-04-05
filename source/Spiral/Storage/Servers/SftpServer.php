@@ -64,7 +64,7 @@ class SftpServer extends StorageServer
 
         if (!extension_loaded('ssh2')) {
             throw new ServerException(
-                "Unable to initialize sftp storage server, extension 'ssh2' not found."
+                "Unable to initialize sftp storage server, extension 'ssh2' not found"
             );
         }
 
@@ -145,7 +145,7 @@ class SftpServer extends StorageServer
     {
         if (!$this->exists($bucket, $oldname)) {
             throw new ServerException(
-                "Unable to rename storage object '{$oldname}', object does not exists at SFTP server."
+                "Unable to rename storage object '{$oldname}', object does not exists at SFTP server"
             );
         }
 
@@ -179,7 +179,7 @@ class SftpServer extends StorageServer
 
         if (empty($session)) {
             throw new ServerException(
-                "Unable to connect to remote SSH server '{$this->options['host']}'."
+                "Unable to connect to remote SSH server '{$this->options['host']}'"
             );
         }
 
@@ -269,7 +269,7 @@ class SftpServer extends StorageServer
             if (!file_exists('ssh2.sftp://' . $this->sftp . $location)) {
                 if (!ssh2_sftp_mkdir($this->sftp, $location)) {
                     throw new ServerException(
-                        "Unable to create directory {$location} using sftp connection."
+                        "Unable to create directory {$location} using sftp connection"
                     );
                 }
 

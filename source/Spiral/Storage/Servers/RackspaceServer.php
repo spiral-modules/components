@@ -315,7 +315,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         } catch (ClientException $exception) {
             if ($exception->getCode() == 401) {
                 throw new ServerException(
-                    "Unable to perform Rackspace authorization using given credentials."
+                    "Unable to perform RackSpace authorization using given credentials"
                 );
             }
 
@@ -332,7 +332,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         }
 
         if (!isset($response['access']['token']['id'])) {
-            throw new ServerException("Unable to fetch rackspace auth token.");
+            throw new ServerException("Unable to fetch rackspace auth token");
         }
 
         $this->authToken = $response['access']['token']['id'];
@@ -374,12 +374,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     protected function buildUri(BucketInterface $bucket, $name)
     {
         if (empty($bucket->getOption('region'))) {
-            throw new ServerException("Every rackspace container should have specified region.");
+            throw new ServerException("Every RackSpace container should have specified region");
         }
 
         $region = $bucket->getOption('region');
         if (!isset($this->regions[$region])) {
-            throw new ServerException("'{$region}' region is not supported by Rackspace.");
+            throw new ServerException("'{$region}' region is not supported by RackSpace");
         }
 
         return new Uri(

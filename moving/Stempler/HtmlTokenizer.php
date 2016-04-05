@@ -14,7 +14,7 @@ use Spiral\Tokenizer\Isolator;
  * related operations. HtmlTokenizer is pretty slow! Please don't forget that this is tokenizer,
  * not parser.
  *
- * @todo very old class, improvement required
+ * @todo very old class, improvement is required
  */
 class HtmlTokenizer
 {

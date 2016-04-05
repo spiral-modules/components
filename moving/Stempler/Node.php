@@ -15,16 +15,9 @@ use Spiral\Stempler\Exceptions\StrictModeException;
 /**
  * Stempler Node represents simple XML like tree of blocks defined by behaviours provided by it's
  * supervisor. Node utilizes HtmlTokenizer to create set of tokens being feeded to supervisor.
- * 
- * @todo move shortTags to syntax! ASAP!
  */
 class Node
 {
-    /**
-     * Short tags expression, usually used inside attributes and etc.
-     */
-    const SHORT_TAGS = '/\${(?P<name>[a-z0-9_\.\-]+)(?: *\| *(?P<default>[^}]+) *)?}/i';
-
     /**
      * Node name (usually related to block name).
      *
@@ -360,7 +353,7 @@ class Node
         }
 
         //Looking for short tag definitions (${title|DEFAULT})
-        if (preg_match(self::SHORT_TAGS, $content, $matches)) {
+        if (preg_match($this->supervisor->syntax()->shortTags(), $content, $matches)) {
             $chunks = explode($matches[0], $content);
 
             //We expecting first chunk to be string (before block)

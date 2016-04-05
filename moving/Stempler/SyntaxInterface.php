@@ -35,6 +35,14 @@ interface SyntaxInterface
     public function isStrict();
 
     /**
+     * Regular expression which defined short node tag, must declare named pattern with "name" and
+     * "default" keys
+     *
+     * @return mixed
+     */
+    public function shortTags();
+
+    /**
      * Detect token behaviour.
      *
      * @param array  $token

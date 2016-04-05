@@ -21,13 +21,6 @@ abstract class ReflectionEntity extends \ReflectionClass
     const BASE_CLASS = DataEntity::class;
 
     /**
-     * Mutator names.
-     */
-    const MUTATOR_SETTER   = 'setter';
-    const MUTATOR_GETTER   = 'getter';
-    const MUTATOR_ACCESSOR = 'accessor';
-
-    /**
      * Properties cache.
      *
      * @invisible

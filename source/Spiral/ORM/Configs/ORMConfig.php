@@ -76,8 +76,8 @@ class ORMConfig extends InjectableConfig
      */
     public function getMutators($type)
     {
-        return isset($this->config['mutators'][$type])
-            ? $this->config['mutators'][$type]
-            : [];
+        $mutators = $this->config['mutators'];
+
+        return isset($mutators[$type]) ? $mutators[$type] : [];
     }
 }

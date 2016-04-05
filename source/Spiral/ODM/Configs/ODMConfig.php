@@ -91,8 +91,8 @@ class ODMConfig extends InjectableConfig
      */
     public function getMutators($type)
     {
-        return isset($this->config['schemas']['mutators'][$type])
-            ? $this->config['schemas']['mutators'][$type]
-            : [];
+        $mutators = $this->config['schemas']['mutators'];
+
+        return isset($mutators[$type]) ? $mutators[$type] : [];
     }
 }

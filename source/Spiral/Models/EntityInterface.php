@@ -9,12 +9,11 @@
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityExceptionInterface;
-use Spiral\Validation\ValidatesInterface;
 
 /**
  * Generic data entity instance.
  */
-interface EntityInterface extends ValidatesInterface
+interface EntityInterface
 {
     /**
      * Check if field known to entity, field value can be null!

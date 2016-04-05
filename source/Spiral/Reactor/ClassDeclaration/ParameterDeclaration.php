@@ -152,6 +152,6 @@ class ParameterDeclaration extends NamedDeclaration
             return $result;
         }
 
-        return $result . ' = ' . $this->serializer()->serialize($this->defaultValue, $indentLevel);
+        return $result . ' = ' . $this->serializer()->serialize($this->defaultValue);
     }
 }

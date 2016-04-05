@@ -31,4 +31,21 @@ abstract class Declaration extends Component implements RenderableInterface
     {
         return str_repeat(self::INDENT, max($indent, 0)) . $string;
     }
+
+    /**
+     * Normalize string endings to avoid EOL problem. Replace \n\r and multiply new lines with
+     * single \n.
+     *
+     * @param string $string       String to be normalized.
+     * @param bool   $joinMultiple Join multiple new lines into one.
+     * @return mixed
+     */
+    protected function normalizeEndings($string, $joinMultiple = true)
+    {
+        if (!$joinMultiple) {
+            return str_replace("\r\n", "\n", $string);
+        }
+
+        return preg_replace('/[\n\r]+/', "\n", $string);
+    }
 }

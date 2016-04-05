@@ -28,7 +28,7 @@ use Spiral\Validation\Exceptions\ValidationException;
  *      "status" => [
  *           ["notEmpty"],
  *           ["string::shorter", 10, "error" => "Your string is too short."],
- *           [["MyClass","myMethod"], "error" => "Custom validation failed."]
+ *           [["MyClass", "myMethod"], "error" => "Custom validation failed."]
  *      ],
  *      "email" => [
  *           ["notEmpty", "error" => "Please enter your email address."],

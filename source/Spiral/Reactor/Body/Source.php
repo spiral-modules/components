@@ -136,10 +136,10 @@ class Source extends Declaration
     public function fetchLines($string, $cutIndents)
     {
         if ($cutIndents) {
-            $string = Strings::normalizeEndings($string, false);
+            $string = $this->normalizeEndings($string, false);
         }
 
-        $lines = explode("\n", Strings::normalizeEndings($string, false));
+        $lines = explode("\n", $this->normalizeEndings($string, false));
 
         //Pre-processing
         return array_map([$this, 'prepareLine'], $lines);

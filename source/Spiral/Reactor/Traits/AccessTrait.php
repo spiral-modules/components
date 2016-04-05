@@ -34,7 +34,7 @@ trait AccessTrait
             Declaration::ACCESS_PUBLIC
         ])
         ) {
-            throw new ReactorException("Invalid declaration level '{$access}'.");
+            throw new ReactorException("Invalid declaration level '{$access}'");
         }
 
         $this->access = $access;

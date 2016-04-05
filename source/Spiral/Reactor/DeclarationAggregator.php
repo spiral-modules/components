@@ -86,7 +86,7 @@ class DeclarationAggregator extends Declaration implements
 
         if (!$allowed) {
             $type = get_class($element);
-            throw new ReactorException("Elements with type '{$type}' are not allowed.");
+            throw new ReactorException("Elements with type '{$type}' are not allowed");
         }
 
         $this->elements[] = $element;
@@ -103,7 +103,7 @@ class DeclarationAggregator extends Declaration implements
     public function get($name)
     {
         if (!$this->has($name)) {
-            throw new ReactorException("Undefined element '{$name}'.");
+            throw new ReactorException("Undefined element '{$name}'");
         }
 
         return $this->find($name);
@@ -222,6 +222,6 @@ class DeclarationAggregator extends Declaration implements
                 return $element;
             }
         }
-        throw new ReactorException("Unable to find element '{$name}'.");
+        throw new ReactorException("Unable to find element '{$name}'");
     }
 }

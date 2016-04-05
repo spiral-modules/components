@@ -7,6 +7,7 @@
  */
 namespace Spiral\Models;
 
+use Spiral\Core\Component;
 use Spiral\Models\Traits\EventsTrait;
 
 /**
@@ -18,7 +19,7 @@ use Spiral\Models\Traits\EventsTrait;
  * Simply define method with name: __init__... you can get access to self::events() inside it.
  * Traits can be used to define such methods.
  */
-abstract class MutableObject
+abstract class MutableObject extends Component
 {
     use EventsTrait;
 

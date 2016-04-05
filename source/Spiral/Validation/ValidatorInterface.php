@@ -37,7 +37,7 @@ interface ValidatorInterface
      * @throws ValidationException
      */
     public function setData($data);
-
+    
     /**
      * Register outer validation error. Registered error persists until context data are changed
      * or flushRegistered method not called.

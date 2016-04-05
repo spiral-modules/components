@@ -11,6 +11,7 @@ namespace Spiral\Tokenizer;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -25,9 +26,6 @@ use Symfony\Component\Finder\Finder;
  */
 class Tokenizer extends Component implements SingletonInterface, TokenizerInterface, InjectorInterface
 {
-    /*
-     * Required traits.
-     */
     use LoggerTrait, BenchmarkTrait, TokensTrait;
 
     /**
@@ -78,7 +76,9 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      */
     public function fetchTokens($filename)
     {
-        return $this->normalizeTokens(token_get_all($this->files->read($filename)));
+        return $this->normalizeTokens(
+            token_get_all($this->files->read($filename))
+        );
     }
 
     /**
@@ -113,21 +113,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         array $exclude = [],
         Finder $finder = null
     ) {
-        $finder = !empty($finder) ?: new Finder();
-
-        if (empty($directories)) {
-            $directories = $this->config->getDirectories();
-        }
-
-        if (empty($exclude)) {
-            $exclude = $this->config->getExcludes();
-        }
-
-        //Configuring finder
-        return new ClassLocator(
-            $this,
-            $finder->files()->in($directories)->exclude($exclude)->name('*.php')
-        );
+        return new ClassLocator($this, $this->prepareFinder($finder, $directories, $exclude));
     }
 
     /**
@@ -144,7 +130,37 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         array $exclude = [],
         Finder $finder = null
     ) {
-        $finder = !empty($finder) ?: new Finder();
+        return new InvocationLocator($this, $this->prepareFinder($finder, $directories, $exclude));
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws InjectionException
+     */
+    public function createInjection(\ReflectionClass $class, $context = null)
+    {
+        if ($class->isSubclassOf(ClassLocatorInterface::class)) {
+            return $this->classLocator();
+        } elseif ($class->isSubclassOf(InvocationLocatorInterface::class)) {
+            return $this->invocationLocator();
+        }
+
+        throw new InjectionException("Unable to create injection for {$class}");
+    }
+
+    /**
+     * @param Finder|null $finder
+     * @param array       $directories
+     * @param array       $exclude
+     * @return Finder
+     */
+    private function prepareFinder(
+        Finder $finder = null,
+        array $directories = [],
+        array $exclude = []
+    ) {
+        $finder = !empty($finder) ? $finder : new Finder();
 
         if (empty($directories)) {
             $directories = $this->config->getDirectories();
@@ -154,22 +170,6 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
             $exclude = $this->config->getExcludes();
         }
 
-        //Configuring finder
-        return new InvocationLocator(
-            $this,
-            $finder->files()->in($directories)->exclude($exclude)->name('*.php')
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createInjection(\ReflectionClass $class, $context = null)
-    {
-        if ($class->isSubclassOf(ClassLocatorInterface::class)) {
-            return $this->classLocator();
-        } else {
-            return $this->invocationLocator();
-        }
+        return $finder->files()->in($directories)->exclude($exclude)->name('*.php');
     }
 }

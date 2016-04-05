@@ -229,6 +229,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     {
         $this->errors = [];
         foreach ($this->rules as $field => $rules) {
+
             foreach ($rules as $rule) {
                 if (isset($this->errors[$field])) {
                     //We are validating field till first error
@@ -237,18 +238,14 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
 
                 //Condition is either rule itself or first array element
                 $condition = is_string($rule) ? $rule : $rule[0];
+                $arguments = is_string($rule) ? [] : $this->fetchArguments($rule);
 
                 if (empty($this->getValue($field)) && !$this->config->emptyCondition($condition)) {
                     //There is no need to validate empty field except for special conditions
                     break;
                 }
 
-                $result = $this->check(
-                    $field,
-                    $this->getValue($field),
-                    $condition,
-                    $arguments = is_string($rule) ? [] : $this->fetchArguments($rule)
-                );
+                $result = $this->check($field, $this->getValue($field), $condition, $arguments);
 
                 if ($result === true) {
                     //No errors

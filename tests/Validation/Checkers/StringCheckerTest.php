@@ -9,13 +9,14 @@
 namespace Spiral\Tests\Validation\Checkers;
 
 
+use Spiral\Core\Container;
 use Spiral\Validation\Checkers\StringChecker;
 
 class StringCheckerTest extends \PHPUnit_Framework_TestCase
 {
     public function testShorter()
     {
-        $checker = new StringChecker();
+        $checker = new StringChecker(new Container());
 
         $this->assertFalse($checker->shorter('abc', 2));
         $this->assertFalse($checker->shorter('абв', 2));
@@ -29,7 +30,7 @@ class StringCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testLonger()
     {
-        $checker = new StringChecker();
+        $checker = new StringChecker(new Container());
 
         $this->assertTrue($checker->longer('abc', 2));
         $this->assertTrue($checker->longer('абв', 2));
@@ -43,7 +44,7 @@ class StringCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testLength()
     {
-        $checker = new StringChecker();
+        $checker = new StringChecker(new Container());
 
         $this->assertTrue($checker->length('abc', 3));
         $this->assertTrue($checker->length('абв', 3));
@@ -54,7 +55,7 @@ class StringCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testRange()
     {
-        $checker = new StringChecker();
+        $checker = new StringChecker(new Container());
 
         $this->assertTrue($checker->range('abc', 2, 4));
         $this->assertTrue($checker->range('абв', 1, 100));

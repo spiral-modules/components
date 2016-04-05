@@ -50,14 +50,15 @@ class AddressChecker extends AbstractChecker implements SingletonInterface
      */
     public function url($url, $requireScheme = true)
     {
-        if (
-            !$requireScheme
-            && stripos($url, 'http://') === false && stripos($url, 'https://') === false
-        ) {
+        if (!$requireScheme && stripos($url, '://') === false) {
             //Forcing scheme (not super great idea)
             $url = 'http://' . $url;
         }
 
-        return (bool)filter_var($url, FILTER_VALIDATE_URL);
+        if ((bool)filter_var($url, FILTER_VALIDATE_URL)) {
+            return stripos($url, 'http://') === 0 || stripos($url, 'https://') === 0;
+        }
+
+        return false;
     }
 }

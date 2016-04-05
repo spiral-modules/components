@@ -8,6 +8,7 @@
 
 namespace Spiral\Validation\Checkers;
 
+use Interop\Container\ContainerInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\FilesInterface;
@@ -33,11 +34,14 @@ class FileChecker extends AbstractChecker implements SingletonInterface
     protected $files = null;
 
     /**
-     * @param FilesInterface $files
+     * @param FilesInterface     $files
+     * @param ContainerInterface $container
      */
-    public function __construct(FilesInterface $files)
+    public function __construct(FilesInterface $files, ContainerInterface $container = null)
     {
         $this->files = $files;
+
+        parent::__construct($container);
     }
 
     /**

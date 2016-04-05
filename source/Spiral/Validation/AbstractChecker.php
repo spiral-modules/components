@@ -7,7 +7,10 @@
  */
 namespace Spiral\Validation;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
+use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Validation\Exceptions\ValidationException;
 
@@ -16,7 +19,7 @@ use Spiral\Validation\Exceptions\ValidationException;
  */
 abstract class AbstractChecker extends Component implements CheckerInterface
 {
-    use TranslatorTrait;
+    use TranslatorTrait, SaturateTrait;
 
     /**
      * @var Validator
@@ -29,6 +32,21 @@ abstract class AbstractChecker extends Component implements CheckerInterface
      * @var array
      */
     protected $messages = [];
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container = null;
+
+    /**
+     * @param ContainerInterface $container Needed for translations and other things, saturated
+     *
+     * @throws SugarException
+     */
+    public function __construct(ContainerInterface $container = null)
+    {
+        $this->container = $this->saturate($container, ContainerInterface::class);
+    }
 
     /**
      * {@inheritdoc}

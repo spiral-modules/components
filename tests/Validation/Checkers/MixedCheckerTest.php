@@ -8,6 +8,7 @@
 
 namespace Spiral\Tests\Validation\Checkers;
 
+use Spiral\Core\Container;
 use Spiral\Validation\Checkers\MixedChecker;
 use Spiral\Validation\Validator;
 
@@ -18,14 +19,14 @@ class MixedCheckerTest extends \PHPUnit_Framework_TestCase
      */
     public function testCardNumber($expected, $card)
     {
-        $checker = new MixedChecker();
+        $checker = new MixedChecker(new Container());
 
         $this->assertEquals($expected, $checker->cardNumber($card));
     }
 
     public function testMatch()
     {
-        $checker = new MixedChecker();
+        $checker = new MixedChecker(new Container());
 
         $mock = $this->getMockBuilder(Validator::class)->disableOriginalConstructor()->getMock();
         $mock->method('getValue')->with('abc')->will($this->returnValue(123));

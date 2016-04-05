@@ -9,7 +9,6 @@
 namespace Spiral\Tokenizer\Reflections;
 
 use Spiral\Core\Component;
-use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
@@ -19,11 +18,6 @@ use Spiral\Tokenizer\TokenizerInterface;
  */
 class ReflectionFile extends Component
 {
-    /*
-     * Development sugar.
-     */
-    use SaturateTrait;
-
     /**
      * Namespace separator.
      */
@@ -665,7 +659,7 @@ class ReflectionFile extends Component
         }
 
         //Can not be detected
-        return;
+        return null;
     }
 
     /**

@@ -8,13 +8,14 @@
 
 namespace Spiral\Tests\Validation\Checkers;
 
+use Spiral\Core\Container;
 use Spiral\Validation\Checkers\TypeChecker;
 
 class TypeCheckerTest extends \PHPUnit_Framework_TestCase
 {
     public function testNotEmpty()
     {
-        $checker = new TypeChecker();
+        $checker = new TypeChecker(new Container());
 
         $this->assertEquals(!empty('value'), $checker->notEmpty('value'));
         $this->assertEquals(!empty(1), $checker->notEmpty(1));
@@ -29,7 +30,7 @@ class TypeCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testNotEmptyStrings()
     {
-        $checker = new TypeChecker();
+        $checker = new TypeChecker(new Container());
 
         $this->assertTrue($checker->notEmpty('abc'));
         $this->assertTrue($checker->notEmpty(' ', false));
@@ -40,7 +41,7 @@ class TypeCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testBoolean()
     {
-        $checker = new TypeChecker();
+        $checker = new TypeChecker(new Container());
 
         $this->assertTrue($checker->boolean(true));
         $this->assertTrue($checker->boolean(false));
@@ -55,7 +56,7 @@ class TypeCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testDatetime()
     {
-        $checker = new TypeChecker();
+        $checker = new TypeChecker(new Container());
 
         $this->assertTrue($checker->datetime('now'));
         $this->assertTrue($checker->datetime('tomorrow 10am'));
@@ -68,7 +69,7 @@ class TypeCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testTimezone()
     {
-        $checker = new TypeChecker();
+        $checker = new TypeChecker(new Container());
 
         foreach (\DateTimeZone::listIdentifiers() as $identifier) {
             $this->assertTrue($checker->timezone($identifier));

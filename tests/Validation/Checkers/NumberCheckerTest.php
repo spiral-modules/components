@@ -8,13 +8,14 @@
 
 namespace Spiral\Tests\Validation\Checkers;
 
+use Spiral\Core\Container;
 use Spiral\Validation\Checkers\NumberChecker;
 
 class NumberCheckerTest extends \PHPUnit_Framework_TestCase
 {
     public function testRange()
     {
-        $checker = new NumberChecker();
+        $checker = new NumberChecker(new Container());
 
         $this->assertTrue($checker->range(10, 1, 100));
         $this->assertTrue($checker->range(10, 10, 100));
@@ -29,7 +30,7 @@ class NumberCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testHigher()
     {
-        $checker = new NumberChecker();
+        $checker = new NumberChecker(new Container());
 
         $this->assertTrue($checker->higher(10, 10));
         $this->assertTrue($checker->higher(10, 9));
@@ -40,7 +41,7 @@ class NumberCheckerTest extends \PHPUnit_Framework_TestCase
 
     public function testLower()
     {
-        $checker = new NumberChecker();
+        $checker = new NumberChecker(new Container());
 
         $this->assertTrue($checker->lower(10, 11));
         $this->assertTrue($checker->lower(10, 10.01));

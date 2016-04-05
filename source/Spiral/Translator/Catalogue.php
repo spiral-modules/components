@@ -106,6 +106,22 @@ class Catalogue
     }
 
     /**
+     * Get all domain messages
+     *
+     * @param string $domain
+     *
+     * @return array
+     */
+    public function domainMessages($domain)
+    {
+        if (!$this->isLoaded($domain)) {
+            $this->loadDomain($domain);
+        }
+
+        return $this->domains[$domain];
+    }
+
+    /**
      * Adding string association to be stored into memory.
      *
      * @param string $domain
@@ -172,6 +188,17 @@ class Catalogue
         foreach ($this->domains as $domain => $data) {
             $this->saveDomain($domain, $data);
         }
+    }
+
+    /**
+     * Check if domain data was loaded
+     *
+     * @param string $domain
+     * @return bool
+     */
+    protected function isLoaded($domain)
+    {
+        return isset($this->domains[$domain]);
     }
 
     /**

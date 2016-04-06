@@ -11,7 +11,7 @@ use Spiral\Models\AbstractEntity;
 
 /**
  * Provides ability to generate entity schema based on given entity class and default property
- * values
+ * values, support value inheritance!
  */
 class ReflectionEntity
 {

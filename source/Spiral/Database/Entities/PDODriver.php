@@ -278,7 +278,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return \PDOStatement|PDOQuery
      */
-    public function query($statement, array $parameters, $class = null, array $args = [])
+    public function query($statement, array $parameters = [], $class = null, array $args = [])
     {
         return $this->statement(
             $statement,
@@ -334,6 +334,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             if (!empty($queryString)) {
                 $this->logger()->info($queryString, compact('query', 'parameters'));
             }
+
         } catch (\PDOException $e) {
             if (empty($queryString)) {
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
@@ -564,7 +565,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function isolationLevel($level)
     {
-        $this->logger()->info("Set transaction isolation level to '{$level}'.");
+        $this->logger()->info("Set transaction isolation level to '{$level}'");
 
         if (!empty($level)) {
             $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
@@ -581,7 +582,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function savepointCreate($name)
     {
-        $this->logger()->info("Creating savepoint '{$name}'.");
+        $this->logger()->info("Creating savepoint '{$name}'");
         $this->statement('SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 
@@ -595,7 +596,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function savepointRelease($name)
     {
-        $this->logger()->info("Releasing savepoint '{$name}'.");
+        $this->logger()->info("Releasing savepoint '{$name}'");
         $this->statement('RELEASE SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 
@@ -609,7 +610,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function savepointRollback($name)
     {
-        $this->logger()->info("Rolling back savepoint '{$name}'.");
+        $this->logger()->info("Rolling back savepoint '{$name}'");
         $this->statement('ROLLBACK TO SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 

@@ -44,6 +44,13 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @param QueryCompiler $compiler Associated compiled to be used by default.
+     */
+    abstract public function sqlStatement(QueryCompiler $compiler = null);
+
+    /**
      * Get ordered list of builder parameters in a form of ParameterInterface array.
      *
      * @param QueryCompiler $compiler Compiler is needed to validly sort parameters from different
@@ -55,13 +62,6 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
      * @throws BuilderException
      */
     abstract public function getParameters(QueryCompiler $compiler = null);
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param QueryCompiler $compiler Associated compiled to be used by default.
-     */
-    abstract public function sqlStatement(QueryCompiler $compiler = null);
 
     /**
      * Get interpolated (populated with parameters) SQL which will be run against database, please
@@ -89,8 +89,8 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     {
         try {
             $queryString = $this->queryString();
-        } catch (\Exception $exception) {
-            $queryString = "[ERROR: {$exception->getMessage()}]";
+        } catch (\Exception $e) {
+            $queryString = "[ERROR: {$e->getMessage()}]";
         }
 
         $debugInfo = [

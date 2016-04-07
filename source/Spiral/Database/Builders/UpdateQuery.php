@@ -41,6 +41,7 @@ class UpdateQuery extends AbstractAffect
         array $values = []
     ) {
         parent::__construct($database, $compiler, $table, $where);
+
         $this->values = $values;
     }
 
@@ -127,7 +128,11 @@ class UpdateQuery extends AbstractAffect
 
         //Join and where parameters are going after values
         return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::UPDATE_QUERY, $this->whereParameters, [], [], $values
+            QueryCompiler::UPDATE_QUERY,
+            $this->whereParameters,
+            [],
+            [],
+            $values
         ));
     }
 
@@ -137,7 +142,7 @@ class UpdateQuery extends AbstractAffect
     public function sqlStatement(QueryCompiler $compiler = null)
     {
         if (empty($this->values)) {
-            throw new BuilderException('Update values must be specified.');
+            throw new BuilderException('Update values must be specified');
         }
 
         if (empty($compiler)) {

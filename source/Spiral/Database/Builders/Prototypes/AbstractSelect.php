@@ -38,13 +38,10 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  */
 abstract class AbstractSelect extends AbstractWhere implements
     \IteratorAggregate,
+    \JsonSerializable,
     PaginableInterface,
-    PaginatorAwareInterface,
-    \JsonSerializable
+    PaginatorAwareInterface
 {
-    /*
-     * Abstract select query must fully support joins and be paginable.
-     */
     use JoinsTrait, PaginatorTrait;
 
     /**
@@ -402,11 +399,11 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function __call($method, $arguments)
     {
         if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
-            throw new BuilderException("Unknown aggregation method '{$method}'.");
+            throw new BuilderException("Unknown aggregation method '{$method}'");
         }
 
         if (!isset($arguments[0]) || count($arguments) > 1) {
-            throw new BuilderException('Aggregation methods can support exactly one column.');
+            throw new BuilderException('Aggregation methods can support exactly one column');
         }
 
         $columns = $this->columns;
@@ -451,7 +448,7 @@ abstract class AbstractSelect extends AbstractWhere implements
             }
 
             if (is_array($parameter)) {
-                throw new BuilderException('Arrays must be wrapped with Parameter instance.');
+                throw new BuilderException('Arrays must be wrapped with Parameter instance');
             }
 
             //Wrapping all values with ParameterInterface

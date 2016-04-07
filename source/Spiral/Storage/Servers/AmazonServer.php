@@ -73,13 +73,13 @@ class AmazonServer extends StorageServer
     {
         try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 404) {
                 return false;
             }
 
             //Something wrong with connection
-            throw $exception;
+            throw $e;
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -134,13 +134,13 @@ class AmazonServer extends StorageServer
     {
         try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() != 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() != 404) {
                 //Some authorization or other error
-                throw $exception;
+                throw $e;
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $response->getBody();
@@ -166,13 +166,13 @@ class AmazonServer extends StorageServer
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() != 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() != 404) {
                 //Some authorization or other error
-                throw $exception;
+                throw $e;
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         $this->delete($bucket, $oldname);
@@ -192,13 +192,13 @@ class AmazonServer extends StorageServer
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() != 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() != 404) {
                 //Some authorization or other error
-                throw $exception;
+                throw $e;
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return true;

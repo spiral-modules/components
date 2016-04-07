@@ -19,7 +19,7 @@ use Spiral\Database\ResultInterface;
  * @todo bad namespace choice?
  * @todo withParameters!
  */
-class PDOQuery extends PDOStatement implements ResultInterface
+class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializable
 {
     use InstantiationTrait;
 
@@ -72,6 +72,14 @@ class PDOQuery extends PDOStatement implements ResultInterface
     public function count()
     {
         return $this->rowCount();
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**

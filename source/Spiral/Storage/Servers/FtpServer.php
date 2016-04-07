@@ -221,7 +221,7 @@ class FtpServer extends StorageServer
 
                 return $this->getPath($bucket, $name);
             }
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
             //Directory has to be created
         }
 
@@ -235,7 +235,7 @@ class FtpServer extends StorageServer
 
             try {
                 ftp_chdir($this->connection, $directory);
-            } catch (\Exception $exception) {
+            } catch (\Exception $e) {
                 ftp_mkdir($this->connection, $directory);
                 ftp_chmod($this->connection, $mode | 0111, $directory);
                 ftp_chdir($this->connection, $directory);

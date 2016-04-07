@@ -19,9 +19,6 @@ use Spiral\Debug\Traits\LoggerTrait;
  */
 abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterface
 {
-    /*
-     * Few builder warnings.
-     */
     use LoggerTrait;
 
     /**
@@ -62,7 +59,7 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
     public function run()
     {
         if (empty($this->whereTokens)) {
-            $this->logger()->warning('Affect query performed without any limiting condition.');
+            $this->logger()->warning('Affect query performed without any limiting condition');
         }
 
         return $this->pdoStatement()->rowCount();

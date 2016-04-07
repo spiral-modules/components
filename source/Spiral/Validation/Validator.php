@@ -328,7 +328,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             array_unshift($arguments, $value);
 
             return call_user_func_array($condition, $arguments);
-        } catch (\ErrorException $exception) {
+        } catch (\ErrorException $e) {
             $condition = func_get_arg(2);
             if (is_array($condition)) {
                 if (is_object($condition[0])) {
@@ -340,7 +340,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
 
             $this->logger()->error(
                 "Condition '{condition}' failed with '{exception}' while checking '{field}' field.",
-                compact('condition', 'field') + ['exception' => $exception->getMessage()]
+                compact('condition', 'field') + ['exception' => $e->getMessage()]
             );
 
             return false;

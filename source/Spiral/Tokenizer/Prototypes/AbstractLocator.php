@@ -101,10 +101,10 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
 
         try {
             return new \ReflectionClass($class);
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
             $this->logger()->error(
                 "Unable to resolve class '{class}', error '{message}'",
-                ['class' => $class, 'message' => $exception->getMessage()]
+                ['class' => $class, 'message' => $e->getMessage()]
             );
 
             return;

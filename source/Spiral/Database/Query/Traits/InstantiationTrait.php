@@ -41,11 +41,12 @@ trait InstantiationTrait
     {
         $values = $this->fetch();
 
-        if ($values === false) {
+        if ($values === false || !is_array($values)) {
             return null;
         }
 
         if (class_exists(AbstractEntity::class) && is_a($class, AbstractEntity::class, true)) {
+            //Spiral Models shortcut
             return new $class($values);
         }
 
@@ -64,9 +65,10 @@ trait InstantiationTrait
         return $instance;
     }
 
-
     /**
      * All results as instances.
+     *
+     * @param string $class
      *
      * @return array
      */

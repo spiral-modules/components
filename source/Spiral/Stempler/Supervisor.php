@@ -157,15 +157,15 @@ class Supervisor implements SupervisorInterface
 
         try {
             $source = $this->loader->getSource($path);
-        } catch (LoaderExceptionInterface $exception) {
-            throw new StemplerException($exception->getMessage(), $token, 0, $exception);
+        } catch (LoaderExceptionInterface $e) {
+            throw new StemplerException($e->getMessage(), $token, 0, $e);
         }
 
         try {
             return new Node(clone $this, $this->uniquePlaceholder(), $source);
-        } catch (StemplerException $exception) {
+        } catch (StemplerException $e) {
             //Wrapping to clarify location of error
-            throw $this->clarifyException($path, $exception);
+            throw $this->clarifyException($path, $e);
         }
     }
 

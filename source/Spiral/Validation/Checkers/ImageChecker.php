@@ -155,7 +155,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
     {
         try {
             return getimagesize($this->filename($filename));
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
             //We can simply invalidate image if system can't read it
         }
 

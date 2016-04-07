@@ -200,7 +200,9 @@ trait JoinsTrait
     public function on($joined = null, $operator = null, $outer = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            func_get_args(),
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
@@ -222,7 +224,9 @@ trait JoinsTrait
     public function andOn($joined = null, $operator = null, $outer = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            func_get_args(),
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
@@ -244,7 +248,10 @@ trait JoinsTrait
     public function orOn($joined = null, $operator = null, $outer = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->onWrapper()
+            'AND',
+            func_get_args(),
+            $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWrapper()
         );
 
         return $this;
@@ -268,7 +275,9 @@ trait JoinsTrait
     public function onWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            func_get_args(),
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->whereWrapper()
         );
 
@@ -293,7 +302,9 @@ trait JoinsTrait
     public function andOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            func_get_args(),
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->whereWrapper()
         );
 
@@ -318,7 +329,9 @@ trait JoinsTrait
     public function orOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            func_get_args(),
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->whereWrapper()
         );
 
@@ -379,7 +392,7 @@ trait JoinsTrait
             }
 
             if (is_array($parameter)) {
-                throw new BuilderException('Arrays must be wrapped with Parameter instance.');
+                throw new BuilderException('Arrays must be wrapped with Parameter instance');
             }
 
             //Wrapping all values with ParameterInterface

@@ -334,7 +334,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             if (!empty($queryString)) {
                 $this->logger()->info($queryString, compact('query', 'parameters'));
             }
-        } catch (\PDOException $exception) {
+        } catch (\PDOException $e) {
             if (empty($queryString)) {
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
             }
@@ -342,7 +342,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             $this->logger()->error($queryString, compact('query', 'parameters'));
 
             //Converting exception into query or integrity exception
-            throw $this->clarifyException($exception);
+            throw $this->clarifyException($e);
         }
 
         return $pdoStatement;

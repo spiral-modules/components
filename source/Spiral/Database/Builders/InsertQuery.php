@@ -45,6 +45,7 @@ class InsertQuery extends QueryBuilder
     public function __construct(Database $database, QueryCompiler $compiler, $table = '')
     {
         parent::__construct($database, $compiler);
+
         $this->table = $table;
     }
 
@@ -140,7 +141,11 @@ class InsertQuery extends QueryBuilder
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
         return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::INSERT_QUERY, [], [], [], $this->rowsets
+            QueryCompiler::INSERT_QUERY,
+            [],
+            [],
+            [],
+            $this->rowsets
         ));
     }
 

@@ -338,12 +338,12 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
             $this->commit();
 
             return $result;
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
             $this->rollBack();
-            throw $exception;
-        } catch (\Throwable $exception) {
+            throw $e;
+        } catch (\Throwable $e) {
             $this->rollBack();
-            throw $exception;
+            throw $e;
         }
     }
 

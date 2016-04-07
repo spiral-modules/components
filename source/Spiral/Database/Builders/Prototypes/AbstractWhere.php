@@ -238,7 +238,7 @@ abstract class AbstractWhere extends QueryBuilder
                 $valueA = strtoupper($valueA);
                 if (!in_array($valueA, ['BETWEEN', 'NOT BETWEEN'])) {
                     throw new BuilderException(
-                        'Only "BETWEEN" or "NOT BETWEEN" can define second comparasions value.'
+                        'Only "BETWEEN" or "NOT BETWEEN" can define second comparasions value'
                     );
                 }
 
@@ -322,7 +322,7 @@ abstract class AbstractWhere extends QueryBuilder
     {
         foreach ($where as $operation => $value) {
             if (is_numeric($operation)) {
-                throw new BuilderException('Nested conditions should have defined operator.');
+                throw new BuilderException('Nested conditions should have defined operator');
             }
 
             $operation = strtoupper($operation);
@@ -369,7 +369,7 @@ abstract class AbstractWhere extends QueryBuilder
             }
 
             if (is_array($parameter)) {
-                throw new BuilderException('Arrays must be wrapped with Parameter instance.');
+                throw new BuilderException('Arrays must be wrapped with Parameter instance');
             }
 
             //Wrapping all values with ParameterInterface

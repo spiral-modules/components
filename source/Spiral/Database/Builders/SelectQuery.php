@@ -183,6 +183,6 @@ class SelectQuery extends AbstractSelect
      */
     public function all()
     {
-        return $this->getIterator()->all();
+        return $this->getIterator()->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

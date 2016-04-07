@@ -116,19 +116,19 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     {
         try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 404) {
                 return false;
             }
 
-            if ($exception->getCode() == 401) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->exists($bucket, $name);
             }
 
             //Some unexpected error
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         if ($response->getStatusCode() !== 200) {
@@ -166,15 +166,15 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             ]);
 
             $this->client->send($request->withBody($this->castStream($source)));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->put($bucket, $name, $source);
             }
 
             //Some unexpected error
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return true;
@@ -187,14 +187,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     {
         try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->allocateStream($bucket, $name);
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $response->getBody();
@@ -207,13 +207,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     {
         try {
             $this->client->send($this->buildRequest('DELETE', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
                 $this->delete($bucket, $name);
-            } elseif ($exception->getCode() != 404) {
-                throw new ServerException($exception->getMessage(), $exception->getCode(),
-                    $exception);
+            } elseif ($e->getCode() != 404) {
+                throw new ServerException($e->getMessage(), $e->getCode(), $e);
             }
         }
     }
@@ -230,14 +229,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->rename($bucket, $oldname, $newname);
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         //Deleting old file
@@ -267,14 +266,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->copy($bucket, $destination, $name);
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return true;
@@ -312,14 +311,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
              * @var ResponseInterface $response
              */
             $response = $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 throw new ServerException(
                     "Unable to perform RackSpace authorization using given credentials"
                 );
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         $response = json_decode((string)$response->getBody(), 1);

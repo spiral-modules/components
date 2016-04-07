@@ -84,9 +84,12 @@ class SynchronizationBus extends Component
 
             //Dropping non declared columns
             $this->saveTables(true, true, true);
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
             $this->rollbackTransaction();
-            throw $exception;
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->rollbackTransaction();
+            throw $e;
         }
 
         $this->commitTransaction();

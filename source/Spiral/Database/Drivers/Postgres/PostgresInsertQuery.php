@@ -8,6 +8,7 @@
 
 namespace Spiral\Database\Drivers\Postgres;
 
+use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Drivers\Postgres\QueryCompiler as PostgresCompiler;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 use Spiral\Database\Exceptions\BuilderException;
@@ -16,11 +17,8 @@ use Spiral\Debug\Traits\LoggerTrait;
 /**
  * Postgres driver requires little bit different way to handle last insert id.
  */
-class InsertQuery extends \Spiral\Database\Builders\InsertQuery
+class PostgresInsertQuery extends InsertQuery
 {
-    /*
-     * Debug messages.
-     */
     use LoggerTrait;
 
     /**
@@ -29,6 +27,7 @@ class InsertQuery extends \Spiral\Database\Builders\InsertQuery
     public function sqlStatement(AbstractCompiler $compiler = null)
     {
         $driver = $this->database->driver();
+
         if (
             !$driver instanceof PostgresDriver
             || (!empty($compiler) && !$compiler instanceof PostgresCompiler)

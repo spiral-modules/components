@@ -19,23 +19,21 @@ use Spiral\Debug\Traits\LoggerTrait;
  */
 class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 {
-    /*
-     * There is few warning notices.
-     */
     use LoggerTrait;
 
     /**
      * @var SQLServerDriver
      */
-    protected $driver = null;
+    private $driver = null;
 
     /**
-     * @param SQLServerDriver $driver
      * @param Quoter          $quoter
+     * @param SQLServerDriver $driver
      */
-    public function __construct(SQLServerDriver $driver, Quoter $quoter)
+    public function __construct(Quoter $quoter, SQLServerDriver $driver)
     {
-        parent::__construct($driver, $quoter);
+        parent::__construct($quoter);
+        $this->driver = $driver;
     }
 
     /**
@@ -70,12 +68,11 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
         if ($this->driver->serverVersion() >= 12) {
             $this->logger()->warning(
-                "You can't use query limiting without specifying ORDER BY statement, sql fallback used."
+                "You can't use query limiting without specifying ORDER BY statement, sql fallback used"
             );
         } else {
             $this->logger()->warning(
-                'You are using older version of SQLServer, '
-                . 'it has some limitation with query limiting and unions.'
+                'You are using older version of SQLServer, it has some limitation with query limiting and unions'
             );
         }
 
@@ -87,7 +84,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
         //Will be removed by QueryResult
         $columns[] = new Fragment(
-            "ROW_NUMBER() OVER ($ordering) AS {$this->quote(PDOQuery::ROW_NUMBER_COLUMN)}"
+            "ROW_NUMBER() OVER ($ordering) AS {$this->quote(SQLServerResult::ROW_NUMBER_COLUMN)}"
         );
 
         //Let's compile MOST of our query :)
@@ -105,7 +102,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
             $unionTokens
         );
 
-        $limitStatement = $this->compileLimit($limit, $offset, PDOQuery::ROW_NUMBER_COLUMN);
+        $limitStatement = $this->compileLimit($limit, $offset, SQLServerResult::ROW_NUMBER_COLUMN);
 
         return "SELECT * FROM (\n{$selection}\n) AS [selection_alias] {$limitStatement}";
     }

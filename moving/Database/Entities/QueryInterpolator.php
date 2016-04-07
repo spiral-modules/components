@@ -16,7 +16,7 @@ use Spiral\Database\Injections\ParameterInterface;
  */
 class QueryInterpolator
 {
-    //TODO: WHTF
+    //TODO: SUPPORT NAMED PARAMETERS!
 
     /**
      * Helper method used to interpolate SQL query with set of parameters, must be used only for

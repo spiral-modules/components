@@ -31,28 +31,19 @@ class QueryCompiler extends Component
     const INSERT_QUERY = 'insert';
 
     /**
-     * Associated driver instance, may be required for some data assumptions.
-     *
-     * @var PDODriver
-     */
-    protected $driver = null;
-
-    /**
      * Quotes names and expressions.
      *
      * @var Quoter
      */
-    protected $quoter = null;
+    private $quoter = null;
 
     /**
      * QueryCompiler constructor.
      *
-     * @param PDODriver $driver
-     * @param Quoter    $quoter
+     * @param Quoter $quoter
      */
-    public function __construct(PDODriver $driver, Quoter $quoter)
+    public function __construct(Quoter $quoter)
     {
-        $this->driver = $driver;
         $this->quoter = $quoter;
     }
 
@@ -127,12 +118,12 @@ class QueryCompiler extends Component
     public function compileInsert($table, array $columns, array $rowsets)
     {
         if (empty($columns)) {
-            throw new CompilerException('Unable to build insert statement, columns must be set.');
+            throw new CompilerException('Unable to build insert statement, columns must be set');
         }
 
         if (empty($rowsets)) {
             throw new CompilerException(
-                'Unable to build insert statement, at least one value set must be provided.'
+                'Unable to build insert statement, at least one value set must be provided'
             );
         }
 
@@ -491,9 +482,7 @@ class QueryCompiler extends Component
             }
 
             if (!is_array($context)) {
-                throw new CompilerException(
-                    'Invalid where token, context expected to be an array.'
-                );
+                throw new CompilerException('Invalid where token, context expected to be an array');
             }
 
             /*
@@ -522,7 +511,7 @@ class QueryCompiler extends Component
         }
 
         if ($activeGroup) {
-            throw new CompilerException('Unable to build where statement, unclosed where group.');
+            throw new CompilerException('Unable to build where statement, unclosed where group');
         }
 
         return trim($statement);
@@ -544,7 +533,7 @@ class QueryCompiler extends Component
             return '';
         }
 
-        if ($prefix != "\n") {
+        if ($prefix != "\n" && $prefix != ' ') {
             $prefix .= ' ';
         }
 

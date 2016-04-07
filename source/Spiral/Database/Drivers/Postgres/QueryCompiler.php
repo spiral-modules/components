@@ -20,10 +20,11 @@ class QueryCompiler extends AbstractCompiler
      */
     public function compileInsert($table, array $columns, array $rowsets, $primaryKey = '')
     {
-        return parent::compileInsert($table, $columns, $rowsets) . (!empty($primaryKey)
-            ? ' RETURNING ' . $this->quote($primaryKey)
-            : ''
-        );
+        return parent::compileInsert(
+            $table,
+            $columns,
+            $rowsets
+        ) . (!empty($primaryKey) ? ' RETURNING ' . $this->quote($primaryKey) : '');
     }
 
     /**

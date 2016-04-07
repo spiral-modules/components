@@ -8,6 +8,7 @@
 
 namespace Spiral\Database\Entities;
 
+use Spiral\Core\FactoryInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -22,7 +23,7 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 abstract class Driver extends PDODriver
 {
     /**
-     * Driver schemas.
+     * Schema table class.
      */
     const SCHEMA_TABLE = '';
 
@@ -30,6 +31,11 @@ abstract class Driver extends PDODriver
      * Commander used to execute commands. :).
      */
     const COMMANDER = '';
+
+    /**
+     * Query compiler class.
+     */
+    const QUERY_COMPILER = '';
 
     /**
      * Default datetime value.
@@ -51,6 +57,17 @@ abstract class Driver extends PDODriver
     protected $factory = null;
 
     /**
+     * @param string           $name
+     * @param array            $connection
+     * @param FactoryInterface $factory
+     */
+    public function __construct($name, array $connection, FactoryInterface $factory)
+    {
+        parent::__construct($name, $connection);
+        $this->factory = $factory;
+    }
+
+    /**
      * Current timestamp expression value.
      *
      * @return string
@@ -65,10 +82,7 @@ abstract class Driver extends PDODriver
      *
      * @param string $table Table name with prefix included.
      */
-    public function truncate($table)
-    {
-        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
-    }
+    abstract public function truncate($table);
 
     /**
      * Check if table exists.
@@ -87,32 +101,6 @@ abstract class Driver extends PDODriver
     abstract public function tableNames();
 
     /**
-     * Clean (truncate) specified driver table.
-     *
-     * @param string $table Table name with prefix included.
-     */
-    public function truncate($table)
-    {
-        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
-    }
-
-    /**
-     * Get instance of Driver specific QueryCompiler.
-     *
-     * @param string $prefix Database specific table prefix, used to quote table names and build
-     *                       aliases.
-     *
-     * @return QueryCompiler
-     */
-    public function queryCompiler($prefix = '')
-    {
-        return $this->factory->make(static::QUERY_COMPILER, [
-            'driver' => $this,
-            'quoter' => new Quoter($this, $prefix),
-        ]);
-    }
-
-    /**
      * Get Driver specific AbstractTable implementation.
      *
      * @param string $table  Table name without prefix included.
@@ -129,6 +117,22 @@ abstract class Driver extends PDODriver
             'name'      => $table,
             'prefix'    => $prefix,
             'commander' => $this->factory->make(static::COMMANDER, ['driver' => $this]),
+        ]);
+    }
+
+    /**
+     * Get instance of Driver specific QueryCompiler.
+     *
+     * @param string $prefix Database specific table prefix, used to quote table names and build
+     *                       aliases.
+     *
+     * @return QueryCompiler
+     */
+    public function queryCompiler($prefix = '')
+    {
+        return $this->factory->make(static::QUERY_COMPILER, [
+            'driver' => $this,
+            'quoter' => new Quoter($this, $prefix),
         ]);
     }
 

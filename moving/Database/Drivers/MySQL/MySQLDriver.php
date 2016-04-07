@@ -61,6 +61,17 @@ class MySQLDriver extends Driver
         return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
     }
 
+
+    /**
+     * Clean (truncate) specified driver table.
+     *
+     * @param string $table Table name with prefix included.
+     */
+    abstract public function truncate($table)
+    {
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
     /**
      * {@inheritdoc}
      */

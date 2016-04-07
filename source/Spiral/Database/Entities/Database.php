@@ -198,12 +198,13 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * {@inheritdoc}
      *
      * @param string $class Class to be used to represent PDOStatement.
+     * @param array  $args  Class construction arguments, by default array of parameters.
      *
      * @return ResultInterface|\PDOStatement|PDOQuery
      */
-    public function query($query, array $parameters = [], $class = PDOQuery::class)
+    public function query($query, array $parameters = [], $class = null, array $args = [])
     {
-        return $this->driver->query($query, $parameters, $class = PDOQuery::class);
+        return $this->driver->query($query, $parameters, $class, $args);
     }
 
     /**
@@ -216,7 +217,6 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @throws DriverException
      * @throws QueryException
-     * @event statement($statement, $query, $parameters, $database): statement
      */
     public function statement($query, array $parameters = [])
     {

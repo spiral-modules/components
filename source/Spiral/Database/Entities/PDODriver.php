@@ -42,6 +42,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     const DATETIME = 'Y-m-d H:i:s';
 
     /**
+     * Query result class.
+     */
+    const QUERY_RESULT = PDOQuery::class;
+
+    /**
      * Driver name.
      *
      * @var string
@@ -267,12 +272,20 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $statement
      * @param array  $parameters
-     * @param string $class
+     * @param string $class Class name to be used, by default driver specific query result to be
+     *                      used.
+     * @param array  $args  Class construction arguments (by default filtered parameters).
+     *
      * @return \PDOStatement|PDOQuery
      */
-    public function query($statement, array $parameters, $class = PDOQuery::class)
+    public function query($statement, array $parameters, $class = null, array $args = [])
     {
-        return $this->statement($statement, $parameters, $class);
+        return $this->statement(
+            $statement,
+            $parameters,
+            !empty($class) ? $class : static::QUERY_RESULT,
+            $args
+        );
     }
 
     /**
@@ -445,6 +458,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function beginTransaction($isolationLevel = null)
     {
         ++$this->transactionLevel;
+
         if ($this->transactionLevel == 1) {
             if (!empty($isolationLevel)) {
                 $this->isolationLevel($isolationLevel);
@@ -468,6 +482,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function commitTransaction()
     {
         --$this->transactionLevel;
+
         if ($this->transactionLevel == 0) {
             $this->logger()->info('Commit transaction');
 
@@ -497,20 +512,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         $this->savepointRollback($this->transactionLevel + 1);
 
         return true;
-    }
-
-    /**
-     * @param string $dns
-     * @param string $username
-     * @param string $password
-     * @param array  $options
-     * @return $this
-     */
-    public static function asPDO($dns, $username, $password, array $options)
-    {
-        $connection = $dns;
-
-        return new static($dns, compact('connection', 'username', 'password', 'options'));
     }
 
     /**
@@ -547,7 +548,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param \PDOException $exception
      *
-     * @return QueryException|ConstrainException
+     * @return QueryException
      */
     protected function clarifyException(\PDOException $exception)
     {

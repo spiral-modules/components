@@ -9,8 +9,8 @@
 namespace Spiral\Database\Exceptions;
 
 /**
- * Exceptions happen inside result iterators.
+ * Error while compiling query based on builder options.
  */
-class ResultException extends DatabaseException
+class CompilerException extends DBALException
 {
 }

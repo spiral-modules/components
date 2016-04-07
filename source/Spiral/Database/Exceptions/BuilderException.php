@@ -9,8 +9,8 @@
 namespace Spiral\Database\Exceptions;
 
 /**
- * Exceptions raised by synchronisation bus.
+ * Exception raised by query builders.
  */
-class BusException extends DatabaseException
+class BuilderException extends DBALException
 {
 }

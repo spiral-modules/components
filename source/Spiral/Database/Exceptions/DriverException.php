@@ -11,6 +11,6 @@ namespace Spiral\Database\Exceptions;
 /**
  * Driver specific exception.
  */
-class DriverException extends \RuntimeException
+class DriverException extends DBALException
 {
 }

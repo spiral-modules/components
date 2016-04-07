@@ -9,8 +9,8 @@
 namespace Spiral\Database\Exceptions;
 
 /**
- * When constrains are violated.
+ * Error while building table schema.
  */
-class ConstrainException extends QueryException
+class SchemaException extends DBALException
 {
 }

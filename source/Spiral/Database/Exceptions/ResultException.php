@@ -9,8 +9,8 @@
 namespace Spiral\Database\Exceptions;
 
 /**
- * Error while building table schema.
+ * Exceptions happen inside result iterators.
  */
-class SchemaException extends DatabaseException
+class ResultException extends DBALException
 {
 }

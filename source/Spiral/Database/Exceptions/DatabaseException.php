@@ -11,6 +11,6 @@ namespace Spiral\Database\Exceptions;
 /**
  * Generic database exception.
  */
-class DatabaseException extends \RuntimeException
+class DatabaseException extends DBALException
 {
 }

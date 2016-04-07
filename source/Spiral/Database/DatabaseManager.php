@@ -168,6 +168,32 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     }
 
     /**
+     * Create and register connection under given name.
+     *
+     * @param string $name
+     * @param string $driver Driver class.
+     * @param string $dns
+     * @param string $username
+     * @param string $password
+     * @return Driver
+     */
+    public function registerConnection($name, $driver, $dns, $username, $password = '')
+    {
+        $instance = $this->factory->make($driver, [
+            'name'   => $name,
+            'config' => [
+                'connection' => $dns,
+                'username'   => $username,
+                'password'   => $password
+            ]
+        ]);
+
+        $this->setConnection($instance);
+
+        return $instance;
+    }
+
+    /**
      * Get connection/driver by it's name. Every driver associated with configured connection,
      * there is minor de-sync in naming due legacy code.
      *

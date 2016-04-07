@@ -47,7 +47,17 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * Related table database.
+     * {@inheritdoc}
+     *
+     * @return Database
+     */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+
+    /**
+     * Alias for getDatabase().
      *
      * @return Database
      */
@@ -61,7 +71,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return AbstractTable
      */
-    public function schema()
+    public function getSchema()
     {
         return $this->database->driver()->tableSchema(
             $this->realName(),
@@ -70,13 +80,13 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * Check if table exists.
+     * Alias for getSchema().
      *
-     * @return bool
+     * @return AbstractTable
      */
-    public function exists()
+    public function schema()
     {
-        return $this->database->hasTable($this->name);
+        return $this->getSchema();
     }
 
     /**
@@ -98,18 +108,13 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     }
 
     /**
-     * Get list of column names associated with their abstract types.
+     * Check if table exists.
      *
-     * @return array
+     * @return bool
      */
-    public function getColumns()
+    public function exists()
     {
-        $columns = [];
-        foreach ($this->schema()->getColumns() as $column) {
-            $columns[$column->getName()] = $column->abstractType();
-        }
-
-        return $columns;
+        return $this->database->hasTable($this->name);
     }
 
     /**
@@ -118,6 +123,21 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     public function truncate()
     {
         $this->database->driver()->truncate($this->realName());
+    }
+
+    /**
+     * Get list of column names associated with their abstract types.
+     *
+     * @return array
+     */
+    public function getColumns()
+    {
+        $columns = [];
+        foreach ($this->getSchema()->getColumns() as $column) {
+            $columns[$column->getName()] = $column->abstractType();
+        }
+
+        return $columns;
     }
 
     /**

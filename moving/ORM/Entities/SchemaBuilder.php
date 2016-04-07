@@ -151,7 +151,7 @@ class SchemaBuilder extends Component
             return $this->tables[$normalizedDatabase . '/' . $table];
         }
 
-        $schema = $this->orm->database($normalizedDatabase)->table($table)->schema();
+        $schema = $this->orm->database($normalizedDatabase)->table($table)->getSchema();
 
         $this->aliases[] = [
             'schema'   => $schema,

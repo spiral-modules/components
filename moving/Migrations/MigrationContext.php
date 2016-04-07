@@ -62,7 +62,7 @@ class MigrationContext extends Component implements LoggerAwareInterface, Contex
     public function getSchema($database, $table)
     {
         if (!isset($this->schemas[$database . '.' . $table])) {
-            $schema = $this->getTable($database, $table)->schema();
+            $schema = $this->getTable($database, $table)->getSchema();
 
             //We have to declare existed to prevent dropping existed schema
             $this->schemas[$database . '.' . $table] = $schema->declareExisted();

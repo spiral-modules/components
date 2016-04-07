@@ -66,7 +66,7 @@ class Migrator implements SingletonInterface
         }
 
         //Migrations table is pretty simple.
-        $schema = $this->stateTable()->schema();
+        $schema = $this->stateTable()->getSchema();
 
         $schema->column('id')->primary();
         $schema->column('migration')->string(255)->index();

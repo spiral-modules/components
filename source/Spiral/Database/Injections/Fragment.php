@@ -8,8 +8,6 @@
 
 namespace Spiral\Database\Injections;
 
-use Spiral\Database\Entities\QueryCompiler;
-
 /**
  * Default implementation of SQLFragmentInterface, provides ability to inject custom SQL code into
  * query builders. Usually used to mock database specific functions.
@@ -33,10 +31,8 @@ class Fragment implements FragmentInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @param QueryCompiler $compiler
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement()
     {
         return $this->statement;
     }

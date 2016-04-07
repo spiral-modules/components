@@ -23,20 +23,24 @@ interface StorageInterface
     /**
      * Register new bucket using it's options, server and prefix.
      *
-     * @param string          $name
-     * @param string          $prefix
-     * @param array           $options
-     * @param ServerInterface $server
+     * @param string                 $name
+     * @param string                 $prefix
+     * @param ServerInterface|string $server  Instance of alias.
+     * @param array                  $options Server specific options.
+     *
      * @return BucketInterface
+     *
      * @throws StorageException
      */
-    public function registerBucket($name, $prefix, array $options = [], ServerInterface $server);
+    public function registerBucket($name, $prefix, $server, array $options = []);
 
     /**
      * Get bucket by it's name.
      *
      * @param string $bucket
+     *
      * @return BucketInterface
+     *
      * @throws StorageException
      */
     public function bucket($bucket);
@@ -46,7 +50,9 @@ interface StorageInterface
      *
      * @param string $address
      * @param string $name Name stripped from address.
+     *
      * @return BucketInterface
+     *
      * @throws StorageException
      */
     public function locateBucket($address, &$name = null);
@@ -55,7 +61,9 @@ interface StorageInterface
      * Get or create instance of storage server.
      *
      * @param string $server
+     *
      * @return ServerInterface
+     *
      * @throws StorageException
      */
     public function server($server);
@@ -67,7 +75,9 @@ interface StorageInterface
      * @param string|BucketInterface                    $bucket
      * @param string                                    $name
      * @param mixed|StreamInterface|StreamableInterface $source
+     *
      * @return ObjectInterface|bool
+     *
      * @throws StorageException
      * @throws BucketException
      * @throws ServerException
@@ -78,7 +88,9 @@ interface StorageInterface
      * Create instance of storage object using it's address.
      *
      * @param string $address
+     *
      * @return ObjectInterface
+     *
      * @throws StorageException
      * @throws ObjectException
      */

@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-
 namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
- * Error while performing migration.
+ * Generic DBAL exception.
  */
-class MigrationException extends RuntimeException
+class DBALException extends \RuntimeException
 {
+
 }

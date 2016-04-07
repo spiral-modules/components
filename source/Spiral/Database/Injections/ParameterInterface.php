@@ -34,6 +34,14 @@ interface ParameterInterface extends ExpressionInterface
     public function setValue($value);
 
     /**
+     * Create copy of self with new value but same type.
+     *
+     * @param mixed $value
+     * @return self
+     */
+    public function withValue($value);
+
+    /**
      * Parameter type.
      *
      * @return int|mixed
@@ -41,8 +49,14 @@ interface ParameterInterface extends ExpressionInterface
     public function getType();
 
     /**
-     * In cases when parameter mock arrays such method has to return all nested values on one level,
-     * when parameter mock singular value - it has to return array of itself.
+     * Indication that parameter represent multiple values.
+     *
+     * @return bool
+     */
+    public function isArray();
+
+    /**
+     * Expand itself into array of Parameters each of what represent one nested value.
      *
      * @return ParameterInterface[]
      */

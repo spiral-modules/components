@@ -42,6 +42,15 @@ abstract class Driver extends PDODriver
     const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
 
     /**
+     * Container is needed to construct instances of QueryCompiler.
+     *
+     * @invisible
+     *
+     * @var FactoryInterface
+     */
+    protected $factory = null;
+
+    /**
      * Current timestamp expression value.
      *
      * @return string
@@ -76,6 +85,32 @@ abstract class Driver extends PDODriver
      * @return array
      */
     abstract public function tableNames();
+
+    /**
+     * Clean (truncate) specified driver table.
+     *
+     * @param string $table Table name with prefix included.
+     */
+    public function truncate($table)
+    {
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
+    /**
+     * Get instance of Driver specific QueryCompiler.
+     *
+     * @param string $prefix Database specific table prefix, used to quote table names and build
+     *                       aliases.
+     *
+     * @return QueryCompiler
+     */
+    public function queryCompiler($prefix = '')
+    {
+        return $this->factory->make(static::QUERY_COMPILER, [
+            'driver' => $this,
+            'quoter' => new Quoter($this, $prefix),
+        ]);
+    }
 
     /**
      * Get Driver specific AbstractTable implementation.

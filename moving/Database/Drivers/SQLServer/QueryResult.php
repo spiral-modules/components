@@ -12,7 +12,7 @@ namespace Spiral\Database\Drivers\SQLServer;
  * SQLServer specific result reader, required due server need additional column for sorting in some
  * cases.
  */
-class QueryResult extends \Spiral\Database\Query\QueryResult
+class PDOQuery extends \Spiral\Database\Query\PDOQuery
 {
     /**
      * Helper column used to create limit, offset statements in older versions of sql server.

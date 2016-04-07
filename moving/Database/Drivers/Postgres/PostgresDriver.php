@@ -68,17 +68,17 @@ class PostgresDriver extends Driver
      * {@inheritdoc}
      *
      * @param string               $name
-     * @param array                $config
+     * @param array                $connection
      * @param FactoryInterface     $factory
      * @param HippocampusInterface $memory
      */
     public function __construct(
         $name,
-        array $config,
+        array $connection,
         FactoryInterface $factory = null,
         HippocampusInterface $memory = null
     ) {
-        parent::__construct($name, $config, $factory);
+        parent::__construct($name, $connection, $factory);
 
         $this->memory = $memory;
     }

@@ -16,12 +16,14 @@ use Spiral\Database\Injections\ParameterInterface;
  */
 class QueryInterpolator
 {
+    //TODO: WHTF
+
     /**
      * Helper method used to interpolate SQL query with set of parameters, must be used only for
      * development purposes and never for real query.
      *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
+     * @param string               $query
+     * @param ParameterInterface[] $parameters Parameters to be binded into query.
      *
      * @return mixed
      */

@@ -9,8 +9,8 @@
 namespace Spiral\Database\Exceptions;
 
 /**
- * Generic migration exception.
+ * Driver specific exception.
  */
-class MigratorException extends DatabaseException
+class DriverException extends \RuntimeException
 {
 }

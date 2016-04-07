@@ -20,7 +20,7 @@ use Spiral\Database\Exceptions\QueryException;
 interface DatabaseInterface
 {
     /**
-     * Known database types.
+     * Known database types. More to be added?
      */
     const MYSQL      = 'MySQL';
     const POSTGRES   = 'Postgres';

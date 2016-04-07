@@ -61,16 +61,25 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function registerBucket($name, $prefix, array $options = [], ServerInterface $server)
+    public function registerBucket($name, $prefix, $server, array $options = [])
     {
         if (isset($this->buckets[$name])) {
-            throw new StorageException("Unable to create bucket '{$name}', name already taken");
+            throw new StorageException("Unable to create bucket '{$name}', already exists");
         }
 
-        return $this->buckets[$name] = $this->factory->make(
+        //One of default implementation options
+        $storage = $this;
+
+        if (!$server instanceof ServerInterface) {
+            $server = $this->server($server);
+        }
+
+        $bucket = $this->factory->make(
             StorageBucket::class,
-            ['storage' => $this] + compact('prefix', 'options', 'server')
+            compact('storage', 'prefix', 'options', 'server')
         );
+
+        return $this->buckets[$name] = $bucket;
     }
 
     /**
@@ -89,18 +98,6 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         }
 
         throw new StorageException("Unable to fetch bucket '{$bucket}', no presets found");
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createInjection(\ReflectionClass $class, $context = null)
-    {
-        if (empty($context)) {
-            throw new StorageException("Storage bucket can be requested without specified context");
-        }
-
-        return $this->bucket($context);
     }
 
     /**
@@ -159,6 +156,18 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     public function open($address)
     {
         return new StorageObject($address, $this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createInjection(\ReflectionClass $class, $context = null)
+    {
+        if (empty($context)) {
+            throw new StorageException("Storage bucket can be requested without specified context");
+        }
+
+        return $this->bucket($context);
     }
 
     /**

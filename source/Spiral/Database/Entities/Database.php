@@ -8,21 +8,21 @@
 
 namespace Spiral\Database\Entities;
 
-use Spiral\Cache\CacheInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\Core\Exceptions\SugarException;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Exceptions\DatabaseException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Query\QueryResult;
+use Spiral\Database\Query\PDOQuery;
+use Spiral\Database\ResultInterface;
 
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
@@ -101,16 +101,6 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     const ISOLATION_READ_UNCOMMITTED = 'READ UNCOMMITTED';
 
     /**
-     * Default timestamp expression (must be handler by driver as native expressions).
-     */
-    const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
-
-    /**
-     * @var Driver
-     */
-    private $driver = null;
-
-    /**
      * @var string
      */
     private $name = '';
@@ -121,43 +111,35 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     private $prefix = '';
 
     /**
-     * @invisible
-     *
-     * @var CacheInterface
+     * @var Driver
      */
-    protected $cache = null;
+    private $driver = null;
 
     /**
-     * @todo replace container with factory?
+     * @invisible
      *
-     * @param Driver         $driver Driver instance responsible for database
-     *                               connection.
-     * @param string         $name   Internal database name/id.
-     * @param string         $prefix Default database table prefix, will be used for
-     *                               all table identifiers.
-     * @param CacheInterface $cache  Needed to receive cache store on demand.
+     * @var StoreInterface
      */
-    public function __construct(
-        Driver $driver,
-        $name,
-        $prefix = '',
-        CacheInterface $cache = null
-    ) {
-        $this->driver = $driver;
+    private $cacheStore = null;
+
+    /**
+     * @param string         $name       Internal database name/id.
+     * @param string         $prefix     Default database table prefix, will be used for all table
+     *                                   identifiers.
+     * @param Driver         $driver     Driver instance responsible for database connection.
+     * @param StoreInterface $cache      Cache store associated with database.
+     */
+    public function __construct($name, $prefix = '', Driver $driver, StoreInterface $cache = null)
+    {
         $this->name = $name;
         $this->setPrefix($prefix);
 
-        //Not mandratory
-        $this->cache = $cache;
+        $this->driver = $driver;
+
+        //Not required
+        $this->cacheStore = $cache;
     }
 
-    /**
-     * @return Driver
-     */
-    public function driver()
-    {
-        return $this->driver;
-    }
 
     /**
      * @return string
@@ -176,8 +158,26 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     }
 
     /**
+     * @return Driver
+     */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * @deprecated use getDriver()
+     * @return Driver
+     */
+    public function driver()
+    {
+        return $this->getDriver();
+    }
+
+    /**
      * @param string $prefix
      *
+     * @todo with prefix?
      * @return $this
      */
     public function setPrefix($prefix)
@@ -206,12 +206,13 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      *
-     * @return QueryResult
-     * @event statement($statement, $query, $parameters, $database): statement
+     * @param string $class Class to be used to represent PDOStatement.
+     *
+     * @return ResultInterface|\PDOStatement|PDOQuery
      */
-    public function query($query, array $parameters = [])
+    public function query($query, array $parameters = [], $class = PDOQuery::class)
     {
-        return $this->driver->query($query, $parameters);
+        return $this->driver->query($query, $parameters, $class = PDOQuery::class);
     }
 
     /**
@@ -253,15 +254,12 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
         $key = '',
         StoreInterface $store = null
     ) {
-        if (empty($store) && empty($this->cache)) {
-            throw new SugarException(
-                "Unable to receive cache 'StoreInterface', no cache provider or user store provided."
-            );
-        }
-
         if (empty($store)) {
-            //todo use different stores for different dbs
-            $store = $this->cache->getStore();
+            if (empty($this->cacheStore)) {
+                throw new DatabaseException("StoreInterface is missing");
+            }
+
+            $store = $this->cacheStore;
         }
 
         if (empty($key)) {
@@ -273,7 +271,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
             return $this->query($query, $parameters)->fetchAll();
         });
 
-        return new CachedResult($store, $key, $query, $parameters, $data);
+        return new CachedResult($data, $parameters, $query, $key, $store);
     }
 
     /**

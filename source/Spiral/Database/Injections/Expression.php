@@ -31,6 +31,6 @@ class Expression extends Fragment implements ExpressionInterface
             return parent::sqlStatement();
         }
 
-        return $compiler->quote(parent::sqlStatement($compiler));
+        return $compiler->quote(parent::sqlStatement());
     }
 }

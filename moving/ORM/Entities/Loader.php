@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Database\Entities\Database;
-use Spiral\Database\Query\QueryResult;
+use Spiral\Database\Query\PDOQuery;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\LoaderInterface;
@@ -612,12 +612,12 @@ abstract class Loader implements LoaderInterface
      * Parse QueryResult provided by parent loaders and populate data tree. Loader must pass parsing
      * to inner loaders also.
      *
-     * @param QueryResult $result
-     * @param int         $rowsCount
+     * @param PDOQuery $result
+     * @param int      $rowsCount
      *
      * @return array
      */
-    public function parseResult(QueryResult $result, &$rowsCount)
+    public function parseResult(PDOQuery $result, &$rowsCount)
     {
         foreach ($result as $row) {
             $this->parseRow($row);

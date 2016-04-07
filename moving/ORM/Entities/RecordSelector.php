@@ -13,7 +13,7 @@ use Spiral\Cache\CacheInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Query\QueryResult;
+use Spiral\Database\Query\PDOQuery;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
@@ -428,7 +428,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      *
      * @param array $callbacks Callbacks to be used in record iterator as magic methods.
      *
-     * @return QueryResult|RecordIterator
+     * @return PDOQuery|RecordIterator
      */
     public function getIterator(array $callbacks = [])
     {

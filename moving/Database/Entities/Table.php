@@ -12,7 +12,7 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\Query\QueryResult;
+use Spiral\Database\Query\PDOQuery;
 use Spiral\Database\TableInterface;
 
 /**
@@ -210,7 +210,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     /**
      * A simple alias for table query without condition.
      *
-     * @return QueryResult
+     * @return PDOQuery
      */
     public function all()
     {

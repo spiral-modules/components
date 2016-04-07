@@ -19,7 +19,7 @@ use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Query\QueryResult;
+use Spiral\Database\Query\PDOQuery;
 use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\Traits\PaginatorTrait;
@@ -287,7 +287,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @param bool $paginate Apply pagination to result, can be disabled in honor of count method.
      *
-     * @return QueryResult|CachedResult
+     * @return PDOQuery|CachedResult
      */
     public function run($paginate = true)
     {
@@ -420,7 +420,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     /**
      * {@inheritdoc}
      *
-     * @return QueryResult
+     * @return PDOQuery
      */
     public function getIterator()
     {

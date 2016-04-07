@@ -46,17 +46,28 @@ class Parameter implements ParameterInterface
     {
         $this->value = $value;
 
-        if ($type == self::DETECT_TYPE && !is_array($value)) {
-            $this->type = $this->detectType($value);
+        if ($type == self::DETECT_TYPE) {
+            if (!is_array($value)) {
+                $this->type = $this->detectType($value);
+            } else {
+                //Default and quick fallback
+                $this->type = \PDO::PARAM_STR;
+            }
         } else {
             $this->type = $type;
         }
     }
 
     /**
-     * Change mocked parameter value.
-     *
-     * @param mixed $value
+     * {@inheritdoc}
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function setValue($value)
     {
@@ -66,9 +77,12 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function getValue()
+    public function withValue($value)
     {
-        return $this->value;
+        $parameter = clone $this;
+        $parameter->value = $value;
+
+        return $parameter;
     }
 
     /**
@@ -84,26 +98,37 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function flatten()
+    public function isArray()
     {
-        if (is_array($this->value)) {
-            $result = [];
-            foreach ($this->value as $value) {
-                if (!$value instanceof ParameterInterface) {
-                    $value = new self($value, $this->type);
-                }
-
-                $result = array_merge($result, $value->flatten());
-            }
-
-            return $result;
-        }
-
-        return [$this];
+        return is_array($this->value);
     }
 
     /**
      * {@inheritdoc}
+     */
+    public function flatten()
+    {
+        if (!is_array($this->value)) {
+            return [$this];
+        }
+
+        $result = [];
+        foreach ($this->value as $value) {
+            if (!$value instanceof ParameterInterface) {
+                //Self copy
+                $value = $this->withValue($value);
+            }
+
+            $result = array_merge($result, $value->flatten());
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Parameters are unnamed by default.
      */
     public function sqlStatement(QueryCompiler $compiler = null)
     {
@@ -134,6 +159,10 @@ class Parameter implements ParameterInterface
         ];
     }
 
+    /**
+     * @param mixed $value
+     * @return int
+     */
     protected function detectType($value)
     {
         switch (gettype($value)) {

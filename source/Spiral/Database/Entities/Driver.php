@@ -64,6 +64,7 @@ abstract class Driver extends PDODriver
     public function __construct($name, array $connection, FactoryInterface $factory)
     {
         parent::__construct($name, $connection);
+
         $this->factory = $factory;
     }
 

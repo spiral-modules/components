@@ -18,9 +18,6 @@ use Spiral\Support\DFSSorter;
  */
 class SynchronizationBus extends Component
 {
-    /*
-     * Logging.
-     */
     use LoggerTrait;
 
     /**
@@ -39,6 +36,7 @@ class SynchronizationBus extends Component
     public function __construct(array $tables)
     {
         $this->tables = $tables;
+
         $this->collectDrivers();
     }
 
@@ -112,6 +110,7 @@ class SynchronizationBus extends Component
     protected function beginTransaction()
     {
         $this->logger()->debug('Begin transaction');
+
         foreach ($this->drivers as $driver) {
             $driver->beginTransaction();
         }
@@ -123,6 +122,7 @@ class SynchronizationBus extends Component
     protected function commitTransaction()
     {
         $this->logger()->debug('Commit transaction');
+
         foreach ($this->drivers as $driver) {
             $driver->commitTransaction();
         }
@@ -134,6 +134,7 @@ class SynchronizationBus extends Component
     protected function rollbackTransaction()
     {
         $this->logger()->warning('Roll back transaction');
+
         foreach ($this->drivers as $driver) {
             $driver->rollbackTransaction();
         }

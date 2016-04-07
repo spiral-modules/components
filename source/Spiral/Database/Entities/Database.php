@@ -160,18 +160,9 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * @return Driver
      */
-    public function getDriver()
-    {
-        return $this->driver;
-    }
-
-    /**
-     * @deprecated use getDriver()
-     * @return Driver
-     */
     public function driver()
     {
-        return $this->getDriver();
+        return $this->driver;
     }
 
     /**

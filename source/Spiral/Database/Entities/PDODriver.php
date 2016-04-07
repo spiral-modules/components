@@ -13,7 +13,6 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Exceptions\ConstrainException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\Parameter;

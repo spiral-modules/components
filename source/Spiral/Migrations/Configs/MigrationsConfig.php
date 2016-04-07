@@ -14,7 +14,7 @@ class MigrationsConfig extends InjectableConfig
     /**
      * Configuration section.
      */
-    const CONFIG = 'modules/migrations';
+    const CONFIG = 'migrations';
 
     /**
      * @var array

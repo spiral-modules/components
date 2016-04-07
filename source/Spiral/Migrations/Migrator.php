@@ -7,6 +7,7 @@
  */
 namespace Spiral\Migrations;
 
+use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Driver;
@@ -14,7 +15,10 @@ use Spiral\Database\Entities\Table;
 use Spiral\Migrations\Configs\MigrationsConfig;
 use Spiral\Migrations\Migration\Meta;
 
-class Migrator implements SingletonInterface
+/**
+ * Migrator component.
+ */
+class Migrator extends Component implements SingletonInterface
 {
     /**
      * @var MigrationsConfig
@@ -68,6 +72,9 @@ class Migrator implements SingletonInterface
         //Migrations table is pretty simple.
         $schema = $this->stateTable()->getSchema();
 
+        /*
+         * Schema update will automatically sync all needed data
+         */
         $schema->column('id')->primary();
         $schema->column('migration')->string(255)->index();
         $schema->column('time_executed')->datetime();
@@ -167,11 +174,7 @@ class Migrator implements SingletonInterface
      */
     protected function stateTable()
     {
-        return $this->dbal->database(
-            $this->config->getDatabase()
-        )->table(
-            $this->config->getTable()
-        );
+        return $this->dbal->database($this->config->getDatabase())->table($this->config->getTable());
     }
 
     /**

@@ -10,6 +10,9 @@ namespace Spiral\Migrations;
 use Spiral\Database\Entities\Database;
 use Spiral\Migrations\Migration\Meta;
 
+/**
+ * Simple migration class with shortcut for database and blueprint instances.
+ */
 abstract class Migration implements MigrationInterface
 {
     /**
@@ -48,6 +51,7 @@ abstract class Migration implements MigrationInterface
 
     /**
      * @param string $database
+     *
      * @return Database
      */
     public function database($database = null)
@@ -58,6 +62,7 @@ abstract class Migration implements MigrationInterface
     /**
      * @param string      $table
      * @param string|null $database
+     *
      * @return TableBlueprint
      */
     public function table($table, $database = null)

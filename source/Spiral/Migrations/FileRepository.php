@@ -15,6 +15,9 @@ use Spiral\Migrations\Exceptions\RepositoryException;
 use Spiral\Migrations\Migration\Meta;
 use Spiral\Tokenizer\TokenizerInterface;
 
+/**
+ * Stores migrations as files.
+ */
 class FileRepository implements RepositoryInterface
 {
     /**

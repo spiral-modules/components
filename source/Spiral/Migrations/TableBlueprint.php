@@ -83,6 +83,7 @@ class TableBlueprint
      * @param string $name
      * @param string $type
      * @param array  $options
+     *
      * @return TableBlueprint
      */
     public function addColumn($name, $type, array $options = [])
@@ -99,6 +100,7 @@ class TableBlueprint
      * @param string $name
      * @param string $type
      * @param array  $options
+     *
      * @return TableBlueprint
      */
     public function alterColumn($name, $type, array $options = [])
@@ -114,6 +116,7 @@ class TableBlueprint
      *
      * @param string $name
      * @param string $newName
+     *
      * @return TableBlueprint
      */
     public function renameColumn($name, $newName)
@@ -128,6 +131,7 @@ class TableBlueprint
      * $table->dropColumn('email');
      *
      * @param string $name
+     *
      * @return TableBlueprint
      */
     public function dropColumn($name)
@@ -143,6 +147,7 @@ class TableBlueprint
      *
      * @param array $columns
      * @param array $options
+     *
      * @return TableBlueprint
      */
     public function addIndex(array $columns, array $options = [])
@@ -158,6 +163,7 @@ class TableBlueprint
      *
      * @param array $columns
      * @param array $options
+     *
      * @return TableBlueprint
      */
     public function alterIndex(array $columns, array $options)
@@ -172,6 +178,7 @@ class TableBlueprint
      * $table->dropIndex(['email']);
      *
      * @param array $columns
+     *
      * @return TableBlueprint
      */
     public function dropIndex(array $columns)
@@ -189,6 +196,7 @@ class TableBlueprint
      * @param string $foreignTable
      * @param string $foreignKey
      * @param array  $options
+     *
      * @return TableBlueprint
      */
     public function addForeignKey($column, $foreignTable, $foreignKey, array $options = [])
@@ -214,6 +222,7 @@ class TableBlueprint
      * @param string $foreignTable
      * @param string $foreignKey
      * @param array  $options
+     *
      * @return TableBlueprint
      */
     public function alterForeignKey($column, $foreignTable, $foreignKey, array $options = [])
@@ -235,6 +244,7 @@ class TableBlueprint
      * $table->dropForeignKey('user_id');
      *
      * @param string $column
+     *
      * @return TableBlueprint
      */
     public function dropForeignKey($column)
@@ -248,6 +258,7 @@ class TableBlueprint
      * Set table primary keys index. Attention, you can only call it when table being created.
      *
      * @param array $keys
+     *
      * @return TableBlueprint
      */
     public function setPrimaryKeys(array $keys)
@@ -311,7 +322,8 @@ class TableBlueprint
      * Register new operation.
      *
      * @param OperationInterface $operation
-     * @return $this
+     *
+     * @return TableBlueprint
      */
     public function addOperation(OperationInterface $operation)
     {

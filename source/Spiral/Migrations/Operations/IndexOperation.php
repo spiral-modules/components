@@ -7,23 +7,24 @@
  */
 namespace Spiral\Migrations\Operations;
 
-abstract class ReferenceOperation extends TableOperation
+abstract class IndexOperation extends TableOperation
 {
     /**
-     * Column foreign key associated to.
+     * Columns index associated to, order matter!
      *
-     * @var string
+     * @var array
      */
-    protected $column = '';
+    protected $columns = [];
 
     /**
      * @param string $database
      * @param string $table
-     * @param string $column
+     * @param array  $columns
      */
-    public function __construct($database, $table, $column)
+    public function __construct($database, $table, array $columns)
     {
         parent::__construct($database, $table);
-        $this->column = $column;
+
+        $this->columns = $columns;
     }
 }

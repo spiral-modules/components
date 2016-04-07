@@ -12,10 +12,14 @@ use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
 use Spiral\Migrations\Exceptions\ContextException;
 
+/**
+ * Migration context (isolation).
+ */
 interface ContextInterface
 {
     /**
      * @param string $database
+     *
      * @return Database
      */
     public function getDatabase($database);
@@ -23,6 +27,7 @@ interface ContextInterface
     /**
      * @param string $database
      * @param string $table
+     *
      * @return Table
      */
     public function getTable($database, $table);
@@ -32,7 +37,9 @@ interface ContextInterface
      *
      * @param string|null $database
      * @param string      $table
+     *
      * @return AbstractTable
+     *
      * @throws ContextException
      */
     public function getSchema($database, $table);

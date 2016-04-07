@@ -64,17 +64,18 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     /**
      * Manually set database.
      *
-     * @param string   $name
      * @param Database $database
      * @return $this
+     *
+     * @throws DBALException
      */
-    public function setDatabase($name, Database $database)
+    public function setDatabase(Database $database)
     {
-        if (isset($this->databases[$name])) {
-            throw new DBALException("Database '{$name}' already exists");
+        if (isset($this->databases[$database->getName()])) {
+            throw new DBALException("Database '{$database->getName()}' already exists");
         }
 
-        $this->databases[$name] = $database;
+        $this->databases[$database->getName()] = $database;
 
         return $this;
     }
@@ -90,7 +91,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function createDatabase($name, $prefix, $connection)
+    public function registerDatabase($name, $prefix, $connection)
     {
         if (!$connection instanceof Driver) {
             $connection = $this->connection($connection);
@@ -102,7 +103,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             'driver' => $connection,
         ]);
 
-        $this->setDatabase($name, $instance);
+        $this->setDatabase($instance);
 
         return $instance;
     }
@@ -111,7 +112,9 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * Get Database associated with a given database alias or automatically created one.
      *
      * @param string|null $database
+     *
      * @return Database
+     *
      * @throws DBALException
      */
     public function database($database = null)
@@ -147,17 +150,19 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     /**
      * Manually set connection instance.
      *
-     * @param string $name
      * @param Driver $driver
+     *
      * @return $this
+     *
+     * @throws DBALException
      */
-    public function setConnection($name, Driver $driver)
+    public function setConnection(Driver $driver)
     {
-        if (isset($this->connections[$name])) {
-            throw new DBALException("Connection '{$name}' already exists");
+        if (isset($this->connections[$driver->getName()])) {
+            throw new DBALException("Connection '{$driver->getName()}' already exists");
         }
 
-        $this->connections[$name] = $driver;
+        $this->connections[$driver->getName()] = $driver;
 
         return $this;
     }

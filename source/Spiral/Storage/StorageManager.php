@@ -59,6 +59,25 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     }
 
     /**
+     * @param BucketInterface $bucket
+     *
+     * @return $this
+     *
+     * @throws StorageException
+     */
+    public function setBucket(BucketInterface $bucket)
+    {
+        if (isset($this->buckets[$bucket->getName()])) {
+            throw new StorageException("Unable to create bucket '{$bucket->getName()}', already exists");
+        }
+
+        $this->buckets[$bucket->getName()] = $bucket;
+
+        return $this;
+
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function registerBucket($name, $prefix, $server, array $options = [])
@@ -79,7 +98,9 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             compact('storage', 'prefix', 'options', 'server')
         );
 
-        return $this->buckets[$name] = $bucket;
+        $this->setBucket($bucket);
+
+        return $bucket;
     }
 
     /**
@@ -98,6 +119,55 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         }
 
         throw new StorageException("Unable to fetch bucket '{$bucket}', no presets found");
+    }
+
+    /**
+     * Add server.
+     *
+     * @param string          $name
+     * @param ServerInterface $server
+     * @return $this
+     *
+     * @throws StorageException
+     */
+    public function setServer($name, ServerInterface $server)
+    {
+        if (isset($this->servers[$name])) {
+            throw new StorageException(
+                "Unable to set storage server '{$server}', name is already taken"
+            );
+        }
+
+        $this->servers[$name] = $server;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function server($server)
+    {
+        if (isset($this->servers[$server])) {
+            return $this->servers[$server];
+        }
+
+        if (!$this->config->hasServer($server)) {
+            throw new StorageException("Undefined storage server '{$server}'");
+        }
+
+        return $this->servers[$server] = $this->factory->make(
+            $this->config->serverClass($server),
+            $this->config->serverOptions($server)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function open($address)
+    {
+        return new StorageObject($address, $this);
     }
 
     /**
@@ -124,38 +194,11 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function server($server)
-    {
-        if (isset($this->servers[$server])) {
-            return $this->servers[$server];
-        }
-
-        if (!$this->config->hasServer($server)) {
-            throw new StorageException("Undefined storage server '{$server}'");
-        }
-
-        return $this->servers[$server] = $this->factory->make(
-            $this->config->serverClass($server),
-            $this->config->serverOptions($server)
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function put($bucket, $name, $source = '')
     {
         $bucket = is_string($bucket) ? $this->bucket($bucket) : $bucket;
 
         return $bucket->put($name, $source);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function open($address)
-    {
-        return new StorageObject($address, $this);
     }
 
     /**
@@ -175,7 +218,10 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @param string $name
      * @param array  $bucket
+     *
      * @return BucketInterface
+     *
+     * @throws StorageException
      */
     private function createBucket($name, array $bucket)
     {

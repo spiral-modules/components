@@ -341,8 +341,6 @@ trait JoinsTrait
                 if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
                     return $parameter;
                 }
-
-                return $parameter;
             }
 
             if (is_array($parameter)) {

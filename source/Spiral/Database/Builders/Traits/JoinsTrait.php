@@ -278,7 +278,7 @@ trait JoinsTrait
             'AND',
             func_get_args(),
             $this->joinTokens[$this->activeJoin]['on'],
-            $this->whereWrapper()
+            $this->onWhereWrapper()
         );
 
         return $this;
@@ -305,7 +305,7 @@ trait JoinsTrait
             'AND',
             func_get_args(),
             $this->joinTokens[$this->activeJoin]['on'],
-            $this->whereWrapper()
+            $this->onWhereWrapper()
         );
 
         return $this;
@@ -332,7 +332,7 @@ trait JoinsTrait
             'AND',
             func_get_args(),
             $this->joinTokens[$this->activeJoin]['on'],
-            $this->whereWrapper()
+            $this->onWhereWrapper()
         );
 
         return $this;
@@ -379,7 +379,7 @@ trait JoinsTrait
      *
      * @return \Closure
      */
-    private function whereWrapper()
+    private function onWhereWrapper()
     {
         return function ($parameter) {
             if ($parameter instanceof FragmentInterface) {
@@ -387,8 +387,6 @@ trait JoinsTrait
                 if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
                     return $parameter;
                 }
-
-                return $parameter;
             }
 
             if (is_array($parameter)) {

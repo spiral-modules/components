@@ -8,7 +8,7 @@
 namespace Spiral\Migrations\Operations\References;
 
 use Spiral\Database\Entities\Schemas\AbstractReference;
-use Spiral\Migrations\ContextInterface;
+use Spiral\Migrations\CapsuleInterface;
 use Spiral\Migrations\Exceptions\Operations\ReferenceException;
 use Spiral\Migrations\Operations\ReferenceOperation;
 use Spiral\Migrations\Operations\Traits\OptionsTrait;
@@ -64,7 +64,7 @@ class AlterReference extends ReferenceOperation
     /**
      * {@inheritdoc}
      */
-    public function execute(ContextInterface $context)
+    public function execute(CapsuleInterface $context)
     {
         $schema = $context->getSchema($this->getDatabase(), $this->getTable());
 

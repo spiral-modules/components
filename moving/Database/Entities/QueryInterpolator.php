@@ -29,30 +29,30 @@ class QueryInterpolator
      */
     public static function interpolate($query, array $parameters = [])
     {
-        if (empty($parameters)) {
+       // if (empty($parameters)) {
             return $query;
-        }
-
-        //Flattening first
-        $parameters = self::flattenParameters($parameters);
-
-        //Let's prepare values so they looks better
-        foreach ($parameters as &$parameter) {
-            $parameter = self::prepareParameter($parameter);
-            unset($parameter);
-        }
-
-        reset($parameters);
-        if (!is_int(key($parameters))) {
-            //Associative array
-            return \Spiral\interpolate($query, $parameters, '', '');
-        }
-
-        foreach ($parameters as $parameter) {
-            $query = preg_replace('/\?/', $parameter, $query, 1);
-        }
-
-        return $query;
+       // }
+//
+//        //Flattening first
+//        $parameters = self::flattenParameters($parameters);
+//
+//        //Let's prepare values so they looks better
+//        foreach ($parameters as &$parameter) {
+//            $parameter = self::resolveValue($parameter);
+//            unset($parameter);
+//        }
+//
+//        reset($parameters);
+//        if (!is_int(key($parameters))) {
+//            //Associative array
+//            return \Spiral\interpolate($query, $parameters, '', '');
+//        }
+//
+//        foreach ($parameters as $parameter) {
+//            $query = preg_replace('/\?/', $parameter, $query, 1);
+//        }
+//
+//        return $query;
     }
 
     /**
@@ -82,29 +82,34 @@ class QueryInterpolator
     }
 
     /**
-     * Normalize parameter value to be interpolated.
+     * Get parameter value.
      *
      * @param mixed $parameter
      *
      * @return string
      */
-    protected static function prepareParameter($parameter)
+    protected static function resolveValue($parameter)
     {
         if ($parameter instanceof ParameterInterface) {
-            return self::prepareParameter($parameter->getValue());
+            return self::resolveValue($parameter->getValue());
         }
 
         switch (gettype($parameter)) {
             case 'boolean':
                 return $parameter ? 'true' : 'false';
+
             case 'integer':
                 return $parameter + 0;
+
             case 'NULL':
                 return 'NULL';
+
             case 'double':
                 return sprintf('%F', $parameter);
+
             case 'string':
                 return "'" . addcslashes($parameter, "'") . "'";
+
             case 'object':
                 if (method_exists($parameter, '__toString')) {
                     return "'" . addcslashes((string)$parameter, "'") . "'";

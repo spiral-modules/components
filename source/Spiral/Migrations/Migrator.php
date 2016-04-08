@@ -103,7 +103,7 @@ class Migrator extends Component implements SingletonInterface
                 $this->resolveStatus($migration->getMeta())
             );
 
-            $migration->setContext(new MigrationContext($this->dbal));
+            $migration->setContext(new MigrationCapsule($this->dbal));
 
             $result[] = $migration;
         }

@@ -7,7 +7,7 @@
  */
 namespace Spiral\Migrations\Operations\Columns;
 
-use Spiral\Migrations\ContextInterface;
+use Spiral\Migrations\CapsuleInterface;
 use Spiral\Migrations\Exceptions\Operations\ColumnException;
 use Spiral\Migrations\Operations\TableOperation;
 
@@ -35,7 +35,7 @@ class DropColumn extends TableOperation
     /**
      * {@inheritdoc}
      */
-    public function execute(ContextInterface $context)
+    public function execute(CapsuleInterface $context)
     {
         $schema = $context->getSchema($this->getDatabase(), $this->getTable());
 

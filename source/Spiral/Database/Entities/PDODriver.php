@@ -443,7 +443,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         return $flatten;
     }
 
-
     /**
      * Start SQL transaction with specified isolation level (not all DBMS support it). Nested
      * transactions are processed using savepoints.

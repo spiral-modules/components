@@ -30,7 +30,7 @@ use Spiral\Migrations\Operations\Table\UpdateTable;
 class TableBlueprint
 {
     /**
-     * @var ContextInterface
+     * @var CapsuleInterface
      */
     private $context = null;
 
@@ -52,11 +52,11 @@ class TableBlueprint
     private $database = null;
 
     /**
-     * @param ContextInterface $context
+     * @param CapsuleInterface $context
      * @param null|string      $database
      * @param string           $table
      */
-    public function __construct(ContextInterface $context, $database = null, $table)
+    public function __construct(CapsuleInterface $context, $database = null, $table)
     {
         $this->context = $context;
         $this->table = $table;

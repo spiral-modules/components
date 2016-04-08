@@ -7,7 +7,7 @@
  */
 namespace Spiral\Migrations\Operations\References;
 
-use Spiral\Migrations\ContextInterface;
+use Spiral\Migrations\CapsuleInterface;
 use Spiral\Migrations\Exceptions\Operations\ReferenceException;
 use Spiral\Migrations\Operations\ReferenceOperation;
 
@@ -16,7 +16,7 @@ class DropReference extends ReferenceOperation
     /**
      * {@inheritdoc}
      */
-    public function execute(ContextInterface $context)
+    public function execute(CapsuleInterface $context)
     {
         $schema = $context->getSchema($this->getDatabase(), $this->getTable());
 

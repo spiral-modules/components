@@ -15,7 +15,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 /**
  * Isolates set of table specific operations and schemas into one place. Kinda repository.
  */
-class MigrationContext extends Component implements LoggerAwareInterface, ContextInterface
+class MigrationCapsule extends Component implements LoggerAwareInterface, CapsuleInterface
 {
     use LoggerTrait;
 

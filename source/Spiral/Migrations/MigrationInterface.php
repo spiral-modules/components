@@ -12,9 +12,9 @@ use Spiral\Migrations\Migration\Meta;
 interface MigrationInterface
 {
     /**
-     * @param MigrationContext $pipeline
+     * @param MigrationCapsule $pipeline
      */
-    public function setContext(MigrationContext $pipeline);
+    public function setContext(MigrationCapsule $pipeline);
 
     /**
      * @param Meta $state

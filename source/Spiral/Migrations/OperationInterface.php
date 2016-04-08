@@ -32,8 +32,8 @@ interface OperationInterface
     /**
      * Execute operation in a given context.
      *
-     * @param ContextInterface $context
+     * @param CapsuleInterface $context
      * @throws OperationException
      */
-    public function execute(ContextInterface $context);
+    public function execute(CapsuleInterface $context);
 }

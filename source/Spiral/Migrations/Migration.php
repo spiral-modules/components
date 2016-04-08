@@ -21,14 +21,14 @@ abstract class Migration implements MigrationInterface
     private $status = null;
 
     /**
-     * @var MigrationContext
+     * @var MigrationCapsule
      */
     private $context = null;
 
     /**
-     * @param MigrationContext $context
+     * @param MigrationCapsule $context
      */
-    public function setContext(MigrationContext $context)
+    public function setContext(MigrationCapsule $context)
     {
         $this->context = $context;
     }

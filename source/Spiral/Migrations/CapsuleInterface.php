@@ -13,9 +13,9 @@ use Spiral\Database\Entities\Table;
 use Spiral\Migrations\Exceptions\ContextException;
 
 /**
- * Migration context (isolation).
+ * Migration capsule (isolation).
  */
-interface ContextInterface
+interface CapsuleInterface
 {
     /**
      * @param string $database

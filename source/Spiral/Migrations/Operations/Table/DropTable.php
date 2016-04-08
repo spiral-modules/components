@@ -7,7 +7,7 @@
  */
 namespace Spiral\Migrations\Operations\Table;
 
-use Spiral\Migrations\ContextInterface;
+use Spiral\Migrations\CapsuleInterface;
 use Spiral\Migrations\Exceptions\Operations\TableException;
 use Spiral\Migrations\Operations\TableOperation;
 
@@ -16,7 +16,7 @@ class DropTable extends TableOperation
     /**
      * {@inheritdoc}
      */
-    public function execute(ContextInterface $context)
+    public function execute(CapsuleInterface $context)
     {
         $schema = $context->getSchema($this->getDatabase(), $this->getTable());
         $database = !empty($this->database) ? $this->database : '[default]';

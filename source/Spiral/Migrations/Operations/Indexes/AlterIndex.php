@@ -7,7 +7,7 @@
  */
 namespace Spiral\Migrations\Operations\Indexes;
 
-use Spiral\Migrations\ContextInterface;
+use Spiral\Migrations\CapsuleInterface;
 use Spiral\Migrations\Exceptions\Operations\IndexException;
 use Spiral\Migrations\Operations\IndexOperation;
 use Spiral\Migrations\Operations\Traits\OptionsTrait;
@@ -31,7 +31,7 @@ class AlterIndex extends IndexOperation
     /**
      * {@inheritdoc}
      */
-    public function execute(ContextInterface $context)
+    public function execute(CapsuleInterface $context)
     {
         $schema = $context->getSchema($this->getDatabase(), $this->getTable());
 

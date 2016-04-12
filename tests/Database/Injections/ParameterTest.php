@@ -90,4 +90,34 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(2, $flattened[1]->getValue());
         $this->assertSame(3, $flattened[2]->getValue());
     }
+
+    public function testAutoTyping()
+    {
+        $parameter = new Parameter('abc');
+        $this->assertSame(\PDO::PARAM_STR, $parameter->getType());
+
+        $parameter = new Parameter(123);
+        $this->assertSame(\PDO::PARAM_INT, $parameter->getType());
+
+        $parameter = new Parameter(null);
+        $this->assertSame(\PDO::PARAM_NULL, $parameter->getType());
+
+        $parameter = new Parameter(false);
+        $this->assertSame(\PDO::PARAM_BOOL, $parameter->getType());
+
+        $parameter = new Parameter(true);
+        $this->assertSame(\PDO::PARAM_BOOL, $parameter->getType());
+    }
+
+    /**
+     * At this moment arrays values are always treated as strings.
+     */
+    public function testAutoTypingArrays()
+    {
+        $parameter = new Parameter([1, 2, 3]);
+        $this->assertSame(\PDO::PARAM_STR, $parameter->getType());
+
+        $parameter = new Parameter(['1', '2', '3']);
+        $this->assertSame(\PDO::PARAM_STR, $parameter->getType());
+    }
 }

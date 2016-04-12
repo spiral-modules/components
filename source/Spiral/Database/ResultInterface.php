@@ -8,8 +8,6 @@
 
 namespace Spiral\Database;
 
-use Spiral\Database\Exceptions\ResultException;
-
 /**
  * Must represent single query result.
  *
@@ -30,17 +28,6 @@ interface ResultInterface extends \Traversable, \Countable
      * @return array|bool
      */
     public function fetch();
-
-    /**
-     * Fetch given class instance. Behaviour must be similar to Doctrine\Instantiator and must
-     * support AbstractEntity classes initiation using constructor.
-     *
-     * @param string $class
-     * @return object|null
-     *
-     * @throws ResultException
-     */
-    public function fetchInstance($class);
 
     /**
      * Returns an array containing all of the result set rows. Avoid using this method

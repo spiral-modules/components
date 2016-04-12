@@ -10,19 +10,15 @@ namespace Spiral\Database\Query;
 
 use PDOStatement;
 use Spiral\Database\Helpers\QueryInterpolator;
-use Spiral\Database\Query\Traits\InstantiationTrait;
 use Spiral\Database\ResultInterface;
 
 /**
  * Works as prepared PDOStatement.
  *
  * @todo bad namespace choice?
- * @todo withParameters!
  */
 class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializable
 {
-    use InstantiationTrait;
-
     /**
      * Limits after which no records will be dumped in __debugInfo.
      */
@@ -36,7 +32,7 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
     /**
      * @param array $parameters
      */
-    public function __construct(array $parameters)
+    protected function __construct(array $parameters)
     {
         $this->parameters = $parameters;
     }
@@ -54,7 +50,7 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
             //PDO columns are 1-indexed
             $fieldID = $fieldID + 1;
         }
-        
+
         $this->bindColumn($fieldID, $variable);
 
         return $this;

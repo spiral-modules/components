@@ -21,8 +21,7 @@
     "symfony/finder": "^2.7",
     "symfony/event-dispatcher": "^2.7",
     "symfony/translation": "^2.7",
-    "defuse/php-encryption": "^1.2",
-    "doctrine/instantiator": "^1.0"
+    "defuse/php-encryption": "^1.2"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.0",

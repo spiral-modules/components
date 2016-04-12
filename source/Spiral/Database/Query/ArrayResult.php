@@ -8,7 +8,6 @@
 namespace Spiral\Database\Query;
 
 use Spiral\Database\Exceptions\ResultException;
-use Spiral\Database\Query\Traits\InstantiationTrait;
 use Spiral\Database\ResultInterface;
 
 /**
@@ -16,8 +15,6 @@ use Spiral\Database\ResultInterface;
  */
 class ArrayResult extends \ArrayIterator implements ResultInterface
 {
-    use InstantiationTrait;
-
     /**
      * @var array
      */

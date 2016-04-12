@@ -7,7 +7,7 @@
  */
 namespace Spiral\Database\Tests;
 
-class FragmentTest extends \PHPUnit_Framework_TestCase
+class FragmentTest //extends \PHPUnit_Framework_TestCase
 {
 
 }

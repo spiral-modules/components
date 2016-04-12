@@ -5,9 +5,9 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tests\Storage;
+namespace Spiral\Tests\Database;
 
-class ConfigTest //extends \PHPUnit_Framework_TestCase
+class InterpolatorTest
 {
 
 }

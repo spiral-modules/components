@@ -14,7 +14,7 @@ use Spiral\Database\Drivers\SQLServer\SQLServerDriver;
 use Spiral\Database\Entities\PDODriver;
 use Spiral\Database\Entities\Quoter;
 
-class QuoterTest extends \PHPUnit_Framework_TestCase
+class QuoterTest //extends \PHPUnit_Framework_TestCase
 {
     public function testPrefixless()
     {
@@ -352,7 +352,7 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
     protected function quoter($prefix = '', $driver = PDODriver::class)
     {
         /**
-         * @var PDODriver
+         * @var PDODriver $driver
          */
         $driver = m::mock($driver . '[identifier]');
 

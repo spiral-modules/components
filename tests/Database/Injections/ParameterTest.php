@@ -7,7 +7,7 @@
  */
 namespace Spiral\Database\Tests;
 
-class ParameterTest extends \PHPUnit_Framework_TestCase
+class ParameterTest //extends \PHPUnit_Framework_TestCase
 {
 
 }

@@ -25,7 +25,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
         $driver->method('getType')->will($this->returnValue('test-driver'));
 
-        $database = new Database($driver, 'test', 'prefix_');
+        $database = new Database('test', 'prefix_', $driver);
 
         $this->assertEquals('test', $database->getName());
         $this->assertEquals($driver, $database->driver());
@@ -44,7 +44,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
         $driver->expects($this->once())->method('query')->with('test query');
 
-        $database = new Database($driver, 'test', 'prefix_');
+        $database = new Database('test', 'prefix_', $driver);
         $database->query('test query');
     }
 
@@ -59,7 +59,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
         $driver->expects($this->once())->method('statement')->with('test statement', [1, 2, 3]);
 
-        $database = new Database($driver, 'test', 'prefix_');
+        $database = new Database('test', 'prefix_', $driver);
         $database->statement('test statement', [1, 2, 3]);
     }
 
@@ -76,7 +76,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             $this->returnValue(true)
         );
 
-        $database = new Database($driver, 'test', 'prefix_');
+        $database = new Database('test', 'prefix_', $driver);
         $this->assertTrue($database->hasTable('table'));
     }
 
@@ -89,7 +89,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $database = new Database($driver, 'test', 'prefix_');
+        $database = new Database('test', 'prefix_', $driver);
 
         $driver->expects($this->once())->method('hasTable')->with('prefix_table')->will(
             $this->returnValue(true)

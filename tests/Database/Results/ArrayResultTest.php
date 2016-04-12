@@ -7,7 +7,7 @@
  */
 namespace Spiral\Tests\Database\Results;
 
-class ArrayResultTest extends \PHPUnit_Framework_TestCase
+class ArrayResultTest //extends \PHPUnit_Framework_TestCase
 {
 
 }

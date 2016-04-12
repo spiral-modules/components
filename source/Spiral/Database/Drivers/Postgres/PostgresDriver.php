@@ -97,6 +97,14 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
+    public function truncate($table)
+    {
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function tableNames()
     {
         $query = 'SELECT "table_name" FROM "information_schema"."tables" '
@@ -131,7 +139,7 @@ class PostgresDriver extends Driver
 
         if (!$this->hasTable($table)) {
             throw new DriverException(
-                "Unable to fetch table primary key, no such table '{$table}' exists."
+                "Unable to fetch table primary key, no such table '{$table}' exists"
             );
         }
 

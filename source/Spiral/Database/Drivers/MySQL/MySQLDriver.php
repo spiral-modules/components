@@ -61,17 +61,6 @@ class MySQLDriver extends Driver
         return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
     }
 
-
-    /**
-     * Clean (truncate) specified driver table.
-     *
-     * @param string $table Table name with prefix included.
-     */
-    abstract public function truncate($table)
-    {
-        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -85,10 +74,18 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
+    public function truncate($table)
+    {
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function tableNames()
     {
         $result = [];
-        foreach ($this->query('SHOW TABLES')->fetchMode(PDO::FETCH_NUM) as $row) {
+        foreach ($this->query('SHOW TABLES')->fetch(PDO::FETCH_NUM) as $row) {
             $result[] = $row[0];
         }
 

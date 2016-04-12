@@ -79,13 +79,6 @@ abstract class Driver extends PDODriver
     }
 
     /**
-     * Clean (truncate) specified driver table.
-     *
-     * @param string $table Table name with prefix included.
-     */
-    abstract public function truncate($table);
-
-    /**
      * Check if table exists.
      *
      * @param string $name
@@ -93,6 +86,13 @@ abstract class Driver extends PDODriver
      * @return bool
      */
     abstract public function hasTable($name);
+
+    /**
+     * Clean (truncate) specified driver table.
+     *
+     * @param string $table Table name with prefix included.
+     */
+    abstract public function truncate($table);
 
     /**
      * Get every available table name as array.

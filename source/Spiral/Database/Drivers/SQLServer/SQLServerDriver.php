@@ -103,12 +103,20 @@ class SQLServerDriver extends Driver
     /**
      * {@inheritdoc}
      */
+    public function truncate($table)
+    {
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function tableNames()
     {
         $query = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE'";
 
         $tables = [];
-        foreach ($this->query($query)->fetchMode(PDO::FETCH_NUM) as $row) {
+        foreach ($this->query($query)->fetch(PDO::FETCH_NUM) as $row) {
             $tables[] = $row[0];
         }
 

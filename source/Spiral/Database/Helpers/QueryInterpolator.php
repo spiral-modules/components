@@ -64,7 +64,7 @@ class QueryInterpolator
      *
      * @throws InterpolatorException
      */
-    public function flattenParameters(array $parameters)
+    public static function flattenParameters(array $parameters)
     {
         $flatten = [];
         foreach ($parameters as $key => $parameter) {
@@ -81,7 +81,12 @@ class QueryInterpolator
                 //Quick and dirty
                 $flatten = array_merge($flatten, $parameter->flatten());
             } else {
-                $flatten[$key] = $parameter;
+                if (is_numeric($key)) {
+                    //We have to shift numeric keys due arrays
+                    $flatten[] = $parameter;
+                } else {
+                    $flatten[$key] = $parameter;
+                }
             }
         }
 
@@ -121,6 +126,11 @@ class QueryInterpolator
                 if (method_exists($parameter, '__toString')) {
                     return "'" . addcslashes((string)$parameter, "'") . "'";
                 }
+
+                if ($parameter instanceof \DateTime) {
+                    //Let's process dates different way
+                    return "'" . $parameter->format(\DateTime::ISO8601) . "'";
+                }
         }
 
         return '[UNRESOLVED]';
@@ -135,7 +145,7 @@ class QueryInterpolator
      * @param string $subject
      * @return string
      */
-    private function replaceOnce($search, $replace, $subject)
+    private static function replaceOnce($search, $replace, $subject)
     {
         $position = strpos($subject, $search);
         if ($position !== false) {

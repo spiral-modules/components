@@ -7,7 +7,7 @@
  */
 namespace Spiral\Database\Tests;
 
-class ExpressionTest extends \PHPUnit_Framework_TestCase
+class ExpressionTest //extends \PHPUnit_Framework_TestCase
 {
 
 }

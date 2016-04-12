@@ -437,7 +437,12 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                     );
                 }
 
-                $flatten[$key] = $parameter;
+                if (is_numeric($key)) {
+                    //Numeric keys can be shifted
+                    $flatten[] = $parameter;
+                } else {
+                    $flatten[$key] = $parameter;
+                }
             }
         }
 

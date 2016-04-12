@@ -899,7 +899,7 @@ abstract class Loader implements LoaderInterface
             return;
         }
 
-        $this->dataOffset = $selector->generateColumns($this->getAlias(), $this->dataColumns);
+        $this->dataOffset = $selector->registerColumns($this->getAlias(), $this->dataColumns);
     }
 
     /**

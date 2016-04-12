@@ -182,12 +182,12 @@ class ManyToManyLoader extends Loader
             return;
         }
 
-        $this->dataOffset = $selector->generateColumns(
+        $this->dataOffset = $selector->registerColumns(
             $this->getAlias(),
             $this->dataColumns
         );
 
-        $this->pivotOffset = $selector->generateColumns(
+        $this->pivotOffset = $selector->registerColumns(
             $this->pivotAlias(),
             $this->pivotColumns
         );

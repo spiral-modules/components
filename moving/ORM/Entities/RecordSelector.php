@@ -57,7 +57,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      * generateColumns() method, this is not the same column set as one provided by user using
      * columns() method. Do not define columns using generateColumns() method outside of loaders.
      *
-     * @see generateColumns()
+     * @see addColumns()
      *
      * @var array
      */
@@ -150,7 +150,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      *
      * @return int
      */
-    public function generateColumns($table, array $columns)
+    public function registerColumns($table, array $columns)
     {
         $offset = count($this->dataColumns);
         foreach ($columns as $column) {

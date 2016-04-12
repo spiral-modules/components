@@ -10,7 +10,7 @@ namespace Spiral\tests\Cases\Models;
 
 use Spiral\Models\DataEntity;
 
-//todo: improve coverage
+//todo: improve test coverage
 class DataEntityTest extends \PHPUnit_Framework_TestCase
 {
     public function testSetter()

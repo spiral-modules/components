@@ -8,14 +8,13 @@
 
 namespace Spiral\Tokenizer;
 
-use Spiral\Core\Component;
 use Spiral\Tokenizer\Highlighter\Style;
 use Spiral\Tokenizer\Traits\TokensTrait;
 
 /**
  * Highlights php file using specified style. For debug purposes only.
  */
-class Highlighter extends Component
+class Highlighter
 {
     use TokensTrait;
 
@@ -52,6 +51,7 @@ class Highlighter extends Component
      * Get highlighter with different source.
      *
      * @param string $source
+     *
      * @return Highlighter
      */
     public function withSource($source)

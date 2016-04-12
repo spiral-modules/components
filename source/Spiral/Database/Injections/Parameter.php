@@ -8,8 +8,6 @@
 
 namespace Spiral\Database\Injections;
 
-use Spiral\Database\Entities\QueryCompiler;
-
 /**
  * Default implementation of ParameterInterface, provides ability to mock value or array of values
  * and automatically create valid query placeholder at moment of query compilation (? vs (?, ?, ?)).
@@ -109,7 +107,7 @@ class Parameter implements ParameterInterface
     public function flatten()
     {
         if (!is_array($this->value)) {
-            return [$this];
+            return [clone $this];
         }
 
         $result = [];
@@ -127,10 +125,8 @@ class Parameter implements ParameterInterface
 
     /**
      * {@inheritdoc}
-     *
-     * Parameters are unnamed by default.
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement()
     {
         if (is_array($this->value)) {
             //Array were mocked

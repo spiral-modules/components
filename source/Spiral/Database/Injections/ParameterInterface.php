@@ -17,7 +17,7 @@ namespace Spiral\Database\Injections;
  * Database implementation must inject parameter SQL into expression, but use parameter value to be
  * sent to database.
  */
-interface ParameterInterface extends ExpressionInterface
+interface ParameterInterface extends FragmentInterface
 {
     /**
      * Get mocked parameter value or values in array form.
@@ -57,6 +57,8 @@ interface ParameterInterface extends ExpressionInterface
 
     /**
      * Expand itself into array of Parameters each of what represent one nested value.
+     * Attention, parameter reference LOST at this moment, make sure to alter original parmater
+     * not flattened values.
      *
      * @return ParameterInterface[]
      */

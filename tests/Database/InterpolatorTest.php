@@ -21,7 +21,7 @@ class InterpolatorTest extends \PHPUnit_Framework_TestCase
         ];
 
         $flattened = QueryInterpolator::flattenParameters($parameters);
-        $this->assertSame(4, count($flattened));
+        $this->assertCount(4, $flattened);
 
         $this->assertArrayHasKey(':named', $flattened);
 

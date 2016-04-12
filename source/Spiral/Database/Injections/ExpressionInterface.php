@@ -18,6 +18,8 @@ use Spiral\Database\Entities\QueryCompiler;
 interface ExpressionInterface extends FragmentInterface
 {
     /**
+     * @todo think about alternative implementation
+     *
      * @param QueryCompiler|null $compiler
      *
      * @return mixed

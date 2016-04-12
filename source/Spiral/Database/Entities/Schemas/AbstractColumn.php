@@ -300,7 +300,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
 
             //Driver specific now expression
-            $nowExpression = $this->table->getDriver()->nowExpression();
+            $nowExpression = $this->table->driver()->nowExpression();
             if (strtolower($this->defaultValue) == strtolower($nowExpression)) {
                 return new Fragment($this->defaultValue);
             }
@@ -451,7 +451,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             $this->abstractType() == 'timestamp'
             && strtolower($value) == strtolower(Driver::TIMESTAMP_NOW)
         ) {
-            $this->defaultValue = $this->table->getDriver()->nowExpression();
+            $this->defaultValue = $this->table->driver()->nowExpression();
         }
 
         return $this;
@@ -744,7 +744,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     {
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
         }
 
         if (!empty($enumValues)) {
@@ -781,6 +781,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             return $defaultValue;
         }
 
-        return $this->table->getDriver()->getPDO()->quote($defaultValue);
+        return $this->table->driver()->getPDO()->quote($defaultValue);
     }
 }

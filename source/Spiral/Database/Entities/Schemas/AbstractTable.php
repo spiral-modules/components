@@ -138,17 +138,6 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return Driver
      */
-    public function getDriver()
-    {
-        return $this->driver;
-    }
-
-    /**
-     * Get associated table driver.
-     *
-     * @deprecated see getDriver()
-     * @return Driver
-     */
     public function driver()
     {
         return $this->driver;
@@ -157,17 +146,6 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Get table comparator.
      *
-     * @return Comparator
-     */
-    public function getComparator()
-    {
-        return $this->comparator;
-    }
-
-    /**
-     * Get table comparator.
-     *
-     * @deprecated See getComparator()
      * @return Comparator
      */
     public function comparator()

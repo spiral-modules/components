@@ -10,6 +10,7 @@ namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Database\Exceptions\BuilderException;
+use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\ParameterInterface;
 

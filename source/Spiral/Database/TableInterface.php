@@ -13,6 +13,8 @@ use Spiral\Database\Exceptions\QueryException;
 /**
  * TableInterface is table level abstraction linked to existed or not existed database table. You
  * can check if table really exist or not exist using "exists" method of table schema.
+ *
+ * @todo add interfaces for builders
  */
 interface TableInterface extends \Countable
 {

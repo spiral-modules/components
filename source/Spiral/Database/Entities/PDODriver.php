@@ -15,6 +15,7 @@ use Spiral\Core\Exceptions\SugarException;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\PDOQuery;

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities;
+namespace Spiral\Database\Helpers;
 
 use Spiral\Database\Injections\ParameterInterface;
 

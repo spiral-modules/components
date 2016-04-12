@@ -28,11 +28,12 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
     /**
      * @param Quoter          $quoter
-     * @param SQLServerDriver $driver
+     * @param SQLServerDriver $driver Needed to validly detect driver version.
      */
     public function __construct(Quoter $quoter, SQLServerDriver $driver)
     {
         parent::__construct($quoter);
+
         $this->driver = $driver;
     }
 

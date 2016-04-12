@@ -309,7 +309,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     ) {
         try {
             //Filtered and normalized parameters
-            $parameters = $this->filterParameters($parameters);
+            $parameters = $this->flattenParameters($parameters);
 
             if ($this->isProfiling()) {
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
@@ -394,7 +394,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @throws DriverException
      */
-    public function filterParameters(array $parameters)
+    public function flattenParameters(array $parameters)
     {
         $flatten = [];
         foreach ($parameters as $key => $parameter) {
@@ -636,7 +636,13 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     private function bindParameters(\PDOStatement $statement, array $parameters)
     {
         foreach ($parameters as $index => $parameter) {
-            $statement->bindValue($index, $parameter->getValue(), $parameter->getType());
+            if (is_numeric($index)) {
+                //Numeric, @see http://php.net/manual/en/pdostatement.bindparam.php
+                $statement->bindValue($index + 1, $parameter->getValue(), $parameter->getType());
+            } else {
+                //Named
+                $statement->bindValue($index, $parameter->getValue(), $parameter->getType());
+            }
         }
 
         return $statement;

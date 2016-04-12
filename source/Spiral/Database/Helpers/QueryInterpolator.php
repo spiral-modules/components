@@ -8,6 +8,8 @@
 
 namespace Spiral\Database\Helpers;
 
+use Spiral\Database\Exceptions\InterpolatorException;
+use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 
 /**
@@ -16,66 +18,71 @@ use Spiral\Database\Injections\ParameterInterface;
  */
 class QueryInterpolator
 {
-    //TODO: SUPPORT NAMED PARAMETERS!
-
     /**
      * Helper method used to interpolate SQL query with set of parameters, must be used only for
      * development purposes and never for real query.
      *
      * @param string               $query
-     * @param ParameterInterface[] $parameters Parameters to be binded into query.
+     * @param ParameterInterface[] $parameters Parameters to be binded into query. Named list are
+     *                                         supported.
      *
      * @return mixed
      */
     public static function interpolate($query, array $parameters = [])
     {
-       // if (empty($parameters)) {
+        if (empty($parameters)) {
             return $query;
-       // }
-//
-//        //Flattening first
-//        $parameters = self::flattenParameters($parameters);
-//
-//        //Let's prepare values so they looks better
-//        foreach ($parameters as &$parameter) {
-//            $parameter = self::resolveValue($parameter);
-//            unset($parameter);
-//        }
-//
-//        reset($parameters);
-//        if (!is_int(key($parameters))) {
-//            //Associative array
-//            return \Spiral\interpolate($query, $parameters, '', '');
-//        }
-//
-//        foreach ($parameters as $parameter) {
-//            $query = preg_replace('/\?/', $parameter, $query, 1);
-//        }
-//
-//        return $query;
+        }
+
+        //Flattening
+        $parameters = self::flattenParameters($parameters);
+
+        //Let's prepare values so they looks better
+        foreach ($parameters as $index => $parameter) {
+            $value = self::resolveValue($parameter);
+
+            if (is_numeric($index)) {
+                $query = self::replaceOnce('?', $value, $query);
+            } else {
+                $query = str_replace($index, $value, $query);
+            }
+        }
+
+
+        return $query;
     }
 
     /**
-     * Flatten all parameters into simple array.
+     * Prepare set of query builder/user parameters to be send to PDO. Must convert DateTime
+     * instances into valid database timestamps and resolve values of ParameterInterface.
+     *
+     * Every value has to wrapped with parameter interface.
      *
      * @param array $parameters
      *
-     * @return array
+     * @return ParameterInterface[]
+     *
+     * @throws InterpolatorException
      */
-    protected static function flattenParameters(array $parameters)
+    public function flattenParameters(array $parameters)
     {
         $flatten = [];
-        foreach ($parameters as $parameter) {
-            if ($parameter instanceof ParameterInterface) {
+        foreach ($parameters as $key => $parameter) {
+            if (!$parameter instanceof ParameterInterface) {
+                //Let's wrap value
+                $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
+            }
+
+            if ($parameter->isArray()) {
+                if (!is_numeric($key)) {
+                    throw new InterpolatorException("Array parameters can not be named");
+                }
+
+                //Quick and dirty
                 $flatten = array_merge($flatten, $parameter->flatten());
-                continue;
+            } else {
+                $flatten[$key] = $parameter;
             }
-
-            if (is_array($parameter)) {
-                $flatten = array_merge($flatten, $parameter);
-            }
-
-            $flatten[] = $parameter;
         }
 
         return $flatten;
@@ -117,5 +124,24 @@ class QueryInterpolator
         }
 
         return '[UNRESOLVED]';
+    }
+
+    /**
+     * Replace search value only once.
+     *
+     * @see http://stackoverflow.com/questions/1252693/using-str-replace-so-that-it-only-acts-on-the-first-match
+     * @param string $search
+     * @param string $replace
+     * @param string $subject
+     * @return string
+     */
+    private function replaceOnce($search, $replace, $subject)
+    {
+        $position = strpos($subject, $search);
+        if ($position !== false) {
+            return substr_replace($subject, $replace, $position, strlen($search));
+        }
+
+        return $subject;
     }
 }

@@ -9,7 +9,7 @@
 namespace Spiral\Database\Query;
 
 use PDOStatement;
-use Spiral\Database\Entities\QueryInterpolator;
+use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Query\Traits\InstantiationTrait;
 use Spiral\Database\ResultInterface;
 
@@ -39,6 +39,25 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
     public function __construct(array $parameters)
     {
         $this->parameters = $parameters;
+    }
+
+    /**
+     * Bind a column value to a PHP variable. Aliased to bindParam.
+     *
+     * @param int|string $fieldID Column number (0 - first column)
+     * @param mixed      $variable
+     * @return self
+     */
+    public function bind($fieldID, &$variable)
+    {
+        if (is_numeric($fieldID)) {
+            //PDO columns are 1-indexed
+            $fieldID = $fieldID + 1;
+        }
+        
+        $this->bindColumn($fieldID, $variable);
+
+        return $this;
     }
 
     /**

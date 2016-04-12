@@ -9,7 +9,7 @@
 namespace Spiral\Database\Query;
 
 use Spiral\Cache\StoreInterface;
-use Spiral\Database\Entities\QueryInterpolator;
+use Spiral\Database\Helpers\QueryInterpolator;
 
 /**
  * CacheResult is almost identical to QueryResult by it's functionality, but used to represent query

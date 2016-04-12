@@ -55,11 +55,13 @@ class TableSchema extends AbstractTable
      * @param string $engine
      *
      * @return $this
+     *
+     * @throws SchemaException
      */
     public function setEngine($engine)
     {
         if ($this->exists()) {
-            throw new SchemaException('Table engine can be set only at moment of creation.');
+            throw new SchemaException('Table engine can be set only at moment of creation');
         }
 
         $this->engine = $engine;

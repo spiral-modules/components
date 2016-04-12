@@ -138,7 +138,7 @@ class ColumnSchema extends AbstractColumn
         $defaultValue = parent::getDefaultValue();
 
         if (in_array($this->type, $this->forbiddenDefaults)) {
-            return;
+            return null;
         }
 
         return $defaultValue;

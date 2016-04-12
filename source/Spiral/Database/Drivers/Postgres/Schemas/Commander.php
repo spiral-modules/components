@@ -24,7 +24,7 @@ class Commander extends AbstractCommander
         AbstractColumn $column
     ) {
         if (!$initial instanceof ColumnSchema || !$column instanceof ColumnSchema) {
-            throw new SchemaException('Postgres commander can work only with Postgres columns.');
+            throw new SchemaException('Postgres commander can work only with Postgres columns');
         }
 
         //Rename is separate operation

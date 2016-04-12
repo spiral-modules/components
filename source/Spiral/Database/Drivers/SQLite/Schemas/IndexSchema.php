@@ -23,7 +23,7 @@ class IndexSchema extends AbstractIndex
         $this->name = $schema['name'];
         $this->type = $schema['unique'] ? self::UNIQUE : self::NORMAL;
 
-        $indexColumns = $this->table->driver()->query("PRAGMA INDEX_INFO({$this->getName(true)})");
+        $indexColumns = $this->table->getDriver()->query("PRAGMA INDEX_INFO({$this->getName(true)})");
         foreach ($indexColumns as $column) {
             $this->columns[] = $column['name'];
         }

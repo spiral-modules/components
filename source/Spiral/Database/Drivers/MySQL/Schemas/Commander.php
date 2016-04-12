@@ -83,11 +83,13 @@ class Commander extends AbstractCommander
      * @param AbstractTable $table
      *
      * @return string
+     *
+     * @throws SchemaException
      */
     protected function createStatement(AbstractTable $table)
     {
         if (!$table instanceof TableSchema) {
-            throw new SchemaException('MySQL commander can process only MySQL tables.');
+            throw new SchemaException('MySQL commander can process only MySQL tables');
         }
 
         return parent::createStatement($table) . " ENGINE {$table->getEngine()}";

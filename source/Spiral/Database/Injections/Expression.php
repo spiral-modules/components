@@ -22,6 +22,16 @@ use Spiral\Database\Entities\QueryCompiler;
 class Expression extends Fragment implements ExpressionInterface
 {
     /**
+     * Unescaped expression.
+     *
+     * @return string
+     */
+    public function getExpression()
+    {
+        return parent::sqlStatement();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function sqlStatement(QueryCompiler $compiler = null)

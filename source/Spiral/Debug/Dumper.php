@@ -56,8 +56,10 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     ) {
         $this->maxLevel = $maxLevel;
         $this->style = !empty($styler) ? $styler : new Style();
-        
-        $this->setLogger($logger);
+
+        if (!empty($logger)) {
+            $this->setLogger($logger);
+        }
     }
 
     /**
@@ -98,7 +100,9 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
                     break;
 
                 case self::OUTPUT_LOG:
-                    $this->logger()->debug($this->dump($value, self::OUTPUT_RETURN));
+                    if (!empty($this->logger)) {
+                        $this->logger->debug($this->dump($value, self::OUTPUT_RETURN));
+                    }
                     break;
             }
 

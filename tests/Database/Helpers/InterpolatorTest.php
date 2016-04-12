@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tests\Database;
+namespace Spiral\Tests\Database\Helpers;
 
 use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\Parameter;

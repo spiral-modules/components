@@ -12,6 +12,8 @@ use Spiral\Core\Component;
 
 /**
  * TableSchema helper used to store original table elements and run comparation between them.
+ *
+ * Attention: this state IS MUTABLE!
  */
 class TableState extends Component
 {
@@ -106,14 +108,6 @@ class TableState extends Component
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function getPrimaryKeys()
-    {
-        return $this->primaryKeys;
-    }
-
-    /**
      * Set table primary keys.
      *
      * @param array $columns
@@ -125,6 +119,14 @@ class TableState extends Component
         $this->primaryKeys = $columns;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPrimaryKeys()
+    {
+        return $this->primaryKeys;
     }
 
     /**
@@ -297,7 +299,7 @@ class TableState extends Component
             }
         }
 
-        return;
+        return null;
     }
 
     /**
@@ -315,7 +317,7 @@ class TableState extends Component
             }
         }
 
-        return;
+        return null;
     }
 
     /**
@@ -333,7 +335,7 @@ class TableState extends Component
             }
         }
 
-        return;
+        return null;
     }
 
     /**

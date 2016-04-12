@@ -5,9 +5,11 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tests\Database;
+namespace Spiral\Tests\Database\Schemas;
 
-class ConfigTest //extends \PHPUnit_Framework_TestCase
+use Mockery as m;
+
+class StateTest
 {
 
 }

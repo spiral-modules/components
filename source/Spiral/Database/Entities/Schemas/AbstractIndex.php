@@ -129,7 +129,11 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
         }
 
         //Wrapping column names
-        $columns = implode(', ', array_map([$this->table->driver(), 'identifier'], $this->columns));
+        $columns = implode(', ', array_map(
+            [$this->table->getDriver(), 'identifier']
+            , $this->columns
+        ));
+
         $statement[] = "({$columns})";
 
         return implode(' ', $statement);

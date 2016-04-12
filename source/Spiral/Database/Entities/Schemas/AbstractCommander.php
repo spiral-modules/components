@@ -13,7 +13,7 @@ use Spiral\Database\Entities\Driver;
 /**
  * Holds set of DBMS specific element operations.
  *
- * @todo deprecate in order to replace with Phinx and migration engine
+ * @todo deprecate in order to replace with Phinx and/or migration engine
  */
 abstract class AbstractCommander
 {

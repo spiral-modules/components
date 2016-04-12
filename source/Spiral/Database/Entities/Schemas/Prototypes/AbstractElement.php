@@ -8,14 +8,13 @@
 
 namespace Spiral\Database\Entities\Schemas\Prototypes;
 
-use Spiral\Core\Component;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Database\Exceptions\SchemaException;
 
 /**
  * Aggregates common functionality for columns, indexes and foreign key schemas.
  */
-abstract class AbstractElement extends Component
+abstract class AbstractElement
 {
     /**
      * Declaration flag used to create full table diff.
@@ -58,7 +57,7 @@ abstract class AbstractElement extends Component
      *
      * @return AbstractTable
      */
-    public function table()
+    public function getTable()
     {
         return $this->table;
     }

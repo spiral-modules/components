@@ -8,9 +8,8 @@
 
 namespace Spiral\Database\Entities\Schemas;
 
-use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
-use Spiral\Database\Exceptions\InvalidArgumentException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Injections\FragmentInterface;
@@ -291,7 +290,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     public function getDefaultValue()
     {
         if (!$this->hasDefaultValue()) {
-            return;
+            return null;
         }
 
         if ($this->defaultValue instanceof FragmentInterface) {
@@ -299,9 +298,10 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
-            if (
-                strtolower($this->defaultValue) == strtolower($this->table->driver()->nowExpression())
-            ) {
+
+            //Driver specific now expression
+            $nowExpression = $this->table->getDriver()->nowExpression();
+            if (strtolower($this->defaultValue) == strtolower($nowExpression)) {
                 return new Fragment($this->defaultValue);
             }
         }
@@ -369,7 +369,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
                         continue;
                     }
 
-                    if ($this->$option != $required) {
+                    if ($this->{$option} != $required) {
                         continue 2;
                     }
                 }
@@ -401,7 +401,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         if (!isset($this->mapping[$abstract])) {
-            throw new SchemaException("Undefined abstract/virtual type '{$abstract}'.");
+            throw new SchemaException("Undefined abstract/virtual type '{$abstract}'");
         }
 
         //Resetting all values to default state.
@@ -416,7 +416,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 
         //Additional type options
         foreach ($this->mapping[$abstract] as $property => $value) {
-            $this->$property = $value;
+            $this->{$property} = $value;
         }
 
         return $this;
@@ -449,9 +449,9 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         $this->defaultValue = $value;
         if (
             $this->abstractType() == 'timestamp'
-            && strtolower($value) == strtolower(Database::TIMESTAMP_NOW)
+            && strtolower($value) == strtolower(Driver::TIMESTAMP_NOW)
         ) {
-            $this->defaultValue = $this->table->driver()->nowExpression();
+            $this->defaultValue = $this->table->getDriver()->nowExpression();
         }
 
         return $this;
@@ -523,20 +523,20 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return $this
      *
-     * @throws InvalidArgumentException
+     * @throws SchemaException
      */
     public function string($size = 255)
     {
         $this->setType('string');
 
         if ($size > 255) {
-            throw new InvalidArgumentException(
-                "String size can't exceed 255 characters. Use text instead."
+            throw new SchemaException(
+                "String size can't exceed 255 characters. Use text instead"
             );
         }
 
         if ($size < 0) {
-            throw new InvalidArgumentException('Invalid string length value.');
+            throw new SchemaException('Invalid string length value');
         }
 
         $this->size = (int)$size;
@@ -552,14 +552,14 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return $this
      *
-     * @throws InvalidArgumentException
+     * @throws SchemaException
      */
     public function decimal($precision, $scale = 0)
     {
         $this->setType('decimal');
 
         if (empty($precision)) {
-            throw new InvalidArgumentException('Invalid precision value.');
+            throw new SchemaException('Invalid precision value');
         }
 
         $this->precision = (int)$precision;
@@ -744,7 +744,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     {
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
         }
 
         if (!empty($enumValues)) {
@@ -781,6 +781,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             return $defaultValue;
         }
 
-        return $this->table->driver()->getPDO()->quote($defaultValue);
+        return $this->table->getDriver()->getPDO()->quote($defaultValue);
     }
 }

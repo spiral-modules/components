@@ -22,6 +22,8 @@ use Spiral\ODM\Exceptions\SchemaException;
  * Most of table operation like column, index or foreign key creation/altering will be applied when
  * save() method will be called.
  *
+ * @todo Split operations and state representation.
+ *
  * Column configuration shortcuts:
  *
  * @method AbstractColumn primary($column)
@@ -48,9 +50,6 @@ use Spiral\ODM\Exceptions\SchemaException;
  */
 abstract class AbstractTable extends TableState implements TableInterface, LoggerAwareInterface
 {
-    /*
-     * Some operation better to be logged.
-     */
     use LoggerTrait;
 
     /**
@@ -139,6 +138,17 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return Driver
      */
+    public function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * Get associated table driver.
+     *
+     * @deprecated see getDriver()
+     * @return Driver
+     */
     public function driver()
     {
         return $this->driver;
@@ -147,6 +157,17 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Get table comparator.
      *
+     * @return Comparator
+     */
+    public function getComparator()
+    {
+        return $this->comparator;
+    }
+
+    /**
+     * Get table comparator.
+     *
+     * @deprecated See getComparator()
      * @return Comparator
      */
     public function comparator()
@@ -222,7 +243,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     public function setPrimaryKeys(array $columns)
     {
         if ($this->exists() && $this->getPrimaryKeys() != $columns) {
-            throw new SchemaException('Unable to change primary keys for already exists table.');
+            throw new SchemaException('Unable to change primary keys for already exists table');
         }
 
         parent::setPrimaryKeys($columns);
@@ -590,6 +611,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Synchronise columns.
      *
+     * @todo Split or isolate.
      * @return $this
      */
     protected function synchroniseColumns()
@@ -614,7 +636,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
 
         foreach ($this->comparator->alteredColumns() as $pair) {
             /**
-             * @var AbstractColumn
+             * @var AbstractColumn $initial
              * @var AbstractColumn $current
              */
             list($current, $initial) = $pair;
@@ -668,7 +690,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
 
         foreach ($this->comparator->alteredIndexes() as $pair) {
             /**
-             * @var AbstractIndex
+             * @var AbstractIndex $initial
              * @var AbstractIndex $current
              */
             list($current, $initial) = $pair;
@@ -722,7 +744,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
 
         foreach ($this->comparator->alteredForeigns() as $pair) {
             /**
-             * @var AbstractReference
+             * @var AbstractReference $initial
              * @var AbstractReference $current
              */
             list($current, $initial) = $pair;

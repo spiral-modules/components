@@ -9,6 +9,7 @@ namespace Spiral\ODM\Entities;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
+use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\MongoManager;
 use Spiral\ODM\ODMInterface;
@@ -28,7 +29,7 @@ class DocumentSelector extends Component implements
     LoggerAwareInterface,
     \JsonSerializable
 {
-    use LimitsTrait, PaginatorTrait;
+    use LimitsTrait, PaginatorTrait, LoggerTrait;
 
     /**
      * Sort order.
@@ -52,18 +53,11 @@ class DocumentSelector extends Component implements
     private $odm = null;
 
     /**
-     * Associated database name or alias.
+     * Associated ODM class.
      *
      * @var string
      */
-    private $database = 'default';
-
-    /**
-     * Associated MongoCollection name.
-     *
-     * @var string
-     */
-    private $collection = null;
+    private $class = '';
 
     /**
      * Fields and conditions to query by.
@@ -85,17 +79,13 @@ class DocumentSelector extends Component implements
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      *
      * @param ODMInterface $odm
-     * @param string       $database   Associated database name/id.
-     * @param string       $collection Collection name.
-     * @param array        $query      Fields and conditions to query by (initial).
+     * @param string       $class Associated document class.
+     * @param array        $query Fields and conditions to query by (initial).
      */
-    public function __construct(ODMInterface $odm, $database, $collection, array $query = [])
+    public function __construct(ODMInterface $odm, $class, array $query = [])
     {
         $this->odm = $odm;
-
-        $this->name = $collection;
-        $this->database = $database;
-
+        $this->class = $class;
         $this->query = $query;
     }
 
@@ -104,7 +94,7 @@ class DocumentSelector extends Component implements
      */
     public function getCollection()
     {
-        return $this->collection;
+        return $this->odm->getSchema($this->class, ODMInterface::D_DB);
     }
 
     /**
@@ -112,7 +102,7 @@ class DocumentSelector extends Component implements
      */
     public function getDatabase()
     {
-        return $this->database;
+        return $this->odm->getSchema($this->class, ODMInterface::D_COLLECTION);
     }
 
     /**
@@ -120,21 +110,16 @@ class DocumentSelector extends Component implements
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      *
-     * @param array $query        Fields and conditions to query by.
-     * @param bool  $convertDates When true (default) all DateTime objects will be converted into
-     *                            MongoDate.
+     * @param array $query          Fields and conditions to query by.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
      *
      * @return $this
      */
-    public function query(array $query = [], $convertDates = true)
+    public function query(array $query = [], $normalizeDates = true)
     {
-        if ($convertDates) {
-            array_walk_recursive($query, function (&$value) {
-                if ($value instanceof \DateTime) {
-                    //MongoDate is always UTC, which is good :)
-                    $value = new \MongoDate($value->getTimestamp());
-                }
-            });
+        if ($normalizeDates) {
+            $query = $this->normalizeDates($query);
         }
 
         $this->query = array_merge($this->query, $query);
@@ -150,15 +135,15 @@ class DocumentSelector extends Component implements
      *
      * @see  query()
      *
-     * @param array $query        Fields and conditions to query by.
-     * @param bool  $convertDates When true (default) all DateTime objects will be converted into
-     *                            MongoDate.
+     * @param array $query          Fields and conditions to query by.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
      *
      * @return $this
      */
-    public function where(array $query = [], $convertDates = true)
+    public function where(array $query = [], $normalizeDates = true)
     {
-        return $this->query($query, $convertDates);
+        return $this->query($query, $normalizeDates);
     }
 
     /**
@@ -169,15 +154,15 @@ class DocumentSelector extends Component implements
      *
      * @see  query()
      *
-     * @param array $query        Fields and conditions to query by.
-     * @param bool  $convertDates When true (default) all DateTime objects will be converted into
-     *                            MongoDate.
+     * @param array $query          Fields and conditions to query by.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
      *
      * @return $this
      */
-    public function find(array $query = [], $convertDates = true)
+    public function find(array $query = [], $normalizeDates = true)
     {
-        return $this->query($query, $convertDates);
+        return $this->query($query, $normalizeDates);
     }
 
     /**
@@ -229,23 +214,75 @@ class DocumentSelector extends Component implements
     /**
      * Select one document or it's fields from collection.
      *
-     * @param array $query Fields and conditions to query by.
+     * @param array $query          Fields and conditions to query by. Query will not be added to an
+     *                              existed query array.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
      *
      * @return DocumentEntity|array
      */
-    public function findOne(array $query = [])
+    public function findOne(array $query = [], $normalizeDates = true)
     {
-        return $this->createCursor($query, [], 1)->getNext();
+        if ($normalizeDates) {
+            $query = $this->normalizeDates($query);
+        }
+
+        return $this->createCursor($query, [], 1)->current();
     }
 
     /**
-     * Count all records matching request.
+     * Fetch all available document instances from query.
+     *
+     * @return DocumentEntity[]
+     */
+    public function fetchDocuments()
+    {
+        $result = [];
+        foreach ($this->createCursor() as $document) {
+            $result[] = $document;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Alias for fetchDocuments().
+     *
+     * @return DocumentEntity[]
+     */
+    public function all()
+    {
+        return $this->fetchDocuments();
+    }
+
+    /**
+     * Fetch all available documents as arrays of fields.
+     *
+     * @param array $fields Fields of the results to return.
+     *
+     * @return array
+     */
+    public function fetchFields($fields = [])
+    {
+        $result = [];
+        foreach ($this->createCursor([], $fields) as $document) {
+            $result[] = $document;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Count all records matching request inside given limit/offset window.
      *
      * @return int
      */
     public function count()
     {
-        return $this->mongoCollection()->count($this->query);
+        return $this->mongoCollection()->count($this->query, [
+            'limit'  => $this->limit,
+            'offset' => $this->offset
+        ]);
     }
 
     /**
@@ -312,7 +349,41 @@ class DocumentSelector extends Component implements
      */
     protected function createCursor($query = [], $fields = [], $limit = null)
     {
+        //We have to create original mongo cursor first
+        $cursor = $this->mongoCollection()->find(array_merge($this->query, $query));
 
+        //Getting selection specific paginator
+        if ($this->hasPaginator()) {
+            $paginator = $this->configurePaginator($this->count());
+
+            //We have to ensure that selection works inside given pagination window
+            $cursor->limit(min($this->getLimit(), $paginator->getLimit()));
+
+            //Making sure that window is shifted
+            $cursor->skip($this->getOffset() + $paginator->getOffset());
+        } else {
+            $cursor->limit($this->getLimit())->skip($this->getOffset());
+        }
+
+        if (!empty($this->sort)) {
+            $cursor->sort($this->sort);
+        }
+
+        //Profiling and logging
+        $this->describeCursor(
+            $cursor,
+            $this->mongoDatabase()->getProfiling()
+        );
+
+        //Now we need our cursor wrapper instance
+        $iterator = new DocumentCursor($cursor, $this->class, $this->odm);
+
+        if (!empty($fields)) {
+            //Iteration over fields array
+            $iterator->fields($fields);
+        }
+
+        return $iterator;
     }
 
     /**
@@ -330,8 +401,80 @@ class DocumentSelector extends Component implements
     /**
      * @return \MongoCollection
      */
-    protected function mongoCollection()
+    private function mongoCollection()
     {
-        return $this->odm->database($this->database)->selectCollection($this->collection);
+        return $this->mongoDatabase()->selectCollection($this->getCollection());
+    }
+
+    /**
+     * @return MongoDatabase
+     */
+    private function mongoDatabase()
+    {
+        return $this->odm->database($this->getDatabase());
+    }
+
+    /**
+     * Converts DateTime objects into MongoDatetime.
+     *
+     * @param array $query
+     * @return array
+     */
+    private function normalizeDates(array $query)
+    {
+        array_walk_recursive($query, function (&$value) {
+            if ($value instanceof \DateTime) {
+                //MongoDate is always UTC, which is good :)
+                $value = new \MongoDate($value->getTimestamp());
+            }
+        });
+
+        return $query;
+    }
+
+    /**
+     * Debug information and logging.
+     *
+     * @param \MongoCursor $cursor
+     * @param int|bool     $profiling Profiling level
+     */
+    protected function describeCursor(
+        \MongoCursor $cursor,
+        $profiling = MongoDatabase::PROFILE_DISABLED
+    ) {
+        if ($profiling == MongoDatabase::PROFILE_DISABLED) {
+            return;
+        }
+
+        if ((!empty($this->limit) || !empty($this->offset)) && empty($this->sort)) {
+
+            //Document can travel in mongo collection
+            $this->logger()->warning(
+                'MongoDB query executed with limit/offset but without specified sorting.'
+            );
+        }
+
+        $debug = [
+            'query' => $this->query,
+            'sort'  => $this->sort
+        ];
+
+        if (!empty($this->limit)) {
+            $debug['limit'] = !empty($limit) ? (int)$limit : (int)$this->limit;
+        }
+
+        if (!empty($this->offset)) {
+            $debug['offset'] = (int)$this->offset;
+        }
+
+        if ($profiling == MongoDatabase::PROFILE_EXPLAIN) {
+            $debug['explained'] = $cursor->explain();
+        }
+
+        $this->logger()->debug('{db}/{collection}: ' . json_encode($debug, JSON_PRETTY_PRINT), [
+            'db'         => $this->getDatabase(),
+            'collection' => $this->getCollection(),
+            'queryInfo'  => $debug,
+        ]);
     }
 }

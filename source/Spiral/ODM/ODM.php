@@ -27,27 +27,8 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
      */
     const MEMORY = 'odm.schema';
 
-    /**
-     * Class definition options.
-     */
-    const DEFINITION         = 0;
-    const DEFINITION_OPTIONS = 1;
 
-    /**
-     * Normalized document constants.
-     */
-    const D_DEFINITION   = self::DEFINITION;
-    const D_COLLECTION   = 1;
-    const D_DB           = 2;
-    const D_SOURCE       = 3;
-    const D_HIDDEN       = SchematicEntity::SH_HIDDEN;
-    const D_SECURED      = SchematicEntity::SH_SECURED;
-    const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
-    const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
-    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
-    const D_DEFAULTS     = 9;
-    const D_AGGREGATIONS = 10;
-    const D_COMPOSITIONS = 11;
+
 
     /**
      * Normalized aggregation constants.

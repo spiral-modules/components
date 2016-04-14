@@ -8,6 +8,8 @@
 namespace Spiral\ODM;
 
 use Spiral\Models\SchematicEntity;
+use Spiral\ODM\Entities\DocumentSelector;
+use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -53,7 +55,7 @@ interface ODMInterface
      * Create instance of document by given class name and set of fields, ODM component must
      * automatically find appropriate class to be used as ODM support model inheritance.
      *
-     * @todo hydrate external class type!
+     * @todo hydrate external class type?
      *
      * @param string                $class
      * @param array                 $fields
@@ -66,7 +68,7 @@ interface ODMInterface
     public function document($class, $fields, CompositableInterface $parent = null);
 
     /**
-     * Get given class schema property. If property empy full schema array to be returned.
+     * Get given class schema property. If property empty full schema array to be returned.
      *
      * @param string $class
      * @param int    $property See property constants (all schema to be returned if value is empty).
@@ -77,8 +79,23 @@ interface ODMInterface
      */
     public function getSchema($class, $property = null);
 
+    /**
+     * Get DocumentSelector associated with give ODM model class.
+     *
+     * @param string $class
+     * @param array  $query
+     *
+     * @return DocumentSelector
+     */
     public function selector($class, array $query = []);
 
+    /**
+     * Get source class associated with given ODM model class.
+     *
+     * @param string $class
+     *
+     * @return DocumentSource
+     */
     public function source($class);
 
     public function saver($class);

@@ -11,7 +11,6 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Configs\ODMConfig;
 use Spiral\ODM\Exceptions\DefinitionException;
 
@@ -26,9 +25,6 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
      * Memory section to store ODM schema.
      */
     const MEMORY = 'odm.schema';
-
-
-
 
     /**
      * Normalized aggregation constants.
@@ -87,16 +83,25 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
         return new $class($fields, $parent, $this, $schema);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function selector($class, array $query = [])
     {
 
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function source($class)
     {
 
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function saver($class)
     {
 

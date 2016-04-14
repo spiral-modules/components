@@ -20,8 +20,8 @@ use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\PDOQuery;
-use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
+use Spiral\Pagination\Traits\LimitsTrait;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
 /**
@@ -39,10 +39,9 @@ use Spiral\Pagination\Traits\PaginatorTrait;
 abstract class AbstractSelect extends AbstractWhere implements
     \IteratorAggregate,
     \JsonSerializable,
-    PaginableInterface,
     PaginatorAwareInterface
 {
-    use JoinsTrait, PaginatorTrait;
+    use JoinsTrait, LimitsTrait, PaginatorTrait;
 
     /**
      * Sort directions.
@@ -288,22 +287,30 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function run($paginate = true)
     {
-        $backup = [$this->limit, $this->offset];
+        if ($paginate && $this->hasPaginator()) {
+            /**
+             * To prevent original select builder altering
+             *
+             * @var AbstractSelect $select
+             */
+            $select = clone $this;
 
-        if ($paginate) {
-            $this->applyPagination();
-        } else {
-            //We have to flush limit and offset values when pagination is not required.
-            $this->limit = $this->offset = 0;
+            //Getting selection specific paginator
+            $paginator = $this->configurePaginator($this->count());
+
+            //We have to ensure that selection works inside given pagination window
+            $select = $select->limit(min($this->getLimit(), $paginator->getLimit()));
+
+            //Making sure that window is shifted
+            $select = $select->offset($this->getOffset() + $paginator->getOffset());
+
+            //No inner pagination
+            return $select->run(false);
         }
 
-        if (empty($this->cacheLifetime)) {
-            $result = $this->database->query(
-                $this->sqlStatement(),
-                $this->getParameters()
-            );
-        } else {
-            $result = $this->database->cached(
+        if (!empty($this->cacheLifetime)) {
+            //Cached query
+            return $this->database->cached(
                 $this->cacheLifetime,
                 $this->sqlStatement(),
                 $this->getParameters(),
@@ -312,10 +319,7 @@ abstract class AbstractSelect extends AbstractWhere implements
             );
         }
 
-        //Restoring limit and offset values
-        list($this->limit, $this->offset) = $backup;
-
-        return $result;
+        return $this->database->query($this->sqlStatement(), $this->getParameters());
     }
 
     /**
@@ -333,9 +337,12 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function chunked($limit, callable $callback)
     {
+        //TODO: Think about it
+
         $count = $this->count();
 
         $this->limit($limit);
+
         $offset = 0;
 
         while ($offset + $limit <= $count) {
@@ -366,17 +373,15 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function count($column = '*')
     {
-        $backup = [$this->columns, $this->ordering, $this->grouping, $this->limit, $this->offset];
-        $this->columns = ["COUNT({$column})"];
+        /**
+         * @var AbstractSelect $select
+         */
+        $select = clone $this;
+        $select->columns = ["COUNT({$column})"];
+        $select->ordering = [];
+        $select->grouping = [];
 
-        //Can not be used with COUNT()
-        $this->ordering = $this->grouping = [];
-        $this->limit = $this->offset = 0;
-
-        $result = $this->run(false)->fetchColumn();
-        list($this->columns, $this->ordering, $this->grouping, $this->limit, $this->offset) = $backup;
-
-        return (int)$result;
+        return (int)$select->run(false)->fetchColumn();
     }
 
     /**
@@ -399,19 +404,20 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function __call($method, $arguments)
     {
         if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
-            throw new BuilderException("Unknown aggregation method '{$method}'");
+            throw new BuilderException("Unknown method '{$method}' in '" . get_class($this) . "'");
         }
 
         if (!isset($arguments[0]) || count($arguments) > 1) {
             throw new BuilderException('Aggregation methods can support exactly one column');
         }
 
-        $columns = $this->columns;
-        $this->columns = ["{$method}({$arguments[0]})"];
-        $result = $this->run(false)->fetchColumn();
-        $this->columns = $columns;
+        /**
+         * @var AbstractSelect $select
+         */
+        $select = clone $this;
+        $select->columns = ["{$method}({$arguments[0]})"];
 
-        return (int)$result;
+        return (int)$this->run(false)->fetchColumn();
     }
 
     /**
@@ -430,6 +436,14 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function jsonSerialize()
     {
         return $this->getIterator()->jsonSerialize();
+    }
+
+    /**
+     * Destructing.
+     */
+    public function __destruct()
+    {
+        $this->paginator = null;
     }
 
     /**

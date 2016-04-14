@@ -12,6 +12,7 @@ use Spiral\ODM\Document;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODM;
+use Spiral\ODM\ODMInterface;
 
 /**
  * Walks thought query result and creates instances of Document on demand. Class decorates methods
@@ -22,43 +23,35 @@ use Spiral\ODM\ODM;
  * Wrapped methods.
  *
  * @method bool hasNext()
- * @method static limit($number)
- * @method static batchSize($number)
- * @method static skip($number)
- * @method static addOption($key, $value)
- * @method static snapshot()
- * @method static sort($fields)
- * @method static hint($keyPattern)
- * @method array  explain()
- * @method static setFlag($bit, $set)
- * @method static slaveOkay($okay)
- * @method static tailable($tail)
- * @method static immortal($liveForever)
- * @method static awaitData($wait)
- * @method static partial($okay)
+ * @method $this limit($number)
+ * @method $this batchSize($number)
+ * @method $this skip($number)
+ * @method $this addOption($key, $value)
+ * @method $this snapshot()
+ * @method $this sort($fields)
+ * @method $this hint($keyPattern)
+ * @method array explain()
+ * @method $this setFlag($bit, $set)
+ * @method $this slaveOkay($okay)
+ * @method $this tailable($tail)
+ * @method $this immortal($liveForever)
+ * @method $this awaitData($wait)
+ * @method $this partial($okay)
  * @method array getReadPreference()
- * @method static setReadPreference($read_preference, array $tags)
- * @method static timeout()
- * @method static info()
+ * @method $this setReadPreference($read_preference, array $tags)
+ * @method $this timeout()
+ * @method array info()
  * @method bool dead()
- * @method static reset()
- * @method int count($foundOnly)
+ * @method $this reset()
  */
-class DocumentCursor implements \Iterator, \JsonSerializable
+class DocumentCursor implements \Iterator, \JsonSerializable, \Countable
 {
     /**
      * MongoCursor instance.
      *
      * @var \MongoCursor
      */
-    protected $cursor = null;
-
-    /**
-     * ODM component.
-     *
-     * @var ODM
-     */
-    protected $odm = null;
+    private $cursor = null;
 
     /**
      * Document class being iterated.
@@ -68,28 +61,20 @@ class DocumentCursor implements \Iterator, \JsonSerializable
     protected $class = '';
 
     /**
-     * @param \MongoCursor $cursor
-     * @param ODM          $odm
-     * @param string|null  $class
-     * @param array        $sort
-     * @param int          $limit
-     * @param int          $offset
+     * @var ODMInterface
      */
-    public function __construct(
-        \MongoCursor $cursor,
-        ODM $odm,
-        $class,
-        array $sort = [],
-        $limit = null,
-        $offset = null
-    ) {
+    private $odm = null;
+
+    /**
+     * @param \MongoCursor $cursor
+     * @param string|null  $class
+     * @param ODMInterface $odm
+     */
+    public function __construct(\MongoCursor $cursor, $class, ODMInterface $odm)
+    {
         $this->cursor = $cursor;
         $this->odm = $odm;
         $this->class = $class;
-
-        !empty($sort) && $this->cursor->sort($sort);
-        !empty($limit) && $this->cursor->limit($limit);
-        !empty($offset) && $this->cursor->skip($offset);
     }
 
     /**
@@ -128,6 +113,16 @@ class DocumentCursor implements \Iterator, \JsonSerializable
         }
 
         return $result;
+    }
+
+    /**
+     * @param bool $foundOnly
+     * @return int
+     */
+    public function count($foundOnly = true)
+    {
+        //Found only true
+        return $this->cursor->count($foundOnly);
     }
 
     /**

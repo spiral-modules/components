@@ -5,11 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-
 namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\ODM\ODM;
+use Spiral\ODM\MongoManager;
 
 /**
  * Simple spiral ODM wrapper at top of MongoDB.
@@ -20,7 +19,7 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
      * injections.
      */
-    const INJECTOR = ODM::class;
+    const INJECTOR = MongoManager::class;
 
     /**
      * Profiling levels. Not identical to MongoDB profiling levels.
@@ -45,20 +44,11 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
     protected $config = ['profiling' => self::PROFILE_DISABLED];
 
     /**
-     * @invisible
-     *
-     * @var ODM
-     */
-    protected $odm = null;
-
-    /**
-     * @param ODM    $odm
      * @param string $name
-     * @param array  $config
+     * @param array  $config Config must include sections 'server', 'options' and 'database'.
      */
-    public function __construct(ODM $odm, $name, array $config)
+    public function __construct($name, array $config)
     {
-        $this->odm = $odm;
         $this->name = $name;
         $this->config = $config + $this->config;
 
@@ -107,8 +97,10 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
     }
 
     /**
-     * Get database profiling. Not identical to getProfilingLevel().
+     * Get database profiling level. Not identical to getProfilingLevel(). Used in document
+     * selector.
      *
+     * @see DocumentSelector
      * @return int
      */
     public function getProfiling()

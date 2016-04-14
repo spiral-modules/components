@@ -170,8 +170,8 @@ class SelectQuery extends AbstractSelect
             $this->havingTokens,
             $this->grouping,
             $this->ordering,
-            $this->limit,
-            $this->offset,
+            $this->getLimit(),
+            $this->getOffset(),
             $this->unionTokens
         );
     }

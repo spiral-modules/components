@@ -69,7 +69,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function setDatabase(Database $database)
+    public function addDatabase(Database $database)
     {
         if (isset($this->databases[$database->getName()])) {
             throw new DBALException("Database '{$database->getName()}' already exists");
@@ -103,7 +103,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             'driver' => $connection,
         ]);
 
-        $this->setDatabase($instance);
+        $this->addDatabase($instance);
 
         return $instance;
     }
@@ -155,7 +155,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function setConnection(Driver $driver)
+    public function addConnection(Driver $driver)
     {
         if (isset($this->connections[$driver->getName()])) {
             throw new DBALException("Connection '{$driver->getName()}' already exists");
@@ -187,7 +187,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             ]
         ]);
 
-        $this->setConnection($instance);
+        $this->addConnection($instance);
 
         return $instance;
     }

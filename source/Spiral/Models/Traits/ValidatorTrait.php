@@ -10,11 +10,11 @@ namespace Spiral\Models\Traits;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\FactoryInterface;
 use Spiral\Models\AccessorInterface;
+use Spiral\Models\InvalidatesInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
 use Spiral\Validation\Events\ValidatorEvent;
 use Spiral\Validation\Exceptions\ValidationException;
-use Spiral\Validation\ValidatesInterface;
 use Spiral\Validation\ValidatorInterface;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -169,7 +169,7 @@ trait ValidatorTrait
         //Invalidating all compositions
         foreach ($this->getFields(false) as $value) {
             //Let's force composition construction
-            if ($value instanceof ValidatesInterface && method_exists($value, 'invalidate')) {
+            if ($value instanceof InvalidatesInterface) {
                 $value->invalidate($cascade);
             }
         }

@@ -10,8 +10,8 @@ namespace Spiral\Pagination\Traits;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Exceptions\SugarException;
+use Spiral\Pagination\CountingInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
-use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
 use Spiral\Pagination\PaginatorsInterface;
 
@@ -31,57 +31,13 @@ trait PaginatorTrait
     private $paginator = null;
 
     /**
-     * @var int
-     */
-    protected $limit = 0;
-
-    /**
-     * @var int
-     */
-    protected $offset = 0;
-
-    /**
-     * Set selection limit.
+     * Indication that object was paginated.
      *
-     * @param int $limit
-     *
-     * @return mixed
+     * @return bool
      */
-    public function limit($limit = 0)
+    public function hasPaginator()
     {
-        $this->limit = $limit;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLimit()
-    {
-        return $this->limit;
-    }
-
-    /**
-     * Set selection offset.
-     *
-     * @param int $offset
-     *
-     * @return mixed
-     */
-    public function offset($offset = 0)
-    {
-        $this->offset = $offset;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getOffset()
-    {
-        return $this->offset;
+        return !empty($this->paginator);
     }
 
     /**
@@ -101,7 +57,7 @@ trait PaginatorTrait
     /**
      * Get paginator for the current selection. Paginate method should be already called.
      *
-     * @see isPaginated()
+     * @see hasPaginator()
      * @see paginate()
      *
      * @return PaginatorInterface
@@ -125,16 +81,6 @@ trait PaginatorTrait
     public function paginator()
     {
         return $this->getPaginator();
-    }
-
-    /**
-     * Indication that object was paginated.
-     *
-     * @return bool
-     */
-    public function isPaginated()
-    {
-        return !empty($this->paginator);
     }
 
     /**
@@ -166,33 +112,28 @@ trait PaginatorTrait
     }
 
     /**
-     * Count elements of an object.
+     * Get paginator instance configured for a given count. Must not affect already associated
+     * paginator instance.
      *
-     * @link http://php.net/manual/en/countable.count.php
+     * @param int|null $count Can be skipped.
      *
-     * @return int
+     * @return PaginatorInterface
      */
-    abstract public function count();
+    protected function configurePaginator($count = null)
+    {
+        $paginator = $this->getPaginator();
+
+        if (!empty($count) && $paginator instanceof CountingInterface) {
+            $paginator = $paginator->withCount($count);
+        } else {
+            $paginator = clone $paginator;
+        }
+
+        return $paginator;
+    }
 
     /**
      * @return ContainerInterface
      */
     abstract protected function container();
-
-    /**
-     * Apply pagination to current object. Will be applied only if internal paginator already
-     * constructed.
-     *
-     * @return $this
-     *
-     * @throws PaginationException
-     */
-    protected function applyPagination()
-    {
-        if (empty($this->paginator)) {
-            return $this;
-        }
-
-        return $this->paginator->paginate($this);
-    }
 }

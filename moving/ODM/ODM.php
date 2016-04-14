@@ -8,18 +8,10 @@
 
 namespace Spiral\ODM;
 
-use Spiral\Core\Component;
-use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
-use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\DataEntity;
-use Spiral\Models\SchematicEntity;
-use Spiral\ODM\Configs\ODMConfig;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
-use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Entities\SchemaBuilder;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
@@ -29,154 +21,8 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  * ODM component used to manage state of cached Document's schema, document creation and schema
  * analysis.
  */
-class ODM extends Component implements SingletonInterface, InjectorInterface
+class ODM extends MongoManager implements SingletonInterface
 {
-    use BenchmarkTrait;
-
-    /**
-     * Memory section to store ODM schema.
-     */
-    const MEMORY = 'odm.schema';
-
-    /**
-     * Class definition options.
-     */
-    const DEFINITION         = 0;
-    const DEFINITION_OPTIONS = 1;
-
-    /**
-     * Normalized document constants.
-     */
-    const D_DEFINITION   = self::DEFINITION;
-    const D_COLLECTION   = 1;
-    const D_DB           = 2;
-    const D_SOURCE       = 3;
-    const D_HIDDEN       = SchematicEntity::SH_HIDDEN;
-    const D_SECURED      = SchematicEntity::SH_SECURED;
-    const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
-    const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
-    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
-    const D_DEFAULTS     = 9;
-    const D_AGGREGATIONS = 10;
-    const D_COMPOSITIONS = 11;
-
-    /**
-     * Normalized aggregation constants.
-     */
-    const AGR_TYPE  = 1;
-    const ARG_CLASS = 2;
-    const AGR_QUERY = 3;
-
-    /**
-     * Normalized composition constants.
-     */
-    const CMP_TYPE  = 0;
-    const CMP_CLASS = 1;
-    const CMP_ONE   = 0x111;
-    const CMP_MANY  = 0x222;
-    const CMP_HASH  = 0x333;
-
-    /**
-     * @var ODMConfig
-     */
-    protected $config = null;
-
-    /**
-     * Cached documents and collections schema.
-     *
-     * @var array|null
-     */
-    protected $schema = null;
-
-    /**
-     * Mongo databases instances.
-     *
-     * @var MongoDatabase[]
-     */
-    protected $databases = [];
-
-    /**
-     * @invisible
-     *
-     * @var HippocampusInterface
-     */
-    protected $memory = null;
-
-    /**
-     * @invisible
-     *
-     * @var FactoryInterface
-     */
-    protected $factory = null;
-
-    /**
-     * @param ODMConfig            $config
-     * @param HippocampusInterface $memory
-     * @param FactoryInterface     $factory
-     */
-    public function __construct(
-        ODMConfig $config,
-        HippocampusInterface $memory,
-        FactoryInterface $factory
-    ) {
-        $this->config = $config;
-        $this->memory = $memory;
-
-        //Loading schema from memory
-        $this->schema = (array)$memory->loadData(static::MEMORY);
-        $this->factory = $factory;
-    }
-
-    /**
-     * Create specified or select default instance of MongoDatabase.
-     *
-     * @param string $database Database name (internal).
-     *
-     * @return MongoDatabase
-     *
-     * @throws ODMException
-     */
-    public function database($database = null)
-    {
-        if (empty($database)) {
-            $database = $this->config->defaultDatabase();
-        }
-
-        //Spiral support ability to link multiple virtual databases together using aliases
-        $database = $this->config->resolveAlias($database);
-
-        if (isset($this->databases[$database])) {
-            return $this->databases[$database];
-        }
-
-        if (!$this->config->hasDatabase($database)) {
-            throw new ODMException(
-                "Unable to initiate mongo database, no presets for '{$database}' found."
-            );
-        }
-
-        $benchmark = $this->benchmark('database', $database);
-        try {
-            $this->databases[$database] = $this->factory->make(MongoDatabase::class, [
-                'name'   => $database,
-                'config' => $this->config->databaseConfig($database),
-                'odm'    => $this,
-            ]);
-        } finally {
-            $this->benchmark($benchmark);
-        }
-
-        return $this->databases[$database];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createInjection(\ReflectionClass $class, $context = null)
-    {
-        return $this->database($context);
-    }
-
     /**
      * Create instance of document by given class name and set of fields, ODM component must
      * automatically find appropriate class to be used as ODM support model inheritance.
@@ -213,20 +59,6 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
         }
 
         return new $source($class, $this);
-    }
-
-    /**
-     * Mongo collection associated with given model class.
-     *
-     * @param string $class
-     *
-     * @return \MongoCollection
-     */
-    public function mongoCollection($class)
-    {
-        $schema = $this->schema($class);
-
-        return $this->database($schema[self::D_DB])->selectCollection($schema[self::D_COLLECTION]);
     }
 
     /**
@@ -383,34 +215,5 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
             'config'  => $this->config['schemas'],
             'locator' => $locator,
         ]);
-    }
-
-    /**
-     * Create valid MongoId object based on string or id provided from client side.
-     *
-     * @param mixed $mongoID String or MongoId object.
-     *
-     * @return \MongoId|null
-     */
-    public static function mongoID($mongoID)
-    {
-        if (empty($mongoID)) {
-            return null;
-        }
-
-        if (!is_object($mongoID)) {
-            //Old versions of mongo api does not throws exception on invalid mongo id (1.2.1)
-            if (!is_string($mongoID) || !preg_match('/[0-9a-f]{24}/', $mongoID)) {
-                return null;
-            }
-
-            try {
-                $mongoID = new \MongoId($mongoID);
-            } catch (\Exception $exception) {
-                return null;
-            }
-        }
-
-        return $mongoID;
     }
 }

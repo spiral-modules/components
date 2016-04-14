@@ -7,19 +7,22 @@
  */
 namespace Spiral\Pagination;
 
-use Spiral\Pagination\Exceptions\PaginationException;
-
 /**
  * Generic paginator interface with ability to set/get page and limit values.
  */
 interface PaginatorInterface
 {
     /**
-     * Apply paginator to paginable object.
+     * Get pagination limit value.
      *
-     * @param PaginableInterface $paginable
-     * @return PaginableInterface
-     * @throws PaginationException
+     * @return int
      */
-    public function paginate(PaginableInterface $paginable);
+    public function getLimit();
+
+    /**
+     * Get calculated offset value.
+     *
+     * @return int
+     */
+    public function getOffset();
 }

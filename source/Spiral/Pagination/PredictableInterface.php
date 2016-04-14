@@ -11,7 +11,7 @@ namespace Spiral\Pagination;
 /**
  * Paginator with predictable length (count).
  */
-interface PredictableInterface extends PaginatorInterface
+interface PredictableInterface extends CountingInterface
 {
     /**
      * Set pagination limit.
@@ -42,13 +42,6 @@ interface PredictableInterface extends PaginatorInterface
      * @return int
      */
     public function getPage();
-
-    /**
-     * Change predicted length (count).
-     *
-     * @param int $count
-     */
-    public function setCount($count);
 
     /**
      * The count of pages required to represent all records using a specified limit value.

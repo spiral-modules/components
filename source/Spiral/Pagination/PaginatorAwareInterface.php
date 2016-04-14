@@ -13,8 +13,15 @@ use Spiral\Pagination\Exceptions\PaginationException;
 /**
  * Provides ability to associate paginator and execute pagination when needed.
  */
-interface PaginatorAwareInterface extends PaginableInterface
+interface PaginatorAwareInterface
 {
+    /**
+     * Indication that object has associated paginator.
+     *
+     * @return bool
+     */
+    public function hasPaginator();
+
     /**
      * Manually set paginator instance for specific object.
      *
@@ -38,11 +45,4 @@ interface PaginatorAwareInterface extends PaginableInterface
      * @throws PaginationException
      */
     public function getPaginator();
-
-    /**
-     * Indication that object was paginated.
-     *
-     * @return bool
-     */
-    public function isPaginated();
 }

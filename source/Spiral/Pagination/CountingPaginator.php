@@ -23,6 +23,8 @@ class CountingPaginator implements PredictableInterface, \Countable
     private $countPages = 1;
 
     /**
+     * Pagination limit.
+     *
      * @var int
      */
     private $limit = 25;
@@ -90,9 +92,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     }
 
     /**
-     * Get pagination offset.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     public function getOffset()
     {
@@ -102,17 +102,18 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function paginate(PaginableInterface $paginable)
+    public function withCount($count)
     {
-        $this->setCount($paginable->count());
+        $paginator = clone $this;
 
-        return $paginable->offset($this->getOffset())->limit($this->getLimit());
+        return $paginator->setCount($count);
     }
 
     /**
-     * {@inheritdoc}
+     * Non-Immutable version of withCount.
      *
-     * @return $this
+     * @param int $count
+     * @return CountingPaginator
      */
     public function setCount($count)
     {

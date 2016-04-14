@@ -19,6 +19,7 @@ use Spiral\Validation\ValueInterface;
  */
 abstract class AbstractEntity extends MutableObject implements
     EntityInterface,
+    InvalidatesInterface,
     \JsonSerializable,
     \IteratorAggregate,
     \ArrayAccess,
@@ -350,6 +351,16 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
+     * Alias for serializeData.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return $this->serializeData();
+    }
+
+    /**
      * Public entity fields.
      *
      * @return array|AccessorInterface[]
@@ -407,7 +418,13 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * {@inheritdoc}
+     * Create entity by passing fields thought setFields method
+     *
+     * @param array $fields
+     *
+     * @return AbstractEntity
+     *
+     * @event created($entity)
      */
     public static function create($fields = [])
     {

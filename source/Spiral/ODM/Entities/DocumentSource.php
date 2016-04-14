@@ -14,6 +14,7 @@ use Spiral\Models\SourceInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\SourceException;
 use Spiral\ODM\ODM;
+use Spiral\ODM\ODMInterface;
 
 /**
  * Source class associated to one or multiple (default implementation) ODM models. Source can be
@@ -21,9 +22,6 @@ use Spiral\ODM\ODM;
  */
 class DocumentSource extends Component implements SourceInterface, \Countable
 {
-    /*
-     * Sugary!
-     */
     use SaturateTrait;
 
     /**
@@ -47,28 +45,28 @@ class DocumentSource extends Component implements SourceInterface, \Countable
     /**
      * @invisible
      *
-     * @var ODM
+     * @var ODMInterface|ODM
      */
     protected $odm = null;
 
     /**
-     * @param string $class
-     * @param ODM    $odm
+     * @param string       $class
+     * @param ODMInterface $odm
      *
      * @throws SourceException
      */
-    public function __construct($class = null, ODM $odm = null)
+    public function __construct($class = null, ODMInterface $odm = null)
     {
         if (empty($class)) {
             if (empty(static::DOCUMENT)) {
-                throw new SourceException('Unable to create source without associate class.');
+                throw new SourceException('Unable to create source without associated class');
             }
 
             $class = static::DOCUMENT;
         }
 
         $this->class = $class;
-        $this->odm = $this->saturate($odm, ODM::class);
+        $this->odm = $this->saturate($odm, ODMInterface::class);
         $this->setSelector($this->odm->selector($this->class));
     }
 
@@ -89,7 +87,7 @@ class DocumentSource extends Component implements SourceInterface, \Countable
             $class = $this->class;
         }
 
-        //Letting entity to create itself (needed
+        //Letting entity to create itself (needed to ensure event firing)
         return call_user_func([$class, 'create'], $fields, $this->odm);
     }
 
@@ -155,5 +153,17 @@ class DocumentSource extends Component implements SourceInterface, \Countable
     protected function setSelector(DocumentSelector $selector)
     {
         $this->selector = $selector;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function container()
+    {
+        if ($this->odm instanceof Component) {
+            return $this->odm->container();
+        }
+
+        return parent::container();
     }
 }

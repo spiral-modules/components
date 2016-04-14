@@ -12,7 +12,6 @@ use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
-use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
@@ -28,9 +27,6 @@ use Spiral\ODM\Exceptions\ODMException;
  */
 abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
-    /*
-     * Optional constructor arguments.
-     */
     use SaturateTrait;
 
     /**
@@ -308,11 +304,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function setField($name, $value, $filter = true)
     {
-        if (!array_key_exists($name, $this->fields)) {
+        if (!$this->hasField($name)) {
             throw new FieldException("Undefined field '{$name}' in '" . static::class . "'.");
         }
 
-        $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
+        //Original field value
+        $original = $this->getField($name, null, false);
+
         parent::setField($name, $value, $filter);
 
         if (!array_key_exists($name, $this->updates)) {
@@ -682,42 +680,5 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         return $accessor;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see   Component::staticContainer()
-     *
-     * @param array $fields Model fields to set, will be passed thought filters.
-     * @param ODM   $odm    ODM component, global container will be called if not instance provided.
-     * @event created()
-     */
-    public static function create($fields = [], ODM $odm = null)
-    {
-        /**
-         * @var DocumentEntity
-         */
-        $document = new static([], null, $odm);
-
-        //Forcing validation (empty set of fields is not valid set of fields)
-        $document->setFields($fields)->dispatch('created', new EntityEvent($document));
-
-        return $document;
-    }
-
-    /**
-     * Called by ODM with set of loaded fields. Must return name of appropriate class.
-     *
-     * @param array $fields
-     * @param ODM   $odm
-     *
-     * @return string
-     *
-     * @throws DefinitionException
-     */
-    public static function defineClass(array $fields, ODM $odm)
-    {
-        throw new DefinitionException('Class definition methods was not implemented.');
     }
 }

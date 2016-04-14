@@ -8,8 +8,8 @@
 namespace Spiral\Tests\Pagination;
 
 use Mockery as m;
+use Spiral\Pagination\CountingInterface;
 use Spiral\Pagination\CountingPaginator;
-use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\PaginatorInterface;
 use Spiral\Pagination\PredictableInterface;
 
@@ -20,6 +20,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
         $paginator = new CountingPaginator(25);
 
         $this->assertInstanceOf(PaginatorInterface::class, $paginator);
+        $this->assertInstanceOf(CountingInterface::class, $paginator);
         $this->assertInstanceOf(PredictableInterface::class, $paginator);
     }
 
@@ -46,7 +47,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
     public function testFirstPage()
     {
         $paginator = new CountingPaginator(25);
-        $paginator->setCount(100);
+        $paginator = $paginator->withCount(100);
 
         $this->assertSame(1, $paginator->getPage());
 
@@ -62,7 +63,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
     public function testSecondPage()
     {
         $paginator = new CountingPaginator(25);
-        $paginator->setCount(110);
+        $paginator = $paginator->withCount(110);
 
         $this->assertSame(110, $paginator->getCount());
         $this->assertSame(1, $paginator->getPage());
@@ -81,7 +82,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
     public function testLastPageNumber()
     {
         $paginator = new CountingPaginator(25);
-        $paginator->setCount(110);
+        $paginator = $paginator->withCount(110);
 
         $this->assertSame(110, $paginator->getCount());
         $this->assertSame(1, $paginator->getPage());
@@ -102,33 +103,13 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
     {
         $paginator = new CountingPaginator(25);
 
-        $paginator->setCount(24);
+        $paginator = $paginator->withCount(24);
         $this->assertFalse($paginator->isRequired());
 
-        $paginator->setCount(25);
+        $paginator = $paginator->withCount(25);
         $this->assertFalse($paginator->isRequired());
 
-        $paginator->setCount(26);
+        $paginator = $paginator->withCount(26);
         $this->assertTrue($paginator->isRequired());
-    }
-
-    public function testPaginate()
-    {
-        $paginator = new CountingPaginator(25);
-        $paginable = m::mock(PaginableInterface::class);
-
-        $paginable->shouldReceive('count')->andReturn(255);
-
-        $paginable->shouldReceive('limit')->with(25)->andReturnSelf();
-        $paginable->shouldReceive('offset')->with(4 * 25)->andReturnSelf();
-
-        $paginator->setPage(5)->paginate($paginable);
-
-        $this->assertSame(255, $paginator->getCount());
-        $this->assertTrue($paginator->isRequired());
-        $this->assertSame(5, $paginator->getPage());
-        $this->assertSame(4 * 25, $paginator->getOffset());
-
-        $this->assertSame((int)ceil(255 / 25), $paginator->countPages());
     }
 }

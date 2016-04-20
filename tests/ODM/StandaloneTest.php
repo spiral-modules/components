@@ -42,8 +42,7 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
     public function testEntities()
     {
         $odm = $this->createODM();
-        $builder = $odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures'));
-        $odm->updateSchema($builder);
+        $odm->updateSchema($odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures')));
 
         $data = $odm->document(Data::class);
         $element = $data->elements->create();
@@ -53,8 +52,7 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
     public function testSerialization()
     {
         $odm = $this->createODM();
-        $builder = $odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures'));
-        $odm->updateSchema($builder);
+        $odm->updateSchema($odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures')));
 
         $model = $odm->document(Data::class, [
                 'name'     => 'value',
@@ -67,10 +65,13 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
         );
 
         $this->assertSame('value', $model->name);
+        $model->name = 123;
+        $this->assertSame('123', $model->name);
+
         $this->assertCount(3, $model->elements);
 
         $this->assertSame([
-            'name'     => 'value',
+            'name'     => '123',
             'elements' => [
                 ['name' => 'Element A'],
                 ['name' => 'Element B'],

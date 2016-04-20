@@ -134,7 +134,8 @@ class ReflectionEntity
      */
     public function getFields()
     {
-        return [];
+        //Default property to store schema
+        return (array)$this->getProperty('schema', true);
     }
 
     /**

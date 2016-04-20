@@ -31,9 +31,6 @@ class Compositor extends Component implements
     \Countable,
     \ArrayAccess
 {
-    /*
-     * Optional arguments.
-     */
     use SaturateTrait;
 
     /**

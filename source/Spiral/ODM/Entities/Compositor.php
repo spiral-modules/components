@@ -532,7 +532,7 @@ class Compositor extends Component implements
 
         $this->changedDirectly = true;
 
-        $document = call_user_func([$class, 'create'], $fields, $this->odm)->embed($this);
+        $document = call_user_func([$class, 'create'], $fields, $this->odm);
         $this->documents[] = $document;
 
         return $document;

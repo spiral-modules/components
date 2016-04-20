@@ -154,7 +154,7 @@ class DocumentSchema extends ReflectionEntity
     public function getDefaults()
     {
         //Default values described in defaults property, inherited
-        $defaults = $this->getProperty('defaults', true);
+        $defaults = (array)$this->getProperty('defaults', true);
 
         $setters = $this->getSetters();
         $accessors = $this->getAccessors();
@@ -379,7 +379,7 @@ class DocumentSchema extends ReflectionEntity
     {
         $result = [];
         foreach ($this->builder->getDocuments() as $document) {
-            if ($document->isSubclassOf($this)) {
+            if ($document->isSubclassOf($this->getReflection())) {
                 if ($sameCollection && !$this->compareCollection($document)) {
                     //Child changed collection or database
                     continue;

@@ -114,7 +114,7 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
     /**
      * {@inheritdoc}
      */
-    public function document($class, $fields, CompositableInterface $parent = null)
+    public function document($class, $fields = [], CompositableInterface $parent = null)
     {
         $class = $this->defineClass($class, $fields, $schema);
 

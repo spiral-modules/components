@@ -69,7 +69,7 @@ class ReflectionEntity
             return $this->getProperty('secured', true);
         }
 
-        return array_unique($this->getProperty('secured', true));
+        return array_unique((array)$this->getProperty('secured', true));
     }
 
     /**
@@ -77,7 +77,7 @@ class ReflectionEntity
      */
     public function getFillable()
     {
-        return array_unique($this->getProperty('fillable', true));
+        return array_unique((array)$this->getProperty('fillable', true));
     }
 
     /**
@@ -85,7 +85,7 @@ class ReflectionEntity
      */
     public function getHidden()
     {
-        return array_unique($this->getProperty('hidden', true));
+        return array_unique((array)$this->getProperty('hidden', true));
     }
 
     /**

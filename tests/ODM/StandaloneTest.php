@@ -32,13 +32,56 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($builder->hasDocument(Element::class));
     }
 
+    public function testUpdateSchema()
+    {
+        $odm = $this->createODM();
+        $builder = $odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures'));
+        $odm->updateSchema($builder);
+    }
+
+    public function testEntities()
+    {
+        $odm = $this->createODM();
+        $builder = $odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures'));
+        $odm->updateSchema($builder);
+
+        $data = $odm->document(Data::class);
+        $element = $data->elements->create();
+        $this->assertInstanceOf(Element::class, $element);
+    }
+
+    public function testSerialization()
+    {
+        $odm = $this->createODM();
+        $builder = $odm->schemaBuilder($this->createLocator(__DIR__ . '/Fixtures'));
+        $odm->updateSchema($builder);
+
+        $model = $odm->document(Data::class, [
+                'name'     => 'value',
+                'elements' => [
+                    ['name' => 'Element A'],
+                    ['name' => 'Element B'],
+                    ['name' => 'Element C']
+                ]
+            ]
+        );
+
+        $this->assertSame('value', $model->name);
+        $this->assertCount(3, $model->elements);
+
+        $this->assertSame([
+            'name'     => 'value',
+            'elements' => [
+                ['name' => 'Element A'],
+                ['name' => 'Element B'],
+                ['name' => 'Element C']
+            ]
+        ], $model->serializeData());
+    }
+
     protected function createLocator($directory)
     {
-        $memory = m::mock(HippocampusInterface::class);
-        $memory->shouldReceive('loadData')->andReturn(null);
-        $memory->shouldReceive('saveData')->andReturn(null);
-
-        $tokenizer = new Tokenizer(new FileManager(), new TokenizerConfig(), $memory);
+        $tokenizer = new Tokenizer(new FileManager(), new TokenizerConfig(), $this->createMemory());
 
         $finder = new Finder();
         $finder->in($directory);
@@ -50,10 +93,7 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
     {
         $container = new Container();
 
-        $memory = m::mock(HippocampusInterface::class);
-        $memory->shouldReceive('loadData')->andReturn(null);
-
-        $odm = new ODM($this->createConfig(), $memory, $container);
+        $odm = new ODM($this->createConfig(), $this->createMemory(), $container);
 
         $container->bind(ODM::class, $odm);
         $container->bind(ODMInterface::class, $odm);
@@ -106,5 +146,14 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
                 ]
             ]
         ]);
+    }
+
+    protected function createMemory()
+    {
+        $memory = m::mock(HippocampusInterface::class);
+        $memory->shouldReceive('loadData')->andReturn(null);
+        $memory->shouldReceive('saveData')->andReturn(null);
+
+        return $memory;
     }
 }

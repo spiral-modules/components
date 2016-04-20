@@ -17,6 +17,7 @@ use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\FieldException;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\Validation\ValidatesInterface;
 
 /**
  * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
@@ -592,7 +593,7 @@ class DocumentEntity extends SchematicEntity implements CompositableInterface
         foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
 
             $composition = $this->getField($field);
-            if (!$composition instanceof CompositableInterface) {
+            if (!$composition instanceof ValidatesInterface) {
                 //Something weird.
                 continue;
             }

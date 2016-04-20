@@ -98,7 +98,7 @@ class DocumentSchema extends ReflectionEntity
             return;
         }
 
-        $collection = $this->property('collection');
+        $collection = $this->getProperty('collection');
 
         if (empty($collection)) {
             if ($this->parentSchema()) {
@@ -124,7 +124,7 @@ class DocumentSchema extends ReflectionEntity
             return;
         }
 
-        return $this->builder->databaseAlias($this->property('database'));
+        return $this->builder->databaseAlias($this->getProperty('database'));
     }
 
     /**
@@ -162,7 +162,7 @@ class DocumentSchema extends ReflectionEntity
     public function getDefaults()
     {
         //Default values described in defaults property, inherited
-        $defaults = $this->property('defaults', true);
+        $defaults = $this->getProperty('defaults', true);
 
         $setters = $this->getSetters();
         $accessors = $this->getAccessors();
@@ -212,7 +212,7 @@ class DocumentSchema extends ReflectionEntity
             return [];
         }
 
-        $indexes = $this->property('indexes', true);
+        $indexes = $this->getProperty('indexes', true);
         foreach ($this->getChildren(true) as $children) {
             $indexes = array_merge($indexes, $children->getIndexes());
         }
@@ -532,7 +532,7 @@ class DocumentSchema extends ReflectionEntity
     protected function getSchema()
     {
         //Reading schema as property to inherit all values
-        return $this->property('schema', true);
+        return $this->getProperty('schema', true);
     }
 
     /**

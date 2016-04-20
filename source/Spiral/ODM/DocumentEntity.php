@@ -29,7 +29,7 @@ use Spiral\Validation\ValidatesInterface;
  *
  * class Test extends DocumentEntity
  * {
- *    protected $schema = [
+ *    private $schema = [
  *       'name' => 'string'
  *    ];
  * }

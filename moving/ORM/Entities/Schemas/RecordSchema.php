@@ -156,7 +156,7 @@ class RecordSchema extends ReflectionEntity
      */
     public function getTable()
     {
-        if (empty($table = $this->property('table'))) {
+        if (empty($table = $this->getProperty('table'))) {
             //We can guess table name
             $table = Inflector::tableize($this->getShortName());
 
@@ -176,7 +176,7 @@ class RecordSchema extends ReflectionEntity
      */
     public function getDatabase()
     {
-        return $this->builder->resolveDatabase($this->property('database'));
+        return $this->builder->resolveDatabase($this->getProperty('database'));
     }
 
     /**
@@ -216,7 +216,7 @@ class RecordSchema extends ReflectionEntity
      */
     public function getIndexes()
     {
-        return $this->property('indexes', true);
+        return $this->getProperty('indexes', true);
     }
 
     /**
@@ -245,7 +245,7 @@ class RecordSchema extends ReflectionEntity
         //We have to reiterate columns as schema can be altered while relation creation,
         //plus we always have to keep original columns order (this is very important)
         $defaults = [];
-        $recordDefaults = $this->property('defaults', true);
+        $recordDefaults = $this->getProperty('defaults', true);
 
         //We must pass all default values thought set of setters and accessor to ensure their value
         $setters = $this->getSetters();
@@ -324,9 +324,9 @@ class RecordSchema extends ReflectionEntity
     {
         //Default values fetched from record, system will try to use this values as default
         //values for associated table column
-        $defaults = $this->property('defaults', true);
+        $defaults = $this->getProperty('defaults', true);
 
-        foreach ($this->property('schema', true) as $name => $definition) {
+        foreach ($this->getProperty('schema', true) as $name => $definition) {
             if (is_array($definition)) {
                 //Relation or something else
                 continue;
@@ -355,7 +355,7 @@ class RecordSchema extends ReflectionEntity
      */
     public function castRelations()
     {
-        foreach ($this->property('schema', true) as $name => $definition) {
+        foreach ($this->getProperty('schema', true) as $name => $definition) {
             if (is_scalar($definition)) {
                 //Column definition or something else
                 continue;

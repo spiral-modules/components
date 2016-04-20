@@ -28,7 +28,6 @@ class DocumentEntity extends SchematicEntity
      */
     const I18N_INHERIT_MESSAGES = true;
 
-
     /**
      * Create document entity using given ODM instance or load parent ODM via shared container.
      *

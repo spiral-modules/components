@@ -15,8 +15,10 @@ use Spiral\Models\EntityInterface;
  * in instance) updates, public fields and validations. Basically it's embeddable entity.
  *
  * Compositable instance is primary entity type for ODM.
+ *
+ * Compositable object can be validated if ValidatesInterface are implemented.
  */
-interface CompositableInterface extends EntityInterface, DocumentAccessorInterface
+interface CompositableInterface extends DocumentAccessorInterface
 {
     /**
      * {@inheritdoc}
@@ -30,13 +32,6 @@ interface CompositableInterface extends EntityInterface, DocumentAccessorInterfa
         ODM $odm = null,
         $options = null
     );
-
-    /**
-     * Instance must re-validate data.
-     *
-     * @return $this
-     */
-    public function invalidate();
 
     /**
      * Every composited object must know how to give it's public data (safe to send to client) to

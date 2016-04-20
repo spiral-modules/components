@@ -8,6 +8,7 @@
 namespace Spiral\ODM;
 
 use Spiral\Models\SchematicEntity;
+use Spiral\ODM\Entities\DocumentMapper;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Entities\MongoDatabase;
@@ -52,6 +53,23 @@ interface ODMInterface
     public function database($name = null);
 
     /**
+     * Get given class schema or schema property. If property empty full schema array to be
+     * returned.
+     *
+     * Example:
+     * $odm->getSchema(User::class, ODM::D_COLLECTION); //User class mongo collection
+     *
+     * @param string $item
+     * @param int    $property See property constants (all schema to be returned if value is
+     *                         empty).
+     *
+     * @return array|mixed|string
+     *
+     * @throws ODMException
+     */
+    public function schema($item, $property = null);
+
+    /**
      * Create instance of document by given class name and set of fields, ODM component must
      * automatically find appropriate class to be used as ODM support model inheritance.
      *
@@ -66,18 +84,6 @@ interface ODMInterface
      * @throws DefinitionException
      */
     public function document($class, $fields, CompositableInterface $parent = null);
-
-    /**
-     * Get given class schema property. If property empty full schema array to be returned.
-     *
-     * @param string $class
-     * @param int    $property See property constants (all schema to be returned if value is empty).
-     *
-     * @return array|mixed|string
-     *
-     * @throws ODMException
-     */
-    public function getSchema($class, $property = null);
 
     /**
      * Get DocumentSelector associated with give ODM model class.
@@ -98,5 +104,13 @@ interface ODMInterface
      */
     public function source($class);
 
-    public function saver($class);
+    /**
+     * Get instance of DocumentMapper responsible for save, update and delete operations with
+     * documents.
+     *
+     * @param string $class
+     *
+     * @return DocumentMapper
+     */
+    public function mapper($class);
 }

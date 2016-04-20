@@ -83,6 +83,9 @@ class MongoManager extends Component implements InjectorInterface
     {
         $benchmark = $this->benchmark('database', $name);
         try {
+            /*
+             * Database will be automatically connected here.
+             */
             $instance = $this->factory->make(MongoDatabase::class, [
                 'name'   => $database,
                 'config' => compact('server', 'database', 'options')

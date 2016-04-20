@@ -61,7 +61,11 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
                 continue;
             }
 
-            $result[$field] = $this->getField($field);
+            if ($value instanceof PublishableInterface) {
+                $result[$field] = $value->publicFields();
+            } else {
+                $result[$field] = $value;
+            }
         }
 
         return $result;

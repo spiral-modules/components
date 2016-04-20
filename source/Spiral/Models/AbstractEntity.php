@@ -23,7 +23,8 @@ abstract class AbstractEntity extends MutableObject implements
     \JsonSerializable,
     \IteratorAggregate,
     \ArrayAccess,
-    ValueInterface
+    ValueInterface,
+    PublishableInterface
 {
     /**
      * Field format declares how entity must process magic setters and getters. Available values:
@@ -359,13 +360,6 @@ abstract class AbstractEntity extends MutableObject implements
     {
         return $this->serializeData();
     }
-
-    /**
-     * Public entity fields.
-     *
-     * @return array|AccessorInterface[]
-     */
-    abstract public function publicFields();
 
     /**
      * {@inheritdoc}

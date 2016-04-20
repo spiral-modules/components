@@ -94,7 +94,7 @@ class DocumentSelector extends Component implements
      */
     public function getCollection()
     {
-        return $this->odm->getSchema($this->class, ODMInterface::D_DB);
+        return $this->odm->schema($this->class, ODMInterface::D_DB);
     }
 
     /**
@@ -102,7 +102,7 @@ class DocumentSelector extends Component implements
      */
     public function getDatabase()
     {
-        return $this->odm->getSchema($this->class, ODMInterface::D_COLLECTION);
+        return $this->odm->schema($this->class, ODMInterface::D_COLLECTION);
     }
 
     /**

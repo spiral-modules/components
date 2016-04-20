@@ -48,6 +48,11 @@ class Document extends DocumentEntity implements ActiveEntityInterface
     use FindTrait;
 
     /**
+     * Additional index options must be located under this key.
+     */
+    const INDEX_OPTIONS = '@options';
+
+    /**
      * Indication that save methods must be validated by default, can be altered by calling save
      * method with user arguments.
      */

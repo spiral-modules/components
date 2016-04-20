@@ -21,17 +21,11 @@ use Spiral\Models\EntityInterface;
 interface CompositableInterface extends DocumentAccessorInterface
 {
     /**
-     * {@inheritdoc}
-     *
-     * @param ODM   $odm     ODM component if any.
-     * @param mixed $options Implementation specific options. In ODM will always contain field type.
+     * @param mixed|array          $value
+     * @param EntityInterface|null $parent
+     * @param ODMInterface|null    $odm
      */
-    public function __construct(
-        $value,
-        EntityInterface $parent = null,
-        ODM $odm = null,
-        $options = null
-    );
+    public function __construct($value, EntityInterface $parent = null, ODMInterface $odm = null);
 
     /**
      * Every composited object must know how to give it's public data (safe to send to client) to

@@ -18,6 +18,9 @@ use Spiral\Translator\TranslatorInterface;
  * Add bundle specific translation functionality, class name will be used as translation bundle.
  * In addition every default string message declared in class using [[]] braces can be indexed by
  * spiral application.
+ *
+ * Set constant I18N_INHERIT_MESSAGES to true to force translation indexer merge messages from class
+ * and it's parents.
  */
 trait TranslatorTrait
 {

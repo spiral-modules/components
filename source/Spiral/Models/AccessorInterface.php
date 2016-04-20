@@ -30,8 +30,6 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
     /**
      * Change mocked data.
      *
-     * @deprecated see setData().
-     *
      * @see serializeData
      *
      * @param mixed $data

@@ -19,6 +19,13 @@ use Spiral\Models\AccessorInterface;
 interface DocumentAccessorInterface extends AccessorInterface
 {
     /**
+     * Accessor default value.
+     *
+     * @return mixed
+     */
+    public function defaultValue();
+
+    /**
      * Check if object has any update.
      *
      * @return bool
@@ -38,11 +45,4 @@ interface DocumentAccessorInterface extends AccessorInterface
      * @return array
      */
     public function buildAtomics($container = '');
-
-    /**
-     * Accessor default value.
-     *
-     * @return mixed
-     */
-    public function defaultValue();
 }

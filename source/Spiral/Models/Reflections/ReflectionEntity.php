@@ -49,6 +49,14 @@ class ReflectionEntity
     }
 
     /**
+     * @return \ReflectionClass
+     */
+    public function getReflection()
+    {
+        return $this->reflection;
+    }
+
+    /**
      * @return array
      */
     public function getSecured()
@@ -151,15 +159,15 @@ class ReflectionEntity
             AbstractEntity::MUTATOR_ACCESSOR => [],
         ];
 
-        foreach ($this->getProperty('getters', true) as $field => $filter) {
+        foreach ((array)$this->getProperty('getters', true) as $field => $filter) {
             $mutators[AbstractEntity::MUTATOR_GETTER][$field] = $filter;
         }
 
-        foreach ($this->getProperty('setters', true) as $field => $filter) {
+        foreach ((array)$this->getProperty('setters', true) as $field => $filter) {
             $mutators[AbstractEntity::MUTATOR_SETTER][$field] = $filter;
         }
 
-        foreach ($this->getProperty('accessors', true) as $field => $filter) {
+        foreach ((array)$this->getProperty('accessors', true) as $field => $filter) {
             $mutators[AbstractEntity::MUTATOR_ACCESSOR][$field] = $filter;
         }
 
@@ -225,7 +233,11 @@ class ReflectionEntity
                 $parent = clone $this;
                 $parent->reflection = $this->getParentClass();
 
-                $value = array_merge($parent->getProperty($property, $merge), $value);
+                $parentValue = $parent->getProperty($property, $merge);
+
+                if (is_array($parentValue)) {
+                    $value = array_merge($parentValue, $value);
+                }
             }
         }
 

@@ -41,7 +41,7 @@ use Spiral\Validation\ValidatesInterface;
  * - fillable
  * - validates
  */
-class DocumentEntity extends SchematicEntity implements CompositableInterface
+abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
     use SaturateTrait;
 

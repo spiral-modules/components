@@ -13,7 +13,11 @@ use Spiral\Models\AbstractEntity;
  * Provides ability to generate entity schema based on given entity class and default property
  * values, support value inheritance!
  *
+ * @method bool isAbstract()
  * @method string getName()
+ * @method string getShortName()
+ * @method bool isSubclassOf($class)
+ * @method mixed getConstant($name)
  * @method \ReflectionMethod[] getMethods()
  * @method \ReflectionClass|null getParentClass()
  */
@@ -227,17 +231,11 @@ class ReflectionEntity
         }
 
         //Merge with parent value requested
-        if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS)) {
+        if ($merge && is_array($value) && !empty($parent = $this->parentSchema())) {
+            $parentValue = $parent->getProperty($property, $merge);
 
-            if (is_array($value) && !empty($this->getParentClass())) {
-                $parent = clone $this;
-                $parent->reflection = $this->getParentClass();
-
-                $parentValue = $parent->getProperty($property, $merge);
-
-                if (is_array($parentValue)) {
-                    $value = array_merge($parentValue, $value);
-                }
+            if (is_array($parentValue)) {
+                $value = array_merge($parentValue, $value);
             }
         }
 
@@ -245,5 +243,25 @@ class ReflectionEntity
         return $this->cache[$property] = call_user_func(
             [$this->getName(), 'describeProperty'], $this, $property, $value
         );
+    }
+
+    /**
+     * Parent entity schema/
+     *
+     * @return $this|self
+     */
+    protected function parentSchema()
+    {
+        if (
+            !empty($this->getParentClass())
+            && $this->getParentClass()->getName() != static::BASE_CLASS
+        ) {
+            $parent = clone $this;
+            $parent->reflection = $this->getParentClass();
+
+            return $parent;
+        }
+
+        return null;
     }
 }

@@ -163,7 +163,12 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
             return $this->mappers[$class];
         }
 
-        //TODO
+        $mapper = $this->factory->make(DocumentMapper::class, [
+            'odm'   => $this,
+            'class' => $class
+        ]);
+
+        return $this->mappers[$class] = $mapper;
     }
 
     /**
@@ -208,8 +213,7 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
     {
         return $this->factory->make(SchemaBuilder::class, [
             'odm'     => $this,
-            'config'  => $this->config['schemas'],
-            'locator' => $locator,
+            'locator' => $locator
         ]);
     }
 

@@ -61,7 +61,7 @@ use Spiral\ODM\Traits\FindTrait;
  * - fillable
  * - validate
  */
-class Document extends DocumentEntity implements ActiveEntityInterface
+abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
     use FindTrait;
 

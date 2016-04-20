@@ -50,6 +50,16 @@ use Spiral\ODM\Traits\FindTrait;
  * ];
  *
  * @link http://php.net/manual/en/mongocollection.ensureindex.php
+ *
+ * Configuration properties:
+ * - database
+ * - collection
+ * - schema
+ * - indexes
+ * - defaults
+ * - secured (* by default)
+ * - fillable
+ * - validate
  */
 class Document extends DocumentEntity implements ActiveEntityInterface
 {

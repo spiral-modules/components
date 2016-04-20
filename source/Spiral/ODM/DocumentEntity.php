@@ -33,6 +33,13 @@ use Spiral\Validation\ValidatesInterface;
  *       'name' => 'string'
  *    ];
  * }
+ *
+ * Configuration properties:
+ * - schema
+ * - defaults
+ * - secured (* by default)
+ * - fillable
+ * - validates
  */
 class DocumentEntity extends SchematicEntity implements CompositableInterface
 {

@@ -109,14 +109,14 @@ class DocumentEntity extends SchematicEntity implements CompositableInterface
     const ONE  = 899;
 
     /**
-     * Model schema provided by ODM compoent.
+     * Model schema provided by ODM component.
      *
      * @var array
      */
     private $odmSchema = [];
 
     /**
-     * Errors in nested documents and acessors.
+     * Errors in nested documents and accessors.
      *
      * @var array
      */

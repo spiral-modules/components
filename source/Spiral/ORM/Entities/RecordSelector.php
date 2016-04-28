@@ -38,6 +38,8 @@ use Spiral\ORM\RecordInterface;
  */
 class RecordSelector extends AbstractSelect implements LoggerAwareInterface
 {
+    const DEFAULT_COUNTING_FIELD = '*';
+
     /**
      * Selector provides set of profiling functionality helps to understand what is going on with
      * query and data parsing.
@@ -519,5 +521,17 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
     public function __clone()
     {
         $this->loader = clone $this->loader;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count($column = self::DEFAULT_COUNTING_FIELD)
+    {
+        if ($column == self::DEFAULT_COUNTING_FIELD && !empty($this->loader->getPrimaryKey())) {
+            $column = 'DISTINCT(' . $this->loader->getPrimaryKey().')';
+        }
+
+        return parent::count($column);
     }
 }

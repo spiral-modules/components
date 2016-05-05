@@ -171,17 +171,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     private $solidState = false;
 
     /**
-     * Populated when record loaded using many-to-many connection. Property will include every
-     * column of connection row in pivot table.
-     *
-     * @see setContext()
-     * @see getPivot();
-     *
-     * @var array
-     */
-    private $pivotData = [];
-
-    /**
      * Record field updates (changed values).
      *
      * @var array
@@ -322,7 +311,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->ormSchema = !empty($ormSchema) ? $ormSchema : $this->orm->schema(static::class);
 
         if (isset($data[ORM::PIVOT_DATA])) {
-            $this->pivotData = $data[ORM::PIVOT_DATA];
+            //We are not storing pivot data in entity
             unset($data[ORM::PIVOT_DATA]);
         }
 
@@ -411,17 +400,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     public function isDeleted()
     {
         return $this->loaded === self::DELETED;
-    }
-
-    /**
-     * Pivot data associated with record instance, populated only in cases when record loaded using
-     * Many-to-Many relation.
-     *
-     * @return array
-     */
-    public function getPivot()
-    {
-        return $this->pivotData;
     }
 
     /**
@@ -698,15 +676,10 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     public function __debugInfo()
     {
         $info = [
-            'table'     => $this->ormSchema[ORM::M_DB] . '/' . $this->ormSchema[ORM::M_TABLE],
-            'pivotData' => $this->pivotData,
-            'fields'    => $this->getFields(),
-            'errors'    => $this->getErrors(),
+            'table'  => $this->ormSchema[ORM::M_DB] . '/' . $this->ormSchema[ORM::M_TABLE],
+            'fields' => $this->getFields(),
+            'errors' => $this->getErrors(),
         ];
-
-        if (empty($this->pivotData)) {
-            unset($info['pivotData']);
-        }
 
         return $info;
     }

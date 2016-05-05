@@ -17,6 +17,11 @@ use Spiral\ORM\Exceptions\ORMException;
 interface ORMInterface
 {
     /**
+     * Pivot table data location row fields.
+     */
+    const PIVOT_DATA = '@pivot';
+
+    /**
      * Normalized record constants.
      */
     const M_ROLE_NAME   = 0;

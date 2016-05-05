@@ -7,62 +7,42 @@
  */
 namespace Spiral\ORM\Entities;
 
-use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
 
 /**
  * Provides iteration over set of specified records data using internal instances cache. Does not
  * implements classic "collection" methods besides 'has'.
- *
- * Each entity kept inside internal array and given back as clone to prevent issues caused by
- * mutability.
  */
-class RecordIterator implements \Iterator, \Countable, \JsonSerializable
+class RecordIterator implements \IteratorAggregate, \Countable, \JsonSerializable
 {
     /**
-     * Current iterator position.
-     *
-     * @var int
+     * @var RecordInterface[]
      */
-    private $position = 0;
+    private $instances = [];
 
     /**
-     * @var string
-     */
-    protected $class = '';
-
-    /**
-     * Data to be iterated.
+     * Pivot data which links entity to parent.
      *
      * @var array
      */
-    protected $data = [];
+    private $pivotData = [];
 
     /**
-     * Constructed record instances. Cache.
-     *
-     * @var RecordInterface[]
-     */
-    protected $instances = [];
-
-    /**
-     * @invisible
-     *
-     * @var ORMInterface
-     */
-    protected $orm = null;
-
-    /**
+     * @param array        $data
      * @param string       $class
      * @param ORMInterface $orm
-     * @param array        $data
      */
-    public function __construct($class, ORMInterface $orm, array $data)
+    public function __construct(array $data, $class, ORMInterface $orm)
     {
-        $this->class = $class;
-        $this->orm = $orm;
-        $this->data = $data;
+        foreach ($data as $item) {
+            $pivotData = $this->extractPivot($item);
+            $this->instances[] = $instance = $orm->record($class, $item);
+
+            if (!empty($pivotData)) {
+                $this->pivotData[spl_object_hash($instance)] = $pivotData;
+            }
+        }
     }
 
     /**
@@ -70,102 +50,38 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
      */
     public function count()
     {
-        return count($this->data);
+        return count($this->instances);
     }
 
     /**
-     * Get all Records as array.
+     * Get pivot data related to a given object if any.
      *
-     * @return RecordInterface[]
+     * @param RecordInterface $record
+     * @return array
      */
-    public function all()
+    public function pivotData(RecordInterface $record)
     {
-        $result = [];
+        $objectHash = spl_object_hash($record);
 
-        /**
-         * Cloning to prevent position overlapping.
-         *
-         * @var self|RecordInterface[]
-         */
-        $iterator = clone $this;
-        foreach ($iterator as $nested) {
-            $result[] = $nested;
+        if (empty($this->pivotData[$objectHash])) {
+            return [];
         }
 
-        //Copying instances just in case
-        $this->instances = $iterator->instances;
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return RecordInterface
-     *
-     * @see ORMInterface::record()
-     * @see RecordInterface::withContext()
-     *
-     * @throws ORMException
-     */
-    public function current()
-    {
-        if (!isset($this->instances[$this->position])) {
-            //Constructing entity into local iterator cache
-            $this->instances[$this->position] = $this->orm->record(
-                $this->class,
-                $this->data[$this->position]
-            );
-        }
-
-        //We are breaking reference here so entity modifications can't alter iterator (todo: implement withPivot method?)
-        return clone $this->instances[$this->position];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        ++$this->position;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->position;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return isset($this->data[$this->position]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->position = 0;
+        return $this->pivotData[$objectHash];
     }
 
     /**
      * Check if record or record with specified id presents in iteration.
      *
-     * @param RecordInterface|string|int $record
+     * @param RecordInterface|string|int $lookup
      *
      * @return true
      */
-    public function has($record)
+    public function has($lookup)
     {
-        foreach ($this->all() as $nested) {
+        foreach ($this->instances as $record) {
             if (
-                is_array($record) && array_intersect_assoc($nested->getFields(), $record) == $record
+                is_array($lookup) && array_intersect_assoc($record->getFields(), $lookup) == $lookup
             ) {
                 //Comparing via fields intersection
                 return true;
@@ -173,14 +89,14 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
             }
 
             if (
-                is_scalar($record) && !empty($record) && $nested->primaryKey() == $record
+                is_scalar($lookup) && !empty($lookup) && $record->primaryKey() == $lookup
             ) {
                 //Comparing using primary keys
                 return true;
             }
 
             if (
-                $nested == $record || $nested->getFields() == $record->getFields()
+                $record == $lookup || $record->getFields() == $lookup->getFields()
             ) {
                 //Comparing as object vars
                 return true;
@@ -191,19 +107,29 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
     }
 
     /**
+     * Get all Records as array.
+     *
+     * @return RecordInterface[]
+     */
+    public function all()
+    {
+        return $this->instances;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->instances);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function jsonSerialize()
     {
-        return $this->all();
-    }
-
-    /**
-     * @return RecordInterface[]
-     */
-    public function __debugInfo()
-    {
-        return $this->all();
+        return $this->instances;
     }
 
     /**
@@ -211,8 +137,24 @@ class RecordIterator implements \Iterator, \Countable, \JsonSerializable
      */
     public function __destruct()
     {
-        $this->data = [];
+        $this->pivotData = [];
         $this->instances = [];
-        $this->orm = null;
+    }
+
+    /**
+     * @param array $data
+     * @return array|null
+     */
+    private function extractPivot(array &$data)
+    {
+        if (!empty($data[ORMInterface::PIVOT_DATA])) {
+
+            $pivotData = $data[ORMInterface::PIVOT_DATA];
+            unset($data[ORMInterface::PIVOT_DATA]);
+
+            return $pivotData;
+        }
+
+        return null;
     }
 }

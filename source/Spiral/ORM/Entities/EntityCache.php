@@ -23,16 +23,16 @@ class EntityCache
     private $enabled = true;
 
     /**
+     * @var IdentifiedInterface[]
+     */
+    private $data = [];
+
+    /**
      * Maximum entity cache size. Null is unlimited.
      *
      * @var int|null
      */
-    private $cacheSize = null;
-
-    /**
-     * @var IdentifiedInterface[]
-     */
-    private $cache = [];
+    private $maxSize = null;
 
     /**
      * Check if entity cache enabled.
@@ -45,38 +45,26 @@ class EntityCache
     }
 
     /**
-     * Enable or disable entity cache. Disabling cache will not flush it's values.
+     * Enable entity cache.
      *
-     * @deprecated see configure
-     *
-     * @param bool     $enabled
-     * @param int|null $maxSize Null = unlimited.
-     *
-     * @return $this
+     * @param int|null $maxSize
      */
-    public function configureCache($enabled, $maxSize = null)
+    public function enable($maxSize = null)
     {
-        return $this->configure($enabled, $maxSize);
-    }
-
-    /**
-     * Enable or disable entity cache. Disabling cache will not flush it's values.
-     *
-     * @param bool     $enabled
-     * @param int|null $maxSize Null = unlimited.
-     *
-     * @return $this
-     */
-    public function configure($enabled, $maxSize = null)
-    {
-        $this->enabled = (bool)$enabled;
+        $this->enabled = true;
         if (!is_null($maxSize) && !is_int($maxSize)) {
             throw new \InvalidArgumentException('Cache size value has to be null or integer.');
         }
 
-        $this->cacheSize = $maxSize;
+        $this->maxSize = $maxSize;
+    }
 
-        return $this;
+    /**
+     * Disable entity cache without flushing it's data.
+     */
+    public function disable()
+    {
+        $this->enabled = false;
     }
 
     /**
@@ -95,11 +83,11 @@ class EntityCache
             return $entity;
         }
 
-        if (!$ignoreLimit && count($this->cache) > $this->cacheSize) {
+        if (!$ignoreLimit && count($this->data) > $this->maxSize) {
             throw new CacheException('Entity cache size exceeded');
         }
 
-        return $this->cache[get_class($entity) . '.' . $entity->primaryKey()] = $entity;
+        return $this->data[get_class($entity) . '.' . $entity->primaryKey()] = $entity;
     }
 
     /**
@@ -113,7 +101,7 @@ class EntityCache
             return;
         }
 
-        unset($this->cache[get_class($entity) . '.' . $entity->primaryKey()]);
+        unset($this->data[get_class($entity) . '.' . $entity->primaryKey()]);
     }
 
     /**
@@ -126,7 +114,7 @@ class EntityCache
      */
     public function has($class, $primaryKey)
     {
-        return isset($this->cache[$class . '.' . $primaryKey]);
+        return isset($this->data[$class . '.' . $primaryKey]);
     }
 
     /**
@@ -139,11 +127,11 @@ class EntityCache
      */
     public function get($class, $primaryKey)
     {
-        if (empty($this->cache[$class . '.' . $primaryKey])) {
+        if (empty($this->data[$class . '.' . $primaryKey])) {
             return null;
         }
 
-        return $this->cache[$class . '.' . $primaryKey];
+        return $this->data[$class . '.' . $primaryKey];
     }
 
     /**
@@ -151,7 +139,7 @@ class EntityCache
      */
     public function flushCache()
     {
-        $this->cache = [];
+        $this->data = [];
     }
 
     /**

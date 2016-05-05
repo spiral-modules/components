@@ -24,7 +24,7 @@ interface RelationInterface
 {
     /**
      * @param SchemaBuilder $builder
-     * @param RecordSchema  $record
+     * @param RecordSchema  $owner Parent record.
      * @param string        $name
      * @param array         $definition
      *
@@ -32,7 +32,7 @@ interface RelationInterface
      */
     public function __construct(
         SchemaBuilder $builder,
-        RecordSchema $record,
+        RecordSchema $owner,
         $name,
         array $definition
     );

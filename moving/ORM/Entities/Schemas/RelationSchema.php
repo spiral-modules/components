@@ -107,12 +107,12 @@ abstract class RelationSchema implements RelationInterface
      */
     public function __construct(
         SchemaBuilder $builder,
-        RecordSchema $record,
+        RecordSchema $owner,
         $name,
         array $definition
     ) {
         $this->builder = $builder;
-        $this->record = $record;
+        $this->record = $owner;
 
         $this->name = $name;
 

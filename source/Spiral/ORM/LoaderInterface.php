@@ -24,17 +24,17 @@ use Spiral\ORM\Exceptions\LoaderException;
 interface LoaderInterface
 {
     /**
-     * @param ORM                  $orm
      * @param string               $container
      * @param array                $definition
+     * @param ORMInterface         $orm
      * @param LoaderInterface|null $parent
      *
      * @throws LoaderException
      */
     public function __construct(
-        ORM $orm,
         $container,
         array $definition = [],
+        ORMInterface $orm,
         LoaderInterface $parent = null
     );
 

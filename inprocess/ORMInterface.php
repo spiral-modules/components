@@ -62,7 +62,7 @@ interface ORMInterface
      * Construct instance of Record or receive it from cache (if enabled). Only records with
      * declared primary key can be cached.
      *
-     * @todo hydrate external class type?
+     * @todo hydrate external class type!
      *
      * @param string $class Record class name.
      * @param array  $data  Record data including nested relations.
@@ -71,4 +71,66 @@ interface ORMInterface
      * @return RecordInterface
      */
     public function record($class, array $data, $cache = true);
+
+    /**
+     * Create record relation instance by given relation type, parent and definition (options).
+     *
+     * @param int             $type
+     * @param RecordInterface $parent
+     * @param array           $definition Relation definition.
+     * @param array           $data
+     * @param bool            $loaded
+     * @return RelationInterface
+     * @throws ORMException
+     */
+    public function relation(
+        $type,
+        RecordInterface $parent,
+        $definition,
+        $data = null,
+        $loaded = false
+    );
+
+    /**
+     * Get DocumentSelector associated with give ORM model class.
+     *
+     * @param string $class
+     * @param Loader $loader Primary selection loader (usually RootLoader).
+     *
+     * @return RecordSelector
+     */
+    public function selector($class, Loader $loader = null);
+
+    /**
+     * Get instance of relation/selection loader based on relation type and definition.
+     *
+     * @param int    $type       Relation type.
+     * @param string $container  Container related to parent loader.
+     * @param array  $definition Relation definition.
+     * @param Loader $parent     Parent loader (if presented).
+     *
+     * @return LoaderInterface
+     *
+     * @throws ORMException
+     */
+    public function loader($type, $container, array $definition, Loader $parent = null);
+
+    /**
+     * Get source class associated with given ORM model class.
+     *
+     * @param string $class
+     *
+     * @return RecordSource
+     */
+    public function source($class);
+
+    /**
+     * Get instance of RecordMapper responsible for save, update and delete operations with
+     * records.
+     *
+     * @param string $class
+     *
+     * @return RecordMapper
+     */
+    public function mapper($class);
 }

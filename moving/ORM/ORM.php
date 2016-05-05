@@ -9,14 +9,9 @@ namespace Spiral\ORM;
 
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
-use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\DataEntity;
-use Spiral\Models\SchematicEntity;
-use Spiral\ORM\Configs\ORMConfig;
 use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
@@ -28,148 +23,10 @@ use Spiral\Tokenizer\ClassLocatorInterface;
 /**
  * ORM component used to manage state of cached Record's schema, record creation and schema
  * analysis.
- *
- * Attention, do not forget to reset cache between requests.
- *
- * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
- * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
- *
- * @todo think about entity cache and potential use cases when model can be accessed from outside
  */
 class ORM extends Component implements SingletonInterface
 {
     use LoggerTrait;
-
-    /**
-     * Memory section to store ORM schema.
-     */
-    const MEMORY = 'orm.schema';
-
-    /**
-     * Normalized record constants.
-     */
-    const M_ROLE_NAME   = 0;
-    const M_SOURCE      = 1;
-    const M_TABLE       = 2;
-    const M_DB          = 3;
-    const M_HIDDEN      = SchematicEntity::SH_HIDDEN;
-    const M_SECURED     = SchematicEntity::SH_SECURED;
-    const M_FILLABLE    = SchematicEntity::SH_FILLABLE;
-    const M_MUTATORS    = SchematicEntity::SH_MUTATORS;
-    const M_VALIDATES   = SchematicEntity::SH_VALIDATES;
-    const M_COLUMNS     = 9;
-    const M_NULLABLE    = 10;
-    const M_RELATIONS   = 11;
-    const M_PRIMARY_KEY = 12;
-
-    /**
-     * Normalized relation options.
-     */
-    const R_TYPE       = 0;
-    const R_TABLE      = 1;
-    const R_DEFINITION = 2;
-    const R_DATABASE   = 3;
-
-    /**
-     * Pivot table data location in Record fields. Pivot data only provided when record is loaded
-     * using many-to-many relation.
-     */
-    const PIVOT_DATA = '@pivot';
-
-    /**
-     * @var EntityCache
-     */
-    private $cache = null;
-
-    /**
-     * @var ORMConfig
-     */
-    protected $config = null;
-
-    /**
-     * Cached records schema.
-     *
-     * @whatif private
-     * @var array|null
-     */
-    protected $schema = null;
-
-    /**
-     * @invisible
-     * @var DatabaseManager
-     */
-    protected $databases = null;
-
-    /**
-     * @invisible
-     * @var FactoryInterface
-     */
-    protected $factory = null;
-
-    /**
-     * @invisible
-     * @var HippocampusInterface
-     */
-    protected $memory = null;
-
-    /**
-     * @param ORMConfig            $config
-     * @param EntityCache          $cache
-     * @param HippocampusInterface $memory
-     * @param DatabaseManager      $databases
-     * @param FactoryInterface     $factory
-     */
-    public function __construct(
-        ORMConfig $config,
-        EntityCache $cache,
-        HippocampusInterface $memory,
-        DatabaseManager $databases,
-        FactoryInterface $factory
-    ) {
-        $this->config = $config;
-        $this->memory = $memory;
-
-        $this->cache = $cache;
-
-        $this->schema = (array)$memory->loadData(static::MEMORY);
-
-        $this->databases = $databases;
-        $this->factory = $factory;
-    }
-
-    /**
-     * @param EntityCache $cache
-     * @return $this
-     */
-    public function setCache(EntityCache $cache)
-    {
-        $this->cache = $cache;
-
-        return $this;
-    }
-
-    /**
-     * @return EntityCache
-     */
-    public function cache()
-    {
-        return $this->cache;
-    }
-
-    /**
-     * When ORM is cloned we are automatically cloning it's cache as well to create
-     * new isolated area. Basically we have cache enabled per selection.
-     *
-     * @see RecordSelector::getIterator()
-     */
-    public function __clone()
-    {
-        $this->cache = clone $this->cache;
-
-        if (!$this->cache->isEnabled()) {
-            $this->logger()->warning("ORM are cloned with disabled state.");
-        }
-    }
 
     /**
      * Get database by it's name from DatabaseManager associated with ORM component.

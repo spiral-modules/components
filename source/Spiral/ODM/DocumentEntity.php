@@ -12,6 +12,7 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
+use Spiral\Models\PublishableInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
@@ -405,7 +406,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
              */
             $value = $this->getField($field);
 
-            if ($value instanceof CompositableInterface) {
+            if ($value instanceof PublishableInterface) {
                 $result[$field] = $value->publicFields();
                 continue;
             }

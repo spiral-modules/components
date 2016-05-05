@@ -32,18 +32,19 @@ use Spiral\ORM\RecordInterface;
  * Selector loaders may not only be related to SQL databases, but might load data from external
  * sources.
  *
- * @see with()
- * @see load()
- * @see LoaderInterface
- * @see AbstractSelect
+ * @see  with()
+ * @see  load()
+ * @see  LoaderInterface
+ * @see  AbstractSelect
+ *
+ * @todo update count
+ * @todo update paginator usage
  */
 class RecordSelector extends AbstractSelect implements LoggerAwareInterface
 {
-    /*
-     * Selector provides set of profiling functionality helps to understand what is going on with
-     * query and data parsing.
-     */
     use LoggerTrait, BenchmarkTrait, SaturateTrait;
+
+    const DEFAULT_COUNTING_FIELD = '*';
 
     /**
      * Class name of record to be loaded.
@@ -93,6 +94,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
     {
         $this->class = $class;
         $this->orm = $this->saturate($orm, ORM::class);
+
         $this->columns = $this->dataColumns = [];
 
         //We aways need primary loader
@@ -100,7 +102,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
             //Selector always need primary data loaded to define data structure and perform query
             //parsing, in most of cases we can easily use RootLoader associated with primary record
             //schema
-            $this->loader = new RootLoader($this->orm, null, $this->orm->schema($class));
+            $this->loader = new RootLoader(null, $this->orm->schema($class), $this->orm);
         }
 
         //Every ORM loader has ability to declare it's primary database, we are going to use
@@ -108,7 +110,10 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         $database = $this->loader->dbalDatabase();
 
         //AbstractSelect construction
-        parent::__construct($database, $database->driver()->queryCompiler($database->getPrefix()));
+        parent::__construct(
+            $database,
+            $database->driver()->queryCompiler($database->getPrefix())
+        );
     }
 
     /**
@@ -153,6 +158,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
     public function registerColumns($table, array $columns)
     {
         $offset = count($this->dataColumns);
+
         foreach ($columns as $column) {
             $columnAlias = 'c' . (++$this->countColumns);
             $this->dataColumns[] = $table . '.' . $column . ' AS ' . $columnAlias;
@@ -354,7 +360,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
 
         if (empty($primaryKey)) {
             throw new SelectorException(
-                'Unable to fetch data by primary key, no primary key found.'
+                'Unable to fetch data by primary key, no primary key found'
             );
         }
 
@@ -407,6 +413,8 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
             $columns = !empty($this->dataColumns) ? $this->dataColumns : ['*'];
         }
 
+        //TODO: paginator
+
         return $compiler->compileSelect(
             ["{$this->primaryTable()} AS {$this->primaryAlias()}"],
             $this->distinct,
@@ -416,8 +424,8 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
             $this->havingTokens,
             $this->grouping,
             $this->ordering,
-            $this->limit,
-            $this->offset
+            $this->getLimit(),
+            $this->getOffset()
         );
     }
 
@@ -426,11 +434,9 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      *
      * Return type will depend if custom columns set were used.
      *
-     * @param array $callbacks Callbacks to be used in record iterator as magic methods.
-     *
      * @return PDOQuery|RecordIterator
      */
-    public function getIterator(array $callbacks = [])
+    public function getIterator()
     {
         if (!empty($this->columns) || !empty($this->grouping)) {
             //QueryResult for user requests
@@ -441,13 +447,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
          * We are getting copy of ORM with cloned cache, so all our entities are isolated in it.
          */
 
-        return new RecordIterator(
-            clone $this->orm,
-            $this->class,
-            $this->fetchData(),
-            true,
-            $callbacks
-        );
+        return new RecordIterator($this->fetchData(), $this->class, clone $this->orm);
     }
 
     /**
@@ -525,6 +525,18 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         }
 
         return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count($column = self::DEFAULT_COUNTING_FIELD)
+    {
+        if ($column == self::DEFAULT_COUNTING_FIELD && !empty($this->loader->getPrimaryKey())) {
+            $column = 'DISTINCT(' . $this->loader->getPrimaryKey() . ')';
+        }
+
+        return parent::count($column);
     }
 
     /**

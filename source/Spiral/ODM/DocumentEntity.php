@@ -111,7 +111,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *      'parentID' => 'key::_id'
      * ]]
      *
-     * @see Document::$schema
+     * @see odmSchema::$schema
      */
     const MANY = 778;
     const ONE  = 899;
@@ -167,21 +167,19 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      *
-     * @param array|null $odmSchema
+     * @param array|null $schema
      */
     public function __construct(
         $fields,
         EntityInterface $parent = null,
         ODMInterface $odm = null,
-        $odmSchema = null
+        $schema = null
     ) {
         $this->parent = $parent;
 
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODMInterface::class);
-
-        //Fetching schema from ODM manager if none were provided
-        $this->odmSchema = !empty($odmSchema) ? $odmSchema : $this->odm->schema(static::class);
+        $this->odmSchema = !empty($schema) ? $schema : $this->odm->schema(static::class);
 
         if (empty($fields)) {
             //Default state for an empty model - invalid
@@ -376,7 +374,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         return $this;
     }
-
 
     /**
      * {@inheritdoc}

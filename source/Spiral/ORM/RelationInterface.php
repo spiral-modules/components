@@ -10,19 +10,18 @@ namespace Spiral\ORM;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\Validation\ValidatesInterface;
 
 /**
  * Relations used to represent data related to parent record. Every relation must be embedded into
  * record, be callable and provide related data by record request. In addition, relations must know
  * how to associate data/entity provided by user.
  *
- * @see Record
+ * @see RecordEntity
  */
-interface RelationInterface extends ValidatesInterface
+interface RelationInterface
 {
     /**
-     * @param ORM                  $orm        ORM component.
+     * @param ORMInterface         $orm        ORM component.
      * @param null|RecordInterface $parent     Parent RecordEntity.
      * @param array                $definition Relation definition, crated by RelationSchema.
      * @param mixed                $data       Pre-loaded relation data.
@@ -30,7 +29,7 @@ interface RelationInterface extends ValidatesInterface
      *                                         database.
      */
     public function __construct(
-        ORM $orm,
+        ORMInterface $orm,
         RecordInterface $parent,
         array $definition,
         $data = null,
@@ -87,7 +86,7 @@ interface RelationInterface extends ValidatesInterface
      * @return bool
      * @throws RelationException
      */
-    public function saveAssociation($validate = true);
+    public function saveRelated($validate = true);
 
     /**
      * Reset relation state. By default it must flush all relation data. Method used by Record when

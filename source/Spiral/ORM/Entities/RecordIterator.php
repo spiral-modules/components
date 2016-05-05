@@ -148,7 +148,6 @@ class RecordIterator implements \IteratorAggregate, \Countable, \JsonSerializabl
     private function extractPivot(array &$data)
     {
         if (!empty($data[ORMInterface::PIVOT_DATA])) {
-
             $pivotData = $data[ORMInterface::PIVOT_DATA];
             unset($data[ORMInterface::PIVOT_DATA]);
 

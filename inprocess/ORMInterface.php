@@ -116,15 +116,6 @@ interface ORMInterface
     public function loader($type, $container, array $definition, Loader $parent = null);
 
     /**
-     * Get source class associated with given ORM model class.
-     *
-     * @param string $class
-     *
-     * @return RecordSource
-     */
-    public function source($class);
-
-    /**
      * Get instance of RecordMapper responsible for save, update and delete operations with
      * records.
      *

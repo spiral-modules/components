@@ -16,7 +16,7 @@ class Data extends DocumentEntity
      *
      * @var array
      */
-    protected $schema = [
+    protected $odmSchema = [
         'name'     => 'string',
         'elements' => [Element::class]
     ];

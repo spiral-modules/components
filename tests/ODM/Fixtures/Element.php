@@ -16,7 +16,7 @@ class Element extends DocumentEntity
      *
      * @var array
      */
-    protected $schema = [
+    protected $odmSchema = [
         'name' => 'string'
     ];
 }

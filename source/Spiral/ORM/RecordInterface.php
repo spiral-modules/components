@@ -12,8 +12,6 @@ use Spiral\Models\IdentifiedInterface;
 
 /**
  * Generic ORM contract for records to be constructed and updated by ORM.
- *
- * @todo add additional layer responsible for custom model constructions?
  */
 interface RecordInterface extends IdentifiedInterface
 {
@@ -24,17 +22,11 @@ interface RecordInterface extends IdentifiedInterface
      * @see Component::staticContainer()
      * @see setContext
      *
-     * @param array      $data
-     * @param bool|false $loaded
-     * @param ORM|null   $orm
-     * @param array      $ormSchema
+     * @param array             $data
+     * @param bool|false        $loaded
+     * @param ORMInterface|null $orm
      */
-    //public function __construct(
-    //    array $data = [],
-    //    $loaded = false,
-    //    ORM $orm = null,
-    //    array $ormSchema = []
-    //);
+    public function __construct(array $data = [], $loaded = false, ORMInterface $orm = null);
 
     /**
      * Indication that record data was deleted (required due entity map/cache).

@@ -20,6 +20,14 @@ use Spiral\Models\AccessorInterface;
 interface RecordAccessorInterface extends AccessorInterface
 {
     /**
+     * Accessor default value (must be specific to driver).
+     *
+     * @param Driver $driver
+     * @return mixed
+     */
+    public function defaultValue(Driver $driver);
+
+    /**
      * Check if object has any update.
      *
      * @return bool
@@ -39,12 +47,4 @@ interface RecordAccessorInterface extends AccessorInterface
      * @return mixed|FragmentInterface
      */
     public function compileUpdates($field = '');
-
-    /**
-     * Accessor default value (must be specific to driver).
-     *
-     * @param Driver $driver
-     * @return mixed
-     */
-    public function defaultValue(Driver $driver);
 }

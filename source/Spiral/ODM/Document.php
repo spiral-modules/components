@@ -77,15 +77,15 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * @param array           $fields
      * @param EntityInterface $parent
      * @param ODMInterface    $odm
-     * @param array           $odmSchema
+     * @param array           $schema
      */
     public function __construct(
         $fields = [],
         EntityInterface $parent = null,
         ODMInterface $odm = null,
-        $odmSchema = null
+        $schema = null
     ) {
-        parent::__construct($fields, $parent, $odm, $odmSchema);
+        parent::__construct($fields, $parent, $odm, $schema);
 
         if ((!$this->isLoaded() && !$this->isEmbedded())) {
             //Document is newly created instance
@@ -120,6 +120,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      *                            disable validation before saving.
      *
      * @throws DocumentException
+     *
      * @event saving()
      * @event saved()
      * @event updating()
@@ -140,7 +141,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             );
         }
 
-        //Associated collection
+        //Associated mapper
         $mapper = $this->odm->mapper(static::class);
 
         if (!$this->isLoaded()) {

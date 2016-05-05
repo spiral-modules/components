@@ -133,7 +133,7 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
             return null;
         }
 
-        return $this->defaultValidator($this->validates);
+        return $this->intiaiteValidator($this->validates);
     }
 
     /**

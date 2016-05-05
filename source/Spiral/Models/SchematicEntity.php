@@ -91,7 +91,7 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
             return null;
         }
 
-        return $this->defaultValidator($this->schema[self::SH_VALIDATES]);
+        return $this->intiaiteValidator($this->schema[self::SH_VALIDATES]);
     }
 
     /**

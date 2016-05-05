@@ -11,7 +11,7 @@ namespace Spiral\ODM\Traits;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
-use Spiral\ODM\ODM;
+use Spiral\ODM\ODMInterface;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\RecordEntity;
 
@@ -71,22 +71,23 @@ trait FindTrait
      *
      * @see Component::staticContainer()
      *
-     * @param ODM $odm ODM component, global container will be called if not instance provided.
+     * @param ODMInterface $odm ODM component, global container will be called if not instance
+     *                          provided.
      *
      * @return DocumentSource
      *
      * @throws ORMException
      */
-    public static function source(ODM $odm = null)
+    public static function source(ODMInterface $odm = null)
     {
         /**
          * Using global container as fallback.
          *
-         * @var ODM
+         * @var ODMInterface $odm
          */
         if (empty($odm)) {
             //Using global container as fallback
-            $odm = self::staticContainer()->get(ODM::class);
+            $odm = self::staticContainer()->get(ODMInterface::class);
         }
 
         return $odm->source(static::class);

@@ -12,6 +12,7 @@ use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
 
 /**
@@ -79,22 +80,22 @@ trait FindTrait
      *
      * @see Component::staticContainer()
      *
-     * @param ORM $orm ORM component, global container will be called if not instance provided.
+     * @param ORMInterface $orm ORM component, global container will be called if not instance provided.
      *
      * @return RecordSource
      *
      * @throws ORMException
      */
-    public static function source(ORM $orm = null)
+    public static function source(ORMInterface $orm = null)
     {
         /**
          * Using global container as fallback.
          *
-         * @var ORM
+         * @var ORMInterface $orm
          */
         if (empty($orm)) {
             //Using global container as fallback
-            $orm = self::staticContainer()->get(ORM::class);
+            $orm = self::staticContainer()->get(ORMInterface::class);
         }
 
         return $orm->source(static::class);

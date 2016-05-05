@@ -9,8 +9,7 @@ namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Database;
 use Spiral\Models\SchematicEntity;
-use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\RecordSelector;
+use Spiral\ORM\Entities\RecordMapper;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 
@@ -37,6 +36,14 @@ interface ORMInterface
     const M_NULLABLE    = 10;
     const M_RELATIONS   = 11;
     const M_PRIMARY_KEY = 12;
+
+    /**
+     * Normalized relation options.
+     */
+    const R_TYPE       = 0;
+    const R_TABLE      = 1;
+    const R_DEFINITION = 2;
+    const R_DATABASE   = 3;
 
     /**
      * Get database by it's name from DatabaseManager associated with ORM component.
@@ -76,4 +83,23 @@ interface ORMInterface
      * @return RecordInterface
      */
     public function record($class, array $data, $cache = true);
+
+    /**
+     * Get ORM source for given class.
+     *
+     * @param string $class
+     * @return RecordSource
+     * @throws ORMException
+     */
+    public function source($class);
+
+    /**
+     * Get instance of RecordMapper responsible for save, update and delete operations with
+     * records.
+     *
+     * @param string $class
+     *
+     * @return RecordMapper
+     */
+    public function mapper($class);
 }

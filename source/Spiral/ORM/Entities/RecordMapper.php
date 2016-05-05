@@ -65,11 +65,12 @@ class RecordMapper
     /**
      * Update row in related table.
      *
-     * @param array $updates DBAL updates, must be provided in a form of column => value and can
-     *                       include expressions.
+     * @param array $criteria Search criteria (usually id => value)
+     * @param array $updates  DBAL updates, must be provided in a form of column => value and can
+     *                        include expressions.
      * @return bool
      */
-    public function update(array $updates)
+    public function update(array $criteria, array $updates)
     {
         //todo: implement
     }
@@ -77,9 +78,10 @@ class RecordMapper
     /**
      * Delete document from related collection.
      *
+     * @param array $criteria Search criteria (usually id => value)
      * @return array|bool
      */
-    public function delete()
+    public function delete(array $criteria)
     {
         //todo: implement
     }

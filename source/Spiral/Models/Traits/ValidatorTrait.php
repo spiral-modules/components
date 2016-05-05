@@ -255,7 +255,7 @@ trait ValidatorTrait
      *
      * @throws SugarException
      */
-    private function defaultValidator(array $rules = [])
+    private function intiaiteValidator(array $rules = [])
     {
         $container = $this->container();
 
@@ -274,7 +274,7 @@ trait ValidatorTrait
             $factory = $container->get(FactoryInterface::class);
         }
 
-        //Receiving instance of validator from container (todo: impove?)
+        //Receiving instance of validator from container (todo: improve?)
         return $factory->make(ValidatorInterface::class, compact('rules'));
     }
 }

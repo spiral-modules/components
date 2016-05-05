@@ -9,12 +9,9 @@ namespace Spiral\ORM;
 
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Database\Entities\Database;
-use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\DataEntity;
 use Spiral\ORM\Entities\Loader;
 use Spiral\ORM\Entities\RecordSelector;
-use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Entities\SchemaBuilder;
 use Spiral\ORM\Entities\Schemas\RecordSchema;
 use Spiral\ORM\Exceptions\ORMException;
@@ -26,77 +23,6 @@ use Spiral\Tokenizer\ClassLocatorInterface;
  */
 class ORM extends Component implements SingletonInterface
 {
-    use LoggerTrait;
-
-    /**
-     * Get database by it's name from DatabaseManager associated with ORM component.
-     *
-     * @param string $database
-     * @return Database
-     */
-    public function database($database)
-    {
-        return $this->databases->database($database);
-    }
-
-    /**
-     * Construct instance of Record or receive it from cache (if enabled). Only records with
-     * declared primary key can be cached.
-     *
-     * @todo hydrate external class type!
-     * @param string $class Record class name.
-     * @param array  $data
-     * @param bool   $cache Add record to entity cache if enabled.
-     * @return RecordInterface
-     */
-    public function record($class, array $data = [], $cache = true)
-    {
-        $schema = $this->schema($class);
-
-        if (!$this->cache->isEnabled() || !$cache) {
-            //Entity cache is disabled, we can create record right now
-            return new $class($data, !empty($data), $this, $schema);
-        }
-
-        //We have to find unique object criteria (will work for objects with primary key only)
-        $primaryKey = null;
-
-        if (
-            !empty($schema[self::M_PRIMARY_KEY])
-            && !empty($data[$schema[self::M_PRIMARY_KEY]])
-        ) {
-            $primaryKey = $data[$schema[self::M_PRIMARY_KEY]];
-        }
-
-        if ($this->cache->has($class, $primaryKey)) {
-            /**
-             * @var RecordInterface $entity
-             */
-            return $this->cache->get($class, $primaryKey);
-        }
-
-        return $this->cache->remember(
-            new $class($data, !empty($data), $this, $schema)
-        );
-    }
-
-    /**
-     * Get ORM source for given class.
-     *
-     * @param string $class
-     * @return RecordSource
-     * @throws ORMException
-     */
-    public function source($class)
-    {
-        $schema = $this->schema($class);
-        if (empty($source = $schema[self::M_SOURCE])) {
-            //Default source
-            $source = RecordSource::class;
-        }
-
-        return new $source($class, $this);
-    }
 
     /**
      * Get ORM selector for given class.

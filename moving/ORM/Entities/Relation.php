@@ -200,7 +200,7 @@ abstract class Relation extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function saveAssociation($validate = true)
+    public function saveRelated($validate = true)
     {
         if (empty($instance = $this->getRelated())) {
             //Nothing to save

@@ -102,10 +102,10 @@ class ManyToMorphed implements RelationInterface
     /**
      * {@inheritdoc}
      */
-    public function saveAssociation($validate = true)
+    public function saveRelated($validate = true)
     {
         foreach ($this->relations as $relation) {
-            if (!$relation->saveAssociation($validate)) {
+            if (!$relation->saveRelated($validate)) {
                 return false;
             }
         }

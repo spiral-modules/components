@@ -144,17 +144,24 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         $mapper = $this->odm->mapper(static::class);
 
         if (!$this->isLoaded()) {
-
             $this->dispatch('saving', new EntityEvent($this));
-            $this->setField('_id', $mapper->insert($this->serializeData()));
+
+            /*
+             * Performing an insertion using ODM class mapper.
+             */
+            $mongoID = $mapper->insert($this->serializeData());
+            $this->setField('_id', $mongoID);
+
             $this->dispatch('saved', new EntityEvent($this));
 
         } elseif ($this->isSolid() || $this->hasUpdates()) {
 
+            /*
+             * Performing an update using ODM class mapper.
+             */
             $this->dispatch('updating', new EntityEvent($this));
             $mapper->update($this->primaryKey(), $this->buildAtomics());
             $this->dispatch('updated', new EntityEvent($this));
-
         }
 
         $this->flushUpdates();
@@ -178,10 +185,15 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         }
 
         $this->dispatch('deleting', new EntityEvent($this));
+
+        /*
+         * Performing deletion using ODM class mapper.
+         */
         if ($this->isLoaded()) {
             $this->odm->mapper(static::class)->delete($this->primaryKey());
             $this->setField('_id', null, false);
         }
+
         $this->dispatch('deleted', new EntityEvent($this));
     }
 }

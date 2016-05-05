@@ -11,7 +11,6 @@ use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
-use Spiral\Models\PublishableInterface;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\CompositorException;
@@ -27,7 +26,6 @@ use Spiral\Validation\ValidatesInterface;
 class Compositor extends Component implements
     CompositableInterface,
     ValidatesInterface,
-    PublishableInterface,
     \IteratorAggregate,
     \Countable,
     \ArrayAccess

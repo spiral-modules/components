@@ -117,13 +117,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     const ONE  = 899;
 
     /**
-     * Model schema provided by ODM component.
-     *
-     * @var array
-     */
-    private $odmSchema = [];
-
-    /**
      * Errors in nested documents and accessors.
      *
      * @var array
@@ -163,6 +156,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      * @var ODMInterface|ODM
      */
     protected $odm = null;
+
+    /**
+     * Model schema provided by ODM component.
+     *
+     * @var array
+     */
+    protected $odmSchema = [];
 
     /**
      * {@inheritdoc}
@@ -647,16 +647,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         return $this->odm->container();
-    }
-
-    /**
-     * Related and cached ODM schema.
-     *
-     * @return array
-     */
-    protected function odmSchema()
-    {
-        return $this->odmSchema;
     }
 
     /**

@@ -126,7 +126,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
             $this->dispatch('saving', new EntityEvent($this));
 
             //Primary key field name (if any)
-            $primaryKey = $this->ormSchema()[ORMInterface::M_PRIMARY_KEY];
+            $primaryKey = $this->ormSchema[ORMInterface::M_PRIMARY_KEY];
 
             //Inserting
             $lastID = $mapper->insert($this->serializeData());

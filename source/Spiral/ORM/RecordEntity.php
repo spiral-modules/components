@@ -155,13 +155,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     private $loaded = false;
 
     /**
-     * Schema provided by ORM component.
-     *
-     * @var array
-     */
-    private $ormSchema = [];
-
-    /**
      * Errors in relations and accessors.
      *
      * @var array
@@ -202,6 +195,13 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      * @var ORMInterface|ORM
      */
     protected $orm = null;
+
+    /**
+     * Schema provided by ORM component.
+     *
+     * @var array
+     */
+    protected $ormSchema = [];
 
     /**
      * {@inheritdoc}
@@ -676,18 +676,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         return $this->orm->container();
-    }
-
-    /**
-     * Related and cached ORM schema.
-     *
-     * @internal
-     *
-     * @return array
-     */
-    protected function ormSchema()
-    {
-        return $this->ormSchema;
     }
 
     /**

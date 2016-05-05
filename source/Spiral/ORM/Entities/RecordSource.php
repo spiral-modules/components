@@ -9,10 +9,12 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
+use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SourceInterface;
 use Spiral\ORM\Exceptions\SourceException;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
 
 /**
@@ -21,9 +23,6 @@ use Spiral\ORM\RecordEntity;
  */
 class RecordSource extends Component implements SourceInterface, \Countable
 {
-    /*
-     * Sugary!
-     */
     use SaturateTrait;
 
     /**
@@ -52,23 +51,23 @@ class RecordSource extends Component implements SourceInterface, \Countable
     protected $orm = null;
 
     /**
-     * @param string $class
-     * @param ORM    $orm
+     * @param string       $class
+     * @param ORMInterface $orm
      *
-     * @throws SourceException
+     * @throws SugarException
      */
-    public function __construct($class = null, ORM $orm = null)
+    public function __construct($class = null, ORMInterface $orm = null)
     {
         if (empty($class)) {
             if (empty(static::RECORD)) {
-                throw new SourceException('Unable to create source without associate class.');
+                throw new SourceException('Unable to create source without associated class');
             }
 
             $class = static::RECORD;
         }
 
         $this->class = $class;
-        $this->orm = $this->saturate($orm, ORM::class);
+        $this->orm = $this->saturate($orm, ORMInterface::class);
         $this->setSelector($this->orm->selector($this->class));
     }
 
@@ -149,5 +148,17 @@ class RecordSource extends Component implements SourceInterface, \Countable
     protected function setSelector(RecordSelector $selector)
     {
         $this->selector = $selector;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function container()
+    {
+        if ($this->orm instanceof Component) {
+            return $this->orm->container();
+        }
+
+        return parent::container();
     }
 }

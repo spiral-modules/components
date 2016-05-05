@@ -121,7 +121,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @var array
      */
-    private $nestedErrors = [];
+    private $innerErrors = [];
 
     /**
      * SolidState will force document to be saved as one big data set without any atomic operations
@@ -570,7 +570,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function isValid()
     {
-        return parent::isValid() && empty($this->nestedErrors);
+        return parent::isValid() && empty($this->innerErrors);
     }
 
     /**
@@ -578,7 +578,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function getErrors($reset = false)
     {
-        return parent::getErrors($reset) + $this->nestedErrors;
+        return parent::getErrors($reset) + $this->innerErrors;
     }
 
     /**
@@ -592,7 +592,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     protected function validate($reset = false)
     {
-        $this->nestedErrors = [];
+        $this->innerErrors = [];
 
         //Validating all compositions
         foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
@@ -604,13 +604,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             }
 
             if (!$composition->isValid()) {
-                $this->nestedErrors[$field] = $composition->getErrors($reset);
+                $this->innerErrors[$field] = $composition->getErrors($reset);
             }
         }
 
         parent::validate($reset);
 
-        return $this->hasErrors() && empty($this->nestedErrors);
+        return $this->hasErrors() && empty($this->innerErrors);
     }
 
     /**

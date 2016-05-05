@@ -159,7 +159,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * @var array
      */
-    private $nestedErrors = [];
+    private $innerErrors = [];
 
     /**
      * SolidState will force record data to be saved as one big update set without any generating
@@ -596,7 +596,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function isValid()
     {
-        return parent::isValid() && empty($this->nestedErrors);
+        return parent::isValid() && empty($this->innerErrors);
     }
 
     /**
@@ -604,7 +604,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function getErrors($reset = false)
     {
-        return parent::getErrors($reset) + $this->nestedErrors;
+        return parent::getErrors($reset) + $this->innerErrors;
     }
 
     /**
@@ -632,7 +632,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     protected function validate($reset = false)
     {
-        $this->nestedErrors = [];
+        $this->innerErrors = [];
 
         foreach ($this->relations as $name => $relation) {
             if (!$relation instanceof ValidatesInterface) {
@@ -641,13 +641,13 @@ class RecordEntity extends SchematicEntity implements RecordInterface
             }
 
             if ($this->embeddedRelation($name) && !$relation->isValid()) {
-                $this->nestedErrors[$name] = $relation->getErrors($reset);
+                $this->innerErrors[$name] = $relation->getErrors($reset);
             }
         }
 
         parent::validate($reset);
 
-        return $this->hasErrors() && empty($this->nestedErrors);
+        return $this->hasErrors() && empty($this->innerErrors);
     }
 
     /**

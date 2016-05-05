@@ -37,7 +37,7 @@ interface RecordInterface extends IdentifiedInterface
     //);
 
     /**
-     * Indication that record data was deleted.
+     * Indication that record data was deleted (required due entity map/cache).
      *
      * @return bool
      */

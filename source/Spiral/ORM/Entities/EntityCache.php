@@ -5,19 +5,15 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+namespace Spiral\ORM\Entities;
 
-namespace Spiral\ORM;
-
-use Spiral\Core\Component;
 use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Exceptions\CacheException;
 
 /**
  * Entity cache support. Used to share same model instance across it's child or related objects.
- *
- * @todo Interface is needed
  */
-class EntityCache extends Component
+class EntityCache
 {
     /**
      * Indication that entity cache is enabled.
@@ -34,7 +30,7 @@ class EntityCache extends Component
     private $cacheSize = null;
 
     /**
-     * @var RecordEntity[]
+     * @var IdentifiedInterface[]
      */
     private $cache = [];
 
@@ -100,7 +96,7 @@ class EntityCache extends Component
         }
 
         if (!$ignoreLimit && count($this->cache) > $this->cacheSize) {
-            throw new CacheException('Entity cache size exceeded.');
+            throw new CacheException('Entity cache size exceeded');
         }
 
         return $this->cache[get_class($entity) . '.' . $entity->primaryKey()] = $entity;
@@ -144,7 +140,7 @@ class EntityCache extends Component
     public function get($class, $primaryKey)
     {
         if (empty($this->cache[$class . '.' . $primaryKey])) {
-            return;
+            return null;
         }
 
         return $this->cache[$class . '.' . $primaryKey];

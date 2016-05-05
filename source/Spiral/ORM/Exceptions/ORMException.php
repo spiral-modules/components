@@ -5,12 +5,11 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-
 namespace Spiral\ORM\Exceptions;
 
 /**
- * Entity cache exception.
+ * Generic ORM exception.
  */
-class CacheException extends ORMException
+class ORMException extends \RuntimeException
 {
 }

@@ -5,14 +5,11 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
-
 /**
- * Generic ORM exception.
+ * Entity cache exception.
  */
-class ORMException extends LogicException
+class CacheException extends ORMException
 {
 }

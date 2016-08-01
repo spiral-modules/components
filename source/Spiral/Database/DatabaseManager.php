@@ -10,6 +10,7 @@ namespace Spiral\Database;
 use Spiral\Core\Component;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\Container\SingletonInterface;
 use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
@@ -18,7 +19,10 @@ use Spiral\Database\Exceptions\DatabaseException;
 /**
  * DatabaseManager responsible for database creation, configuration storage and drivers factory.
  */
-class DatabaseManager extends Component implements InjectorInterface, DatabasesInterface
+class DatabaseManager extends Component implements
+    InjectorInterface, 
+    DatabasesInterface,
+    SingletonInterface
 {
     /**
      * By default spiral will force time conversion into single timezone before storing in

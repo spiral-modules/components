@@ -48,7 +48,7 @@ class BelongsToMorphed extends BelongsTo
     protected function createSelector()
     {
         //To prevent morph key being added as where
-        $selector = new RecordSelector($this->orm, $this->getClass());
+        $selector = new RecordSelector($this->getClass(), $this->orm);
 
         return $selector->where(
             $selector->primaryAlias() . '.' . $this->definition[RecordEntity::OUTER_KEY],

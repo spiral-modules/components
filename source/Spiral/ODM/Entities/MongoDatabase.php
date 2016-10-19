@@ -12,6 +12,8 @@ use Spiral\ODM\ODM;
 
 /**
  * Simple spiral ODM wrapper at top of MongoDB.
+ *
+ * @decorates MongoDB
  */
 class MongoDatabase extends \MongoDB implements InjectableInterface
 {
@@ -25,18 +27,8 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
      * Profiling levels. Not identical to MongoDB profiling levels.
      */
     const PROFILE_DISABLED = false;
-    const PROFILE_SIMPLE   = 1;
-    const PROFILE_EXPLAIN  = 2;
-
-    /**
-     * @var string
-     */
-    private $name = '';
-
-    /**
-     * @var \Mongo|\MongoClient
-     */
-    private $connection = null;
+    const PROFILE_SIMPLE = 1;
+    const PROFILE_EXPLAIN = 2;
 
     /**
      * @var array
@@ -61,13 +53,9 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
         $this->config = $config + $this->config;
 
         //Selecting client
-        if (class_exists('MongoClient', false)) {
-            $this->connection = new \MongoClient($this->config['server'], $this->config['options']);
-        } else {
-            $this->connection = new \Mongo($this->config['server'], $this->config['options']);
-        }
+        $client = new \MongoClient($this->config['server'], $this->config['options']);
 
-        parent::__construct($this->connection, $this->config['database']);
+        parent::__construct($client, $this->config['database']);
     }
 
     /**

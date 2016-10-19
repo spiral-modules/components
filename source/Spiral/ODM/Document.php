@@ -156,7 +156,9 @@ class Document extends DocumentEntity implements ActiveEntityInterface
             unset($this->fields['_id']);
 
             //Create new document
-            $collection->insert($this->fields = $this->serializeData());
+            $fields = $this->serializeData();
+            $collection->insert($fields);
+            $this->fields = $fields;
 
             $this->dispatch('saved', new EntityEvent($this));
         } elseif ($this->isSolid() || $this->hasUpdates()) {

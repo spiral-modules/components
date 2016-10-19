@@ -490,10 +490,10 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         $value = $this->fields[$name];
         if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
-            if (!isset($this->ormSchema[ORM::M_MUTATORS]['accessor'][$name])) {
+            //if (!isset($this->ormSchema[ORM::M_MUTATORS]['accessor'][$name])) {
                 //We can skip setters for null values, but not accessors
                 return $value;
-            }
+            //}
         }
 
         return parent::getField($name, $default, $filter);

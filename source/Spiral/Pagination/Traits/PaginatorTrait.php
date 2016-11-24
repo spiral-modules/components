@@ -95,6 +95,7 @@ trait PaginatorTrait
      */
     public function paginate($limit = 25, $parameter = 'page')
     {
+        //We are required to fetch paginator from associated container or shared container
         $container = $this->container();
 
         if (empty($container) || !$container->has(PaginatorsInterface::class)) {
@@ -114,6 +115,9 @@ trait PaginatorTrait
     /**
      * Get paginator instance configured for a given count. Must not affect already associated
      * paginator instance.
+     *
+     * Attention: this method MUST be called from a child class in order to properly set paginator
+     * counts IF paginator support it.
      *
      * @param int|null $count Can be skipped.
      *

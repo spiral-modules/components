@@ -174,7 +174,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function flushRegistered()
+    public function flushRegisteredErrors()
     {
         $this->registeredErrors = [];
 

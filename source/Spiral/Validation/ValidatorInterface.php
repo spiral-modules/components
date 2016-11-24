@@ -54,7 +54,7 @@ interface ValidatorInterface
      *
      * @return self
      */
-    public function flushRegistered();
+    public function flushRegisteredErrors();
 
     /**
      * Check if context data valid accordingly to provided rules.

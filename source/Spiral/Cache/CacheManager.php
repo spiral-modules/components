@@ -21,9 +21,6 @@ use Spiral\Debug\Traits\BenchmarkTrait;
  */
 class CacheManager extends Component implements SingletonInterface, CacheInterface, InjectorInterface
 {
-    /*
-     * Some operations can be slow.
-     */
     use BenchmarkTrait;
 
     /**
@@ -63,6 +60,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
         //Default store class
         $store = !empty($store) ? $store : $this->config->defaultStore();
 
+        //We are allowing reference aliases for store names
         $store = $this->config->resolveAlias($store);
 
         if (isset($this->stores[$store])) {

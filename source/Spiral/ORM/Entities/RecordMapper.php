@@ -60,6 +60,7 @@ class RecordMapper
     public function insert(array $data)
     {
         //todo: implement
+
     }
 
     /**
@@ -73,6 +74,7 @@ class RecordMapper
     public function update(array $criteria, array $updates)
     {
         //todo: implement
+
     }
 
     /**
@@ -84,6 +86,7 @@ class RecordMapper
     public function delete(array $criteria)
     {
         //todo: implement
+
     }
 
     /**

@@ -183,6 +183,17 @@ class ORM extends Component implements ORMInterface
     }
 
     /**
+     * Set custom instance of source for a given ORM model.
+     *
+     * @param string       $class
+     * @param RecordSource $source
+     */
+    public function setSource($class, RecordSource $source)
+    {
+        $this->mappers[$class] = $source;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function source($class)

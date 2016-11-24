@@ -17,9 +17,11 @@ use Spiral\ORM\Exceptions\LoaderException;
  * Some loader implementations (see Loader) allows not only data loading, but manipulations with
  * parent Selector to create filters and joins.
  *
- * @see Selector
- * @see Loader
- * @see LoaderInterface::mount()
+ * @see  Selector
+ * @see  Loader
+ * @see  LoaderInterface::mount()
+ *
+ * @todo possible improve abstraction
  */
 interface LoaderInterface
 {

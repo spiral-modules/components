@@ -285,8 +285,6 @@ class ORM extends Component implements ORMInterface
         return $this->mappers[$class] = $mapper;
     }
 
-    //-------------
-
     /**
      * {@inheritdoc}
      */
@@ -338,7 +336,11 @@ class ORM extends Component implements ORMInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Selection (like SelectQuery) builder for a specific ORM class.
+     *
+     * @param string      $class
+     * @param Loader|null $loader
+     * @return RecordSelector
      */
     public function selector($class, Loader $loader = null)
     {
@@ -346,18 +348,24 @@ class ORM extends Component implements ORMInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get instance of class responsible for data parsing in database response.
+     *
+     * @param string      $type      Loader type (usually related to relation type).
+     * @param string      $container Data segment associated with loader.
+     * @param array       $definition
+     * @param LoaderInterface|null $parent
+     * @return Loader
      */
     public function loader($type, $container, array $definition, Loader $parent = null)
     {
-//        if (!$this->config->hasRelation($type, 'loader')) {
-//            throw new ORMException("Undefined relation loader '{$type}'.");
-//        }
-//
-//        $class = $this->config->relationClass($type, 'loader');
-//
-//        //For performance reasons class constructed without container
-//        return new $class($this, $container, $definition, $parent);
+        if (!$this->config->hasRelation($type, 'loader')) {
+            throw new ORMException("Undefined relation loader '{$type}'.");
+        }
+
+        $class = $this->config->relationClass($type, 'loader');
+
+        //For performance reasons class constructed without container
+        return new $class($this, $container, $definition, $parent);
     }
 
     /**

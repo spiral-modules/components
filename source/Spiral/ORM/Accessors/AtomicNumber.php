@@ -43,6 +43,7 @@ class AtomicNumber implements RecordAccessorInterface
     protected $delta = 0;
 
     /**
+     * @todo change this concept in future
      * @var EntityInterface
      */
     protected $parent = null;

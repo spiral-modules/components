@@ -152,7 +152,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * @var bool
      */
-    private $loaded = false;
+    private $recordState = false;
 
     /**
      * Errors in relations and accessors.
@@ -216,7 +216,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         ORMInterface $orm = null,
         array $schema = []
     ) {
-        $this->loaded = $loaded;
+        $this->recordState = (bool)$loaded;
 
         //We can use global container as fallback if no default values were provided
         $this->orm = $this->saturate($orm, ORMInterface::class);
@@ -230,7 +230,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         parent::__construct($data + $this->ormSchema[ORMInterface::M_COLUMNS], $this->ormSchema);
-
     }
 
     /**
@@ -285,7 +284,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function isLoaded()
     {
-        return (bool)$this->loaded && !$this->isDeleted();
+        return (bool)$this->recordState && !$this->isDeleted();
     }
 
     /**
@@ -293,7 +292,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function isDeleted()
     {
-        return $this->loaded === self::DELETED;
+        return $this->recordState === self::DELETED;
     }
 
     /**
@@ -383,10 +382,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
 
         $value = parent::getField($name, $default, false);
         if ($value === null && in_array($name, $this->ormSchema[ORM::M_NULLABLE])) {
-            if (!isset($this->ormSchema[ORMInterface::M_MUTATORS][self::MUTATOR_ACCESSOR][$name])) {
-                //We can skip setters for null values, but not accessors
-                return $value;
-            }
+            return $value;
         }
 
         return parent::getField($name, $default, $filter);
@@ -483,7 +479,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
                 return $this->relations[$name];
             }
 
-            //Been preloaded
+            //Been pre-loaded
             return $this->initiateRelation($name, $this->relations[$name], true);
         }
 
@@ -616,7 +612,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      */
     protected function loadedState($state)
     {
-        $this->loaded = $state;
+        $this->recordState = $state;
 
         return $this;
     }

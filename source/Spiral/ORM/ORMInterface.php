@@ -74,7 +74,7 @@ interface ORMInterface
      * Construct instance of Record or receive it from cache (if enabled). Only records with
      * declared primary key can be cached.
      *
-     * @todo hydrate external class type?
+     * @todo hydrate external classes?
      *
      * @param string $class Record class name.
      * @param array  $data  Record data including nested relations.

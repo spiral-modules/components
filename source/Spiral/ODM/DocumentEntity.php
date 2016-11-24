@@ -148,6 +148,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * @invisible
      *
+     * @todo change this concept in future
      * @var EntityInterface
      */
     protected $parent = null;

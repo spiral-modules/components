@@ -14,7 +14,7 @@ use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 
-interface ORMInterface
+interface ORMInterfaceX
 {
     /**
      * Normalized record constants.

@@ -9,12 +9,13 @@
 
 namespace Spiral\ORM\Entities\Loaders;
 
-use Spiral\ORM\Entities\Loader;
+use Spiral\ORM\Entities\AbstractLoader;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 
-class RootLoader extends Loader
+class RootLoader extends AbstractLoader
 {
     /**
      * RootLoader always work via INLOAD.
@@ -28,9 +29,9 @@ class RootLoader extends Loader
      * for primary record parsing without any conditions.
      */
     public function __construct(
-        ORM $orm,
         $container,
         array $definition = [],
+        ORMInterface $orm,
         LoaderInterface $parent = null
     ) {
         $this->orm = $orm;

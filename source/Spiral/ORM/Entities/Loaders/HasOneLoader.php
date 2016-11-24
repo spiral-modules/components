@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Injections\Parameter;
-use Spiral\ORM\Entities\Loader;
+use Spiral\ORM\Entities\AbstractLoader;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\ORM;
 use Spiral\ORM\RecordEntity;
@@ -18,7 +18,7 @@ use Spiral\ORM\RecordEntity;
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
  * Loader support MORPH_KEY.
  */
-class HasOneLoader extends Loader
+class HasOneLoader extends AbstractLoader
 {
     /**
      * Relation type is required to correctly resolve foreign record class based on relation
@@ -43,7 +43,7 @@ class HasOneLoader extends Loader
     public function createSelector()
     {
         if (empty($selector = parent::createSelector())) {
-            return;
+            return null;
         }
 
         if (empty($this->parent)) {
@@ -57,7 +57,8 @@ class HasOneLoader extends Loader
         //Aggregated keys (example: all parent ids)
         if (empty($aggregatedKeys = $this->parent->aggregatedKeys($this->getReferenceKey()))) {
             //Nothing to postload, no parents
-            return;
+            return null;
+
         }
 
         //Adding condition

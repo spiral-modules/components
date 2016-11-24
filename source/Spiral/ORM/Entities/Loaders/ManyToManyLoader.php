@@ -9,11 +9,12 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Injections\Parameter;
-use Spiral\ORM\Entities\Loader;
+use Spiral\ORM\Entities\AbstractLoader;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\WhereDecorator;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
 
 /**
@@ -23,7 +24,7 @@ use Spiral\ORM\RecordEntity;
  * It's STRONGLY recommended to load many-to-many data using postload method. However relation still
  * can be used to filter query.
  */
-class ManyToManyLoader extends Loader
+class ManyToManyLoader extends AbstractLoader
 {
     /**
      * Relation type is required to correctly resolve foreign record class based on relation
@@ -68,12 +69,12 @@ class ManyToManyLoader extends Loader
      * {@inheritdoc}
      */
     public function __construct(
-        ORM $orm,
         $container,
         array $definition = [],
+        ORMInterface $orm,
         LoaderInterface $parent = null
     ) {
-        parent::__construct($orm, $container, $definition, $parent);
+        parent::__construct($container, $definition, $orm, $parent);
         $this->pivotColumns = $this->definition[RecordEntity::PIVOT_COLUMNS];
     }
 
@@ -110,7 +111,7 @@ class ManyToManyLoader extends Loader
     public function createSelector($parentRole = '')
     {
         if (empty($selector = parent::createSelector())) {
-            return;
+            return null;
         }
 
         //Pivot table joining (INNER in post selection)
@@ -137,7 +138,7 @@ class ManyToManyLoader extends Loader
         //Aggregated keys (example: all parent ids)
         if (empty($aggregatedKeys = $this->parent->aggregatedKeys($this->getReferenceKey()))) {
             //Nothing to postload, no parents
-            return;
+            return null;
         }
 
         //Adding condition
@@ -205,7 +206,7 @@ class ManyToManyLoader extends Loader
     protected function getPivotKey($key)
     {
         if (!isset($this->definition[$key])) {
-            return;
+            return null;
         }
 
         return $this->pivotAlias() . '.' . $this->definition[$key];
@@ -291,7 +292,7 @@ class ManyToManyLoader extends Loader
     protected function fetchCriteria(array $data)
     {
         if (!isset($data[ORM::PIVOT_DATA][$this->definition[RecordEntity::THOUGHT_INNER_KEY]])) {
-            return;
+            return null;
         }
 
         return $data[ORM::PIVOT_DATA][$this->definition[RecordEntity::THOUGHT_INNER_KEY]];

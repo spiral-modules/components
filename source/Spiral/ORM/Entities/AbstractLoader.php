@@ -1,11 +1,9 @@
 <?php
 /**
- * Spiral Framework.
+ * components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author    Wolfy-J
  */
-
 namespace Spiral\ORM\Entities;
 
 use Spiral\Database\Entities\Database;
@@ -14,6 +12,7 @@ use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
 
 /**
@@ -35,7 +34,7 @@ use Spiral\ORM\RecordEntity;
  * @see Selector::load()
  * @see Selector::with()
  */
-abstract class Loader implements LoaderInterface
+abstract class AbstractLoader implements LoaderInterface
 {
     /**
      * Default loading methods for ORM loaders.
@@ -151,7 +150,7 @@ abstract class Loader implements LoaderInterface
     /**
      * Loaders used purely for conditional purposes. Only ORM loaders can do that.
      *
-     * @var Loader[]
+     * @var AbstractLoader[]
      */
     protected $joiners = [];
 
@@ -185,7 +184,7 @@ abstract class Loader implements LoaderInterface
      *
      * @invisible
      *
-     * @var Loader|null
+     * @var AbstractLoader|null
      */
     protected $parent = null;
 
@@ -200,15 +199,25 @@ abstract class Loader implements LoaderInterface
      * {@inheritdoc}
      */
     public function __construct(
-        ORM $orm,
         $container,
         array $definition = [],
+        ORMInterface $orm,
         LoaderInterface $parent = null
     ) {
+        if (!$orm instanceof ORM) {
+            //Current implementation limitation
+            throw new LoaderException("Loaders implementation is locked into ORM implementation");
+        }
+
         $this->orm = $orm;
 
         //Related record schema
         $this->schema = $orm->schema($definition[static::RELATION_TYPE]);
+
+        if (!$parent instanceof self) {
+            //Current implementation limitation
+            throw new LoaderException("ORM loaders can only be nested to ORM loaders");
+        }
 
         $this->container = $container;
         $this->definition = $definition;
@@ -218,6 +227,7 @@ abstract class Loader implements LoaderInterface
         $this->options['method'] = static::LOAD_METHOD;
 
         if (!empty($parent)) {
+            //Parent data might belong to another database, it's normal
             if (!$parent instanceof self || $parent->getDatabase() != $this->getDatabase()) {
                 //We have to force post-load (separate query) if parent loader database is different
                 $this->options['method'] = self::POSTLOAD;
@@ -332,7 +342,7 @@ abstract class Loader implements LoaderInterface
     public function getPrimaryKey()
     {
         if (!isset($this->schema[ORM::M_PRIMARY_KEY])) {
-            return;
+            return null;
         }
 
         return $this->getAlias() . '.' . $this->schema[ORM::M_PRIMARY_KEY];
@@ -360,7 +370,7 @@ abstract class Loader implements LoaderInterface
             if (empty($nested) || !$nested instanceof self) {
                 //todo: Think about the options
                 throw new LoaderException(
-                    'Only ORM loaders can be used to generate/configure chain of relation loaders.'
+                    'Only ORM loaders can be used to generate/configure chain of relation loaders'
                 );
             }
 
@@ -372,7 +382,7 @@ abstract class Loader implements LoaderInterface
             $container = $this->container ?: $this->schema[ORM::M_ROLE_NAME];
 
             throw new LoaderException(
-                "Undefined relation '{$relation}' under '{$container}'."
+                "Undefined relation '{$relation}' under '{$container}'"
             );
         }
 
@@ -380,7 +390,7 @@ abstract class Loader implements LoaderInterface
             $nested = $this->loaders[$relation];
             if (!$nested instanceof self) {
                 throw new LoaderException(
-                    'Only ORM loaders can be used to generate/configure chain of relation loaders.'
+                    'Only ORM loaders can be used to generate/configure chain of relation loaders'
                 );
             }
 
@@ -403,7 +413,7 @@ abstract class Loader implements LoaderInterface
         if (!empty($options) && !$loader instanceof self) {
             //todo: think about alternatives again
             throw new LoaderException(
-                'Only ORM loaders can be used to generate/configure chain of relation loaders.'
+                'Only ORM loaders can be used to generate/configure chain of relation loaders'
             );
         }
 
@@ -431,7 +441,7 @@ abstract class Loader implements LoaderInterface
      * @param string $relation Relation name, or chain of relations separated by.
      * @param array  $options  Loader options (will be applied to last chain element only).
      *
-     * @return Loader
+     * @return AbstractLoader
      *
      * @throws LoaderException
      */
@@ -448,7 +458,7 @@ abstract class Loader implements LoaderInterface
             if (empty($nested) || !$nested instanceof self) {
                 //todo: DRY
                 throw new LoaderException(
-                    'Only ORM loaders can be used to generate/configure chain of relation joiners.'
+                    'Only ORM loaders can be used to generate/configure chain of relation joiners'
                 );
             }
 
@@ -481,7 +491,7 @@ abstract class Loader implements LoaderInterface
         if (!$joiner instanceof self) {
             //todo: DRY
             throw new LoaderException(
-                'Only ORM loaders can be used to generate/configure chain of relation joiners.'
+                'Only ORM loaders can be used to generate/configure chain of relation joiners'
             );
         }
 
@@ -526,7 +536,7 @@ abstract class Loader implements LoaderInterface
     public function createSelector()
     {
         if (!$this->isLoadable()) {
-            return;
+            return null;
         }
 
         $selector = $this->orm->selector($this->definition[static::RELATION_TYPE], $this);
@@ -601,8 +611,8 @@ abstract class Loader implements LoaderInterface
     }
 
     /**
-     * Implementation specific selector configuration, must create required joins, conditions and
-     * etc.
+     * Implementation (relation) specific selector configuration, must create required joins,
+     * conditions and etc.
      *
      * @param RecordSelector $selector
      */
@@ -756,7 +766,7 @@ abstract class Loader implements LoaderInterface
         }
 
         return $this->options['method'] !== self::JOIN
-        && $this->options['method'] !== self::LEFT_JOIN;
+            && $this->options['method'] !== self::LEFT_JOIN;
     }
 
     /**
@@ -784,7 +794,7 @@ abstract class Loader implements LoaderInterface
     protected function joinType()
     {
         if (!$this->isJoinable()) {
-            throw new LoaderException('Unable to resolve Loader join type, Loader is not joinable.');
+            throw new LoaderException('Unable to resolve Loader join type, Loader is not joinable');
         }
 
         if ($this->options['method'] == self::JOIN) {
@@ -866,7 +876,7 @@ abstract class Loader implements LoaderInterface
     protected function getKey($key)
     {
         if (!isset($this->definition[$key])) {
-            return;
+            return null;
         }
 
         return $this->getAlias() . '.' . $this->definition[$key];
@@ -882,7 +892,7 @@ abstract class Loader implements LoaderInterface
     protected function getParentKey()
     {
         if (empty($this->parent)) {
-            throw new LoaderException('Unable to get parent key, no parent loader provided.');
+            throw new LoaderException('Unable to get parent key, no parent loader provided');
         }
 
         return $this->parent->getAlias() . '.' . $this->definition[RecordEntity::INNER_KEY];
@@ -921,7 +931,7 @@ abstract class Loader implements LoaderInterface
     protected function fetchCriteria(array $data)
     {
         if (!isset($data[$this->definition[RecordEntity::OUTER_KEY]])) {
-            return;
+            return null;
         }
 
         return $data[$this->definition[RecordEntity::OUTER_KEY]];
@@ -931,8 +941,6 @@ abstract class Loader implements LoaderInterface
      * Parse single result row to generate data tree. Must pass parsing to every nested loader.
      *
      * @param array $row
-     *
-     * @return bool
      */
     private function parseRow(array $row)
     {

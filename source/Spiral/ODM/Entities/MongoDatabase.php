@@ -27,8 +27,8 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
      * Profiling levels. Not identical to MongoDB profiling levels.
      */
     const PROFILE_DISABLED = false;
-    const PROFILE_SIMPLE = 1;
-    const PROFILE_EXPLAIN = 2;
+    const PROFILE_SIMPLE   = 1;
+    const PROFILE_EXPLAIN  = 2;
 
     /**
      * @var array
@@ -53,7 +53,11 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
         $this->config = $config + $this->config;
 
         //Selecting client
-        $client = new \MongoClient($this->config['server'], $this->config['options']);
+        $client = new \MongoClient(
+            $this->config['server'],
+            $this->config['options'],
+            isset($this->config['driverOptions']) ? $this->config['driverOptions'] : []
+        );
 
         parent::__construct($client, $this->config['database']);
     }

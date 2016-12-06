@@ -53,7 +53,7 @@ interface ParameterInterface extends FragmentInterface
      *
      * @return bool
      */
-    public function isArray();
+    public function isArray(): bool;
 
     /**
      * Expand itself into array of Parameters each of what represent one nested value.
@@ -62,5 +62,5 @@ interface ParameterInterface extends FragmentInterface
      *
      * @return ParameterInterface[]
      */
-    public function flatten();
+    public function flatten(): array;
 }

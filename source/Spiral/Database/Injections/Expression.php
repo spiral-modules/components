@@ -26,7 +26,7 @@ class Expression extends Fragment implements ExpressionInterface
      *
      * @return string
      */
-    public function getExpression()
+    public function getExpression(): string
     {
         return parent::sqlStatement();
     }
@@ -34,7 +34,7 @@ class Expression extends Fragment implements ExpressionInterface
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($compiler)) {
             //We might need to throw an exception here in some cases

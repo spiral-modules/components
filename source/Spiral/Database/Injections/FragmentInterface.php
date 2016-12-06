@@ -16,10 +16,10 @@ interface FragmentInterface
     /**
      * @return string
      */
-    public function sqlStatement();
+    public function sqlStatement(): string;
 
     /**
      * @return string
      */
-    public function __toString();
+    public function __toString(): string;
 }

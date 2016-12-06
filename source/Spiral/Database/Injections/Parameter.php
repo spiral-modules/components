@@ -40,7 +40,7 @@ class Parameter implements ParameterInterface
      * @param mixed $value
      * @param int   $type
      */
-    public function __construct($value, $type = self::DETECT_TYPE)
+    public function __construct($value, int $type = self::DETECT_TYPE)
     {
         $this->value = $value;
 
@@ -75,7 +75,7 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function withValue($value)
+    public function withValue($value): Parameter
     {
         $parameter = clone $this;
         $parameter->value = $value;
@@ -88,7 +88,7 @@ class Parameter implements ParameterInterface
      *
      * @return int
      */
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
@@ -96,7 +96,7 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function isArray()
+    public function isArray(): bool
     {
         return is_array($this->value);
     }
@@ -104,7 +104,7 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function flatten()
+    public function flatten(): array
     {
         if (!is_array($this->value)) {
             return [clone $this];
@@ -126,7 +126,7 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement()
+    public function sqlStatement(): string
     {
         if (is_array($this->value)) {
             //Array were mocked
@@ -139,7 +139,7 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->sqlStatement();
     }
@@ -159,7 +159,7 @@ class Parameter implements ParameterInterface
      * @param mixed $value
      * @return int
      */
-    protected function detectType($value)
+    protected function detectType($value): int
     {
         switch (gettype($value)) {
             case 'boolean':

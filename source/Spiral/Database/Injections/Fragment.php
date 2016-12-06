@@ -24,7 +24,7 @@ class Fragment implements FragmentInterface
     /**
      * @param string $statement
      */
-    public function __construct($statement)
+    public function __construct(string $statement)
     {
         $this->statement = $statement;
     }
@@ -32,7 +32,7 @@ class Fragment implements FragmentInterface
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement()
+    public function sqlStatement(): string
     {
         return $this->statement;
     }
@@ -40,7 +40,7 @@ class Fragment implements FragmentInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->sqlStatement();
     }

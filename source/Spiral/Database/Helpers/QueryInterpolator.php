@@ -26,9 +26,9 @@ class QueryInterpolator
      * @param ParameterInterface[] $parameters Parameters to be binded into query. Named list are
      *                                         supported.
      *
-     * @return mixed
+     * @return string
      */
-    public static function interpolate($query, array $parameters = [])
+    public static function interpolate(string $query, array $parameters = []): string
     {
         if (empty($parameters)) {
             return $query;
@@ -64,7 +64,7 @@ class QueryInterpolator
      *
      * @throws InterpolatorException
      */
-    public static function flattenParameters(array $parameters)
+    public static function flattenParameters(array $parameters): array
     {
         $flatten = [];
         foreach ($parameters as $key => $parameter) {
@@ -100,7 +100,7 @@ class QueryInterpolator
      *
      * @return string
      */
-    protected static function resolveValue($parameter)
+    protected static function resolveValue($parameter): string
     {
         if ($parameter instanceof ParameterInterface) {
             return self::resolveValue($parameter->getValue());
@@ -145,7 +145,7 @@ class QueryInterpolator
      * @param string $subject
      * @return string
      */
-    private static function replaceOnce($search, $replace, $subject)
+    private static function replaceOnce(string $search, string $replace, string $subject): string
     {
         $position = strpos($subject, $search);
         if ($position !== false) {

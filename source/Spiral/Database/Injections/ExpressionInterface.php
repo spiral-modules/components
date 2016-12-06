@@ -22,7 +22,7 @@ interface ExpressionInterface extends FragmentInterface
      *
      * @param QueryCompiler|null $compiler
      *
-     * @return mixed
+     * @return string
      */
-    public function sqlStatement(QueryCompiler $compiler = null);
+    public function sqlStatement(QueryCompiler $compiler = null): string;
 }

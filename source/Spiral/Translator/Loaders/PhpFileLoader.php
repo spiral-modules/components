@@ -13,7 +13,7 @@ use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Symfony\Component\Translation\Loader\ArrayLoader;
 
 /**
- * Includes file.
+ * Loader which allows to store translation in a form of PHP code (used for caching purposes).
  */
 class PhpFileLoader extends ArrayLoader
 {
@@ -24,12 +24,12 @@ class PhpFileLoader extends ArrayLoader
     {
         if (!stream_is_local($resource)) {
             throw new InvalidResourceException(
-                sprintf('This is not a local file "%s".', $resource)
+                sprintf('This is not a local file "%s"', $resource)
             );
         }
 
         if (!file_exists($resource)) {
-            throw new NotFoundResourceException(sprintf('File "%s" not found.', $resource));
+            throw new NotFoundResourceException(sprintf('File "%s" not found', $resource));
         }
 
         return parent::load(require $resource, $locale, $domain);

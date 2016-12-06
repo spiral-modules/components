@@ -46,7 +46,7 @@ interface StorageInterface
     public function bucket($bucket);
 
     /**
-     * Find bucket instance using object address.
+     * Find bucket instance by object address.
      *
      * @param string $address
      * @param string $name Name stripped from address.

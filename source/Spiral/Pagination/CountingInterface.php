@@ -8,7 +8,7 @@
 namespace Spiral\Pagination;
 
 /**
- * Paginator with dependecy on count.
+ * Paginator with dependency on count of items.
  */
 interface CountingInterface extends PaginatorInterface
 {

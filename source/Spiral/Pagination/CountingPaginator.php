@@ -39,7 +39,7 @@ class CountingPaginator implements PredictableInterface, \Countable
      */
     public function __construct(int $limit = 25)
     {
-        $this->setLimit($limit);
+        $this->withLimit($limit);
     }
 
     /**
@@ -74,13 +74,14 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return self
      */
-    public function setLimit(int $limit): self
+    public function withLimit(int $limit): PredictableInterface
     {
-        $this->limit = $limit;
+        $paginator = clone $this;
+        $paginator->limit = $limit;
 
-        return $this;
+        return $paginator;
     }
 
     /**

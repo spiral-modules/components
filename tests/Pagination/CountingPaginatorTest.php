@@ -29,8 +29,9 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
         $paginator = new CountingPaginator(25);
 
         $this->assertSame(25, $paginator->getLimit());
-        $paginator->setLimit(50);
-        $this->assertSame(50, $paginator->getLimit());
+        $newPaginator = $paginator->withLimit(50);
+        $this->assertSame(25, $paginator->getLimit());
+        $this->assertSame(50, $newPaginator->getLimit());
     }
 
     public function testCountsAndPages()

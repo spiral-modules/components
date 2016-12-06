@@ -14,11 +14,12 @@ namespace Spiral\Pagination;
 interface PredictableInterface extends CountingInterface
 {
     /**
-     * Set pagination limit.
+     * Set pagination limit. Immutable.
      *
      * @param int $limit
+     * @return self
      */
-    public function setLimit(int $limit);
+    public function withLimit(int $limit): self;
 
     /**
      * Get pagination limit.

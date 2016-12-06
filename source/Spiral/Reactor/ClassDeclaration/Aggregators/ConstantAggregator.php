@@ -9,7 +9,6 @@ namespace Spiral\Reactor\ClassDeclaration\Aggregators;
 
 use Spiral\Reactor\ClassDeclaration\ConstantDeclaration;
 use Spiral\Reactor\DeclarationAggregator;
-use Spiral\Reactor\DeclarationInterface;
 
 /**
  * Constants aggregation. Can automatically create constant on demand.
@@ -32,7 +31,7 @@ class ConstantAggregator extends DeclarationAggregator
      * @param string $name
      * @return ConstantDeclaration
      */
-    public function get(string $name): DeclarationInterface
+    public function get(string $name): ConstantDeclaration
     {
         if (!$this->has($name)) {
             //Automatically creating constant

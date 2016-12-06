@@ -103,7 +103,7 @@ class DeclarationAggregator extends Declaration implements
      *
      * @throws ReactorException
      */
-    public function get(string $name): DeclarationInterface
+    public function get(string $name)
     {
         if (!$this->has($name)) {
             throw new ReactorException("Undefined element '{$name}'");
@@ -222,7 +222,7 @@ class DeclarationAggregator extends Declaration implements
      *
      * @throws ReactorException When unable to find.
      */
-    protected function find(string $name): DeclarationInterface
+    protected function find(string $name)
     {
         foreach ($this->elements as $element) {
             if ($element instanceof NamedDeclaration && $element->getName() == $name) {

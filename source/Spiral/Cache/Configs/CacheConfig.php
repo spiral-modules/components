@@ -35,7 +35,7 @@ class CacheConfig extends InjectableConfig
     /**
      * @return string
      */
-    public function defaultStore()
+    public function defaultStore(): string
     {
         return $this->config['store'];
     }
@@ -45,7 +45,7 @@ class CacheConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasStore($store)
+    public function hasStore(string $store): bool
     {
         return isset($this->config['stores'][$store]);
     }
@@ -55,7 +55,7 @@ class CacheConfig extends InjectableConfig
      *
      * @return string
      */
-    public function storeClass($store)
+    public function storeClass(string $store): string
     {
         if (class_exists($store)) {
             //Legacy format support
@@ -70,7 +70,7 @@ class CacheConfig extends InjectableConfig
      *
      * @return array
      */
-    public function storeOptions($store)
+    public function storeOptions(string $store): array
     {
         if (isset($this->config['stores'][$store]['options'])) {
             return $this->config['stores'][$store]['options'];
@@ -84,15 +84,16 @@ class CacheConfig extends InjectableConfig
     }
 
     /**
-     * Detect store ID based on provided store class.
+     * Detect store ID based on provided store class. Attention, method expects that config key
+     * is store id/name.
      *
      * @param \ReflectionClass $class
      *
-     * @return string|null
+     * @return string
      *
      * @throws ConfigException
      */
-    public function resolveStore(\ReflectionClass $class)
+    public function resolveStore(\ReflectionClass $class): string
     {
         foreach ($this->config['stores'] as $store => $options) {
             if ($options['class'] == $class->getName()) {

@@ -58,17 +58,23 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
      * @param string         $name
      * @param StoreInterface $store
      */
-    public function setStore($name, StoreInterface $store)
+    public function setStore(string $name, StoreInterface $store)
     {
         if (!empty($this->stores[$name])) {
             throw new CacheException("Store '{$name}' is already created");
         }
+
+        if (!$store->isAvailable()) {
+            throw new CacheException("Unable to mount unavailable store '" . get_class($store) . "'");
+        }
+
+        $this->stores[$name] = $store;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getStore($store = null): StoreInterface
+    public function getStore(string $store = null): StoreInterface
     {
         //Default store class
         $store = !empty($store) ? $store : $this->config->defaultStore();
@@ -106,7 +112,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
      * @param string|null $store
      * @return StoreInterface
      */
-    public function store($store = null): StoreInterface
+    public function store(string $store = null): StoreInterface
     {
         return $this->getStore($store);
     }

@@ -25,5 +25,5 @@ interface CacheInterface
      *
      * @throws CacheException
      */
-    public function getStore($store = null): StoreInterface;
+    public function getStore(string $store = null): StoreInterface;
 }

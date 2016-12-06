@@ -94,7 +94,8 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
             m::on(function (\ReflectionClass $reflection) {
                 return $reflection->getName() == FileStore::class;
             })
-        )->andReturn(true);
+        )->andReturn('file');
+
         $config->shouldReceive('resolveAlias')->with('file')->andReturn('file');
 
         $config->shouldReceive('storeClass')->with('file')->andReturn(FileStore::class);

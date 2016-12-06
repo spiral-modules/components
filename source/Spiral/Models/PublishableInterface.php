@@ -18,5 +18,5 @@ interface PublishableInterface
      *
      * @return array|AccessorInterface[]
      */
-    public function publicFields();
+    public function publicFields(): array;
 }

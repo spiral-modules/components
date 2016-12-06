@@ -16,8 +16,6 @@ interface InvalidatesInterface
      * Entity must re-validate data.
      *
      * @param bool $cascade Do not invalidate nested models (if such presented)
-     *
-     * @return $this
      */
-    public function invalidate($cascade = false);
+    public function invalidate(bool $cascade = false);
 }

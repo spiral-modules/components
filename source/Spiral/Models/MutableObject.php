@@ -53,7 +53,7 @@ abstract class MutableObject extends Component
      *
      * @param bool $analysis Must be set to true while static reflection analysis.
      */
-    final protected static function initialize($analysis = false)
+    final protected static function initialize(bool $analysis = false)
     {
         $state = $class = static::class;
 

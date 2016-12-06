@@ -9,7 +9,7 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * String validations.
@@ -35,7 +35,7 @@ class StringChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function regexp($string, $expression)
+    public function regexp(string $string, string $expression): bool
     {
         return is_string($string) && preg_match($expression, $string);
     }
@@ -48,7 +48,7 @@ class StringChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function shorter($string, $length)
+    public function shorter(string $string, int $length): bool
     {
         return mb_strlen($string) <= $length;
     }
@@ -61,7 +61,7 @@ class StringChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function longer($string, $length)
+    public function longer(string $string, int $length): bool
     {
         return mb_strlen($string) >= $length;
     }
@@ -74,7 +74,7 @@ class StringChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function length($string, $length)
+    public function length(string $string, int $length): bool
     {
         return mb_strlen($string) == $length;
     }
@@ -88,7 +88,7 @@ class StringChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function range($string, $lengthA, $lengthB)
+    public function range(string $string, int $lengthA, int $lengthB): bool
     {
         return (mb_strlen($string) >= $lengthA) && (mb_strlen($string) <= $lengthB);
     }

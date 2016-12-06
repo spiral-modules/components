@@ -91,7 +91,7 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
      *
      * Include every composition public data into result.
      */
-    public function publicFields()
+    public function publicFields(): array
     {
         $result = [];
 
@@ -116,7 +116,7 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
     /**
      * {@inheritdoc}
      */
-    public function setField($name, $value, $filter = true)
+    public function setField(string $name, $value, bool $filter = true)
     {
         parent::setField($name, $value, $filter);
         $this->invalidate(false);
@@ -147,7 +147,7 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
      *
      * @return bool
      */
-    protected function isFillable($field)
+    protected function isFillable(string $field): bool
     {
         if (!empty($this->fillable)) {
             return in_array($field, $this->fillable);
@@ -170,7 +170,7 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
      *
      * @throws EntityException
      */
-    protected function getMutator($field, $mutator)
+    protected function getMutator(string $field, string $mutator)
     {
         //We do support 3 mutators: getter, setter and accessor, all of them can be
         //referenced to valid field name by adding "s" at the end

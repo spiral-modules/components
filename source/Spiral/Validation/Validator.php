@@ -17,6 +17,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Validation\Configs\ValidatorConfig;
 use Spiral\Validation\Exceptions\ValidationException;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * Validator is default implementation of ValidatorInterface. Class support functional rules with
@@ -124,7 +125,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function setRules(array $rules)
+    public function setRules(array $rules): ValidatorInterface
     {
         if ($this->rules == $rules) {
             return $this;
@@ -139,7 +140,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function setData($data)
+    public function setData($data): ValidatorInterface
     {
         if ($this->data == $data) {
             return $this;
@@ -154,7 +155,15 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function isValid()
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isValid(): bool
     {
         $this->validate();
 
@@ -164,7 +173,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function registerError($field, $error)
+    public function registerError(string $field, string $error): ValidatorInterface
     {
         $this->registeredErrors[$field] = $error;
 
@@ -174,7 +183,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function flushRegisteredErrors()
+    public function flushRegisteredErrors(): ValidatorInterface
     {
         $this->registeredErrors = [];
 
@@ -184,7 +193,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function hasErrors()
+    public function hasErrors(): bool
     {
         return !$this->isValid();
     }
@@ -192,7 +201,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         $this->validate();
 
@@ -206,7 +215,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param mixed  $default
      * @return mixed
      */
-    public function getValue($field, $default = null)
+    public function getValue(string $field, $default = null)
     {
         $value = isset($this->data[$field]) ? $this->data[$field] : $default;
 
@@ -298,7 +307,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @return bool|CheckerInterface
      * @throws ValidationException
      */
-    protected function check($field, $value, &$condition, array $arguments = [])
+    protected function check(string $field, $value, &$condition, array $arguments = [])
     {
         $condition = $this->config->resolveAlias($condition);
 
@@ -351,10 +360,10 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * Get or create instance of validation checker.
      *
      * @param string $name
-     * @return AbstractChecker
+     * @return CheckerInterface
      * @throws ValidationException
      */
-    protected function checker($name)
+    protected function checker(string $name): CheckerInterface
     {
         if (!$this->config->hasChecker($name)) {
             throw new ValidationException(
@@ -371,7 +380,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param array $rule
      * @return array
      */
-    private function fetchArguments(array $rule)
+    private function fetchArguments(array $rule): array
     {
         unset($rule[0], $rule['message'], $rule['error']);
 
@@ -384,9 +393,9 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      *
      * @param array  $rule
      * @param string $message Default message to use.
-     * @return mixed
+     * @return string
      */
-    private function fetchMessage(array $rule, $message)
+    private function fetchMessage(array $rule, string $message): string
     {
         if (isset($rule['message'])) {
             return $rule['message'];
@@ -408,7 +417,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param mixed  $condition
      * @param array  $arguments
      */
-    private function addMessage($field, $message, $condition, array $arguments = [])
+    private function addMessage(string $field, string $message, $condition, array $arguments = [])
     {
         if (is_array($condition)) {
             if (is_object($condition[0])) {

@@ -72,7 +72,7 @@ trait ValidatorTrait
      *
      * @return bool
      */
-    public function isValid()
+    public function isValid(): bool
     {
         $this->validate(false);
 
@@ -84,7 +84,7 @@ trait ValidatorTrait
      *
      * @return bool
      */
-    public function hasErrors()
+    public function hasErrors(): bool
     {
         return !$this->isValid();
     }
@@ -96,7 +96,7 @@ trait ValidatorTrait
      *
      * @return array
      */
-    public function getErrors($reset = false)
+    public function getErrors(bool $reset = false): array
     {
         $this->validate($reset);
 
@@ -123,7 +123,7 @@ trait ValidatorTrait
      *
      * @param string $message
      */
-    protected function setError($field, $message)
+    protected function setError(string $field, string $message)
     {
         $this->errors[$field] = $message;
     }
@@ -138,7 +138,7 @@ trait ValidatorTrait
      *
      * @return bool
      */
-    protected function hasError($field)
+    protected function hasError(string $field): bool
     {
         return !empty($this->errors[$field]);
     }
@@ -146,7 +146,7 @@ trait ValidatorTrait
     /**
      * @return bool
      */
-    public function isValidated()
+    public function isValidated(): bool
     {
         return $this->validated;
     }
@@ -156,9 +156,9 @@ trait ValidatorTrait
      *
      * @param bool $cascade Do not invalidate nested models (if such presented)
      *
-     * @return $this
+     * @return self
      */
-    public function invalidate($cascade = false)
+    public function invalidate(bool $cascade = false): self
     {
         $this->validated = false;
 
@@ -199,7 +199,7 @@ trait ValidatorTrait
      *
      * @event validate($validator)
      */
-    protected function validate($reset = false)
+    protected function validate(bool $reset = false): bool
     {
         $validator = $this->getValidator();
         if (empty($validator)) {
@@ -227,7 +227,7 @@ trait ValidatorTrait
      * @param bool $filter
      * @return array|AccessorInterface[]
      */
-    abstract public function getFields($filter = true);
+    abstract public function getFields(bool $filter = true): array;
 
     /**
      * Method can return null if no validator is required.
@@ -244,7 +244,7 @@ trait ValidatorTrait
      *
      * @return Event
      */
-    abstract protected function dispatch($name, Event $event = null);
+    abstract protected function dispatch(string $name, Event $event = null): Event;
 
     /**
      * Create validator using shared container.
@@ -255,7 +255,7 @@ trait ValidatorTrait
      *
      * @throws SugarException
      */
-    private function intiaiteValidator(array $rules = [])
+    private function intiaiteValidator(array $rules = []): ValidatorInterface
     {
         $container = $this->container();
 

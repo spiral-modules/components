@@ -65,7 +65,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function type($filename, $types)
+    public function type($filename, $types): bool
     {
         if (empty($image = $this->imageData($filename))) {
             return false;
@@ -85,7 +85,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function valid($filename)
+    public function valid($filename): bool
     {
         return $this->type($filename, ['jpeg', 'png', 'gif']);
     }
@@ -99,7 +99,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function smaller($filename, $width, $height = null)
+    public function smaller($filename, int $width, int $height = null): bool
     {
         if (empty($image = $this->imageData($filename))) {
             return false;
@@ -125,7 +125,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function bigger($filename, $width, $height = null)
+    public function bigger($filename, int $width, int $height = null): bool
     {
         if (empty($image = $this->imageData($filename))) {
             return false;
@@ -147,7 +147,7 @@ class ImageChecker extends FileChecker implements SingletonInterface
      *
      * @see getimagesize()
      *
-     * @param string $filename
+     * @param string|mixed $filename
      *
      * @return array|bool
      */

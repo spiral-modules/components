@@ -51,7 +51,7 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
      *
      * Include every composition public data into result.
      */
-    public function publicFields()
+    public function publicFields(): array
     {
         $result = [];
 
@@ -74,7 +74,7 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
     /**
      * {@inheritdoc}
      */
-    public function setField($name, $value, $filter = true)
+    public function setField(string $name, $value, bool $filter = true)
     {
         parent::setField($name, $value, $filter);
         $this->invalidate(false);
@@ -97,7 +97,7 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
     /**
      * {@inheritdoc}
      */
-    protected function isFillable($field)
+    protected function isFillable(string $field): bool
     {
         if (!empty($this->schema[self::SH_FILLABLE])) {
             return in_array($field, $this->schema[self::SH_FILLABLE]);
@@ -113,7 +113,7 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
     /**
      * {@inheritdoc}
      */
-    protected function getMutator($field, $mutator)
+    protected function getMutator(string $field, string $mutator)
     {
         if (isset($this->schema[self::SH_MUTATORS][$mutator][$field])) {
             return $this->schema[self::SH_MUTATORS][$mutator][$field];
@@ -133,7 +133,7 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
      * @return mixed Returns filtered value.
      * @event describe(DescribeEvent)
      */
-    public static function describeProperty(ReflectionEntity $reflection, $property, $value)
+    public static function describeProperty(ReflectionEntity $reflection, string $property, $value)
     {
         static::initialize(true);
 

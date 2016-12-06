@@ -14,7 +14,7 @@ namespace Spiral\Validation;
 interface ValueInterface
 {
     /**
-     * Convert object data into simple value.
+     * Convert object data into simple value (array or string for example).
      *
      * @return mixed
      */

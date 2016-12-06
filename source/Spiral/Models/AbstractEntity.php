@@ -66,7 +66,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws EntityException
      */
-    public function __call($method, array $arguments)
+    public function __call(string $method, array $arguments)
     {
         if (method_exists($this, $method)) {
             throw new EntityException(
@@ -112,7 +112,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function hasField($name)
+    public function hasField(string $name)
     {
         return array_key_exists($name, $this->fields);
     }
@@ -124,7 +124,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws AccessorExceptionInterface
      */
-    public function setField($name, $value, $filter = true)
+    public function setField(string $name, $value, bool $filter = true)
     {
         if ($value instanceof AccessorInterface) {
             $this->fields[$name] = $value->embed($this);
@@ -168,7 +168,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws AccessorExceptionInterface
      */
-    public function getField($name, $default = null, $filter = true)
+    public function getField(string $name, $default = null, bool $filter = true)
     {
         $value = $this->hasField($name) ? $this->fields[$name] : $default;
 
@@ -207,7 +207,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws AccessorExceptionInterface
      */
-    public function setFields($fields = [], $all = false)
+    public function setFields($fields = [], bool $all = false)
     {
         if (!is_array($fields) && !$fields instanceof \Traversable) {
             return $this;
@@ -229,7 +229,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * @return array
      */
-    protected function getKeys()
+    protected function getKeys(): array
     {
         return array_keys($this->fields);
     }
@@ -243,7 +243,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws AccessorExceptionInterface
      */
-    public function getFields($filter = true)
+    public function getFields(bool $filter = true): array
     {
         $result = [];
         foreach ($this->fields as $name => $field) {
@@ -325,7 +325,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function getIterator()
+    public function getIterator(): \Iterator
     {
         return new \ArrayIterator($this->getFields());
     }
@@ -356,7 +356,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->serializeData();
     }
@@ -385,16 +385,16 @@ abstract class AbstractEntity extends MutableObject implements
      * @param string $field
      * @return bool
      */
-    abstract protected function isFillable($field);
+    abstract protected function isFillable(string $field): bool;
 
     /**
      * Get mutator associated with given field.
      *
      * @param string $field
      * @param string $type See MUTATOR_* constants
-     * @return string
+     * @return mixed
      */
-    abstract protected function getMutator($field, $type);
+    abstract protected function getMutator(string $field, string $type);
 
     /**
      * Create instance of field accessor.
@@ -406,7 +406,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws AccessorExceptionInterface
      */
-    protected function createAccessor($accessor, $value)
+    protected function createAccessor(string $accessor, $value): AccessorInterface
     {
         return new $accessor($value, $this);
     }

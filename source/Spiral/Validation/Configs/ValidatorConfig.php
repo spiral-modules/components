@@ -37,7 +37,7 @@ class ValidatorConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function emptyCondition($condition)
+    public function emptyCondition($condition): bool
     {
         return in_array($condition, $this->config['emptyConditions']);
     }
@@ -47,7 +47,7 @@ class ValidatorConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasChecker($checker)
+    public function hasChecker(string $checker): bool
     {
         return isset($this->config['checkers'][$checker]);
     }
@@ -58,7 +58,7 @@ class ValidatorConfig extends InjectableConfig
      * @return string
      * @return string
      */
-    public function checkerClass($checker)
+    public function checkerClass(string $checker): string
     {
         return $this->config['checkers'][$checker];
     }

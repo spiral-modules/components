@@ -20,14 +20,14 @@ interface ValidatesInterface
      *
      * @return bool
      */
-    public function isValid();
+    public function isValid(): bool;
 
     /**
      * Check if context data has errors.
      *
      * @return bool
      */
-    public function hasErrors();
+    public function hasErrors(): bool;
 
     /**
      * List of errors associated with parent field, every field must have only one error assigned.
@@ -38,5 +38,5 @@ interface ValidatesInterface
      *
      * @throws ValidationException
      */
-    public function getErrors($reset = false);
+    public function getErrors(bool $reset = false): array;
 }

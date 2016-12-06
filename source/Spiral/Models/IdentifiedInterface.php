@@ -20,7 +20,7 @@ interface IdentifiedInterface extends EntityInterface
      *
      * @return bool
      */
-    public function isLoaded();
+    public function isLoaded(): bool;
 
     /**
      * Primary entity key if any.

@@ -5,14 +5,16 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Validation;
+namespace Spiral\Validation\Prototypes;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
+use Spiral\Validation\CheckerInterface;
 use Spiral\Validation\Exceptions\ValidationException;
+use Spiral\Validation\ValidatorInterface;
 
 /**
  * Checkers used to group set of validation rules under one roof.
@@ -22,7 +24,7 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     use TranslatorTrait, SaturateTrait;
 
     /**
-     * @var Validator
+     * @var ValidatorInterface
      */
     private $validator = null;
 
@@ -36,7 +38,7 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     /**
      * @var ContainerInterface
      */
-    protected $container = null;
+    protected $container;
 
     /**
      * @param ContainerInterface $container Needed for translations and other things, saturated
@@ -51,8 +53,12 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function check($method, $value, array $arguments = [], Validator $validator = null)
-    {
+    public function check(
+        string $method,
+        $value,
+        array $arguments = [],
+        ValidatorInterface $validator = null
+    ) {
         array_unshift($arguments, $value);
 
         $this->validator = $validator;
@@ -68,7 +74,7 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function getMessage($method, \ReflectionClass $reflection = null)
+    public function getMessage(string $method, \ReflectionClass $reflection = null): string
     {
         if (!empty($reflection)) {
             $messages = $reflection->getDefaultProperties()['messages'];
@@ -92,12 +98,12 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     /**
      * Currently active validator instance.
      *
-     * @return Validator
+     * @return ValidatorInterface
      */
-    protected function getValidator()
+    protected function getValidator(): ValidatorInterface
     {
         if (empty($this->validator)) {
-            throw new ValidationException("Unable to receive parent checker validator.");
+            throw new ValidationException("Unable to receive parent checker validator");
         }
 
         return $this->validator;

@@ -9,7 +9,7 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * Validate different addresses: email, url and etc.
@@ -33,7 +33,7 @@ class AddressChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function email($email)
+    public function email(string $email): bool
     {
         return (bool)filter_var($email, FILTER_VALIDATE_EMAIL);
     }
@@ -48,7 +48,7 @@ class AddressChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function url($url, $requireScheme = true)
+    public function url(string $url, bool $requireScheme = true): bool
     {
         if (!$requireScheme && stripos($url, '://') === false) {
             //Forcing scheme (not super great idea)

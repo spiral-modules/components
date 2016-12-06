@@ -9,7 +9,7 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * Validations can't be fitted to any other checker.
@@ -32,7 +32,7 @@ class MixedChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function cardNumber($cardNumber)
+    public function cardNumber(string $cardNumber): bool
     {
         if (!is_string($cardNumber) || strlen($cardNumber) < 12) {
             return false;
@@ -57,13 +57,13 @@ class MixedChecker extends AbstractChecker implements SingletonInterface
     /**
      * Check if value matches value from another field.
      *
-     * @param string $value
+     * @param mixed  $value
      * @param string $field
      * @param bool   $strict
      *
      * @return bool
      */
-    public function match($value, $field, $strict = false)
+    public function match($value, string $field, bool $strict = false): bool
     {
         if ($strict) {
             return $value === $this->getValidator()->getValue($field, null);

@@ -39,7 +39,7 @@ trait EventsTrait
      *
      * @return EventDispatcherInterface
      */
-    public static function events()
+    public static function events(): EventDispatcherInterface
     {
         if (isset(self::$dispatchers[static::class])) {
             return self::$dispatchers[static::class];
@@ -56,7 +56,7 @@ trait EventsTrait
      *
      * @return Event
      */
-    protected function dispatch($name, Event $event = null)
+    protected function dispatch(string $name, Event $event = null): Event
     {
         if (empty(self::$dispatchers[static::class])) {
             //We can bypass dispatcher creation

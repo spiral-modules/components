@@ -25,7 +25,7 @@ interface ValidatorInterface
      *
      * @return self
      */
-    public function setRules(array $rules);
+    public function setRules(array $rules): self;
 
     /**
      * Update validation data (context). Data change must reset validation state and all errors.
@@ -36,8 +36,24 @@ interface ValidatorInterface
      *
      * @throws ValidationException
      */
-    public function setData($data);
-    
+    public function setData($data): self;
+
+    /**
+     * Get all validation data passed into validator.
+     *
+     * @return array|\ArrayAccess
+     */
+    public function getData();
+
+    /**
+     * Receive field from context data or return default value.
+     *
+     * @param string $field
+     * @param mixed  $default
+     * @return mixed
+     */
+    public function getValue(string $field, $default = null);
+
     /**
      * Register outer validation error. Registered error persists until context data are changed
      * or flushRegistered method not called.
@@ -47,14 +63,14 @@ interface ValidatorInterface
      *
      * @return self
      */
-    public function registerError($field, $error);
+    public function registerError(string $field, string $error): self;
 
     /**
      * Flush all registered errors.
      *
      * @return self
      */
-    public function flushRegisteredErrors();
+    public function flushRegisteredErrors(): self;
 
     /**
      * Check if context data valid accordingly to provided rules.
@@ -63,7 +79,7 @@ interface ValidatorInterface
      *
      * @throws ValidationException
      */
-    public function isValid();
+    public function isValid(): bool;
 
     /**
      * Evil tween of isValid() method should return true if context data is not valid.
@@ -72,12 +88,12 @@ interface ValidatorInterface
      *
      * @throws ValidationException
      */
-    public function hasErrors();
+    public function hasErrors(): bool;
 
     /**
      * List of errors associated with parent field, every field should have only one error assigned.
      *
      * @return array
      */
-    public function getErrors();
+    public function getErrors(): array;
 }

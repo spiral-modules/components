@@ -9,7 +9,7 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * Scalar number validations.
@@ -34,7 +34,7 @@ class NumberChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function range($value, $begin, $end)
+    public function range($value, $begin, $end): bool
     {
         return $value >= $begin && $value <= $end;
     }
@@ -47,7 +47,7 @@ class NumberChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function higher($value, $limit)
+    public function higher($value, $limit): bool
     {
         return $value >= $limit;
     }
@@ -60,7 +60,7 @@ class NumberChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function lower($value, $limit)
+    public function lower($value, $limit): bool
     {
         return $value <= $limit;
     }

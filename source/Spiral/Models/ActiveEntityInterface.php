@@ -24,7 +24,7 @@ interface ActiveEntityInterface extends IdentifiedInterface
      *
      * @throws EntityExceptionInterface
      */
-    public function save($validate = null);
+    public function save(bool $validate = null);
 
     /**
      * Delete entity from it's primary storage, entity object must not be used anymore after that

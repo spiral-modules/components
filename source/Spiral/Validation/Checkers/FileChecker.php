@@ -14,7 +14,7 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Files\Streams\StreamWrapper;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 class FileChecker extends AbstractChecker implements SingletonInterface
 {
@@ -51,7 +51,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function exists($filename)
+    public function exists($filename): bool
     {
         return (bool)$this->filename($filename, false);
     }
@@ -63,7 +63,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function uploaded($file)
+    public function uploaded($file): bool
     {
         return (bool)$this->filename($file, true);
     }
@@ -76,7 +76,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    public function size($filename, $size)
+    public function size($filename, int $size): bool
     {
         if (empty($filename = $this->filename($filename, false))) {
             return false;
@@ -88,12 +88,12 @@ class FileChecker extends AbstractChecker implements SingletonInterface
     /**
      * Check if file extension in whitelist. Client name of uploaded file will be used!
      *
-     * @param mixed $filename
-     * @param array $extensions
+     * @param mixed        $filename
+     * @param array|string $extensions
      *
      * @return bool
      */
-    public function extension($filename, $extensions)
+    public function extension($filename, $extensions): bool
     {
         if (!is_array($extensions)) {
             $extensions = array_slice(func_get_args(), 1);
@@ -117,7 +117,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      *
      * @return string|bool
      */
-    protected function filename($filename, $onlyUploaded = true)
+    protected function filename($filename, bool $onlyUploaded = true): bool
     {
         if (empty($filename) || ($onlyUploaded && !$this->isUploaded($filename))) {
             return false;
@@ -144,7 +144,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      *
      * @return bool
      */
-    private function isUploaded($filename)
+    private function isUploaded($filename): bool
     {
         if (is_string($filename)) {
             //We can use native method

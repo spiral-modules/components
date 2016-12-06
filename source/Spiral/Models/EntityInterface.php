@@ -22,7 +22,7 @@ interface EntityInterface
      *
      * @return bool
      */
-    public function hasField($name);
+    public function hasField(string $name);
 
     /**
      * Set entity field value.
@@ -32,7 +32,7 @@ interface EntityInterface
      *
      * @throws EntityExceptionInterface
      */
-    public function setField($name, $value);
+    public function setField(string $name, $value);
 
     /**
      * Get value of entity field.
@@ -44,7 +44,7 @@ interface EntityInterface
      *
      * @throws EntityExceptionInterface
      */
-    public function getField($name, $default = null);
+    public function getField(string $name, $default = null);
 
     /**
      * Update entity fields using mass assignment. Only allowed fields must be set.
@@ -62,5 +62,5 @@ interface EntityInterface
      *
      * @throws EntityExceptionInterface
      */
-    public function getFields();
+    public function getFields(): array;
 }

@@ -9,7 +9,7 @@
 namespace Spiral\Validation\Checkers;
 
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validation\Prototypes\AbstractChecker;
 use Spiral\Validation\Validator;
 
 /**
@@ -33,7 +33,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $with
      *
-     * @return bool
+     * @return bool|Validator::STOP_VALIDATION
      */
     public function with($value, array $with)
     {
@@ -57,7 +57,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $with
      *
-     * @return bool
+     * @return bool|Validator::STOP_VALIDATION
      */
     public function withAll($value, array $with)
     {
@@ -80,7 +80,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $without
      *
-     * @return bool
+     * @return bool|Validator::STOP_VALIDATION
      */
     public function without($value, array $without)
     {
@@ -104,7 +104,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $without
      *
-     * @return bool
+     * @return bool|Validator::STOP_VALIDATION
      */
     public function withoutAll($value, array $without)
     {

@@ -30,21 +30,10 @@ class EntityEvent extends Event
     }
 
     /**
-     * @return null|EntityInterface
+     * @return EntityInterface
      */
-    public function getEntity()
+    public function getEntity(): EntityInterface
     {
         return $this->entity;
-    }
-
-    /**
-     * Alias for getEntity(), deprecated!
-     *
-     * @deprecated Use getEntity() instead.
-     * @return null|EntityInterface
-     */
-    public function entity()
-    {
-        return $this->getEntity();
     }
 }

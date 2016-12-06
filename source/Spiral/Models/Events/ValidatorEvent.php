@@ -19,7 +19,7 @@ class ValidatorEvent extends Event
     /**
      * @var ValidatorInterface
      */
-    private $validator = null;
+    private $validator;
 
     /**
      * @param ValidatorInterface $validator
@@ -30,9 +30,9 @@ class ValidatorEvent extends Event
     }
 
     /**
-     * @return array
+     * @return ValidatorInterface
      */
-    public function getValidator()
+    public function getValidator(): ValidatorInterface
     {
         return $this->validator;
     }

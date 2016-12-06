@@ -13,7 +13,7 @@ namespace Spiral\Pagination;
 interface CountingInterface extends PaginatorInterface
 {
     /**
-     * Get instance of paginator with a given count. Must not affect existed pagintor.
+     * Get instance of paginator with a given count. Must not affect existed paginator.
      *
      * @param int $count
      * @return self

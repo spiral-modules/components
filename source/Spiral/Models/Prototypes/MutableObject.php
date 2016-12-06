@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Models;
+namespace Spiral\Models\Prototypes;
 
 use Spiral\Core\Component;
 use Spiral\Models\Traits\EventsTrait;

@@ -5,13 +5,16 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Models;
+namespace Spiral\Models\Prototypes;
 
 use Doctrine\Common\Inflector\Inflector;
+use Spiral\Models\AccessorInterface;
+use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\FieldExceptionInterface;
+use Spiral\Models\PublishableInterface;
 use Spiral\Validation\ValueInterface;
 
 /**

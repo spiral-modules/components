@@ -8,6 +8,7 @@
 namespace Spiral\Models;
 
 use Spiral\Models\Events\DescribeEvent;
+use Spiral\Models\Prototypes\AbstractEntity;
 use Spiral\Models\Reflections\ReflectionEntity;
 
 /**

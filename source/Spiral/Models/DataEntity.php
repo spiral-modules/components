@@ -9,6 +9,7 @@
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Prototypes\AbstractEntity;
 
 /**
  * DataEntity in spiral used to represent basic data set with validation rules, filters and

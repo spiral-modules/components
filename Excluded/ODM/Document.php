@@ -116,9 +116,6 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      *
      * Create or update document data in database.
      *
-     * @param bool|null $validate Overwrite default option declared in VALIDATE_SAVE to force or
-     *                            disable validation before saving.
-     *
      * @throws DocumentException
      *
      * @event saving()
@@ -126,15 +123,8 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * @event updating()
      * @event updated()
      */
-    public function save($validate = null)
+    public function save()
     {
-        $validate = !is_null($validate) ? $validate : static::VALIDATE_SAVE;
-
-        if ($validate && !$this->isValid()) {
-            //Using default model behaviour
-            return false;
-        }
-
         if ($this->isEmbedded()) {
             throw new DocumentException(
                 "Embedded document '" . get_class($this) . "' can not be saved into collection"

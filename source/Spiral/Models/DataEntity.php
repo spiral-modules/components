@@ -9,9 +9,6 @@
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityException;
-use Spiral\Models\Traits\ValidatorTrait;
-use Spiral\Validation\ValidatesInterface;
-use Spiral\Validation\ValidatorInterface;
 
 /**
  * DataEntity in spiral used to represent basic data set with validation rules, filters and
@@ -20,10 +17,8 @@ use Spiral\Validation\ValidatorInterface;
  *
  * DataEntity provides ability to configure it's state using internal properties.
  */
-class DataEntity extends AbstractEntity implements ValidatesInterface
+class DataEntity extends AbstractEntity
 {
-    use ValidatorTrait;
-
     /**
      * List of fields must be hidden from publicFields() method.
      *
@@ -80,13 +75,6 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
     protected $accessors = [];
 
     /**
-     * Validation rules in a form supported by active validator binding.
-     *
-     * @var array
-     */
-    protected $validates = [];
-
-    /**
      * {@inheritdoc}
      *
      * Include every composition public data into result.
@@ -111,29 +99,6 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
         }
 
         return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setField(string $name, $value, bool $filter = true)
-    {
-        parent::setField($name, $value, $filter);
-        $this->invalidate(false);
-    }
-
-    /**
-     * Entity specific validator (if any).
-     *
-     * @return ValidatorInterface|null
-     */
-    protected function createValidator()
-    {
-        if (empty($this->validates)) {
-            return null;
-        }
-
-        return $this->intiaiteValidator($this->validates);
     }
 
     /**
@@ -181,14 +146,5 @@ class DataEntity extends AbstractEntity implements ValidatesInterface
         }
 
         return null;
-    }
-
-    /**
-     * Destruct data entity.
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-        $this->validator = null;
     }
 }

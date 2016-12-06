@@ -9,17 +9,12 @@ namespace Spiral\Models;
 
 use Spiral\Models\Events\DescribeEvent;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\Models\Traits\ValidatorTrait;
-use Spiral\Validation\ValidatesInterface;
-use Spiral\Validation\ValidatorInterface;
 
 /**
  * Entity which code follows external behaviour schema.
  */
-class SchematicEntity extends AbstractEntity implements ValidatesInterface
+class SchematicEntity extends AbstractEntity
 {
-    use ValidatorTrait;
-
     /**
      * Schema constants. Starts with 4, but why not?
      */
@@ -69,29 +64,6 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
         }
 
         return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setField(string $name, $value, bool $filter = true)
-    {
-        parent::setField($name, $value, $filter);
-        $this->invalidate(false);
-    }
-
-    /**
-     * Entity specific validator (if any).
-     *
-     * @return ValidatorInterface|null
-     */
-    protected function createValidator()
-    {
-        if (empty($this->schema[self::SH_VALIDATES])) {
-            return null;
-        }
-
-        return $this->intiaiteValidator($this->schema[self::SH_VALIDATES]);
     }
 
     /**
@@ -148,14 +120,5 @@ class SchematicEntity extends AbstractEntity implements ValidatesInterface
         );
 
         return $event->getValue();
-    }
-
-    /**
-     * Destruct data entity.
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-        $this->validator = null;
     }
 }

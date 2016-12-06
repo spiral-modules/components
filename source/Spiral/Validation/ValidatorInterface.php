@@ -66,11 +66,16 @@ interface ValidatorInterface
     public function registerError(string $field, string $error): self;
 
     /**
+     * Reset validation state.
+     */
+    public function reset();
+
+    /**
      * Flush all registered errors.
      *
      * @return self
      */
-    public function flushRegisteredErrors(): self;
+    public function flushRegistered(): self;
 
     /**
      * Check if context data valid accordingly to provided rules.

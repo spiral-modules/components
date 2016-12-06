@@ -17,7 +17,6 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Validation\Configs\ValidatorConfig;
 use Spiral\Validation\Exceptions\ValidationException;
-use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * Validator is default implementation of ValidatorInterface. Class support functional rules with
@@ -44,8 +43,6 @@ use Spiral\Validation\Prototypes\AbstractChecker;
  * In cases where you don't need custom message or check parameters you can use simplified
  * rule syntax:
  *      "flag" => ["notEmpty", "boolean"]
- *
- * Future updates: it's planned to make validator immutable in very far future.
  */
 class Validator extends Component implements ValidatorInterface, LoggerAwareInterface
 {
@@ -183,7 +180,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     /**
      * {@inheritdoc}
      */
-    public function flushRegisteredErrors(): ValidatorInterface
+    public function flushRegistered(): ValidatorInterface
     {
         $this->registeredErrors = [];
 

@@ -19,7 +19,6 @@ use Spiral\Validation\ValueInterface;
  */
 abstract class AbstractEntity extends MutableObject implements
     EntityInterface,
-    InvalidatesInterface,
     \JsonSerializable,
     \IteratorAggregate,
     \ArrayAccess,

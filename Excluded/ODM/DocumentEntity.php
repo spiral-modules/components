@@ -47,14 +47,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     use SaturateTrait;
 
     /**
-     * We are going to inherit parent validation rules, this will let spiral translator know about
-     * it and merge i18n messages.
-     *
-     * @see TranslatorTrait
-     */
-    const I18N_INHERIT_MESSAGES = true;
-
-    /**
      * Helper constant to identify atomic SET operations.
      */
     const ATOMIC_SET = '$set';
@@ -181,11 +173,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODMInterface::class);
         $this->odmSchema = !empty($schema) ? $schema : $this->odm->schema(static::class);
-
-        if (empty($fields)) {
-            //Default state for an empty model - invalid
-            $this->invalidate();
-        }
 
         $fields = is_array($fields) ? $fields : [];
         if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
@@ -564,54 +551,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
             'errors'  => $this->getErrors(),
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isValid()
-    {
-        return parent::isValid() && empty($this->innerErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getErrors($reset = false)
-    {
-        return parent::getErrors($reset) + $this->innerErrors;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Will validate every CompositableInterface instance.
-     *
-     * @param bool $reset
-     *
-     * @throws DocumentException
-     */
-    protected function validate($reset = false)
-    {
-        $this->innerErrors = [];
-
-        //Validating all compositions
-        foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
-
-            $composition = $this->getField($field);
-            if (!$composition instanceof ValidatesInterface) {
-                //Something weird.
-                continue;
-            }
-
-            if (!$composition->isValid()) {
-                $this->innerErrors[$field] = $composition->getErrors($reset);
-            }
-        }
-
-        parent::validate($reset);
-
-        return $this->hasErrors() && empty($this->innerErrors);
     }
 
     /**

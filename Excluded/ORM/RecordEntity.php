@@ -43,14 +43,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     use SaturateTrait;
 
     /**
-     * We are going to inherit parent validation rules, this will let spiral translator know about
-     * it and merge i18n messages.
-     *
-     * @see TranslatorTrait
-     */
-    const I18N_INHERIT_MESSAGES = true;
-
-    /**
      * Field format declares how entity must process magic setters and getters. Available values:
      * camelCase, tableize.
      */
@@ -225,8 +217,8 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->extractRelations($data);
 
         if (!$this->isLoaded()) {
-            //Non loaded records should be in solid state by default and require initial validation
-            $this->solidState(true)->invalidate();
+            //Non loaded records should be in solid state by default
+            $this->solidState(true);
         }
 
         parent::__construct($data + $this->ormSchema[ORMInterface::M_COLUMNS], $this->ormSchema);
@@ -588,22 +580,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function isValid()
-    {
-        return parent::isValid() && empty($this->innerErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getErrors($reset = false)
-    {
-        return parent::getErrors($reset) + $this->innerErrors;
-    }
-
-    /**
      * Change record loaded state.
      *
      * @param bool|mixed $state
@@ -615,35 +591,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $this->recordState = $state;
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Will validate every embedded relation.
-     *
-     * @param bool $reset
-     *
-     * @throws RecordException
-     */
-    protected function validate($reset = false)
-    {
-        $this->innerErrors = [];
-
-        foreach ($this->relations as $name => $relation) {
-            if (!$relation instanceof ValidatesInterface) {
-                //Never constructed
-                continue;
-            }
-
-            if ($this->embeddedRelation($name) && !$relation->isValid()) {
-                $this->innerErrors[$name] = $relation->getErrors($reset);
-            }
-        }
-
-        parent::validate($reset);
-
-        return $this->hasErrors() && empty($this->innerErrors);
     }
 
     /**

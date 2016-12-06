@@ -37,7 +37,6 @@ interface ODMInterface
     const D_SECURED      = SchematicEntity::SH_SECURED;
     const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
     const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
-    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
     const D_DEFAULTS     = 9;
     const D_AGGREGATIONS = 10;
     const D_COMPOSITIONS = 11;

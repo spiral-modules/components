@@ -7,6 +7,7 @@
  */
 namespace Spiral\Storage\Entities;
 
+use Psr\Http\Message\StreamInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
@@ -118,7 +119,7 @@ class StorageObject extends Component implements ObjectInterface
     public function localFilename()
     {
         if (empty($this->name)) {
-            throw new ObjectException("Unable to allocate filename for unassigned storage object.");
+            throw new ObjectException("Unable to allocate filename for unassigned storage object");
         }
 
         return $this->bucket->allocateFilename($this->name);
@@ -127,10 +128,10 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function getStream()
+    public function getStream(): StreamInterface
     {
         if (empty($this->name)) {
-            throw new ObjectException("Unable to get stream for unassigned storage object.");
+            throw new ObjectException("Unable to get stream for unassigned storage object");
         }
 
         return $this->bucket->allocateStream($this->name);
@@ -157,7 +158,7 @@ class StorageObject extends Component implements ObjectInterface
     public function rename($newname)
     {
         if (empty($this->name)) {
-            throw new ObjectException("Unable to rename unassigned storage object.");
+            throw new ObjectException("Unable to rename unassigned storage object");
         }
 
         $this->address = $this->bucket->rename($this->name, $newname);
@@ -172,7 +173,7 @@ class StorageObject extends Component implements ObjectInterface
     public function copy($destination)
     {
         if (empty($this->name)) {
-            throw new ObjectException("Unable to copy unassigned storage object.");
+            throw new ObjectException("Unable to copy unassigned storage object");
         }
 
         if (is_string($destination)) {
@@ -188,7 +189,7 @@ class StorageObject extends Component implements ObjectInterface
     public function replace($destination)
     {
         if (empty($this->name)) {
-            throw new ObjectException("Unable to replace unassigned storage object.");
+            throw new ObjectException("Unable to replace unassigned storage object");
         }
 
         if (is_string($destination)) {

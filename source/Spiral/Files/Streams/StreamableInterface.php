@@ -18,5 +18,5 @@ interface StreamableInterface
     /**
      * @return StreamInterface
      */
-    public function getStream();
+    public function getStream(): StreamInterface;
 }

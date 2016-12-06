@@ -57,39 +57,27 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      *
      * @param FilesInterface       $files
      * @param TokenizerConfig      $config
-     * @param HippocampusInterface $runtime
+     * @param HippocampusInterface $memory
      */
     public function __construct(
         FilesInterface $files,
         TokenizerConfig $config,
-        HippocampusInterface $runtime
+        HippocampusInterface $memory
     ) {
         $this->files = $files;
         $this->config = $config;
-        $this->memory = $runtime;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @deprecated this method creates looped dependencies, drop it
-     */
-    public function fetchTokens($filename)
-    {
-        return $this->normalizeTokens(
-            token_get_all($this->files->read($filename))
-        );
+        $this->memory = $memory;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function fileReflection($filename)
+    public function fileReflection(string $filename): ReflectionFile
     {
         $fileMD5 = $this->files->md5($filename = $this->files->normalizePath($filename));
 
         $reflection = new ReflectionFile(
-            $this->fetchTokens($filename),
+            $this->normalizeTokens(token_get_all($this->files->read($filename))),
             (array)$this->memory->loadData($fileMD5, self::MEMORY_LOCATION)
         );
 
@@ -106,13 +94,13 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param array  $exclude
      * @param Finder $finder
      *
-     * @return ClassLocator
+     * @return ClassLocatorInterface
      */
     public function classLocator(
         array $directories = [],
         array $exclude = [],
         Finder $finder = null
-    ) {
+    ): ClassLocatorInterface {
         return new ClassLocator($this, $this->prepareFinder($finder, $directories, $exclude));
     }
 
@@ -123,13 +111,13 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param array  $exclude
      * @param Finder $finder
      *
-     * @return ClassLocator
+     * @return InvocationLocatorInterface
      */
     public function invocationLocator(
         array $directories = [],
         array $exclude = [],
         Finder $finder = null
-    ) {
+    ): InvocationLocatorInterface {
         return new InvocationLocator($this, $this->prepareFinder($finder, $directories, $exclude));
     }
 
@@ -159,8 +147,8 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         Finder $finder = null,
         array $directories = [],
         array $exclude = []
-    ) {
-        $finder = !empty($finder) ? $finder : new Finder();
+    ): Finder {
+        $finder = $finder ?? new Finder();
 
         if (empty($directories)) {
             $directories = $this->config->getDirectories();

@@ -22,7 +22,7 @@ trait TokensTrait
      *
      * @return array
      */
-    private function normalizeTokens(array $tokens)
+    private function normalizeTokens(array $tokens): array
     {
         $line = 0;
         foreach ($tokens as &$token) {

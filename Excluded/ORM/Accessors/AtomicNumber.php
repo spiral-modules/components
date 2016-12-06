@@ -43,29 +43,11 @@ class AtomicNumber implements RecordAccessorInterface
     protected $delta = 0;
 
     /**
-     * @todo change this concept in future
-     * @var EntityInterface
-     */
-    protected $parent = null;
-
-    /**
      * {@inheritdoc}
      */
-    public function __construct($number, EntityInterface $parent = null)
+    public function __construct($number)
     {
         $this->original = $this->value = $number;
-        $this->parent = $parent;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function embed(EntityInterface $parent)
-    {
-        $accessor = clone $this;
-        $accessor->parent = $parent;
-
-        return $accessor;
     }
 
     /**

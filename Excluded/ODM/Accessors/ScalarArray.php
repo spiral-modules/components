@@ -63,13 +63,6 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
     protected $atomics = [];
 
     /**
-     * @invisible
-     *
-     * @var EntityInterface
-     */
-    protected $parent = null;
-
-    /**
      * Supported type filters. No boolean include, cos who the hell need array of booleans.
      *
      * @var array
@@ -89,12 +82,9 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
      */
     public function __construct(
         $value,
-        EntityInterface $parent = null,
         ODMInterface $odm = null,
         $type = self::MIXED_TYPE
     ) {
-        $this->parent = $parent;
-
         if (!is_array($value) && $value !== null) {
             throw new AccessorException('ScalarArray support only scalar arrays'); //:)
         }
@@ -147,22 +137,6 @@ class ScalarArray implements DocumentAccessorInterface, \IteratorAggregate, \Cou
         $this->solidState = $solidState;
 
         return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function embed(EntityInterface $parent)
-    {
-        if ($parent === $this->parent) {
-            return $this;
-        }
-
-        $accessor = clone $this;
-        $accessor->parent = $parent;
-        $accessor->solidState = $accessor->updated = true;
-
-        return $accessor;
     }
 
     /**

@@ -10,7 +10,6 @@ namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Models\SourceInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\SourceException;
 use Spiral\ODM\ODM;
@@ -20,7 +19,7 @@ use Spiral\ODM\ODMInterface;
  * Source class associated to one or multiple (default implementation) ODM models. Source can be
  * used to write your own custom find method or change default selection.
  */
-class DocumentSource extends Component implements SourceInterface, \Countable
+class DocumentSource extends Component implements \Countable
 {
     use SaturateTrait;
 

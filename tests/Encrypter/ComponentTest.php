@@ -7,6 +7,7 @@
  */
 namespace Spiral\Tests\Encrypter;
 
+use Defuse\Crypto\Key;
 use Spiral\Core\Container;
 use Spiral\Encrypter\Configs\EncrypterConfig;
 use Spiral\Encrypter\Encrypter;
@@ -16,7 +17,7 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
 {
     public function testInjection()
     {
-        $key = \Crypto::CreateNewRandomKey();
+        $key = Key::CreateNewRandomKey()->saveToAsciiSafeString();
 
         $container = new Container();
         $container->bind(EncrypterInterface::class, Encrypter::class);

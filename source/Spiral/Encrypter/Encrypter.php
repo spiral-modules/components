@@ -7,6 +7,10 @@
  */
 namespace Spiral\Encrypter;
 
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Exception\BadFormatException;
+use Defuse\Crypto\Exception\CryptoException;
+use Defuse\Crypto\Key;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Encrypter\Exceptions\DecryptException;
 use Spiral\Encrypter\Exceptions\EncrypterException;
@@ -15,7 +19,6 @@ use Spiral\Encrypter\Exceptions\EncryptException;
 /**
  * Default implementation of spiral encrypter. Sugary implementation at top of defuse/php-encryption
  *
- * @todo move to 2.x when ready
  * @see  https://github.com/defuse/php-encryption
  */
 class Encrypter implements EncrypterInterface, InjectableInterface
@@ -33,20 +36,20 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     /**
      * Encrypter constructor.
      *
-     * @param string $key
+     * @param string $key Loads a Key from its encoded form (ANSI).
      */
-    public function __construct($key)
+    public function __construct(string $key)
     {
-        $this->key = $key;
+        $this->key = Key::loadFromAsciiSafeString($key);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function withKey($key)
+    public function withKey(string $key): EncrypterInterface
     {
         $encrypter = clone $this;
-        $encrypter->key = (string)$key;
+        $encrypter->key = Key::loadFromAsciiSafeString($key);
 
         return $encrypter;
     }
@@ -54,9 +57,9 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     /**
      * {@inheritdoc}
      */
-    public function getKey()
+    public function getKey(): string
     {
-        return $this->key;
+        return $this->key->saveToAsciiSafeString();
     }
 
     /**
@@ -65,7 +68,7 @@ class Encrypter implements EncrypterInterface, InjectableInterface
      * @todo double check
      * @param bool $passWeak Do not throw an exception if result is "weak". Not recommended.
      */
-    public function random($length, $passWeak = false)
+    public function random(int $length, $passWeak = false): string
     {
         if ($length < 1) {
             throw new EncrypterException("Random string length should be at least 1 byte long");
@@ -90,18 +93,18 @@ class Encrypter implements EncrypterInterface, InjectableInterface
      *
      * Data encoded using json_encode method, only supported formats are allowed!
      */
-    public function encrypt($data)
+    public function encrypt($data): string
     {
         $packed = json_encode($data);
 
         try {
             return base64_encode(
-                \Crypto::Encrypt($packed, $this->key)
+                Crypto::Encrypt($packed, $this->key)
             );
-        } catch (\CannotPerformOperationException $e) {
+        } catch (BadFormatException $e) {
             throw new EncryptException($e->getMessage(), $e->getCode(), $e);
-        } catch (\CryptoTestFailedException $e) {
-            throw new EncrypterException($e->getMessage(), $e->getCode(), $e);
+        } catch (CryptoException $e) {
+            throw new EncryptException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -110,21 +113,17 @@ class Encrypter implements EncrypterInterface, InjectableInterface
      *
      * json_decode with assoc flag set to true
      */
-    public function decrypt($payload)
+    public function decrypt(string $payload)
     {
         try {
-            $result = \Crypto::Decrypt(
+            $result = Crypto::Decrypt(
                 base64_decode($payload),
                 $this->key
             );
 
             return json_decode($result, true);
-        } catch (\InvalidCiphertextException $e) {
+        } catch (CryptoException $e) {
             throw new DecryptException($e->getMessage(), $e->getCode(), $e);
-        } catch (\CannotPerformOperationException $e) {
-            throw new DecryptException($e->getMessage(), $e->getCode(), $e);
-        } catch (\CryptoTestFailedException $e) {
-            throw new EncrypterException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

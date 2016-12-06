@@ -11,7 +11,6 @@ namespace Spiral\ORM\Entities;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Models\SourceInterface;
 use Spiral\ORM\Exceptions\SourceException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMInterface;
@@ -21,7 +20,7 @@ use Spiral\ORM\RecordEntity;
  * Source class associated to one or multiple (default implementation) ORM models. Source can be
  * used to write your own custom find method or change default selection.
  */
-class RecordSource extends Component implements SourceInterface, \Countable
+class RecordSource extends Component implements \Countable
 {
     use SaturateTrait;
 

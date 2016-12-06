@@ -7,6 +7,7 @@
  */
 namespace Spiral\Tests\Encrypter;
 
+use Defuse\Crypto\Key;
 use Spiral\Encrypter\Encrypter;
 
 class RandomTest extends \PHPUnit_Framework_TestCase
@@ -25,11 +26,10 @@ class RandomTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param string $key
      * @return Encrypter
      */
-    protected function makeEncrypter($key = '1234567890123456')
+    protected function makeEncrypter()
     {
-        return new Encrypter($key);
+        return new Encrypter(Key::createNewRandomKey()->saveToAsciiSafeString());
     }
 }

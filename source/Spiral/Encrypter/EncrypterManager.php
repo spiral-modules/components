@@ -7,6 +7,7 @@
  */
 namespace Spiral\Encrypter;
 
+use Defuse\Crypto\Key;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Encrypter\Configs\EncrypterConfig;
@@ -34,9 +35,9 @@ class EncrypterManager implements InjectorInterface, SingletonInterface
      *
      * @return string
      */
-    public function generateKey()
+    public function generateKey(): string
     {
-        return \Crypto::CreateNewRandomKey();
+        return Key::createNewRandomKey()->saveToAsciiSafeString();
     }
 
     /**

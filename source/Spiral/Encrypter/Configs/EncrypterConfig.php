@@ -30,7 +30,7 @@ class EncrypterConfig extends InjectableConfig
     ];
 
     /**
-     * Attention, key has to be stored in base64 format.
+     * ANSI encryption key.
      *
      * @return string
      */

@@ -24,6 +24,15 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('ru', $config->defaultLocale());
     }
 
+    public function testDefaultDomain()
+    {
+        $config = new TranslatorConfig([
+            'locale' => 'ru'
+        ]);
+
+        $this->assertSame('messages', $config->defaultDomain());
+    }
+
     public function testFallbackLocale()
     {
         $config = new TranslatorConfig([

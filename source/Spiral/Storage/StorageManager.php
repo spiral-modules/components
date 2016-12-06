@@ -65,7 +65,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @throws StorageException
      */
-    public function setBucket(BucketInterface $bucket): self
+    public function setBucket(BucketInterface $bucket): StorageManager
     {
         if (isset($this->buckets[$bucket->getName()])) {
             throw new StorageException("Unable to create bucket '{$bucket->getName()}', already exists");

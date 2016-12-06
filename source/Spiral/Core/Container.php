@@ -219,7 +219,7 @@ class Container extends Component implements
      *
      * @return self
      */
-    public function bind(string $alias, $resolver): self
+    public function bind(string $alias, $resolver): Container
     {
         if (is_array($resolver) || $resolver instanceof \Closure) {
             $this->bindings[$alias] = [$resolver, false];
@@ -241,7 +241,7 @@ class Container extends Component implements
      *
      * @return self
      */
-    public function bindSingleton(string $alias, $resolver): self
+    public function bindSingleton(string $alias, $resolver): Container
     {
         if (is_object($resolver) && !$resolver instanceof \Closure) {
             $this->bindings[$alias] = $resolver;
@@ -262,7 +262,7 @@ class Container extends Component implements
      *
      * @return self
      */
-    public function bindInjector(string $class, $injector): self
+    public function bindInjector(string $class, $injector): Container
     {
         if (!is_string($injector)) {
             throw new \InvalidArgumentException('Injector can only be set as string binding');

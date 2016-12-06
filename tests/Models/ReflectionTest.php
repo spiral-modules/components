@@ -52,29 +52,6 @@ class ReflectionTest extends \PHPUnit_Framework_TestCase
             $schema->getSetters()
         );
     }
-
-    public function testValidates()
-    {
-        $schema = new ReflectionEntity(TestModel::class);
-        $this->assertSame(
-            [
-                'value' => ['notEmpty']
-            ],
-            $schema->getValidates()
-        );
-    }
-
-    public function testValidatesExtended()
-    {
-        $schema = new ReflectionEntity(ExtendedModel::class);
-        $this->assertSame(
-            [
-                'value' => ['notEmpty'],
-                'name'  => ['notEmpty']
-            ],
-            $schema->getValidates()
-        );
-    }
 }
 
 class TestModel extends SchematicEntity
@@ -83,11 +60,6 @@ class TestModel extends SchematicEntity
 
     protected $setters = ['value' => 'intval'];
     protected $getters = ['value' => 'intval'];
-
-    protected $validates = [
-        'value' => ['notEmpty']
-    ];
-
 }
 
 class ExtendedModel extends TestModel
@@ -97,8 +69,4 @@ class ExtendedModel extends TestModel
     protected $setters = ['name' => 'strval'];
 
     protected $getters = ['name' => 'strtoupper'];
-
-    protected $validates = [
-        'name' => ['notEmpty']
-    ];
 }

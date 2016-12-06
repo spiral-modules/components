@@ -103,7 +103,7 @@ class Isolator
      *
      * @throws IsolatorException
      */
-    public function setBlock(string $blockID, string $source): self
+    public function setBlock(string $blockID, string $source): Isolator
     {
         if (!isset($this->phpBlocks[$blockID])) {
             throw new IsolatorException("Undefined block {$blockID}");

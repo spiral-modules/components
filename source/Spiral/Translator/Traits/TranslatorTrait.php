@@ -9,7 +9,6 @@
 namespace Spiral\Translator\Traits;
 
 use Interop\Container\ContainerInterface;
-use Spiral\Core\Container;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Translator\Translator;
 use Spiral\Translator\TranslatorInterface;
@@ -38,7 +37,7 @@ trait TranslatorTrait
      *
      * @throws SugarException
      */
-    protected function say($string, array $options = [], $bundle = null)
+    protected function say(string $string, array $options = [], $bundle = null): string
     {
         if (Translator::isMessage($string)) {
             //This string was defined in class attributes

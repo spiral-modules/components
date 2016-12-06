@@ -155,7 +155,7 @@ class ReflectionArgument
      *
      * @return self
      */
-    private static function createArgument(array $definition): self
+    private static function createArgument(array $definition): ReflectionArgument
     {
         $result = new static(self::EXPRESSION, $definition['value']);
 

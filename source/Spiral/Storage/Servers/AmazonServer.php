@@ -58,7 +58,7 @@ class AmazonServer extends StorageServer
      * @param ClientInterface $client
      * @return self
      */
-    public function setClient(ClientInterface $client): self
+    public function setClient(ClientInterface $client): AmazonServer
     {
         $this->client = $client;
 

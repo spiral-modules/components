@@ -49,7 +49,7 @@ class DFSSorter
      *
      * @return self
      */
-    public function addItem(string $key, $item, array $dependencies): self
+    public function addItem(string $key, $item, array $dependencies): DFSSorter
     {
         $this->keys[] = $key;
         $this->objects[$key] = $item;

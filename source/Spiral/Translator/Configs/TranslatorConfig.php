@@ -41,10 +41,20 @@ class TranslatorConfig extends InjectableConfig
     ];
 
     /**
+     * Default transation domain.
+     *
+     * @return string
+     */
+    public function defaultDomain(): string
+    {
+        return 'messages';
+    }
+
+    /**
      * @param Patternizer $patternizer
      * @return self
      */
-    public function withPatternizer(Patternizer $patternizer): self
+    public function withPatternizer(Patternizer $patternizer): TranslatorConfig
     {
         $config = clone $this;
         $config->patternizer = $patternizer;
@@ -114,9 +124,7 @@ class TranslatorConfig extends InjectableConfig
      */
     public function resolveDomain(string $bundle): string
     {
-        if (empty($this->patternizer)) {
-            $this->patternizer = new Patternizer();
-        }
+        $this->patternizer = $this->patternizer ?? new Patternizer();
 
         $bundle = strtolower(str_replace(['/', '\\'], '-', $bundle));
 

@@ -55,6 +55,7 @@ class SourceTest extends \PHPUnit_Framework_TestCase
     public function testLoadLocale()
     {
         $config = m::mock(TranslatorConfig::class);
+
         $source = new TranslationSource($config, new FileManager());
 
         $config->shouldReceive('localeDirectory')->with('ru')->andReturn(

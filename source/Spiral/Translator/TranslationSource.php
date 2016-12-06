@@ -48,7 +48,7 @@ class TranslationSource extends Component implements SourceInterface
     /**
      * {@inheritdoc}
      */
-    public function hasLocale($locale)
+    public function hasLocale(string $locale): bool
     {
         $locale = preg_replace("/[^a-zA-Z_]/", '', mb_strtolower($locale));
 
@@ -58,7 +58,7 @@ class TranslationSource extends Component implements SourceInterface
     /**
      * {@inheritdoc}
      */
-    public function getLocales()
+    public function getLocales(): array
     {
         $finder = new Finder();
         $finder->in($this->config->localesDirectory())->directories();
@@ -78,7 +78,7 @@ class TranslationSource extends Component implements SourceInterface
     /**
      * {@inheritdoc}
      */
-    public function loadLocale($locale)
+    public function loadLocale(string $locale): array
     {
         $domains = [];
 

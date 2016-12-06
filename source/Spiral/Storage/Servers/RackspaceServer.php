@@ -98,7 +98,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * @param ClientInterface $client
      * @return self
      */
-    public function setClient(ClientInterface $client): self
+    public function setClient(ClientInterface $client): RackspaceServer
     {
         $this->client = $client;
 

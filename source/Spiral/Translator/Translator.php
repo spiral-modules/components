@@ -107,7 +107,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * @return SourceInterface
      */
-    public function getSource()
+    public function getSource(): SourceInterface
     {
         return $this->source;
     }
@@ -115,7 +115,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * {@inheritdoc}
      */
-    public function resolveDomain($bundle)
+    public function resolveDomain(string $bundle): string
     {
         return $this->config->resolveDomain($bundle);
     }
@@ -127,7 +127,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * @param string $locale
      * @return Translator
      */
-    public function withLocale($locale)
+    public function withLocale(string $locale): Translator
     {
         $translator = clone $this;
         $translator->setLocale($locale);
@@ -139,6 +139,8 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
 
     /**
      * {@inheritdoc}
+     *
+     * Non immutable version of withLocale.
      *
      * @return $this
      *
@@ -158,7 +160,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * @return string
      */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
@@ -170,15 +172,10 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      *
      * @throws LocaleException
      */
-    public function trans(
-        $id,
-        array $parameters = [],
-        $domain = self::DEFAULT_DOMAIN,
-        $locale = null
-    ) {
-        if (empty($locale)) {
-            $locale = $this->locale;
-        }
+    public function trans($id, array $parameters = [], $domain = null, $locale = null)
+    {
+        $domain = $domain ?? $this->config->defaultDomain();
+        $locale = $locale ?? $this->locale;
 
         //Automatically falls back to default locale
         $translation = $this->get($domain, $id, $locale);
@@ -199,12 +196,11 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
         $id,
         $number,
         array $parameters = [],
-        $domain = self::DEFAULT_DOMAIN,
+        $domain = null,
         $locale = null
     ) {
-        if (empty($locale)) {
-            $locale = $this->locale;
-        }
+        $domain = $domain ?? $this->config->defaultDomain();
+        $locale = $locale ?? $this->locale;
 
         if (empty($parameters['{n}'])) {
             $parameters['{n}'] = number_format($number);
@@ -226,7 +222,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * {@inheritdoc}
      */
-    public function getLocales()
+    public function getLocales(): array
     {
         if (!empty($this->loadedLocales)) {
             return array_keys($this->loadedLocales);
@@ -243,7 +239,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      *
      * @throws LocaleException
      */
-    public function getCatalogue($locale = null)
+    public function getCatalogue(string $locale = null): Catalogue
     {
         if (empty($locale)) {
             $locale = $this->locale;
@@ -263,9 +259,9 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * Load all possible locales into memory.
      *
-     * @return $this
+     * @return self
      */
-    public function loadLocales()
+    public function loadLocales(): Translator
     {
         foreach ($this->source->getLocales() as $locale) {
             $this->loadCatalogue($locale);
@@ -277,9 +273,9 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * Flush all loaded locales data.
      *
-     * @return $this
+     * @return self
      */
-    public function flushLocales()
+    public function flushLocales(): Translator
     {
         $this->loadedLocales = [];
         $this->catalogues = [];
@@ -302,7 +298,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      *
      * @return string
      */
-    protected function get($domain, $string, $locale)
+    protected function get(string $domain, string $string, string $locale): string
     {
         //Active language first
         if ($this->getCatalogue($locale)->has($domain, $string)) {
@@ -326,7 +322,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * @return Catalogue
      */
-    protected function fallbackCatalogue()
+    protected function fallbackCatalogue(): Catalogue
     {
         if (empty($this->fallbackCatalogue)) {
             $this->fallbackCatalogue = $this->loadCatalogue(
@@ -343,7 +339,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * @param string $locale
      * @return Catalogue
      */
-    protected function loadCatalogue($locale)
+    protected function loadCatalogue(string $locale): Catalogue
     {
         $catalogue = new Catalogue($locale, $this->memory);
 
@@ -382,7 +378,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * @param string $locale
      * @return bool
      */
-    private function hasLocale($locale)
+    private function hasLocale(string $locale): bool
     {
         if (array_key_exists($locale, $this->loadedLocales)) {
             return true;
@@ -397,9 +393,9 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * @param string $string
      * @return bool
      */
-    public static function isMessage($string)
+    public static function isMessage(string $string): bool
     {
         return substr($string, 0, 2) == self::I18N_PREFIX
-        && substr($string, -2) == self::I18N_POSTFIX;
+            && substr($string, -2) == self::I18N_POSTFIX;
     }
 }

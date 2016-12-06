@@ -25,7 +25,7 @@ interface ValidatorInterface
      *
      * @return self
      */
-    public function setRules(array $rules): self;
+    public function setRules(array $rules): ValidatorInterface;
 
     /**
      * Update validation data (context). Data change must reset validation state and all errors.
@@ -36,7 +36,7 @@ interface ValidatorInterface
      *
      * @throws ValidationException
      */
-    public function setData($data): self;
+    public function setData($data): ValidatorInterface;
 
     /**
      * Get all validation data passed into validator.
@@ -63,7 +63,7 @@ interface ValidatorInterface
      *
      * @return self
      */
-    public function registerError(string $field, string $error): self;
+    public function registerError(string $field, string $error): ValidatorInterface;
 
     /**
      * Reset validation state.
@@ -72,10 +72,8 @@ interface ValidatorInterface
 
     /**
      * Flush all registered errors.
-     *
-     * @return self
      */
-    public function flushRegistered(): self;
+    public function flushRegistered();
 
     /**
      * Check if context data valid accordingly to provided rules.

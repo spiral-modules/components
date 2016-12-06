@@ -89,7 +89,7 @@ interface ObjectInterface extends StreamableInterface
      * @throws BucketException
      * @throws ObjectException
      */
-    public function rename(string $newName): self;
+    public function rename(string $newName): ObjectInterface;
 
     /**
      * Copy storage object to another bucket. Method must return ObjectInterface which points to
@@ -112,7 +112,7 @@ interface ObjectInterface extends StreamableInterface
      * @throws BucketException
      * @throws ObjectException
      */
-    public function replace(string $destination): self;
+    public function replace(string $destination): ObjectInterface;
 
     /**
      * Must be serialized into object address.

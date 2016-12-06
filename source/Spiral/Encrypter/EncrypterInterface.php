@@ -23,7 +23,7 @@ interface EncrypterInterface
      * @return self
      * @throws EncrypterException
      */
-    public function withKey(string $key): self;
+    public function withKey(string $key): EncrypterInterface;
 
     /**
      * Encryption ket value. Returns in a format of ANSI string.

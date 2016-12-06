@@ -69,7 +69,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return self
      */
-    public function setStyle(Style $style): self
+    public function setStyle(Style $style): Dumper
     {
         $this->style = $style;
 

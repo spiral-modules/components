@@ -16,11 +16,6 @@ namespace Spiral\Translator;
 interface TranslatorInterface extends \Symfony\Component\Translation\TranslatorInterface
 {
     /**
-     * Default translation bundle.
-     */
-    const DEFAULT_DOMAIN = 'messages';
-
-    /**
      * Default set of braces to be used in classes or views for indication of translatable content.
      */
     const I18N_PREFIX  = '[[';
@@ -33,12 +28,12 @@ interface TranslatorInterface extends \Symfony\Component\Translation\TranslatorI
      *
      * @return string
      */
-    public function resolveDomain($bundle);
+    public function resolveDomain(string $bundle): string;
 
     /**
      * Get list of supported locales.
      *
      * @return array
      */
-    public function getLocales();
+    public function getLocales(): array;
 }

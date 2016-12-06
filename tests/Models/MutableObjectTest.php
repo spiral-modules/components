@@ -8,7 +8,7 @@
 namespace Spiral\Tests\Models;
 
 use Mockery as m;
-use Spiral\Models\MutableObject;
+use Spiral\Models\Prototypes\MutableObject;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 

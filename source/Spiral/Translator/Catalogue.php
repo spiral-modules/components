@@ -52,7 +52,7 @@ class Catalogue
     /**
      * @return string
      */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
@@ -62,7 +62,7 @@ class Catalogue
      *
      * @return array
      */
-    public function loadedDomains()
+    public function loadedDomains(): array
     {
         return array_keys($this->domains);
     }
@@ -75,7 +75,7 @@ class Catalogue
      *
      * @return bool
      */
-    public function has($domain, $string)
+    public function has(string $domain, string $string): bool
     {
         if (!empty($this->domains[$domain]) && array_key_exists($string, $this->domains[$domain])) {
             return true;
@@ -96,7 +96,7 @@ class Catalogue
      *
      * @throws CatalogueException
      */
-    public function get($domain, $string)
+    public function get(string $domain, string $string): string
     {
         if (!$this->has($domain, $string)) {
             throw new CatalogueException("Undefined string in domain '{$domain}'");
@@ -112,7 +112,7 @@ class Catalogue
      *
      * @return array
      */
-    public function domainMessages($domain)
+    public function domainMessages(string $domain): array
     {
         if (!$this->isLoaded($domain)) {
             $this->loadDomain($domain);
@@ -128,7 +128,7 @@ class Catalogue
      * @param string $string
      * @param string $value
      */
-    public function set($domain, $string, $value)
+    public function set(string $domain, string $string, string $value)
     {
         $this->domains[$domain][$string] = $value;
     }
@@ -138,7 +138,7 @@ class Catalogue
      * @param bool             $follow When set to true messages from given catalogue will overwrite
      *                                 existed messages.
      */
-    public function mergeFrom(MessageCatalogue $catalogue, $follow = true)
+    public function mergeFrom(MessageCatalogue $catalogue, bool $follow = true)
     {
         foreach ($catalogue->all() as $domain => $messages) {
 
@@ -160,7 +160,7 @@ class Catalogue
      *
      * @return MessageCatalogue
      */
-    public function toMessageCatalogue()
+    public function toMessageCatalogue(): MessageCatalogue
     {
         return new MessageCatalogue($this->locale, $this->domains);
     }
@@ -169,9 +169,9 @@ class Catalogue
      * Load all catalogue domains.
      *
      * @param array $domains Domains to be loaded
-     * @return $this
+     * @return self
      */
-    public function loadDomains(array $domains = [])
+    public function loadDomains(array $domains = []): Catalogue
     {
         foreach ($domains as $domain) {
             $this->loadDomain($domain);
@@ -196,7 +196,7 @@ class Catalogue
      * @param string $domain
      * @return bool
      */
-    protected function isLoaded($domain)
+    protected function isLoaded(string $domain): bool
     {
         return isset($this->domains[$domain]);
     }
@@ -206,7 +206,7 @@ class Catalogue
      *
      * @param string $domain
      */
-    protected function loadDomain($domain)
+    protected function loadDomain(string $domain)
     {
         $data = $this->memory->loadData($this->domainSection($domain), Translator::MEMORY);
 
@@ -227,7 +227,7 @@ class Catalogue
      * @param string $domain
      * @param array  $data
      */
-    protected function saveDomain($domain, $data)
+    protected function saveDomain(string $domain, array $data)
     {
         $this->memory->saveData($this->domainSection($domain), $data, Translator::MEMORY);
     }
@@ -238,7 +238,7 @@ class Catalogue
      * @param string $domain
      * @return string
      */
-    private function domainSection($domain)
+    private function domainSection(string $domain): string
     {
         return "{$this->locale}-{$domain}";
     }

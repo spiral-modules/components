@@ -22,7 +22,7 @@ interface SourceInterface
      * @param string $locale
      * @return bool
      */
-    public function hasLocale($locale);
+    public function hasLocale(string $locale): bool;
 
     /**
      * Load and return all locale messages aggregated by their domain.
@@ -33,12 +33,12 @@ interface SourceInterface
      *
      * @throws SourceException
      */
-    public function loadLocale($locale);
+    public function loadLocale(string $locale): array;
 
     /**
      * List of available locales. Can be rewritten with other logic in future.
      *
      * @return array
      */
-    public function getLocales();
+    public function getLocales(): array;
 }

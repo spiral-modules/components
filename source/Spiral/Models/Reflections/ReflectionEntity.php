@@ -7,7 +7,7 @@
  */
 namespace Spiral\Models\Reflections;
 
-use Spiral\Models\AbstractEntity;
+use Spiral\Models\Prototypes\AbstractEntity;
 
 /**
  * Provides ability to generate entity schema based on given entity class and default property

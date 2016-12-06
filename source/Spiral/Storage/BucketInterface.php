@@ -33,7 +33,7 @@ interface BucketInterface
      *
      * @throws StorageException
      */
-    public function getServer();
+    public function getServer(): ServerInterface;
 
     /**
      * Get server specific bucket option or return default value.
@@ -44,7 +44,7 @@ interface BucketInterface
      *
      * @return mixed
      */
-    public function getOption($name, $default = null);
+    public function getOption(string $name, $default = null);
 
     /**
      * Get bucket prefix.
@@ -58,7 +58,7 @@ interface BucketInterface
      *
      * @param string $address
      *
-     * @return bool|int Should return matched address length.
+     * @return bool|int Should return matched address length (change in future).
      */
     public function hasAddress(string $address);
 
@@ -82,7 +82,7 @@ interface BucketInterface
      * @throws ServerException
      * @throws BucketException
      */
-    public function exists($name);
+    public function exists(string $name): bool;
 
     /**
      * Get object size or return false if object not found.

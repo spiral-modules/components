@@ -138,14 +138,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     private $atomics = [];
 
     /**
-     * @invisible
-     *
-     * @todo change this concept in future
-     * @var EntityInterface
-     */
-    protected $parent = null;
-
-    /**
      * @var ODMInterface|ODM
      */
     protected $odm = null;
@@ -164,12 +156,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function __construct(
         $fields,
-        EntityInterface $parent = null,
         ODMInterface $odm = null,
         $schema = null
     ) {
-        $this->parent = $parent;
-
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODMInterface::class);
         $this->odmSchema = !empty($schema) ? $schema : $this->odm->schema(static::class);
@@ -229,8 +218,10 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
     /**
      * {@inheritdoc}
+     *
+     * @todo change to clone
      */
-    public function embed(EntityInterface $parent)
+    public function __clone()
     {
         if (empty($this->parent)) {
             $this->parent = $parent;

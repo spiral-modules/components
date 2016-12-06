@@ -18,7 +18,7 @@ class XCacheStore extends CacheStore
     /**
      * @var string
      */
-    private $prefix = 'spiral:';
+    private $prefix;
 
     /**
      * @param string $prefix

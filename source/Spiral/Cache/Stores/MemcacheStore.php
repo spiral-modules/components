@@ -36,7 +36,7 @@ class MemcacheStore extends CacheStore
      *
      * @var DriverInterface
      */
-    private $driver = null;
+    private $driver;
 
     /**
      * @param string          $prefix

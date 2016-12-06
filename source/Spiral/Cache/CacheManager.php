@@ -28,19 +28,19 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
      *
      * @var StoreInterface[]
      */
-    private $stores = false;
+    private $stores = [];
 
     /**
      * @var CacheConfig
      */
-    protected $config = null;
+    protected $config;
 
     /**
      * @invisible
      *
      * @var FactoryInterface
      */
-    protected $factory = null;
+    protected $factory;
 
     /**
      * @param CacheConfig      $config

@@ -17,21 +17,21 @@ use Spiral\Files\FilesInterface;
 class FileStore extends CacheStore
 {
     /**
-     * @var string
-     */
-    private $directory = '';
-
-    /**
-     * @var string
-     */
-    private $extension = 'cache';
-
-    /**
      * @invisible
      *
      * @var FilesInterface
      */
-    protected $files = null;
+    protected $files;
+
+    /**
+     * @var string
+     */
+    private $directory;
+
+    /**
+     * @var string
+     */
+    private $extension;
 
     /**
      * @param FilesInterface $files

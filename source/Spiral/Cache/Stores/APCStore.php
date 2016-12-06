@@ -24,14 +24,14 @@ class APCStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    private $prefix = 'spiral:';
+    private $prefix;
 
     /**
      * Cache driver type.
      *
      * @var int
      */
-    private $driver = self::APC_DRIVER;
+    private $driverType;
 
     /**
      * @param string $prefix
@@ -40,19 +40,19 @@ class APCStore extends CacheStore
     {
         $this->prefix = $prefix;
 
-        $this->driver = function_exists('apcu_store')
-            ? self::APCU_DRIVER
-            : self::APC_DRIVER;
+        $this->driverType = function_exists('apcu_store') ? self::APCU_DRIVER : self::APC_DRIVER;
     }
 
     /**
      * Get APC cache type (APC or APCU).
      *
+     * @see APCStore::APC_DRIVER
+     * @see APCStore::APCU_DRIVER
      * @return int
      */
-    public function getDriver()
+    public function getDriver(): int
     {
-        return $this->driver;
+        return $this->driverType;
     }
 
     /**
@@ -68,7 +68,7 @@ class APCStore extends CacheStore
      */
     public function has($name)
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             return apcu_exists($this->prefix . $name);
         }
 
@@ -80,7 +80,7 @@ class APCStore extends CacheStore
      */
     public function get($name)
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             return apcu_fetch($this->prefix . $name);
         }
 
@@ -92,7 +92,7 @@ class APCStore extends CacheStore
      */
     public function set($name, $data, $lifetime)
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             return apcu_store($this->prefix . $name, $data, $lifetime);
         }
 
@@ -112,7 +112,7 @@ class APCStore extends CacheStore
      */
     public function delete($name)
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             apcu_delete($this->prefix . $name);
 
             return;
@@ -126,7 +126,7 @@ class APCStore extends CacheStore
      */
     public function inc($name, $delta = 1)
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             return apcu_inc($this->prefix . $name, $delta);
         }
 
@@ -138,7 +138,7 @@ class APCStore extends CacheStore
      */
     public function dec($name, $delta = 1)
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             return apcu_dec($this->prefix . $name, $delta);
         }
 
@@ -150,7 +150,7 @@ class APCStore extends CacheStore
      */
     public function flush()
     {
-        if ($this->driver == self::APCU_DRIVER) {
+        if ($this->driverType == self::APCU_DRIVER) {
             apcu_clear_cache();
 
             return;

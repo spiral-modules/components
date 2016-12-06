@@ -46,16 +46,16 @@ class ParameterDeclaration extends NamedDeclaration
     /**
      * {@inheritdoc}
      */
-    public function setName($name)
+    public function setName(string $name): ParameterDeclaration
     {
         return parent::setName(Inflector::camelize($name));
     }
 
     /**
      * @param string $type
-     * @return $this
+     * @return self
      */
-    public function setType($type)
+    public function setType(string $type): ParameterDeclaration
     {
         $this->type = $type;
 
@@ -65,7 +65,7 @@ class ParameterDeclaration extends NamedDeclaration
     /**
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -74,9 +74,9 @@ class ParameterDeclaration extends NamedDeclaration
      * Flag that parameter should pass by reference.
      *
      * @param bool $passedByReference
-     * @return $this
+     * @return self
      */
-    public function setPBR($passedByReference = false)
+    public function setPBR(bool $passedByReference = false): ParameterDeclaration
     {
         $this->pdb = $passedByReference;
 
@@ -86,7 +86,7 @@ class ParameterDeclaration extends NamedDeclaration
     /**
      * @return bool
      */
-    public function isPBR()
+    public function isPBR(): bool
     {
         return $this->pdb;
     }
@@ -96,7 +96,7 @@ class ParameterDeclaration extends NamedDeclaration
      *
      * @return bool
      */
-    public function isOptional()
+    public function isOptional(): bool
     {
         return $this->isOptional;
     }
@@ -105,9 +105,9 @@ class ParameterDeclaration extends NamedDeclaration
      * Set parameter default value.
      *
      * @param mixed $defaultValue
-     * @return $this
+     * @return self
      */
-    public function setDefault($defaultValue)
+    public function setDefault($defaultValue): ParameterDeclaration
     {
         $this->isOptional = null;
         $this->defaultValue = $defaultValue;
@@ -126,9 +126,9 @@ class ParameterDeclaration extends NamedDeclaration
     /**
      * Remove default value.
      *
-     * @return $this
+     * @return self
      */
-    public function removeDefault()
+    public function removeDefault(): ParameterDeclaration
     {
         $this->isOptional = false;
         $this->defaultValue = null;
@@ -139,7 +139,7 @@ class ParameterDeclaration extends NamedDeclaration
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $type = '';
         if (!empty($this->type)) {
@@ -152,6 +152,6 @@ class ParameterDeclaration extends NamedDeclaration
             return $result;
         }
 
-        return $result . ' = ' . $this->serializer()->serialize($this->defaultValue);
+        return $result . ' = ' . $this->getSerializer()->serialize($this->defaultValue);
     }
 }

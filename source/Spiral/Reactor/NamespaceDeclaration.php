@@ -29,7 +29,7 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
      * @param string $name
      * @param string $comment
      */
-    public function __construct($name = '', $comment = '')
+    public function __construct(string $name = '', string $comment = '')
     {
         parent::__construct($name);
 
@@ -46,12 +46,12 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
     /**
      * Method will automatically mount requested uses is any.
      *
-     * @todo DRY, see FileDeclaration
-     * @param RenderableInterface $element
-     * @return $this
+     * @todo dry, see FileDeclaration
+     * @param DeclarationInterface $element
+     * @return self
      * @throws Exceptions\ReactorException
      */
-    public function addElement(RenderableInterface $element)
+    public function addElement(DeclarationInterface $element): NamespaceDeclaration
     {
         $this->elements->add($element);
         if ($element instanceof DependedInterface) {
@@ -64,9 +64,9 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return self
      */
-    public function replace($search, $replace)
+    public function replace($search, $replace): NamespaceDeclaration
     {
         $this->docComment->replace($search, $replace);
         $this->elements->replace($search, $replace);
@@ -77,7 +77,7 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $result = '';
         $indentShift = 0;
@@ -87,7 +87,7 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
         }
 
         if (!empty($this->getName())) {
-            $result = $this->indent("namespace {$this->getName()} {", $indentLevel) . "\n";
+            $result = $this->addIndent("namespace {$this->getName()} {", $indentLevel) . "\n";
             $indentShift = 1;
         }
 
@@ -98,7 +98,7 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
         $result .= $this->elements->render($indentLevel + $indentShift);
 
         if (!empty($this->getName())) {
-            $result .= "\n" . $this->indent("}", $indentLevel);
+            $result .= "\n" . $this->addIndent("}", $indentLevel);
         }
 
         return $result;
@@ -107,7 +107,7 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
     /**
      * @return DeclarationAggregator|ClassDeclaration[]|Source[]|DocComment[]
      */
-    public function elements()
+    public function getElements(): DeclarationAggregator
     {
         return $this->elements;
     }

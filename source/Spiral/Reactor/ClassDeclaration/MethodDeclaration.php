@@ -7,7 +7,6 @@
  */
 namespace Spiral\Reactor\ClassDeclaration;
 
-use Doctrine\Common\Inflector\Inflector;
 use Spiral\Reactor\Body\Source;
 use Spiral\Reactor\ClassDeclaration\Aggregators\ParameterAggregator;
 use Spiral\Reactor\Prototypes\NamedDeclaration;
@@ -38,11 +37,11 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
     private $source = null;
 
     /**
-     * @param string $name
-     * @param string $source
-     * @param string $comment
+     * @param string       $name
+     * @param string|array $source
+     * @param string       $comment
      */
-    public function __construct($name, $source = '', $comment = '')
+    public function __construct(string $name, $source = '', string $comment = '')
     {
         parent::__construct($name);
 
@@ -54,9 +53,9 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param bool $static
-     * @return $this
+     * @return self
      */
-    public function setStatic($static)
+    public function setStatic(bool $static = true): MethodDeclaration
     {
         $this->static = (bool)$static;
 
@@ -66,7 +65,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
     /**
      * @return bool
      */
-    public function isStatic()
+    public function isStatic(): bool
     {
         return $this->static;
     }
@@ -74,7 +73,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
     /**
      * @return Source
      */
-    public function source()
+    public function source(): Source
     {
         return $this->source;
     }
@@ -83,9 +82,9 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
      * Set method source.
      *
      * @param string|array $source
-     * @return $this
+     * @return self
      */
-    public function setSource($source)
+    public function setSource($source): MethodDeclaration
     {
         if (!empty($source)) {
             if (is_array($source)) {
@@ -101,7 +100,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
     /**
      * @return ParameterAggregator|ParameterDeclaration[]
      */
-    public function parameters()
+    public function getParameters(): ParameterAggregator
     {
         return $this->parameters;
     }
@@ -110,7 +109,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
      * @param string $name
      * @return ParameterDeclaration
      */
-    public function parameter($name)
+    public function parameter(string $name): ParameterDeclaration
     {
         return $this->parameters->get($name);
     }
@@ -120,7 +119,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
      *
      * @return $this
      */
-    public function replace($search, $replace)
+    public function replace($search, $replace): MethodDeclaration
     {
         $this->docComment->replace($search, $replace);
 
@@ -131,7 +130,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
      * @param int $indentLevel
      * @return string
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $result = '';
         if (!$this->docComment->isEmpty()) {
@@ -145,14 +144,14 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
             $method .= "()";
         }
 
-        $result .= $this->indent($method, $indentLevel) . "\n";
-        $result .= $this->indent('{', $indentLevel) . "\n";
+        $result .= $this->addIndent($method, $indentLevel) . "\n";
+        $result .= $this->addIndent('{', $indentLevel) . "\n";
 
         if (!$this->source->isEmpty()) {
             $result .= $this->source->render($indentLevel + 1) . "\n";
         }
 
-        $result .= $this->indent("}", $indentLevel);
+        $result .= $this->addIndent("}", $indentLevel);
 
         return $result;
     }

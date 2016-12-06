@@ -42,7 +42,7 @@ class ConstantDeclaration extends NamedDeclaration
     /**
      * {@inheritdoc}
      */
-    public function setName($name)
+    public function setName(string $name): ConstantDeclaration
     {
         return parent::setName(strtoupper(Inflector::tableize($name)));
     }
@@ -51,9 +51,9 @@ class ConstantDeclaration extends NamedDeclaration
      * Array values allowed (but works in PHP7 only).
      *
      * @param mixed $value
-     * @return $this
+     * @return self
      */
-    public function setValue($value)
+    public function setValue($value): ConstantDeclaration
     {
         $this->value = $value;
 
@@ -71,16 +71,16 @@ class ConstantDeclaration extends NamedDeclaration
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $result = '';
         if (!$this->docComment->isEmpty()) {
             $result .= $this->docComment->render($indentLevel) . "\n";
         }
 
-        $result .= $this->indent("const {$this->getName()} = ", $indentLevel);
+        $result .= $this->addIndent("const {$this->getName()} = ", $indentLevel);
 
         //todo: make indent level work
-        return $result . $this->serializer()->serialize($this->value);
+        return $result . $this->getSerializer()->serialize($this->value);
     }
 }

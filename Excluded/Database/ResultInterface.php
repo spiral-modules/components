@@ -20,12 +20,12 @@ interface ResultInterface extends \Traversable, \Countable
      *
      * @return int
      */
-    public function countColumns();
+    public function countColumns(): int;
 
     /**
-     * Fetch one result row as array or return false.
+     * Fetch one result row as array or return null.
      *
-     * @return array|bool
+     * @return array|null
      */
     public function fetch();
 
@@ -34,7 +34,7 @@ interface ResultInterface extends \Traversable, \Countable
      *
      * @return array
      */
-    public function fetchAll();
+    public function fetchAll(): array;
 
     /**
      * Close result iterator. Must free as much memory as it can.

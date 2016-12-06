@@ -20,5 +20,5 @@ interface DependedInterface
      *
      * @return array
      */
-    public function getDependencies();
+    public function getDependencies(): array;
 }

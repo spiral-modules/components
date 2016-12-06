@@ -26,7 +26,7 @@ class DeclarationAggregator extends Declaration implements
     private $allowed = [];
 
     /**
-     * @var RenderableInterface[]
+     * @var DeclarationInterface[]
      */
     private $elements = [];
 
@@ -43,7 +43,7 @@ class DeclarationAggregator extends Declaration implements
     /**
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->elements);
     }
@@ -54,7 +54,7 @@ class DeclarationAggregator extends Declaration implements
      * @param string $name
      * @return bool
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         foreach ($this->elements as $element) {
             if ($element instanceof NamedDeclaration && $element->getName() == $name) {
@@ -68,11 +68,11 @@ class DeclarationAggregator extends Declaration implements
     /**
      * Add new element.
      *
-     * @param RenderableInterface $element
-     * @return $this
+     * @param DeclarationInterface $element
+     * @return self
      * @throws ReactorException
      */
-    public function add(RenderableInterface $element)
+    public function add(DeclarationInterface $element): DeclarationAggregator
     {
         $reflector = new \ReflectionObject($element);
 
@@ -98,9 +98,12 @@ class DeclarationAggregator extends Declaration implements
      * Get named element by it's name.
      *
      * @param string $name
-     * @return RenderableInterface
+     *
+     * @return DeclarationInterface
+     *
+     * @throws ReactorException
      */
-    public function get($name)
+    public function get(string $name): DeclarationInterface
     {
         if (!$this->has($name)) {
             throw new ReactorException("Undefined element '{$name}'");
@@ -113,9 +116,9 @@ class DeclarationAggregator extends Declaration implements
      * Remove element by it's name.
      *
      * @param string $name
-     * @return $this
+     * @return self
      */
-    public function remove($name)
+    public function remove(string $name): DeclarationAggregator
     {
         foreach ($this->elements as $index => $element) {
             if ($element instanceof NamedDeclaration && $element->getName() == $name) {
@@ -130,7 +133,9 @@ class DeclarationAggregator extends Declaration implements
      * Get element by it's name.
      *
      * @param string $name
-     * @return RenderableInterface
+     *
+     * @return DeclarationInterface
+     *
      * @throws ReactorException
      */
     public function __get($name)
@@ -181,9 +186,9 @@ class DeclarationAggregator extends Declaration implements
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return self
      */
-    public function replace($search, $replace)
+    public function replace($search, $replace): DeclarationAggregator
     {
         foreach ($this->elements as $element) {
             if ($element instanceof ReplaceableInterface) {
@@ -197,7 +202,7 @@ class DeclarationAggregator extends Declaration implements
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $result = '';
 
@@ -212,16 +217,19 @@ class DeclarationAggregator extends Declaration implements
      * Find element by it's name (NamedDeclarations only).
      *
      * @param string $name
-     * @return RenderableInterface
-     * @throws ReactorException
+     *
+     * @return DeclarationInterface
+     *
+     * @throws ReactorException When unable to find.
      */
-    protected function find($name)
+    protected function find(string $name): DeclarationInterface
     {
         foreach ($this->elements as $element) {
             if ($element instanceof NamedDeclaration && $element->getName() == $name) {
                 return $element;
             }
         }
+
         throw new ReactorException("Unable to find element '{$name}'");
     }
 }

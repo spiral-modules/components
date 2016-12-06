@@ -31,10 +31,10 @@ class PropertyDeclaration extends NamedDeclaration
 
     /**
      * @param string $name
-     * @param null   $defaultValue
+     * @param mixed  $defaultValue
      * @param string $comment
      */
-    public function __construct($name, $defaultValue = null, $comment = '')
+    public function __construct(string $name, $defaultValue = null, string $comment = '')
     {
         parent::__construct($name);
         $this->setDefault($defaultValue);
@@ -46,7 +46,7 @@ class PropertyDeclaration extends NamedDeclaration
      *
      * @return bool
      */
-    public function hasDefault()
+    public function hasDefault(): bool
     {
         return $this->hasDefault;
     }
@@ -55,9 +55,9 @@ class PropertyDeclaration extends NamedDeclaration
      * Set default value.
      *
      * @param mixed $value
-     * @return $this
+     * @return self
      */
-    public function setDefault($value)
+    public function setDefault($value): PropertyDeclaration
     {
         $this->hasDefault = true;
         $this->defaultValue = $value;
@@ -68,9 +68,9 @@ class PropertyDeclaration extends NamedDeclaration
     /**
      * Remove default value.
      *
-     * @return $this
+     * @return self
      */
-    public function removeDefault()
+    public function removeDefault(): PropertyDeclaration
     {
         $this->hasDefault = false;
         $this->defaultValue = null;
@@ -89,17 +89,17 @@ class PropertyDeclaration extends NamedDeclaration
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $result = '';
         if (!$this->docComment->isEmpty()) {
             $result .= $this->docComment->render($indentLevel) . "\n";
         }
 
-        $result .= $this->indent("{$this->access} \${$this->getName()}", $indentLevel);
+        $result .= $this->addIndent("{$this->access} \${$this->getName()}", $indentLevel);
 
         if ($this->hasDefault) {
-            $value = $this->serializer()->serialize($this->defaultValue);
+            $value = $this->getSerializer()->serialize($this->defaultValue);
 
             if (is_array($this->defaultValue)) {
                 $value = $this->mountIndents($value, $indentLevel);
@@ -116,15 +116,15 @@ class PropertyDeclaration extends NamedDeclaration
     /**
      * Mount indentation to value. Attention, to be applied to arrays only!
      *
-     * @param $serialized
-     * @param $indentLevel
+     * @param string $serialized
+     * @param int    $indentLevel
      * @return string
      */
-    private function mountIndents($serialized, $indentLevel)
+    private function mountIndents(string $serialized, int $indentLevel): string
     {
         $lines = explode("\n", $serialized);
         foreach ($lines as &$line) {
-            $line = $this->indent($line, $indentLevel);
+            $line = $this->addIndent($line, $indentLevel);
             unset($line);
         }
 

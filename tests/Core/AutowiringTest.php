@@ -9,6 +9,7 @@
 namespace Spiral\Tests\Core;
 
 use Spiral\Core\Container;
+use Spiral\Reactor\ClassDeclaration;
 use Spiral\Tests\Core\Fixtures\Bucket;
 use Spiral\Tests\Core\Fixtures\DependedClass;
 use Spiral\Tests\Core\Fixtures\ExtendedSample;
@@ -22,6 +23,8 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
 {
     public function testSimple()
     {
+        $c = new ClassDeclaration('a');
+
         $container = new Container();
 
         $this->assertInstanceOf(SampleClass::class, $container->get(SampleClass::class));

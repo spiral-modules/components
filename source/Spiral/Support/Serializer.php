@@ -7,7 +7,7 @@
  */
 namespace Spiral\Support;
 
-use Spiral\Reactor\RenderableInterface;
+use Spiral\Reactor\DeclarationInterface;
 use Spiral\Support\Exceptions\SerializeException;
 
 /**
@@ -19,7 +19,7 @@ class Serializer
     /**
      * Fixed 4 spaces indent.
      */
-    const INDENT = RenderableInterface::INDENT;
+    const INDENT = DeclarationInterface::INDENT;
 
     /**
      * Serialize array.
@@ -104,7 +104,7 @@ class Serializer
      */
     protected function packValue($value): string
     {
-        if ($value instanceof RenderableInterface) {
+        if ($value instanceof DeclarationInterface) {
             //No indentation here
             return $value->render();
         }

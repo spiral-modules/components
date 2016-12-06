@@ -34,7 +34,7 @@ trait SerializerTrait
      *
      * @return Serializer
      */
-    private function serializer()
+    private function getSerializer(): Serializer
     {
         if (empty($this->serializer)) {
             $this->serializer = new Serializer();

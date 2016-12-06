@@ -8,12 +8,12 @@
 namespace Spiral\Reactor\Prototypes;
 
 use Spiral\Core\Component;
-use Spiral\Reactor\RenderableInterface;
+use Spiral\Reactor\DeclarationInterface;
 
 /**
  * Generic element declaration.
  */
-abstract class Declaration extends Component implements RenderableInterface
+abstract class Declaration extends Component implements DeclarationInterface
 {
     /**
      * Access level constants.
@@ -27,7 +27,7 @@ abstract class Declaration extends Component implements RenderableInterface
      * @param int    $indent
      * @return string
      */
-    protected function indent($string, $indent = 0)
+    protected function addIndent(string $string, int $indent = 0): string
     {
         return str_repeat(self::INDENT, max($indent, 0)) . $string;
     }
@@ -38,9 +38,9 @@ abstract class Declaration extends Component implements RenderableInterface
      *
      * @param string $string       String to be normalized.
      * @param bool   $joinMultiple Join multiple new lines into one.
-     * @return mixed
+     * @return string
      */
-    protected function normalizeEndings($string, $joinMultiple = true)
+    protected function normalizeEndings(string $string, bool $joinMultiple = true): string
     {
         if (!$joinMultiple) {
             return str_replace("\r\n", "\n", $string);

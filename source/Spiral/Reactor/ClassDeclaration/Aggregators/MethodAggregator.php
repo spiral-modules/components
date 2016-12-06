@@ -7,38 +7,39 @@
  */
 namespace Spiral\Reactor\ClassDeclaration\Aggregators;
 
-use Spiral\Reactor\ClassDeclaration\ConstantDeclaration;
+use Spiral\Reactor\ClassDeclaration\MethodDeclaration;
 use Spiral\Reactor\DeclarationAggregator;
+use Spiral\Reactor\DeclarationInterface;
 
 /**
- * Constants aggregation. Can automatically create constant on demand.
+ * Method aggregation. Can automatically create constant on demand.
  *
- * @method $this add(ConstantDeclaration $element)
+ * @method $this add(MethodDeclaration $element)
  */
-class ConstantAggregator extends DeclarationAggregator
+class MethodAggregator extends DeclarationAggregator
 {
     /**
      * @param array $constants
      */
     public function __construct(array $constants)
     {
-        parent::__construct([ConstantDeclaration::class], $constants);
+        parent::__construct([MethodDeclaration::class], $constants);
     }
 
     /**
      * Get named element by it's name.
      *
      * @param string $name
-     * @return ConstantDeclaration
+     * @return MethodDeclaration
      */
-    public function get($name)
+    public function get(string $name): DeclarationInterface
     {
         if (!$this->has($name)) {
             //Automatically creating constant
-            $constant = new ConstantDeclaration($name, null);
-            $this->add($constant);
+            $method = new MethodDeclaration($name);
+            $this->add($method);
 
-            return $constant;
+            return $method;
         }
 
         return parent::get($name);

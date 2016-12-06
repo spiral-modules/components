@@ -9,7 +9,6 @@ namespace Spiral\Reactor\Body;
 
 use Spiral\Reactor\Exceptions\MultilineException;
 use Spiral\Reactor\Prototypes\Declaration;
-use Spiral\Support\Strings;
 
 /**
  * Represents set of lines (function source, docComment).
@@ -32,16 +31,16 @@ class Source extends Declaration
     /**
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->lines);
     }
 
     /**
      * @param array $lines
-     * @return $this
+     * @return self
      */
-    public function setLines(array $lines)
+    public function setLines(array $lines): Source
     {
         $this->lines = $lines;
 
@@ -50,9 +49,9 @@ class Source extends Declaration
 
     /**
      * @param array $lines
-     * @return $this
+     * @return self
      */
-    public function addLines(array $lines)
+    public function addLines(array $lines): Source
     {
         $this->lines = array_merge($this->lines, $lines);
 
@@ -61,10 +60,10 @@ class Source extends Declaration
 
     /**
      * @param string $line
-     * @return $this
+     * @return self
      * @throws MultilineException
      */
-    public function addLine($line)
+    public function addLine(string $line): Source
     {
         if (strpos($line, "\n") !== false) {
             throw new MultilineException(
@@ -80,9 +79,9 @@ class Source extends Declaration
     /**
      * @param string $string
      * @param bool   $cutIndents Function Strings::normalizeIndents will be applied.
-     * @return $this
+     * @return self
      */
-    public function setString($string, $cutIndents = false)
+    public function setString(string $string, bool $cutIndents = false): Source
     {
         return $this->setLines($this->fetchLines($string, $cutIndents));
     }
@@ -90,9 +89,9 @@ class Source extends Declaration
     /**
      * @param string $string
      * @param bool   $cutIndents Function Strings::normalizeIndents will be applied.
-     * @return $this
+     * @return self
      */
-    public function addString($string, $cutIndents = false)
+    public function addString(string $string, bool $cutIndents = false): Source
     {
         return $this->addLines($this->fetchLines($string, $cutIndents));
     }
@@ -100,7 +99,7 @@ class Source extends Declaration
     /**
      * @return array
      */
-    public function getLines()
+    public function getLines(): array
     {
         return $this->lines;
     }
@@ -108,11 +107,11 @@ class Source extends Declaration
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $lines = $this->lines;
         array_walk($lines, function (&$line) use ($indentLevel) {
-            $line = $this->indent($line, $indentLevel);
+            $line = $this->addIndent($line, $indentLevel);
         });
 
         return join("\n", $lines);
@@ -121,7 +120,7 @@ class Source extends Declaration
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render(0);
     }
@@ -133,7 +132,7 @@ class Source extends Declaration
      * @param bool   $cutIndents
      * @return array
      */
-    public function fetchLines($string, $cutIndents)
+    public function fetchLines(string $string, bool $cutIndents): array
     {
         if ($cutIndents) {
             $string = $this->normalizeEndings($string, false);
@@ -146,11 +145,13 @@ class Source extends Declaration
     }
 
     /**
+     * Create version of source cut from specific string location.
+     *
      * @param string $string
      * @param bool   $cutIndents Function Strings::normalizeIndents will be applied.
      * @return Source
      */
-    public static function fromString($string, $cutIndents = false)
+    public static function fromString(string $string, bool $cutIndents = false): Source
     {
         $source = new self();
 
@@ -163,7 +164,7 @@ class Source extends Declaration
      * @param string $line
      * @return string
      */
-    protected function prepareLine($line)
+    protected function prepareLine(string $line): string
     {
         return $line;
     }

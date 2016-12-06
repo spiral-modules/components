@@ -22,7 +22,7 @@ abstract class NamedDeclaration extends Declaration
     /**
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->setName($name);
     }
@@ -31,10 +31,10 @@ abstract class NamedDeclaration extends Declaration
      * Attention, element name will be automatically classified.
      *
      * @param string $name
-     * @return $this
+     * @return $this|static
      * @throws ReactorException
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
 
@@ -44,7 +44,7 @@ abstract class NamedDeclaration extends Declaration
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }

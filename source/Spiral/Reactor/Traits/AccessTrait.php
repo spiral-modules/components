@@ -26,7 +26,7 @@ trait AccessTrait
      * @return $this
      * @throws ReactorException
      */
-    public function setAccess($access)
+    public function setAccess(string $access)
     {
         if (!in_array($access, [
             Declaration::ACCESS_PRIVATE,
@@ -45,7 +45,7 @@ trait AccessTrait
     /**
      * @return string
      */
-    public function getAccess()
+    public function getAccess(): string
     {
         return $this->access;
     }

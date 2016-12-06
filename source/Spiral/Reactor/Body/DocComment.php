@@ -17,9 +17,9 @@ class DocComment extends Source implements ReplaceableInterface
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return self
      */
-    public function replace($search, $replace)
+    public function replace($search, $replace): DocComment
     {
         $lines = $this->getLines();
 
@@ -33,18 +33,18 @@ class DocComment extends Source implements ReplaceableInterface
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         if ($this->isEmpty()) {
             return '';
         }
 
-        $result = $this->indent("/**\n", $indentLevel);
+        $result = $this->addIndent("/**\n", $indentLevel);
         foreach ($this->getLines() as $line) {
-            $result .= $this->indent(" * {$line}\n", $indentLevel);
+            $result .= $this->addIndent(" * {$line}\n", $indentLevel);
         }
 
-        $result .= $this->indent(" */", $indentLevel);
+        $result .= $this->addIndent(" */", $indentLevel);
 
         return $result;
     }
@@ -52,7 +52,7 @@ class DocComment extends Source implements ReplaceableInterface
     /**
      * {@inheritdoc}
      */
-    protected function prepareLine($line)
+    protected function prepareLine(string $line): string
     {
         $line = trim($line);
 

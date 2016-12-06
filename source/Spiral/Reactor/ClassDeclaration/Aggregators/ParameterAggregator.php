@@ -9,6 +9,7 @@ namespace Spiral\Reactor\ClassDeclaration\Aggregators;
 
 use Spiral\Reactor\ClassDeclaration\ParameterDeclaration;
 use Spiral\Reactor\DeclarationAggregator;
+use Spiral\Reactor\DeclarationInterface;
 
 /**
  * Constants aggregation. Can automatically create constant on demand.
@@ -31,7 +32,7 @@ class ParameterAggregator extends DeclarationAggregator
      * @param string $name
      * @return ParameterDeclaration
      */
-    public function get($name)
+    public function get(string $name): DeclarationInterface
     {
         if (!$this->has($name)) {
             //Automatically creating constant
@@ -47,7 +48,7 @@ class ParameterAggregator extends DeclarationAggregator
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         /**
          * Overwriting parent call.

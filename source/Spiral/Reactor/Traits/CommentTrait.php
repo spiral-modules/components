@@ -24,23 +24,9 @@ trait CommentTrait
      *
      * @return DocComment
      */
-    public function comment()
+    public function comment(): DocComment
     {
         return $this->docComment;
-    }
-
-    /**
-     * Initi comment value.
-     *
-     * @param string|array $comment
-     */
-    private function initComment($comment)
-    {
-        if (empty($this->docComment)) {
-            $this->docComment = new DocComment();
-        }
-
-        $this->setComment($comment);
     }
 
     /**
@@ -60,5 +46,19 @@ trait CommentTrait
         }
 
         return $this;
+    }
+
+    /**
+     * Init comment value.
+     *
+     * @param string|array $comment
+     */
+    private function initComment($comment)
+    {
+        if (empty($this->docComment)) {
+            $this->docComment = new DocComment();
+        }
+
+        $this->setComment($comment);
     }
 }

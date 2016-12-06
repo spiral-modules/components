@@ -10,7 +10,7 @@ namespace Spiral\Reactor;
 /**
  * To be rendered with some indent.
  */
-interface RenderableInterface
+interface DeclarationInterface
 {
     /**
      * Indent is always 4 spaces.
@@ -23,5 +23,5 @@ interface RenderableInterface
      * @param int $indentLevel
      * @return string
      */
-    public function render($indentLevel = 0);
+    public function render(int $indentLevel = 0): string;
 }

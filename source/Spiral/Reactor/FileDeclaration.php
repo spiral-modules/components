@@ -36,7 +36,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
      * @param string $namespace
      * @param string $comment
      */
-    public function __construct($namespace = '', $comment = '')
+    public function __construct(string $namespace = '', string $comment = '')
     {
         $this->namespace = $namespace;
 
@@ -53,9 +53,9 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
 
     /**
      * @param string $namespace
-     * @return $this
+     * @return self
      */
-    public function setNamespace($namespace)
+    public function setNamespace(string $namespace): FileDeclaration
     {
         $this->namespace = $namespace;
 
@@ -65,7 +65,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
     /**
      * @return string
      */
-    public function getNamespace()
+    public function getNamespace(): string
     {
         return $this->namespace;
     }
@@ -73,11 +73,11 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
     /**
      * Method will automatically mount requested uses is any.
      *
-     * @param RenderableInterface $element
-     * @return $this
+     * @param DeclarationInterface $element
+     * @return self
      * @throws Exceptions\ReactorException
      */
-    public function addElement(RenderableInterface $element)
+    public function addElement(DeclarationInterface $element): FileDeclaration
     {
         $this->elements->add($element);
         if ($element instanceof DependedInterface) {
@@ -90,9 +90,9 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return self
      */
-    public function replace($search, $replace)
+    public function replace($search, $replace): FileDeclaration
     {
         $this->docComment->replace($search, $replace);
         $this->elements->replace($search, $replace);
@@ -103,7 +103,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
     /**
      * {@inheritdoc}
      */
-    public function render($indentLevel = 0)
+    public function render(int $indentLevel = 0): string
     {
         $result = "<?php\n";
 
@@ -127,7 +127,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render(0);
     }
@@ -135,7 +135,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
     /**
      * @return DeclarationAggregator|ClassDeclaration[]|NamespaceDeclaration[]|Source[]|DocComment[]
      */
-    public function elements()
+    public function getElements(): DeclarationAggregator
     {
         return $this->elements;
     }

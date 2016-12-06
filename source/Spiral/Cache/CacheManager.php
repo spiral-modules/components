@@ -107,17 +107,6 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     }
 
     /**
-     * Alias for getStore.
-     *
-     * @param string|null $store
-     * @return StoreInterface
-     */
-    public function store(string $store = null): StoreInterface
-    {
-        return $this->getStore($store);
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @throws CacheException
@@ -126,7 +115,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
     {
         if ($class->isAbstract()) {
             //Default store
-            return $this->store();
+            return $this->getStore();
         }
 
         return $this->getStore(

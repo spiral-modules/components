@@ -17,7 +17,6 @@ use Spiral\ODM\Exceptions\CompositorException;
 use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\ODMInterface;
-use Spiral\Validation\ValidatesInterface;
 
 /**
  * Compositor is responsible for managing set (array) of classes nested to parent DocumentEntity.
@@ -25,7 +24,6 @@ use Spiral\Validation\ValidatesInterface;
  */
 class Compositor extends Component implements
     CompositableInterface,
-    ValidatesInterface,
     \IteratorAggregate,
     \Countable,
     \ArrayAccess
@@ -172,22 +170,6 @@ class Compositor extends Component implements
     public function isSolid()
     {
         return $this->solidState;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Invalidates every composited document.
-     *
-     * @return $this
-     */
-    public function invalidate()
-    {
-        foreach ($this->getIterator() as $document) {
-            $document->invalidate();
-        }
-
-        return $this;
     }
 
     /**
@@ -727,38 +709,6 @@ class Compositor extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function isValid()
-    {
-        $this->validate();
-
-        return empty($this->errors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasErrors()
-    {
-        return !$this->isValid();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getErrors($reset = false)
-    {
-        $errors = $this->errors;
-
-        if ($reset) {
-            $this->errors = [];
-        }
-
-        return $errors;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function jsonSerialize()
     {
         return $this->publicFields();
@@ -773,8 +723,7 @@ class Compositor extends Component implements
 
         return [
             'data'    => $this->serializeData(),
-            'atomics' => $this->buildAtomics('@compositor'),
-            'errors'  => $this->getErrors(),
+            'atomics' => $this->buildAtomics('@compositor')
         ];
     }
 
@@ -788,27 +737,6 @@ class Compositor extends Component implements
         }
 
         return parent::iocContainer();
-    }
-
-    /**
-     * Validate every composited document.
-     *
-     * @return bool
-     */
-    protected function validate()
-    {
-        $this->errors = [];
-        foreach ($this->documents as $offset => $document) {
-            //To ensure that instance is Document since components
-            //is lazy loading them
-            $document = $this->getDocument($offset);
-
-            if (!$document->isValid()) {
-                $this->errors[$offset] = $document->getErrors();
-            }
-        }
-
-        return empty($this->errors);
     }
 
     /**

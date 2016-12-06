@@ -40,6 +40,11 @@ class CachedResult extends ArrayResult
     protected $queryString = '';
 
     /**
+     * @var array
+     */
+    protected $parameters = [];
+
+    /**
      * @param array          $data
      * @param array          $parameters
      * @param string         $queryString

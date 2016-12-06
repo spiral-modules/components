@@ -30,7 +30,7 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
     /**
      * @param array $rowsets
      */
-    public function __construct(array  $rowsets)
+    public function __construct(array $rowsets)
     {
         parent::__construct($rowsets);
 
@@ -48,7 +48,7 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
     /**
      * {@inheritdoc}
      */
-    public function countColumns()
+    public function countColumns(): int
     {
         return count($this->columns);
     }
@@ -136,7 +136,7 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
     /**
      * {@inheritdoc}
      */
-    public function fetchAll()
+    public function fetchAll(): array
     {
         $result = [];
         while (($values = $this->fetch()) !== false) {

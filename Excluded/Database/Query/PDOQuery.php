@@ -14,8 +14,6 @@ use Spiral\Database\ResultInterface;
 
 /**
  * Works as prepared PDOStatement.
- *
- * @todo bad namespace choice?
  */
 class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializable
 {
@@ -61,7 +59,7 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
      *
      * @return int
      */
-    public function countColumns()
+    public function countColumns(): int
     {
         return $this->columnCount();
     }

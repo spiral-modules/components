@@ -188,7 +188,7 @@ class ReflectionInvocation
      *
      * @return ReflectionArgument|null
      */
-    public function argument(int $index): ReflectionArgument
+    public function getArgument(int $index): ReflectionArgument
     {
         if (!isset($this->arguments[$index])) {
             throw new ReflectionException("No such argument with index '{$index}'");

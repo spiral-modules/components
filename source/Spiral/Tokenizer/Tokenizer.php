@@ -31,7 +31,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Memory section.
      */
-    const MEMORY_LOCATION = 'tokenizer';
+    const MEMORY = 'tokenizer';
 
     /**
      * @var TokenizerConfig
@@ -78,11 +78,11 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
 
         $reflection = new ReflectionFile(
             $this->normalizeTokens(token_get_all($this->files->read($filename))),
-            (array)$this->memory->loadData($fileMD5, self::MEMORY_LOCATION)
+            (array)$this->memory->loadData($fileMD5, self::MEMORY)
         );
 
         //Let's save to cache
-        $this->memory->saveData($fileMD5, $reflection->exportSchema(), static::MEMORY_LOCATION);
+        $this->memory->saveData($fileMD5, $reflection->exportSchema(), static::MEMORY);
 
         return $reflection;
     }

@@ -11,8 +11,8 @@ namespace Spiral\Tokenizer;
 use Spiral\Tokenizer\Exceptions\IsolatorException;
 
 /**
- * Isolators used to find and replace php blocks in given source. Can
- * be used by view processors, or to remove php code from some string.
+ * Isolators used to find and replace php blocks in given source. Can be used by view processors,
+ * or to remove php code from some string.
  */
 class Isolator
 {
@@ -29,7 +29,7 @@ class Isolator
      *
      * @var string
      */
-    private $prefix = '';
+    private $prefix;
 
     /**
      * Isolation postfix. Use any values that will not corrupt HTML
@@ -37,13 +37,13 @@ class Isolator
      *
      * @var string
      */
-    private $postfix = '';
+    private $postfix;
 
     /**
      * @param string $prefix  Replaced block prefix, -php by default.
      * @param string $postfix Replaced block postfix, block- by default.
      */
-    public function __construct($prefix = '-php-', $postfix = '-block-')
+    public function __construct(string $prefix = '-php-', string $postfix = '-block-')
     {
         $this->prefix = $prefix;
         $this->postfix = $postfix;
@@ -58,7 +58,7 @@ class Isolator
      *
      * @return string
      */
-    public function isolatePHP($source)
+    public function isolatePHP(string $source): string
     {
         $phpBlock = false;
 
@@ -94,32 +94,16 @@ class Isolator
     }
 
     /**
-     * Replace every isolated block.
-     *
-     * @deprecated Use setBlock instead!
-     *
-     * @param array $blocks
-     *
-     * @return $this
-     */
-    public function setBlocks(array $blocks)
-    {
-        $this->phpBlocks = $blocks;
-
-        return $this;
-    }
-
-    /**
      * Set block content by id.
      *
      * @param string $blockID
      * @param string $source
      *
-     * @return $this
+     * @return self
      *
      * @throws IsolatorException
      */
-    public function setBlock($blockID, $source)
+    public function setBlock(string $blockID, string $source): self
     {
         if (!isset($this->phpBlocks[$blockID])) {
             throw new IsolatorException("Undefined block {$blockID}");
@@ -135,7 +119,7 @@ class Isolator
      *
      * @return array
      */
-    public function getBlocks()
+    public function getBlocks(): array
     {
         return $this->phpBlocks;
     }
@@ -148,7 +132,7 @@ class Isolator
      *
      * @return string
      */
-    public function repairPHP($source)
+    public function repairPHP(string $source): string
     {
         return preg_replace_callback(
             $this->blockRegex(),
@@ -171,7 +155,7 @@ class Isolator
      *
      * @return string
      */
-    public function removePHP($isolatedSource)
+    public function removePHP(string $isolatedSource): string
     {
         return preg_replace($this->blockRegex(), '', $isolatedSource);
     }
@@ -187,29 +171,29 @@ class Isolator
     /**
      * @return string
      */
-    private function blockRegex()
+    private function blockRegex(): string
     {
         return '/' .
-        preg_quote($this->prefix)
-        . '(?P<id>[0-9a-z]+)'
-        . preg_quote($this->postfix)
-        . '/';
+            preg_quote($this->prefix)
+            . '(?P<id>[0-9a-z]+)'
+            . preg_quote($this->postfix)
+            . '/';
     }
 
     /**
      * @return string
      */
-    private function uniqueID()
+    private function uniqueID(): string
     {
         return md5(count($this->phpBlocks) . uniqid(true));
     }
 
     /**
-     * @param int $blockID
+     * @param string $blockID
      *
      * @return string
      */
-    private function placeholder($blockID)
+    private function placeholder(string $blockID): string
     {
         return $this->prefix . $blockID . $this->postfix;
     }
@@ -219,7 +203,7 @@ class Isolator
      *
      * @return bool
      */
-    private function isOpenTag($token)
+    private function isOpenTag($token): bool
     {
         if (!is_array($token)) {
             return false;
@@ -238,7 +222,7 @@ class Isolator
      *
      * @return bool
      */
-    public function isCloseTag($token)
+    public function isCloseTag($token): bool
     {
         if (!is_array($token)) {
             return false;

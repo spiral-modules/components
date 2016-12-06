@@ -31,7 +31,7 @@ class TokenizerConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function getDirectories()
+    public function getDirectories(): array
     {
         return $this->config['directories'];
     }
@@ -39,7 +39,7 @@ class TokenizerConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function getExcludes()
+    public function getExcludes(): array
     {
         return $this->config['exclude'];
     }

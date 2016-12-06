@@ -43,18 +43,18 @@ class Highlighter
      */
     public function __construct($source = '', Style $style = null)
     {
-        $this->style = !empty($style) ? $style : new Style();
+        $this->style = $style ?? new Style();
         $this->tokens = $this->normalizeTokens(token_get_all($source));
     }
 
     /**
-     * Get highlighter with different source.
+     * Get highlighter with different source. Immutable.
      *
      * @param string $source
      *
-     * @return Highlighter
+     * @return self
      */
-    public function withSource($source)
+    public function withSource($source): self
     {
         $highlighter = clone $this;
         $highlighter->tokens = $this->normalizeTokens(token_get_all($source));
@@ -63,16 +63,17 @@ class Highlighter
     }
 
     /**
-     * Set highlighter styler.
+     * Set highlighter Style. Immutable.
      *
      * @param Style $style
-     * @return $this
+     * @return self
      */
-    public function setStyle(Style $style)
+    public function withStyle(Style $style): self
     {
-        $this->style = $style;
+        $highlighter = clone $this;
+        $highlighter->style = $style;
 
-        return $this;
+        return $highlighter;
     }
 
     /**
@@ -80,7 +81,7 @@ class Highlighter
      *
      * @return string
      */
-    public function highlight()
+    public function highlight(): string
     {
         if (!empty($this->highlighted)) {
             //Nothing to do
@@ -105,7 +106,7 @@ class Highlighter
      * @param int|null $around Set as null to return every line.
      * @return string
      */
-    public function lines($line = null, $around = null)
+    public function lines(int $line = null, int $around = null): string
     {
         //Chinking by lines
         $lines = explode("\n", str_replace("\r\n", "\n", $this->highlight()));

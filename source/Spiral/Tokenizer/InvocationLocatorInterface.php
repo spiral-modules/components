@@ -24,5 +24,5 @@ interface InvocationLocatorInterface
      *
      * @return ReflectionInvocation[]
      */
-    public function getInvocations(\ReflectionFunctionAbstract $function);
+    public function getInvocations(\ReflectionFunctionAbstract $function): array;
 }

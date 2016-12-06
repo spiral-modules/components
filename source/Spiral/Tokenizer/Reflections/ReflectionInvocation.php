@@ -8,6 +8,8 @@
 
 namespace Spiral\Tokenizer\Reflections;
 
+use Spiral\Tokenizer\Exceptions\ReflectionException;
+
 /**
  * ReflectionInvocation used to represent function or static method call found by ReflectionFile.
  * This reflection is very useful for static analysis and mainly used in Translator component to
@@ -70,14 +72,14 @@ class ReflectionInvocation
      * @param int                  $level
      */
     public function __construct(
-        $filename,
-        $line,
-        $class,
-        $operator,
-        $name,
+        string $filename,
+        int $line,
+        string $class,
+        string $operator,
+        string $name,
         array $arguments,
-        $source,
-        $level
+        string $source,
+        int $level
     ) {
         $this->filename = $filename;
         $this->line = $line;
@@ -94,7 +96,7 @@ class ReflectionInvocation
      *
      * @return string
      */
-    public function getFilename()
+    public function getFilename(): string
     {
         return $this->filename;
     }
@@ -104,7 +106,7 @@ class ReflectionInvocation
      *
      * @return int
      */
-    public function getLine()
+    public function getLine(): int
     {
         return $this->line;
     }
@@ -114,7 +116,7 @@ class ReflectionInvocation
      *
      * @return string
      */
-    public function getClass()
+    public function getClass(): string
     {
         return $this->class;
     }
@@ -124,7 +126,7 @@ class ReflectionInvocation
      *
      * @return string
      */
-    public function getOperator()
+    public function getOperator(): string
     {
         return $this->operator;
     }
@@ -134,7 +136,7 @@ class ReflectionInvocation
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -144,7 +146,7 @@ class ReflectionInvocation
      *
      * @return bool
      */
-    public function isMethod()
+    public function isMethod(): bool
     {
         return !empty($this->class);
     }
@@ -154,7 +156,7 @@ class ReflectionInvocation
      *
      * @return string
      */
-    public function getSource()
+    public function getSource(): string
     {
         return $this->source;
     }
@@ -164,7 +166,7 @@ class ReflectionInvocation
      *
      * @return int
      */
-    public function countArguments()
+    public function countArguments(): int
     {
         return count($this->arguments);
     }
@@ -174,7 +176,7 @@ class ReflectionInvocation
      *
      * @return ReflectionArgument[]
      */
-    public function getArguments()
+    public function getArguments(): array
     {
         return $this->arguments;
     }
@@ -186,9 +188,13 @@ class ReflectionInvocation
      *
      * @return ReflectionArgument|null
      */
-    public function argument($index)
+    public function argument(int $index): ReflectionArgument
     {
-        return isset($this->arguments[$index]) ? $this->arguments[$index] : null;
+        if (!isset($this->arguments[$index])) {
+            throw new ReflectionException("No such argument with index '{$index}'");
+        }
+
+        return $this->arguments[$index];
     }
 
     /**
@@ -196,7 +202,7 @@ class ReflectionInvocation
      *
      * @return int
      */
-    public function getLevel()
+    public function getLevel(): int
     {
         return $this->level;
     }

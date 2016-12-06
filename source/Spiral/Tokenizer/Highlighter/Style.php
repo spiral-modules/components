@@ -93,12 +93,12 @@ class Style
     /**
      * Highlight given token.
      *
-     * @param int    $tokenType
-     * @param string $code
+     * @param int    $tokenType PHP token type used to correctly resolve proper color.
+     * @param string $code      Token source code.
      *
      * @return string
      */
-    public function highlightToken($tokenType, $code)
+    public function highlightToken(int $tokenType, string $code): string
     {
         foreach ($this->styles as $style => $tokens) {
             if (!in_array($tokenType, $tokens)) {
@@ -125,18 +125,18 @@ class Style
     }
 
     /**
-     * Highlight one line.
+     * Highlight one line of code.
      *
-     * @param int    $number
-     * @param string $code
-     * @param bool   $highlighted
+     * @param int    $number        Line number in file.
+     * @param string $code          Line code.
+     * @param bool   $highlightLine Indication that line must be highlighted (i.e. current line).
      *
      * @return string
      */
-    public function line($number, $code, $highlighted = false)
+    public function line(int $number, string $code, bool $highlightLine = false): string
     {
         return \Spiral\interpolate(
-            $this->templates[$highlighted ? 'highlighted' : 'line'],
+            $this->templates[$highlightLine ? 'highlighted' : 'line'],
             compact('number', 'code')
         );
     }

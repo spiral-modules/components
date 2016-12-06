@@ -12,7 +12,9 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\Tokenizer\Exceptions\LocatorException;
+use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Spiral\Tokenizer\Tokenizer;
 use Spiral\Tokenizer\TokenizerInterface;
 use Symfony\Component\Finder\Finder;
@@ -43,7 +45,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     protected $finder = null;
 
     /**
-     * @param TokenizerInterface $tokenizer
+     * @param TokenizerInterface $tokenizer Required to provide ReflectionFile.
      * @param Finder             $finder
      */
     public function __construct(TokenizerInterface $tokenizer, Finder $finder)
@@ -55,9 +57,9 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     /**
      * Available file reflections. Generator.
      *
-     * @generate ReflectionFile[]
+     * @return ReflectionFile[]|\Generator
      */
-    protected function availableReflections()
+    protected function availableReflections(): \Generator
     {
         /**
          * @var SplFileInfo
@@ -88,9 +90,9 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
      *
      * @param string $class
      *
-     * @return \ReflectionClass|null
+     * @return \ReflectionClass
      */
-    protected function classReflection($class)
+    protected function classReflection(string $class): \ReflectionClass
     {
         $loader = function ($class) {
             throw new LocatorException("Class '{$class}' can not be loaded");
@@ -100,14 +102,16 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
         spl_autoload_register($loader);
 
         try {
+            //In some cases reflection can thrown an exception if class invalid or can not be loaded,
+            //we are going to handle such exception and convert it soft exception
             return new \ReflectionClass($class);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger()->error(
                 "Unable to resolve class '{class}', error '{message}'",
                 ['class' => $class, 'message' => $e->getMessage()]
             );
 
-            return;
+            throw new LoaderException($e->getMessage(), $e->getCode());
         } finally {
             spl_autoload_unregister($loader);
         }
@@ -120,7 +124,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
      *
      * @return array
      */
-    protected function getTraits($class)
+    protected function fetchTraits(string $class): array
     {
         $traits = [];
 

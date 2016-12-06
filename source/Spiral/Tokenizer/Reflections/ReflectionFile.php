@@ -160,7 +160,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return array_keys($this->functions);
     }
@@ -170,7 +170,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    public function getClasses()
+    public function getClasses(): array
     {
         if (!isset($this->declarations['T_CLASS'])) {
             return [];
@@ -184,7 +184,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    public function getTraits()
+    public function getTraits(): array
     {
         if (!isset($this->declarations['T_TRAIT'])) {
             return [];
@@ -198,7 +198,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    public function getInterfaces()
+    public function getInterfaces(): array
     {
         if (!isset($this->declarations['T_INTERFACE'])) {
             return [];
@@ -212,7 +212,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    public function getTokens()
+    public function getTokens(): array
     {
         return $this->tokens;
     }
@@ -222,7 +222,7 @@ class ReflectionFile extends Component
      *
      * @return bool
      */
-    public function hasIncludes()
+    public function hasIncludes(): bool
     {
         return $this->hasIncludes;
     }
@@ -233,7 +233,7 @@ class ReflectionFile extends Component
      *
      * @return ReflectionInvocation[]
      */
-    public function getInvocations()
+    public function getInvocations(): array
     {
         if (empty($this->invocations)) {
             $this->locateInvocations($this->getTokens());
@@ -247,7 +247,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    public function exportSchema()
+    public function exportSchema(): array
     {
         return [$this->hasIncludes, $this->declarations, $this->functions, $this->namespaces];
     }
@@ -320,7 +320,7 @@ class ReflectionFile extends Component
      *
      * @param int $tokenID
      */
-    private function registerNamespace($tokenID)
+    private function registerNamespace(int $tokenID)
     {
         $namespace = '';
         $localID = $tokenID + 1;
@@ -364,7 +364,7 @@ class ReflectionFile extends Component
      *
      * @param int $tokenID
      */
-    private function registerUse($tokenID)
+    private function registerUse(int $tokenID)
     {
         $namespace = rtrim($this->activeNamespace($tokenID), '\\');
 
@@ -396,7 +396,7 @@ class ReflectionFile extends Component
      *
      * @param int $tokenID
      */
-    private function registerFunction($tokenID)
+    private function registerFunction(int $tokenID)
     {
         foreach ($this->declarations as $declarations) {
             foreach ($declarations as $location) {
@@ -431,7 +431,7 @@ class ReflectionFile extends Component
      * @param int $tokenID
      * @param int $tokenType
      */
-    private function registerDeclaration($tokenID, $tokenType)
+    private function registerDeclaration(int $tokenID, int $tokenType)
     {
         $localID = $tokenID + 1;
         while ($this->tokens[$localID][self::TOKEN_TYPE] != T_STRING) {
@@ -455,7 +455,7 @@ class ReflectionFile extends Component
      * @param array $tokens
      * @param int   $invocationLevel
      */
-    private function locateInvocations(array $tokens, $invocationLevel = 0)
+    private function locateInvocations(array $tokens, int $invocationLevel = 0)
     {
         //Multiple "(" and ")" statements nested.
         $level = 0;
@@ -582,11 +582,11 @@ class ReflectionFile extends Component
      * @param int   $invocationLevel
      */
     private function registerInvocation(
-        $invocationID,
-        $argumentsID,
-        $endID,
+        int $invocationID,
+        int $argumentsID,
+        int $endID,
         array $arguments,
-        $invocationLevel
+        int $invocationLevel
     ) {
         //Nested invocations
         $this->locateInvocations($arguments, $invocationLevel + 1);
@@ -617,7 +617,7 @@ class ReflectionFile extends Component
      *
      * @return array
      */
-    private function fetchContext($invocationTID, $argumentsTID)
+    private function fetchContext(int $invocationTID, int $argumentsTID): array
     {
         $class = $operator = '';
         $name = trim($this->getSource($invocationTID, $argumentsTID), '( ');
@@ -648,7 +648,7 @@ class ReflectionFile extends Component
      *
      * @return string|null
      */
-    private function activeDeclaration($tokenID)
+    private function activeDeclaration(int $tokenID): string
     {
         foreach ($this->declarations as $declarations) {
             foreach ($declarations as $name => $position) {
@@ -659,7 +659,7 @@ class ReflectionFile extends Component
         }
 
         //Can not be detected
-        return null;
+        return '';
     }
 
     /**
@@ -669,7 +669,7 @@ class ReflectionFile extends Component
      *
      * @return string
      */
-    private function activeNamespace($tokenID)
+    private function activeNamespace(int $tokenID): string
     {
         foreach ($this->namespaces as $namespace => $position) {
             if ($tokenID >= $position[self::O_TOKEN] && $tokenID <= $position[self::C_TOKEN]) {
@@ -692,9 +692,9 @@ class ReflectionFile extends Component
      *
      * @param int $tokenID
      *
-     * @return mixed
+     * @return int
      */
-    private function endingToken($tokenID)
+    private function endingToken(int $tokenID): int
     {
         $level = null;
         for ($localID = $tokenID; $localID < $this->countTokens; ++$localID) {
@@ -723,7 +723,7 @@ class ReflectionFile extends Component
      *
      * @return int
      */
-    private function lineNumber($tokenID)
+    private function lineNumber(int $tokenID): int
     {
         while (empty($this->tokens[$tokenID][self::TOKEN_LINE])) {
             --$tokenID;
@@ -740,7 +740,7 @@ class ReflectionFile extends Component
      *
      * @return string
      */
-    private function getSource($startID, $endID)
+    private function getSource(int $startID, int $endID): string
     {
         $result = '';
         for ($tokenID = $startID; $tokenID <= $endID; ++$tokenID) {

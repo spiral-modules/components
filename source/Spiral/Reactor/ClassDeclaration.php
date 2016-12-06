@@ -25,9 +25,6 @@ use Spiral\Reactor\Traits\CommentTrait;
  */
 class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 {
-    /**
-     * Can be commented.
-     */
     use CommentTrait;
 
     /**

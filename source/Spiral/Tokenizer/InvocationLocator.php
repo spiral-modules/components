@@ -13,14 +13,15 @@ use Spiral\Tokenizer\Reflections\ReflectionInvocation;
 /**
  * Can locate invocations in a specified directory. Can only find simple invocations!
  *
- * @todo use ast
+ * Potentially this class have to be rewritten in order to use new PHP API and AST tree, for now it
+ * still relies on legacy token based parser.
  */
 class InvocationLocator extends AbstractLocator implements InvocationLocatorInterface
 {
     /**
      * {@inheritdoc}
      */
-    public function getInvocations(\ReflectionFunctionAbstract $function)
+    public function getInvocations(\ReflectionFunctionAbstract $function): array
     {
         $result = [];
         foreach ($this->availableInvocations($function->getName()) as $invocation) {
@@ -38,7 +39,7 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
      * @param string $signature Method or function signature (name), for pre-filtering.
      * @return ReflectionInvocation[]
      */
-    protected function availableInvocations($signature = '')
+    protected function availableInvocations(string $signature = ''): array
     {
         $invocations = [];
 
@@ -67,7 +68,7 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
     protected function isTargeted(
         ReflectionInvocation $invocation,
         \ReflectionFunctionAbstract $function
-    ) {
+    ): bool {
         if ($function instanceof \ReflectionFunction) {
             return !$invocation->isMethod();
         }
@@ -84,7 +85,7 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
 
         if ($target->isTrait()) {
             //Let's compare traits
-            return in_array($target->getName(), $this->getTraits($invocation->getClass()));
+            return in_array($target->getName(), $this->fetchTraits($invocation->getClass()));
         }
 
         return $class->getName() == $target->getName() || $class->isSubclassOf($target);

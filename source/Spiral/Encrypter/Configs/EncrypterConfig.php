@@ -34,7 +34,7 @@ class EncrypterConfig extends InjectableConfig
      *
      * @return string
      */
-    public function getKey()
+    public function getKey(): string
     {
         return $this->config['key'];
     }

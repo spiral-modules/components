@@ -30,5 +30,5 @@ interface ClassLocatorInterface
      *                       results.
      * @return array
      */
-    public function getClasses($target = null);
+    public function getClasses($target = null): array;
 }

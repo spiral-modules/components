@@ -36,21 +36,21 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * @var TokenizerConfig
      */
-    protected $config = null;
+    protected $config;
 
     /**
      * @invisible
      *
      * @var FilesInterface
      */
-    protected $files = null;
+    protected $files;
 
     /**
      * @invisible
      *
      * @var HippocampusInterface
      */
-    protected $memory = null;
+    protected $memory;
 
     /**
      * Tokenizer constructor.

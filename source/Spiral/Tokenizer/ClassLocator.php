@@ -17,7 +17,7 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
     /**
      * {!@inheritdoc}
      */
-    public function getClasses($target = null)
+    public function getClasses($target = null): array
     {
         if (!empty($target) && (is_object($target) || is_string($target))) {
             $target = new \ReflectionClass($target);
@@ -49,7 +49,7 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
      *
      * @return array
      */
-    protected function availableClasses()
+    protected function availableClasses(): array
     {
         $classes = [];
 
@@ -67,7 +67,7 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
      * @param \ReflectionClass|null $target
      * @return bool
      */
-    protected function isTargeted(\ReflectionClass $class, \ReflectionClass $target = null)
+    protected function isTargeted(\ReflectionClass $class, \ReflectionClass $target = null): bool
     {
         if (empty($target)) {
             return true;
@@ -79,6 +79,6 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
         }
 
         //Checking using traits
-        return in_array($target->getName(), $this->getTraits($class->getName()));
+        return in_array($target->getName(), $this->fetchTraits($class->getName()));
     }
 }

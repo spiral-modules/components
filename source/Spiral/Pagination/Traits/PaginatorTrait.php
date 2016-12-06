@@ -88,14 +88,17 @@ trait PaginatorTrait
 
         if (empty($container) || !$container->has(PaginatorsInterface::class)) {
             throw new SugarException(
-                'Unable to create paginator, PaginatorsInterface binding is missing or container is set'
+                'Unable to create paginator, PaginatorsInterface binding is missing or container not set'
             );
         }
 
-        $this->paginator = $container->get(PaginatorsInterface::class)->createPaginator(
-            $parameter,
-            $limit
-        );
+        /**
+         * @var PaginatorsInterface $factory
+         */
+        $factory = $container->get(PaginatorsInterface::class);
+
+        //Now we can create new instance of paginator using factory
+        $this->paginator = $factory->createPaginator($parameter, $limit);
 
         return $this;
     }
@@ -127,5 +130,5 @@ trait PaginatorTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container(): ContainerInterface;
+    abstract protected function container();
 }

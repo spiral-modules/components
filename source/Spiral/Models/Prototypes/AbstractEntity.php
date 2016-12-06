@@ -129,7 +129,7 @@ abstract class AbstractEntity extends MutableObject implements
     public function setField(string $name, $value, bool $filter = true)
     {
         if ($value instanceof AccessorInterface) {
-            $this->fields[$name] = $value->embed($this);
+            $this->fields[$name] = clone $value;
 
             return;
         }
@@ -410,7 +410,7 @@ abstract class AbstractEntity extends MutableObject implements
      */
     protected function createAccessor(string $accessor, $value): AccessorInterface
     {
-        return new $accessor($value, $this);
+        return new $accessor($value);
     }
 
     /**

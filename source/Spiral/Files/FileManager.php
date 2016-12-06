@@ -17,7 +17,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 /**
- * Default files storage, points to local hard drive.
+ * Default abstraction for file management operations.
  */
 class FileManager extends Component implements SingletonInterface, FilesInterface
 {
@@ -28,14 +28,14 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @var array
      */
-    private $destruct = [];
+    private $destructFiles = [];
 
     /**
      * FileManager constructor.
      */
     public function __construct()
     {
-        //Safety mechanism for temporary files, to be investigated if such approach alredy expired
+        //Safety mechanism for temporary files, to be investigated if such approach already expired
         register_shutdown_function([$this, '__destruct']);
     }
 
@@ -372,7 +372,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         if (!empty($extension)) {
             //I should find more original way of doing that
             rename($filename, $filename = $filename . '.' . $extension);
-            $this->destruct[] = $filename;
+            $this->destructFiles[] = $filename;
         }
 
         return $filename;
@@ -430,7 +430,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      */
     public function __destruct()
     {
-        foreach ($this->destruct as $filename) {
+        foreach ($this->destructFiles as $filename) {
             $this->delete($filename);
         }
     }

@@ -10,7 +10,7 @@ namespace Spiral\Pagination;
 /**
  * Simple predictable paginator.
  */
-class CountingPaginator implements PredictableInterface, \Countable
+class Paginator implements PredictableInterface, \Countable
 {
     /**
      * @var int
@@ -37,9 +37,10 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * @param int $limit
      */
-    public function __construct(int $limit = 25)
+    public function __construct(int $limit = 25, int $count = 0)
     {
-        $this->withLimit($limit);
+        $this->limit = $limit;
+        $this->count = $count;
     }
 
     /**
@@ -185,7 +186,7 @@ class CountingPaginator implements PredictableInterface, \Countable
      * Non-Immutable version of withCount.
      *
      * @param int $count
-     * @return CountingPaginator
+     * @return Paginator
      */
     private function setCount(int $count)
     {

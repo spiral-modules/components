@@ -9,15 +9,15 @@ namespace Spiral\Tests\Pagination;
 
 use Mockery as m;
 use Spiral\Pagination\CountingInterface;
-use Spiral\Pagination\CountingPaginator;
+use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
 use Spiral\Pagination\PredictableInterface;
 
-class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
+class PaginatorTest extends \PHPUnit_Framework_TestCase
 {
     public function testInterfaces()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
 
         $this->assertInstanceOf(PaginatorInterface::class, $paginator);
         $this->assertInstanceOf(CountingInterface::class, $paginator);
@@ -26,7 +26,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
 
     public function testLimit()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
 
         $this->assertSame(25, $paginator->getLimit());
         $newPaginator = $paginator->withLimit(50);
@@ -36,7 +36,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
 
     public function testCountsAndPages()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
 
         $this->assertSame(0, $paginator->getCount());
         $this->assertSame(1, $paginator->getPage());
@@ -47,7 +47,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
 
     public function testFirstPage()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
         $paginator = $paginator->withCount(100);
 
         $this->assertSame(1, $paginator->getPage());
@@ -63,7 +63,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
 
     public function testSecondPage()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
         $paginator = $paginator->withCount(110);
 
         $this->assertSame(110, $paginator->getCount());
@@ -82,7 +82,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
 
     public function testLastPageNumber()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
         $paginator = $paginator->withCount(110);
 
         $this->assertSame(110, $paginator->getCount());
@@ -102,7 +102,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
 
     public function testIsRequired()
     {
-        $paginator = new CountingPaginator(25);
+        $paginator = new Paginator(25);
 
         $paginator = $paginator->withCount(24);
         $this->assertFalse($paginator->isRequired());

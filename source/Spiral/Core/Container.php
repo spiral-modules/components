@@ -82,7 +82,7 @@ class Container extends Component implements
      *
      * @param string|null $context Related to parameter caused injection if any.
      */
-    public function make($class, $parameters = [], $context = null)
+    public function make(string $class, $parameters = [], string $context = null)
     {
         if (!isset($this->bindings[$class])) {
             return $this->autowire($class, $parameters, $context);
@@ -155,8 +155,8 @@ class Container extends Component implements
     public function resolveArguments(
         ContextFunction $reflection,
         array $parameters = [],
-        $context = null
-    ) {
+        string $context = null
+    ): array {
         $arguments = [];
         foreach ($reflection->getParameters() as $parameter) {
             $name = $parameter->getName();
@@ -217,9 +217,9 @@ class Container extends Component implements
      * @param string                $alias
      * @param string|array|callable $resolver
      *
-     * @return $this
+     * @return self
      */
-    public function bind($alias, $resolver)
+    public function bind(string $alias, $resolver): self
     {
         if (is_array($resolver) || $resolver instanceof \Closure) {
             $this->bindings[$alias] = [$resolver, false];
@@ -239,9 +239,9 @@ class Container extends Component implements
      * @param string                $alias
      * @param string|array|callable $resolver
      *
-     * @return $this
+     * @return self
      */
-    public function bindSingleton($alias, $resolver)
+    public function bindSingleton(string $alias, $resolver): self
     {
         if (is_object($resolver) && !$resolver instanceof \Closure) {
             $this->bindings[$alias] = $resolver;
@@ -257,12 +257,12 @@ class Container extends Component implements
     /**
      * Specify binding which has to be used for class injection.
      *
-     * @param string $class
-     * @param string $injector
+     * @param string        $class
+     * @param string|object $injector
      *
-     * @return $this
+     * @return self
      */
-    public function bindInjector($class, $injector)
+    public function bindInjector(string $class, $injector): self
     {
         if (!is_string($injector)) {
             throw new \InvalidArgumentException('Injector can only be set as string binding');
@@ -276,7 +276,7 @@ class Container extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function replace($alias, $resolver)
+    public function replace(string $alias, $resolver): array
     {
         $payload = [$alias, null];
         if (isset($this->bindings[$alias])) {
@@ -291,7 +291,7 @@ class Container extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function restore($replacePayload)
+    public function restore(array $replacePayload)
     {
         list($alias, $resolver) = $replacePayload;
 
@@ -310,7 +310,7 @@ class Container extends Component implements
      *
      * @return bool
      */
-    public function hasInstance($alias)
+    public function hasInstance(string $alias): bool
     {
         if (!$this->has($alias)) {
             return false;
@@ -327,7 +327,7 @@ class Container extends Component implements
     /**
      * @param string $alias
      */
-    public function removeBinding($alias)
+    public function removeBinding(string $alias)
     {
         unset($this->bindings[$alias]);
     }
@@ -338,7 +338,7 @@ class Container extends Component implements
      *
      * @return array
      */
-    public function getBindings()
+    public function getBindings(): array
     {
         return $this->bindings;
     }
@@ -348,7 +348,7 @@ class Container extends Component implements
      *
      * @return array
      */
-    public function getInjectors()
+    public function getInjectors(): array
     {
         return $this->injectors;
     }
@@ -364,7 +364,7 @@ class Container extends Component implements
      *
      * @throws AutowireException
      */
-    protected function autowire($class, array $parameters, $context)
+    protected function autowire(string $class, array $parameters, string $context = null)
     {
         if (!class_exists($class)) {
             throw new AutowireException("Undefined class or binding '{$class}'");
@@ -383,7 +383,7 @@ class Container extends Component implements
      *
      * @return bool
      */
-    protected function hasInjector(\ReflectionClass $reflection)
+    protected function hasInjector(\ReflectionClass $reflection): bool
     {
         if (isset($this->injectors[$reflection->getName()])) {
             return true;
@@ -399,7 +399,7 @@ class Container extends Component implements
      *
      * @return InjectorInterface
      */
-    protected function getInjector(\ReflectionClass $reflection)
+    protected function getInjector(\ReflectionClass $reflection): InjectorInterface
     {
         if (isset($this->injectors[$reflection->getName()])) {
             $injector = $this->get($this->injectors[$reflection->getName()]);
@@ -430,9 +430,9 @@ class Container extends Component implements
      * @throws ContainerException
      */
     private function createInstance(
-        $class,
+        string $class,
         array $parameters,
-        $context = null,
+        string $context = null,
         \ReflectionClass &$reflection = null
     ) {
         try {

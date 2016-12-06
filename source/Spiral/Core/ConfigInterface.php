@@ -20,5 +20,5 @@ interface ConfigInterface extends InjectableInterface, \ArrayAccess
      *
      * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 }

@@ -26,5 +26,5 @@ interface ResolverInterface
      *
      * @throws ArgumentException
      */
-    public function resolveArguments(ContextFunction $reflection, array $parameters = []);
+    public function resolveArguments(ContextFunction $reflection, array $parameters = []): array;
 }

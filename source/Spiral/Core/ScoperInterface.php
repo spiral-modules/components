@@ -26,9 +26,9 @@ interface ScoperInterface
      * @param string                $alias
      * @param string|array|callable $resolver
      *
-     * @return mixed Scope payload.
+     * @return array Scope payload.
      */
-    public function replace($alias, $resolver);
+    public function replace(string $alias, $resolver): array;
 
     /**
      * Restore previously pulled binding value using implementation specific payload. Method should
@@ -36,9 +36,9 @@ interface ScoperInterface
      *
      * @see replace
      *
-     * @param mixed $replacePayload
+     * @param array $replacePayload
      *
      * @throws ContainerException
      */
-    public function restore($replacePayload);
+    public function restore(array $replacePayload);
 }

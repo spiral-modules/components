@@ -44,7 +44,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->config;
     }

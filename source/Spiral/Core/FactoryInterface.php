@@ -32,5 +32,5 @@ interface FactoryInterface
      * @throws AutowireException
      * @throws ArgumentException
      */
-    public function make($class, $parameters = []);
+    public function make(string $class, $parameters = []);
 }

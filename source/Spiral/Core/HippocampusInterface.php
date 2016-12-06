@@ -23,7 +23,7 @@ interface HippocampusInterface
      *
      * @return string|array|null
      */
-    public function loadData($section, $location = null);
+    public function loadData(string $section, string $location = null);
 
     /**
      * Put data to long memory cache. No inner references or closures are allowed.
@@ -32,5 +32,5 @@ interface HippocampusInterface
      * @param string|array $data
      * @param string       $location Specific memory location.
      */
-    public function saveData($section, $data, $location = null);
+    public function saveData(string $section, $data, string $location = null);
 }

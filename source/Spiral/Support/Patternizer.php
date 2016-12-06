@@ -9,7 +9,8 @@
 namespace Spiral\Support;
 
 /**
- * Provides ability to process permissions as star based patterns.
+ * Provides ability to process permissions as star based patterns. This is helper class which is
+ * used in Tokenizer and Strempler components.
  *
  * Example:
  * post.*
@@ -21,17 +22,19 @@ class Patternizer
      * @param string $string
      * @return bool
      */
-    public function isPattern($string)
+    public function isPattern(string $string): bool
     {
         return strpos($string, '*') !== false || strpos($string, '|') !== false;
     }
 
     /**
+     * Checks if string matches given pattent.
+     *
      * @param string $string
      * @param string $pattern
      * @return bool
      */
-    public function matches($string, $pattern)
+    public function matches(string $string, string $pattern): bool
     {
         if (!$this->isPattern($pattern)) {
             return $string === $pattern;
@@ -44,7 +47,7 @@ class Patternizer
      * @param string $pattern
      * @return string
      */
-    private function getRegex($pattern)
+    private function getRegex(string $pattern): string
     {
         $regex = str_replace('*', '[a-z0-9_\-]+', addcslashes($pattern, '.-'));
 

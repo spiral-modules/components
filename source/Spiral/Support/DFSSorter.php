@@ -47,9 +47,9 @@ class DFSSorter
      * @param mixed  $item
      * @param array  $dependencies Must include keys object depends on.
      *
-     * @return $this
+     * @return self
      */
-    public function addItem($key, $item, array $dependencies)
+    public function addItem(string $key, $item, array $dependencies): self
     {
         $this->keys[] = $key;
         $this->objects[$key] = $item;
@@ -63,7 +63,7 @@ class DFSSorter
      *
      * @return array
      */
-    public function sort()
+    public function sort(): array
     {
         $items = array_values($this->keys);
 
@@ -79,7 +79,7 @@ class DFSSorter
      * @param string $key
      * @param array  $dependencies
      */
-    private function dfs($key, array $dependencies)
+    private function dfs(string $key, array $dependencies)
     {
         if (isset($this->states[$key])) {
             return;

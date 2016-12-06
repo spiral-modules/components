@@ -11,7 +11,8 @@ use Spiral\Reactor\RenderableInterface;
 use Spiral\Support\Exceptions\SerializeException;
 
 /**
- * Provides very simple api for serializing values.
+ * Provides very simple api for serializing values. Attention, this is helper class, it's not
+ * intended for processing user input.
  */
 class Serializer
 {
@@ -26,7 +27,7 @@ class Serializer
      * @param mixed $array
      * @return string
      */
-    public function serialize($array)
+    public function serialize($array): string
     {
         if (is_array($array)) {
             return $this->packArray($array);
@@ -40,7 +41,7 @@ class Serializer
      * @param int   $level
      * @return string
      */
-    protected function packArray(array $array, $level = 0)
+    protected function packArray(array $array, int $level = 0): string
     {
         if ($array === []) {
             return '[]';
@@ -101,7 +102,7 @@ class Serializer
      * @return string
      * @throws SerializeException
      */
-    protected function packValue($value)
+    protected function packValue($value): string
     {
         if ($value instanceof RenderableInterface) {
             //No indentation here

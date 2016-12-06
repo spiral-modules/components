@@ -24,7 +24,7 @@ interface StoreInterface
      *
      * @return bool
      */
-    public function isAvailable();
+    public function isAvailable(): bool;
 
     /**
      * Check if value is present in cache.
@@ -35,7 +35,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function has($name);
+    public function has(string $name): bool;
 
     /**
      * Get value stored in cache.
@@ -46,7 +46,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function get($name);
+    public function get(string $name);
 
     /**
      * Save data in cache. Method will replace values created before.
@@ -55,11 +55,9 @@ interface StoreInterface
      * @param mixed  $data
      * @param int    $lifetime Duration in seconds until the value will expire.
      *
-     * @return mixed
-     *
      * @throws StoreException
      */
-    public function set($name, $data, $lifetime);
+    public function set(string $name, $data, int $lifetime);
 
     /**
      * Store value in cache with infinite lifetime. Value will only expire when the cache is
@@ -68,11 +66,9 @@ interface StoreInterface
      * @param string $name
      * @param mixed  $data
      *
-     * @return mixed
-     *
      * @throws StoreException
      */
-    public function forever($name, $data);
+    public function forever(string $name, $data);
 
     /**
      * Delete data from cache.
@@ -81,7 +77,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function delete($name);
+    public function delete(string $name);
 
     /**
      * Increment numeric value stored in cache. Must return incremented value.
@@ -93,7 +89,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function inc($name, $delta = 1);
+    public function inc(string $name, int $delta = 1): int;
 
     /**
      * Decrement numeric value stored in cache. Must return decremented value.
@@ -105,7 +101,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function dec($name, $delta = 1);
+    public function dec(string $name, int $delta = 1): int;
 
     /**
      * Read item from cache and delete it afterwards.
@@ -116,7 +112,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function pull($name);
+    public function pull(string $name);
 
     /**
      * Get the item from cache and if the item is missing, set a default value using Closure.
@@ -129,7 +125,7 @@ interface StoreInterface
      *
      * @throws StoreException
      */
-    public function remember($name, $lifetime, $callback);
+    public function remember(string $name, int $lifetime, $callback);
 
     /**
      * Flush all values stored in cache.

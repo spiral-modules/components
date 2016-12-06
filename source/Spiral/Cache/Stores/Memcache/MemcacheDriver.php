@@ -47,7 +47,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function has($name)
+    public function has(string $name)
     {
         return $this->driver->get($name) !== false;
     }
@@ -55,7 +55,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function get($name)
+    public function get(string $name)
     {
         return $this->driver->get($name);
     }
@@ -65,7 +65,7 @@ class MemcacheDriver extends AbstractDriver
      *
      * @throws \MemcachedException
      */
-    public function set($name, $data, $lifetime)
+    public function set(string $name, $data, int $lifetime)
     {
         return $this->driver->set($name, $data, 0, $lifetime);
     }
@@ -73,7 +73,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function forever($name, $data)
+    public function forever(string $name, $data)
     {
         $this->driver->set($name, $data);
     }
@@ -81,7 +81,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         $this->driver->delete($name);
     }
@@ -89,7 +89,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function inc($name, $delta = 1)
+    public function inc(string $name, int $delta = 1): int
     {
         if (!$this->has($name)) {
             $this->forever($name, $delta);
@@ -103,7 +103,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function dec($name, $delta = 1)
+    public function dec(string $name, int $delta = 1): int
     {
         return $this->driver->decrement($name, $delta);
     }

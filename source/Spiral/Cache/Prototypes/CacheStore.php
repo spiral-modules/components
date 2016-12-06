@@ -6,8 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Cache;
+namespace Spiral\Cache\Prototypes;
 
+use Spiral\Cache\CacheManager;
+use Spiral\Cache\StoreInterface;
 use Spiral\Core\Container\InjectableInterface;
 
 /**
@@ -24,7 +26,7 @@ abstract class CacheStore implements StoreInterface, InjectableInterface
     /**
      * {@inheritdoc}
      */
-    public function pull($name)
+    public function pull(string $name)
     {
         $value = $this->get($name);
         $this->delete($name);
@@ -35,7 +37,7 @@ abstract class CacheStore implements StoreInterface, InjectableInterface
     /**
      * {@inheritdoc}
      */
-    public function remember($name, $lifetime, $callback)
+    public function remember(string $name, int $lifetime, $callback)
     {
         if (!$this->has($name)) {
             $this->set($name, $value = call_user_func($callback), $lifetime);

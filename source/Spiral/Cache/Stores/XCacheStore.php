@@ -8,7 +8,7 @@
 
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheStore;
+use Spiral\Cache\Prototypes\CacheStore;
 
 /**
  * Talks to xcache functions.
@@ -31,7 +31,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return extension_loaded('xcache');
     }
@@ -39,7 +39,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         return xcache_isset($this->prefix . $name);
     }
@@ -47,7 +47,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function get($name)
+    public function get(string $name)
     {
         return xcache_get($this->prefix . $name);
     }
@@ -55,7 +55,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function set($name, $data, $lifetime)
+    public function set(string $name, $data, int $lifetime)
     {
         return xcache_set($this->prefix . $name, $data, $lifetime);
     }
@@ -63,7 +63,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function forever($name, $data)
+    public function forever(string $name, $data)
     {
         return xcache_set($this->prefix . $name, $data, 0);
     }
@@ -71,7 +71,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         xcache_unset($this->prefix . $name);
     }
@@ -79,7 +79,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function inc($name, $delta = 1)
+    public function inc(string $name, int $delta = 1): int
     {
         return xcache_inc($this->prefix . $name, $delta);
     }
@@ -87,7 +87,7 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function dec($name, $delta = 1)
+    public function dec(string $name, int $delta = 1): int
     {
         return xcache_dec($this->prefix . $name, $delta);
     }

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2011
  */
-namespace Spiral\Storage;
+namespace Spiral\Storage\Prototypes;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -14,7 +14,9 @@ use Spiral\Core\Component;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Files\Streams\StreamWrapper;
+use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
+use Spiral\Storage\ServerInterface;
 
 /**
  * AbstractServer implementation with different naming.

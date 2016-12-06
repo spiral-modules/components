@@ -48,7 +48,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         if ($this->driver->get($name) === false) {
             return $this->driver->getResultCode() != \Memcached::RES_NOTFOUND;
@@ -60,7 +60,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function get($name)
+    public function get(string $name)
     {
         return $this->driver->get($name);
     }
@@ -70,7 +70,7 @@ class MemcachedDriver extends AbstractDriver
      *
      * @throws \MemcachedException
      */
-    public function set($name, $data, $lifetime)
+    public function set(string $name, $data, int $lifetime)
     {
         return $this->driver->set($name, $data, $lifetime);
     }
@@ -78,7 +78,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function forever($name, $data)
+    public function forever(string $name, $data)
     {
         $this->driver->set($name, $data);
     }
@@ -86,7 +86,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         $this->driver->delete($name);
     }
@@ -94,7 +94,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function inc($name, $delta = 1)
+    public function inc(string $name, int $delta = 1): int
     {
         if (!$this->has($name)) {
             $this->forever($name, $delta);
@@ -108,7 +108,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function dec($name, $delta = 1)
+    public function dec(string $name, int $delta = 1): int
     {
         return $this->driver->decrement($name, $delta);
     }

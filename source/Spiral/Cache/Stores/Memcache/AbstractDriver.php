@@ -8,7 +8,7 @@
 
 namespace Spiral\Cache\Stores\Memcache;
 
-use Spiral\Cache\CacheStore;
+use Spiral\Cache\Prototypes\CacheStore;
 
 /**
  * Common functionality for Memcache and Memcached drivers.
@@ -59,7 +59,7 @@ abstract class AbstractDriver extends CacheStore implements DriverInterface
     /**
      * {@inheritdoc}
      */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return true;
     }

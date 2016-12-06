@@ -8,8 +8,8 @@
 
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheStore;
 use Spiral\Cache\Exceptions\StoreException;
+use Spiral\Cache\Prototypes\CacheStore;
 use Spiral\Cache\Stores\Memcache\DriverInterface;
 use Spiral\Cache\Stores\Memcache\MemcachedDriver;
 use Spiral\Cache\Stores\Memcache\MemcacheDriver;
@@ -29,7 +29,7 @@ class MemcacheStore extends CacheStore
     /**
      * @var string
      */
-    private $prefix = 'spiral:';
+    private $prefix;
 
     /**
      * Currently active driver.
@@ -81,7 +81,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return $this->driver->isAvailable();
     }
@@ -89,7 +89,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         return $this->driver->get($this->prefix . $name);
     }
@@ -97,7 +97,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function get($name)
+    public function get(string $name)
     {
         return $this->driver->get($this->prefix . $name);
     }
@@ -107,7 +107,7 @@ class MemcacheStore extends CacheStore
      *
      * Will apply MAX_EXPIRATION.
      */
-    public function set($name, $data, $lifetime)
+    public function set(string $name, $data, int $lifetime)
     {
         $lifetime = min(self::MAX_EXPIRATION + time(), $lifetime + time());
         if ($lifetime < 0) {
@@ -120,7 +120,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function forever($name, $data)
+    public function forever(string $name, $data)
     {
         return $this->driver->forever($this->prefix . $name, $data);
     }
@@ -128,7 +128,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         return $this->driver->delete($this->prefix . $name);
     }
@@ -136,7 +136,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function inc($name, $delta = 1)
+    public function inc(string $name, int $delta = 1): int
     {
         return $this->driver->inc($this->prefix . $name);
     }
@@ -144,7 +144,7 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function dec($name, $delta = 1)
+    public function dec(string $name, int $delta = 1): int
     {
         return $this->driver->dec($this->prefix . $name, $delta);
     }
@@ -163,7 +163,7 @@ class MemcacheStore extends CacheStore
      * @param DriverInterface $driver  Pre-created driver instance.
      * @param bool            $connect Force connection.
      */
-    protected function setDriver(DriverInterface $driver, $connect = false)
+    protected function setDriver(DriverInterface $driver, bool $connect = false)
     {
         $this->driver = $driver;
 

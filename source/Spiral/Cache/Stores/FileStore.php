@@ -8,7 +8,7 @@
 
 namespace Spiral\Cache\Stores;
 
-use Spiral\Cache\CacheStore;
+use Spiral\Cache\Prototypes\CacheStore;
 use Spiral\Files\FilesInterface;
 
 /**
@@ -49,7 +49,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return true;
     }
@@ -57,7 +57,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function has($name)
+    public function has(string $name): bool
     {
         if (!$this->files->exists($filename = $this->makeFilename($name))) {
             return false;
@@ -79,7 +79,7 @@ class FileStore extends CacheStore
      *
      * @param int $expiration Current expiration time value in seconds (reference).
      */
-    public function get($name, &$expiration = null)
+    public function get(string $name, int &$expiration = null)
     {
         if (!$this->files->exists($filename = $this->makeFilename($name))) {
             return null;
@@ -98,7 +98,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function set($name, $data, $lifetime)
+    public function set(string $name, $data, int $lifetime)
     {
         return $this->files->write(
             $this->makeFilename($name),
@@ -109,7 +109,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function forever($name, $data)
+    public function forever(string $name, $data)
     {
         return $this->files->write(
             $this->makeFilename($name),
@@ -120,7 +120,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         $this->files->delete($this->makeFilename($name));
     }
@@ -128,7 +128,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function inc($name, $delta = 1)
+    public function inc(string $name, int $delta = 1): int
     {
         $value = $this->get($name, $expiration) + $delta;
 
@@ -144,7 +144,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function dec($name, $delta = 1)
+    public function dec(string $name, int $delta = 1): int
     {
         $value = $this->get($name, $expiration) - $delta;
 
@@ -174,7 +174,7 @@ class FileStore extends CacheStore
      *
      * @return string Filename.
      */
-    protected function makeFilename($name)
+    protected function makeFilename(string $name): string
     {
         return $this->directory . md5($name) . '.' . $this->extension;
     }

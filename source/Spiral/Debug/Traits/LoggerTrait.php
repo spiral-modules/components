@@ -61,7 +61,7 @@ trait LoggerTrait
      *
      * @return LoggerInterface
      */
-    protected function logger()
+    protected function logger(): LoggerInterface
     {
         if (!empty($this->logger)) {
             return $this->logger;
@@ -76,11 +76,21 @@ trait LoggerTrait
     }
 
     /**
-     * Create new instance of associated logger.
+     * Alias for "logger" function.
      *
      * @return LoggerInterface
      */
-    private function createLogger()
+    protected function getLogger(): LoggerInterface
+    {
+        return $this->logger();
+    }
+
+    /**
+     * Create new instance of associated logger (on demand creation).
+     *
+     * @return LoggerInterface
+     */
+    private function createLogger(): LoggerInterface
     {
         $container = $this->container();
         if (empty($container) || !$container->has(LogsInterface::class)) {

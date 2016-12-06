@@ -54,7 +54,7 @@ abstract class Migration implements MigrationInterface
      *
      * @return Database
      */
-    public function database($database = null)
+    public function getDatabase($database = null)
     {
         return $this->context->getDatabase($database);
     }
@@ -65,7 +65,7 @@ abstract class Migration implements MigrationInterface
      *
      * @return TableBlueprint
      */
-    public function table($table, $database = null)
+    public function getTable($table, $database = null)
     {
         return new TableBlueprint($this->context, $database, $table);
     }

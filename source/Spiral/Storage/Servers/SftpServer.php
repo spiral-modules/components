@@ -12,7 +12,7 @@ use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
+use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located at remove SFTP server.
@@ -75,7 +75,7 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function exists(BucketInterface $bucket, $name)
+    public function exists(BucketInterface $bucket, string $name): bool
     {
         return file_exists($this->getUri($bucket, $name));
     }
@@ -83,7 +83,7 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->exists($bucket, $name)) {
             return false;
@@ -95,7 +95,7 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         if ($source instanceof StreamInterface) {
             $expectedSize = $source->getSize();
@@ -123,7 +123,7 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         return \GuzzleHttp\Psr7\stream_for(fopen($this->getUri($bucket, $name), 'rb'));
     }
@@ -131,7 +131,7 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         if ($this->exists($bucket, $name)) {
             ssh2_sftp_unlink($this->sftp, $this->getPath($bucket, $name));
@@ -141,7 +141,7 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldName, $newName)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         if (!$this->exists($bucket, $oldName)) {
             throw new ServerException(
@@ -215,7 +215,7 @@ class SftpServer extends StorageServer
      * @param string          $name
      * @return string
      */
-    protected function getPath(BucketInterface $bucket, $name)
+    protected function getPath(BucketInterface $bucket, string $name): string
     {
         return $this->files->normalizePath(
             $this->options['home'] . '/' . $bucket->getOption('directory') . '/' . $name
@@ -230,7 +230,7 @@ class SftpServer extends StorageServer
      * @param string          $name
      * @return string
      */
-    protected function getUri(BucketInterface $bucket, $name)
+    protected function getUri(BucketInterface $bucket, string $name): string
     {
         return 'ssh2.sftp://' . $this->sftp . $this->getPath($bucket, $name);
     }
@@ -243,7 +243,7 @@ class SftpServer extends StorageServer
      * @return string
      * @throws ServerException
      */
-    protected function ensureLocation(BucketInterface $bucket, $name)
+    protected function ensureLocation(BucketInterface $bucket, string $name): string
     {
         $directory = dirname($this->getPath($bucket, $name));
 
@@ -289,7 +289,7 @@ class SftpServer extends StorageServer
      * @param string          $name
      * @return bool
      */
-    protected function refreshPermissions(BucketInterface $bucket, $name)
+    protected function refreshPermissions(BucketInterface $bucket, string $name): bool
     {
         if (!function_exists('ssh2_sftp_chmod')) {
             return true;

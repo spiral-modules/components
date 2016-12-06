@@ -7,6 +7,7 @@
  */
 namespace Spiral\Storage\Entities;
 
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
@@ -16,6 +17,7 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\BucketInterface;
+use Spiral\Storage\ObjectInterface;
 use Spiral\Storage\ServerInterface;
 use Spiral\Storage\StorageInterface;
 use Spiral\Storage\StorageManager;
@@ -28,9 +30,6 @@ class StorageBucket extends Component implements
     LoggerAwareInterface,
     InjectableInterface
 {
-    /**
-     * Most of storage operations are pretty slow, we might record and explain all of them.
-     */
     use BenchmarkTrait, LoggerTrait;
 
     /**
@@ -75,8 +74,8 @@ class StorageBucket extends Component implements
      * {@inheritdoc}
      */
     public function __construct(
-        $name,
-        $prefix,
+        string $name,
+        string $prefix,
         array $options,
         ServerInterface $server,
         StorageInterface $storage,
@@ -93,7 +92,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -101,7 +100,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function getServer()
+    public function getServer(): ServerInterface
     {
         return $this->server;
     }
@@ -109,7 +108,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function getOption($name, $default = null)
+    public function getOption(string $name, $default = null)
     {
         return isset($this->options[$name]) ? $this->options[$name] : $default;
     }
@@ -118,7 +117,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->prefix;
     }
@@ -126,7 +125,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function hasAddress($address)
+    public function hasAddress(string $address)
     {
         if (strpos($address, $this->prefix) === 0) {
             return strlen($this->prefix);
@@ -138,7 +137,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function buildAddress($name)
+    public function buildAddress(string $name): string
     {
         return $this->prefix . $name;
     }
@@ -146,7 +145,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function exists($name)
+    public function exists(string $name): bool
     {
         $this->logger()->info(
             "Check existence of '{$this->buildAddress($name)}' at '{$this->getName()}'."
@@ -163,7 +162,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function size($name)
+    public function size(string $name)
     {
         $this->logger()->info(
             "Get size of '{$this->buildAddress($name)}' at '{$this->getName()}'."
@@ -180,7 +179,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function put($name, $source)
+    public function put(string $name, $source): ObjectInterface
     {
         $this->logger()->info(
             "Put '{$this->buildAddress($name)}' at '{$this->getName()}' server."
@@ -209,7 +208,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function allocateFilename($name)
+    public function allocateFilename(string $name): string
     {
         $this->logger()->info(
             "Allocate filename of '{$this->buildAddress($name)}' at '{$this->getName()}' server."
@@ -229,7 +228,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function allocateStream($name)
+    public function allocateStream(string $name): StreamInterface
     {
         $this->logger()->info(
             "Get stream for '{$this->buildAddress($name)}' at '{$this->getName()}' server."
@@ -249,7 +248,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         $this->logger()->info(
             "Delete '{$this->buildAddress($name)}' at '{$this->getName()}' server."
@@ -269,7 +268,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function rename($oldName, $newName)
+    public function rename(string $oldName, string $newName): string
     {
         if ($oldName == $newName) {
             return true;
@@ -296,7 +295,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $destination, $name)
+    public function copy(BucketInterface $destination, string $name): string
     {
         if ($destination == $this) {
             return $this->buildAddress($name);
@@ -333,7 +332,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function replace(BucketInterface $destination, $name)
+    public function replace(BucketInterface $destination, string $name): string
     {
         if ($destination == $this) {
             return $this->buildAddress($name);

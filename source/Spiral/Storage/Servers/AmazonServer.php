@@ -15,11 +15,12 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
+use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in Amazon S3 cloud.
@@ -55,9 +56,9 @@ class AmazonServer extends StorageServer
 
     /**
      * @param ClientInterface $client
-     * @return $this
+     * @return self
      */
-    public function setClient(ClientInterface $client)
+    public function setClient(ClientInterface $client): self
     {
         $this->client = $client;
 
@@ -67,10 +68,14 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      *
+     * @param ResponseInterface $response Reference.
      * @return bool|ResponseInterface
      */
-    public function exists(BucketInterface $bucket, $name)
-    {
+    public function exists(
+        BucketInterface $bucket,
+        string $name,
+        ResponseInterface &$response = null
+    ): bool {
         try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
         } catch (ClientException $e) {
@@ -86,25 +91,28 @@ class AmazonServer extends StorageServer
             return false;
         }
 
-        return $response;
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
-        if (empty($response = $this->exists($bucket, $name))) {
+        if (!$this->exists($bucket, $name, $response)) {
             return false;
         }
 
+        /**
+         * @var ResponseInterface $response
+         */
         return (int)$response->getHeaderLine('Content-Length');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
@@ -125,12 +133,14 @@ class AmazonServer extends StorageServer
         if ($response->getStatusCode() != 200) {
             throw new ServerException("Unable to put '{$name}' to Amazon server");
         }
+
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
@@ -149,7 +159,7 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         $this->client->send($this->buildRequest('DELETE', $bucket, $name));
     }
@@ -157,7 +167,7 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldName, $newName)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         try {
             $request = $this->buildRequest('PUT', $bucket, $newName, [], [
@@ -183,7 +193,7 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool
     {
         try {
             $request = $this->buildRequest('PUT', $destination, $name, [], [
@@ -211,7 +221,7 @@ class AmazonServer extends StorageServer
      * @param string          $name
      * @return UriInterface
      */
-    protected function buildUri(BucketInterface $bucket, $name)
+    protected function buildUri(BucketInterface $bucket, string $name): UriInterface
     {
         return new Uri(
             $this->options['server'] . '/' . $bucket->getOption('bucket') . '/' . rawurlencode($name)
@@ -229,12 +239,12 @@ class AmazonServer extends StorageServer
      * @return RequestInterface
      */
     protected function buildRequest(
-        $method,
+        string $method,
         BucketInterface $bucket,
-        $name,
+        string $name,
         array $headers = [],
         array $commands = []
-    ) {
+    ): RequestInterface {
         $headers += [
             'Date'         => gmdate('D, d M Y H:i:s T'),
             'Content-MD5'  => '',
@@ -255,7 +265,7 @@ class AmazonServer extends StorageServer
      * @param array $commands
      * @return array
      */
-    private function packCommands(array $commands)
+    private function packCommands(array $commands): array
     {
         $headers = [];
         foreach ($commands as $command => $value) {
@@ -273,8 +283,10 @@ class AmazonServer extends StorageServer
      *                                         packCommands() method for more information.
      * @return RequestInterface
      */
-    private function signRequest(RequestInterface $request, array $packedCommands = [])
-    {
+    private function signRequest(
+        RequestInterface $request,
+        array $packedCommands = []
+    ): RequestInterface {
         $signature = [
             $request->getMethod(),
             $request->getHeaderLine('Content-MD5'),
@@ -312,7 +324,7 @@ class AmazonServer extends StorageServer
      * @param mixed           $source
      * @return array
      */
-    private function createHeaders(BucketInterface $bucket, $name, $source)
+    private function createHeaders(BucketInterface $bucket, string $name, $source): array
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
@@ -330,8 +342,8 @@ class AmazonServer extends StorageServer
         }
 
         return $headers + [
-            'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
-            'Content-Type' => $mimetype
-        ];
+                'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
+                'Content-Type' => $mimetype
+            ];
     }
 } 

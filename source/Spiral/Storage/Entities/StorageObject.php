@@ -17,7 +17,7 @@ use Spiral\Storage\ObjectInterface;
 use Spiral\Storage\StorageInterface;
 
 /**
- * Default implementation of storage object.
+ * Default implementation of storage object. This is immutable class.
  */
 class StorageObject extends Component implements ObjectInterface
 {
@@ -52,7 +52,7 @@ class StorageObject extends Component implements ObjectInterface
      * @param StorageInterface|null $storage
      * @throws SugarException
      */
-    public function __construct($address, StorageInterface $storage = null)
+    public function __construct(string $address, StorageInterface $storage = null)
     {
         $this->storage = $this->saturate($storage, StorageInterface::class);
 
@@ -68,7 +68,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -76,7 +76,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function getAddress()
+    public function getAddress(): string
     {
         return $this->address;
     }
@@ -84,7 +84,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function getBucket()
+    public function getBucket(): BucketInterface
     {
         return $this->bucket;
     }
@@ -92,7 +92,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function exists()
+    public function exists(): bool
     {
         if (empty($this->name)) {
             return false;
@@ -116,7 +116,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function localFilename()
+    public function localFilename(): string
     {
         if (empty($this->name)) {
             throw new ObjectException("Unable to allocate filename for unassigned storage object");
@@ -155,7 +155,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function rename($newName)
+    public function rename(string $newName): ObjectInterface
     {
         if (empty($this->name)) {
             throw new ObjectException("Unable to rename unassigned storage object");
@@ -170,7 +170,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function copy($destination)
+    public function copy(string $destination): ObjectInterface
     {
         if (empty($this->name)) {
             throw new ObjectException("Unable to copy unassigned storage object");
@@ -186,7 +186,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function replace($destination)
+    public function replace(string $destination): ObjectInterface
     {
         if (empty($this->name)) {
             throw new ObjectException("Unable to replace unassigned storage object");
@@ -205,7 +205,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->address;
     }

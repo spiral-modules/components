@@ -14,6 +14,7 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Cache\StoreInterface;
@@ -21,16 +22,13 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
+use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in Rackspace cloud.
  */
 class RackspaceServer extends StorageServer implements LoggerAwareInterface
 {
-    /**
-     * There is few warning messages.
-     */
     use LoggerTrait;
 
     /**
@@ -98,9 +96,9 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
 
     /**
      * @param ClientInterface $client
-     * @return $this
+     * @return self
      */
-    public function setClient(ClientInterface $client)
+    public function setClient(ClientInterface $client): self
     {
         $this->client = $client;
 
@@ -110,10 +108,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      *
-     * @return bool|ResponseInterface
+     * @param ResponseInterface $response Reference.
+     * @return bool
      */
-    public function exists(BucketInterface $bucket, $name)
-    {
+    public function exists(
+        BucketInterface $bucket,
+        string $name,
+        ResponseInterface &$response = null
+    ): bool {
         try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
         } catch (ClientException $e) {
@@ -135,25 +137,28 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             return false;
         }
 
-        return $response;
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
-        if (empty($response = $this->exists($bucket, $name))) {
+        if (!$this->exists($bucket, $name, $response)) {
             return false;
         }
 
+        /**
+         * @var ResponseInterface $response
+         */
         return (int)$response->getHeaderLine('Content-Length');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
@@ -183,7 +188,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
@@ -203,7 +208,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         try {
             $this->client->send($this->buildRequest('DELETE', $bucket, $name));
@@ -220,7 +225,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldName, $newName)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         try {
             $request = $this->buildRequest('PUT', $bucket, $newName, [
@@ -248,7 +253,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool
     {
         if ($bucket->getOption('region') != $destination->getOption('region')) {
             $this->logger()->warning(
@@ -370,7 +375,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * @return UriInterface
      * @throws ServerException
      */
-    protected function buildUri(BucketInterface $bucket, $name)
+    protected function buildUri(BucketInterface $bucket, string $name): UriInterface
     {
         if (empty($bucket->getOption('region'))) {
             throw new ServerException("Every RackSpace container should have specified region");
@@ -395,8 +400,12 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * @param array           $headers
      * @return RequestInterface
      */
-    protected function buildRequest($method, BucketInterface $bucket, $name, array $headers = [])
-    {
+    protected function buildRequest(
+        string $method,
+        BucketInterface $bucket,
+        string $name,
+        array $headers = []
+    ): RequestInterface {
         //Adding auth headers
         $headers += [
             'X-Auth-Token' => $this->authToken,

@@ -7,12 +7,13 @@
  */
 namespace Spiral\Storage\Servers;
 
+use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\ODM;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
+use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in GridFS storage.
@@ -49,7 +50,7 @@ class GridfsServer extends StorageServer
      *
      * @return bool|\MongoGridFSFile
      */
-    public function exists(BucketInterface $bucket, $name)
+    public function exists(BucketInterface $bucket, string $name): bool
     {
         return $this->gridFS($bucket)->findOne(['filename' => $name]);
     }
@@ -57,7 +58,7 @@ class GridfsServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
         if (!$file = $this->exists($bucket, $name)) {
             return false;
@@ -69,7 +70,7 @@ class GridfsServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         //We have to remove existed file first, this might not be super optimal operation.
         //Can be re-thinked
@@ -102,7 +103,7 @@ class GridfsServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         if (!$file = $this->exists($bucket, $name)) {
             throw new ServerException(
@@ -116,7 +117,7 @@ class GridfsServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         $this->gridFS($bucket)->remove(['filename' => $name]);
     }
@@ -124,7 +125,7 @@ class GridfsServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldName, $newName)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         $this->delete($bucket, $newName);
 
@@ -140,7 +141,7 @@ class GridfsServer extends StorageServer
      * @param BucketInterface $bucket Bucket instance.
      * @return \MongoGridFS
      */
-    protected function gridFS(BucketInterface $bucket)
+    protected function gridFS(BucketInterface $bucket): \MongoGridFS
     {
         $gridFs = $this->database->getGridFS($bucket->getOption('collection'));
         $gridFs->createIndex(['filename' => 1]);

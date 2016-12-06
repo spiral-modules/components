@@ -8,10 +8,11 @@
  */
 namespace Spiral\Storage\Servers;
 
+use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
+use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located at remove FTP server.
@@ -57,7 +58,7 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function exists(BucketInterface $bucket, $name)
+    public function exists(BucketInterface $bucket, string $name): bool
     {
         return ftp_size($this->connection, $this->getPath($bucket, $name)) != -1;
     }
@@ -65,7 +66,7 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
         if (($size = ftp_size($this->connection, $this->getPath($bucket, $name))) != -1) {
             return $size;
@@ -77,7 +78,7 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         $location = $this->ensureLocation($bucket, $name);
         if (!ftp_put($this->connection, $location, $this->castFilename($source), FTP_BINARY)) {
@@ -90,7 +91,7 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function allocateFilename(BucketInterface $bucket, $name)
+    public function allocateFilename(BucketInterface $bucket, string $name): string
     {
         if (!$this->exists($bucket, $name)) {
             throw new ServerException(
@@ -113,7 +114,7 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         if (!$filename = $this->allocateFilename($bucket, $name)) {
             throw new ServerException(
@@ -121,13 +122,14 @@ class FtpServer extends StorageServer
             );
         }
 
+        //Thought local file
         return \GuzzleHttp\Psr7\stream_for(fopen($filename, 'rb'));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         if ($this->exists($bucket, $name)) {
             ftp_delete($this->connection, $this->getPath($bucket, $name));
@@ -137,7 +139,7 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldName, $newName)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         if (!$this->exists($bucket, $oldName)) {
             throw new ServerException("Unable to rename '{$oldName}', object does not exists");
@@ -154,8 +156,11 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
-    {
+    public function replace(
+        BucketInterface $bucket,
+        BucketInterface $destination,
+        string $name
+    ): bool {
         if (!$this->exists($bucket, $name)) {
             throw new ServerException("Unable to replace '{$name}', object does not exists");
         }
@@ -198,8 +203,6 @@ class FtpServer extends StorageServer
                 "Unable to set passive mode at remote FTP server '{$this->options['host']}'"
             );
         }
-
-        return true;
     }
 
     /**
@@ -210,7 +213,7 @@ class FtpServer extends StorageServer
      * @return string
      * @throws ServerException
      */
-    protected function ensureLocation(BucketInterface $bucket, $name)
+    protected function ensureLocation(BucketInterface $bucket, string $name): string
     {
         $directory = dirname($this->getPath($bucket, $name));
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
@@ -252,7 +255,7 @@ class FtpServer extends StorageServer
      * @param string          $name
      * @return string
      */
-    protected function getPath(BucketInterface $bucket, $name)
+    protected function getPath(BucketInterface $bucket, string $name): string
     {
         return $this->files->normalizePath(
             $this->options['home'] . '/' . $bucket->getOption('directory') . $name
@@ -266,7 +269,7 @@ class FtpServer extends StorageServer
      * @param string          $name
      * @return bool
      */
-    protected function refreshPermissions(BucketInterface $bucket, $name)
+    protected function refreshPermissions(BucketInterface $bucket, string $name): bool
     {
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 

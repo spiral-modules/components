@@ -12,6 +12,8 @@ use Spiral\Core\Exceptions\Container\ContainerException;
 
 /**
  * Provides ability to open and close IoC scope.
+ *
+ * This is new abstraction which is not used currently anywhere.
  */
 interface ScoperInterface
 {

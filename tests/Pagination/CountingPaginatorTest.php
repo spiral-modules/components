@@ -69,7 +69,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(110, $paginator->getCount());
         $this->assertSame(1, $paginator->getPage());
 
-        $paginator->setPage(2);
+        $paginator = $paginator->withPage(2);
 
         $this->assertSame(1, $paginator->previousPage());
         $this->assertSame(3, $paginator->nextPage());
@@ -88,7 +88,7 @@ class CountingPaginatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(110, $paginator->getCount());
         $this->assertSame(1, $paginator->getPage());
 
-        $paginator->setPage(100);
+        $paginator = $paginator->withPage(100);
 
         $this->assertSame($paginator->countPages(), $paginator->getPage());
         $this->assertSame(

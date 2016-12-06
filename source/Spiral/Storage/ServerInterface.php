@@ -27,28 +27,28 @@ interface ServerInterface
      * @return bool
      * @throws ServerException
      */
-    public function exists(BucketInterface $bucket, $name);
+    public function exists(BucketInterface $bucket, string $name): bool;
 
     /**
      * Get object size in specified bucket or return false.
      *
      * @param BucketInterface $bucket
      * @param string          $name
-     * @return int|bool
+     * @return int|null
      * @throws ServerException
      */
-    public function size(BucketInterface $bucket, $name);
+    public function size(BucketInterface $bucket, string $name);
 
     /**
      * Put object data into specified bucket under given name, must replace existed data.
      *
-     * @param BucketInterface        $bucket
-     * @param string                 $name
+     * @param BucketInterface $bucket
+     * @param string $name
      * @param string|StreamInterface $source
      * @return bool
      * @throws ServerException
      */
-    public function put(BucketInterface $bucket, $name, $source);
+    public function put(BucketInterface $bucket, string $name, $source): bool;
 
     /**
      * Must return filename which is valid in associated FilesInterface instance. Must trow an
@@ -60,7 +60,7 @@ interface ServerInterface
      * @return string
      * @throws ServerException
      */
-    public function allocateFilename(BucketInterface $bucket, $name);
+    public function allocateFilename(BucketInterface $bucket, string $name): string;
 
     /**
      * Return PSR7 stream associated with bucket object content or trow and exception.
@@ -70,7 +70,7 @@ interface ServerInterface
      * @return StreamInterface
      * @throws ServerException
      */
-    public function allocateStream(BucketInterface $bucket, $name);
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface;
 
     /**
      * Delete bucket object if it exists.
@@ -79,18 +79,18 @@ interface ServerInterface
      * @param string          $name
      * @throws ServerException
      */
-    public function delete(BucketInterface $bucket, $name);
+    public function delete(BucketInterface $bucket, string $name);
 
     /**
      * Rename storage object without changing it's bucket.
      *
      * @param BucketInterface $bucket
-     * @param string          $oldname
-     * @param string          $newname
+     * @param string          $oldName
+     * @param string          $newName
      * @return bool
      * @throws ServerException
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname);
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool;
 
     /**
      * Copy storage object to another bucket. Both buckets must belong to same server.
@@ -101,7 +101,7 @@ interface ServerInterface
      * @return bool
      * @throws ServerException
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name);
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool;
 
     /**
      * Move storage object data to another bucket. Both buckets must belong to same server.
@@ -112,5 +112,9 @@ interface ServerInterface
      * @return bool
      * @throws ServerException
      */
-    public function replace(BucketInterface $bucket, BucketInterface $destination, $name);
+    public function replace(
+        BucketInterface $bucket,
+        BucketInterface $destination,
+        string $name
+    ): bool;
 }

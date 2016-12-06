@@ -220,11 +220,11 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldName, $newName)
     {
         try {
-            $request = $this->buildRequest('PUT', $bucket, $newname, [
-                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldname),
+            $request = $this->buildRequest('PUT', $bucket, $newName, [
+                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldName),
                 'Content-Length' => 0
             ]);
 
@@ -233,14 +233,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             if ($e->getCode() == 401) {
                 $this->reconnect();
 
-                return $this->rename($bucket, $oldname, $newname);
+                return $this->rename($bucket, $oldName, $newName);
             }
 
             throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         //Deleting old file
-        $this->delete($bucket, $oldname);
+        $this->delete($bucket, $oldName);
 
         return true;
     }

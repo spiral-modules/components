@@ -93,12 +93,12 @@ class LocalServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldName, $newName)
     {
         return $this->internalMove(
             $bucket,
-            $this->getPath($bucket, $oldname),
-            $this->getPath($bucket, $newname)
+            $this->getPath($bucket, $oldName),
+            $this->getPath($bucket, $newName)
         );
     }
 

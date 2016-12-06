@@ -6,7 +6,6 @@ php:
 
 before_install:
  - if [[ $PHP = hhvm* ]]; then INI_FILE=/etc/hhvm/php.ini; fi
- - if [[ $PHP = hhvm* ]]; then echo extension = mongodb.so >> $INI_FILE; fi;
- - if [[ ! $PHP = hhvm* ]]; then phpenv config-add tests/php-travis.ini; fi;
+ - if [[ $PHP = hhvm* ]]; then echo extension = mongodb.so >> $INI_FILE; else phpenv config-add tests/php-travis.ini fi;
 install: composer install --no-interaction --prefer-source
 script: phpunit

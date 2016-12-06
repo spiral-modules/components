@@ -27,14 +27,14 @@ abstract class StorageServer extends Component implements ServerInterface
     const DEFAULT_MIMETYPE = 'application/octet-stream';
 
     /**
+     * @var FilesInterface
+     */
+    protected $files;
+
+    /**
      * @var array
      */
     protected $options = [];
-
-    /**
-     * @var FilesInterface
-     */
-    protected $files = null;
 
     /**
      * @param FilesInterface $files   Required for local filesystem operations.
@@ -42,14 +42,14 @@ abstract class StorageServer extends Component implements ServerInterface
      */
     public function __construct(FilesInterface $files, array $options)
     {
-        $this->options = $options + $this->options;
         $this->files = $files;
+        $this->options = $options + $this->options;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function allocateFilename(BucketInterface $bucket, $name)
+    public function allocateFilename(BucketInterface $bucket, string $name): string
     {
         if (empty($stream = $this->allocateStream($bucket, $name))) {
             throw new ServerException("Unable to allocate local filename for '{$name}'");
@@ -63,7 +63,7 @@ abstract class StorageServer extends Component implements ServerInterface
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool
     {
         return $this->put($destination, $name, $this->allocateStream($bucket, $name));
     }
@@ -71,8 +71,11 @@ abstract class StorageServer extends Component implements ServerInterface
     /**
      * {@inheritdoc}
      */
-    public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
-    {
+    public function replace(
+        BucketInterface $bucket,
+        BucketInterface $destination,
+        string $name
+    ): bool {
         if ($this->copy($bucket, $destination, $name)) {
             $this->delete($bucket, $name);
 
@@ -88,7 +91,7 @@ abstract class StorageServer extends Component implements ServerInterface
      * @param string|StreamInterface $source
      * @return string
      */
-    protected function castFilename($source)
+    protected function castFilename($source): string
     {
         if (empty($source)) {
             return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
@@ -119,7 +122,7 @@ abstract class StorageServer extends Component implements ServerInterface
      * @param string|StreamInterface $source
      * @return StreamInterface
      */
-    protected function castStream($source)
+    protected function castStream($source): StreamInterface
     {
         if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface) {
             $source = $source->getStream();

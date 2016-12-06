@@ -157,12 +157,12 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldName, $newName)
     {
         try {
-            $request = $this->buildRequest('PUT', $bucket, $newname, [], [
+            $request = $this->buildRequest('PUT', $bucket, $newName, [], [
                 'Acl'         => $bucket->getOption('public') ? 'public-read' : 'private',
-                'Copy-Source' => $this->buildUri($bucket, $oldname)->getPath()
+                'Copy-Source' => $this->buildUri($bucket, $oldName)->getPath()
             ]);
 
             $this->client->send($request);
@@ -175,7 +175,7 @@ class AmazonServer extends StorageServer
             throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $this->delete($bucket, $oldname);
+        $this->delete($bucket, $oldName);
 
         return true;
     }

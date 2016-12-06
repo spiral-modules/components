@@ -137,18 +137,18 @@ class FtpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldName, $newName)
     {
-        if (!$this->exists($bucket, $oldname)) {
-            throw new ServerException("Unable to rename '{$oldname}', object does not exists");
+        if (!$this->exists($bucket, $oldName)) {
+            throw new ServerException("Unable to rename '{$oldName}', object does not exists");
         }
 
-        $location = $this->ensureLocation($bucket, $newname);
-        if (!ftp_rename($this->connection, $this->getPath($bucket, $oldname), $location)) {
-            throw new ServerException("Unable to rename '{$oldname}' to '{$newname}'.");
+        $location = $this->ensureLocation($bucket, $newName);
+        if (!ftp_rename($this->connection, $this->getPath($bucket, $oldName), $location)) {
+            throw new ServerException("Unable to rename '{$oldName}' to '{$newName}'.");
         }
 
-        return $this->refreshPermissions($bucket, $newname);
+        return $this->refreshPermissions($bucket, $newName);
     }
 
     /**

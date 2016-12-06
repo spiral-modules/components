@@ -124,13 +124,13 @@ class GridfsServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldName, $newName)
     {
-        $this->delete($bucket, $newname);
+        $this->delete($bucket, $newName);
 
         return $this->gridFS($bucket)->update(
-            ['filename' => $oldname],
-            ['$set' => ['filename' => $newname]]
+            ['filename' => $oldName],
+            ['$set' => ['filename' => $newName]]
         );
     }
 

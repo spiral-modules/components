@@ -141,27 +141,27 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, $oldName, $newName)
     {
-        if (!$this->exists($bucket, $oldname)) {
+        if (!$this->exists($bucket, $oldName)) {
             throw new ServerException(
-                "Unable to rename storage object '{$oldname}', object does not exists at SFTP server"
+                "Unable to rename storage object '{$oldName}', object does not exists at SFTP server"
             );
         }
 
-        $location = $this->ensureLocation($bucket, $newname);
-        if (file_exists($this->getUri($bucket, $newname))) {
+        $location = $this->ensureLocation($bucket, $newName);
+        if (file_exists($this->getUri($bucket, $newName))) {
             //We have to clean location before renaming
-            $this->delete($bucket, $newname);
+            $this->delete($bucket, $newName);
         }
 
-        if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldname), $location)) {
+        if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldName), $location)) {
             throw new ServerException(
-                "Unable to rename storage object '{$oldname}' to '{$newname}'."
+                "Unable to rename storage object '{$oldName}' to '{$newName}'."
             );
         }
 
-        return $this->refreshPermissions($bucket, $newname);
+        return $this->refreshPermissions($bucket, $newName);
     }
 
     /**

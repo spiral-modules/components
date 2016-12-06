@@ -54,7 +54,7 @@ class Highlighter
      *
      * @return self
      */
-    public function withSource($source): self
+    public function withSource($source): Highlighter
     {
         $highlighter = clone $this;
         $highlighter->tokens = $this->normalizeTokens(token_get_all($source));
@@ -68,7 +68,7 @@ class Highlighter
      * @param Style $style
      * @return self
      */
-    public function withStyle(Style $style): self
+    public function withStyle(Style $style): Highlighter
     {
         $highlighter = clone $this;
         $highlighter->style = $style;

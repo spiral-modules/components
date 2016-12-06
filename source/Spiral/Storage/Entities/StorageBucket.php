@@ -101,7 +101,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function server()
+    public function getServer()
     {
         return $this->server;
     }
@@ -220,7 +220,7 @@ class StorageBucket extends Component implements
         );
 
         try {
-            return $this->server()->allocateFilename($this, $name);
+            return $this->getServer()->allocateFilename($this, $name);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -240,7 +240,7 @@ class StorageBucket extends Component implements
         );
 
         try {
-            return $this->server()->allocateStream($this, $name);
+            return $this->getServer()->allocateStream($this, $name);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -269,25 +269,25 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function rename($oldname, $newname)
+    public function rename($oldName, $newName)
     {
-        if ($oldname == $newname) {
+        if ($oldName == $newName) {
             return true;
         }
 
         $this->logger()->info(
-            "Rename '{$this->buildAddress($oldname)}' to '{$this->buildAddress($newname)}' "
+            "Rename '{$this->buildAddress($oldName)}' to '{$this->buildAddress($newName)}' "
             . "at '{$this->server}' server."
         );
 
         $benchmark = $this->benchmark(
-            $this->getName(), "rename::{$this->buildAddress($oldname)}"
+            $this->getName(), "rename::{$this->buildAddress($oldName)}"
         );
 
         try {
-            $this->server->rename($this, $oldname, $newname);
+            $this->server->rename($this, $oldName, $newName);
 
-            return $this->buildAddress($newname);
+            return $this->buildAddress($newName);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -303,7 +303,7 @@ class StorageBucket extends Component implements
         }
 
         //Internal copying
-        if ($this->server() === $destination->server()) {
+        if ($this->getServer() === $destination->getServer()) {
             $this->logger()->info(
                 "Internal copy of '{$this->buildAddress($name)}' "
                 . "to '{$destination->buildAddress($name)}' at '{$this->getName()}' server."
@@ -314,7 +314,7 @@ class StorageBucket extends Component implements
             );
 
             try {
-                $this->server()->copy($this, $destination, $name);
+                $this->getServer()->copy($this, $destination, $name);
             } finally {
                 $this->benchmark($benchmark);
             }
@@ -351,7 +351,7 @@ class StorageBucket extends Component implements
             );
 
             try {
-                $this->server()->replace($this, $destination, $name);
+                $this->getServer()->replace($this, $destination, $name);
             } finally {
                 $this->benchmark($benchmark);
             }

@@ -24,21 +24,24 @@ interface BucketInterface
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Associated storage server instance.
      *
      * @return ServerInterface
+     *
      * @throws StorageException
      */
-    public function server();
+    public function getServer();
 
     /**
      * Get server specific bucket option or return default value.
      *
      * @param string $name
+     *
      * @param null   $default
+     *
      * @return mixed
      */
     public function getOption($name, $default = null);
@@ -48,30 +51,34 @@ interface BucketInterface
      *
      * @return string
      */
-    public function getPrefix();
+    public function getPrefix(): string;
 
     /**
      * Check if address be found in bucket namespace defined by bucket prefix.
      *
      * @param string $address
+     *
      * @return bool|int Should return matched address length.
      */
-    public function hasAddress($address);
+    public function hasAddress(string $address);
 
     /**
      * Build object address using object name and bucket prefix. While using URL like prefixes
      * address can appear valid URI which can be used directly at frontend.
      *
      * @param string $name
+     *
      * @return string
      */
-    public function buildAddress($name);
+    public function buildAddress(string $name): string;
 
     /**
      * Check if given name points to valid and existed location in bucket server.
      *
      * @param string $name
+     *
      * @return bool
+     *
      * @throws ServerException
      * @throws BucketException
      */
@@ -81,11 +88,13 @@ interface BucketInterface
      * Get object size or return false if object not found.
      *
      * @param string $name
+     *
      * @return int|bool
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function size($name);
+    public function size(string $name);
 
     /**
      * Put given content under given name in associated bucket server. Must replace already existed
@@ -93,11 +102,13 @@ interface BucketInterface
      *
      * @param string                                     $name
      * @param string|StreamInterface|StreamableInterface $source
+     *
      * @return ObjectInterface
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function put($name, $source);
+    public function put(string $name, $source): ObjectInterface;
 
     /**
      * Must return filename which is valid in associated FilesInterface instance. Must trow an
@@ -105,42 +116,49 @@ interface BucketInterface
      * between sessions.
      *
      * @param string $name
+     *
      * @return string
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function allocateFilename($name);
+    public function allocateFilename(string $name): string;
 
     /**
      * Return PSR7 stream associated with bucket object content or trow and exception.
      *
      * @param string $name Storage object name.
+     *
      * @return StreamInterface
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function allocateStream($name);
+    public function allocateStream(string $name): StreamInterface;
 
     /**
      * Delete bucket object if it exists.
      *
      * @param string $name Storage object name.
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function delete($name);
+    public function delete(string $name);
 
     /**
      * Rename storage object without changing it's bucket. Must return new address on success.
      *
-     * @param string $oldname
-     * @param string $newname
-     * @return string|bool
+     * @param string $oldName
+     * @param string $newName
+     *
+     * @return string
+     *
      * @throws StorageException
      * @throws ServerException
      * @throws BucketException
      */
-    public function rename($oldname, $newname);
+    public function rename(string $oldName, string $newName): string;
 
     /**
      * Copy storage object to another bucket. Method must return address which points to
@@ -148,11 +166,13 @@ interface BucketInterface
      *
      * @param BucketInterface $destination
      * @param string          $name
+     *
      * @return string
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function copy(BucketInterface $destination, $name);
+    public function copy(BucketInterface $destination, string $name): string;
 
     /**
      * Move storage object data to another bucket. Method must return new object address on success.
@@ -160,9 +180,11 @@ interface BucketInterface
      * @todo Add ability to specify new name, not only destination.
      * @param BucketInterface $destination
      * @param string          $name
+     *
      * @return string
+     *
      * @throws ServerException
      * @throws BucketException
      */
-    public function replace(BucketInterface $destination, $name);
+    public function replace(BucketInterface $destination, string $name): string;
 }

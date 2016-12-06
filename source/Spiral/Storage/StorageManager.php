@@ -33,14 +33,14 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * @var StorageConfig
      */
-    protected $config = null;
+    protected $config;
 
     /**
      * @invisible
      *
      * @var FactoryInterface
      */
-    protected $factory = null;
+    protected $factory;
 
     /**
      * @param StorageConfig    $config
@@ -61,11 +61,11 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * @param BucketInterface $bucket
      *
-     * @return $this
+     * @return self
      *
      * @throws StorageException
      */
-    public function setBucket(BucketInterface $bucket)
+    public function setBucket(BucketInterface $bucket): self
     {
         if (isset($this->buckets[$bucket->getName()])) {
             throw new StorageException("Unable to create bucket '{$bucket->getName()}', already exists");
@@ -80,8 +80,12 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function registerBucket($name, $prefix, $server, array $options = [])
-    {
+    public function registerBucket(
+        string $name,
+        string $prefix,
+        $server,
+        array $options = []
+    ): BucketInterface {
         if (isset($this->buckets[$name])) {
             throw new StorageException("Unable to create bucket '{$name}', already exists");
         }
@@ -90,7 +94,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         $storage = $this;
 
         if (!$server instanceof ServerInterface) {
-            $server = $this->server($server);
+            $server = $this->getServer($server);
         }
 
         $bucket = $this->factory->make(
@@ -106,7 +110,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function bucket($bucket)
+    public function getBucket(string $bucket): BucketInterface
     {
         if (empty($bucket)) {
             throw new StorageException("Unable to fetch bucket, name can not be empty");
@@ -146,7 +150,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function server($server)
+    public function getServer(string $server): ServerInterface
     {
         if (isset($this->servers[$server])) {
             return $this->servers[$server];
@@ -165,7 +169,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function open($address)
+    public function open(string $address): ObjectInterface
     {
         return new StorageObject($address, $this);
     }
@@ -173,7 +177,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function locateBucket($address, &$name = null)
+    public function locateBucket(string $address, string &$name = null): BucketInterface
     {
         /**
          * @var BucketInterface $bestBucket
@@ -194,9 +198,9 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function put($bucket, $name, $source = '')
+    public function put(string $bucket, string $name, $source = ''): ObjectInterface
     {
-        $bucket = is_string($bucket) ? $this->bucket($bucket) : $bucket;
+        $bucket = is_string($bucket) ? $this->getBucket($bucket) : $bucket;
 
         return $bucket->put($name, $source);
     }
@@ -210,7 +214,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Storage bucket can be requested without specified context");
         }
 
-        return $this->bucket($context);
+        return $this->getBucket($context);
     }
 
     /**
@@ -219,11 +223,11 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      * @param string $name
      * @param array  $bucket
      *
-     * @return BucketInterface
+     * @return StorageBucket
      *
      * @throws StorageException
      */
-    private function createBucket($name, array $bucket)
+    private function createBucket(string $name, array $bucket): StorageBucket
     {
         $parameters = $bucket + compact('name');
 
@@ -239,7 +243,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Bucket configuration must include server id");
         }
 
-        $parameters['server'] = $this->server($bucket['server']);
+        $parameters['server'] = $this->getServer($bucket['server']);
         $parameters['storage'] = $this;
 
         return $this->factory->make(StorageBucket::class, $parameters);

@@ -32,7 +32,12 @@ interface StorageInterface
      *
      * @throws StorageException
      */
-    public function registerBucket($name, $prefix, $server, array $options = []);
+    public function registerBucket(
+        string $name,
+        string $prefix,
+        $server,
+        array $options = []
+    ): BucketInterface;
 
     /**
      * Get bucket by it's name.
@@ -43,7 +48,7 @@ interface StorageInterface
      *
      * @throws StorageException
      */
-    public function bucket($bucket);
+    public function getBucket(string $bucket): BucketInterface;
 
     /**
      * Find bucket instance by object address.
@@ -55,7 +60,7 @@ interface StorageInterface
      *
      * @throws StorageException
      */
-    public function locateBucket($address, &$name = null);
+    public function locateBucket(string $address, string &$name = null): BucketInterface;
 
     /**
      * Get or create instance of storage server.
@@ -66,7 +71,7 @@ interface StorageInterface
      *
      * @throws StorageException
      */
-    public function server($server);
+    public function getServer(string $server): ServerInterface;
 
     /**
      * Put object data into specified bucket under provided name. Should support filenames, PSR7
@@ -76,13 +81,13 @@ interface StorageInterface
      * @param string                                    $name
      * @param mixed|StreamInterface|StreamableInterface $source
      *
-     * @return ObjectInterface|bool
+     * @return ObjectInterface
      *
      * @throws StorageException
      * @throws BucketException
      * @throws ServerException
      */
-    public function put($bucket, $name, $source = '');
+    public function put(string $bucket, string $name, $source = ''): ObjectInterface;
 
     /**
      * Create instance of storage object using it's address.
@@ -94,5 +99,5 @@ interface StorageInterface
      * @throws StorageException
      * @throws ObjectException
      */
-    public function open($address);
+    public function open(string $address): ObjectInterface;
 }

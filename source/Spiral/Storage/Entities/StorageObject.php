@@ -155,14 +155,14 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function rename($newname)
+    public function rename($newName)
     {
         if (empty($this->name)) {
             throw new ObjectException("Unable to rename unassigned storage object");
         }
 
-        $this->address = $this->bucket->rename($this->name, $newname);
-        $this->name = $newname;
+        $this->address = $this->bucket->rename($this->name, $newName);
+        $this->name = $newName;
 
         return $this;
     }
@@ -177,7 +177,7 @@ class StorageObject extends Component implements ObjectInterface
         }
 
         if (is_string($destination)) {
-            $destination = $this->storage->bucket($destination);
+            $destination = $this->storage->getBucket($destination);
         }
 
         return $this->storage->open($this->bucket->copy($destination, $this->name));
@@ -193,7 +193,7 @@ class StorageObject extends Component implements ObjectInterface
         }
 
         if (is_string($destination)) {
-            $destination = $this->storage->bucket($destination);
+            $destination = $this->storage->getBucket($destination);
         }
 
         $this->address = $this->bucket->replace($destination, $this->name);

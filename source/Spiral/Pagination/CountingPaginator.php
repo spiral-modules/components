@@ -47,12 +47,13 @@ class CountingPaginator implements PredictableInterface, \Countable
      *
      * @return $this
      */
-    public function setPage(int $number): self
+    public function withPage(int $number): CountingInterface
     {
-        $this->pageNumber = abs(intval($number));
+        $paginator = clone $this;
+        $paginator->pageNumber = abs(intval($number));
 
         //Real page number
-        return $this;
+        return $paginator;
     }
 
     /**

@@ -216,7 +216,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
 
         $instance = $this->factory->make($this->config->connectionDriver($connection), [
             'name'       => $connection,
-            'connection' => $this->config->connectionConfig($connection),
+            'connection' => $this->config->connectionOptions($connection),
         ]);
 
         return $this->connections[$connection] = $instance;

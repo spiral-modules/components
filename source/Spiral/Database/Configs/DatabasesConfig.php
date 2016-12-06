@@ -36,7 +36,7 @@ class DatabasesConfig extends InjectableConfig
     /**
      * @return string
      */
-    public function defaultDatabase()
+    public function defaultDatabase(): string
     {
         return $this->config['default'];
     }
@@ -46,7 +46,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasDatabase($database)
+    public function hasDatabase(string $database): bool
     {
         return isset($this->config['databases'][$database]);
     }
@@ -56,7 +56,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasConnection($connection)
+    public function hasConnection(string $connection): bool
     {
         return isset($this->config['connections'][$connection]);
     }
@@ -64,7 +64,7 @@ class DatabasesConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function databaseNames()
+    public function databaseNames(): array
     {
         return array_keys($this->config['databases']);
     }
@@ -72,7 +72,7 @@ class DatabasesConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function connectionNames()
+    public function connectionNames(): array
     {
         return array_keys($this->config['connections']);
     }
@@ -82,7 +82,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return string
      */
-    public function databaseConnection($database)
+    public function databaseConnection(string $database): string
     {
         return $this->config['databases'][$database]['connection'];
     }
@@ -92,7 +92,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return string
      */
-    public function databasePrefix($database)
+    public function databasePrefix(string $database): string
     {
         if (isset($this->config['databases'][$database]['tablePrefix'])) {
             return $this->config['databases'][$database]['tablePrefix'];
@@ -106,7 +106,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return string
      */
-    public function connectionDriver($connection)
+    public function connectionDriver(string $connection): string
     {
         return $this->config['connections'][$connection]['driver'];
     }
@@ -116,7 +116,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return array
      */
-    public function connectionConfig($connection)
+    public function connectionOptions(string $connection): array
     {
         return $this->config['connections'][$connection];
     }

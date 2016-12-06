@@ -17,12 +17,12 @@ interface PaginatorInterface
      *
      * @return int
      */
-    public function getLimit();
+    public function getLimit(): int;
 
     /**
      * Get calculated offset value.
      *
      * @return int
      */
-    public function getOffset();
+    public function getOffset(): int;
 }

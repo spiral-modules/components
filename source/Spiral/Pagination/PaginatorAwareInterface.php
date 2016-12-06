@@ -20,14 +20,12 @@ interface PaginatorAwareInterface
      *
      * @return bool
      */
-    public function hasPaginator();
+    public function hasPaginator(): bool;
 
     /**
      * Manually set paginator instance for specific object.
      *
      * @param PaginatorInterface $paginator
-     *
-     * @return $this
      */
     public function setPaginator(PaginatorInterface $paginator);
 
@@ -44,5 +42,5 @@ interface PaginatorAwareInterface
      *
      * @throws PaginationException
      */
-    public function getPaginator();
+    public function getPaginator(): PaginatorInterface;
 }

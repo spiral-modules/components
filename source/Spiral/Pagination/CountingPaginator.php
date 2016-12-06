@@ -37,7 +37,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * @param int $limit
      */
-    public function __construct($limit = 25)
+    public function __construct(int $limit = 25)
     {
         $this->setLimit($limit);
     }
@@ -47,7 +47,7 @@ class CountingPaginator implements PredictableInterface, \Countable
      *
      * @return $this
      */
-    public function setPage($number)
+    public function setPage(int $number): self
     {
         $this->pageNumber = abs(intval($number));
 
@@ -58,7 +58,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function getPage()
+    public function getPage(): int
     {
         if ($this->pageNumber < 1) {
             return 1;
@@ -76,7 +76,7 @@ class CountingPaginator implements PredictableInterface, \Countable
      *
      * @return $this
      */
-    public function setLimit($limit)
+    public function setLimit(int $limit): self
     {
         $this->limit = $limit;
 
@@ -86,7 +86,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function getLimit()
+    public function getLimit(): int
     {
         return $this->limit;
     }
@@ -94,7 +94,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function getOffset()
+    public function getOffset(): int
     {
         return ($this->getPage() - 1) * $this->limit;
     }
@@ -102,7 +102,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function withCount($count)
+    public function withCount(int $count): CountingInterface
     {
         $paginator = clone $this;
 
@@ -110,29 +110,11 @@ class CountingPaginator implements PredictableInterface, \Countable
     }
 
     /**
-     * Non-Immutable version of withCount.
-     *
-     * @param int $count
-     * @return CountingPaginator
-     */
-    public function setCount($count)
-    {
-        $this->count = abs(intval($count));
-        if ($this->count > 0) {
-            $this->countPages = (int)ceil($this->count / $this->limit);
-        } else {
-            $this->countPages = 1;
-        }
-
-        return $this;
-    }
-
-    /**
      * Alias for count.
      *
      * @return int
      */
-    public function getCount()
+    public function getCount(): int
     {
         return $this->count;
     }
@@ -148,7 +130,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function countPages()
+    public function countPages(): int
     {
         return $this->countPages;
     }
@@ -156,7 +138,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function countDisplayed()
+    public function countDisplayed(): int
     {
         if ($this->getPage() == $this->countPages) {
             return $this->count - $this->getOffset();
@@ -168,7 +150,7 @@ class CountingPaginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function isRequired()
+    public function isRequired(): bool
     {
         return ($this->countPages > 1);
     }
@@ -182,7 +164,7 @@ class CountingPaginator implements PredictableInterface, \Countable
             return $this->getPage() + 1;
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -194,6 +176,24 @@ class CountingPaginator implements PredictableInterface, \Countable
             return $this->getPage() - 1;
         }
 
-        return false;
+        return null;
+    }
+
+    /**
+     * Non-Immutable version of withCount.
+     *
+     * @param int $count
+     * @return CountingPaginator
+     */
+    private function setCount(int $count)
+    {
+        $this->count = abs(intval($count));
+        if ($this->count > 0) {
+            $this->countPages = (int)ceil($this->count / $this->limit);
+        } else {
+            $this->countPages = 1;
+        }
+
+        return $this;
     }
 }

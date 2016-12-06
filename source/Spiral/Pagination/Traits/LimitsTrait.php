@@ -28,9 +28,9 @@ trait LimitsTrait
      *
      * @param int $limit
      *
-     * @return mixed
+     * @return $this
      */
-    public function limit($limit = 0)
+    public function limit(int $limit = 0)
     {
         $this->limit = $limit;
 
@@ -40,7 +40,7 @@ trait LimitsTrait
     /**
      * @return int
      */
-    public function getLimit()
+    public function getLimit(): int
     {
         return $this->limit;
     }
@@ -53,7 +53,7 @@ trait LimitsTrait
      *
      * @return mixed
      */
-    public function offset($offset = 0)
+    public function offset(int $offset = 0): int
     {
         $this->offset = $offset;
 
@@ -63,7 +63,7 @@ trait LimitsTrait
     /**
      * @return int
      */
-    public function getOffset()
+    public function getOffset(): int
     {
         return $this->offset;
     }

@@ -28,16 +28,16 @@ trait PaginatorTrait
      *
      * @var PaginatorInterface|null
      */
-    private $paginator = null;
+    private $paginator;
 
     /**
      * Indication that object was paginated.
      *
      * @return bool
      */
-    public function hasPaginator()
+    public function hasPaginator(): bool
     {
-        return !empty($this->paginator);
+        return $this->paginator instanceof PaginatorInterface;
     }
 
     /**
@@ -62,25 +62,13 @@ trait PaginatorTrait
      *
      * @return PaginatorInterface
      */
-    public function getPaginator()
+    public function getPaginator(): PaginatorInterface
     {
-        if (empty($this->paginator)) {
+        if (!$this->hasPaginator()) {
             throw new PaginationException("Unable to get paginator, no paginator were set");
         }
 
         return $this->paginator;
-    }
-
-    /**
-     * Alias for getPaginator. Deprecated since paginator can not be created automatically on
-     * request so getPaginator call is more obvious.
-     *
-     * @deprecated Use getPaginator() instead.
-     * @return PaginatorInterface
-     */
-    public function paginator()
-    {
-        return $this->getPaginator();
     }
 
     /**
@@ -93,7 +81,7 @@ trait PaginatorTrait
      *
      * @throws SugarException
      */
-    public function paginate($limit = 25, $parameter = 'page')
+    public function paginate(int $limit = 25, string $parameter = 'page')
     {
         //We are required to fetch paginator from associated container or shared container
         $container = $this->container();
@@ -123,7 +111,7 @@ trait PaginatorTrait
      *
      * @return PaginatorInterface
      */
-    protected function configurePaginator($count = null)
+    protected function configurePaginator(int $count = null): PaginatorInterface
     {
         $paginator = $this->getPaginator();
 
@@ -139,5 +127,5 @@ trait PaginatorTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function container(): ContainerInterface;
 }

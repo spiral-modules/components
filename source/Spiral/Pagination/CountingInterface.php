@@ -15,8 +15,8 @@ interface CountingInterface extends PaginatorInterface
     /**
      * Get instance of paginator with a given count. Must not affect existed pagintor.
      *
-     * @param string $count
+     * @param int $count
      * @return self
      */
-    public function withCount($count);
+    public function withCount(int $count): self;
 }

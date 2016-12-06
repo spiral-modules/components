@@ -8,7 +8,8 @@
 namespace Spiral\Pagination;
 
 /**
- * Responsible for paginator creation based on a given pagination parameter.
+ * Responsible for paginator creation based on a given pagination parameter (parameter in this case
+ * is an abstract definition which might depend on specific implementation if needed).
  */
 interface PaginatorsInterface
 {
@@ -19,5 +20,5 @@ interface PaginatorsInterface
      * @param int    $limit Pagination limit
      * @return PaginatorInterface
      */
-    public function createPaginator($parameter, $limit = 25);
+    public function createPaginator(string $parameter, int $limit = 25): PaginatorInterface;
 }

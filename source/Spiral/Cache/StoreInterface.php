@@ -12,6 +12,9 @@ use Spiral\Cache\Exceptions\StoreException;
 
 /**
  * Represents single cache store.
+ *
+ * @todo planned to make it compatible with PSR16 once it's finally completed
+ * @see  https://github.com/php-fig/fig-standards/blob/master/proposed/simplecache.md
  */
 interface StoreInterface
 {

@@ -15,14 +15,18 @@ namespace Spiral;
  * Output: Hello Member! Good Day!
  *
  * @param string $string
- * @param array  $values  Arguments (key => value). Will skip unknown names.
- * @param string $prefix  Placeholder prefix, "{" by default.
+ * @param array  $values Arguments (key => value). Will skip unknown names.
+ * @param string $prefix Placeholder prefix, "{" by default.
  * @param string $postfix Placeholder postfix, "}" by default.
  *
  * @return mixed
  */
-function interpolate($string, array $values, $prefix = '{', $postfix = '}')
-{
+function interpolate(
+    string $string,
+    array $values,
+    string $prefix = '{',
+    string $postfix = '}'
+): string {
     $replaces = [];
     foreach ($values as $key => $value) {
         $value = (is_array($value) || $value instanceof \Closure) ? '' : $value;

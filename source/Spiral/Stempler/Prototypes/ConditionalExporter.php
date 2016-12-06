@@ -5,7 +5,9 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Stempler;
+namespace Spiral\Stempler\Prototypes;
+
+use Spiral\Stempler\ExporterInterface;
 
 /**
  * Exported has to export (obviously) specified blocks into content. Every exporter should

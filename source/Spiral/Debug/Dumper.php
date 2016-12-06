@@ -46,16 +46,16 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
 
     /**
      * @param int             $maxLevel
-     * @param Style           $styler Light styler to be used by default.
+     * @param Style           $style Light styler to be used by default.
      * @param LoggerInterface $logger
      */
     public function __construct(
         int $maxLevel = 10,
-        Style $styler = null,
+        Style $style = null,
         LoggerInterface $logger = null
     ) {
         $this->maxLevel = $maxLevel;
-        $this->style = !empty($styler) ? $styler : new Style();
+        $this->style = $style ?? new Style();
 
         if (!empty($logger)) {
             $this->setLogger($logger);
@@ -67,9 +67,9 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @param Style $style
      *
-     * @return $this
+     * @return self
      */
-    public function setStyle(Style $style)
+    public function setStyle(Style $style): self
     {
         $this->style = $style;
 
@@ -84,7 +84,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return null|string
      */
-    public function dump($value, $output = self::OUTPUT_ECHO)
+    public function dump($value, int $output = self::OUTPUT_ECHO): string
     {
         //Dumping is pretty slow operation, let's record it so we can exclude dump time from application
         //timeline
@@ -92,11 +92,11 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         try {
             switch ($output) {
                 case self::OUTPUT_ECHO:
-                    echo $this->style->mountContainer($this->dumpValue($value, '', 0));
+                    echo $this->style->wrapContainer($this->dumpValue($value, '', 0));
                     break;
 
                 case self::OUTPUT_RETURN:
-                    return $this->style->mountContainer($this->dumpValue($value, '', 0));
+                    return $this->style->wrapContainer($this->dumpValue($value, '', 0));
                     break;
 
                 case self::OUTPUT_LOG:
@@ -106,7 +106,8 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
                     break;
             }
 
-            return;
+            //Nothing to return
+            return '';
         } finally {
             $this->benchmark($benchmark);
         }
@@ -122,8 +123,12 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return string
      */
-    private function dumpValue($value, $name = '', $level = 0, $hideHeader = false)
-    {
+    private function dumpValue(
+        $value,
+        string $name = '',
+        int $level = 0,
+        bool $hideHeader = false
+    ): string {
         //Any dump starts with initial indent (level based)
         $indent = $this->style->indent($level);
 
@@ -193,7 +198,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return string
      */
-    private function dumpArray(array $array, $level, $hideHeader = false)
+    private function dumpArray(array $array, int $level, bool $hideHeader = false): string
     {
         $indent = $this->style->indent($level);
 
@@ -235,8 +240,12 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return string
      */
-    private function dumpObject($object, $level, $hideHeader = false, $class = '')
-    {
+    private function dumpObject(
+        $object,
+        int $level,
+        bool $hideHeader = false,
+        string $class = ''
+    ): string {
         $indent = $this->style->indent($level);
 
         if (!$hideHeader) {
@@ -290,7 +299,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return string
      */
-    private function dumpProperty($object, \ReflectionProperty $property, $level)
+    private function dumpProperty($object, \ReflectionProperty $property, int $level): string
     {
         if ($property->isStatic()) {
             return '';
@@ -328,7 +337,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      *
      * @return string
      */
-    private function getAccess(\ReflectionProperty $property)
+    private function getAccess(\ReflectionProperty $property): string
     {
         if ($property->isPrivate()) {
             return 'private';

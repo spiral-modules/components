@@ -78,7 +78,7 @@ class Style
      *
      * @return string
      */
-    public function mountContainer($dump)
+    public function wrapContainer(string $dump): string
     {
         return \Spiral\interpolate($this->container, compact('dump'));
     }
@@ -90,7 +90,7 @@ class Style
      *
      * @return string
      */
-    public function indent($level)
+    public function indent(int $level): string
     {
         if ($level == 0) {
             return '';
@@ -108,7 +108,7 @@ class Style
      *
      * @return string
      */
-    public function style($element, $type, $context = '')
+    public function style(string $element, string $type, string $context = ''): string
     {
         if (!empty($style = $this->getStyle($type, $context))) {
             return \Spiral\interpolate(
@@ -128,7 +128,7 @@ class Style
      *
      * @return string
      */
-    private function getStyle($type, $context)
+    private function getStyle(string $type, string $context): string
     {
         if (isset($this->styles[$type][$context])) {
             return $this->styles[$type][$context];

@@ -29,7 +29,7 @@ class Benchmarker extends Component implements BenchmarkerInterface, SingletonIn
      *
      * @throws BenchmarkException
      */
-    public function benchmark($caller, $record, $context = '')
+    public function benchmark($caller, $record, string $context = '')
     {
         $benchmarkID = count($this->benchmarks);
         if (is_array($record)) {
@@ -53,9 +53,9 @@ class Benchmarker extends Component implements BenchmarkerInterface, SingletonIn
     /**
      * Retrieve all active and finished benchmark records.
      *
-     * @return array|null
+     * @return array
      */
-    public function getBenchmarks()
+    public function getBenchmarks(): array
     {
         return $this->benchmarks;
     }

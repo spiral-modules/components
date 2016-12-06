@@ -21,7 +21,7 @@ trait BenchmarkTrait
      *
      * @var BenchmarkerInterface
      */
-    private $benchmarker = null;
+    private $benchmarker;
 
     /**
      * Set custom benchmarker.
@@ -38,12 +38,12 @@ trait BenchmarkTrait
      * should return elapsed time when record are be closed (same set of arguments has to be
      * provided).
      *
-     * @param string $record  Benchmark record name.
-     * @param string $context Record context (if any).
+     * @param string|array $record  Benchmark record name or set of names.
+     * @param string       $context Record context (if any).
      *
      * @return bool|float|mixed
      */
-    protected function benchmark($record, $context = '')
+    protected function benchmark($record, string $context = '')
     {
         if (empty($this->benchmarker)) {
             $container = $this->container();

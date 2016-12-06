@@ -29,5 +29,5 @@ interface BenchmarkerInterface
      *
      * @return bool|float|mixed
      */
-    public function benchmark($caller, $record, $context = '');
+    public function benchmark($caller, $record, string $context = '');
 }

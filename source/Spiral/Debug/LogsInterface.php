@@ -22,5 +22,5 @@ interface LogsInterface
      *
      * @return LoggerInterface
      */
-    public function getLogger($channel);
+    public function getLogger(string $channel): LoggerInterface;
 }

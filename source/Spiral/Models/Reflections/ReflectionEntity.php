@@ -47,7 +47,7 @@ class ReflectionEntity
      *
      * @param string $class
      */
-    public function __construct($class)
+    public function __construct(string $class)
     {
         $this->reflection = new \ReflectionClass($class);
     }
@@ -55,7 +55,7 @@ class ReflectionEntity
     /**
      * @return \ReflectionClass
      */
-    public function getReflection()
+    public function getReflection(): \ReflectionClass
     {
         return $this->reflection;
     }
@@ -63,7 +63,7 @@ class ReflectionEntity
     /**
      * @return array
      */
-    public function getSecured()
+    public function getSecured(): array
     {
         if ($this->getProperty('secured', true) === '*') {
             return $this->getProperty('secured', true);
@@ -75,7 +75,7 @@ class ReflectionEntity
     /**
      * @return array
      */
-    public function getFillable()
+    public function getFillable(): array
     {
         return array_unique((array)$this->getProperty('fillable', true));
     }
@@ -83,7 +83,7 @@ class ReflectionEntity
     /**
      * @return array
      */
-    public function getHidden()
+    public function getHidden(): array
     {
         return array_unique((array)$this->getProperty('hidden', true));
     }
@@ -91,15 +91,7 @@ class ReflectionEntity
     /**
      * @return array
      */
-    public function getValidates()
-    {
-        return $this->getProperty('validates', true);
-    }
-
-    /**
-     * @return array
-     */
-    public function getSetters()
+    public function getSetters(): array
     {
         return $this->getMutators()[AbstractEntity::MUTATOR_SETTER];
     }
@@ -107,7 +99,7 @@ class ReflectionEntity
     /**
      * @return array
      */
-    public function getGetters()
+    public function getGetters(): array
     {
         return $this->getMutators()[AbstractEntity::MUTATOR_GETTER];
     }
@@ -115,7 +107,7 @@ class ReflectionEntity
     /**
      * @return array
      */
-    public function getAccessors()
+    public function getAccessors(): array
     {
         return $this->getMutators()[AbstractEntity::MUTATOR_ACCESSOR];
     }
@@ -125,7 +117,7 @@ class ReflectionEntity
      *
      * @return \ReflectionMethod[]
      */
-    public function getLocalMethods()
+    public function getLocalMethods(): array
     {
         $methods = [];
         foreach ($this->getMethods() as $method) {
@@ -144,7 +136,7 @@ class ReflectionEntity
      *
      * @return array
      */
-    public function getFields()
+    public function getFields(): array
     {
         //Default property to store schema
         return (array)$this->getProperty('schema', true);
@@ -155,7 +147,7 @@ class ReflectionEntity
      *
      * @return array
      */
-    public function getMutators()
+    public function getMutators(): array
     {
         $mutators = [
             AbstractEntity::MUTATOR_GETTER   => [],
@@ -185,7 +177,7 @@ class ReflectionEntity
      * @param array  $arguments
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         return call_user_func_array([$this->reflection, $name], $arguments);
     }
@@ -193,7 +185,7 @@ class ReflectionEntity
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getName();
     }
@@ -215,7 +207,7 @@ class ReflectionEntity
      *
      * @return mixed
      */
-    final protected function getProperty($property, $merge = false)
+    final protected function getProperty(string $property, bool $merge = false)
     {
         if (isset($this->cache[$property])) {
             //Property merging and trait events are pretty slow
@@ -250,7 +242,7 @@ class ReflectionEntity
      *
      * @return $this|self
      */
-    protected function parentSchema()
+    protected function parentSchema(): ReflectionEntity
     {
         if (
             !empty($this->getParentClass())

@@ -665,10 +665,10 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * {@inheritdoc}
      */
-    protected function container()
+    protected function iocContainer()
     {
         if (empty($this->orm) || !$this->orm instanceof Component) {
-            return parent::container();
+            return parent::iocContainer();
         }
 
         return $this->orm->container();

@@ -368,7 +368,7 @@ abstract class Relation extends Component implements
     /**
      * {@inheritdoc}
      */
-    protected function container()
+    protected function iocContainer()
     {
         return $this->orm->container();
     }

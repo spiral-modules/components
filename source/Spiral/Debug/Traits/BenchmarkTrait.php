@@ -46,7 +46,7 @@ trait BenchmarkTrait
     protected function benchmark($record, string $context = '')
     {
         if (empty($this->benchmarker)) {
-            $container = $this->container();
+            $container = $this->iocContainer();
 
             if (empty($container) || !$container->has(BenchmarkerInterface::class)) {
                 //Nothing to do
@@ -62,5 +62,5 @@ trait BenchmarkTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

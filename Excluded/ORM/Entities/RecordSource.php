@@ -152,12 +152,12 @@ class RecordSource extends Component implements \Countable
     /**
      * {@inheritdoc}
      */
-    protected function container()
+    protected function iocContainer()
     {
         if ($this->orm instanceof Component) {
             return $this->orm->container();
         }
 
-        return parent::container();
+        return parent::iocContainer();
     }
 }

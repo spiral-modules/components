@@ -84,7 +84,7 @@ trait PaginatorTrait
     public function paginate(int $limit = 25, string $parameter = 'page')
     {
         //We are required to fetch paginator from associated container or shared container
-        $container = $this->container();
+        $container = $this->iocContainer();
 
         if (empty($container) || !$container->has(PaginatorsInterface::class)) {
             throw new SugarException(
@@ -130,5 +130,5 @@ trait PaginatorTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

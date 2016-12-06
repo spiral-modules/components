@@ -781,13 +781,13 @@ class Compositor extends Component implements
     /**
      * @return null|ContainerInterface
      */
-    protected function container()
+    protected function iocContainer()
     {
         if (!empty($this->parent) && $this->parent instanceof Component) {
             return $this->parent->container();
         }
 
-        return parent::container();
+        return parent::iocContainer();
     }
 
     /**

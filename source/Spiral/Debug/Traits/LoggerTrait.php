@@ -92,7 +92,7 @@ trait LoggerTrait
      */
     private function createLogger(): LoggerInterface
     {
-        $container = $this->container();
+        $container = $this->iocContainer();
         if (empty($container) || !$container->has(LogsInterface::class)) {
             return new NullLogger();
         }
@@ -104,5 +104,5 @@ trait LoggerTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

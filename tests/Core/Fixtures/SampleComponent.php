@@ -15,7 +15,7 @@ class SampleComponent extends Component
 {
     public function getContainer()
     {
-        return $this->container();
+        return $this->iocContainer();
     }
 
     /**

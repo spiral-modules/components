@@ -641,13 +641,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      */
-    protected function container()
+    protected function iocContainer()
     {
         if (empty($this->odm) || !$this->odm instanceof Component) {
-            return parent::container();
+            return parent::iocContainer();
         }
 
-        return $this->odm->container();
+        return $this->odm->iocContainer();
     }
 
     /**

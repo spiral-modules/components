@@ -157,12 +157,12 @@ class DocumentSource extends Component implements \Countable
     /**
      * {@inheritdoc}
      */
-    protected function container()
+    protected function iocContainer()
     {
         if ($this->odm instanceof Component) {
-            return $this->odm->container();
+            return $this->odm->iocContainer();
         }
 
-        return parent::container();
+        return parent::iocContainer();
     }
 }

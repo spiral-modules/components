@@ -31,7 +31,7 @@ abstract class Component
      *
      * @return ContainerInterface|null
      */
-    protected function container()
+    protected function iocContainer()
     {
         if (
             property_exists($this, 'container')

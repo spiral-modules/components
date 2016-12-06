@@ -38,7 +38,7 @@ trait SaturateTrait
             return $default;
         }
 
-        $container = $this->container();
+        $container = $this->iocContainer();
 
         if (empty($container)) {
             throw new SugarException("Unable to saturate '{$class}': no container available");
@@ -57,5 +57,5 @@ trait SaturateTrait
      *
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

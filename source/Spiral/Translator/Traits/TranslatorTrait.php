@@ -44,7 +44,7 @@ trait TranslatorTrait
             $string = substr($string, 2, -2);
         }
 
-        $container = $this->container();
+        $container = $this->iocContainer();
         if (empty($container) || !$container->has(TranslatorInterface::class)) {
             throw new SugarException("Unable to get instance of 'TranslatorInterface'");
         }
@@ -65,5 +65,5 @@ trait TranslatorTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

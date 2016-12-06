@@ -44,7 +44,7 @@ class TranslatorConfig extends InjectableConfig
      * @param Patternizer $patternizer
      * @return self
      */
-    public function withPatternizer(Patternizer $patternizer)
+    public function withPatternizer(Patternizer $patternizer): self
     {
         $config = clone $this;
         $config->patternizer = $patternizer;
@@ -55,7 +55,7 @@ class TranslatorConfig extends InjectableConfig
     /**
      * @return string
      */
-    public function defaultLocale()
+    public function defaultLocale(): string
     {
         return $this->config['locale'];
     }
@@ -63,7 +63,7 @@ class TranslatorConfig extends InjectableConfig
     /**
      * @return string
      */
-    public function fallbackLocale()
+    public function fallbackLocale(): string
     {
         return $this->config['fallbackLocale'];
     }
@@ -71,7 +71,7 @@ class TranslatorConfig extends InjectableConfig
     /**
      * @return bool
      */
-    public function cacheLocales()
+    public function cacheLocales(): bool
     {
         if (array_key_exists('cacheLocales', $this->config)) {
             return $this->config['cacheLocales'];
@@ -84,7 +84,7 @@ class TranslatorConfig extends InjectableConfig
     /**
      * @return bool
      */
-    public function registerMessages()
+    public function registerMessages(): bool
     {
         return !empty($this->config['autoRegister']) || !empty($this->config['registerMessages']);
     }
@@ -92,7 +92,7 @@ class TranslatorConfig extends InjectableConfig
     /**
      * @return string
      */
-    public function localesDirectory()
+    public function localesDirectory(): string
     {
         return $this->config['localesDirectory'];
     }
@@ -101,7 +101,7 @@ class TranslatorConfig extends InjectableConfig
      * @param string $locale
      * @return string
      */
-    public function localeDirectory($locale)
+    public function localeDirectory(string $locale): string
     {
         return $this->config['localesDirectory'] . $locale . '/';
     }
@@ -112,7 +112,7 @@ class TranslatorConfig extends InjectableConfig
      * @param string $bundle
      * @return string
      */
-    public function resolveDomain($bundle)
+    public function resolveDomain(string $bundle): string
     {
         if (empty($this->patternizer)) {
             $this->patternizer = new Patternizer();
@@ -136,7 +136,7 @@ class TranslatorConfig extends InjectableConfig
      * @param string $extension
      * @return bool
      */
-    public function hasLoader($extension)
+    public function hasLoader(string $extension): bool
     {
         return isset($this->config['loaders'][$extension]);
     }
@@ -145,7 +145,7 @@ class TranslatorConfig extends InjectableConfig
      * @param string $extension
      * @return string
      */
-    public function loaderClass($extension)
+    public function loaderClass(string $extension): string
     {
         return $this->config['loaders'][$extension];
     }
@@ -154,7 +154,7 @@ class TranslatorConfig extends InjectableConfig
      * @param string $dumper
      * @return bool
      */
-    public function hasDumper($dumper)
+    public function hasDumper(string $dumper): bool
     {
         return isset($this->config['dumpers'][$dumper]);
     }
@@ -163,7 +163,7 @@ class TranslatorConfig extends InjectableConfig
      * @param string $dumper
      * @return string
      */
-    public function dumperClass($dumper)
+    public function dumperClass(string $dumper): string
     {
         return $this->config['dumpers'][$dumper];
     }

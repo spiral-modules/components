@@ -16,11 +16,19 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 interface ActiveEntityInterface extends IdentifiedInterface
 {
     /**
+     * Save return flags.
+     */
+    const CREATED = 10;
+    const UPDATED = 20;
+
+    /**
      * Save entity content into it's primary storage and return true if operation went successfully.
+     *
+     * @return int CREATED or UPDATE flag.
      *
      * @throws EntityExceptionInterface
      */
-    public function save();
+    public function save(): int;
 
     /**
      * Delete entity from it's primary storage, entity object must not be used anymore after that

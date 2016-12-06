@@ -1,0 +1,1 @@
+This module is going to be kept as PHP5.6 compatible for legacy reasons.

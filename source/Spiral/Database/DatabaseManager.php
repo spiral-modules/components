@@ -259,7 +259,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function createInjection(\ReflectionClass $class,string  $context = null)
     {
         //If context is empty default database will be returned
         return $this->database($context);

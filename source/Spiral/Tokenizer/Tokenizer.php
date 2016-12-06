@@ -126,7 +126,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      *
      * @throws InjectionException
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
         if ($class->isSubclassOf(ClassLocatorInterface::class)) {
             return $this->classLocator();

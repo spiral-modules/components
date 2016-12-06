@@ -208,7 +208,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
         if (empty($context)) {
             throw new StorageException("Storage bucket can be requested without specified context");

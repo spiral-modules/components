@@ -143,7 +143,7 @@ class MongoManager extends Component implements InjectorInterface
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
         return $this->database($context);
     }

@@ -111,7 +111,7 @@ class CacheManager extends Component implements SingletonInterface, CacheInterfa
      *
      * @throws CacheException
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
         if ($class->isAbstract()) {
             //Default store

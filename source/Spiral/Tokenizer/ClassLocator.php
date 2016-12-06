@@ -7,7 +7,7 @@
  */
 namespace Spiral\Tokenizer;
 
-use Spiral\ORM\Exceptions\LoaderException;
+use Spiral\Tokenizer\Exceptions\LocatorException;
 use Spiral\Tokenizer\Prototypes\AbstractLocator;
 
 /**
@@ -28,7 +28,7 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
         foreach ($this->availableClasses() as $class) {
             try {
                 $reflection = $this->classReflection($class);
-            } catch (LoaderException $e) {
+            } catch (LocatorException $e) {
                 //Ignoring
                 continue;
             }

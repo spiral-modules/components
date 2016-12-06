@@ -120,10 +120,7 @@ class ClassLocatorTest extends \PHPUnit_Framework_TestCase
 
         $config = m::mock(TokenizerConfig::class);
 
-        $config->shouldReceive('getDirectories')->andReturn([
-            __DIR__
-        ]);
-
+        $config->shouldReceive('getDirectories')->andReturn([__DIR__]);
         $config->shouldReceive('getExcludes')->andReturn(['Excluded']);
 
         $tokenizer = new Tokenizer(new FileManager(), $config, $memory);

@@ -23,7 +23,7 @@ class XCacheStore extends CacheStore
     /**
      * @param string $prefix
      */
-    public function __construct($prefix = 'spiral:')
+    public function __construct(string $prefix = 'spiral:')
     {
         $this->prefix = $prefix;
     }

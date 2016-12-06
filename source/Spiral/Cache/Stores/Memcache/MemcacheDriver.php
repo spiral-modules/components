@@ -47,7 +47,7 @@ class MemcacheDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function has(string $name)
+    public function has(string $name): bool
     {
         return $this->driver->get($name) !== false;
     }

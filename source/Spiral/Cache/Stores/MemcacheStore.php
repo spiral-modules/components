@@ -45,10 +45,10 @@ class MemcacheStore extends CacheStore
      * @param bool            $connect
      */
     public function __construct(
-        $prefix = 'spiral:',
+        string $prefix = 'spiral:',
         array $servers = [],
         DriverInterface $driver = null,
-        $connect = true
+        bool $connect = true
     ) {
         $this->prefix = $prefix;
 

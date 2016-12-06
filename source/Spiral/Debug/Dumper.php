@@ -50,7 +50,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      * @param LoggerInterface $logger
      */
     public function __construct(
-        $maxLevel = 10,
+        int $maxLevel = 10,
         Style $styler = null,
         LoggerInterface $logger = null
     ) {
@@ -263,8 +263,8 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
             }
 
             return $header
-            . $this->dumpValue($debugInfo, '', $level + (is_scalar($object)), true)
-            . $indent . $this->style->style(')', 'syntax', ')') . "\n";
+                . $this->dumpValue($debugInfo, '', $level + (is_scalar($object)), true)
+                . $indent . $this->style->style(')', 'syntax', ')') . "\n";
         }
 
         if ($object instanceof \Closure) {

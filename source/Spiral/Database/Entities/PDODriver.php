@@ -280,7 +280,13 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         array $parameters = [],
         array $args = []
     ): PDOResult {
-        return $this->statement($statement, $parameters, PDOResult::class, $args);
+        //Forcing specific return class
+        $result = $this->statement($statement, $parameters, PDOResult::class, $args);
+
+        /**
+         * @var PDOResult $result
+         */
+        return $result;
     }
 
     /**

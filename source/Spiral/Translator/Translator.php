@@ -53,7 +53,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * Loaded catalogues (hash).
      *
-     * @var Catalogue
+     * @var Catalogue[]
      */
     private $catalogues = [];
 

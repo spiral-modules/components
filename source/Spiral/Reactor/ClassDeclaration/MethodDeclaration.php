@@ -159,7 +159,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
     /**
      * Init source value.
      *
-     * @param string $source
+     * @param string|array $source
      */
     private function initSource($source)
     {

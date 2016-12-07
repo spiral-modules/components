@@ -28,6 +28,7 @@ abstract class ConditionalExporter implements ExporterInterface
      *
      * @param string $condition
      * @param array  $blocks
+     *
      * @return array
      */
     protected function filterBlocks($condition = null, array $blocks)

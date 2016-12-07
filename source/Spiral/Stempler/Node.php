@@ -140,6 +140,7 @@ class Node
      * Recursively find a children node by it's name.
      *
      * @param string $name
+     *
      * @return Node|null
      */
     public function findNode($name)
@@ -164,6 +165,7 @@ class Node
      *
      * @param array $dynamic  All outer blocks will be aggregated in this array (in compiled form).
      * @param array $compiled Internal complication memory (method called recursively)
+     *
      * @return string
      */
     public function compile(&$dynamic = [], &$compiled = [])
@@ -221,6 +223,7 @@ class Node
      * constructions. Basically it will try to created html tree.
      *
      * @param array $tokens
+     *
      * @throws StrictModeException
      */
     protected function parseTokens(array $tokens)

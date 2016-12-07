@@ -47,6 +47,7 @@ interface SyntaxInterface
      *
      * @param array  $token
      * @param string $name Node name stripper from token name.
+     *
      * @return string
      */
     public function tokenType(array $token, &$name = null);
@@ -55,6 +56,7 @@ interface SyntaxInterface
      * Resolve include or extend location based on given token.
      *
      * @param array $token
+     *
      * @return string
      * @throws SyntaxException
      */
@@ -63,6 +65,7 @@ interface SyntaxInterface
     /**
      * @param array      $token
      * @param Supervisor $supervisor
+     *
      * @return ImporterInterface
      * @throws SyntaxException
      */

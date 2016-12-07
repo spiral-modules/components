@@ -136,6 +136,7 @@ class LocalServer extends StorageServer
      * @param BucketInterface $bucket
      * @param string          $filename
      * @param string          $destination
+     *
      * @return bool
      * @throws ServerException
      */
@@ -166,6 +167,7 @@ class LocalServer extends StorageServer
      * @param BucketInterface $bucket
      * @param string          $filename
      * @param string          $destination
+     *
      * @return bool
      * @throws ServerException
      */
@@ -195,6 +197,7 @@ class LocalServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      */
     protected function getPath(BucketInterface $bucket, string $name): string

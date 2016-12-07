@@ -97,6 +97,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * @param string $name
      * @param array  $connection
+     *
      * @throws SugarException
      */
     public function __construct(string $name, array $connection)
@@ -657,6 +658,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param \PDOStatement        $statement
      * @param ParameterInterface[] $parameters Named hash of ParameterInterface.
+     *
      * @return \PDOStatement
      */
     private function bindParameters(\PDOStatement $statement, array $parameters): \PDOStatement

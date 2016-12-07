@@ -18,6 +18,7 @@ interface LoaderInterface
      * Get local (includable) filename for given view name, needed to highlight errors (if any).
      *
      * @param string $path
+     *
      * @return string
      * @throws LoaderExceptionInterface
      */
@@ -27,6 +28,7 @@ interface LoaderInterface
      * Get source for given name.
      *
      * @param string $path
+     *
      * @return string
      * @throws LoaderExceptionInterface
      */

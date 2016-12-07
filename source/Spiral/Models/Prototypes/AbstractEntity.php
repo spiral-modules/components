@@ -399,6 +399,7 @@ abstract class AbstractEntity extends MutableObject implements
      * Check if field is fillable.
      *
      * @param string $field
+     *
      * @return bool
      */
     abstract protected function isFillable(string $field): bool;
@@ -408,6 +409,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param string $field
      * @param string $type See MUTATOR_* constants
+     *
      * @return mixed
      */
     abstract protected function getMutator(string $field, string $type);

@@ -38,8 +38,11 @@ class FileStore extends CacheStore
      * @param string         $directory
      * @param string         $extension
      */
-    public function __construct(FilesInterface $files, string $directory,string  $extension = 'cache')
-    {
+    public function __construct(
+        FilesInterface $files,
+        string $directory,
+        string $extension = 'cache'
+    ) {
         $this->directory = $files->normalizePath($directory, true);
         $this->extension = $extension;
 

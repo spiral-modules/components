@@ -66,6 +66,7 @@ class Highlighter
      * Set highlighter Style. Immutable.
      *
      * @param Style $style
+     *
      * @return self
      */
     public function withStyle(Style $style): Highlighter
@@ -104,6 +105,7 @@ class Highlighter
      *
      * @param int|null $line   Set as null to avoid line highlighting.
      * @param int|null $around Set as null to return every line.
+     *
      * @return string
      */
     public function lines(int $line = null, int $around = null): string

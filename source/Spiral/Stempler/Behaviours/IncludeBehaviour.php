@@ -132,6 +132,7 @@ class IncludeBehaviour implements BehaviourInterface
      *
      * @param string $name
      * @param string $blockID
+     *
      * @return string
      */
     protected function createPlaceholder($name, &$blockID)

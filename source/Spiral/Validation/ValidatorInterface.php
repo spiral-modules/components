@@ -50,6 +50,7 @@ interface ValidatorInterface
      *
      * @param string $field
      * @param mixed  $default
+     *
      * @return mixed
      */
     public function getValue(string $field, $default = null);

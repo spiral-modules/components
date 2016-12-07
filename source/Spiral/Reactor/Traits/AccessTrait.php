@@ -23,6 +23,7 @@ trait AccessTrait
 
     /**
      * @param string $access
+     *
      * @return $this
      * @throws ReactorException
      */

@@ -17,6 +17,7 @@ interface PredictableInterface extends CountingInterface
      * Set pagination limit. Immutable.
      *
      * @param int $limit
+     *
      * @return PredictableInterface
      */
     public function withLimit(int $limit): PredictableInterface;

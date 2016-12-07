@@ -140,9 +140,11 @@ class QueryInterpolator
      * Replace search value only once.
      *
      * @see http://stackoverflow.com/questions/1252693/using-str-replace-so-that-it-only-acts-on-the-first-match
+     *
      * @param string $search
      * @param string $replace
      * @param string $subject
+     *
      * @return string
      */
     private static function replaceOnce(string $search, string $replace, string $subject): string

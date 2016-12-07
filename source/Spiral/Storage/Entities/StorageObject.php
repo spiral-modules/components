@@ -50,6 +50,7 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * @param string                $address
      * @param StorageInterface|null $storage
+     *
      * @throws SugarException
      */
     public function __construct(string $address, StorageInterface $storage = null)

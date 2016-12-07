@@ -53,6 +53,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
 
     /**
      * @param string $namespace
+     *
      * @return self
      */
     public function setNamespace(string $namespace): FileDeclaration
@@ -74,6 +75,7 @@ class FileDeclaration extends Declaration implements ReplaceableInterface
      * Method will automatically mount requested uses is any.
      *
      * @param DeclarationInterface $element
+     *
      * @return self
      * @throws Exceptions\ReactorException
      */

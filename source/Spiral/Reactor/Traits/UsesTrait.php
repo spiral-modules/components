@@ -19,6 +19,7 @@ trait UsesTrait
 
     /**
      * @param string $class
+     *
      * @return bool
      */
     public function hasUse($class)
@@ -32,6 +33,7 @@ trait UsesTrait
      * Declare uses in a form of array [class => alias|null]. Existed uses will be dropped.
      *
      * @param array $uses
+     *
      * @return self
      */
     public function setUses(array $uses)
@@ -45,6 +47,7 @@ trait UsesTrait
      * Add additional set of uses.
      *
      * @param array $uses
+     *
      * @return self
      */
     public function addUses(array $uses)
@@ -59,6 +62,7 @@ trait UsesTrait
     /**
      * @param string $class
      * @param string $alias Optional.
+     *
      * @return self
      */
     public function addUse($class, $alias = null)
@@ -70,6 +74,7 @@ trait UsesTrait
 
     /**
      * @param string $class
+     *
      * @return self
      */
     public function removeUse($class)
@@ -89,6 +94,7 @@ trait UsesTrait
 
     /**
      * @param int $indentLevel
+     *
      * @return string
      */
     private function renderUses(int $indentLevel = 0): string
@@ -112,6 +118,7 @@ trait UsesTrait
     /**
      * @param string $string
      * @param int    $indent
+     *
      * @return string
      */
     abstract protected function addIndent(string $string, int $indent = 0): string;

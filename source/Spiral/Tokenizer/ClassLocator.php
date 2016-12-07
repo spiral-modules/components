@@ -68,6 +68,7 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
      *
      * @param \ReflectionClass      $class
      * @param \ReflectionClass|null $target
+     *
      * @return bool
      */
     protected function isTargeted(\ReflectionClass $class, \ReflectionClass $target = null): bool

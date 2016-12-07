@@ -51,6 +51,7 @@ class ConstantDeclaration extends NamedDeclaration
      * Array values allowed (but works in PHP7 only).
      *
      * @param mixed $value
+     *
      * @return self
      */
     public function setValue($value): ConstantDeclaration

@@ -169,6 +169,7 @@ class Catalogue
      * Load all catalogue domains.
      *
      * @param array $domains Domains to be loaded
+     *
      * @return self
      */
     public function loadDomains(array $domains = []): Catalogue
@@ -194,6 +195,7 @@ class Catalogue
      * Check if domain data was loaded
      *
      * @param string $domain
+     *
      * @return bool
      */
     protected function isLoaded(string $domain): bool
@@ -236,6 +238,7 @@ class Catalogue
      * Memory section to store domain data in memory
      *
      * @param string $domain
+     *
      * @return string
      */
     private function domainSection(string $domain): string

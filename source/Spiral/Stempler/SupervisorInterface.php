@@ -29,6 +29,7 @@ interface SupervisorInterface
      * @param array $token
      * @param array $content
      * @param Node  $node Node which called behaviour creation. Just in case.
+     *
      * @return mixed|BehaviourInterface
      */
     public function tokenBehaviour(array $token, array $content, Node $node);

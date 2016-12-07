@@ -38,6 +38,7 @@ class Source extends Declaration
 
     /**
      * @param array $lines
+     *
      * @return self
      */
     public function setLines(array $lines): Source
@@ -49,6 +50,7 @@ class Source extends Declaration
 
     /**
      * @param array $lines
+     *
      * @return self
      */
     public function addLines(array $lines): Source
@@ -60,6 +62,7 @@ class Source extends Declaration
 
     /**
      * @param string $line
+     *
      * @return self
      * @throws MultilineException
      */
@@ -79,6 +82,7 @@ class Source extends Declaration
     /**
      * @param string $string
      * @param bool   $cutIndents Function Strings::normalizeIndents will be applied.
+     *
      * @return self
      */
     public function setString(string $string, bool $cutIndents = false): Source
@@ -89,6 +93,7 @@ class Source extends Declaration
     /**
      * @param string $string
      * @param bool   $cutIndents Function Strings::normalizeIndents will be applied.
+     *
      * @return self
      */
     public function addString(string $string, bool $cutIndents = false): Source
@@ -130,6 +135,7 @@ class Source extends Declaration
      *
      * @param string $string
      * @param bool   $cutIndents
+     *
      * @return array
      */
     public function fetchLines(string $string, bool $cutIndents): array
@@ -149,6 +155,7 @@ class Source extends Declaration
      *
      * @param string $string
      * @param bool   $cutIndents Function Strings::normalizeIndents will be applied.
+     *
      * @return Source
      */
     public static function fromString(string $string, bool $cutIndents = false): Source
@@ -162,6 +169,7 @@ class Source extends Declaration
      * Applied to every string before adding it to lines.
      *
      * @param string $line
+     *
      * @return string
      */
     protected function prepareLine(string $line): string

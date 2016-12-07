@@ -186,6 +186,7 @@ class Paginator implements PredictableInterface, \Countable
      * Non-Immutable version of withCount.
      *
      * @param int $count
+     *
      * @return Paginator
      */
     private function setCount(int $count)

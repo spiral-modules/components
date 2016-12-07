@@ -29,6 +29,7 @@ class ParameterAggregator extends DeclarationAggregator
      * Get named element by it's name.
      *
      * @param string $name
+     *
      * @return ParameterDeclaration
      */
     public function get(string $name): ParameterDeclaration

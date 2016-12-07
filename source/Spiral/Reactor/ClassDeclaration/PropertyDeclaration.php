@@ -55,6 +55,7 @@ class PropertyDeclaration extends NamedDeclaration
      * Set default value.
      *
      * @param mixed $value
+     *
      * @return self
      */
     public function setDefault($value): PropertyDeclaration
@@ -118,6 +119,7 @@ class PropertyDeclaration extends NamedDeclaration
      *
      * @param string $serialized
      * @param int    $indentLevel
+     *
      * @return string
      */
     private function mountIndents(string $serialized, int $indentLevel): string

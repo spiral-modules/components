@@ -29,6 +29,7 @@ class MethodAggregator extends DeclarationAggregator
      * Get named element by it's name.
      *
      * @param string $name
+     *
      * @return MethodDeclaration
      */
     public function get(string $name): MethodDeclaration

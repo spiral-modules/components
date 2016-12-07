@@ -18,6 +18,7 @@ interface PaginatorsInterface
      *
      * @param string $parameter
      * @param int    $limit Pagination limit
+     *
      * @return PaginatorInterface
      */
     public function createPaginator(string $parameter, int $limit = 25): PaginatorInterface;

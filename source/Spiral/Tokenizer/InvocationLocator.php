@@ -37,6 +37,7 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
      * Invocations available in finder scope.
      *
      * @param string $signature Method or function signature (name), for pre-filtering.
+     *
      * @return ReflectionInvocation[]
      */
     protected function availableInvocations(string $signature = ''): array
@@ -63,6 +64,7 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
     /**
      * @param ReflectionInvocation        $invocation
      * @param \ReflectionFunctionAbstract $function
+     *
      * @return bool
      */
     protected function isTargeted(

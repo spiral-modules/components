@@ -141,6 +141,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param Finder|null $finder
      * @param array       $directories
      * @param array       $exclude
+     *
      * @return Finder
      */
     private function prepareFinder(

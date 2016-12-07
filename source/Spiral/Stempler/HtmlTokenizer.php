@@ -103,6 +103,7 @@ class HtmlTokenizer
      * Parse HTML content and return it's tokens.
      *
      * @param string $source HTML source.
+     *
      * @return array
      */
     public function parse($source)
@@ -185,6 +186,7 @@ class HtmlTokenizer
      * Compile token and all it's attributes into string.
      *
      * @param array $token
+     *
      * @return string
      */
     public function compile(array $token)
@@ -220,6 +222,7 @@ class HtmlTokenizer
      * Parses tag body for arguments, name, etc.
      *
      * @param string $content Tag content to be parsed (from < till >).
+     *
      * @return array
      */
     protected function parseToken($content)
@@ -324,6 +327,7 @@ class HtmlTokenizer
      * Will restore all existing PHP blocks to their original content.
      *
      * @param string $source
+     *
      * @return string
      */
     protected function repairPHP($source)

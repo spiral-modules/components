@@ -25,6 +25,7 @@ abstract class Declaration extends Component implements DeclarationInterface
     /**
      * @param string $string
      * @param int    $indent
+     *
      * @return string
      */
     protected function addIndent(string $string, int $indent = 0): string
@@ -38,6 +39,7 @@ abstract class Declaration extends Component implements DeclarationInterface
      *
      * @param string $string       String to be normalized.
      * @param bool   $joinMultiple Join multiple new lines into one.
+     *
      * @return string
      */
     protected function normalizeEndings(string $string, bool $joinMultiple = true): string

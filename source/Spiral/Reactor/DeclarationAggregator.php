@@ -52,6 +52,7 @@ class DeclarationAggregator extends Declaration implements
      * Check if aggregation has named element with given name.
      *
      * @param string $name
+     *
      * @return bool
      */
     public function has(string $name): bool
@@ -69,6 +70,7 @@ class DeclarationAggregator extends Declaration implements
      * Add new element.
      *
      * @param DeclarationInterface $element
+     *
      * @return self
      * @throws ReactorException
      */
@@ -116,6 +118,7 @@ class DeclarationAggregator extends Declaration implements
      * Remove element by it's name.
      *
      * @param string $name
+     *
      * @return self
      */
     public function remove(string $name): DeclarationAggregator

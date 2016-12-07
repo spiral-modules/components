@@ -29,6 +29,7 @@ class PropertyAggregator extends DeclarationAggregator
      * Get named element by it's name.
      *
      * @param string $name
+     *
      * @return PropertyDeclaration
      */
     public function get(string $name): PropertyDeclaration

@@ -210,6 +210,7 @@ class FtpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      * @throws ServerException
      */
@@ -253,6 +254,7 @@ class FtpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      */
     protected function getPath(BucketInterface $bucket, string $name): string
@@ -267,6 +269,7 @@ class FtpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return bool
      */
     protected function refreshPermissions(BucketInterface $bucket, string $name): bool

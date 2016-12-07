@@ -91,6 +91,7 @@ abstract class StorageServer extends Component implements ServerInterface
      * Cast local filename to be used in file based methods and etc.
      *
      * @param string|StreamInterface $source
+     *
      * @return string
      */
     protected function castFilename($source): string
@@ -122,6 +123,7 @@ abstract class StorageServer extends Component implements ServerInterface
      * Cast stream associated with origin data.
      *
      * @param string|StreamInterface $source
+     *
      * @return StreamInterface
      */
     protected function castStream($source): StreamInterface

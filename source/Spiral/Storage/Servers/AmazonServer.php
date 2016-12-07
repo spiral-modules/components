@@ -56,6 +56,7 @@ class AmazonServer extends StorageServer
 
     /**
      * @param ClientInterface $client
+     *
      * @return self
      */
     public function setClient(ClientInterface $client): AmazonServer
@@ -69,6 +70,7 @@ class AmazonServer extends StorageServer
      * {@inheritdoc}
      *
      * @param ResponseInterface $response Reference.
+     *
      * @return bool|ResponseInterface
      */
     public function exists(
@@ -219,6 +221,7 @@ class AmazonServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return UriInterface
      */
     protected function buildUri(BucketInterface $bucket, string $name): UriInterface
@@ -236,6 +239,7 @@ class AmazonServer extends StorageServer
      * @param string          $name
      * @param array           $headers
      * @param array           $commands Amazon commands associated with values.
+     *
      * @return RequestInterface
      */
     protected function buildRequest(
@@ -263,6 +267,7 @@ class AmazonServer extends StorageServer
      * Generate request headers based on provided set of amazon commands.
      *
      * @param array $commands
+     *
      * @return array
      */
     private function packCommands(array $commands): array
@@ -281,6 +286,7 @@ class AmazonServer extends StorageServer
      * @param RequestInterface $request
      * @param array            $packedCommands Headers generated based on request commands, see
      *                                         packCommands() method for more information.
+     *
      * @return RequestInterface
      */
     private function signRequest(
@@ -322,6 +328,7 @@ class AmazonServer extends StorageServer
      * @param BucketInterface $bucket
      * @param string          $name
      * @param mixed           $source
+     *
      * @return array
      */
     private function createHeaders(BucketInterface $bucket, string $name, $source): array

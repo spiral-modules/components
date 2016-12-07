@@ -145,6 +145,7 @@ class Supervisor implements SupervisorInterface
      *
      * @param string $path
      * @param array  $token Context token.
+     *
      * @return Node
      * @throws StemplerException
      */
@@ -185,6 +186,7 @@ class Supervisor implements SupervisorInterface
      *
      * @param string            $path
      * @param StemplerException $exception
+     *
      * @return StemplerException
      */
     protected function clarifyException($path, StemplerException $exception)

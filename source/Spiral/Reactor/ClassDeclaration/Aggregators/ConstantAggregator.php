@@ -29,6 +29,7 @@ class ConstantAggregator extends DeclarationAggregator
      * Get named element by it's name.
      *
      * @param string $name
+     *
      * @return ConstantDeclaration
      */
     public function get(string $name): ConstantDeclaration

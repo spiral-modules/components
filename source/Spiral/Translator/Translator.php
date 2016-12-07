@@ -125,6 +125,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * sources are not copied, cache synced.
      *
      * @param string $locale
+     *
      * @return Translator
      */
     public function withLocale(string $locale): Translator
@@ -235,6 +236,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * Return catalogue for specific locate or return default one if no locale specified.
      *
      * @param string $locale
+     *
      * @return Catalogue
      *
      * @throws LocaleException
@@ -337,6 +339,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * Load catalogue data from source.
      *
      * @param string $locale
+     *
      * @return Catalogue
      */
     protected function loadCatalogue(string $locale): Catalogue
@@ -376,6 +379,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * Check if given locale exists.
      *
      * @param string $locale
+     *
      * @return bool
      */
     private function hasLocale(string $locale): bool
@@ -391,6 +395,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      * Check if string has translation braces [[ and ]].
      *
      * @param string $string
+     *
      * @return bool
      */
     public static function isMessage(string $string): bool

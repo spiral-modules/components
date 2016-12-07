@@ -157,6 +157,7 @@ class Parameter implements ParameterInterface
 
     /**
      * @param mixed $value
+     *
      * @return int
      */
     protected function detectType($value): int

@@ -130,6 +130,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @param string          $name
      * @param ServerInterface $server
+     *
      * @return $this
      *
      * @throws StorageException

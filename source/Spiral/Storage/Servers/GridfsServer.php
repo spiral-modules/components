@@ -139,6 +139,7 @@ class GridfsServer extends StorageServer
      * Get valid gridfs collection associated with container.
      *
      * @param BucketInterface $bucket Bucket instance.
+     *
      * @return \MongoGridFS
      */
     protected function gridFS(BucketInterface $bucket): \MongoGridFS

@@ -77,6 +77,7 @@ trait PaginatorTrait
      * @param int    $limit     Pagination limit.
      * @param string $parameter Name of parameter to associate paginator with, by default query
      *                          parameter of active request to be used.
+     *
      * @return $this
      *
      * @throws SugarException

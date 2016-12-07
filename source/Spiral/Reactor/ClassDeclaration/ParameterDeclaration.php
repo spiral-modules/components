@@ -53,6 +53,7 @@ class ParameterDeclaration extends NamedDeclaration
 
     /**
      * @param string $type
+     *
      * @return self
      */
     public function setType(string $type): ParameterDeclaration
@@ -74,6 +75,7 @@ class ParameterDeclaration extends NamedDeclaration
      * Flag that parameter should pass by reference.
      *
      * @param bool $passedByReference
+     *
      * @return self
      */
     public function setPBR(bool $passedByReference = false): ParameterDeclaration
@@ -105,6 +107,7 @@ class ParameterDeclaration extends NamedDeclaration
      * Set parameter default value.
      *
      * @param mixed $defaultValue
+     *
      * @return self
      */
     public function setDefault($defaultValue): ParameterDeclaration

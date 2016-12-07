@@ -52,6 +52,7 @@ class TranslatorConfig extends InjectableConfig
 
     /**
      * @param Patternizer $patternizer
+     *
      * @return self
      */
     public function withPatternizer(Patternizer $patternizer): TranslatorConfig
@@ -109,6 +110,7 @@ class TranslatorConfig extends InjectableConfig
 
     /**
      * @param string $locale
+     *
      * @return string
      */
     public function localeDirectory(string $locale): string
@@ -120,6 +122,7 @@ class TranslatorConfig extends InjectableConfig
      * Get domain name associated with given bundle.
      *
      * @param string $bundle
+     *
      * @return string
      */
     public function resolveDomain(string $bundle): string
@@ -142,6 +145,7 @@ class TranslatorConfig extends InjectableConfig
 
     /**
      * @param string $extension
+     *
      * @return bool
      */
     public function hasLoader(string $extension): bool
@@ -151,6 +155,7 @@ class TranslatorConfig extends InjectableConfig
 
     /**
      * @param string $extension
+     *
      * @return string
      */
     public function loaderClass(string $extension): string
@@ -160,6 +165,7 @@ class TranslatorConfig extends InjectableConfig
 
     /**
      * @param string $dumper
+     *
      * @return bool
      */
     public function hasDumper(string $dumper): bool
@@ -169,6 +175,7 @@ class TranslatorConfig extends InjectableConfig
 
     /**
      * @param string $dumper
+     *
      * @return string
      */
     public function dumperClass(string $dumper): string

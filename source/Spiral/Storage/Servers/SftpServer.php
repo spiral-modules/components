@@ -213,6 +213,7 @@ class SftpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      */
     protected function getPath(BucketInterface $bucket, string $name): string
@@ -228,6 +229,7 @@ class SftpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      */
     protected function getUri(BucketInterface $bucket, string $name): string
@@ -240,6 +242,7 @@ class SftpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      * @throws ServerException
      */
@@ -287,6 +290,7 @@ class SftpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return bool
      */
     protected function refreshPermissions(BucketInterface $bucket, string $name): bool

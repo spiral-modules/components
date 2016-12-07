@@ -53,6 +53,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param bool $static
+     *
      * @return self
      */
     public function setStatic(bool $static = true): MethodDeclaration
@@ -82,6 +83,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
      * Set method source.
      *
      * @param string|array $source
+     *
      * @return self
      */
     public function setSource($source): MethodDeclaration
@@ -107,6 +109,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $name
+     *
      * @return ParameterDeclaration
      */
     public function parameter(string $name): ParameterDeclaration
@@ -128,6 +131,7 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param int $indentLevel
+     *
      * @return string
      */
     public function render(int $indentLevel = 0): string

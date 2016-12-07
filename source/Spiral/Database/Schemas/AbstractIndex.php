@@ -74,7 +74,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @return self
      */
-    public function unique(bool $unique = true):AbstractIndex
+    public function unique(bool $unique = true): AbstractIndex
     {
         $this->type = $unique ? self::UNIQUE : self::NORMAL;
 

@@ -47,7 +47,9 @@ class NamespaceDeclaration extends NamedDeclaration implements ReplaceableInterf
      * Method will automatically mount requested uses is any.
      *
      * @todo dry, see FileDeclaration
+     *
      * @param DeclarationInterface $element
+     *
      * @return self
      * @throws Exceptions\ReactorException
      */

@@ -24,40 +24,40 @@ interface ReferenceInterface
      *
      * @return string
      */
-    public function getName():string;
+    public function getName(): string;
 
     /**
      * Get column name foreign key assigned to.
      *
      * @return string
      */
-    public function getColumn():string;
+    public function getColumn(): string;
 
     /**
      * Foreign table name.
      *
      * @return string
      */
-    public function getForeignTable():string;
+    public function getForeignTable(): string;
 
     /**
      * Foreign key (column name).
      *
      * @return string
      */
-    public function getForeignKey():string;
+    public function getForeignKey(): string;
 
     /**
      * Get delete rule, possible values: NO ACTION, CASCADE and etc.
      *
      * @return string
      */
-    public function getDeleteRule():string;
+    public function getDeleteRule(): string;
 
     /**
      * Get update rule, possible values: NO ACTION, CASCADE and etc.
      *
      * @return string
      */
-    public function getUpdateRule():string;
+    public function getUpdateRule(): string;
 }

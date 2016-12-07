@@ -33,6 +33,7 @@ trait CommentTrait
      * Set comment value.
      *
      * @param string|array $comment
+     *
      * @return $this
      */
     public function setComment($comment)

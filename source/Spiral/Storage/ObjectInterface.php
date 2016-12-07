@@ -84,6 +84,7 @@ interface ObjectInterface extends StreamableInterface
      * Rename storage object without changing it's bucket.
      *
      * @param string $newName
+     *
      * @return self
      * @throws ServerException
      * @throws BucketException
@@ -96,6 +97,7 @@ interface ObjectInterface extends StreamableInterface
      * new storage object.
      *
      * @param BucketInterface|string $destination
+     *
      * @return self
      * @throws ServerException
      * @throws BucketException
@@ -107,6 +109,7 @@ interface ObjectInterface extends StreamableInterface
      * Move storage object data to another bucket.
      *
      * @param BucketInterface|string $destination
+     *
      * @return self
      * @throws ServerException
      * @throws BucketException

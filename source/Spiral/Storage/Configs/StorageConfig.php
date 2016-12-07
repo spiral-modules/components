@@ -32,6 +32,7 @@ class StorageConfig extends InjectableConfig
 
     /**
      * @param string $server
+     *
      * @return bool
      */
     public function hasServer(string $server): bool
@@ -41,6 +42,7 @@ class StorageConfig extends InjectableConfig
 
     /**
      * @param string $server
+     *
      * @return string
      */
     public function serverClass(string $server): string
@@ -50,6 +52,7 @@ class StorageConfig extends InjectableConfig
 
     /**
      * @param string $server
+     *
      * @return array
      */
     public function serverOptions(string $server): array

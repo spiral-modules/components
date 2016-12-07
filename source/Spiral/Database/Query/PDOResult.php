@@ -39,6 +39,7 @@ class PDOResult extends PDOStatement implements \JsonSerializable
      *
      * @param int|string $fieldID Column number (0 - first column)
      * @param mixed      $variable
+     *
      * @return self
      */
     public function bind($fieldID, &$variable): PDOResult

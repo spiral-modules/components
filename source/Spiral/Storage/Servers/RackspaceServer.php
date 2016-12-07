@@ -96,6 +96,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
 
     /**
      * @param ClientInterface $client
+     *
      * @return self
      */
     public function setClient(ClientInterface $client): RackspaceServer
@@ -109,6 +110,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * {@inheritdoc}
      *
      * @param ResponseInterface $response Reference.
+     *
      * @return bool
      */
     public function exists(
@@ -372,6 +374,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return UriInterface
      * @throws ServerException
      */
@@ -398,6 +401,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * @param BucketInterface $bucket
      * @param string          $name
      * @param array           $headers
+     *
      * @return RequestInterface
      */
     protected function buildRequest(

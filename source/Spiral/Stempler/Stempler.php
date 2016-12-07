@@ -43,6 +43,7 @@ class Stempler
      * Compile path.
      *
      * @param string $path
+     *
      * @return string
      */
     public function compile($path)
@@ -54,6 +55,7 @@ class Stempler
      * Compile string template.
      *
      * @param string $source
+     *
      * @return string
      */
     public function compileString($source)

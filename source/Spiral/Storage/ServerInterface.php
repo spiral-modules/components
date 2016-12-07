@@ -24,6 +24,7 @@ interface ServerInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return bool
      * @throws ServerException
      */
@@ -34,6 +35,7 @@ interface ServerInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return int|null
      * @throws ServerException
      */
@@ -42,9 +44,10 @@ interface ServerInterface
     /**
      * Put object data into specified bucket under given name, must replace existed data.
      *
-     * @param BucketInterface $bucket
-     * @param string $name
+     * @param BucketInterface        $bucket
+     * @param string                 $name
      * @param string|StreamInterface $source
+     *
      * @return bool
      * @throws ServerException
      */
@@ -57,6 +60,7 @@ interface ServerInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      * @throws ServerException
      */
@@ -67,6 +71,7 @@ interface ServerInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return StreamInterface
      * @throws ServerException
      */
@@ -77,6 +82,7 @@ interface ServerInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @throws ServerException
      */
     public function delete(BucketInterface $bucket, string $name);
@@ -87,6 +93,7 @@ interface ServerInterface
      * @param BucketInterface $bucket
      * @param string          $oldName
      * @param string          $newName
+     *
      * @return bool
      * @throws ServerException
      */
@@ -98,6 +105,7 @@ interface ServerInterface
      * @param BucketInterface $bucket
      * @param BucketInterface $destination
      * @param string          $name
+     *
      * @return bool
      * @throws ServerException
      */
@@ -109,6 +117,7 @@ interface ServerInterface
      * @param BucketInterface $bucket
      * @param BucketInterface $destination
      * @param string          $name
+     *
      * @return bool
      * @throws ServerException
      */

@@ -20,6 +20,7 @@ class Patternizer
 {
     /**
      * @param string $string
+     *
      * @return bool
      */
     public function isPattern(string $string): bool
@@ -32,6 +33,7 @@ class Patternizer
      *
      * @param string $string
      * @param string $pattern
+     *
      * @return bool
      */
     public function matches(string $string, string $pattern): bool
@@ -45,6 +47,7 @@ class Patternizer
 
     /**
      * @param string $pattern
+     *
      * @return string
      */
     private function getRegex(string $pattern): string

@@ -64,6 +64,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
      * @param string $extends
      * @param array  $interfaces
      * @param string $comment
+     *
      * @throws ReactorException When name is invalid.
      */
     public function __construct(
@@ -96,6 +97,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $class Class name.
+     *
      * @return self
      */
     public function setExtends($class): ClassDeclaration
@@ -115,6 +117,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $interface
+     *
      * @return bool
      */
     public function hasInterface(string $interface): bool
@@ -128,6 +131,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
      * Declare class interfaces.
      *
      * @param array $interfaces
+     *
      * @return self
      */
     public function setInterfaces(array $interfaces): ClassDeclaration
@@ -142,6 +146,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $interface
+     *
      * @return self
      */
     public function addInterface(string $interface): ClassDeclaration
@@ -153,6 +158,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $interface
+     *
      * @return self
      */
     public function removeInterface(string $interface): ClassDeclaration
@@ -164,6 +170,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $class
+     *
      * @return bool
      */
     public function hasTrait(string $class): bool
@@ -177,6 +184,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
      * Declare class traits.
      *
      * @param array $traits
+     *
      * @return self
      */
     public function setTraits(array $traits): ClassDeclaration
@@ -191,6 +199,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $class
+     *
      * @return self
      */
     public function addTrait(string $class): ClassDeclaration
@@ -202,6 +211,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $class
+     *
      * @return self
      */
     public function removeTrait(string $class): ClassDeclaration
@@ -229,6 +239,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $name
+     *
      * @return ConstantDeclaration
      */
     public function constant(string $name): ConstantDeclaration
@@ -246,6 +257,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $name
+     *
      * @return PropertyDeclaration
      */
     public function property(string $name): PropertyDeclaration
@@ -263,6 +275,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param string $name
+     *
      * @return MethodDeclaration
      */
     public function method(string $name): MethodDeclaration
@@ -286,6 +299,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param int $indentLevel
+     *
      * @return string
      */
     public function render(int $indentLevel = 0): string
@@ -337,6 +351,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
 
     /**
      * @param int $indentLevel
+     *
      * @return string
      */
     private function renderTraits(int $indentLevel = 0): string

@@ -106,6 +106,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param array|\Traversable $data      Data or model to be validated.
      * @param ValidatorConfig    $config    Saturated using shared container
      * @param ContainerInterface $container Saturated using shared container
+     *
      * @throws SugarException
      */
     public function __construct(
@@ -212,6 +213,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      *
      * @param string $field
      * @param mixed  $default
+     *
      * @return mixed
      */
     public function getValue(string $field, $default = null)
@@ -303,6 +305,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param mixed  $value
      * @param mixed  $condition Reference, can be altered if alias exists.
      * @param array  $arguments Rule arguments if any.
+     *
      * @return bool|CheckerInterface
      * @throws ValidationException
      */
@@ -359,6 +362,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * Get or create instance of validation checker.
      *
      * @param string $name
+     *
      * @return CheckerInterface
      * @throws ValidationException
      */
@@ -377,6 +381,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * Fetch validation rule arguments from rule definition.
      *
      * @param array $rule
+     *
      * @return array
      */
     private function fetchArguments(array $rule): array
@@ -392,6 +397,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      *
      * @param array  $rule
      * @param string $message Default message to use.
+     *
      * @return string
      */
     private function fetchMessage(array $rule, string $message): string

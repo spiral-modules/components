@@ -65,6 +65,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * Manually set database.
      *
      * @param Database $database
+     *
      * @return self
      *
      * @throws DBALException
@@ -87,6 +88,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * @param string        $name
      * @param string        $prefix
      * @param string|Driver $connection Connection name or instance.
+     *
      * @return Database
      *
      * @throws DBALException
@@ -174,6 +176,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * @param string $dns
      * @param string $username
      * @param string $password
+     *
      * @return Driver
      */
     public function registerConnection(

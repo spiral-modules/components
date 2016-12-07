@@ -20,6 +20,7 @@ interface SourceInterface
      * Check if given locale known to source.
      *
      * @param string $locale
+     *
      * @return bool
      */
     public function hasLocale(string $locale): bool;

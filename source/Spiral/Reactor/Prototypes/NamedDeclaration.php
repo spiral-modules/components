@@ -31,6 +31,7 @@ abstract class NamedDeclaration extends Declaration
      * Attention, element name will be automatically classified.
      *
      * @param string $name
+     *
      * @return $this|self
      * @throws ReactorException
      */

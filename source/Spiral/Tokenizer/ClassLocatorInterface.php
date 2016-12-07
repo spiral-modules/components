@@ -28,6 +28,7 @@ interface ClassLocatorInterface
      * @param mixed $target  Class, interface or trait parent. By default - null (all classes).
      *                       Parent (class) will also be included to classes list as one of
      *                       results.
+     *
      * @return array
      */
     public function getClasses($target = null): array;

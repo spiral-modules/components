@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Entities\SynchronizationBus;
 use Spiral\ORM\Configs\ORMConfig;
 use Spiral\ORM\Entities\Schemas\RecordSchema;

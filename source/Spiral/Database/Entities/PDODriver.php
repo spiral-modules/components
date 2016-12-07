@@ -283,12 +283,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         $class = null,
         array $args = []
     ): \PDOStatement {
-        return $this->statement(
-            $statement,
-            $parameters,
-            !empty($class) ? $class : static::QUERY_RESULT,
-            $args
-        );
+        return $this->statement($statement, $parameters, $class ?? static::QUERY_RESULT, $args);
     }
 
     /**
@@ -307,7 +302,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function statement(
         string $query,
         array $parameters = [],
-        string $class = \PDOStatement::class,
+        string $class = 'PDOStatement',
         array $args = []
     ): \PDOStatement {
         try {
@@ -343,6 +338,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
             }
 
+            //Logging error even when no profiling is enabled
             $this->logger()->error($queryString, compact('query', 'parameters'));
 
             //Converting exception into query or integrity exception
@@ -363,7 +359,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function prepare(
         string $statement,
-        string $class = \PDOStatement::class,
+        string $class = 'PDOStatement',
         array $args = []
     ): \PDOStatement {
         $pdo = $this->getPDO();

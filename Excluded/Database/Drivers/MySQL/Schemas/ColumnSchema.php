@@ -10,7 +10,7 @@ namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;
-use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractColumn;
 use Spiral\Database\Injections\Fragment;
 
 /**

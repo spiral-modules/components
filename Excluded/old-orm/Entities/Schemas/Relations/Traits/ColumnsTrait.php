@@ -8,8 +8,8 @@
 
 namespace Spiral\ORM\Entities\Schemas\Relations\Traits;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\ORM\Exceptions\DefinitionException;
 
 /**

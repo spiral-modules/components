@@ -10,7 +10,7 @@ namespace Spiral\Database\Helpers;
 
 use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Support\DFSSorter;
 

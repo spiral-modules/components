@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * SQLIte specific table schema, some alter operations emulated using temporary tables.

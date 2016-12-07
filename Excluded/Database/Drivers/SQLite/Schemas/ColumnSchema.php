@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractColumn;
 
 /**
  * SQLite column schema.

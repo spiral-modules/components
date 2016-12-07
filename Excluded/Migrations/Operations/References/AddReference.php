@@ -7,7 +7,7 @@
  */
 namespace Spiral\Migrations\Operations\References;
 
-use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractReference;
 use Spiral\Migrations\CapsuleInterface;
 use Spiral\Migrations\Exceptions\Operations\ReferenceException;
 use Spiral\Migrations\Operations\ReferenceOperation;

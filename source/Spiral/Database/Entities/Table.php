@@ -11,7 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * Represent table level abstraction with simplified access to SelectQuery associated with such

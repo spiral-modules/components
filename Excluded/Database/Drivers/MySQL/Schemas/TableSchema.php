@@ -9,8 +9,8 @@
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\Schemas\AbstractCommander;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractCommander;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Exceptions\SchemaException;
 
 /**

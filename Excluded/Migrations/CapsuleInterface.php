@@ -8,7 +8,7 @@
 namespace Spiral\Migrations;
 
 use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Entities\Table;
 use Spiral\Migrations\Exceptions\ContextException;
 

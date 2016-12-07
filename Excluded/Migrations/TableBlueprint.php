@@ -7,7 +7,7 @@
  */
 namespace Spiral\Migrations;
 
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Migrations\Operations\Columns\AddColumn;
 use Spiral\Migrations\Operations\Columns\AlterColumn;
 use Spiral\Migrations\Operations\Columns\DropColumn;

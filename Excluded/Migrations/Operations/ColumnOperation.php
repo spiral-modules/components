@@ -7,8 +7,8 @@
  */
 namespace Spiral\Migrations\Operations;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Migrations\Exceptions\Operations\ColumnException;
 use Spiral\Migrations\Operations\Traits\OptionsTrait;
 

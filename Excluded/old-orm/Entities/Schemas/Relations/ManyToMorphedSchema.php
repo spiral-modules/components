@@ -9,7 +9,7 @@
 namespace Spiral\ORM\Entities\Schemas\Relations;
 
 use Doctrine\Common\Inflector\Inflector;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\MorphedSchema;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Exceptions\RelationSchemaException;

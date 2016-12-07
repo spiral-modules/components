@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractIndex;
 
 /**
  * Postgres index schema.

@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities\Schemas;
+namespace Spiral\Database\Schemas;
 
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
+use Spiral\Database\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Injections\FragmentInterface;

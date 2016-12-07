@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * SQLServer table schema.

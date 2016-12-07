@@ -9,7 +9,7 @@
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractColumn;
 
 /**
  * SQL Server specific column schema.

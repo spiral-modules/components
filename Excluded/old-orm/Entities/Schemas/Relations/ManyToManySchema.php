@@ -8,7 +8,7 @@
 
 namespace Spiral\ORM\Entities\Schemas\Relations;
 
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\ORM\Entities\Schemas\Relations\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Schemas\RelationSchema;
 use Spiral\ORM\Exceptions\RelationSchemaException;

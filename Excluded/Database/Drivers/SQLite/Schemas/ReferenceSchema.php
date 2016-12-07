@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractReference;
 
 /**
  * SQLite foreign key schema.

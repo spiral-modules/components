@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractReference;
 
 /**
  * Postgres foreign key schema.

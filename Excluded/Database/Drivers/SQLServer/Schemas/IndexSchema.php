@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractIndex;
 
 /**
  * SQLServer index schema.

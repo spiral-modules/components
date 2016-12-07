@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractReference;
 
 /**
  * SQLServer foreign key schema.

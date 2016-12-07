@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities\Schemas;
+namespace Spiral\Database\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\Driver;

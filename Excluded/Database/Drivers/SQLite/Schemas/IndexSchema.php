@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractIndex;
 
 /**
  * SQLite index schema.

@@ -204,7 +204,7 @@ class Database implements DatabaseInterface, InjectableInterface
     public function query(
         string $query,
         array $parameters = [],
-        $class = null,
+        string $class = null,
         array $args = []
     ): ResultInterface {
         return $this->driver->query($query, $parameters, $class, $args);

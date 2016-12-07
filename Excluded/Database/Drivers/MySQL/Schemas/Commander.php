@@ -8,11 +8,11 @@
 
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractCommander;
-use Spiral\Database\Entities\Schemas\AbstractIndex;
-use Spiral\Database\Entities\Schemas\AbstractReference;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractCommander;
+use Spiral\Database\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Exceptions\SchemaException;
 
 /**

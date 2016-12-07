@@ -9,9 +9,9 @@
 namespace Spiral\ORM\Entities\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractIndex;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Entities\SchemaBuilder;

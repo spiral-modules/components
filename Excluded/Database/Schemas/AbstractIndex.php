@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities\Schemas;
+namespace Spiral\Database\Schemas;
 
-use Spiral\Database\Entities\Schemas\Prototypes\AbstractElement;
+use Spiral\Database\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Schemas\IndexInterface;
 
 /**

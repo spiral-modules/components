@@ -8,10 +8,10 @@
 
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractCommander;
-use Spiral\Database\Entities\Schemas\AbstractReference;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractCommander;
+use Spiral\Database\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * SQLite commander.

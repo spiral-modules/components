@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractIndex;
+use Spiral\Database\Schemas\AbstractIndex;
 
 /**
  * MySQL index schema.

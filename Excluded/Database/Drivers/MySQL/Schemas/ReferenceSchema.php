@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractReference;
+use Spiral\Database\Schemas\AbstractReference;
 
 /**
  * MySQL foreign key schema.

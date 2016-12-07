@@ -6,9 +6,9 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities\Schemas\Prototypes;
+namespace Spiral\Database\Schemas\Prototypes;
 
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Exceptions\SchemaException;
 
 /**

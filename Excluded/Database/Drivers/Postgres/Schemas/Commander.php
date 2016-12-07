@@ -8,9 +8,9 @@
 
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
-use Spiral\Database\Entities\Schemas\AbstractColumn;
-use Spiral\Database\Entities\Schemas\AbstractCommander;
-use Spiral\Database\Entities\Schemas\AbstractTable;
+use Spiral\Database\Schemas\AbstractColumn;
+use Spiral\Database\Schemas\AbstractCommander;
+use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Exceptions\SchemaException;
 
 class Commander extends AbstractCommander

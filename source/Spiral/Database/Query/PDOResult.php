@@ -15,7 +15,7 @@ use Spiral\Database\ResultInterface;
 /**
  * Works as prepared PDOStatement.
  */
-class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializable
+class PDOResult extends PDOStatement implements ResultInterface, \JsonSerializable
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
@@ -42,7 +42,7 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
      * @param mixed      $variable
      * @return self
      */
-    public function bind($fieldID, &$variable): PDOQuery
+    public function bind($fieldID, &$variable): PDOResult
     {
         if (is_numeric($fieldID)) {
             //PDO columns are 1-indexed

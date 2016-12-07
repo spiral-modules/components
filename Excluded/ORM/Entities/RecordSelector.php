@@ -13,7 +13,7 @@ use Spiral\Cache\CacheInterface;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Query\PDOQuery;
+use Spiral\Database\Query\PDOResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Entities\Loaders\RootLoader;
@@ -434,7 +434,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      *
      * Return type will depend if custom columns set were used.
      *
-     * @return PDOQuery|RecordIterator
+     * @return PDOResult|RecordIterator
      */
     public function getIterator()
     {

@@ -18,7 +18,7 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Query\PDOQuery;
+use Spiral\Database\Query\PDOResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
@@ -45,7 +45,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Query result class.
      */
-    const QUERY_RESULT = PDOQuery::class;
+    const QUERY_RESULT = PDOResult::class;
 
     /**
      * Driver name.
@@ -275,7 +275,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *                      used.
      * @param array  $args  Class construction arguments (by default filtered parameters).
      *
-     * @return \PDOStatement|PDOQuery
+     * @return \PDOStatement|PDOResult
      */
     public function query(
         string $statement,

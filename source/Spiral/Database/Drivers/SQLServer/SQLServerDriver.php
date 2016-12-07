@@ -39,7 +39,7 @@ class SQLServerDriver extends Driver
     /**
      * Query result class.
      */
-    const QUERY_RESULT = SQLServerQuery::class;
+    const QUERY_RESULT = SQLServerResult::class;
 
     /**
      * Query compiler class.

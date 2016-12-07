@@ -85,7 +85,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
 
         //Will be removed by QueryResult
         $columns[] = new Fragment(
-            "ROW_NUMBER() OVER ($ordering) AS {$this->quote(SQLServerQuery::ROW_NUMBER_COLUMN)}"
+            "ROW_NUMBER() OVER ($ordering) AS {$this->quote(SQLServerResult::ROW_NUMBER_COLUMN)}"
         );
 
         //Let's compile MOST of our query :)
@@ -103,7 +103,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
             $unionTokens
         );
 
-        $limitStatement = $this->compileLimit($limit, $offset, SQLServerQuery::ROW_NUMBER_COLUMN);
+        $limitStatement = $this->compileLimit($limit, $offset, SQLServerResult::ROW_NUMBER_COLUMN);
 
         return "SELECT * FROM (\n{$selection}\n) AS [selection_alias] {$limitStatement}";
     }

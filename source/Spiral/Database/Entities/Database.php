@@ -20,7 +20,7 @@ use Spiral\Database\Exceptions\DatabaseException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Query\PDOQuery;
+use Spiral\Database\Query\PDOResult;
 use Spiral\Database\ResultInterface;
 
 /**
@@ -198,7 +198,7 @@ class Database implements DatabaseInterface, InjectableInterface
      * @param string $class Class to be used to represent PDOStatement.
      * @param array  $args  Class construction arguments, by default array of parameters.
      *
-     * @return ResultInterface|\PDOStatement|PDOQuery
+     * @return ResultInterface|\PDOStatement|PDOResult
      */
     public function query(
         string $query,

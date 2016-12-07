@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Drivers\SQLServer;
 
-use Spiral\Database\Query\PDOQuery;
+use Spiral\Database\Query\PDOResult;
 
 /**
  * SQLServer specific result reader, required due server need additional column for sorting in some
@@ -19,7 +19,7 @@ use Spiral\Database\Query\PDOQuery;
  *
  * todo: make sure there is no much inconsistency with SQLServer selections
  */
-class SQLServerQuery extends PDOQuery
+class SQLServerResult extends PDOResult
 {
     /**
      * Helper column used to create limit, offset statements in older versions of sql server.

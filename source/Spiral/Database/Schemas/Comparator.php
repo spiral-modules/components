@@ -38,7 +38,7 @@ class Comparator extends Component
     /**
      * @return bool
      */
-    public function hasChanges()
+    public function hasChanges(): bool
     {
         if ($this->current->getName() != $this->initial->getName()) {
             return true;
@@ -66,7 +66,7 @@ class Comparator extends Component
     /**
      * @return AbstractColumn[]
      */
-    public function addedColumns()
+    public function addedColumns(): array
     {
         $difference = [];
         foreach ($this->current->getColumns() as $name => $column) {
@@ -81,7 +81,7 @@ class Comparator extends Component
     /**
      * @return AbstractColumn[]
      */
-    public function droppedColumns()
+    public function droppedColumns(): array
     {
         $difference = [];
         foreach ($this->initial->getColumns() as $name => $column) {
@@ -98,7 +98,7 @@ class Comparator extends Component
      *
      * @return array
      */
-    public function alteredColumns()
+    public function alteredColumns(): array
     {
         $difference = [];
 
@@ -120,7 +120,7 @@ class Comparator extends Component
     /**
      * @return AbstractIndex[]
      */
-    public function addedIndexes()
+    public function addedIndexes(): array
     {
         $difference = [];
         foreach ($this->current->getIndexes() as $name => $index) {
@@ -135,7 +135,7 @@ class Comparator extends Component
     /**
      * @return AbstractIndex[]
      */
-    public function droppedIndexes()
+    public function droppedIndexes(): array
     {
         $difference = [];
         foreach ($this->initial->getIndexes() as $name => $index) {
@@ -152,7 +152,7 @@ class Comparator extends Component
      *
      * @return array
      */
-    public function alteredIndexes()
+    public function alteredIndexes(): array
     {
         $difference = [];
 
@@ -174,7 +174,7 @@ class Comparator extends Component
     /**
      * @return AbstractReference[]
      */
-    public function addedForeigns()
+    public function addedForeigns(): array
     {
         $difference = [];
         foreach ($this->current->getForeigns() as $name => $foreign) {
@@ -189,7 +189,7 @@ class Comparator extends Component
     /**
      * @return AbstractReference[]
      */
-    public function droppedForeigns()
+    public function droppedForeigns(): array
     {
         $difference = [];
         foreach ($this->initial->getForeigns() as $name => $foreign) {
@@ -206,7 +206,7 @@ class Comparator extends Component
      *
      * @return array
      */
-    public function alteredForeigns()
+    public function alteredForeigns(): array
     {
         $difference = [];
 

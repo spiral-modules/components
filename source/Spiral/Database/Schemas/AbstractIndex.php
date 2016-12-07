@@ -9,7 +9,6 @@
 namespace Spiral\Database\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractElement;
-use Spiral\Database\Schemas\IndexInterface;
 
 /**
  * Abstract index schema with read (see IndexInterface) and write abilities. Must be implemented
@@ -43,7 +42,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @param bool $quoted Quote name.
      */
-    public function getName($quoted = false)
+    public function getName(bool $quoted = false): string
     {
         if (empty(parent::getName())) {
             $this->setName($this->generateName());
@@ -55,7 +54,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
     /**
      * {@inheritdoc}
      */
-    public function isUnique()
+    public function isUnique(): bool
     {
         return $this->type == self::UNIQUE;
     }
@@ -63,7 +62,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
     /**
      * {@inheritdoc}
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
@@ -73,9 +72,9 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @param bool $unique
      *
-     * @return $this
+     * @return self
      */
-    public function unique($unique = true)
+    public function unique(bool $unique = true):AbstractIndex
     {
         $this->type = $unique ? self::UNIQUE : self::NORMAL;
 
@@ -92,9 +91,9 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @param string|array $columns Columns array or comma separated list of parameters.
      *
-     * @return $this
+     * @return self
      */
-    public function columns($columns)
+    public function columns($columns): AbstractIndex
     {
         if (!is_array($columns)) {
             $columns = func_get_args();
@@ -113,7 +112,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @return string
      */
-    public function sqlStatement($includeTable = true)
+    public function sqlStatement(bool $includeTable = true): string
     {
         $statement = [$this->type];
 
@@ -130,7 +129,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
 
         //Wrapping column names
         $columns = implode(', ', array_map(
-            [$this->table->driver(), 'identifier']
+            [$this->table->getDriver(), 'identifier']
             , $this->columns
         ));
 
@@ -146,7 +145,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @return bool
      */
-    public function compare(self $initial)
+    public function compare(self $initial): bool
     {
         $normalized = clone $initial;
         $normalized->declared = $this->declared;
@@ -159,7 +158,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      *
      * @return string
      */
-    protected function generateName()
+    protected function generateName(): string
     {
         //We can generate name
         $name = $this->table->getName() . '_index_' . implode('_', $this->columns) . '_' . uniqid();

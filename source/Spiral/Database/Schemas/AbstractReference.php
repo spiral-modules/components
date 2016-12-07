@@ -9,7 +9,6 @@
 namespace Spiral\Database\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractElement;
-use Spiral\Database\Schemas\ReferenceInterface;
 use Spiral\ODM\Exceptions\SchemaException;
 
 /**
@@ -58,9 +57,9 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @param bool $declared
      *
-     * @return $this
+     * @return self
      */
-    public function declared($declared = true)
+    public function declared(bool $declared = true): AbstractReference
     {
         if ($declared && $this->table->hasIndex([$this->column])) {
             //Some databases require index for each foreign key
@@ -75,9 +74,9 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @param string $name
      *
-     * @return $this
+     * @return self
      */
-    public function setName($name)
+    public function setName(string $name): AbstractReference
     {
         if (!empty($this->name)) {
             throw new SchemaException('Changing reference name is not allowed');
@@ -91,7 +90,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @param bool $quoted Quote name.
      */
-    public function getName($quoted = false)
+    public function getName(bool $quoted = false): string
     {
         if (empty($this->name)) {
             $this->setName($this->generateName());
@@ -103,7 +102,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     /**
      * {@inheritdoc}
      */
-    public function getColumn()
+    public function getColumn(): string
     {
         return $this->column;
     }
@@ -111,7 +110,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     /**
      * {@inheritdoc}
      */
-    public function getForeignTable()
+    public function getForeignTable(): string
     {
         return $this->foreignTable;
     }
@@ -119,7 +118,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     /**
      * {@inheritdoc}
      */
-    public function getForeignKey()
+    public function getForeignKey(): string
     {
         return $this->foreignKey;
     }
@@ -127,7 +126,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     /**
      * {@inheritdoc}
      */
-    public function getDeleteRule()
+    public function getDeleteRule(): string
     {
         return $this->deleteRule;
     }
@@ -135,7 +134,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     /**
      * {@inheritdoc}
      */
-    public function getUpdateRule()
+    public function getUpdateRule(): string
     {
         return $this->updateRule;
     }
@@ -146,9 +145,9 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @param string $column
      *
-     * @return $this
+     * @return self
      */
-    public function column($column)
+    public function column(string $column): AbstractReference
     {
         $this->column = $column;
 
@@ -163,9 +162,9 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *                       automatically).
      * @param string $column Foreign key name (id by default).
      *
-     * @return $this
+     * @return self
      */
-    public function references($table, $column = 'id')
+    public function references(string $table, string $column = 'id'): AbstractReference
     {
         $this->foreignTable = $this->table->getPrefix() . $table;
         $this->foreignKey = $column;
@@ -178,9 +177,9 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @param string $rule Possible values: NO ACTION, CASCADE, etc (driver specific).
      *
-     * @return $this
+     * @return self
      */
-    public function onDelete($rule = self::NO_ACTION)
+    public function onDelete(string $rule = self::NO_ACTION): AbstractReference
     {
         $this->deleteRule = strtoupper($rule);
 
@@ -192,9 +191,9 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @param string $rule Possible values: NO ACTION, CASCADE, etc (driver specific).
      *
-     * @return $this
+     * @return self
      */
-    public function onUpdate($rule = self::NO_ACTION)
+    public function onUpdate(string $rule = self::NO_ACTION): AbstractReference
     {
         $this->updateRule = strtoupper($rule);
 
@@ -206,17 +205,17 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @return string
      */
-    public function sqlStatement()
+    public function sqlStatement(): string
     {
         $statement = [];
 
         $statement[] = 'CONSTRAINT';
         $statement[] = $this->getName(true);
         $statement[] = 'FOREIGN KEY';
-        $statement[] = '(' . $this->table->driver()->identifier($this->column) . ')';
+        $statement[] = '(' . $this->table->getDriver()->identifier($this->column) . ')';
 
-        $statement[] = 'REFERENCES ' . $this->table->driver()->identifier($this->foreignTable);
-        $statement[] = '(' . $this->table->driver()->identifier($this->foreignKey) . ')';
+        $statement[] = 'REFERENCES ' . $this->table->getDriver()->identifier($this->foreignTable);
+        $statement[] = '(' . $this->table->getDriver()->identifier($this->foreignKey) . ')';
 
         $statement[] = "ON DELETE {$this->deleteRule}";
         $statement[] = "ON UPDATE {$this->updateRule}";
@@ -231,7 +230,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @return bool
      */
-    public function compare(self $initial)
+    public function compare(self $initial): bool
     {
         $normalized = clone $initial;
         $normalized->declared = $this->declared;
@@ -244,7 +243,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @return string
      */
-    protected function generateName()
+    protected function generateName(): string
     {
         $name = $this->table->getName() . '_foreign_' . $this->column . '_' . uniqid();
 

@@ -271,7 +271,7 @@ class RecordSchema extends ReflectionEntity
                 $accessor = $accessors[$column->getName()];
                 $accessor = new $accessor($default, null);
                 if ($accessor instanceof RecordAccessorInterface) {
-                    $default = $accessor->defaultValue($this->tableSchema->driver());
+                    $default = $accessor->defaultValue($this->tableSchema->getDriver());
                 }
             }
 
@@ -638,7 +638,7 @@ class RecordSchema extends ReflectionEntity
     private function castDefault(AbstractColumn $column)
     {
         if ($column->abstractType() == 'timestamp' || $column->abstractType() == 'datetime') {
-            $driver = $this->tableSchema->driver();
+            $driver = $this->tableSchema->getDriver();
 
             return $driver::DEFAULT_DATETIME;
         }

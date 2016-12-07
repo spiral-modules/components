@@ -300,7 +300,7 @@ class ColumnSchema extends AbstractColumn
          * them, plus column drop is not possible without removing all constraints.
          */
 
-        $tableDriver = $this->table->driver();
+        $tableDriver = $this->table->getDriver();
         if (!empty($schema['default_object_id'])) {
             //Looking for default constrain id
             $this->defaultConstraint = $tableDriver->query(
@@ -342,7 +342,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         return $quoted
-            ? $this->table->driver()->identifier($this->enumConstraint)
+            ? $this->table->getDriver()->identifier($this->enumConstraint)
             : $this->enumConstraint;
     }
 
@@ -360,7 +360,7 @@ class ColumnSchema extends AbstractColumn
         }
 
         return $quoted
-            ? $this->table->driver()->identifier($this->defaultConstraint)
+            ? $this->table->getDriver()->identifier($this->defaultConstraint)
             : $this->defaultConstraint;
     }
 
@@ -373,7 +373,7 @@ class ColumnSchema extends AbstractColumn
     {
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
         }
 
         $enumConstrain = $this->enumConstraint(true);

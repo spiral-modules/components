@@ -48,7 +48,7 @@ class TableState extends Component
     /**
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
@@ -58,7 +58,7 @@ class TableState extends Component
      *
      * @param string $name
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
     }
@@ -134,7 +134,7 @@ class TableState extends Component
      *
      * @return bool
      */
-    public function knowsColumn($name)
+    public function knowsColumn(string $name): bool
     {
         return isset($this->columns[$name]);
     }
@@ -144,7 +144,7 @@ class TableState extends Component
      *
      * @return bool
      */
-    public function knowsIndex($name)
+    public function knowsIndex(string $name): bool
     {
         return isset($this->indexes[$name]);
     }
@@ -154,7 +154,7 @@ class TableState extends Component
      *
      * @return bool
      */
-    public function knowsForeign($name)
+    public function knowsForeign(string $name): bool
     {
         return isset($this->foreigns[$name]);
     }
@@ -164,7 +164,7 @@ class TableState extends Component
      *
      * Lookup is performed based on initial column name.
      */
-    public function hasColumn($name)
+    public function hasColumn(string $name): bool
     {
         return !empty($this->findColumn($name));
     }
@@ -172,7 +172,7 @@ class TableState extends Component
     /**
      * {@inheritdoc}
      */
-    public function hasIndex(array $columns = [])
+    public function hasIndex(array $columns = []): bool
     {
         return !empty($this->findIndex($columns));
     }
@@ -180,7 +180,7 @@ class TableState extends Component
     /**
      * {@inheritdoc}
      */
-    public function hasForeign($column)
+    public function hasForeign($column): bool
     {
         return !empty($this->findForeign($column));
     }
@@ -192,7 +192,7 @@ class TableState extends Component
      *
      * @return AbstractColumn
      */
-    protected function registerColumn(AbstractColumn $column)
+    protected function registerColumn(AbstractColumn $column): AbstractColumn
     {
         $this->columns[$column->getName()] = $column;
 
@@ -206,7 +206,7 @@ class TableState extends Component
      *
      * @return AbstractIndex
      */
-    protected function registerIndex(AbstractIndex $index)
+    protected function registerIndex(AbstractIndex $index): AbstractIndex
     {
         $this->indexes[$index->getName()] = $index;
 
@@ -220,7 +220,7 @@ class TableState extends Component
      *
      * @return AbstractReference
      */
-    protected function registerReference(AbstractReference $foreign)
+    protected function registerReference(AbstractReference $foreign): AbstractReference
     {
         $this->foreigns[$foreign->getName()] = $foreign;
 
@@ -232,9 +232,9 @@ class TableState extends Component
      *
      * @param AbstractColumn $column
      *
-     * @return $this
+     * @return self
      */
-    protected function forgetColumn(AbstractColumn $column)
+    protected function forgetColumn(AbstractColumn $column): TableState
     {
         foreach ($this->columns as $name => $columnSchema) {
             if ($columnSchema == $column) {
@@ -251,9 +251,9 @@ class TableState extends Component
      *
      * @param AbstractIndex $index
      *
-     * @return $this
+     * @return self
      */
-    protected function forgetIndex(AbstractIndex $index)
+    protected function forgetIndex(AbstractIndex $index): TableState
     {
         foreach ($this->indexes as $name => $indexSchema) {
             if ($indexSchema == $index) {
@@ -270,9 +270,9 @@ class TableState extends Component
      *
      * @param AbstractReference $foreign
      *
-     * @return $this
+     * @return self
      */
-    protected function forgetForeign(AbstractReference $foreign)
+    protected function forgetForeign(AbstractReference $foreign): TableState
     {
         foreach ($this->foreigns as $name => $foreignSchema) {
             if ($foreignSchema == $foreign) {
@@ -291,7 +291,7 @@ class TableState extends Component
      *
      * @return null|AbstractColumn
      */
-    protected function findColumn($name)
+    protected function findColumn(string $name)
     {
         foreach ($this->columns as $column) {
             if ($column->getName() == $name) {
@@ -327,7 +327,7 @@ class TableState extends Component
      *
      * @return null|AbstractReference
      */
-    protected function findForeign($column)
+    protected function findForeign(string $column)
     {
         foreach ($this->foreigns as $reference) {
             if ($reference->getColumn() == $column) {
@@ -340,8 +340,6 @@ class TableState extends Component
 
     /**
      * Remount elements under their current name.
-     *
-     * @return self
      */
     protected function remountElements()
     {
@@ -373,7 +371,7 @@ class TableState extends Component
      *
      * @return self
      */
-    protected function syncSchema(TableState $source)
+    protected function syncSchema(TableState $source): TableState
     {
         $this->name = $source->name;
         $this->primaryKeys = $source->primaryKeys;

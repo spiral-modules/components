@@ -42,7 +42,7 @@ abstract class AbstractElement
      * @param string        $name
      * @param mixed         $schema Driver specific schema information.
      */
-    public function __construct(AbstractTable $table, $name, $schema = null)
+    public function __construct(AbstractTable $table, string $name, $schema = null)
     {
         $this->name = $name;
         $this->table = $table;
@@ -57,7 +57,7 @@ abstract class AbstractElement
      *
      * @return AbstractTable
      */
-    public function getTable()
+    public function getTable(): AbstractTable
     {
         return $this->table;
     }
@@ -69,7 +69,7 @@ abstract class AbstractElement
      *
      * @return $this
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
 
@@ -83,10 +83,10 @@ abstract class AbstractElement
      *
      * @return string
      */
-    public function getName($quoted = false)
+    public function getName(bool $quoted = false): string
     {
         if ($quoted) {
-            return $this->table->driver()->identifier($this->name);
+            return $this->table->getDriver()->identifier($this->name);
         }
 
         return $this->name;
@@ -95,7 +95,7 @@ abstract class AbstractElement
     /**
      * @return bool
      */
-    public function isDeclared()
+    public function isDeclared(): bool
     {
         return $this->declared;
     }
@@ -107,7 +107,7 @@ abstract class AbstractElement
      *
      * @return $this
      */
-    public function declared($declared = true)
+    public function declared(bool $declared = true)
     {
         $this->declared = $declared;
 
@@ -119,12 +119,12 @@ abstract class AbstractElement
      *
      * @return string
      */
-    abstract public function sqlStatement();
+    abstract public function sqlStatement(): string;
 
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->sqlStatement();
     }

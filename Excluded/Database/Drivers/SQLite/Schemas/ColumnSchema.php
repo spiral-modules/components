@@ -113,7 +113,7 @@ class ColumnSchema extends AbstractColumn
 
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
         }
 
         return "$statement CHECK ({$this->getName(true)} IN (" . implode(', ', $enumValues) . '))';

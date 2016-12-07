@@ -35,7 +35,7 @@ abstract class AbstractCommander
      *
      * @return Driver
      */
-    public function driver()
+    public function getDriver(): Driver
     {
         return $this->driver;
     }
@@ -47,7 +47,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function createTable(AbstractTable $table)
+    public function createTable(AbstractTable $table): AbstractCommander
     {
         //Executing!
         $this->run($this->createStatement($table));
@@ -65,7 +65,7 @@ abstract class AbstractCommander
      *
      * @param string $table
      */
-    public function dropTable($table)
+    public function dropTable(string $table)
     {
         $this->run("DROP TABLE {$this->quote($table)}");
     }
@@ -78,7 +78,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function renameTable($table, $name)
+    public function renameTable(string $table, string $name): AbstractCommander
     {
         $this->run("ALTER TABLE {$this->quote($table)} RENAME TO {$this->quote($name)}");
 
@@ -93,7 +93,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function addColumn(AbstractTable $table, AbstractColumn $column)
+    public function addColumn(AbstractTable $table, AbstractColumn $column): AbstractCommander
     {
         $this->run("ALTER TABLE {$table->getName(true)} ADD COLUMN {$column->sqlStatement()}");
 
@@ -108,7 +108,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function dropColumn(AbstractTable $table, AbstractColumn $column)
+    public function dropColumn(AbstractTable $table, AbstractColumn $column): AbstractCommander
     {
         foreach ($column->getConstraints() as $constraint) {
             //We have to erase all associated constraints
@@ -133,7 +133,7 @@ abstract class AbstractCommander
         AbstractTable $table,
         AbstractColumn $initial,
         AbstractColumn $column
-    );
+    ): AbstractCommander;
 
     /**
      * Driver specific index adding command.
@@ -143,7 +143,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function addIndex(AbstractTable $table, AbstractIndex $index)
+    public function addIndex(AbstractTable $table, AbstractIndex $index): AbstractCommander
     {
         $this->run("CREATE {$index->sqlStatement()}");
 
@@ -158,7 +158,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function dropIndex(AbstractTable $table, AbstractIndex $index)
+    public function dropIndex(AbstractTable $table, AbstractIndex $index): AbstractCommander
     {
         $this->run("DROP INDEX {$index->getName(true)}");
 
@@ -174,8 +174,11 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function alterIndex(AbstractTable $table, AbstractIndex $initial, AbstractIndex $index)
-    {
+    public function alterIndex(
+        AbstractTable $table,
+        AbstractIndex $initial,
+        AbstractIndex $index
+    ): AbstractCommander {
         return $this->dropIndex($table, $initial)->addIndex($table, $index);
     }
 
@@ -187,7 +190,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function addForeign(AbstractTable $table, AbstractReference $foreign)
+    public function addForeign(AbstractTable $table, AbstractReference $foreign): AbstractCommander
     {
         $this->run("ALTER TABLE {$table->getName(true)} ADD {$foreign->sqlStatement()}");
 
@@ -202,7 +205,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function dropForeign(AbstractTable $table, AbstractReference $foreign)
+    public function dropForeign(AbstractTable $table, AbstractReference $foreign): AbstractCommander
     {
         return $this->dropConstrain($table, $foreign->getName());
     }
@@ -220,7 +223,7 @@ abstract class AbstractCommander
         AbstractTable $table,
         AbstractReference $initial,
         AbstractReference $foreign
-    ) {
+    ): AbstractCommander {
         return $this->dropForeign($table, $initial)->addForeign($table, $foreign);
     }
 
@@ -232,7 +235,7 @@ abstract class AbstractCommander
      *
      * @return self
      */
-    public function dropConstrain(AbstractTable $table, $constraint)
+    public function dropConstrain(AbstractTable $table, string $constraint): AbstractCommander
     {
         $this->run("ALTER TABLE {$table->getName(true)} DROP CONSTRAINT {$this->quote($constraint)}");
 
@@ -247,7 +250,7 @@ abstract class AbstractCommander
      *
      * @return \PDOStatement
      */
-    protected function run($statement, array $parameters = [])
+    protected function run(string $statement, array $parameters = []): \PDOStatement
     {
         return $this->driver->statement($statement, $parameters);
     }
@@ -259,7 +262,7 @@ abstract class AbstractCommander
      *
      * @return string
      */
-    protected function quote($identifier)
+    protected function quote(string $identifier): string
     {
         return $this->driver->identifier($identifier);
     }
@@ -271,7 +274,7 @@ abstract class AbstractCommander
      *
      * @return string
      */
-    protected function createStatement(AbstractTable $table)
+    protected function createStatement(AbstractTable $table): string
     {
         $statement = ["CREATE TABLE {$table->getName(true)} ("];
         $innerStatement = [];

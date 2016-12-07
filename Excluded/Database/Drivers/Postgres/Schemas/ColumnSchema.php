@@ -192,7 +192,7 @@ class ColumnSchema extends AbstractColumn
         //We have add constraint for enum type
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
         }
 
         return "$statement CONSTRAINT {$this->enumConstraint(true, true)} "
@@ -259,7 +259,7 @@ class ColumnSchema extends AbstractColumn
         if ($this->abstractType() == 'enum') {
             $enumValues = [];
             foreach ($this->enumValues as $value) {
-                $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+                $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
             }
 
             $operations[] = "ADD CONSTRAINT {$this->enumConstraint(true)} "
@@ -349,7 +349,7 @@ class ColumnSchema extends AbstractColumn
             $this->enumConstraint = $this->table->getName() . '_' . $this->getName() . '_enum_' . uniqid();
         }
 
-        return $quote ? $this->table->driver()->identifier($this->enumConstraint) : $this->enumConstraint;
+        return $quote ? $this->table->getDriver()->identifier($this->enumConstraint) : $this->enumConstraint;
     }
 
     /**
@@ -376,7 +376,7 @@ class ColumnSchema extends AbstractColumn
      **/
     private function resolveNativeEnum()
     {
-        $range = $this->table->driver()->query(
+        $range = $this->table->getDriver()->query(
             'SELECT enum_range(NULL::' . $this->type . ')'
         )->fetchColumn(0);
 
@@ -402,7 +402,7 @@ class ColumnSchema extends AbstractColumn
         $query = 'SELECT conname, consrc FROM pg_constraint '
             . "WHERE conrelid = ? AND contype = 'c' AND (consrc LIKE ? OR consrc LIKE ?)";
 
-        $constraints = $this->table->driver()->query(
+        $constraints = $this->table->getDriver()->query(
             $query, [$tableOID, '(' . $this->name . '%', '("' . $this->name . '%']
         );
 

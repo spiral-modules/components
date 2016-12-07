@@ -120,7 +120,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(QueryCompiler $compiler = null): array
     {
         if (empty($compiler)) {
             //Using associated compiler
@@ -394,14 +394,14 @@ abstract class AbstractSelect extends AbstractWhere implements
      * echo $select->sum('user.balance');
      *
      * @param string $method
-     * @param string $arguments
+     * @param array  $arguments
      *
      * @return int
      *
      * @throws BuilderException
      * @throws QueryException
      */
-    public function __call($method, $arguments)
+    public function __call($method, array $arguments)
     {
         if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
             throw new BuilderException("Unknown method '{$method}' in '" . get_class($this) . "'");

@@ -13,7 +13,6 @@ use Spiral\Database\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Injections\FragmentInterface;
-use Spiral\Database\Schemas\ColumnInterface;
 
 /**
  * Abstract column schema with read (see ColumnInterface) and write abilities. Must be implemented
@@ -224,7 +223,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -232,7 +231,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function phpType()
+    public function phpType(): string
     {
         $schemaType = $this->abstractType();
         foreach ($this->phpMapping as $phpType => $candidates) {
@@ -247,7 +246,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function getSize()
+    public function getSize(): int
     {
         return $this->size;
     }
@@ -255,7 +254,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function getPrecision()
+    public function getPrecision(): int
     {
         return $this->precision;
     }
@@ -263,7 +262,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function getScale()
+    public function getScale(): int
     {
         return $this->scale;
     }
@@ -271,7 +270,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function isNullable()
+    public function isNullable(): bool
     {
         return $this->nullable;
     }
@@ -279,7 +278,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * {@inheritdoc}
      */
-    public function hasDefaultValue()
+    public function hasDefaultValue(): bool
     {
         return !is_null($this->defaultValue);
     }
@@ -300,7 +299,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
 
             //Driver specific now expression
-            $nowExpression = $this->table->driver()->nowExpression();
+            $nowExpression = $this->table->getDriver()->nowExpression();
             if (strtolower($this->defaultValue) == strtolower($nowExpression)) {
                 return new Fragment($this->defaultValue);
             }
@@ -327,7 +326,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return array
      */
-    public function getConstraints()
+    public function getConstraints(): array
     {
         return [];
     }
@@ -337,7 +336,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return array
      */
-    public function getEnumValues()
+    public function getEnumValues(): array
     {
         return $this->enumValues;
     }
@@ -348,7 +347,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return string
      */
-    public function abstractType()
+    public function abstractType(): string
     {
         foreach ($this->reverseMapping as $type => $candidates) {
             foreach ($candidates as $candidate) {
@@ -394,7 +393,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @throws SchemaException
      */
-    public function setType($abstract)
+    public function setType(string $abstract): AbstractColumn
     {
         if (isset($this->aliases[$abstract])) {
             $abstract = $this->aliases[$abstract];
@@ -429,7 +428,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return $this
      */
-    public function nullable($nullable = true)
+    public function nullable(bool $nullable = true): AbstractColumn
     {
         $this->nullable = $nullable;
 
@@ -444,14 +443,14 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return $this
      */
-    public function defaultValue($value)
+    public function defaultValue($value): AbstractColumn
     {
         $this->defaultValue = $value;
         if (
             $this->abstractType() == 'timestamp'
             && strtolower($value) == strtolower(Driver::TIMESTAMP_NOW)
         ) {
-            $this->defaultValue = $this->table->driver()->nowExpression();
+            $this->defaultValue = $this->table->getDriver()->nowExpression();
         }
 
         return $this;
@@ -462,9 +461,9 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @see TableSchema::setPrimaryKeys()
      *
-     * @return $this
+     * @return self
      */
-    public function primary()
+    public function primary(): AbstractColumn
     {
         if (!in_array($this->name, $this->table->getPrimaryKeys())) {
             $this->table->setPrimaryKeys([$this->name]);
@@ -478,9 +477,9 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @see TableSchema::setPrimaryKeys()
      *
-     * @return $this
+     * @return self
      */
-    public function bigPrimary()
+    public function bigPrimary(): AbstractColumn
     {
         if (!in_array($this->name, $this->table->getPrimaryKeys())) {
             $this->table->setPrimaryKeys([$this->name]);
@@ -499,9 +498,9 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @param string|array $values Enum values (array or comma separated). String values only.
      *
-     * @return $this
+     * @return self
      */
-    public function enum($values)
+    public function enum($values): AbstractColumn
     {
         $this->setType('enum');
         $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
@@ -521,11 +520,11 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @param int $size Max string length.
      *
-     * @return $this
+     * @return self
      *
      * @throws SchemaException
      */
-    public function string($size = 255)
+    public function string(int $size = 255): AbstractColumn
     {
         $this->setType('string');
 
@@ -550,11 +549,11 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      * @param int $precision
      * @param int $scale
      *
-     * @return $this
+     * @return self
      *
      * @throws SchemaException
      */
-    public function decimal($precision, $scale = 0)
+    public function decimal(int $precision, int $scale = 0): AbstractColumn
     {
         $this->setType('decimal');
 
@@ -575,7 +574,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @throws SchemaException
      */
-    public function index()
+    public function index(): AbstractIndex
     {
         return $this->table->index($this->name);
     }
@@ -587,7 +586,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @throws SchemaException
      */
-    public function unique()
+    public function unique(): AbstractIndex
     {
         return $this->table->unique($this->name);
     }
@@ -603,7 +602,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @throws SchemaException
      */
-    public function references($table, $column = 'id')
+    public function references(string $table, string $column = 'id'): AbstractReference
     {
         if ($this->phpType() != self::INT) {
             throw new SchemaException(
@@ -619,7 +618,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return string
      */
-    public function sqlStatement()
+    public function sqlStatement(): string
     {
         $statement = [$this->getName(true), $this->type];
 
@@ -650,7 +649,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return bool
      */
-    public function compare(self $initial)
+    public function compare(self $initial): bool
     {
         $normalized = clone $initial;
         $normalized->declared = $this->declared;
@@ -687,9 +686,9 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      * @param string $type      Abstract type.
      * @param array  $arguments Not used.
      *
-     * @return $this
+     * @return self
      */
-    public function __call($type, array $arguments = [])
+    public function __call(string $type, array $arguments = []): AbstractColumn
     {
         return $this->setType($type);
     }
@@ -740,11 +739,11 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return string.
      */
-    protected function prepareEnum()
+    protected function prepareEnum(): string
     {
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $this->table->driver()->getPDO()->quote($value);
+            $enumValues[] = $this->table->getDriver()->getPDO()->quote($value);
         }
 
         if (!empty($enumValues)) {
@@ -759,7 +758,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return string
      */
-    protected function prepareDefault()
+    protected function prepareDefault(): string
     {
         if (($defaultValue = $this->getDefaultValue()) === null) {
             return 'NULL';
@@ -781,6 +780,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             return $defaultValue;
         }
 
-        return $this->table->driver()->getPDO()->quote($defaultValue);
+        return $this->table->getDriver()->getPDO()->quote($defaultValue);
     }
 }

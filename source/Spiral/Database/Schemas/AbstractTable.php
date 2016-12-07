@@ -10,8 +10,6 @@ namespace Spiral\Database\Schemas;
 
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Schemas\ColumnInterface;
-use Spiral\Database\Schemas\TableInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ODM\Exceptions\SchemaException;
 
@@ -104,8 +102,12 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * @param string            $name   Table name, must include table prefix.
      * @param string            $prefix Database specific table prefix.
      */
-    public function __construct(Driver $driver, AbstractCommander $commander, $name, $prefix)
-    {
+    public function __construct(
+        Driver $driver,
+        AbstractCommander $commander,
+        string $name,
+        string $prefix
+    ) {
         parent::__construct($name);
 
         $this->driver = $driver;
@@ -138,7 +140,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return Driver
      */
-    public function driver()
+    public function getDriver(): Driver
     {
         return $this->driver;
     }
@@ -148,7 +150,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return Comparator
      */
-    public function comparator()
+    public function getComparator(): Comparator
     {
         return $this->comparator;
     }
@@ -156,7 +158,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * {@inheritdoc}
      */
-    public function exists()
+    public function exists(): bool
     {
         return $this->exists;
     }
@@ -166,7 +168,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * Automatically forces prefix value.
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         parent::setName($this->prefix . $name);
     }
@@ -176,7 +178,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param bool $quoted Quote name.
      */
-    public function getName($quoted = false)
+    public function getName(bool $quoted = false): string
     {
         if (!$quoted) {
             return parent::getName();
@@ -190,7 +192,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return string
      */
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->prefix;
     }
@@ -198,7 +200,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * {@inheritdoc}
      */
-    public function getDependencies()
+    public function getDependencies(): array
     {
         $tables = [];
         foreach ($this->getForeigns() as $foreign) {
@@ -214,11 +216,11 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param array $columns
      *
-     * @return $this
+     * @return self
      *
      * @throws SchemaException
      */
-    public function setPrimaryKeys(array $columns)
+    public function setPrimaryKeys(array $columns): AbstractTable
     {
         if ($this->exists() && $this->getPrimaryKeys() != $columns) {
             throw new SchemaException('Unable to change primary keys for already exists table');
@@ -239,7 +241,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return AbstractColumn
      */
-    public function column($name)
+    public function column($name): AbstractColumn
     {
         if (!empty($column = $this->findColumn($name))) {
             return $column->declared(true);
@@ -264,7 +266,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return AbstractIndex
      */
-    public function index($columns)
+    public function index($columns): AbstractIndex
     {
         $columns = is_array($columns) ? $columns : func_get_args();
         if (!empty($index = $this->findIndex($columns))) {
@@ -288,9 +290,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param mixed $columns Column name, or array of columns.
      *
-     * @return AbstractColumn|null
+     * @return AbstractIndex
      */
-    public function unique($columns)
+    public function unique($columns): AbstractIndex
     {
         $columns = is_array($columns) ? $columns : func_get_args();
 
@@ -303,9 +305,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param string $column Column name.
      *
-     * @return AbstractReference|null
+     * @return AbstractReference
      */
-    public function foreign($column)
+    public function foreign($column): AbstractReference
     {
         if (!empty($foreign = $this->findForeign($column))) {
             return $foreign->declared(true);
@@ -323,9 +325,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * @param string $column
      * @param string $name New column name.
      *
-     * @return $this
+     * @return self
      */
-    public function renameColumn($column, $name)
+    public function renameColumn(string $column, string $name): AbstractTable
     {
         if (empty($column = $this->findColumn($column))) {
             return $this;
@@ -343,9 +345,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * @param array  $columns Index forming columns.
      * @param string $name    New index name.
      *
-     * @return $this
+     * @return self
      */
-    public function renameIndex(array $columns, $name)
+    public function renameIndex(array $columns, string $name): AbstractTable
     {
         if (empty($index = $this->findIndex($columns))) {
             return $this;
@@ -362,9 +364,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param string $column
      *
-     * @return $this
+     * @return self
      */
-    public function dropColumn($column)
+    public function dropColumn(string $column): AbstractTable
     {
         if (!empty($column = $this->findColumn($column))) {
             $this->forgetColumn($column);
@@ -379,9 +381,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param array $columns
      *
-     * @return $this
+     * @return self
      */
-    public function dropIndex(array $columns)
+    public function dropIndex(array $columns): AbstractTable
     {
         if (!empty($index = $this->findIndex($columns))) {
             $this->forgetIndex($index);
@@ -395,9 +397,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @param string $column
      *
-     * @return $this
+     * @return self
      */
-    public function dropForeign($column)
+    public function dropForeign($column): AbstractTable
     {
         if (!empty($foreign = $this->findForeign($column))) {
             $this->forgetForeign($foreign);
@@ -443,9 +445,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * Declare every existed element. Method has to be called if table modification applied to
      * existed table to prevent dropping of existed elements.
      *
-     * @return $this
+     * @return self
      */
-    public function declareExisted()
+    public function declareExisted(): AbstractTable
     {
         foreach ($this->getColumns() as $column) {
             $column->declared(true);
@@ -540,7 +542,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * @return AbstractColumn|string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getName();
     }
@@ -590,9 +592,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      * Synchronise columns.
      *
      * @todo Split or isolate.
-     * @return $this
+     * @return self
      */
-    protected function synchroniseColumns()
+    protected function synchroniseColumns(): AbstractTable
     {
         foreach ($this->comparator->droppedColumns() as $column) {
             $this->logger()->debug('Dropping column [{statement}] from table {table}.', [
@@ -634,9 +636,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Drop needed indexes.
      *
-     * @return $this
+     * @return self
      */
-    protected function dropIndexes()
+    protected function dropIndexes(): AbstractTable
     {
         foreach ($this->comparator->droppedIndexes() as $index) {
             $this->logger()->debug('Dropping index [{statement}] from table {table}.', [
@@ -653,9 +655,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Synchronise indexes.
      *
-     * @return $this
+     * @return self
      */
-    protected function synchroniseIndexes()
+    protected function synchroniseIndexes(): AbstractTable
     {
         foreach ($this->comparator->addedIndexes() as $index) {
             $this->logger()->debug('Adding index [{statement}] into table {table}.', [
@@ -688,9 +690,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Drop needed foreign keys.
      *
-     * @return $this
+     * @return self
      */
-    protected function dropForeigns()
+    protected function dropForeigns(): AbstractTable
     {
         foreach ($this->comparator->droppedForeigns() as $foreign) {
             $this->logger()->debug('Dropping foreign key [{statement}] from table {table}.', [
@@ -707,9 +709,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Synchronise foreign keys.
      *
-     * @return $this
+     * @return self
      */
-    protected function synchroniseForeigns()
+    protected function synchroniseForeigns(): AbstractTable
     {
         foreach ($this->comparator->addedForeigns() as $foreign) {
             $this->logger()->debug('Adding foreign key [{statement}] into table {table}.', [
@@ -746,7 +748,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return AbstractColumn
      */
-    abstract protected function columnSchema($name, $schema = null);
+    abstract protected function columnSchema($name, $schema = null): AbstractColumn;
 
     /**
      * Driver specific index schema.
@@ -756,7 +758,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return AbstractIndex
      */
-    abstract protected function indexSchema($name, $schema = null);
+    abstract protected function indexSchema($name, $schema = null): AbstractIndex;
 
     /**
      * Driver specific reference schema.
@@ -766,7 +768,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return AbstractReference
      */
-    abstract protected function referenceSchema($name, $schema = null);
+    abstract protected function referenceSchema($name, $schema = null): AbstractReference;
 
     /**
      * Must load table columns.
@@ -775,7 +777,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return self
      */
-    abstract protected function loadColumns();
+    abstract protected function loadColumns(): AbstractTable;
 
     /**
      * Must load table indexes.
@@ -784,7 +786,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return self
      */
-    abstract protected function loadIndexes();
+    abstract protected function loadIndexes(): AbstractTable;
 
     /**
      * Must load table references.
@@ -793,7 +795,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return self
      */
-    abstract protected function loadReferences();
+    abstract protected function loadReferences(): AbstractTable;
 
     /**
      * Check if table schema has been modified. Attention, you have to execute dropUndeclared first
@@ -801,7 +803,7 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
      *
      * @return bool
      */
-    protected function hasChanges()
+    protected function hasChanges(): bool
     {
         return $this->comparator->hasChanges();
     }
@@ -828,9 +830,9 @@ abstract class AbstractTable extends TableState implements TableInterface, Logge
     /**
      * Forget all elements.
      *
-     * @return $this
+     * @return self
      */
-    private function forgetElements()
+    private function forgetElements(): AbstractTable
     {
         foreach ($this->getColumns() as $column) {
             $this->forgetColumn($column);

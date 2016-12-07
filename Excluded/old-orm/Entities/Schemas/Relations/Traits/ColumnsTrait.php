@@ -98,7 +98,7 @@ trait ColumnsTrait
     private function castDefault(AbstractTable $table, AbstractColumn $column)
     {
         if ($column->abstractType() == 'timestamp' || $column->abstractType() == 'datetime') {
-            $driver = $table->driver();
+            $driver = $table->getDriver();
 
             return $driver::DEFAULT_DATETIME;
         }

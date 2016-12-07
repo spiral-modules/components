@@ -150,8 +150,8 @@ class SynchronizationBus extends Component
     private function collectDrivers()
     {
         foreach ($this->tables as $table) {
-            if (!in_array($table->driver(), $this->drivers, true)) {
-                $this->drivers[] = $table->driver();
+            if (!in_array($table->getDriver(), $this->drivers, true)) {
+                $this->drivers[] = $table->getDriver();
             }
         }
     }

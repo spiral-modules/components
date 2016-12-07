@@ -12,7 +12,6 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\Query\PDOQuery;
 use Spiral\Database\TableInterface;
 
 /**
@@ -40,7 +39,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      * @param Database $database Parent DBAL database.
      * @param string   $name     Table name without prefix.
      */
-    public function __construct(Database $database, $name)
+    public function __construct(Database $database, string $name)
     {
         $this->name = $name;
         $this->database = $database;
@@ -51,7 +50,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return Database
      */
-    public function getDatabase()
+    public function getDatabase(): Database
     {
         return $this->database;
     }
@@ -61,7 +60,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return Database
      */
-    public function database()
+    public function database(): Database
     {
         return $this->database;
     }
@@ -71,7 +70,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return AbstractTable
      */
-    public function getSchema()
+    public function getSchema(): AbstractTable
     {
         return $this->database->driver()->tableSchema(
             $this->realName(),
@@ -84,7 +83,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return AbstractTable
      */
-    public function schema()
+    public function schema(): AbstractTable
     {
         return $this->getSchema();
     }
@@ -92,7 +91,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -102,7 +101,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return string
      */
-    public function realName()
+    public function realName(): string
     {
         return $this->database->getPrefix() . $this->name;
     }
@@ -112,7 +111,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return bool
      */
-    public function exists()
+    public function exists(): bool
     {
         return $this->database->hasTable($this->name);
     }
@@ -130,7 +129,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return array
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         $columns = [];
         foreach ($this->getSchema()->getColumns() as $column) {
@@ -172,7 +171,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return SelectQuery
      */
-    public function select($columns = '*')
+    public function select($columns = '*'): SelectQuery
     {
         return $this->database->select(func_num_args() ? func_get_args() : '*')->from($this->name);
     }
@@ -186,7 +185,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return DeleteQuery
      */
-    public function delete(array $where = [])
+    public function delete(array $where = []): DeleteQuery
     {
         return $this->database->delete($this->name, $where);
     }
@@ -200,7 +199,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return UpdateQuery
      */
-    public function update(array $values = [], array $where = [])
+    public function update(array $values = [], array $where = []): UpdateQuery
     {
         return $this->database->update($this->name, $values, $where);
     }
@@ -210,7 +209,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return $this->select()->count();
     }
@@ -222,7 +221,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return SelectQuery
      */
-    public function getIterator()
+    public function getIterator(): SelectQuery
     {
         return $this->select();
     }
@@ -230,9 +229,9 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     /**
      * A simple alias for table query without condition.
      *
-     * @return PDOQuery
+     * @return array
      */
-    public function all()
+    public function all(): array
     {
         return $this->select()->all();
     }
@@ -253,7 +252,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
      *
      * @return SelectQuery
      */
-    public function __call($method, array $arguments)
+    public function __call($method, array $arguments): SelectQuery
     {
         return call_user_func_array([$this->select(), $method], $arguments);
     }

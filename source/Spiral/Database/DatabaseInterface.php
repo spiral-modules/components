@@ -115,7 +115,7 @@ interface DatabaseInterface
      *
      * @return TableInterface
      */
-    public function table(string $name): TableInterface;
+    public function table(string $name);
 
     /**
      * Get every available database Table abstraction.

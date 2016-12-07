@@ -9,7 +9,6 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Cache\StoreInterface;
-use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
@@ -23,13 +22,14 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\PDOQuery;
 use Spiral\Database\ResultInterface;
+use Spiral\Database\TableInterface;
 
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
  * and use different by table prefix. Databases usually linked to real database or logical portion
  * of database (filtered by prefix).
  */
-class Database extends Component implements DatabaseInterface, InjectableInterface
+class Database implements DatabaseInterface, InjectableInterface
 {
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
@@ -144,7 +144,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -152,7 +152,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->driver->getType();
     }
@@ -160,7 +160,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * @return Driver
      */
-    public function driver()
+    public function driver(): Driver
     {
         return $this->driver;
     }
@@ -169,9 +169,9 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * @param string $prefix
      *
      * @todo with prefix?
-     * @return $this
+     * @return self
      */
-    public function setPrefix($prefix)
+    public function setPrefix(string $prefix): Database
     {
         $this->prefix = $prefix;
 
@@ -181,7 +181,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * @return string
      */
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->prefix;
     }
@@ -189,7 +189,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      */
-    public function execute($query, array $parameters = [])
+    public function execute(string $query, array $parameters = []): int
     {
         return $this->statement($query, $parameters)->rowCount();
     }
@@ -202,8 +202,12 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return ResultInterface|\PDOStatement|PDOQuery
      */
-    public function query($query, array $parameters = [], $class = null, array $args = [])
-    {
+    public function query(
+        string $query,
+        array $parameters = [],
+        $class = null,
+        array $args = []
+    ): ResultInterface {
         return $this->driver->query($query, $parameters, $class, $args);
     }
 
@@ -218,7 +222,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * @throws DriverException
      * @throws QueryException
      */
-    public function statement($query, array $parameters = [])
+    public function statement(string $query, array $parameters = []): \PDOStatement
     {
         return $this->driver->statement($query, $parameters);
     }
@@ -239,10 +243,10 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * @throws QueryException
      */
     public function cached(
-        $lifetime,
-        $query,
+        int $lifetime,
+        string $query,
         array $parameters = [],
-        $key = '',
+        string $key = '',
         StoreInterface $store = null
     ) {
         if (empty($store)) {
@@ -272,7 +276,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return InsertQuery
      */
-    public function insert($table = '')
+    public function insert(string $table = ''): InsertQuery
     {
         return $this->driver->insertBuilder($this, compact('table'));
     }
@@ -286,7 +290,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return UpdateQuery
      */
-    public function update($table = '', array $values = [], array $where = [])
+    public function update(string $table = '', array $values = [], array $where = []): UpdateQuery
     {
         return $this->driver->updateBuilder($this, compact('table', 'where', 'values'));
     }
@@ -299,7 +303,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return DeleteQuery
      */
-    public function delete($table = '', array $where = [])
+    public function delete(string $table = '', array $where = []): DeleteQuery
     {
         return $this->driver->deleteBuilder($this, compact('table', 'where'));
     }
@@ -311,7 +315,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return SelectQuery
      */
-    public function select($columns = '*')
+    public function select($columns = '*'): SelectQuery
     {
         $columns = func_get_args();
         if (is_array($columns) && isset($columns[0]) && is_array($columns[0])) {
@@ -354,7 +358,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @param string $isolationLevel
      */
-    public function begin($isolationLevel = null)
+    public function begin(string $isolationLevel = null)
     {
         return $this->driver->beginTransaction($isolationLevel);
     }
@@ -378,7 +382,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
         return $this->driver->hasTable($this->prefix . $name);
     }
@@ -388,7 +392,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return Table
      */
-    public function table($name)
+    public function table(string $name): Table
     {
         return new Table($this, $name);
     }
@@ -398,7 +402,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return Table[]
      */
-    public function getTables()
+    public function getTables(): array
     {
         $result = [];
         foreach ($this->driver->tableNames() as $table) {
@@ -420,7 +424,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return Table
      */
-    public function __get($name)
+    public function __get($name): Table
     {
         return $this->table($name);
     }

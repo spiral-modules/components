@@ -23,7 +23,8 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
- * Basic implementation of DBAL Driver, basically decorates PDO.
+ * Basic implementation of DBAL Driver, basically decorates PDO. Extends component to provide access
+ *  to functionality like shared loggers and benchmarking.
  */
 abstract class PDODriver extends Component implements LoggerAwareInterface
 {

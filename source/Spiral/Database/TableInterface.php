@@ -23,14 +23,14 @@ interface TableInterface extends \Countable
      *
      * @return DatabaseInterface
      */
-    public function getDatabase(): DatabaseInterface;
+    public function getDatabase();
 
     /**
      * Must return schema instance even if table does not exists.
      *
      * @return \Spiral\Database\Schemas\TableInterface
      */
-    public function getSchema(): \Spiral\Database\Schemas\TableInterface;
+    public function getSchema();
 
     /**
      * Table name in a context of parent database (no prefix included).

@@ -85,11 +85,11 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
         ODMInterface $odm = null,
         $schema = null
     ) {
-        parent::__construct($fields, $parent, $odm, $schema);
+        parent::__construct($fields, $odm, $schema);
 
         if ((!$this->isLoaded() && !$this->isEmbedded())) {
             //Document is newly created instance
-            $this->solidState(true)->invalidate();
+            $this->solidState(true);
         }
     }
 

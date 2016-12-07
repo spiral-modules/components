@@ -65,11 +65,11 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * Manually set database.
      *
      * @param Database $database
-     * @return $this
+     * @return self
      *
      * @throws DBALException
      */
-    public function addDatabase(Database $database)
+    public function addDatabase(Database $database): DatabaseManager
     {
         if (isset($this->databases[$database->getName()])) {
             throw new DBALException("Database '{$database->getName()}' already exists");
@@ -91,7 +91,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function registerDatabase($name, $prefix, $connection)
+    public function registerDatabase(string $name, string $prefix, $connection): Database
     {
         if (!$connection instanceof Driver) {
             $connection = $this->connection($connection);
@@ -117,7 +117,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function database($database = null)
+    public function database(string $database = null): Database
     {
         if (empty($database)) {
             $database = $this->config->defaultDatabase();
@@ -151,11 +151,11 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @param Driver $driver
      *
-     * @return $this
+     * @return self
      *
      * @throws DBALException
      */
-    public function addConnection(Driver $driver)
+    public function addConnection(Driver $driver): DatabaseManager
     {
         if (isset($this->connections[$driver->getName()])) {
             throw new DBALException("Connection '{$driver->getName()}' already exists");
@@ -176,8 +176,13 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * @param string $password
      * @return Driver
      */
-    public function registerConnection($name, $driver, $dns, $username, $password = '')
-    {
+    public function registerConnection(
+        string $name,
+        string $driver,
+        string $dns,
+        string $username,
+        string $password = ''
+    ): Driver {
         $instance = $this->factory->make($driver, [
             'name'       => $name,
             'connection' => [
@@ -202,7 +207,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function connection($connection)
+    public function connection(string $connection): Driver
     {
         if (isset($this->connections[$connection])) {
             return $this->connections[$connection];
@@ -229,7 +234,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DatabaseException
      */
-    public function getDatabases()
+    public function getDatabases(): array
     {
         $result = [];
         foreach ($this->config->databaseNames() as $name) {
@@ -246,7 +251,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DatabaseException
      */
-    public function getConnections()
+    public function getConnections(): array
     {
         $result = [];
         foreach ($this->config->connectionNames() as $name) {
@@ -259,7 +264,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class,string  $context = null)
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
         //If context is empty default database will be returned
         return $this->database($context);

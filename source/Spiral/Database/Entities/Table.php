@@ -55,6 +55,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
         return $this->database;
     }
 
+
     /**
      * Alias for getDatabase().
      *

@@ -72,7 +72,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * To load locale data from application files.
      *
-     * @var FilesInterface
+     * @var SourceInterface
      */
     protected $source = null;
 

@@ -147,13 +147,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
     private $recordState = false;
 
     /**
-     * Errors in relations and accessors.
-     *
-     * @var array
-     */
-    private $innerErrors = [];
-
-    /**
      * SolidState will force record data to be saved as one big update set without any generating
      * separate update statements for changed columns.
      *
@@ -320,7 +313,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         foreach ($fields as $name => $nested) {
 
             //We can fill data of embedded of relations (usually HAS ONE)
-            if ($this->embeddedRelation($name) && !empty($relation = $this->relation($name))) {
+            if ($this->isEmbedded($name) && !empty($relation = $this->relation($name))) {
                 //Getting related object
                 $related = $relation->getRelated();
 
@@ -573,7 +566,6 @@ class RecordEntity extends SchematicEntity implements RecordInterface
         $info = [
             'table'  => $this->ormSchema[ORMInterface::M_DB] . '/' . $this->ormSchema[ORMInterface::M_TABLE],
             'fields' => $this->getFields(),
-            'errors' => $this->getErrors(),
         ];
 
         return $info;
@@ -630,7 +622,7 @@ class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * @return bool
      */
-    protected function embeddedRelation($relation)
+    protected function isEmbedded($relation)
     {
         return !empty($this->ormSchema[ORMInterface::M_RELATIONS][$relation][ORMInterface::R_DEFINITION][self::EMBEDDED_RELATION]);
     }

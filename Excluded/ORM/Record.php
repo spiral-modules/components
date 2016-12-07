@@ -85,19 +85,11 @@ class Record extends RecordEntity implements ActiveEntityInterface
     use FindTrait;
 
     /**
-     * Indication that save methods must be validated by default, can be altered by calling save
-     * method with user arguments.
-     */
-    const VALIDATE_SAVE = true;
-
-    /**
      * {@inheritdoc}
      *
      * Create or update record data in database. Record will validate all EMBEDDED and loaded
      * relations.
      *
-     * @param bool|null $validate  Overwrite default option declared in VALIDATE_SAVE to force or
-     *                             disable validation before saving.
      * @return bool
      *
      * @throws RecordException
@@ -108,17 +100,8 @@ class Record extends RecordEntity implements ActiveEntityInterface
      * @event updating()
      * @event updated()
      */
-    public function save($validate = null)
+    public function save(): int
     {
-        if (is_null($validate)) {
-            //Using default model behaviour
-            $validate = static::VALIDATE_SAVE;
-        }
-
-        if ($validate && !$this->isValid()) {
-            return false;
-        }
-
         //Associated mapper
         $mapper = $this->orm->mapper(static::class);
 
@@ -148,7 +131,7 @@ class Record extends RecordEntity implements ActiveEntityInterface
         }
 
         $this->flushUpdates();
-        $this->saveRelations($validate);
+        $this->saveRelations();
 
         return true;
     }
@@ -172,20 +155,16 @@ class Record extends RecordEntity implements ActiveEntityInterface
 
     /**
      * Save embedded relations.
-     *
-     * @param bool $validate
      */
-    protected function saveRelations($validate)
+    protected function saveRelations()
     {
         foreach ($this->relations as $name => $relation) {
-            if (!$relation instanceof RelationInterface) {
+            if (!$relation instanceof RelationInterface || !$this->isEmbedded($name)) {
                 //Not constructed
                 continue;
             }
 
-            if ($this->embeddedRelation($name) && !$relation->saveRelated($validate)) {
-                throw new RecordException("Unable to save relation '{$name}'");
-            }
+            $relation->saveRelated();
         }
     }
 }

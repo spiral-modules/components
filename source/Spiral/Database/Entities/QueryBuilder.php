@@ -48,7 +48,7 @@ abstract class QueryBuilder implements ExpressionInterface
      *
      * @param QueryCompiler $compiler Associated compiled to be used by default.
      */
-    abstract public function sqlStatement(QueryCompiler $compiler = null);
+    abstract public function sqlStatement(QueryCompiler $compiler = null): string;
 
     /**
      * Get ordered list of builder parameters in a form of ParameterInterface array.
@@ -61,7 +61,7 @@ abstract class QueryBuilder implements ExpressionInterface
      *
      * @throws BuilderException
      */
-    abstract public function getParameters(QueryCompiler $compiler = null);
+    abstract public function getParameters(QueryCompiler $compiler = null): array;
 
     /**
      * Get interpolated (populated with parameters) SQL which will be run against database, please
@@ -69,7 +69,7 @@ abstract class QueryBuilder implements ExpressionInterface
      *
      * @return string
      */
-    public function queryString()
+    public function queryString(): string
     {
         return QueryInterpolator::interpolate($this->sqlStatement(), $this->getParameters());
     }
@@ -77,7 +77,7 @@ abstract class QueryBuilder implements ExpressionInterface
     /**
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->sqlStatement();
     }
@@ -113,7 +113,7 @@ abstract class QueryBuilder implements ExpressionInterface
      *
      * @return array
      */
-    protected function fetchIdentifiers(array $identifiers)
+    protected function fetchIdentifiers(array $identifiers): array
     {
         if (count($identifiers) == 1 && is_string($identifiers[0])) {
             return array_map('trim', explode(',', $identifiers[0]));
@@ -133,7 +133,7 @@ abstract class QueryBuilder implements ExpressionInterface
      *
      * @return array
      */
-    protected function flattenParameters(array $parameters)
+    protected function flattenParameters(array $parameters): array
     {
         $result = [];
         foreach ($parameters as $parameter) {
@@ -153,7 +153,7 @@ abstract class QueryBuilder implements ExpressionInterface
      *
      * @return \PDOStatement
      */
-    protected function pdoStatement()
+    protected function pdoStatement(): \PDOStatement
     {
         return $this->database->statement($this->sqlStatement(), $this->getParameters());
     }

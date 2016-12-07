@@ -6,9 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities;
+namespace Spiral\Database\Helpers;
 
 use Spiral\Core\Component;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\Schemas\AbstractTable;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Support\DFSSorter;
@@ -53,7 +54,7 @@ class SynchronizationBus extends Component
      *
      * @return AbstractTable[]
      */
-    public function sortedTables()
+    public function sortedTables(): array
     {
         /*
          * Tables has to be sorted using topological graph to execute operations in a valid order.
@@ -71,7 +72,7 @@ class SynchronizationBus extends Component
      *
      * @throws \Exception
      */
-    public function syncronize()
+    public function synchronize()
     {
         $this->beginTransaction();
 
@@ -100,7 +101,7 @@ class SynchronizationBus extends Component
      * @param bool $forgetIndexes
      * @param bool $forgetForeigns
      */
-    protected function saveTables($forgetColumns, $forgetIndexes, $forgetForeigns)
+    protected function saveTables(bool $forgetColumns, bool $forgetIndexes, bool $forgetForeigns)
     {
         foreach ($this->sortedTables() as $table) {
             $table->save($forgetColumns, $forgetIndexes, $forgetForeigns);

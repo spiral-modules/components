@@ -29,7 +29,7 @@ class SQLServerResult extends PDOResult
     /**
      * {@inheritdoc}
      */
-    public function columnCount()
+    public function columnCount(): int
     {
         return parent::columnCount() + ($this->hasHelpColumn() ? -1 : 0);
     }
@@ -61,7 +61,7 @@ class SQLServerResult extends PDOResult
      *
      * @return bool
      */
-    private function hasHelpColumn()
+    private function hasHelpColumn(): bool
     {
         return $this->getColumnMeta($this->countColumns() - 1)['name'] == self::ROW_NUMBER_COLUMN;
     }

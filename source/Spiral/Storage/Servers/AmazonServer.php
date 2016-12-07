@@ -307,7 +307,7 @@ class AmazonServer extends StorageServer
             }
         }
 
-        if ($normalizedCommands) {
+        if (!empty($normalizedCommands)) {
             sort($normalizedCommands);
             $signature[] = join("\n", $normalizedCommands);
         }

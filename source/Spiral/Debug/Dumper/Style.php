@@ -96,7 +96,7 @@ class Style
             return '';
         }
 
-        return $this->style(str_repeat($this->indent, $level), 'indent');
+        return $this->apply(str_repeat($this->indent, $level), 'indent');
     }
 
     /**
@@ -108,7 +108,7 @@ class Style
      *
      * @return string
      */
-    public function style(string $element, string $type, string $context = ''): string
+    public function apply(string $element, string $type, string $context = ''): string
     {
         if (!empty($style = $this->getStyle($type, $context))) {
             return \Spiral\interpolate(

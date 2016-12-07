@@ -134,17 +134,17 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
 
         if (!$hideHeader && !empty($name)) {
             //Showing element name (if any provided)
-            $header = $indent . $this->style->style($name, 'name');
+            $header = $indent . $this->style->apply($name, 'name');
 
             //Showing equal sing
-            $header .= $this->style->style(' = ', 'syntax', '=');
+            $header .= $this->style->apply(' = ', 'syntax', '=');
         } else {
             $header = $indent;
         }
 
         if ($level > $this->maxLevel) {
             //Dumper is not reference based, we can't dump too deep values
-            return $indent . $this->style->style('-too deep-', 'maxLevel') . "\n";
+            return $indent . $this->style->apply('-too deep-', 'maxLevel') . "\n";
         }
 
         $type = strtolower(gettype($value));
@@ -161,14 +161,14 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
             //No need to dump resource value
             $element = get_resource_type($value) . ' resource ';
 
-            return $header . $this->style->style($element, 'type', 'resource') . "\n";
+            return $header . $this->style->apply($element, 'type', 'resource') . "\n";
         }
 
         //Value length
         $length = strlen($value);
 
         //Including type size
-        $header .= $this->style->style("{$type}({$length})", 'type', $type);
+        $header .= $this->style->apply("{$type}({$length})", 'type', $type);
 
         $element = null;
         switch ($type) {
@@ -188,7 +188,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         }
 
         //Including value
-        return $header . ' ' . $this->style->style($element, 'value', $type) . "\n";
+        return $header . ' ' . $this->style->apply($element, 'value', $type) . "\n";
     }
 
     /**
@@ -206,8 +206,8 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
             $count = count($array);
 
             //Array size and scope
-            $output = $this->style->style("array({$count})", 'type', 'array') . "\n";
-            $output .= $indent . $this->style->style('[', 'syntax', '[') . "\n";
+            $output = $this->style->apply("array({$count})", 'type', 'array') . "\n";
+            $output .= $indent . $this->style->apply('[', 'syntax', '[') . "\n";
         } else {
             $output = '';
         }
@@ -226,7 +226,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
 
         if (!$hideHeader) {
             //Closing array scope
-            $output .= $indent . $this->style->style(']', 'syntax', ']') . "\n";
+            $output .= $indent . $this->style->apply(']', 'syntax', ']') . "\n";
         }
 
         return $output;
@@ -251,8 +251,8 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         if (!$hideHeader) {
             $type = ($class ?: get_class($object)) . ' object ';
 
-            $header = $this->style->style($type, 'type', 'object') . "\n";
-            $header .= $indent . $this->style->style('(', 'syntax', '(') . "\n";
+            $header = $this->style->apply($type, 'type', 'object') . "\n";
+            $header .= $indent . $this->style->apply('(', 'syntax', '(') . "\n";
         } else {
             $header = '';
         }
@@ -273,7 +273,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
 
             return $header
                 . $this->dumpValue($debugInfo, '', $level + (is_scalar($object)), true)
-                . $indent . $this->style->style(')', 'syntax', ')') . "\n";
+                . $indent . $this->style->apply(')', 'syntax', ')') . "\n";
         }
 
         if ($object instanceof \Closure) {
@@ -289,7 +289,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         }
 
         //Header, content, footer
-        return $header . $output . $indent . $this->style->style(')', 'syntax', ')') . "\n";
+        return $header . $output . $indent . $this->style->apply(')', 'syntax', ')') . "\n";
     }
 
     /**
@@ -325,7 +325,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         }
 
         //Property name includes access level
-        $name = $property->getName() . $this->style->style(':' . $access, 'access', $access);
+        $name = $property->getName() . $this->style->apply(':' . $access, 'access', $access);
 
         return $this->dumpValue($property->getValue($object), $name, $level + 1);
     }

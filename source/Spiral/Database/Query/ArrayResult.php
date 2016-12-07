@@ -61,6 +61,7 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
         $this->next();
         $values = $this->current();
 
+        //Filling bindings
         foreach ($this->bindings as $name => &$variable) {
             $variable = $values[$name];
         }
@@ -73,9 +74,10 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
      *
      * @param int|string $fieldID Column number (0 - first column)
      * @param mixed      $variable
+     *
      * @return self
      */
-    public function bind($fieldID, &$variable)
+    public function bind($fieldID, &$variable): ArrayResult
     {
         if ($this->count() == 0) {
             return $this;

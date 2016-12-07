@@ -23,26 +23,26 @@ interface TableInterface extends \Countable
      *
      * @return DatabaseInterface
      */
-    public function getDatabase();
+    public function getDatabase(): DatabaseInterface;
 
     /**
      * Must return schema instance even if table does not exists.
      *
      * @return \Spiral\Database\Schemas\TableInterface
      */
-    public function getSchema();
+    public function getSchema(): \Spiral\Database\Schemas\TableInterface;
 
     /**
      * Table name in a context of parent database (no prefix included).
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Truncate (clean) current table.
      */
-    public function truncate();
+    public function truncateData();
 
     /**
      * Must perform single rowset insertion into table. Method must return lastInsertID on success.

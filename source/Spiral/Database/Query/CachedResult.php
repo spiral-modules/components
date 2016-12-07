@@ -54,8 +54,8 @@ class CachedResult extends ArrayResult
     public function __construct(
         array $data = [],
         array $parameters = [],
-        $queryString,
-        $key,
+        string $queryString,
+        string $key,
         StoreInterface $store
     ) {
         parent::__construct($data);
@@ -70,7 +70,7 @@ class CachedResult extends ArrayResult
     /**
      * {@inheritdoc}
      */
-    public function queryString()
+    public function queryString(): string
     {
         return QueryInterpolator::interpolate($this->queryString, $this->parameters);
     }

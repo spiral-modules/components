@@ -120,7 +120,7 @@ class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
     /**
      * {@inheritdoc}
      */
-    public function truncate()
+    public function truncateData()
     {
         $this->database->driver()->truncate($this->realName());
     }

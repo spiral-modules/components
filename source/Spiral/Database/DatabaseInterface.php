@@ -30,7 +30,7 @@ interface DatabaseInterface
     /**
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Database type matched to one of database constants. You MUST write SQL for execute and query
@@ -38,7 +38,7 @@ interface DatabaseInterface
      *
      * @return string
      */
-    public function getType();
+    public function getType(): string;
 
     /**
      * Execute statement and return number of affected rows.
@@ -50,7 +50,7 @@ interface DatabaseInterface
      *
      * @throws QueryException
      */
-    public function execute($query, array $parameters = []);
+    public function execute(string $query, array $parameters = []): int;
 
     /**
      * Execute statement and return query iterator.
@@ -62,7 +62,7 @@ interface DatabaseInterface
      *
      * @throws QueryException
      */
-    public function query($query, array $parameters = []);
+    public function query(string $query, array $parameters = []): ResultInterface;
 
     /**
      * Execute multiple commands defined by Closure function inside one transaction. Closure or
@@ -106,7 +106,7 @@ interface DatabaseInterface
      *
      * @return bool
      */
-    public function hasTable($name);
+    public function hasTable(string $name): bool;
 
     /**
      * Get Table abstraction. Must return valid instance if table does not exists.
@@ -115,12 +115,12 @@ interface DatabaseInterface
      *
      * @return TableInterface
      */
-    public function table($name);
+    public function table(string $name): TableInterface;
 
     /**
      * Get every available database Table abstraction.
      *
      * @return TableInterface[]
      */
-    public function getTables();
+    public function getTables(): array;
 }

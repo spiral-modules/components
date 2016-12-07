@@ -42,7 +42,7 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
      * @param mixed      $variable
      * @return self
      */
-    public function bind($fieldID, &$variable)
+    public function bind($fieldID, &$variable): PDOQuery
     {
         if (is_numeric($fieldID)) {
             //PDO columns are 1-indexed
@@ -67,7 +67,7 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
     /**
      * {@inheritdoc}
      */
-    public function queryString()
+    public function queryString(): string
     {
         return QueryInterpolator::interpolate($this->queryString, $this->parameters);
     }
@@ -82,17 +82,9 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
      *
      * @return int
      */
-    public function count()
+    public function count(): int
     {
         return $this->rowCount();
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize()
-    {
-        return $this->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -101,6 +93,14 @@ class PDOQuery extends PDOStatement implements ResultInterface, \JsonSerializabl
     public function close()
     {
         $this->closeCursor();
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**

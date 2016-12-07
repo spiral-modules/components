@@ -76,7 +76,7 @@ class PostgresDriver extends Driver
     public function __construct(
         string $name,
         array $connection,
-        FactoryInterface $factory = null,
+        FactoryInterface $factory,
         MemoryInterface $memory = null
     ) {
         parent::__construct($name, $connection, $factory);
@@ -89,8 +89,6 @@ class PostgresDriver extends Driver
      */
     public function hasTable(string $name): bool
     {
-
-
         return (bool)$this->query(
             'SELECT "table_name" FROM "information_schema"."tables" '
             . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?',

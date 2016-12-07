@@ -76,13 +76,6 @@ class Compositor extends Component implements
     protected $errors = [];
 
     /**
-     * @invisible
-     *
-     * @var EntityInterface
-     */
-    protected $parent = null;
-
-    /**
      * @var ODMInterface
      */
     protected $odm = null;
@@ -94,11 +87,9 @@ class Compositor extends Component implements
      */
     public function __construct(
         $fields,
-        EntityInterface $parent = null,
         ODMInterface $odm = null,
         $class = null
     ) {
-        $this->parent = $parent;
         $this->class = $class;
 
         if (!empty($fields) && is_array($fields)) {
@@ -133,16 +124,6 @@ class Compositor extends Component implements
     public function getClass()
     {
         return $this->class;
-    }
-
-    /**
-     * Get composition parent.
-     *
-     * @return EntityInterface|DocumentEntity|null
-     */
-    public function getParent()
-    {
-        return $this->parent;
     }
 
     /**

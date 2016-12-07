@@ -8,7 +8,6 @@
 
 namespace Spiral\ODM;
 
-use Spiral\Models\EntityInterface;
 use Spiral\Models\PublishableInterface;
 
 /**
@@ -22,9 +21,8 @@ use Spiral\Models\PublishableInterface;
 interface CompositableInterface extends DocumentAccessorInterface, PublishableInterface
 {
     /**
-     * @param mixed|array          $value
-     * @param EntityInterface|null $parent
-     * @param ODMInterface|null    $odm
+     * @param mixed|array       $value
+     * @param ODMInterface|null $odm
      */
-    public function __construct($value, EntityInterface $parent = null, ODMInterface $odm = null);
+    public function __construct($value, ODMInterface $odm = null);
 }

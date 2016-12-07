@@ -53,11 +53,7 @@ class MongoDatabase extends \MongoDB implements InjectableInterface
         $this->config = $config + $this->config;
 
         //Selecting client
-        if (class_exists('MongoClient', false)) {
-            $this->connection = new \MongoClient($this->config['server'], $this->config['options']);
-        } else {
-            $this->connection = new \Mongo($this->config['server'], $this->config['options']);
-        }
+        $this->connection = new \MongoClient($this->config['server'], $this->config['options']);
 
         parent::__construct($this->connection, $this->config['database']);
     }

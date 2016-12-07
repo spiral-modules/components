@@ -269,7 +269,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @return $this
      */
-    public function cache($lifetime, $key = '', StoreInterface $store = null)
+    public function cache(int $lifetime, string $key = '', StoreInterface $store = null)
     {
         $this->cacheLifetime = $lifetime;
         $this->cacheKey = $key;
@@ -285,7 +285,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @return PDOQuery|CachedResult
      */
-    public function run($paginate = true)
+    public function run(bool $paginate = true)
     {
         if ($paginate && $this->hasPaginator()) {
             /**

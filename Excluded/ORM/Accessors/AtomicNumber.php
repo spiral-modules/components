@@ -10,7 +10,6 @@ namespace Spiral\ORM\Accessors;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\Expression;
-use Spiral\Models\EntityInterface;
 use Spiral\ORM\RecordAccessorInterface;
 
 /**

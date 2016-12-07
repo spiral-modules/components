@@ -139,7 +139,6 @@ class Database implements DatabaseInterface, InjectableInterface
         $this->cacheStore = $cache;
     }
 
-
     /**
      * @return string
      */

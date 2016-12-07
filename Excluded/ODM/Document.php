@@ -8,7 +8,6 @@
 namespace Spiral\ODM;
 
 use Spiral\Models\ActiveEntityInterface;
-use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Traits\FindTrait;
@@ -59,7 +58,6 @@ use Spiral\ODM\Traits\FindTrait;
  * - defaults
  * - secured (* by default)
  * - fillable
- * - validate
  */
 abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
@@ -75,13 +73,11 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * @see Component::staticContainer()
      *
      * @param array           $fields
-     * @param EntityInterface $parent
      * @param ODMInterface    $odm
      * @param array           $schema
      */
     public function __construct(
         $fields = [],
-        EntityInterface $parent = null,
         ODMInterface $odm = null,
         $schema = null
     ) {

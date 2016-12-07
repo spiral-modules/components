@@ -200,7 +200,6 @@ class SchemaBuilder
                 ODMInterface::D_SECURED      => $document->getSecured(),
                 ODMInterface::D_FILLABLE     => $document->getFillable(),
                 ODMInterface::D_MUTATORS     => $document->getMutators(),
-                ODMInterface::D_VALIDATES    => $document->getValidates(),
                 ODMInterface::D_DEFAULTS     => $document->getDefaults(),
                 ODMInterface::D_AGGREGATIONS => $this->packAggregations($document->getAggregations()),
                 ODMInterface::D_COMPOSITIONS => array_keys($document->getCompositions()),

@@ -10,7 +10,6 @@ namespace Spiral\ODM;
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\EntityInterface;
 use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\PublishableInterface;
 use Spiral\Models\SchematicEntity;
@@ -18,7 +17,6 @@ use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\FieldException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\Validation\ValidatesInterface;
 
 /**
  * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
@@ -224,14 +222,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function __clone()
     {
         if (empty($this->parent)) {
-            $this->parent = $parent;
 
             //Moving under new parent
             return $this->solidState(true, true);
-        }
-
-        if ($parent === $this->parent) {
-            return $this;
         }
 
         /**
@@ -239,7 +232,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
          */
         $document = new static(
             $this->serializeData(),
-            $parent,
             $this->odm,
             $this->odmSchema
         );
@@ -539,8 +531,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         return [
             'fields'  => $this->getFields(),
-            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
-            'errors'  => $this->getErrors(),
+            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : []
         ];
     }
 
@@ -561,11 +552,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         if ($accessor == ODM::CMP_ONE) {
             //Pointing to document instance
-            return $this->odm->document($options, $value, $this);
+            return $this->odm->document($options, $value);
         }
 
         //Additional options are supplied for CompositableInterface
-        return new $accessor($value, $this, $this->odm, $options);
+        return new $accessor($value, $this->odm, $options);
     }
 
     /**

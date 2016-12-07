@@ -11,7 +11,7 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Models\MutableObject;
+use Spiral\Models\Prototypes\MutableObject;
 use Spiral\ODM\Configs\ODMConfig;
 use Spiral\ODM\Entities\DocumentMapper;
 use Spiral\ODM\Entities\DocumentSelector;

@@ -198,17 +198,11 @@ class Database implements DatabaseInterface, InjectableInterface
     /**
      * {@inheritdoc}
      *
-     * @param string $class Class to be used to represent PDOStatement.
-     * @param array  $args  Class construction arguments, by default array of parameters.
-     *
      * @return PDOResult
      */
-    public function query(
-        string $query,
-        array $parameters = [],
-        array $args = []
-    ): PDOResult {
-        return $this->driver->query($query, $parameters, $args);
+    public function query(string $query, array $parameters = []): PDOResult
+    {
+        return $this->driver->query($query, $parameters);
     }
 
     /**

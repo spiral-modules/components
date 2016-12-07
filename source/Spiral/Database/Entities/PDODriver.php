@@ -272,17 +272,13 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $statement
      * @param array  $parameters
-     * @param array  $args Class construction arguments (by default filtered parameters).
      *
      * @return PDOResult
      */
-    public function query(
-        string $statement,
-        array $parameters = [],
-        array $args = []
-    ): PDOResult {
+    public function query(string $statement, array $parameters = []): PDOResult
+    {
         //Forcing specific return class
-        $result = $this->statement($statement, $parameters, PDOResult::class, $args);
+        $result = $this->statement($statement, $parameters, PDOResult::class);
 
         /**
          * @var PDOResult $result

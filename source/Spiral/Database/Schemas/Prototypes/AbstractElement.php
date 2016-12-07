@@ -8,8 +8,8 @@
 
 namespace Spiral\Database\Schemas\Prototypes;
 
-use Spiral\Database\Schemas\AbstractTable;
 use Spiral\Database\Exceptions\SchemaException;
+use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * Aggregates common functionality for columns, indexes and foreign key schemas.

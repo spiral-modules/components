@@ -15,8 +15,8 @@ namespace Spiral;
  * Output: Hello Member! Good Day!
  *
  * @param string $string
- * @param array  $values Arguments (key => value). Will skip unknown names.
- * @param string $prefix Placeholder prefix, "{" by default.
+ * @param array  $values  Arguments (key => value). Will skip unknown names.
+ * @param string $prefix  Placeholder prefix, "{" by default.
  * @param string $postfix Placeholder postfix, "}" by default.
  *
  * @return mixed

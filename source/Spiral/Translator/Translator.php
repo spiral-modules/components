@@ -12,7 +12,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Files\FilesInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
 use Spiral\Translator\Exceptions\LocaleException;
 use Spiral\Translator\Exceptions\PluralizationException;

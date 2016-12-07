@@ -98,7 +98,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param array  $connection
      * @throws SugarException
      */
-    public function __construct($name, array $connection)
+    public function __construct(string $name, array $connection)
     {
         $this->name = $name;
 
@@ -113,7 +113,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -125,7 +125,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @throws DriverException
      */
-    public function getSource()
+    public function getSource(): string
     {
         if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches)) {
             return $matches[1];
@@ -139,7 +139,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return static::TYPE;
     }
@@ -151,7 +151,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return \DateTimeZone
      */
-    public function getTimezone()
+    public function getTimezone(): \DateTimeZone
     {
         return new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE);
     }
@@ -159,13 +159,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Enabled profiling will raise set of log messages and benchmarks associated with PDO queries.
      *
-     * @todo withProfiling?
-     *
      * @param bool $enabled Enable or disable driver profiling.
      *
-     * @return $this
+     * @return self
      */
-    public function setProfiling($enabled = true)
+    public function setProfiling(bool $enabled = true): PDODriver
     {
         $this->config['profiling'] = $enabled;
 
@@ -177,7 +175,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function isProfiling()
+    public function isProfiling(): bool
     {
         return $this->config['profiling'];
     }
@@ -189,7 +187,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @throws DriverException
      */
-    public function connect()
+    public function connect(): PDO
     {
         if ($this->isConnected()) {
             throw new DriverException("Driver '{$this->name}' already connected");
@@ -208,9 +206,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Disconnect driver.
      *
-     * @return $this
+     * @return self
      */
-    public function disconnect()
+    public function disconnect(): PDODriver
     {
         $this->pdo = null;
 
@@ -222,7 +220,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function isConnected()
+    public function isConnected(): bool
     {
         return !empty($this->pdo);
     }
@@ -232,9 +230,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param PDO $pdo
      *
-     * @return $this
+     * @return self
      */
-    public function setPDO(PDO $pdo)
+    public function setPDO(PDO $pdo): PDODriver
     {
         $this->pdo = $pdo;
 
@@ -246,7 +244,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return PDO
      */
-    public function getPDO()
+    public function getPDO(): PDO
     {
         if (!$this->isConnected()) {
             $this->connect();
@@ -262,7 +260,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    public function identifier($identifier)
+    public function identifier(string $identifier): string
     {
         return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
     }
@@ -278,8 +276,12 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return \PDOStatement|PDOQuery
      */
-    public function query($statement, array $parameters = [], $class = null, array $args = [])
-    {
+    public function query(
+        string $statement,
+        array $parameters = [],
+        $class = null,
+        array $args = []
+    ): \PDOStatement {
         return $this->statement(
             $statement,
             $parameters,
@@ -302,11 +304,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @throws QueryException
      */
     public function statement(
-        $query,
+        string $query,
         array $parameters = [],
-        $class = \PDOStatement::class,
+        string $class = \PDOStatement::class,
         array $args = []
-    ) {
+    ): \PDOStatement {
         try {
             //Filtered and normalized parameters
             $parameters = $this->flattenParameters($parameters);
@@ -358,8 +360,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return \PDOStatement
      */
-    public function prepare($statement, $class = \PDOStatement::class, array $args = [])
-    {
+    public function prepare(
+        string $statement,
+        string $class = \PDOStatement::class,
+        array $args = []
+    ): \PDOStatement {
         $pdo = $this->getPDO();
         $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [$class, $args]);
 
@@ -375,7 +380,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return mixed
      */
-    public function lastInsertID($sequence = null)
+    public function lastInsertID(string $sequence = null)
     {
         return $sequence
             ? (int)$this->getPDO()->lastInsertId($sequence)
@@ -394,7 +399,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @throws DriverException
      */
-    public function flattenParameters(array $parameters)
+    public function flattenParameters(array $parameters): array
     {
         $flatten = [];
         foreach ($parameters as $key => $parameter) {
@@ -460,7 +465,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function beginTransaction($isolationLevel = null)
+    public function beginTransaction(string $isolationLevel = null): bool
     {
         ++$this->transactionLevel;
 
@@ -469,7 +474,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 $this->isolationLevel($isolationLevel);
             }
 
-            $this->logger()->info('Begin transaction');
+            if ($this->isProfiling()) {
+                $this->logger()->info('Begin transaction');
+            }
 
             return $this->getPDO()->beginTransaction();
         }
@@ -484,12 +491,14 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function commitTransaction()
+    public function commitTransaction(): bool
     {
         --$this->transactionLevel;
 
         if ($this->transactionLevel == 0) {
-            $this->logger()->info('Commit transaction');
+            if ($this->isProfiling()) {
+                $this->logger()->info('Commit transaction');
+            }
 
             return $this->getPDO()->commit();
         }
@@ -504,12 +513,14 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function rollbackTransaction()
+    public function rollbackTransaction(): bool
     {
         --$this->transactionLevel;
 
         if ($this->transactionLevel == 0) {
-            $this->logger()->info('Rollback transaction');
+            if ($this->isProfiling()) {
+                $this->logger()->info('Rollback transaction');
+            }
 
             return $this->getPDO()->rollBack();
         }
@@ -538,7 +549,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return PDO
      */
-    protected function createPDO()
+    protected function createPDO(): PDO
     {
         return new PDO(
             $this->config['connection'],
@@ -555,7 +566,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return QueryException
      */
-    protected function clarifyException(\PDOException $exception)
+    protected function clarifyException(\PDOException $exception): QueryException
     {
         //@todo more exceptions to be thrown
         return new QueryException($exception);
@@ -567,9 +578,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $level
      */
-    protected function isolationLevel($level)
+    protected function isolationLevel(string $level)
     {
-        $this->logger()->info("Set transaction isolation level to '{$level}'");
+        if ($this->isProfiling()) {
+            $this->logger()->info("Set transaction isolation level to '{$level}'");
+        }
 
         if (!empty($level)) {
             $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
@@ -584,9 +597,12 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param string $name Savepoint name/id, must not contain spaces and be valid database
      *                     identifier.
      */
-    protected function savepointCreate($name)
+    protected function savepointCreate(string $name)
     {
-        $this->logger()->info("Creating savepoint '{$name}'");
+        if ($this->isProfiling()) {
+            $this->logger()->info("Creating savepoint '{$name}'");
+        }
+
         $this->statement('SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 
@@ -598,9 +614,12 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param string $name Savepoint name/id, must not contain spaces and be valid database
      *                     identifier.
      */
-    protected function savepointRelease($name)
+    protected function savepointRelease(string $name)
     {
-        $this->logger()->info("Releasing savepoint '{$name}'");
+        if ($this->isProfiling()) {
+            $this->logger()->info("Releasing savepoint '{$name}'");
+        }
+
         $this->statement('RELEASE SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 
@@ -612,9 +631,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param string $name Savepoint name/id, must not contain spaces and be valid database
      *                     identifier.
      */
-    protected function savepointRollback($name)
+    protected function savepointRollback(string $name)
     {
-        $this->logger()->info("Rolling back savepoint '{$name}'");
+        if ($this->isProfiling()) {
+            $this->logger()->info("Rolling back savepoint '{$name}'");
+        }
         $this->statement('ROLLBACK TO SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 
@@ -626,7 +647,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    protected function resolveDateTime(\DateTime $dateTime)
+    protected function resolveDateTime(\DateTime $dateTime): string
     {
         return $dateTime->setTimezone($this->getTimezone())->format(static::DATETIME);
     }
@@ -638,7 +659,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param ParameterInterface[] $parameters Named hash of ParameterInterface.
      * @return \PDOStatement
      */
-    private function bindParameters(\PDOStatement $statement, array $parameters)
+    private function bindParameters(\PDOStatement $statement, array $parameters): \PDOStatement
     {
         foreach ($parameters as $index => $parameter) {
             if (is_numeric($index)) {

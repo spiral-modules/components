@@ -250,97 +250,97 @@ class QuoterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('"x_bubble"', $quoter->quote('x_bubble', true));
     }
 
-//    public function testMySQLlPrefixes()
-//    {
-//        $quoter = $this->quoter('p_', MySQLDriver::class);
-//
-//        $this->assertEquals(
-//            '*',
-//            $quoter->quote('*')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '`column`',
-//            $quoter->quote('column')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '`p_table`.`column`',
-//            $quoter->quote('table.column')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '`p_table`.*',
-//            $quoter->quote('table.*')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '`p_table_name`',
-//            $quoter->quote('table_name', true)
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '`p_table`.`column` AS `column_alias`',
-//            $quoter->quote('table.column AS column_alias')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '`p_table_name` AS `table_name`',
-//            $quoter->quote('table_name AS table_name', true)
-//        );
-//    }
-//
-//    public function testSQLServerPrefixes()
-//    {
-//        $quoter = $this->quoter('p_', SQLServerDriver::class);
-//
-//        $this->assertEquals(
-//            '*',
-//            $quoter->quote('*')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '[column]',
-//            $quoter->quote('column')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '[p_table].[column]',
-//            $quoter->quote('table.column')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '[p_table].*',
-//            $quoter->quote('table.*')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '[p_table_name]',
-//            $quoter->quote('table_name', true)
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '[p_table].[column] AS [column_alias]',
-//            $quoter->quote('table.column AS column_alias')
-//        );
-//
-//        $quoter->reset();
-//        $this->assertEquals(
-//            '[p_table_name] AS [table_name]',
-//            $quoter->quote('table_name AS table_name', true)
-//        );
-//    }
+    public function testMySQLlPrefixes()
+    {
+        $quoter = $this->makeQuoter('p_', MySQLDriver::class);
+
+        $this->assertEquals(
+            '*',
+            $quoter->quote('*')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '`column`',
+            $quoter->quote('column')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '`p_table`.`column`',
+            $quoter->quote('table.column')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '`p_table`.*',
+            $quoter->quote('table.*')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '`p_table_name`',
+            $quoter->quote('table_name', true)
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '`p_table`.`column` AS `column_alias`',
+            $quoter->quote('table.column AS column_alias')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '`p_table_name` AS `table_name`',
+            $quoter->quote('table_name AS table_name', true)
+        );
+    }
+
+    public function testSQLServerPrefixes()
+    {
+        $quoter = $this->makeQuoter('p_', SQLServerDriver::class);
+
+        $this->assertEquals(
+            '*',
+            $quoter->quote('*')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '[column]',
+            $quoter->quote('column')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '[p_table].[column]',
+            $quoter->quote('table.column')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '[p_table].*',
+            $quoter->quote('table.*')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '[p_table_name]',
+            $quoter->quote('table_name', true)
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '[p_table].[column] AS [column_alias]',
+            $quoter->quote('table.column AS column_alias')
+        );
+
+        $quoter->reset();
+        $this->assertEquals(
+            '[p_table_name] AS [table_name]',
+            $quoter->quote('table_name AS table_name', true)
+        );
+    }
 
     /**
      * Get instance of quoter.

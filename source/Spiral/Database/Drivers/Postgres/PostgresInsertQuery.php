@@ -34,6 +34,7 @@ class PostgresInsertQuery extends InsertQuery
             );
         }
 
+        //Resolve table primary key if any
         $primary = $driver->getPrimary($this->database->getPrefix() . $this->table);
 
         if (empty($compiler)) {

@@ -165,6 +165,8 @@ class PostgresDriver extends Driver
 
     /**
      * {@inheritdoc}
+     *
+     * Postgres uses custom insert query builder in order to return value of inserted row.
      */
     public function insertBuilder(Database $database, array $parameters = []): InsertQuery
     {

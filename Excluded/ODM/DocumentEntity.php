@@ -107,13 +107,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     const ONE  = 899;
 
     /**
-     * Errors in nested documents and accessors.
-     *
-     * @var array
-     */
-    private $innerErrors = [];
-
-    /**
      * SolidState will force document to be saved as one big data set without any atomic operations
      * (dirty fields).
      *

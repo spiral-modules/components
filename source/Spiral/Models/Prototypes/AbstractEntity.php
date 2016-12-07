@@ -114,7 +114,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function hasField(string $name)
+    public function hasField(string $name): bool
     {
         return array_key_exists($name, $this->fields);
     }
@@ -129,21 +129,27 @@ abstract class AbstractEntity extends MutableObject implements
     public function setField(string $name, $value, bool $filter = true)
     {
         if ($value instanceof AccessorInterface) {
+            //In case of non scalar values filters must be bypassed
             $this->fields[$name] = clone $value;
 
             return;
         }
 
         if (!$filter) {
+
+            //Bypassing all filters
             $this->fields[$name] = $value;
 
             return;
         }
 
-        if (!empty($accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR))) {
+        //Checking if field have accessor
+        $accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR);
+
+        if (!empty($accessor)) {
             $field = $this->fields[$name];
             if (empty($field) || !($field instanceof AccessorInterface)) {
-                $this->fields[$name] = $field = $this->createAccessor($accessor, $field);
+                $this->fields[$name] = $field = $this->createAccessor($accessor, $value);
             }
 
             //Letting accessor to set value
@@ -152,7 +158,10 @@ abstract class AbstractEntity extends MutableObject implements
             return;
         }
 
-        if (!empty($setter = $this->getMutator($name, self::MUTATOR_SETTER))) {
+        //Checking field setter if any
+        $setter = $this->getMutator($name, self::MUTATOR_SETTER);
+
+        if (!empty($setter)) {
             try {
                 $this->fields[$name] = call_user_func($setter, $value);
             } catch (\ErrorException $e) {
@@ -175,15 +184,20 @@ abstract class AbstractEntity extends MutableObject implements
         $value = $this->hasField($name) ? $this->fields[$name] : $default;
 
         if ($value instanceof AccessorInterface) {
-            //Accessor will deal with setting value by itself
             return $value;
         }
 
-        if (!empty($accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR))) {
+        //Checking if field have accessor (decorator)
+        $accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR);
+
+        if (!empty($accessor)) {
             return $this->fields[$name] = $this->createAccessor($accessor, $value);
         }
 
-        if ($filter && !empty($getter = $this->getMutator($name, self::MUTATOR_GETTER))) {
+        //Checking for getter
+        $getter = $this->getMutator($name, self::MUTATOR_GETTER);
+
+        if ($filter && !empty($getter)) {
             try {
                 return call_user_func($getter, $value);
             } catch (\ErrorException $e) {

@@ -22,7 +22,7 @@ interface EntityInterface
      *
      * @return bool
      */
-    public function hasField(string $name);
+    public function hasField(string $name): bool;
 
     /**
      * Set entity field value.

@@ -11,7 +11,8 @@ namespace Spiral\tests\Cases\Database;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\Table;
-use Spiral\Database\TableInterface;
+use Mockery as m;
+use Spiral\Database\Query\PDOResult;
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase
 {
@@ -43,7 +44,8 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $driver->expects($this->once())->method('query')->with('test query');
+        $driver->expects($this->once())->method('query')->with('test query')
+            ->willReturn(m::mock(PDOResult::class));
 
         $database = new Database('test', 'prefix_', $driver);
         $database->query('test query');
@@ -58,7 +60,8 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $driver->expects($this->once())->method('statement')->with('test statement', [1, 2, 3]);
+        $driver->expects($this->once())->method('statement')->with('test statement',
+            [1, 2, 3])->willReturn(m::mock(PDOResult::class));
 
         $database = new Database('test', 'prefix_', $driver);
         $database->statement('test statement', [1, 2, 3]);

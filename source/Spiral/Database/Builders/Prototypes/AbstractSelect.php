@@ -20,7 +20,6 @@ use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\PDOResult;
-use Spiral\Database\ResultInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\Traits\LimitsTrait;
 use Spiral\Pagination\Traits\PaginatorTrait;
@@ -301,7 +300,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @return PDOResult|CachedResult
      */
-    public function run(bool $paginate = true): ResultInterface
+    public function run(bool $paginate = true)
     {
         if ($paginate && $this->hasPaginator()) {
             /**
@@ -439,9 +438,9 @@ abstract class AbstractSelect extends AbstractWhere implements
     /**
      * {@inheritdoc}
      *
-     * @return PDOResult
+     * @return \PDOStatement|PDOResult
      */
-    public function getIterator(): ResultInterface
+    public function getIterator()
     {
         return $this->run();
     }

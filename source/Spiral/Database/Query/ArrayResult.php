@@ -8,12 +8,11 @@
 namespace Spiral\Database\Query;
 
 use Spiral\Database\Exceptions\ResultException;
-use Spiral\Database\ResultInterface;
 
 /**
  * Represents simple array.
  */
-class ArrayResult extends \ArrayIterator implements ResultInterface
+class ArrayResult extends \ArrayIterator
 {
     /**
      * @var array

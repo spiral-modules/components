@@ -271,19 +271,16 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $statement
      * @param array  $parameters
-     * @param string $class Class name to be used, by default driver specific query result to be
-     *                      used.
-     * @param array  $args  Class construction arguments (by default filtered parameters).
+     * @param array  $args Class construction arguments (by default filtered parameters).
      *
-     * @return \PDOStatement|PDOResult
+     * @return PDOResult
      */
     public function query(
         string $statement,
         array $parameters = [],
-        $class = null,
         array $args = []
-    ): \PDOStatement {
-        return $this->statement($statement, $parameters, $class ?? static::QUERY_RESULT, $args);
+    ): PDOResult {
+        return $this->statement($statement, $parameters, PDOResult::class, $args);
     }
 
     /**
@@ -292,7 +289,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
-     * @param string $class      Class to represent PDO statement.
+     * @param string $class      Class to be used to represent results.
      * @param array  $args       Class construction arguments (by default filtered parameters)
      *
      * @return \PDOStatement
@@ -302,7 +299,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function statement(
         string $query,
         array $parameters = [],
-        string $class = 'PDOStatement',
+        $class = PDOResult::class,
         array $args = []
     ): \PDOStatement {
         try {

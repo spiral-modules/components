@@ -10,12 +10,11 @@ namespace Spiral\Database\Query;
 
 use PDOStatement;
 use Spiral\Database\Helpers\QueryInterpolator;
-use Spiral\Database\ResultInterface;
 
 /**
  * Works as prepared PDOStatement.
  */
-class PDOResult extends PDOStatement implements ResultInterface, \JsonSerializable
+class PDOResult extends PDOStatement implements \JsonSerializable
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.

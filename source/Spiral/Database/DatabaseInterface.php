@@ -56,11 +56,11 @@ interface DatabaseInterface
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      *
-     * @return ResultInterface
+     * @return \PDOStatement
      *
      * @throws QueryException
      */
-    public function query(string $query, array $parameters = []): ResultInterface;
+    public function query(string $query, array $parameters = []);
 
     /**
      * Execute multiple commands defined by Closure function inside one transaction. Closure or

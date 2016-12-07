@@ -21,7 +21,6 @@ use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\PDOResult;
-use Spiral\Database\ResultInterface;
 
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
@@ -128,8 +127,12 @@ class Database implements DatabaseInterface, InjectableInterface
      * @param Driver         $driver     Driver instance responsible for database connection.
      * @param StoreInterface $cache      Cache store associated with database.
      */
-    public function __construct($name, $prefix = '', Driver $driver, StoreInterface $cache = null)
-    {
+    public function __construct(
+        string $name,
+        string $prefix = '',
+        Driver $driver,
+        StoreInterface $cache = null
+    ) {
         $this->name = $name;
         $this->setPrefix($prefix);
 
@@ -198,15 +201,14 @@ class Database implements DatabaseInterface, InjectableInterface
      * @param string $class Class to be used to represent PDOStatement.
      * @param array  $args  Class construction arguments, by default array of parameters.
      *
-     * @return ResultInterface|\PDOStatement|PDOResult
+     * @return PDOResult
      */
     public function query(
         string $query,
         array $parameters = [],
-        string $class = null,
         array $args = []
-    ): ResultInterface {
-        return $this->driver->query($query, $parameters, $class, $args);
+    ): \PDOStatement {
+        return $this->driver->query($query, $parameters, $args);
     }
 
     /**

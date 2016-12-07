@@ -62,9 +62,9 @@ class SelectQuery extends AbstractSelect
      * @param array|string|mixed $tables Array of names, comma separated string or set of
      *                                   parameters.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function from($tables)
+    public function from($tables): SelectQuery
     {
         $this->tables = $this->fetchIdentifiers(func_get_args());
 
@@ -78,9 +78,9 @@ class SelectQuery extends AbstractSelect
      * @param array|string|mixed $columns Array of names, comma separated string or set of
      *                                    parameters.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function columns($columns)
+    public function columns($columns): SelectQuery
     {
         $this->columns = $this->fetchIdentifiers(func_get_args());
 
@@ -93,9 +93,9 @@ class SelectQuery extends AbstractSelect
      * @param array|string|mixed $columns Array of names, comma separated string or set of
      *                                    parameters.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function select($columns)
+    public function select($columns): SelectQuery
     {
         $this->columns = $this->fetchIdentifiers(func_get_args());
 
@@ -107,9 +107,9 @@ class SelectQuery extends AbstractSelect
      *
      * @param FragmentInterface $query
      *
-     * @return $this
+     * @return self|$this
      */
-    public function union(FragmentInterface $query)
+    public function union(FragmentInterface $query): SelectQuery
     {
         $this->unionTokens[] = ['', $query];
 
@@ -121,9 +121,9 @@ class SelectQuery extends AbstractSelect
      *
      * @param FragmentInterface $query
      *
-     * @return $this
+     * @return self|$this
      */
-    public function unionAll(FragmentInterface $query)
+    public function unionAll(FragmentInterface $query): SelectQuery
     {
         $this->unionTokens[] = ['ALL', $query];
 
@@ -133,7 +133,7 @@ class SelectQuery extends AbstractSelect
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(QueryCompiler $compiler = null): array
     {
         if (empty($compiler)) {
             $compiler = $this->compiler;
@@ -154,7 +154,7 @@ class SelectQuery extends AbstractSelect
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();
@@ -181,7 +181,7 @@ class SelectQuery extends AbstractSelect
      *
      * @return array
      */
-    public function all()
+    public function all(): array
     {
         return $this->getIterator()->fetchAll(\PDO::FETCH_ASSOC);
     }

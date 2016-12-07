@@ -20,6 +20,7 @@ use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\PDOQuery;
+use Spiral\Database\ResultInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\Traits\LimitsTrait;
 use Spiral\Pagination\Traits\PaginatorTrait;
@@ -142,9 +143,9 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @param bool|string $distinct You are only allowed to use string value for Postgres databases.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function distinct($distinct = true)
+    public function distinct($distinct = true): AbstractSelect
     {
         $this->distinct = $distinct;
 
@@ -161,12 +162,16 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param mixed        $variousB   Value, if operator specified.
      * @param mixed        $variousC   Required only in between statements.
      *
-     * @return $this
+     * @return self|$this
      *
      * @throws BuilderException
      */
-    public function having($identifier, $variousA = null, $variousB = null, $variousC = null)
-    {
+    public function having(
+        $identifier,
+        $variousA = null,
+        $variousB = null,
+        $variousC = null
+    ): AbstractSelect {
         $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
 
         return $this;
@@ -182,12 +187,16 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param mixed        $variousB   Value, if operator specified.
      * @param mixed        $variousC   Required only in between statements.
      *
-     * @return $this
+     * @return self|$this
      *
      * @throws BuilderException
      */
-    public function andHaving($identifier, $variousA = null, $variousB = null, $variousC = null)
-    {
+    public function andHaving(
+        $identifier,
+        $variousA = null,
+        $variousB = null,
+        $variousC = null
+    ): AbstractSelect {
         $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
 
         return $this;
@@ -203,12 +212,16 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param mixed        $variousB   Value, if operator specified.
      * @param mixed        $variousC   Required only in between statements.
      *
-     * @return $this
+     * @return self|$this
      *
      * @throws BuilderException
      */
-    public function orHaving($identifier, $variousA = [], $variousB = null, $variousC = null)
-    {
+    public function orHaving(
+        $identifier,
+        $variousA = [],
+        $variousB = null,
+        $variousC = null
+    ): AbstractSelect {
         $this->whereToken('OR', func_get_args(), $this->havingTokens, $this->havingWrapper());
 
         return $this;
@@ -226,9 +239,9 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param string|array $expression
      * @param string       $direction Sorting direction, ASC|DESC.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function orderBy($expression, $direction = self::SORT_ASC)
+    public function orderBy($expression, $direction = self::SORT_ASC): AbstractSelect
     {
         if (!is_array($expression)) {
             $this->ordering[] = [$expression, $direction];
@@ -248,9 +261,9 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @param string $expression
      *
-     * @return $this
+     * @return self|$this
      */
-    public function groupBy($expression)
+    public function groupBy($expression): AbstractSelect
     {
         $this->grouping[] = $expression;
 
@@ -267,10 +280,13 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param string         $key      Optional, Database will generate key based on query.
      * @param StoreInterface $store    Optional, Database will resolve cache store using container.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function cache(int $lifetime, string $key = '', StoreInterface $store = null)
-    {
+    public function cache(
+        int $lifetime,
+        string $key = '',
+        StoreInterface $store = null
+    ): AbstractSelect {
         $this->cacheLifetime = $lifetime;
         $this->cacheKey = $key;
         $this->cacheStore = $store;
@@ -285,7 +301,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @return PDOQuery|CachedResult
      */
-    public function run(bool $paginate = true)
+    public function run(bool $paginate = true): ResultInterface
     {
         if ($paginate && $this->hasPaginator()) {
             /**
@@ -335,7 +351,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param int      $limit
      * @param callable $callback
      */
-    public function chunked($limit, callable $callback)
+    public function chunked(int $limit, callable $callback)
     {
         //TODO: Think about it
 
@@ -371,7 +387,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @return int
      */
-    public function count($column = '*')
+    public function count(string $column = '*'): int
     {
         /**
          * @var AbstractSelect $select
@@ -401,7 +417,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @throws BuilderException
      * @throws QueryException
      */
-    public function __call($method, array $arguments)
+    public function __call(string $method, array $arguments)
     {
         if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
             throw new BuilderException("Unknown method '{$method}' in '" . get_class($this) . "'");
@@ -425,7 +441,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @return PDOQuery
      */
-    public function getIterator()
+    public function getIterator(): ResultInterface
     {
         return $this->run();
     }

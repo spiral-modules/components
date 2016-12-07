@@ -112,12 +112,16 @@ abstract class AbstractWhere extends QueryBuilder
      * @param mixed        $variousB   Value, if operator specified.
      * @param mixed        $variousC   Required only in between statements.
      *
-     * @return $this
+     * @return self|$this
      *
      * @throws BuilderException
      */
-    public function where($identifier, $variousA = null, $variousB = null, $variousC = null)
-    {
+    public function where(
+        $identifier,
+        $variousA = null,
+        $variousB = null,
+        $variousC = null
+    ): AbstractWhere {
         $this->whereToken('AND', func_get_args(), $this->whereTokens, $this->whereWrapper());
 
         return $this;
@@ -133,12 +137,16 @@ abstract class AbstractWhere extends QueryBuilder
      * @param mixed        $variousB   Value, if operator specified.
      * @param mixed        $variousC   Required only in between statements.
      *
-     * @return $this
+     * @return self|$this
      *
      * @throws BuilderException
      */
-    public function andWhere($identifier, $variousA = null, $variousB = null, $variousC = null)
-    {
+    public function andWhere(
+        $identifier,
+        $variousA = null,
+        $variousB = null,
+        $variousC = null
+    ): AbstractWhere {
         $this->whereToken('AND', func_get_args(), $this->whereTokens, $this->whereWrapper());
 
         return $this;
@@ -154,12 +162,16 @@ abstract class AbstractWhere extends QueryBuilder
      * @param mixed        $variousB   Value, if operator specified.
      * @param mixed        $variousC   Required only in between statements.
      *
-     * @return $this
+     * @return self|$this
      *
      * @throws BuilderException
      */
-    public function orWhere($identifier, $variousA = [], $variousB = null, $variousC = null)
-    {
+    public function orWhere(
+        $identifier,
+        $variousA = [],
+        $variousB = null,
+        $variousC = null
+    ): AbstractWhere {
         $this->whereToken('OR', func_get_args(), $this->whereTokens, $this->whereWrapper());
 
         return $this;
@@ -260,7 +272,7 @@ abstract class AbstractWhere extends QueryBuilder
      *
      * @throws BuilderException
      */
-    private function arrayWhere($grouper, array $where, &$tokens, callable $wrapper)
+    private function arrayWhere(string $grouper, array $where, &$tokens, callable $wrapper)
     {
         $joiner = ($grouper == self::TOKEN_AND ? 'AND' : 'OR');
 
@@ -318,8 +330,13 @@ abstract class AbstractWhere extends QueryBuilder
      *
      * @return array
      */
-    private function builtConditions($innerJoiner, $key, $where, &$tokens, callable $wrapper)
-    {
+    private function builtConditions(
+        string $innerJoiner,
+        string $key,
+        $where,
+        &$tokens,
+        callable $wrapper
+    ) {
         foreach ($where as $operation => $value) {
             if (is_numeric($operation)) {
                 throw new BuilderException('Nested conditions should have defined operator');

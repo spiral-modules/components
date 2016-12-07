@@ -42,7 +42,7 @@ class InsertQuery extends QueryBuilder
      * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
      * @param string        $table    Associated table name.
      */
-    public function __construct(Database $database, QueryCompiler $compiler, $table = '')
+    public function __construct(Database $database, QueryCompiler $compiler, string $table = '')
     {
         parent::__construct($database, $compiler);
 
@@ -54,9 +54,9 @@ class InsertQuery extends QueryBuilder
      *
      * @param string $into
      *
-     * @return $this
+     * @return self
      */
-    public function into($into)
+    public function into(string $into): InsertQuery
     {
         $this->table = $into;
 
@@ -74,9 +74,9 @@ class InsertQuery extends QueryBuilder
      *
      * @param array|string $columns
      *
-     * @return $this
+     * @return self
      */
-    public function columns($columns)
+    public function columns($columns): InsertQuery
     {
         $this->columns = $this->fetchIdentifiers(func_get_args());
 
@@ -107,9 +107,9 @@ class InsertQuery extends QueryBuilder
      *
      * @param mixed $rowsets
      *
-     * @return $this
+     * @return self
      */
-    public function values($rowsets)
+    public function values($rowsets): InsertQuery
     {
         if (!is_array($rowsets)) {
             return $this->values(func_get_args());
@@ -136,7 +136,7 @@ class InsertQuery extends QueryBuilder
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(QueryCompiler $compiler = null): array
     {
         $compiler = !empty($compiler) ? $compiler : $this->compiler;
 
@@ -152,7 +152,7 @@ class InsertQuery extends QueryBuilder
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();

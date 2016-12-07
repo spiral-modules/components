@@ -36,7 +36,7 @@ class UpdateQuery extends AbstractAffect
     public function __construct(
         Database $database,
         QueryCompiler $compiler,
-        $table = '',
+        string $table = '',
         array $where = [],
         array $values = []
     ) {
@@ -50,9 +50,9 @@ class UpdateQuery extends AbstractAffect
      *
      * @param string $table Table name without prefix.
      *
-     * @return $this
+     * @return self|$this
      */
-    public function in($table)
+    public function in(string $table): UpdateQuery
     {
         $this->table = $table;
 
@@ -65,9 +65,9 @@ class UpdateQuery extends AbstractAffect
      *
      * @param array $values
      *
-     * @return $this
+     * @return self|$this
      */
-    public function values(array $values)
+    public function values(array $values): UpdateQuery
     {
         $this->values = $values;
 
@@ -79,7 +79,7 @@ class UpdateQuery extends AbstractAffect
      *
      * @return array
      */
-    public function getValues()
+    public function getValues(): array
     {
         return $this->values;
     }
@@ -90,9 +90,9 @@ class UpdateQuery extends AbstractAffect
      * @param string $column
      * @param mixed  $value
      *
-     * @return $this
+     * @return self|$this
      */
-    public function set($column, $value)
+    public function set(string $column, $value): UpdateQuery
     {
         $this->values[$column] = $value;
 
@@ -102,7 +102,7 @@ class UpdateQuery extends AbstractAffect
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(QueryCompiler $compiler = null): array
     {
         if (empty($compiler)) {
             $compiler = $this->compiler;
@@ -139,7 +139,7 @@ class UpdateQuery extends AbstractAffect
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($this->values)) {
             throw new BuilderException('Update values must be specified');

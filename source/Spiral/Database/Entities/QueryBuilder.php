@@ -8,6 +8,7 @@
 
 namespace Spiral\Database\Entities;
 
+use Spiral\Core\Component;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\ExpressionInterface;
@@ -17,7 +18,7 @@ use Spiral\Database\Injections\ParameterInterface;
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
  */
-abstract class QueryBuilder implements ExpressionInterface
+abstract class QueryBuilder extends Component implements ExpressionInterface
 {
     /**
      * @invisible

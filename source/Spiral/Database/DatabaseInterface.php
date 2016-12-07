@@ -14,8 +14,6 @@ use Spiral\Database\Exceptions\QueryException;
  * DatabaseInterface is high level abstraction used to represent single database. You must always
  * check database type using getType() method before writing plain SQL for execute and query methods
  * (unless you are locking your module/application to one database).
- *
- * @todo create interfaces for query builders?
  */
 interface DatabaseInterface
 {

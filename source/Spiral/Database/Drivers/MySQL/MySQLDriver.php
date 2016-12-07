@@ -56,7 +56,7 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function identifier($identifier)
+    public function identifier(string $identifier): string
     {
         return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
     }
@@ -64,17 +64,19 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?';
 
-        return (bool)$this->query($query, [$this->getSource(), $name])->fetchColumn();
+        return (bool)$this->query(
+            'SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?',
+            [$this->getSource(), $name]
+        )->fetchColumn();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function truncateData($table)
+    public function truncateData(string $table)
     {
         $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
     }
@@ -82,7 +84,7 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function tableNames(): array
     {
         $result = [];
         foreach ($this->query('SHOW TABLES')->fetch(PDO::FETCH_NUM) as $row) {

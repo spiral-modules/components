@@ -20,12 +20,12 @@ class QueryCompiler extends AbstractCompiler
      * {@inheritdoc}
      */
     public function orderParameters(
-        $queryType,
+        int $queryType,
         array $whereParameters = [],
         array $onParameters = [],
         array $havingParameters = [],
         array $columnIdentifiers = []
-    ) {
+    ): array {
         if ($queryType == self::UPDATE_QUERY) {
             //Where statement has pretty specific order
             return array_merge($onParameters, $columnIdentifiers, $whereParameters);
@@ -45,7 +45,7 @@ class QueryCompiler extends AbstractCompiler
      *
      * @link http://dev.mysql.com/doc/refman/5.0/en/select.html#id4651990
      */
-    protected function compileLimit($limit, $offset)
+    protected function compileLimit(int $limit, int $offset): string
     {
         if (empty($limit) && empty($offset)) {
             return '';
@@ -72,7 +72,7 @@ class QueryCompiler extends AbstractCompiler
      *
      * @return string
      */
-    protected function prepareOperator($parameter, $operator)
+    protected function prepareOperator($parameter, string $operator): string
     {
         if (!$parameter instanceof ParameterInterface) {
             //Probably fragment

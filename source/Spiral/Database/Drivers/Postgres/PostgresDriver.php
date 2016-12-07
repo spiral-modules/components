@@ -10,6 +10,7 @@ namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\HippocampusInterface;
+use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\Postgres\Schemas\Commander;
 use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
@@ -56,7 +57,7 @@ class PostgresDriver extends Driver
     private $primaryKeys = [];
 
     /**
-     * Needed to remember table primary keys.
+     * Needed to remember table primary keys for last insert id statements.
      *
      * @invisible
      *
@@ -73,7 +74,7 @@ class PostgresDriver extends Driver
      * @param HippocampusInterface $memory
      */
     public function __construct(
-        $name,
+        string $name,
         array $connection,
         FactoryInterface $factory = null,
         HippocampusInterface $memory = null
@@ -86,18 +87,21 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?';
 
-        return (bool)$this->query($query, [$name])->fetchColumn();
+
+        return (bool)$this->query(
+            'SELECT "table_name" FROM "information_schema"."tables" '
+            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?',
+            [$name]
+        )->fetchColumn();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function truncateData($table)
+    public function truncateData(string $table)
     {
         $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
     }
@@ -105,7 +109,7 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function tableNames(): array
     {
         $query = 'SELECT "table_name" FROM "information_schema"."tables" '
             . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\'';
@@ -123,11 +127,11 @@ class PostgresDriver extends Driver
      *
      * @param string $table Fully specified table name, including postfix.
      *
-     * @return string
+     * @return string|null
      *
      * @throws DriverException
      */
-    public function getPrimary($table)
+    public function getPrimary(string $table)
     {
         if (!empty($this->memory) && empty($this->primaryKeys)) {
             $this->primaryKeys = (array)$this->memory->loadData($this->getSource() . '-primary');
@@ -162,7 +166,7 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function insertBuilder(Database $database, array $parameters = [])
+    public function insertBuilder(Database $database, array $parameters = []): InsertQuery
     {
         return $this->factory->make(PostgresInsertQuery::class, [
                 'database' => $database,
@@ -173,7 +177,7 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    protected function createPDO()
+    protected function createPDO(): \PDO
     {
         //Spiral is purely UTF-8
         $pdo = parent::createPDO();

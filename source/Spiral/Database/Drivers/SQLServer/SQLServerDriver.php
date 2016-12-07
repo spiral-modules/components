@@ -84,7 +84,7 @@ class SQLServerDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function identifier($identifier)
+    public function identifier(string $identifier): string
     {
         return $identifier == '*' ? '*' : '[' . str_replace('[', '[[', $identifier) . ']';
     }
@@ -92,18 +92,19 @@ class SQLServerDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT COUNT(*) FROM information_schema.tables '
-            . "WHERE table_type = 'BASE TABLE' AND table_name = ?";
-
-        return (bool)$this->query($query, [$name])->fetchColumn();
+        return (bool)$this->query(
+            'SELECT COUNT(*) FROM information_schema.tables '
+            . "WHERE table_type = 'BASE TABLE' AND table_name = ?",
+            [$name]
+        )->fetchColumn();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function truncateData($table)
+    public function truncateData(string $table)
     {
         $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
     }
@@ -111,7 +112,7 @@ class SQLServerDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function tableNames(): array
     {
         $query = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE'";
 
@@ -130,7 +131,7 @@ class SQLServerDriver extends Driver
      *
      * @return int
      */
-    public function serverVersion()
+    public function serverVersion(): int
     {
         if (empty($this->serverVersion)) {
             $this->serverVersion = (int)$this->getPDO()->getAttribute(\PDO::ATTR_SERVER_VERSION);

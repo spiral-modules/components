@@ -51,7 +51,7 @@ class SQLiteDriver extends Driver
      *
      * @throws DriverException
      */
-    public function getSource()
+    public function getSource(): string
     {
         //Remove "sqlite:"
         return substr($this->config['connection'], 7);
@@ -60,17 +60,18 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?';
-
-        return (bool)$this->query($query, [$name])->fetchColumn();
+        return (bool)$this->query(
+            'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?',
+            [$name]
+        )->fetchColumn();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function truncateData($table)
+    public function truncateData(string $table)
     {
         $this->statement("DELETE FROM {$this->identifier($table)}");
     }
@@ -78,7 +79,7 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function tableNames(): array
     {
         $tables = [];
         foreach ($this->query("SELECT * FROM sqlite_master WHERE type = 'table'") as $table) {
@@ -93,11 +94,13 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    protected function isolationLevel($level)
+    protected function isolationLevel(string $level)
     {
-        $this->logger()->alert(
-            'Transaction isolation level is not fully supported by SQLite ({level}).',
-            compact('level')
-        );
+        if ($this->isProfiling()) {
+            $this->logger()->alert(
+                'Transaction isolation level is not fully supported by SQLite ({level}).',
+                compact('level')
+            );
+        }
     }
 }

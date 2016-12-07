@@ -18,7 +18,7 @@ class QueryCompiler extends AbstractCompiler
     /**
      * {@inheritdoc}
      */
-    public function compileInsert($table, array $columns, array $rowsets)
+    public function compileInsert(string $table, array $columns, array $rowsets): string
     {
         if (count($rowsets) == 1) {
             return parent::compileInsert($table, $columns, $rowsets);
@@ -49,7 +49,7 @@ class QueryCompiler extends AbstractCompiler
      *
      * @link http://stackoverflow.com/questions/10491492/sqllite-with-skip-offset-only-not-limit
      */
-    protected function compileLimit($limit, $offset)
+    protected function compileLimit(int $limit, int $offset): string
     {
         if (empty($limit) && empty($offset)) {
             return '';

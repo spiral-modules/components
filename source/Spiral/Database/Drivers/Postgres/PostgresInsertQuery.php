@@ -12,19 +12,16 @@ use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Drivers\Postgres\QueryCompiler as PostgresCompiler;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 use Spiral\Database\Exceptions\BuilderException;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * Postgres driver requires little bit different way to handle last insert id.
  */
 class PostgresInsertQuery extends InsertQuery
 {
-    use LoggerTrait;
-
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(AbstractCompiler $compiler = null)
+    public function sqlStatement(AbstractCompiler $compiler = null): string
     {
         $driver = $this->database->driver();
 
@@ -33,19 +30,11 @@ class PostgresInsertQuery extends InsertQuery
             || (!empty($compiler) && !$compiler instanceof PostgresCompiler)
         ) {
             throw new BuilderException(
-                'Postgres InsertQuery can be used only with Postgres driver and compiler.'
+                'Postgres InsertQuery can be used only with Postgres driver and compiler'
             );
         }
 
-        if ($primary = $driver->getPrimary($this->database->getPrefix() . $this->table)) {
-            $this->logger()->debug(
-                "Primary key '{sequence}' automatically resolved for table '{table}'.",
-                [
-                    'table'    => $this->table,
-                    'sequence' => $primary,
-                ]
-            );
-        }
+        $primary = $driver->getPrimary($this->database->getPrefix() . $this->table);
 
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();

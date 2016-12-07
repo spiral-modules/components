@@ -55,10 +55,10 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
         array $havingTokens = [],
         array $grouping = [],
         array $ordering = [],
-        $limit = 0,
-        $offset = 0,
+        int $limit = 0,
+        int $offset = 0,
         array $unionTokens = []
-    ) {
+    ): string {
         if (
             empty($limit) && empty($offset)
             || ($this->driver->serverVersion() >= 12 && !empty($ordering))
@@ -113,7 +113,7 @@ class QueryCompiler extends AbstractCompiler implements LoggerAwareInterface
      *
      * @link http://stackoverflow.com/questions/2135418/equivalent-of-limit-and-offset-for-sql-server
      */
-    protected function compileLimit($limit, $offset, $rowNumber = null)
+    protected function compileLimit(int $limit, int $offset, $rowNumber = null): string
     {
         if (empty($limit) && empty($offset)) {
             return '';

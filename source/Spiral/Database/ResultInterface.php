@@ -30,7 +30,7 @@ interface ResultInterface extends \Traversable, \Countable
     public function fetch();
 
     /**
-     * Fetch column value.
+     * Fetch column value. Progresses to next row after fetching.
      *
      * @param int|string $columnID
      * @return mixed

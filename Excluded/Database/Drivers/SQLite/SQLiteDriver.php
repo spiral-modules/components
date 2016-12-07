@@ -70,7 +70,7 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function truncate($table)
+    public function truncateData($table)
     {
         $this->statement("DELETE FROM {$this->identifier($table)}");
     }

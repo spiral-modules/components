@@ -97,7 +97,7 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function truncate($table)
+    public function truncateData($table)
     {
         $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
     }

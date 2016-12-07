@@ -61,7 +61,7 @@ abstract class Driver extends PDODriver
      * @param array            $connection
      * @param FactoryInterface $factory
      */
-    public function __construct($name, array $connection, FactoryInterface $factory)
+    public function __construct(string $name, array $connection, FactoryInterface $factory)
     {
         parent::__construct($name, $connection);
 
@@ -73,7 +73,7 @@ abstract class Driver extends PDODriver
      *
      * @return string
      */
-    public function nowExpression()
+    public function nowExpression(): string
     {
         return static::TIMESTAMP_NOW;
     }
@@ -85,21 +85,21 @@ abstract class Driver extends PDODriver
      *
      * @return bool
      */
-    abstract public function hasTable($name);
+    abstract public function hasTable(string $name): bool;
 
     /**
      * Clean (truncate) specified driver table.
      *
      * @param string $table Table name with prefix included.
      */
-    abstract public function truncate($table);
+    abstract public function truncateData(string $table);
 
     /**
      * Get every available table name as array.
      *
      * @return array
      */
-    abstract public function tableNames();
+    abstract public function tableNames(): array;
 
     /**
      * Get Driver specific AbstractTable implementation.
@@ -111,7 +111,7 @@ abstract class Driver extends PDODriver
      *
      * @return AbstractTable
      */
-    public function tableSchema($table, $prefix = '')
+    public function tableSchema($table, $prefix = ''): AbstractTable
     {
         return $this->factory->make(static::SCHEMA_TABLE, [
             'driver'    => $this,
@@ -129,7 +129,7 @@ abstract class Driver extends PDODriver
      *
      * @return QueryCompiler
      */
-    public function queryCompiler($prefix = '')
+    public function queryCompiler(string $prefix = ''): QueryCompiler
     {
         return $this->factory->make(static::QUERY_COMPILER, [
             'driver' => $this,
@@ -145,7 +145,7 @@ abstract class Driver extends PDODriver
      *
      * @return InsertQuery
      */
-    public function insertBuilder(Database $database, array $parameters = [])
+    public function insertBuilder(Database $database, array $parameters = []): InsertQuery
     {
         return $this->factory->make(InsertQuery::class, [
                 'database' => $database,
@@ -161,7 +161,7 @@ abstract class Driver extends PDODriver
      *
      * @return SelectQuery
      */
-    public function selectBuilder(Database $database, array $parameters = [])
+    public function selectBuilder(Database $database, array $parameters = []): SelectQuery
     {
         return $this->factory->make(SelectQuery::class, [
                 'database' => $database,
@@ -177,7 +177,7 @@ abstract class Driver extends PDODriver
      *
      * @return DeleteQuery
      */
-    public function deleteBuilder(Database $database, array $parameters = [])
+    public function deleteBuilder(Database $database, array $parameters = []): DeleteQuery
     {
         return $this->factory->make(DeleteQuery::class, [
                 'database' => $database,
@@ -193,7 +193,7 @@ abstract class Driver extends PDODriver
      *
      * @return UpdateQuery
      */
-    public function updateBuilder(Database $database, array $parameters = [])
+    public function updateBuilder(Database $database, array $parameters = []): UpdateQuery
     {
         return $this->factory->make(UpdateQuery::class, [
                 'database' => $database,

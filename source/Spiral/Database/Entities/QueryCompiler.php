@@ -50,9 +50,9 @@ class QueryCompiler extends Component
     /**
      * Reset table aliases cache, required if same compiler used twice.
      *
-     * @return $this
+     * @return self
      */
-    public function resetQuoter()
+    public function resetQuoter(): QueryCompiler
     {
         $this->quoter->reset();
 
@@ -65,18 +65,18 @@ class QueryCompiler extends Component
      * @param string $identifier Identifier can include simple column operations and functions,
      *                           having "." in it will automatically force table prefix to first
      *                           value.
-     * @param bool   $table      Set to true to let quote method know that identified is related
+     * @param bool   $isTable    Set to true to let quote method know that identified is related
      *                           to table name.
      *
-     * @return mixed|string
+     * @return string
      */
-    public function quote($identifier, $table = false)
+    public function quote(string $identifier, bool $isTable = false): string
     {
         if ($identifier instanceof FragmentInterface) {
             return $this->prepareFragment($identifier);
         }
 
-        return $this->quoter->quote($identifier, $table);
+        return $this->quoter->quote($identifier, $isTable);
     }
 
     /**
@@ -93,12 +93,12 @@ class QueryCompiler extends Component
      * @return array
      */
     public function orderParameters(
-        $queryType,
+        int $queryType,
         array $whereParameters = [],
         array $onParameters = [],
         array $havingParameters = [],
         array $columnIdentifiers = []
-    ) {
+    ): array {
         return array_merge($columnIdentifiers, $onParameters, $whereParameters, $havingParameters);
     }
 
@@ -115,7 +115,7 @@ class QueryCompiler extends Component
      *
      * @throws CompilerException
      */
-    public function compileInsert($table, array $columns, array $rowsets)
+    public function compileInsert(string $table, array $columns, array $rowsets): string
     {
         if (empty($columns)) {
             throw new CompilerException('Unable to build insert statement, columns must be set');
@@ -150,7 +150,7 @@ class QueryCompiler extends Component
      *
      * @throws CompilerException
      */
-    public function compileUpdate($table, array $updates, array $whereTokens = [])
+    public function compileUpdate(string $table, array $updates, array $whereTokens = []): string
     {
         $table = $this->quote($table, true);
 
@@ -173,7 +173,7 @@ class QueryCompiler extends Component
      *
      * @throws CompilerException
      */
-    public function compileDelete($table, array $whereTokens = [])
+    public function compileDelete(string $table, array $whereTokens = []): string
     {
         $table = $this->quote($table, true);
 
@@ -212,10 +212,10 @@ class QueryCompiler extends Component
         array $havingTokens = [],
         array $grouping = [],
         array $ordering = [],
-        $limit = 0,
-        $offset = 0,
+        int $limit = 0,
+        int $offset = 0,
         array $unionTokens = []
-    ) {
+    ): string {
         //This statement parts should be processed first to define set of table and column aliases
         $fromTables = $this->compileTables($fromTables);
 
@@ -254,7 +254,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function prepareColumns(array $columnIdentifiers, $maxLength = 180)
+    protected function prepareColumns(array $columnIdentifiers, int $maxLength = 180): string
     {
         //Let's quote every identifier
         $columnIdentifiers = array_map([$this, 'quote'], $columnIdentifiers);
@@ -267,9 +267,9 @@ class QueryCompiler extends Component
      *
      * @param array $updates
      *
-     * @return array
+     * @return string
      */
-    protected function prepareUpdates(array $updates)
+    protected function prepareUpdates(array $updates): string
     {
         foreach ($updates as $column => &$value) {
             if ($value instanceof FragmentInterface) {
@@ -294,7 +294,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileDistinct($distinct)
+    protected function compileDistinct($distinct): string
     {
         if (empty($distinct)) {
             return '';
@@ -310,7 +310,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileTables(array $tables)
+    protected function compileTables(array $tables): string
     {
         foreach ($tables as &$table) {
             $table = $this->quote($table, true);
@@ -327,7 +327,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileJoins(array $joinTokens)
+    protected function compileJoins(array $joinTokens): string
     {
         $statement = '';
         foreach ($joinTokens as $table => $join) {
@@ -346,7 +346,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileUnions(array $unionTokens)
+    protected function compileUnions(array $unionTokens): string
     {
         if (empty($unionTokens)) {
             return '';
@@ -368,7 +368,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileOrdering(array $ordering)
+    protected function compileOrdering(array $ordering): string
     {
         $result = [];
         foreach ($ordering as $order) {
@@ -385,7 +385,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileGrouping(array $grouping)
+    protected function compileGrouping(array $grouping): string
     {
         $statement = '';
         foreach ($grouping as $identifier) {
@@ -403,7 +403,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function compileLimit($limit, $offset)
+    protected function compileLimit(int $limit, int $offset): string
     {
         if (empty($limit) && empty($offset)) {
             return '';
@@ -430,7 +430,7 @@ class QueryCompiler extends Component
      *
      * @throws CompilerException
      */
-    protected function compileWhere(array $tokens)
+    protected function compileWhere(array $tokens): string
     {
         if (empty($tokens)) {
             return '';
@@ -527,7 +527,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function optional($prefix, $expression, $postfix = '')
+    protected function optional(string $prefix, string $expression, string $postfix = ''): string
     {
         if (empty($expression)) {
             return '';
@@ -548,7 +548,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function prepareOperator($parameter, $operator)
+    protected function prepareOperator($parameter, string $operator): string
     {
         if (!$parameter instanceof ParameterInterface) {
             //Probably fragment
@@ -571,11 +571,11 @@ class QueryCompiler extends Component
     /**
      * Prepare value to be replaced into query (replace ?).
      *
-     * @param string $value
+     * @param mixed $value
      *
      * @return string
      */
-    protected function prepareValue($value)
+    protected function prepareValue($value): string
     {
         if ($value instanceof FragmentInterface) {
             return $this->prepareFragment($value);
@@ -592,7 +592,7 @@ class QueryCompiler extends Component
      *
      * @return string
      */
-    protected function prepareFragment(FragmentInterface $context)
+    protected function prepareFragment(FragmentInterface $context): string
     {
         if ($context instanceof QueryBuilder) {
             //Nested queries has to be wrapped with braces

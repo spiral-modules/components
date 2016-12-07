@@ -108,11 +108,11 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
     /**
      * Returns a single column value from the next row of a result set.
      *
-     * @param int $fieldID Column number (0 - first column)
+     * @param int $columnID Column number (0 - first column)
      *
      * @return mixed
      */
-    public function fetchColumn($fieldID = 0)
+    public function fetchColumn($columnID = 0)
     {
         $values = $this->fetch();
 
@@ -120,19 +120,19 @@ class ArrayResult extends \ArrayIterator implements ResultInterface
             return null;
         }
 
-        if (is_numeric($fieldID)) {
-            if ($this->countColumns() > $fieldID) {
-                throw new ResultException("No such column #{$fieldID}");
+        if (is_numeric($columnID)) {
+            if ($this->countColumns() > $columnID) {
+                throw new ResultException("No such column #{$columnID}");
             }
 
-            return array_values($values)[$fieldID];
+            return array_values($values)[$columnID];
         }
 
-        if (!isset($this->columns[$fieldID])) {
-            throw new ResultException("No such column '{$fieldID}'");
+        if (!isset($this->columns[$columnID])) {
+            throw new ResultException("No such column '{$columnID}'");
         }
 
-        return $values[$fieldID];
+        return $values[$columnID];
     }
 
     /**

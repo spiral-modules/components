@@ -30,6 +30,14 @@ interface ResultInterface extends \Traversable, \Countable
     public function fetch();
 
     /**
+     * Fetch column value.
+     *
+     * @param int|string $columnID
+     * @return mixed
+     */
+    public function fetchColumn($columnID = 0);
+
+    /**
      * Returns an array containing all of the result set rows. Avoid using this method
      *
      * @return array

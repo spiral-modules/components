@@ -18,14 +18,14 @@ interface TableInterface
      *
      * @return bool
      */
-    public function exists();
+    public function exists(): bool;
 
     /**
      * Store specific table name (may include prefix).
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Array of columns dedicated to primary index. Attention, this methods will ALWAYS return
@@ -33,7 +33,7 @@ interface TableInterface
      *
      * @return array
      */
-    public function getPrimaryKeys();
+    public function getPrimaryKeys(): array;
 
     /**
      * Check if table have specified column.
@@ -42,14 +42,14 @@ interface TableInterface
      *
      * @return bool
      */
-    public function hasColumn($name);
+    public function hasColumn(string $name): bool;
 
     /**
      * Get all declared columns.
      *
      * @return ColumnInterface[]
      */
-    public function getColumns();
+    public function getColumns(): array;
 
     /**
      * Check if table has index related to set of provided columns. Columns order does matter!
@@ -58,14 +58,14 @@ interface TableInterface
      *
      * @return bool
      */
-    public function hasIndex(array $columns = []);
+    public function hasIndex(array $columns = []): bool;
 
     /**
      * Get all table indexes.
      *
      * @return IndexInterface[]
      */
-    public function getIndexes();
+    public function getIndexes(): array;
 
     /**
      * Check if table has foreign key related to table column.
@@ -74,14 +74,14 @@ interface TableInterface
      *
      * @return bool
      */
-    public function hasForeign($column);
+    public function hasForeign(string $column): bool;
 
     /**
      * Get all table foreign keys.
      *
      * @return ReferenceInterface[]
      */
-    public function getForeigns();
+    public function getForeigns(): array;
 
     /**
      * Get list of table names current schema depends on, must include every table linked using
@@ -89,5 +89,5 @@ interface TableInterface
      *
      * @return array
      */
-    public function getDependencies();
+    public function getDependencies(): array;
 }

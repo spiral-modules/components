@@ -18,56 +18,56 @@ interface ColumnInterface
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Internal database type, can vary based on database driver.
      *
      * @return string
      */
-    public function getType();
+    public function getType(): string;
 
     /**
      * Must return PHP type column value can be better mapped into: int, bool, string or float.
      *
      * @return string
      */
-    public function phpType();
+    public function phpType(): string;
 
     /**
      * Column size.
      *
      * @return int
      */
-    public function getSize();
+    public function getSize(): int;
 
     /**
      * Column precision.
      *
      * @return int
      */
-    public function getPrecision();
+    public function getPrecision(): int;
 
     /**
      * Column scale value.
      *
      * @return int
      */
-    public function getScale();
+    public function getScale(): int;
 
     /**
      * Can column store null value?
      *
      * @return bool
      */
-    public function isNullable();
+    public function isNullable(): bool;
 
     /**
      * Indication that column has default value.
      *
      * @return bool
      */
-    public function hasDefaultValue();
+    public function hasDefaultValue(): bool;
 
     /**
      * Get column default value, value must be automatically converted to appropriate internal type.

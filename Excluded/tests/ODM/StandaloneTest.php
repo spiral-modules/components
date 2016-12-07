@@ -9,7 +9,7 @@ namespace Spiral\Tests\ODM;
 
 use Mockery as m;
 use Spiral\Core\Container;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Files\FileManager;
 use Spiral\ODM\Configs\ODMConfig;
 use Spiral\ODM\ODM;
@@ -151,7 +151,7 @@ class StandaloneTest extends \PHPUnit_Framework_TestCase
 
     protected function createMemory()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->andReturn(null);
         $memory->shouldReceive('saveData')->andReturn(null);
 

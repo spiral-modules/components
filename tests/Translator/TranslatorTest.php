@@ -9,7 +9,7 @@
 namespace Spiral\Tests\Translator;
 
 use Mockery as m;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
 use Spiral\Translator\TranslationSource;
 use Spiral\Translator\Translator;
@@ -24,7 +24,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
         $translator = new Translator(
@@ -43,7 +43,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
         $translator = new Translator(
@@ -64,7 +64,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([
             'en' => true,
             'ru' => true,
@@ -89,7 +89,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
         $source = m::mock(TranslationSource::class);
@@ -116,7 +116,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
         $source = m::mock(TranslationSource::class);
@@ -138,7 +138,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
         $source = m::mock(TranslationSource::class);
@@ -192,7 +192,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('defaultLocale')->andReturn('en');
         $config->shouldReceive('defaultDomain')->andReturn('messages');
 
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
         $source = m::mock(TranslationSource::class);

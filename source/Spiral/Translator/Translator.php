@@ -10,7 +10,7 @@ namespace Spiral\Translator;
 
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
@@ -77,19 +77,19 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     protected $source = null;
 
     /**
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
     protected $memory = null;
 
     /**
-     * @param TranslatorConfig     $config
-     * @param HippocampusInterface $memory
-     * @param SourceInterface      $source
-     * @param MessageSelector      $selector
+     * @param TranslatorConfig $config
+     * @param MemoryInterface  $memory
+     * @param SourceInterface  $source
+     * @param MessageSelector  $selector
      */
     public function __construct(
         TranslatorConfig $config,
-        HippocampusInterface $memory,
+        MemoryInterface $memory,
         SourceInterface $source,
         MessageSelector $selector = null
     ) {

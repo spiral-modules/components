@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Tokenizer;
 
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Files\FileManager;
 use Spiral\Tests\Tokenizer\Classes\ClassA;
 use Spiral\Tests\Tokenizer\Classes\ClassB;
@@ -114,7 +114,7 @@ class ClassLocatorTest extends \PHPUnit_Framework_TestCase
     protected function getTokenizer()
     {
         //Disabling cache
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->andReturn([]);
         $memory->shouldReceive('saveData');
 

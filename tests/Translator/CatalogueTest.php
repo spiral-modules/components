@@ -9,7 +9,7 @@
 namespace Spiral\Tests\Translator;
 
 use Mockery as m;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Translator\Catalogue;
 use Spiral\Translator\Translator;
 use Symfony\Component\Translation\MessageCatalogue;
@@ -18,7 +18,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 {
     public function testLoadLocale()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $this->assertSame('ru', $catalogue->getLocale());
@@ -26,7 +26,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testGetEmptyDomains()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $this->assertSame([], $catalogue->loadedDomains());
@@ -34,7 +34,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadDomainsFromMemory()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
@@ -52,7 +52,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadAndHas()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
@@ -85,7 +85,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
      */
     public function testUndefinedString()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $memory->shouldReceive('loadData')->with('ru-domain', Translator::MEMORY)->andReturn(null);
@@ -94,7 +94,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadAndGet()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
@@ -115,7 +115,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadGetAndSet()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
         $memory->shouldReceive('loadData')->with('ru-messages', Translator::MEMORY)->andReturn([
             'message' => 'Russian Translation'
@@ -141,7 +141,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testSaveDomains()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $memory->shouldReceive('loadData')->with('ru-test', Translator::MEMORY)->andReturn([
@@ -165,7 +165,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testMergeSymfonyAndFollow()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $catalogue->set('domain', 'message', 'Original Translation');
@@ -179,7 +179,7 @@ class CatalogueTest extends \PHPUnit_Framework_TestCase
 
     public function testMergeSymfonyAndReplace()
     {
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $catalogue = new Catalogue('ru', $memory);
 
         $catalogue->set('domain', 'message', 'Original Translation');

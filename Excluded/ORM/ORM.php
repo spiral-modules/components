@@ -9,7 +9,7 @@ namespace Spiral\ORM;
 
 use Spiral\Core\Component;
 use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\ORM\Configs\ORMConfig;
@@ -70,22 +70,22 @@ class ORM extends Component implements ORMInterface
     /**
      * @invisible
      *
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
     protected $memory = null;
 
     /**
-     * @param ORMConfig            $config
-     * @param DatabaseManager      $dbal
-     * @param EntityCache          $cache
-     * @param HippocampusInterface $memory
-     * @param FactoryInterface     $factory
+     * @param ORMConfig        $config
+     * @param DatabaseManager  $dbal
+     * @param EntityCache      $cache
+     * @param MemoryInterface  $memory
+     * @param FactoryInterface $factory
      */
     public function __construct(
         ORMConfig $config,
         DatabaseManager $dbal,
         EntityCache $cache,
-        HippocampusInterface $memory,
+        MemoryInterface $memory,
         FactoryInterface $factory
     ) {
         $this->config = $config;

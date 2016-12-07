@@ -13,7 +13,7 @@ namespace Spiral\Core;
  *
  * @todo Do we need NeuronInterface [remember(data), forget()] or something similar?
  */
-interface HippocampusInterface
+interface MemoryInterface
 {
     /**
      * Read data from long memory cache. Must return exacts same value as saved or null.

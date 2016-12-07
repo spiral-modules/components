@@ -9,7 +9,7 @@ namespace Spiral\ODM;
 
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Models\MutableObject;
 use Spiral\ODM\Configs\ODMConfig;
@@ -66,18 +66,18 @@ class ODM extends MongoManager implements SingletonInterface, ODMInterface
     /**
      * @invisible
      *
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
     protected $memory = null;
 
     /**
-     * @param ODMConfig            $config
-     * @param HippocampusInterface $memory
-     * @param FactoryInterface     $factory
+     * @param ODMConfig        $config
+     * @param MemoryInterface  $memory
+     * @param FactoryInterface $factory
      */
     public function __construct(
         ODMConfig $config,
-        HippocampusInterface $memory,
+        MemoryInterface $memory,
         FactoryInterface $factory
     ) {
         parent::__construct($config, $factory);

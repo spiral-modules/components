@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Tokenizer;
 
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Files\FileManager;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Reflections\ReflectionArgument;
@@ -18,7 +18,7 @@ class ReflectionFileTest extends \PHPUnit_Framework_TestCase
     public function testReflection()
     {
         //Disabling cache
-        $memory = m::mock(HippocampusInterface::class);
+        $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->andReturn([]);
         $memory->shouldReceive('saveData');
 

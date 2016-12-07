@@ -9,7 +9,7 @@
 namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\Postgres\Schemas\Commander;
@@ -61,23 +61,23 @@ class PostgresDriver extends Driver
      *
      * @invisible
      *
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
     protected $memory = null;
 
     /**
      * {@inheritdoc}
      *
-     * @param string               $name
-     * @param array                $connection
-     * @param FactoryInterface     $factory
-     * @param HippocampusInterface $memory
+     * @param string           $name
+     * @param array            $connection
+     * @param FactoryInterface $factory
+     * @param MemoryInterface  $memory
      */
     public function __construct(
         string $name,
         array $connection,
         FactoryInterface $factory = null,
-        HippocampusInterface $memory = null
+        MemoryInterface $memory = null
     ) {
         parent::__construct($name, $connection, $factory);
 
@@ -124,6 +124,7 @@ class PostgresDriver extends Driver
 
     /**
      * Get singular primary key associated with desired table. Used to emulate last insert id.
+     * Attention, driver stored primary keys in memory cache for performance reasons!
      *
      * @param string $table Fully specified table name, including postfix.
      *

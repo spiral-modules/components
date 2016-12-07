@@ -8,7 +8,7 @@
  */
 namespace Spiral\Translator;
 
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Translator\Exceptions\CatalogueException;
 use Symfony\Component\Translation\MessageCatalogue;
 
@@ -35,15 +35,15 @@ class Catalogue
     private $domains = [];
 
     /**
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
     protected $memory = null;
 
     /**
-     * @param string               $locale
-     * @param HippocampusInterface $memory
+     * @param string          $locale
+     * @param MemoryInterface $memory
      */
-    public function __construct($locale, HippocampusInterface $memory)
+    public function __construct($locale, MemoryInterface $memory)
     {
         $this->locale = $locale;
         $this->memory = $memory;

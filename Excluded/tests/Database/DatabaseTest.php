@@ -10,6 +10,7 @@ namespace Spiral\tests\Cases\Database;
 
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Entities\Table;
 use Spiral\Database\TableInterface;
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase
@@ -95,7 +96,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             $this->returnValue(true)
         );
 
-        $this->assertInstanceOf(TableInterface::class, $table = $database->table('table'));
+        $this->assertInstanceOf(Table::class, $table = $database->table('table'));
         $this->assertEquals('table', $table->getName());
         $this->assertEquals('prefix_table', $table->realName());
 

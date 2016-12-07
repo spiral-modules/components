@@ -22,7 +22,6 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
 use Spiral\Database\Query\PDOQuery;
 use Spiral\Database\ResultInterface;
-use Spiral\Database\TableInterface;
 
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver

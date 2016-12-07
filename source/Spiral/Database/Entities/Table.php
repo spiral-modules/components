@@ -12,7 +12,6 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Schemas\AbstractTable;
-use Spiral\Database\TableInterface;
 
 /**
  * Represent table level abstraction with simplified access to SelectQuery associated with such
@@ -23,7 +22,7 @@ use Spiral\Database\TableInterface;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class Table implements \JsonSerializable, \IteratorAggregate, TableInterface
+class Table implements \JsonSerializable, \IteratorAggregate
 {
     /**
      * @var string

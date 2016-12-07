@@ -107,20 +107,4 @@ interface DatabaseInterface
      * @return bool
      */
     public function hasTable(string $name): bool;
-
-    /**
-     * Get Table abstraction. Must return valid instance if table does not exists.
-     *
-     * @param string $name
-     *
-     * @return TableInterface
-     */
-    public function table(string $name);
-
-    /**
-     * Get every available database Table abstraction.
-     *
-     * @return TableInterface[]
-     */
-    public function getTables(): array;
 }

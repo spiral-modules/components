@@ -207,7 +207,7 @@ class Database implements DatabaseInterface, InjectableInterface
         string $query,
         array $parameters = [],
         array $args = []
-    ): \PDOStatement {
+    ): PDOResult {
         return $this->driver->query($query, $parameters, $args);
     }
 
@@ -225,7 +225,7 @@ class Database implements DatabaseInterface, InjectableInterface
     public function statement(string $query, array $parameters = []): \PDOStatement
     {
         return $this->driver->statement($query, $parameters);
-    }
+}
 
     /**
      * Execute statement or fetch result from cache and return cached query iterator.

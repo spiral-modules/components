@@ -9,6 +9,7 @@
 namespace Spiral\Database;
 
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Query\PDOResult;
 
 /**
  * DatabaseInterface is high level abstraction used to represent single database. You must always
@@ -56,7 +57,7 @@ interface DatabaseInterface
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      *
-     * @return \PDOStatement
+     * @return PDOResult
      *
      * @throws QueryException
      */

@@ -29,9 +29,9 @@ class Encrypter implements EncrypterInterface, InjectableInterface
     const INJECTOR = EncrypterManager::class;
 
     /**
-     * @var string
+     * @var Key
      */
-    private $key = '';
+    private $key = null;
 
     /**
      * Encrypter constructor.

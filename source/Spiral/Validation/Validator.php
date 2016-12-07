@@ -60,7 +60,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     private $config = null;
 
     /**
-     * @var array|\ArrayAccess
+     * @var array|\Traversable
      */
     private $data = [];
 
@@ -336,7 +336,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             array_unshift($arguments, $value);
 
             return call_user_func_array($condition, $arguments);
-        } catch (\ErrorException $e) {
+        } catch (\Error $e) {
             $condition = func_get_arg(2);
             if (is_array($condition)) {
                 if (is_object($condition[0])) {

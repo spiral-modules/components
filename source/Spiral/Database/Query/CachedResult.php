@@ -15,7 +15,7 @@ use Spiral\Database\Helpers\QueryInterpolator;
  * CacheResult is almost identical to QueryResult by it's functionality, but used to represent query
  * result stored in cache storage.
  */
-class CachedResult extends ArrayResult
+class CachedResult extends ArrayResult implements \JsonSerializable
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
@@ -82,6 +82,14 @@ class CachedResult extends ArrayResult
     {
         $this->store->delete($this->key);
         $this->key = null;
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->fetchAll();
     }
 
     /**

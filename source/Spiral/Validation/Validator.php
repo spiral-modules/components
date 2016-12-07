@@ -60,7 +60,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     private $config = null;
 
     /**
-     * @var array|\Traversable
+     * @var array|\Traversable|\ArrayAccess
      */
     private $data = [];
 
@@ -103,7 +103,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * {@inheritdoc}
      *
      * @param array              $rules     Validation rules.
-     * @param array|\Traversable $data      Data or model to be validated.
+     * @param array|\Traversable|\ArrayAccess $data      Data or model to be validated.
      * @param ValidatorConfig    $config    Saturated using shared container
      * @param ContainerInterface $container Saturated using shared container
      *

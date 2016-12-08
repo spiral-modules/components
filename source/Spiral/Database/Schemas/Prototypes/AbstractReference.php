@@ -12,7 +12,7 @@ use Spiral\Database\Schemas\ReferenceInterface;
  * Abstract foreign schema with read (see ReferenceInterface) and write abilities. Must be
  * implemented by driver to support DBMS specific syntax and creation rules.
  */
-abstract class AbstractReference implements ReferenceInterface
+abstract class AbstractReference extends AbstractElement implements ReferenceInterface
 {
 
 }

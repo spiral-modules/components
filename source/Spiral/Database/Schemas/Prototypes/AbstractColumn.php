@@ -6,6 +6,9 @@
  */
 namespace Spiral\Database\Schemas\Prototypes;
 
+use Spiral\Database\Entities\Driver;
+use Spiral\Database\Injections\Fragment;
+use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Schemas\ColumnInterface;
 
 /**
@@ -32,7 +35,472 @@ use Spiral\Database\Schemas\ColumnInterface;
  * @method AbstractColumn|$this longBinary()
  * @method AbstractColumn|$this json()
  */
-abstract class AbstractColumn implements ColumnInterface
+abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 {
+    /**
+     * PHP types for phpType() method.
+     */
+    const INT    = 'int';
+    const BOOL   = 'bool';
+    const STRING = 'string';
+    const FLOAT  = 'float';
 
+    /**
+     * Default datetime value.
+     */
+    const DATETIME_DEFAULT = '1970-01-01 00:00:00';
+
+    /**
+     * Default timestamp expression (driver specific).
+     */
+    const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+
+    /**
+     * Abstract type aliases (for consistency).
+     *
+     * @var array
+     */
+    private $aliases = [
+        'int'            => 'integer',
+        'bigint'         => 'bigInteger',
+        'incremental'    => 'primary',
+        'bigIncremental' => 'bigPrimary',
+        'bool'           => 'boolean',
+        'blob'           => 'binary',
+    ];
+
+    /**
+     * Association list between abstract types and native PHP types. Every non listed type will be
+     * converted into string.
+     *
+     * @invisible
+     *
+     * @var array
+     */
+    private $phpMapping = [
+        self::INT   => ['primary', 'bigPrimary', 'integer', 'tinyInteger', 'bigInteger'],
+        self::BOOL  => ['boolean'],
+        self::FLOAT => ['double', 'float', 'decimal'],
+    ];
+
+    /**
+     * Mapping between abstract type and internal database type with it's options. Multiple abstract
+     * types can map into one database type, this implementation allows us to equalize two columns
+     * if they have different abstract types but same database one. Must be declared by DBMS
+     * specific implementation.
+     *
+     * Example:
+     * integer => array('type' => 'int', 'size' => 1),
+     * boolean => array('type' => 'tinyint', 'size' => 1)
+     *
+     * @invisible
+     *
+     * @var array
+     */
+    protected $mapping = [
+        //Primary sequences
+        'primary'     => null,
+        'bigPrimary'  => null,
+
+        //Enum type (mapped via method)
+        'enum'        => null,
+
+        //Logical types
+        'boolean'     => null,
+
+        //Integer types (size can always be changed with size method), longInteger has method alias
+        //bigInteger
+        'integer'     => null,
+        'tinyInteger' => null,
+        'bigInteger'  => null,
+
+        //String with specified length (mapped via method)
+        'string'      => null,
+
+        //Generic types
+        'text'        => null,
+        'tinyText'    => null,
+        'longText'    => null,
+
+        //Real types
+        'double'      => null,
+        'float'       => null,
+
+        //Decimal type (mapped via method)
+        'decimal'     => null,
+
+        //Date and Time types
+        'datetime'    => null,
+        'date'        => null,
+        'time'        => null,
+        'timestamp'   => null,
+
+        //Binary types
+        'binary'      => null,
+        'tinyBinary'  => null,
+        'longBinary'  => null,
+
+        //Additional types
+        'json'        => null,
+    ];
+
+    /**
+     * Reverse mapping is responsible for generating abstact type based on database type and it's
+     * options. Multiple database types can be mapped into one abstract type.
+     *
+     * @invisible
+     *
+     * @var array
+     */
+    protected $reverseMapping = [
+        'primary'     => [],
+        'bigPrimary'  => [],
+        'enum'        => [],
+        'boolean'     => [],
+        'integer'     => [],
+        'tinyInteger' => [],
+        'bigInteger'  => [],
+        'string'      => [],
+        'text'        => [],
+        'tinyText'    => [],
+        'longText'    => [],
+        'double'      => [],
+        'float'       => [],
+        'decimal'     => [],
+        'datetime'    => [],
+        'date'        => [],
+        'time'        => [],
+        'timestamp'   => [],
+        'binary'      => [],
+        'tinyBinary'  => [],
+        'longBinary'  => [],
+        'json'        => [],
+    ];
+
+    /**
+     * DBMS specific column type.
+     *
+     * @var string
+     */
+    protected $type = '';
+
+    /**
+     * Indicates that column can contain null values.
+     *
+     * @var bool
+     */
+    protected $nullable = true;
+
+    /**
+     * Default column value, may not be applied to some datatypes (for example to primary keys),
+     * should follow type size and other options.
+     *
+     * @var mixed
+     */
+    protected $defaultValue = null;
+
+    /**
+     * Column type size, can have different meanings for different datatypes.
+     *
+     * @var int
+     */
+    protected $size = 0;
+
+    /**
+     * Precision of column, applied only for "decimal" type.
+     *
+     * @var int
+     */
+    protected $precision = 0;
+
+    /**
+     * Scale of column, applied only for "decimal" type.
+     *
+     * @var int
+     */
+    protected $scale = 0;
+
+    /**
+     * List of allowed enum values.
+     *
+     * @var array
+     */
+    protected $enumValues = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function phpType(): string
+    {
+        $schemaType = $this->abstractType();
+        foreach ($this->phpMapping as $phpType => $candidates) {
+            if (in_array($schemaType, $candidates)) {
+                return $phpType;
+            }
+        }
+
+        return self::STRING;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSize(): int
+    {
+        return $this->size;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPrecision(): int
+    {
+        return $this->precision;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getScale(): int
+    {
+        return $this->scale;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isNullable(): bool
+    {
+        return $this->nullable;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasDefaultValue(): bool
+    {
+        return !is_null($this->defaultValue);
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefaultValue()
+    {
+        if (!$this->hasDefaultValue()) {
+            return null;
+        }
+
+        if ($this->defaultValue instanceof FragmentInterface) {
+            return $this->defaultValue;
+        }
+
+        if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
+            //Driver specific now expression
+            if (strtolower($this->defaultValue) == strtolower(static::DATETIME_CURRENT)) {
+                return new Fragment($this->defaultValue);
+            }
+        }
+
+        switch ($this->phpType()) {
+            case 'int':
+                return (int)$this->defaultValue;
+            case 'float':
+                return (float)$this->defaultValue;
+            case 'bool':
+                if (strtolower($this->defaultValue) == 'false') {
+                    return false;
+                }
+
+                return (bool)$this->defaultValue;
+        }
+
+        return (string)$this->defaultValue;
+    }
+
+    /**
+     * Get every associated column constraint names.
+     *
+     * @return array
+     */
+    public function getConstraints(): array
+    {
+        return [];
+    }
+
+    /**
+     * Get allowed enum values.
+     *
+     * @return array
+     */
+    public function getEnumValues(): array
+    {
+        return $this->enumValues;
+    }
+
+    /**
+     * DBMS specific reverse mapping must map database specific type into limited set of abstract
+     * types.
+     *
+     * @return string
+     */
+    public function abstractType(): string
+    {
+        foreach ($this->reverseMapping as $type => $candidates) {
+            foreach ($candidates as $candidate) {
+                if (is_string($candidate)) {
+                    if (strtolower($candidate) == strtolower($this->type)) {
+                        return $type;
+                    }
+
+                    continue;
+                }
+
+                if (strtolower($candidate['type']) != strtolower($this->type)) {
+                    continue;
+                }
+
+                foreach ($candidate as $option => $required) {
+                    if ($option == 'type') {
+                        continue;
+                    }
+
+                    if ($this->{$option} != $required) {
+                        continue 2;
+                    }
+                }
+
+                return $type;
+            }
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Must compare two instances of AbstractColumn.
+     *
+     * @param ColumnInterface $initial
+     *
+     * @return bool
+     */
+    public function compare(ColumnInterface $initial): bool
+    {
+        $normalized = clone $initial;
+
+        if ($this == $normalized) {
+            return true;
+        }
+
+        $columnVars = get_object_vars($this);
+        $dbColumnVars = get_object_vars($normalized);
+
+        $difference = [];
+        foreach ($columnVars as $name => $value) {
+            if ($name == 'defaultValue') {
+
+                //Default values has to compared using type-casted value
+                if ($this->getDefaultValue() != $initial->getDefaultValue()) {
+                    $difference[] = $name;
+                }
+
+                continue;
+            }
+
+            if ($value != $dbColumnVars[$name]) {
+                $difference[] = $name;
+            }
+        }
+
+        return empty($difference);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function sqlStatement(Driver $driver): string
+    {
+        $statement = [$driver->identifier($this->name), $this->type];
+
+        if ($this->abstractType() == 'enum') {
+            //Enum specific column options
+            if (!empty($enumDefinition = $this->prepareEnum($driver))) {
+                $statement[] = $enumDefinition;
+            }
+        } elseif (!empty($this->precision)) {
+            $statement[] = "({$this->precision}, {$this->scale})";
+        } elseif (!empty($this->size)) {
+            $statement[] = "({$this->size})";
+        }
+
+        $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
+
+        if ($this->defaultValue !== null) {
+            $statement[] = "DEFAULT {$this->prepareDefault($driver)}";
+        }
+
+        return implode(' ', $statement);
+    }
+
+    /**
+     * Get database specific enum type definition options.
+     *
+     * @param Driver $driver
+     *
+     * @return string.
+     */
+    protected function prepareEnum(Driver $driver): string
+    {
+        $enumValues = [];
+        foreach ($this->enumValues as $value) {
+            $enumValues[] = $driver->quote($value);
+        }
+
+        if (!empty($enumValues)) {
+            return '(' . implode(', ', $enumValues) . ')';
+        }
+
+        return '';
+    }
+
+    /**
+     * Must return driver specific default value.
+     *
+     * @param Driver $driver
+     *
+     * @return string
+     */
+    protected function prepareDefault(Driver $driver): string
+    {
+        if (($defaultValue = $this->getDefaultValue()) === null) {
+            return 'NULL';
+        }
+
+        if ($defaultValue instanceof FragmentInterface) {
+            return $defaultValue->sqlStatement();
+        }
+
+        if ($this->phpType() == 'bool') {
+            return $defaultValue ? 'TRUE' : 'FALSE';
+        }
+
+        if ($this->phpType() == 'float') {
+            return sprintf('%F', $defaultValue);
+        }
+
+        if ($this->phpType() == 'int') {
+            return $defaultValue;
+        }
+
+        return $driver->quote($defaultValue);
+    }
 }

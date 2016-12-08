@@ -43,16 +43,6 @@ abstract class Driver extends PDODriver
     const QUERY_COMPILER = '';
 
     /**
-     * Default datetime value.
-     */
-    const DEFAULT_DATETIME = '1970-01-01 00:00:00';
-
-    /**
-     * Default timestamp expression.
-     */
-    const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
-
-    /**
      * Associated cache store, if any.
      *
      * @var StoreInterface
@@ -139,16 +129,6 @@ abstract class Driver extends PDODriver
     }
 
     /**
-     * Current timestamp expression value.
-     *
-     * @return string
-     */
-    public function nowExpression(): string
-    {
-        return static::TIMESTAMP_NOW;
-    }
-
-    /**
      * Check if table exists.
      *
      * @param string $name
@@ -183,15 +163,10 @@ abstract class Driver extends PDODriver
      */
     public function tableSchema(string $table, string $prefix = ''): AbstractTable
     {
-//        return $this->factory->make(
-//            static::SCHEMA_TABLE,
-//            [
-//                'driver'    => $this,
-//                'name'      => $table,
-//                'prefix'    => $prefix,
-//                'commander' => $this->factory->make(static::COMMANDER, ['driver' => $this]),
-//            ]
-//        );
+        return $this->factory->make(
+            static::TABLE_SCHEMA_CLASS,
+            ['driver' => $this, 'name' => $table, 'prefix' => $prefix]
+        );
     }
 
     /**

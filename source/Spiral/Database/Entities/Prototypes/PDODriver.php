@@ -101,8 +101,10 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
         $this->defaultOptions = $options + $this->defaultOptions;
 
-        //PDO connection options has to be stored under key "options" of config
-        $this->options = $options['options'] + $this->options;
+        if (!empty($options['options'])) {
+            //PDO connection options has to be stored under key "options" of config
+            $this->options = $options['options'] + $this->options;
+        }
     }
 
     /**
@@ -261,6 +263,19 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function identifier(string $identifier): string
     {
         return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
+    }
+
+    /**
+     * Quote value using PDO.
+     *
+     * @param mixed $value
+     * @param int   $type Parameter type.
+     *
+     * @return string
+     */
+    public function quote($value, int $type = PDO::PARAM_STR): string
+    {
+        return $this->getPDO()->quote($value);
     }
 
     /**

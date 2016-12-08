@@ -6,10 +6,12 @@
  */
 namespace Spiral\Database\Schemas\Prototypes;
 
+use Spiral\Database\Entities\Driver;
+
 /**
  * Aggregates common functionality for columns, indexes and foreign key schemas.
  */
-class AbstractElement
+abstract class AbstractElement
 {
     /**
      * Element name.
@@ -68,4 +70,13 @@ class AbstractElement
     {
         return $this->name;
     }
+
+    /**
+     * Element creation/definition syntax (specific to parent driver).
+     *
+     * @param Driver $driver
+     *
+     * @return string
+     */
+    abstract public function sqlStatement(Driver $driver): string;
 }

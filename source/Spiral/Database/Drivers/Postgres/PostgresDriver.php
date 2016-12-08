@@ -44,7 +44,7 @@ class PostgresDriver extends Driver
     /**
      * Default timestamp expression.
      */
-    const TIMESTAMP_NOW = 'now()';
+    const DATETIME_NOW = 'now()';
 
     /**
      * Cached list of primary keys associated with their table names. Used by InsertBuilder to
@@ -52,7 +52,7 @@ class PostgresDriver extends Driver
      *
      * @var array
      */
-    private $primaryKeys = [];
+    //private $primaryKeys = [];
 
     /**
      * {@inheritdoc}

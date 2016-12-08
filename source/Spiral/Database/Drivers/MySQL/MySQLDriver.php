@@ -43,7 +43,7 @@ class MySQLDriver extends Driver
     /**
      * Default timestamp expression.
      */
-    const TIMESTAMP_NOW = 'CURRENT_TIMESTAMP';
+    const DATETIME_NOW = 'CURRENT_TIMESTAMP';
 
     /**
      * {@inheritdoc}

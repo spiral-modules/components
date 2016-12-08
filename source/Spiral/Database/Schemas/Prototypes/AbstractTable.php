@@ -14,6 +14,7 @@ use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\ColumnInterface;
 use Spiral\Database\Schemas\IndexInterface;
 use Spiral\Database\Schemas\ReferenceInterface;
+use Spiral\Database\Schemas\StateComparator;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Database\Schemas\TableState;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -106,7 +107,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
         if ($this->exists) {
             //Initiating table schema
-            $this->intiSchema($this->initialState);
+            $this->initSchema($this->initialState);
         }
 
         $this->setState($this->initialState);
@@ -120,6 +121,24 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function getDriver(): Driver
     {
         return $this->driver;
+    }
+
+    /**
+     * @return StateComparator
+     */
+    public function getComparator(): StateComparator
+    {
+        return new StateComparator($this->initialState, $this->currentState);
+    }
+
+    /**
+     * Check if table schema has been modified since synchronization.
+     *
+     * @return bool
+     */
+    protected function hasChanges(): bool
+    {
+        return $this->getComparator()->hasChanges();
     }
 
     /**
@@ -202,6 +221,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
     /**
      * {@inheritdoc}
+     *
+     * @return ColumnInterface[]|AbstractColumn[]
      */
     public function getColumns(): array
     {
@@ -218,6 +239,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
     /**
      * {@inheritdoc}
+     *
+     * @return IndexInterface[]|AbstractIndex[]
      */
     public function getIndexes(): array
     {
@@ -234,6 +257,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
     /**
      * {@inheritdoc}
+     *
+     * @return ReferenceInterface[]|AbstractReference[]
      */
     public function getForeigns(): array
     {
@@ -266,7 +291,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function setState(TableState $state = null): AbstractTable
     {
-        $this->currentState = new TableState($this->getName());
+        $this->currentState = new TableState($this->initialState->getName());
 
         if (!empty($state)) {
             $this->currentState->setName($state->getName());
@@ -293,7 +318,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      *
      * @param TableState $state
      */
-    protected function intiSchema(TableState $state)
+    protected function initSchema(TableState $state)
     {
         foreach ($this->fetchColumns() as $column) {
             $state->registerColumn($column);
@@ -306,6 +331,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         foreach ($this->fetchReferences() as $foreign) {
             $state->registerIndex($foreign);
         }
+
+        $state->setPrimaryKeys($this->fetchPrimaryKeys());
 
         //DBMS specific initialization can be placed here
     }
@@ -332,11 +359,32 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     abstract protected function fetchReferences(): array;
 
     /**
+     * Fetch names of primary keys from table.
+     *
+     * @return array
+     */
+    abstract protected function fetchPrimaryKeys(): array;
+
+    /**
      * @return AbstractColumn|string
      */
     public function __toString(): string
     {
         return $this->getName();
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'name'        => $this->getName(),
+            'primaryKeys' => $this->getPrimaryKeys(),
+            'columns'     => array_values($this->getColumns()),
+            'indexes'     => array_values($this->getIndexes()),
+            'references'  => array_values($this->getForeigns()),
+        ];
     }
 
     /**

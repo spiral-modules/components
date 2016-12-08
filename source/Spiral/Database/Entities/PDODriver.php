@@ -18,7 +18,7 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Query\PDOResult;
+use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 

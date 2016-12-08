@@ -16,7 +16,7 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Query\CachedResult;
+use Spiral\Database\Entities\Query\CachedResult;
 //use Spiral\Database\Schemas\AbstractTable;
 
 /**

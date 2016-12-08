@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Query;
+namespace Spiral\Database\Entities\Query;
 
 use Spiral\Cache\StoreInterface;
 use Spiral\Database\Helpers\QueryInterpolator;

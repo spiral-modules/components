@@ -50,7 +50,19 @@ class TableSchema extends AbstractTable
      */
     protected function fetchIndexes(): array
     {
-        return [];
+        $query = "PRAGMA index_list({$this->driver->quote($this->getName())})";
+
+        $result = [];
+        foreach ($this->driver->query($query) as $schema) {
+            //Index schema and all related columns
+            $result[] = IndexSchema::createInstance(
+                $this->getName(),
+                $schema,
+                $this->driver->query("PRAGMA INDEX_INFO({$this->driver->quote($schema['id'])})")->fetchAll()
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -58,7 +70,14 @@ class TableSchema extends AbstractTable
      */
     protected function fetchReferences(): array
     {
-        return [];
+        $query = "PRAGMA foreign_key_list({$this->driver->quote($this->getName())})";
+
+        $result = [];
+        foreach ($this->driver->query($query) as $schema) {
+            $result[] = ReferenceSchema::createInstance($this->getName(), $schema);
+        }
+
+        return $result;
     }
 
     /**

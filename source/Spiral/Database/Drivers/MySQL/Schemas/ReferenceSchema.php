@@ -11,7 +11,10 @@ use Spiral\Database\Schemas\Prototypes\AbstractReference;
 class ReferenceSchema extends AbstractReference
 {
     /**
-     * {@inheritdoc}
+     * @param string $table
+     * @param array  $schema
+     *
+     * @return ReferenceSchema
      */
     static public function createInstance(string $table, array $schema): self
     {

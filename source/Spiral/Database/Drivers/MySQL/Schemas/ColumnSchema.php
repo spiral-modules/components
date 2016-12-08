@@ -159,8 +159,6 @@ class ColumnSchema extends AbstractColumn
     }
 
     /**
-     * Driver specific column initialization.
-     *
      * @param string $table Table name.
      * @param array  $schema
      *

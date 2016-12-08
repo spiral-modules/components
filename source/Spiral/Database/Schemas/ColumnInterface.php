@@ -75,4 +75,13 @@ interface ColumnInterface
      * @return mixed
      */
     public function getDefaultValue();
+
+    /**
+     * Must return true if given schema are identical to current one.
+     *
+     * @param self $initial
+     *
+     * @return bool True when identical.
+     */
+    public function compare(self $initial): bool;
 }

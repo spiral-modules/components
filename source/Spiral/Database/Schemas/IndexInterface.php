@@ -33,4 +33,13 @@ interface IndexInterface
      * @return array
      */
     public function getColumns(): array;
+
+    /**
+     * Must return true if given schema are identical to current one.
+     *
+     * @param self $initial
+     *
+     * @return bool True when identical.
+     */
+    public function compare(self $initial): bool;
 }

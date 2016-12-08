@@ -30,7 +30,7 @@ abstract class Driver extends PDODriver
     /**
      * Schema table class.
      */
-    const SCHEMA_TABLE = '';
+    const TABLE_SCHEMA_CLASS = '';
 
     /**
      * Commander used to execute commands. :).

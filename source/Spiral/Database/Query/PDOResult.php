@@ -37,19 +37,19 @@ class PDOResult extends PDOStatement implements \JsonSerializable
     /**
      * Bind a column value to a PHP variable. Aliased to bindParam.
      *
-     * @param int|string $fieldID Column number (0 - first column)
+     * @param int|string $columnID Column number (0 - first column)
      * @param mixed      $variable
      *
-     * @return self
+     * @return self|$this
      */
-    public function bind($fieldID, &$variable): PDOResult
+    public function bind($columnID, &$variable): PDOResult
     {
-        if (is_numeric($fieldID)) {
+        if (is_numeric($columnID)) {
             //PDO columns are 1-indexed
-            $fieldID = $fieldID + 1;
+            $columnID = $columnID + 1;
         }
 
-        $this->bindColumn($fieldID, $variable);
+        $this->bindColumn($columnID, $variable);
 
         return $this;
     }

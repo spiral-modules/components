@@ -71,34 +71,36 @@ class ArrayResult extends \ArrayIterator
     /**
      * Bind a column value to a PHP variable.
      *
-     * @param int|string $fieldID Column number (0 - first column)
+     * @param int|string $columnID Column number (0 - first column)
      * @param mixed      $variable
      *
-     * @return self
+     * @return self|$this
+     *
+     * @throws ResultException
      */
-    public function bind($fieldID, &$variable): ArrayResult
+    public function bind($columnID, &$variable): ArrayResult
     {
         if ($this->count() == 0) {
             return $this;
         }
 
-        if (is_numeric($fieldID)) {
+        if (is_numeric($columnID)) {
             //Getting column number
             foreach ($this->columns as $name => $index) {
-                if ($index == $fieldID - 1) {
+                if ($index == $columnID - 1) {
                     $this->bindings[$name] = &$variable;
 
                     return $this;
                 }
             }
 
-            throw new ResultException("No such column #{$fieldID}");
+            throw new ResultException("No such column #{$columnID}");
         } else {
-            if (!isset($this->columns[$fieldID])) {
-                throw new ResultException("No such column '{$fieldID}'");
+            if (!isset($this->columns[$columnID])) {
+                throw new ResultException("No such column '{$columnID}'");
             }
 
-            $this->bindings[$fieldID] = &$variable;
+            $this->bindings[$columnID] = &$variable;
         }
 
         return $this;

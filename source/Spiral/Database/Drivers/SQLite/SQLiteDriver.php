@@ -29,11 +29,6 @@ class SQLiteDriver extends Driver
     const TABLE_SCHEMA_CLASS = TableSchema::class;
 
     /**
-     * Commander used to execute commands. :).
-     */
-    // const COMMANDER = Commander::class;
-
-    /**
      * Query compiler class.
      */
     const QUERY_COMPILER = QueryCompiler::class;

@@ -32,11 +32,6 @@ class PostgresDriver extends Driver
     //const SCHEMA_TABLE = TableSchema::class;
 
     /**
-     * Commander used to execute commands. :).
-     */
-    //const COMMANDER = Commander::class;
-
-    /**
      * Query compiler class.
      */
     const QUERY_COMPILER = QueryCompiler::class;
@@ -138,7 +133,7 @@ class PostgresDriver extends Driver
     public function insertBuilder(string $prefix, array $parameters = []): InsertQuery
     {
         return $this->factory->make(
-            PostgresInsertQuery::class,
+            InsertQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix),] + $parameters
         );
     }

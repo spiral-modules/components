@@ -10,10 +10,8 @@ namespace Spiral\Database\Drivers\MySQL;
 
 use PDO;
 use Spiral\Database\DatabaseInterface;
+use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
-
-//use Spiral\Database\Drivers\MySQL\Schemas\Commander;
-//use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
 
 /**
  * Talks to mysql databases.
@@ -28,12 +26,7 @@ class MySQLDriver extends Driver
     /**
      * Driver schemas.
      */
-    // const SCHEMA_TABLE = TableSchema::class;
-
-    /**
-     * Commander used to execute commands. :).
-     */
-    // const COMMANDER = Commander::class;
+    const TABLE_SCHEMA_CLASS = TableSchema::class;
 
     /**
      * Query compiler class.

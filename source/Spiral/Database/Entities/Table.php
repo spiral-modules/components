@@ -11,7 +11,8 @@ namespace Spiral\Database\Entities;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-//use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Database\Schemas\TableInterface;
 
 /**
  * Represent table level abstraction with simplified access to SelectQuery associated with such
@@ -65,18 +66,15 @@ class Table implements \JsonSerializable, \IteratorAggregate
         return $this->database;
     }
 
-//    /**
-//     * {@inheritdoc}
-//     *
-//     * @return AbstractTable
-//     */
-//    public function getSchema(): AbstractTable
-//    {
-//        return $this->database->getDriver()->tableSchema(
-//            $this->realName(),
-//            $this->database->getPrefix()
-//        );
-//    }
+    /**
+     * {@inheritdoc}
+     *
+     * @return TableInterface|AbstractTable
+     */
+    public function getSchema(): TableInterface
+    {
+        return $this->database->getDriver()->tableSchema($this->name, $this->database->getPrefix());
+    }
 
     /**
      * {@inheritdoc}
@@ -91,7 +89,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
      *
      * @return string
      */
-    public function realName(): string
+    public function fullName(): string
     {
         return $this->database->getPrefix() . $this->name;
     }
@@ -111,23 +109,23 @@ class Table implements \JsonSerializable, \IteratorAggregate
      */
     public function truncateData()
     {
-        $this->database->getDriver()->truncateData($this->realName());
+        $this->database->getDriver()->truncateData($this->fullName());
     }
 
-//    /**
-//     * Get list of column names associated with their abstract types.
-//     *
-//     * @return array
-//     */
-//    public function getColumns(): array
-//    {
-//        $columns = [];
-//        foreach ($this->getSchema()->getColumns() as $column) {
-//            $columns[$column->getName()] = $column->abstractType();
-//        }
-//
-//        return $columns;
-//    }
+    /**
+     * Get list of column names associated with their abstract types.
+     *
+     * @return array
+     */
+    public function getColumns(): array
+    {
+        $columns = [];
+        foreach ($this->getSchema()->getColumns() as $column) {
+            $columns[$column->getName()] = $column->abstractType();
+        }
+
+        return $columns;
+    }
 
     /**
      * {@inheritdoc}

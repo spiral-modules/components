@@ -76,7 +76,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(Table::class, $table = $database->table('table'));
         $this->assertEquals('table', $table->getName());
-        $this->assertEquals('prefix_table', $table->realName());
+        $this->assertEquals('prefix_table', $table->fullName());
 
         $this->assertTrue($table->exists());
     }

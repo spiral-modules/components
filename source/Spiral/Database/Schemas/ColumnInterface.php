@@ -28,6 +28,14 @@ interface ColumnInterface
     public function getType(): string;
 
     /**
+     * DBMS specific reverse mapping must map database specific type into limited set of abstract
+     * types. Value depends on driver implementation.
+     *
+     * @return string
+     */
+    public function abstractType(): string;
+
+    /**
      * Must return PHP type column value can be better mapped into: int, bool, string or float.
      *
      * @return string

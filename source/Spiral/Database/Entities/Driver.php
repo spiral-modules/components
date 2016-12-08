@@ -15,10 +15,10 @@ use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Prototypes\PDODriver;
+use Spiral\Database\Entities\Query\CachedResult;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Entities\Query\CachedResult;
-//use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 /**
  * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to
@@ -171,18 +171,18 @@ abstract class Driver extends PDODriver
      */
     abstract public function tableNames(): array;
 
-//    /**
-//     * Get Driver specific AbstractTable implementation.
-//     *
-//     * @param string $table  Table name without prefix included.
-//     * @param string $prefix Database specific table prefix, this parameter is not required,
-//     *                       but if provided all
-//     *                       foreign keys will be created using it.
-//     *
-//     * @return AbstractTable
-//     */
-//    public function tableSchema(string $table, string $prefix = ''): AbstractTable
-//    {
+    /**
+     * Get Driver specific AbstractTable implementation.
+     *
+     * @param string $table  Table name without prefix included.
+     * @param string $prefix Database specific table prefix, this parameter is not required,
+     *                       but if provided all
+     *                       foreign keys will be created using it.
+     *
+     * @return AbstractTable
+     */
+    public function tableSchema(string $table, string $prefix = ''): AbstractTable
+    {
 //        return $this->factory->make(
 //            static::SCHEMA_TABLE,
 //            [
@@ -192,7 +192,7 @@ abstract class Driver extends PDODriver
 //                'commander' => $this->factory->make(static::COMMANDER, ['driver' => $this]),
 //            ]
 //        );
-//    }
+    }
 
     /**
      * Get instance of Driver specific QueryCompiler.

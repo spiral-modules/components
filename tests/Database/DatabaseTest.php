@@ -8,11 +8,11 @@
 
 namespace Spiral\tests\Cases\Database;
 
+use Mockery as m;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Database\Entities\Table;
-use Mockery as m;
-use Spiral\Database\Query\PDOResult;
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase
 {
@@ -27,7 +27,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
         $driver->method('getType')->will($this->returnValue('test-driver'));
 
-        $database = new Database('test', 'prefix_', $driver);
+        $database = new Database($driver, 'test', 'prefix_');
 
         $this->assertEquals('test', $database->getName());
         $this->assertEquals($driver, $database->getDriver());
@@ -47,7 +47,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
         $driver->expects($this->once())->method('query')->with('test query')
             ->willReturn(m::mock(PDOResult::class));
 
-        $database = new Database('test', 'prefix_', $driver);
+        $database = new Database($driver, 'test', 'prefix_');
         $database->query('test query');
     }
 
@@ -63,7 +63,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
         $driver->expects($this->once())->method('statement')->with('test statement',
             [1, 2, 3])->willReturn(m::mock(PDOResult::class));
 
-        $database = new Database('test', 'prefix_', $driver);
+        $database = new Database($driver, 'test', 'prefix_');
         $database->statement('test statement', [1, 2, 3]);
     }
 
@@ -80,7 +80,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             $this->returnValue(true)
         );
 
-        $database = new Database('test', 'prefix_', $driver);
+        $database = new Database($driver, 'test', 'prefix_');
         $this->assertTrue($database->hasTable('table'));
     }
 
@@ -93,7 +93,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $database = new Database('test', 'prefix_', $driver);
+        $database = new Database($driver, 'test', 'prefix_');
 
         $driver->expects($this->once())->method('hasTable')->with('prefix_table')->will(
             $this->returnValue(true)

@@ -44,7 +44,7 @@ class PostgresDriver extends Driver
      *
      * @var array
      */
-    //private $primaryKeys = [];
+    private $primaryKeys = [];
 
     /**
      * {@inheritdoc}
@@ -91,35 +91,34 @@ class PostgresDriver extends Driver
      */
     public function getPrimary(string $prefix, string $table): string
     {
-//        if (!empty($this->cacheStore) && empty($this->primaryKeys)) {
-//            $this->primaryKeys = (array)$this->cacheStore->get($this->getSource() . '/keys');
-//        }
-//
-//        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
-//            return $this->primaryKeys[$table];
-//        }
-//
-//        if (!$this->hasTable($table)) {
-//            throw new DriverException(
-//                "Unable to fetch table primary key, no such table '{$table}' exists"
-//            );
-//        }
-//
-//        $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
-//        if (count($this->primaryKeys[$table]) === 1) {
-//            //We do support only single primary key
-//            $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
-//        } else {
-//            $this->primaryKeys[$table] = null;
-//        }
-//
-//        //Caching
-//        if (!empty($this->memory)) {
-//            $this->cacheStore->forever($this->getSource() . '/keys', $this->primaryKeys);
-//        }
-//
-//        return $this->primaryKeys[$table];
-        return '';
+        if (!empty($this->cacheStore) && empty($this->primaryKeys)) {
+            $this->primaryKeys = (array)$this->cacheStore->get($this->getSource() . '/keys');
+        }
+
+        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
+            return $this->primaryKeys[$table];
+        }
+
+        if (!$this->hasTable($prefix . $table)) {
+            throw new DriverException(
+                "Unable to fetch table primary key, no such table '{$prefix}{$table}' exists"
+            );
+        }
+
+        $this->primaryKeys[$table] = $this->tableSchema($table, $prefix)->getPrimaryKeys();
+        if (count($this->primaryKeys[$table]) === 1) {
+            //We do support only single primary key
+            $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
+        } else {
+            $this->primaryKeys[$table] = null;
+        }
+
+        //Caching
+        if (!empty($this->memory)) {
+            $this->cacheStore->forever($this->getSource() . '/keys', $this->primaryKeys);
+        }
+
+        return $this->primaryKeys[$table];
     }
 
     /**

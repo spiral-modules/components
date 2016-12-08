@@ -17,7 +17,7 @@ use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Schemas\AbstractTable;
+//use Spiral\Database\Schemas\AbstractTable;
 
 /**
  * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to
@@ -170,28 +170,28 @@ abstract class Driver extends PDODriver
      */
     abstract public function tableNames(): array;
 
-    /**
-     * Get Driver specific AbstractTable implementation.
-     *
-     * @param string $table  Table name without prefix included.
-     * @param string $prefix Database specific table prefix, this parameter is not required,
-     *                       but if provided all
-     *                       foreign keys will be created using it.
-     *
-     * @return AbstractTable
-     */
-    public function tableSchema(string $table, string $prefix = ''): AbstractTable
-    {
-        return $this->factory->make(
-            static::SCHEMA_TABLE,
-            [
-                'driver'    => $this,
-                'name'      => $table,
-                'prefix'    => $prefix,
-                'commander' => $this->factory->make(static::COMMANDER, ['driver' => $this]),
-            ]
-        );
-    }
+//    /**
+//     * Get Driver specific AbstractTable implementation.
+//     *
+//     * @param string $table  Table name without prefix included.
+//     * @param string $prefix Database specific table prefix, this parameter is not required,
+//     *                       but if provided all
+//     *                       foreign keys will be created using it.
+//     *
+//     * @return AbstractTable
+//     */
+//    public function tableSchema(string $table, string $prefix = ''): AbstractTable
+//    {
+//        return $this->factory->make(
+//            static::SCHEMA_TABLE,
+//            [
+//                'driver'    => $this,
+//                'name'      => $table,
+//                'prefix'    => $prefix,
+//                'commander' => $this->factory->make(static::COMMANDER, ['driver' => $this]),
+//            ]
+//        );
+//    }
 
     /**
      * Get instance of Driver specific QueryCompiler.

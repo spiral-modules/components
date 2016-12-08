@@ -11,10 +11,9 @@ namespace Spiral\Database\Exceptions;
 /**
  * Query specific exception (bad parameters, database failure).
  *
- * @todo change hierarchy?
  * @todo add more sub exceptions
  */
-class QueryException extends DBALException
+class QueryException extends DatabaseException
 {
     /**
      * {@inheritdoc}

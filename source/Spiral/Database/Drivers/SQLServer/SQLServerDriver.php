@@ -10,8 +10,8 @@ namespace Spiral\Database\Drivers\SQLServer;
 
 use PDO;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLServer\Schemas\Commander;
-use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
+//use Spiral\Database\Drivers\SQLServer\Schemas\Commander;
+//use Spiral\Database\Drivers\SQLServer\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 
 /**
@@ -29,12 +29,12 @@ class SQLServerDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE = TableSchema::class;
+    //const SCHEMA_TABLE = TableSchema::class;
 
     /**
      * Commander used to execute commands. :).
      */
-    const COMMANDER = Commander::class;
+    //const COMMANDER = Commander::class;
 
     /**
      * Query result class.

@@ -10,10 +10,11 @@ namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
-//use Spiral\Database\Drivers\Postgres\Schemas\Commander;
-//use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
+
+//use Spiral\Database\Drivers\Postgres\Schemas\Commander;
+//use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
 
 /**
  * Talks to postgres databases.
@@ -58,11 +59,9 @@ class PostgresDriver extends Driver
      */
     public function hasTable(string $name): bool
     {
-        return (bool)$this->query(
-            'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?',
-            [$name]
-        )->fetchColumn();
+        $query = 'SELECT "table_name" FROM "information_schema"."tables" WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?';
+
+        return (bool)$this->query($query, [$name])->fetchColumn();
     }
 
     /**
@@ -78,8 +77,7 @@ class PostgresDriver extends Driver
      */
     public function tableNames(): array
     {
-        $query = 'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\'';
+        $query = 'SELECT "table_name" FROM "information_schema"."tables" WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\'';
 
         $tables = [];
         foreach ($this->query($query) as $row) {
@@ -89,46 +87,46 @@ class PostgresDriver extends Driver
         return $tables;
     }
 
-    /**
-     * Get singular primary key associated with desired table. Used to emulate last insert id.
-     *
-     * @param string $table Fully specified table name, including postfix.
-     *
-     * @return string|null
-     *
-     * @throws DriverException
-     */
-    public function getPrimary(string $table)
-    {
-        if (!empty($this->cacheStore) && empty($this->primaryKeys)) {
-            $this->primaryKeys = (array)$this->cacheStore->get($this->getSource() . '/keys');
-        }
-
-        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
-            return $this->primaryKeys[$table];
-        }
-
-        if (!$this->hasTable($table)) {
-            throw new DriverException(
-                "Unable to fetch table primary key, no such table '{$table}' exists"
-            );
-        }
-
-        $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
-        if (count($this->primaryKeys[$table]) === 1) {
-            //We do support only single primary key
-            $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
-        } else {
-            $this->primaryKeys[$table] = null;
-        }
-
-        //Caching
-        if (!empty($this->memory)) {
-            $this->cacheStore->forever($this->getSource() . '/keys', $this->primaryKeys);
-        }
-
-        return $this->primaryKeys[$table];
-    }
+//    /**
+//     * Get singular primary key associated with desired table. Used to emulate last insert id.
+//     *
+//     * @param string $table Fully specified table name, including postfix.
+//     *
+//     * @return string|null
+//     *
+//     * @throws DriverException
+//     */
+//    public function getPrimary(string $table)
+//    {
+//        if (!empty($this->cacheStore) && empty($this->primaryKeys)) {
+//            $this->primaryKeys = (array)$this->cacheStore->get($this->getSource() . '/keys');
+//        }
+//
+//        if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
+//            return $this->primaryKeys[$table];
+//        }
+//
+//        if (!$this->hasTable($table)) {
+//            throw new DriverException(
+//                "Unable to fetch table primary key, no such table '{$table}' exists"
+//            );
+//        }
+//
+//        $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
+//        if (count($this->primaryKeys[$table]) === 1) {
+//            //We do support only single primary key
+//            $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
+//        } else {
+//            $this->primaryKeys[$table] = null;
+//        }
+//
+//        //Caching
+//        if (!empty($this->memory)) {
+//            $this->cacheStore->forever($this->getSource() . '/keys', $this->primaryKeys);
+//        }
+//
+//        return $this->primaryKeys[$table];
+//    }
 
     /**
      * {@inheritdoc}

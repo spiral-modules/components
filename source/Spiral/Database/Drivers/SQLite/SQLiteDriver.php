@@ -9,10 +9,11 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Database\DatabaseInterface;
-//use Spiral\Database\Drivers\SQLite\Schemas\Commander;
-//use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
+
+//use Spiral\Database\Drivers\SQLite\Schemas\Commander;
+//use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
 
 /**
  * Talks to sqlite databases.
@@ -32,7 +33,7 @@ class SQLiteDriver extends Driver
     /**
      * Commander used to execute commands. :).
      */
-   // const COMMANDER = Commander::class;
+    // const COMMANDER = Commander::class;
 
     /**
      * Query compiler class.
@@ -62,10 +63,9 @@ class SQLiteDriver extends Driver
      */
     public function hasTable(string $name): bool
     {
-        return (bool)$this->query(
-            'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?',
-            [$name]
-        )->fetchColumn();
+        $query = "SELECT 'sql' FROM sqlite_master WHERE 'type' = 'table' and name = ?";
+
+        return (bool)$this->query($query, [$name])->fetchColumn();
     }
 
     /**
@@ -82,7 +82,7 @@ class SQLiteDriver extends Driver
     public function tableNames(): array
     {
         $tables = [];
-        foreach ($this->query("SELECT * FROM sqlite_master WHERE type = 'table'") as $table) {
+        foreach ($this->query("SELECT * FROM sqlite_master WHERE 'type' = 'table'") as $table) {
             if ($table['name'] != 'sqlite_sequence') {
                 $tables[] = $table['name'];
             }

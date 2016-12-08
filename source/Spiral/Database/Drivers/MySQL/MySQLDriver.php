@@ -10,9 +10,10 @@ namespace Spiral\Database\Drivers\MySQL;
 
 use PDO;
 use Spiral\Database\DatabaseInterface;
+use Spiral\Database\Entities\Driver;
+
 //use Spiral\Database\Drivers\MySQL\Schemas\Commander;
 //use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
-use Spiral\Database\Entities\Driver;
 
 /**
  * Talks to mysql databases.
@@ -27,12 +28,12 @@ class MySQLDriver extends Driver
     /**
      * Driver schemas.
      */
-   // const SCHEMA_TABLE = TableSchema::class;
+    // const SCHEMA_TABLE = TableSchema::class;
 
     /**
      * Commander used to execute commands. :).
      */
-   // const COMMANDER = Commander::class;
+    // const COMMANDER = Commander::class;
 
     /**
      * Query compiler class.
@@ -66,11 +67,9 @@ class MySQLDriver extends Driver
      */
     public function hasTable(string $name): bool
     {
+        $query = "SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?";
 
-        return (bool)$this->query(
-            'SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?',
-            [$this->getSource(), $name]
-        )->fetchColumn();
+        return (bool)$this->query($query, [$this->getSource(), $name])->fetchColumn();
     }
 
     /**
@@ -87,7 +86,7 @@ class MySQLDriver extends Driver
     public function tableNames(): array
     {
         $result = [];
-        foreach ($this->query('SHOW TABLES')->fetch(PDO::FETCH_NUM) as $row) {
+        foreach ($this->query("SHOW TABLES")->fetch(PDO::FETCH_NUM) as $row) {
             $result[] = $row[0];
         }
 

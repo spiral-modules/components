@@ -107,6 +107,15 @@ class TableSchema extends AbstractTable
      */
     protected function fetchPrimaryKeys(): array
     {
-        return [];
+        $query = "SHOW INDEXES FROM {$this->driver->identifier($this->getName())}";
+
+        $primaryKeys = [];
+        foreach ($this->driver->query($query) as $index) {
+            if ($index['Key_name'] == 'PRIMARY') {
+                $primaryKeys[] = $index['Column_name'];
+            }
+        }
+
+        return $primaryKeys;
     }
 }

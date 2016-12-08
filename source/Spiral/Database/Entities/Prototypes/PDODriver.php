@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities;
+namespace Spiral\Database\Entities\Prototypes;
 
 use PDO;
 use Psr\Log\LoggerAwareInterface;

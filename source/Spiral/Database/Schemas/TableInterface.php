@@ -21,7 +21,7 @@ interface TableInterface
     public function exists(): bool;
 
     /**
-     * Store specific table name (may include prefix).
+     * Store specific table name (with included prefix).
      *
      * @return string
      */

@@ -190,7 +190,7 @@ class TableState
      *
      * @return ColumnInterface
      */
-    protected function registerColumn(ColumnInterface $column): ColumnInterface
+    public function registerColumn(ColumnInterface $column): ColumnInterface
     {
         $this->columns[$column->getName()] = $column;
 
@@ -204,7 +204,7 @@ class TableState
      *
      * @return IndexInterface
      */
-    protected function registerIndex(IndexInterface $index): IndexInterface
+    public function registerIndex(IndexInterface $index): IndexInterface
     {
         $this->indexes[$index->getName()] = $index;
 
@@ -218,7 +218,7 @@ class TableState
      *
      * @return ReferenceInterface
      */
-    protected function registerReference(ReferenceInterface $foreign): ReferenceInterface
+    public function registerReference(ReferenceInterface $foreign): ReferenceInterface
     {
         $this->foreigns[$foreign->getName()] = $foreign;
 
@@ -232,7 +232,7 @@ class TableState
      *
      * @return self
      */
-    protected function forgetColumn(ColumnInterface $column): TableState
+    public function forgetColumn(ColumnInterface $column): TableState
     {
         foreach ($this->columns as $name => $columnSchema) {
             if ($columnSchema == $column) {
@@ -251,7 +251,7 @@ class TableState
      *
      * @return self
      */
-    protected function forgetIndex(IndexInterface $index): TableState
+    public function forgetIndex(IndexInterface $index): TableState
     {
         foreach ($this->indexes as $name => $indexSchema) {
             if ($indexSchema == $index) {
@@ -270,7 +270,7 @@ class TableState
      *
      * @return self
      */
-    protected function forgetForeign(ReferenceInterface $foreign): TableState
+    public function forgetForeign(ReferenceInterface $foreign): TableState
     {
         foreach ($this->foreigns as $name => $foreignSchema) {
             if ($foreignSchema == $foreign) {
@@ -289,7 +289,7 @@ class TableState
      *
      * @return null|ColumnInterface
      */
-    protected function findColumn(string $name)
+    public function findColumn(string $name)
     {
         foreach ($this->columns as $column) {
             if ($column->getName() == $name) {
@@ -307,7 +307,7 @@ class TableState
      *
      * @return null|IndexInterface
      */
-    protected function findIndex(array $columns)
+    public function findIndex(array $columns)
     {
         foreach ($this->indexes as $index) {
             if ($index->getColumns() == $columns) {
@@ -325,7 +325,7 @@ class TableState
      *
      * @return null|ReferenceInterface
      */
-    protected function findForeign(string $column)
+    public function findForeign(string $column)
     {
         foreach ($this->foreigns as $reference) {
             if ($reference->getColumn() == $column) {
@@ -339,7 +339,7 @@ class TableState
     /**
      * Remount elements under their current name.
      */
-    protected function remountElements()
+    public function remountElements()
     {
         $columns = [];
         foreach ($this->columns as $column) {
@@ -369,7 +369,7 @@ class TableState
      *
      * @return self
      */
-    protected function syncSchema(self $source): self
+    public function syncState(self $source): self
     {
         $this->name = $source->name;
         $this->primaryKeys = $source->primaryKeys;

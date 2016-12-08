@@ -17,7 +17,7 @@ class IndexSchema extends AbstractIndex
      *
      * @return IndexSchema
      */
-    static public function createInstance(string $table, string $name, array $schema): self
+    public static function createInstance(string $table, string $name, array $schema): self
     {
         $index = new self($table, $name);
 

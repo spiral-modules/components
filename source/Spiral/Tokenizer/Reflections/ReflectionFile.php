@@ -286,7 +286,7 @@ class ReflectionFile extends Component
                     break;
 
                 case T_CLASS:
-                case T_TRAIT;
+                case T_TRAIT:
                 case T_INTERFACE:
                     if (
                         $this->tokens[$tokenID][self::TOKEN_TYPE] == T_CLASS

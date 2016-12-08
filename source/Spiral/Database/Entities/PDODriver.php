@@ -13,12 +13,12 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\SugarException;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
@@ -68,7 +68,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @var array
      */
-    protected $config = [
+    protected $defaultOptions = [
         'profiling'  => false,
 
         //DSN
@@ -91,18 +91,18 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
     /**
      * @param string $name
-     * @param array  $connection
+     * @param array  $options
      *
      * @throws SugarException
      */
-    public function __construct(string $name, array $connection)
+    public function __construct(string $name, array $options)
     {
         $this->name = $name;
 
-        $this->config = $connection + $this->config;
+        $this->defaultOptions = $options + $this->defaultOptions;
 
         //PDO connection options has to be stored under key "options" of config
-        $this->options = $connection['options'] + $this->options;
+        $this->options = $options['options'] + $this->options;
     }
 
     /**
@@ -124,7 +124,8 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function getSource(): string
     {
-        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches)) {
+        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->defaultOptions['connection'],
+            $matches)) {
             return $matches[1];
         }
 
@@ -162,7 +163,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function setProfiling(bool $enabled = true): PDODriver
     {
-        $this->config['profiling'] = $enabled;
+        $this->defaultOptions['profiling'] = $enabled;
 
         return $this;
     }
@@ -174,7 +175,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function isProfiling(): bool
     {
-        return $this->config['profiling'];
+        return $this->defaultOptions['profiling'];
     }
 
     /**
@@ -190,7 +191,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             throw new DriverException("Driver '{$this->name}' already connected");
         }
 
-        $benchmark = $this->benchmark('connect', $this->config['connection']);
+        $benchmark = $this->benchmark('connect', $this->defaultOptions['connection']);
         try {
             $this->pdo = $this->createPDO();
         } finally {
@@ -529,7 +530,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function __debugInfo()
     {
         return [
-            'connection' => $this->config['connection'],
+            'connection' => $this->defaultOptions['connection'],
             'connected'  => $this->isConnected(),
             'profiling'  => $this->isProfiling(),
             'source'     => $this->getSource(),
@@ -545,9 +546,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     protected function createPDO(): PDO
     {
         return new PDO(
-            $this->config['connection'],
-            $this->config['username'],
-            $this->config['password'],
+            $this->defaultOptions['connection'],
+            $this->defaultOptions['username'],
+            $this->defaultOptions['password'],
             $this->options
         );
     }

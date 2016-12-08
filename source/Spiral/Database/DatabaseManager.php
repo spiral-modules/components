@@ -186,8 +186,8 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         string $password = ''
     ): Driver {
         $instance = $this->factory->make($driver, [
-            'name'       => $name,
-            'connection' => [
+            'name'    => $name,
+            'options' => [
                 'connection' => $dns,
                 'username'   => $username,
                 'password'   => $password
@@ -222,8 +222,8 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         }
 
         $instance = $this->factory->make($this->config->connectionDriver($connection), [
-            'name'       => $connection,
-            'connection' => $this->config->connectionOptions($connection),
+            'name'    => $connection,
+            'options' => $this->config->connectionOptions($connection),
         ]);
 
         return $this->connections[$connection] = $instance;

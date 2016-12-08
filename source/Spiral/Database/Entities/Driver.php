@@ -65,17 +65,17 @@ abstract class Driver extends PDODriver
 
     /**
      * @param string           $name
-     * @param array            $connection
+     * @param array            $options
      * @param FactoryInterface $factory Required to build instances of query builders and compilers.
      * @param StoreInterface   $store   Cache store associated with driver (optional).
      */
     public function __construct(
         string $name,
-        array $connection,
+        array $options,
         FactoryInterface $factory,
         StoreInterface $store = null
     ) {
-        parent::__construct($name, $connection);
+        parent::__construct($name, $options);
 
         $this->factory = $factory;
         $this->cacheStore = $store;

@@ -55,7 +55,7 @@ class SQLiteDriver extends Driver
     public function getSource(): string
     {
         //Remove "sqlite:"
-        return substr($this->config['connection'], 7);
+        return substr($this->defaultOptions['connection'], 7);
     }
 
     /**

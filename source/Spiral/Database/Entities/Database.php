@@ -16,7 +16,6 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Exceptions\DatabaseException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Query\CachedResult;
@@ -114,32 +113,16 @@ class Database implements DatabaseInterface, InjectableInterface
     private $driver = null;
 
     /**
-     * @invisible
-     *
-     * @var StoreInterface
+     * @param Driver $driver Driver instance responsible for database connection.
+     * @param string $name   Internal database name/id.
+     * @param string $prefix Default database table prefix, will be used for all table
+     *                       identifiers.
      */
-    private $cacheStore = null;
-
-    /**
-     * @param string         $name       Internal database name/id.
-     * @param string         $prefix     Default database table prefix, will be used for all table
-     *                                   identifiers.
-     * @param Driver         $driver     Driver instance responsible for database connection.
-     * @param StoreInterface $cache      Cache store associated with database.
-     */
-    public function __construct(
-        string $name,
-        string $prefix = '',
-        Driver $driver,
-        StoreInterface $cache = null
-    ) {
-        $this->name = $name;
-        $this->setPrefix($prefix);
-
+    public function __construct(Driver $driver, string $name, string $prefix = '')
+    {
         $this->driver = $driver;
-
-        //Not required
-        $this->cacheStore = $cache;
+        $this->name = $name;
+        $this->prefix = $prefix;
     }
 
     /**
@@ -161,15 +144,16 @@ class Database implements DatabaseInterface, InjectableInterface
     /**
      * @return Driver
      */
-    public function driver(): Driver
+    public function getDriver(): Driver
     {
         return $this->driver;
     }
 
     /**
+     * Update database prefix.
+     *
      * @param string $prefix
      *
-     * @todo with prefix?
      * @return self
      */
     public function setPrefix(string $prefix): Database
@@ -224,9 +208,9 @@ class Database implements DatabaseInterface, InjectableInterface
     /**
      * Execute statement or fetch result from cache and return cached query iterator.
      *
-     * @param int            $lifetime   Cache lifetime in seconds.
      * @param string         $query
      * @param array          $parameters Parameters to be binded into query.
+     * @param int            $lifetime   Cache lifetime in seconds.
      * @param string         $key        Cache key to be used to store query result.
      * @param StoreInterface $store      Cache store to store result in, if null default store will
      *                                   be used.
@@ -236,31 +220,14 @@ class Database implements DatabaseInterface, InjectableInterface
      * @throws DriverException
      * @throws QueryException
      */
-    public function cached(
-        int $lifetime,
+    public function cachedQuery(
         string $query,
         array $parameters = [],
+        int $lifetime,
         string $key = '',
         StoreInterface $store = null
     ) {
-        if (empty($store)) {
-            if (empty($this->cacheStore)) {
-                throw new DatabaseException("StoreInterface is missing");
-            }
-
-            $store = $this->cacheStore;
-        }
-
-        if (empty($key)) {
-            //Trying to build unique query id based on provided options and environment.
-            $key = md5(serialize([$query, $parameters, $this->name, $this->prefix]));
-        }
-
-        $data = $store->remember($key, $lifetime, function () use ($query, $parameters) {
-            return $this->query($query, $parameters)->fetchAll();
-        });
-
-        return new CachedResult($data, $parameters, $query, $key, $store);
+        return $this->driver->cachedQuery($query, $parameters, $lifetime, $key, $store);
     }
 
     /**
@@ -327,7 +294,7 @@ class Database implements DatabaseInterface, InjectableInterface
      *
      * @throws \Exception
      */
-    public function transaction(callable $callback, $isolationLevel = null)
+    public function transaction(callable $callback, string $isolationLevel = null)
     {
         $this->begin($isolationLevel);
 
@@ -418,7 +385,7 @@ class Database implements DatabaseInterface, InjectableInterface
      *
      * @return Table
      */
-    public function __get($name): Table
+    public function __get(string $name): Table
     {
         return $this->table($name);
     }

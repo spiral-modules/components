@@ -6,9 +6,11 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities;
+namespace Spiral\Database\Builders;
 
 use Spiral\Core\Component;
+use Spiral\Database\Entities\Driver;
+use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\ExpressionInterface;
@@ -23,9 +25,9 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     /**
      * @invisible
      *
-     * @var Database
+     * @var Driver
      */
-    protected $database = null;
+    protected $driver = null;
 
     /**
      * @invisible
@@ -35,12 +37,12 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     protected $compiler = null;
 
     /**
-     * @param Database      $database Parent database.
+     * @param Driver        $driver   Associated driver.
      * @param QueryCompiler $compiler Driver specific QueryCompiler instance (one per builder).
      */
-    public function __construct(Database $database, QueryCompiler $compiler)
+    public function __construct(Driver $driver, QueryCompiler $compiler)
     {
-        $this->database = $database;
+        $this->driver = $driver;
         $this->compiler = $compiler;
     }
 
@@ -97,7 +99,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
         $debugInfo = [
             'statement' => $queryString,
             'compiler'  => get_class($this->compiler),
-            'database'  => $this->database,
+            'database'  => $this->driver,
         ];
 
         return $debugInfo;
@@ -156,6 +158,6 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
      */
     protected function pdoStatement(): \PDOStatement
     {
-        return $this->database->statement($this->sqlStatement(), $this->getParameters());
+        return $this->driver->statement($this->sqlStatement(), $this->getParameters());
     }
 }

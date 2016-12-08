@@ -9,6 +9,7 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Core\Component;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;

@@ -30,7 +30,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
         $database = new Database('test', 'prefix_', $driver);
 
         $this->assertEquals('test', $database->getName());
-        $this->assertEquals($driver, $database->driver());
+        $this->assertEquals($driver, $database->getDriver());
         $this->assertEquals('prefix_', $database->getPrefix());
         $this->assertEquals('test-driver', $database->getType());
     }

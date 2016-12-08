@@ -72,7 +72,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
      */
     public function getSchema(): AbstractTable
     {
-        return $this->database->driver()->tableSchema(
+        return $this->database->getDriver()->tableSchema(
             $this->realName(),
             $this->database->getPrefix()
         );
@@ -121,7 +121,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
      */
     public function truncateData()
     {
-        $this->database->driver()->truncateData($this->realName());
+        $this->database->getDriver()->truncateData($this->realName());
     }
 
     /**

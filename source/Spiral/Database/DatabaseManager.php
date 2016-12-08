@@ -99,11 +99,10 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             $connection = $this->connection($connection);
         }
 
-        $instance = $this->factory->make(Database::class, [
-            'name'   => $name,
-            'prefix' => $prefix,
-            'driver' => $connection,
-        ]);
+        $instance = $this->factory->make(
+            Database::class,
+            ['name' => $name, 'prefix' => $prefix, 'driver' => $connection]
+        );
 
         $this->addDatabase($instance);
 

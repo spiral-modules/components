@@ -27,7 +27,6 @@ $driver = new \Spiral\Database\Drivers\MySQL\MySQLDriver(
 
 $schema = $driver->tableSchema('accounts');
 
-
 foreach ($schema->getColumns() as $column) {
     print_R($column->getName() . " ");
     print_R($column->abstractType() . "\n ");

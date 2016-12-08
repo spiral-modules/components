@@ -290,7 +290,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         return !is_null($this->defaultValue);
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -385,6 +384,8 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 
         return 'unknown';
     }
+
+    //--- MODIFICATIONS IS HERE
 
     /**
      * Must compare two instances of AbstractColumn.

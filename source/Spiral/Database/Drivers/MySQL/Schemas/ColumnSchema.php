@@ -229,7 +229,7 @@ class ColumnSchema extends AbstractColumn
      */
     protected function prepareDefault(Driver $driver): string
     {
-        //todo: make sure it works correctly
+        //todo: is it needed?
         if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue)) {
             if (is_numeric($this->defaultValue)) {
                 //Nothing to do

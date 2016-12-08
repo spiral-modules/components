@@ -115,7 +115,24 @@ class TableSchema extends AbstractTable
      */
     protected function fetchReferences(): array
     {
-        return [];
+        $references = $this->driver->query(
+            'SELECT * FROM `information_schema`.`referential_constraints` WHERE `constraint_schema` = ? AND `table_name` = ?',
+            [$this->driver->getSource(), $this->getName()]
+        );
+
+        $result = [];
+        foreach ($references as $schema) {
+            $references = 'SELECT * FROM `information_schema`.`key_column_usage` WHERE `constraint_name` = ? AND `table_schema` = ? AND `table_name` = ?';
+
+            $column = $this->driver->query(
+                $references,
+                [$schema['CONSTRAINT_NAME'], $this->driver->getSource(), $this->getName()]
+            )->fetch();
+
+            $result[] = ReferenceSchema::createInstance($this->getName(), $schema + $column);
+        }
+
+        return $result;
     }
 
     /**

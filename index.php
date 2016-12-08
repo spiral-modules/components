@@ -32,9 +32,20 @@ foreach ($schema->getColumns() as $column) {
     print_R($column->abstractType() . "\n ");
 }
 
+
+echo "----------\n";
 foreach ($schema->getIndexes() as $index) {
     print_r($index->getName());
-    print_r($index->getColumns());
+    print_r($index->getColumns() . "\n");
+}
+
+echo "----------\n";
+
+foreach ($schema->getForeigns() as $f) {
+    print_r($f->getName() . ' ');
+    print_r($f->getColumn() . ' ');
+    print_r($f->getForeignTable() . ' ');
+    print_r($f->getForeignKey() . "\n");
 }
 
 print_r($schema->getPrimaryKeys());

@@ -41,7 +41,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
      */
     public function getName(): string
     {
-        if (empty(parent::getName())) {
+        if (empty($this->name)) {
             //Let's generate index name on a fly
             $this->setName($this->generateName());
         }
@@ -80,7 +80,7 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
     {
         $statement = [$this->type == self::UNIQUE ? 'UNIQUE INDEX' : 'INDEX'];
 
-        $statement[] = $driver->identifier($this->getName());
+        $statement[] = $driver->identifier($this->name);
 
         if ($includeTable) {
             $statement[] = "ON {$driver->identifier($this->table)}";

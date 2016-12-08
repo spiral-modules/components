@@ -380,11 +380,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     //--- MODIFICATIONS IS HERE
 
     /**
-     * Must compare two instances of AbstractColumn.
-     *
-     * @param ColumnInterface $initial
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function compare(ColumnInterface $initial): bool
     {

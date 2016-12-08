@@ -331,7 +331,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         }
 
         foreach ($this->fetchReferences() as $foreign) {
-            $state->registerIndex($foreign);
+            $state->registerReference($foreign);
         }
 
         $state->setPrimaryKeys($this->fetchPrimaryKeys());

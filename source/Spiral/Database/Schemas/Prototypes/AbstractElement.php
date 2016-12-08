@@ -52,9 +52,9 @@ abstract class AbstractElement
      *
      * @param string $name
      *
-     * @return $this
+     * @return self|$this
      */
-    public function setName(string $name)
+    public function setName(string $name): AbstractElement
     {
         $this->name = $name;
 

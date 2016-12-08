@@ -103,7 +103,9 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
         //Initializing states
         $this->initialState = new TableState($this->prefix . $name);
-        $this->exists = $this->driver->hasTable($this->initialState->getName());
+        $this->currentState = new TableState($this->prefix . $name);
+
+        $this->exists = $this->driver->hasTable($this->getName());
 
         if ($this->exists) {
             //Initiating table schema

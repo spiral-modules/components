@@ -15,21 +15,22 @@ require 'vendor/autoload.php';
 
 $container = new \Spiral\Core\Container();
 
-$driver = new \Spiral\Database\Drivers\SQLite\SQLiteDriver(
-    'sqlite',
+$driver = new \Spiral\Database\Drivers\MySQL\MySQLDriver(
+    'mysql',
     [
-        'connection' => 'sqlite:runtime.db',
-        'username'   => 'sqlite',
+        'connection' => 'mysql:host=localhost;dbname=earthquake',
+        'username'   => 'root',
+        'password'   => ''
     ],
     $container
 );
 
-$schema = $driver->tableSchema('COMPANY');
+$schema = $driver->tableSchema('accounts');
+
 
 foreach ($schema->getColumns() as $column) {
     print_R($column->getName() . " ");
     print_R($column->abstractType() . "\n ");
-
 }
 
 print_r($schema->getPrimaryKeys());

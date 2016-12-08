@@ -20,7 +20,7 @@ class TableSchema extends AbstractTable
          */
         $definition = $this->driver->query(
             "SELECT sql FROM 'sqlite_master' WHERE type = 'table' and name = ?",
-            [$this->initialState->getName()]
+            [$this->getName()]
         )->fetchColumn();
 
         /*
@@ -34,7 +34,7 @@ class TableSchema extends AbstractTable
         foreach ($this->columnSchemas(['table' => $definition]) as $schema) {
             //Making new column instance
             $result[] = ColumnSchema::createInstance(
-                $this->initialState->getName(),
+                $this->getName(),
                 $schema + ['quoted' => $this->driver->quote($schema['name'])]
             );
         }
@@ -83,7 +83,7 @@ class TableSchema extends AbstractTable
     private function columnSchemas(array $include = []): array
     {
         $columns = $this->driver->query(
-            "PRAGMA TABLE_INFO(" . $this->driver->quote($this->initialState->getName()) . ")"
+            "PRAGMA TABLE_INFO(" . $this->driver->quote($this->getName()) . ")"
         );
 
         $result = [];

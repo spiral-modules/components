@@ -329,6 +329,8 @@ abstract class AbstractWhere extends QueryBuilder
      *                              parameter.
      *
      * @return array
+     *
+     * @throws BuilderException
      */
     private function builtConditions(
         string $innerJoiner,

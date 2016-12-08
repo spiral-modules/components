@@ -8,8 +8,7 @@
 
 namespace Spiral\Database\Builders;
 
-use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\Parameter;
 
@@ -18,6 +17,11 @@ use Spiral\Database\Injections\Parameter;
  */
 class InsertQuery extends QueryBuilder
 {
+    /**
+     * Query type.
+     */
+    const QUERY_TYPE = QueryCompiler::INSERT_QUERY;
+
     /**
      * @var string
      */
@@ -38,14 +42,13 @@ class InsertQuery extends QueryBuilder
     protected $rowsets = [];
 
     /**
-     * @param Database      $database Parent database.
-     * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
-     * @param string        $table    Associated table name.
+     * {@inheritdoc}
+     *
+     * @param string $table Associated table name.
      */
-    public function __construct(Database $database, QueryCompiler $compiler, string $table = '')
+    public function __construct(Driver $driver, QueryCompiler $compiler, string $table = '')
     {
-        parent::__construct($database, $compiler);
-
+        parent::__construct($driver, $compiler);
         $this->table = $table;
     }
 
@@ -138,15 +141,11 @@ class InsertQuery extends QueryBuilder
      */
     public function getParameters(QueryCompiler $compiler = null): array
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler;
+        $compiler = $compiler ?? $this->compiler;
 
-        return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::INSERT_QUERY,
-            [],
-            [],
-            [],
-            $this->rowsets
-        ));
+        return $this->flattenParameters(
+            $compiler->orderParameters(self::QUERY_TYPE, [], [], [], $this->rowsets)
+        );
     }
 
     /**
@@ -169,7 +168,7 @@ class InsertQuery extends QueryBuilder
         //This must execute our query
         $this->pdoStatement();
 
-        return $this->database->driver()->lastInsertID();
+        return $this->driver->lastInsertID();
     }
 
     /**

@@ -8,7 +8,6 @@
 
 namespace Spiral\Database\Builders;
 
-use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
@@ -20,7 +19,7 @@ use Spiral\Database\Injections\ParameterInterface;
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
  */
-abstract class QueryBuilder extends Component implements ExpressionInterface
+abstract class QueryBuilder implements ExpressionInterface
 {
     /**
      * @invisible
@@ -98,8 +97,8 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
 
         $debugInfo = [
             'statement' => $queryString,
-            'compiler'  => get_class($this->compiler),
-            'database'  => $this->driver,
+            'compiler'  => $this->compiler,
+            'driver'    => $this->driver,
         ];
 
         return $debugInfo;

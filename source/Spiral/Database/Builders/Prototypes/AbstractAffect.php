@@ -8,19 +8,15 @@
 
 namespace Spiral\Database\Builders\Prototypes;
 
-use Psr\Log\LoggerAwareInterface;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * Generic prototype for affect queries with WHERE and JOIN supports. At this moment used as parent
  * for delete and update query builders.
  */
-abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterface
+abstract class AbstractAffect extends AbstractWhere
 {
-    use LoggerTrait;
-
     /**
      * Every affect builder must be associated with specific table.
      *
@@ -58,8 +54,8 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
      */
     public function run(): int
     {
-        if (empty($this->whereTokens)) {
-            $this->logger()->warning('Affect query performed without any limiting condition');
+        if (empty($this->whereTokens) && $this->driver->isProfiling()) {
+            $this->driver->logger()->warning('Affect query performed without any limiting condition');
         }
 
         return $this->pdoStatement()->rowCount();

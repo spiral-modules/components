@@ -43,11 +43,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     const DATETIME = 'Y-m-d H:i:s';
 
     /**
-     * Query result class.
-     */
-    const QUERY_RESULT = PDOResult::class;
-
-    /**
      * Driver name.
      *
      * @var string

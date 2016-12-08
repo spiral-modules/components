@@ -8,7 +8,7 @@
 
 namespace Spiral\Database\Builders\Traits;
 
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Expression;
 use Spiral\Database\Injections\ExpressionInterface;

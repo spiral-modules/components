@@ -44,6 +44,11 @@ abstract class AbstractSelect extends AbstractWhere implements
     use JoinsTrait, LimitsTrait, PaginatorTrait;
 
     /**
+     * Query type.
+     */
+    const QUERY_TYPE = QueryCompiler::SELECT_QUERY;
+
+    /**
      * Sort directions.
      */
     const SORT_ASC  = 'ASC';
@@ -122,14 +127,11 @@ abstract class AbstractSelect extends AbstractWhere implements
      */
     public function getParameters(QueryCompiler $compiler = null): array
     {
-        if (empty($compiler)) {
-            //Using associated compiler
-            $compiler = $this->compiler;
-        }
+        $compiler = $compiler ?? $this->compiler;
 
         return $this->flattenParameters(
             $compiler->orderParameters(
-                QueryCompiler::SELECT_QUERY,
+                self::QUERY_TYPE,
                 $this->whereParameters,
                 $this->onParameters,
                 $this->havingParameters
@@ -286,6 +288,7 @@ abstract class AbstractSelect extends AbstractWhere implements
         string $key = '',
         StoreInterface $store = null
     ): AbstractSelect {
+
         $this->cacheLifetime = $lifetime;
         $this->cacheKey = $key;
         $this->cacheStore = $store;
@@ -341,7 +344,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Iterate thought result using smaller data chinks with defined size and walk function.
      *
      * Example:
-     * $select->chunked(100, function(QueryResult $result, $offset, $count) {
+     * $select->chunked(100, function(PDOResult $result, $offset, $count) {
      *      dump($result);
      * });
      *
@@ -350,22 +353,21 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @param int      $limit
      * @param callable $callback
      */
-    public function chunked(int $limit, callable $callback)
+    public function runChunks(int $limit, callable $callback)
     {
-        //TODO: Think about it
-
         $count = $this->count();
 
-        $this->limit($limit);
+        //To keep original query untouched
+        $select = clone $this;
+
+        $select->limit($limit);
 
         $offset = 0;
-
         while ($offset + $limit <= $count) {
-            $result = call_user_func_array($callback, [
-                $this->offset($offset)->getIterator(),
-                $offset,
-                $count,
-            ]);
+            $result = call_user_func_array(
+                $callback,
+                [$select->offset($offset)->getIterator(), $offset, $count]
+            );
 
             if ($result === false) {
                 //Stop iteration

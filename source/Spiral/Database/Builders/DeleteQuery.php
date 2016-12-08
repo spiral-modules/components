@@ -17,6 +17,11 @@ use Spiral\Database\Entities\QueryCompiler;
 class DeleteQuery extends AbstractAffect
 {
     /**
+     * Query type.
+     */
+    const QUERY_TYPE = QueryCompiler::DELETE_QUERY;
+
+    /**
      * Change target table.
      *
      * @param string $into Table name without prefix.
@@ -35,14 +40,11 @@ class DeleteQuery extends AbstractAffect
      */
     public function getParameters(QueryCompiler $compiler = null): array
     {
-        if (empty($compiler)) {
-            $compiler = $this->compiler;
-        }
+        $compiler = $compiler ?? $this->compiler;
 
-        return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::DELETE_QUERY,
-            $this->whereParameters
-        ));
+        return $this->flattenParameters(
+            $compiler->orderParameters(self::QUERY_TYPE, $this->whereParameters)
+        );
     }
 
     /**

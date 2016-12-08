@@ -8,7 +8,6 @@
 
 namespace Spiral\Database\Entities;
 
-use Spiral\Core\Component;
 use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\ExpressionInterface;
@@ -21,7 +20,7 @@ use Spiral\Database\Injections\ParameterInterface;
  *
  * Source of Compiler must be optimized in nearest future.
  */
-class QueryCompiler extends Component
+class QueryCompiler
 {
     /**
      * Query types for parameter ordering.

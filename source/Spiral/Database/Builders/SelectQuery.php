@@ -9,8 +9,7 @@
 namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
-use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Injections\FragmentInterface;
 
@@ -36,18 +35,18 @@ class SelectQuery extends AbstractSelect
     protected $unionTokens = [];
 
     /**
-     * @param Database      $database Parent database.
-     * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
-     * @param array         $from     Initial set of table names.
-     * @param array         $columns  Initial set of columns to fetch.
+     * {@inheritdoc}
+     *
+     * @param array $from    Initial set of table names.
+     * @param array $columns Initial set of columns to fetch.
      */
     public function __construct(
-        Database $database,
+        Driver $driver,
         QueryCompiler $compiler,
         array $from = [],
         array $columns = []
     ) {
-        parent::__construct($database, $compiler);
+        parent::__construct($driver, $compiler);
 
         $this->tables = $from;
         if (!empty($columns)) {
@@ -135,9 +134,7 @@ class SelectQuery extends AbstractSelect
      */
     public function getParameters(QueryCompiler $compiler = null): array
     {
-        if (empty($compiler)) {
-            $compiler = $this->compiler;
-        }
+        $compiler = $compiler ?? $this->compiler;
 
         $parameters = parent::getParameters($compiler);
 

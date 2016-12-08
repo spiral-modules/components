@@ -440,6 +440,47 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         return implode(' ', $statement);
     }
 
+
+    /**
+     * Simplified way to dump information.
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        $column = [
+            'name' => $this->name,
+            'type' => [
+                'database' => $this->type,
+                'schema'   => $this->abstractType(),
+                'php'      => $this->phpType(),
+            ],
+        ];
+
+        if (!empty($this->size)) {
+            $column['size'] = $this->size;
+        }
+
+        if ($this->nullable) {
+            $column['nullable'] = true;
+        }
+
+        if ($this->defaultValue !== null) {
+            $column['defaultValue'] = $this->getDefaultValue();
+        }
+
+        if ($this->abstractType() == 'enum') {
+            $column['enumValues'] = $this->enumValues;
+        }
+
+        if ($this->abstractType() == 'decimal') {
+            $column['precision'] = $this->precision;
+            $column['scale'] = $this->scale;
+        }
+
+        return $column;
+    }
+
     /**
      * Get database specific enum type definition options.
      *

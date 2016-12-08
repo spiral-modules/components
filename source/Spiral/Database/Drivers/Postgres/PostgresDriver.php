@@ -114,7 +114,7 @@ class PostgresDriver extends Driver
         }
 
         //Caching
-        if (!empty($this->memory)) {
+        if (!empty($this->cacheStore)) {
             $this->cacheStore->forever($this->getSource() . '/keys', $this->primaryKeys);
         }
 

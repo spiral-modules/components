@@ -18,12 +18,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 {
     public function testDatabase()
     {
-        /**
-         * @var Driver|\PHPUnit_Framework_MockObject_MockObject
-         */
-        $driver = $this->getMockBuilder(Driver::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $driver = $this->makeDriver();
 
         $driver->method('getType')->will($this->returnValue('test-driver'));
 
@@ -37,12 +32,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
     public function testQuery()
     {
-        /**
-         * @var Driver|\PHPUnit_Framework_MockObject_MockObject
-         */
-        $driver = $this->getMockBuilder(Driver::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $driver = $this->makeDriver();
 
         $driver->expects($this->once())->method('query')->with('test query')
             ->willReturn(m::mock(PDOResult::class));
@@ -53,12 +43,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
     public function testStatement()
     {
-        /**
-         * @var Driver|\PHPUnit_Framework_MockObject_MockObject
-         */
-        $driver = $this->getMockBuilder(Driver::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $driver = $this->makeDriver();
 
         $driver->expects($this->once())->method('statement')->with('test statement',
             [1, 2, 3])->willReturn(m::mock(PDOResult::class));
@@ -69,12 +54,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
     public function testHasTable()
     {
-        /**
-         * @var Driver|\PHPUnit_Framework_MockObject_MockObject
-         */
-        $driver = $this->getMockBuilder(Driver::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $driver = $this->makeDriver();
 
         $driver->expects($this->once())->method('hasTable')->with('prefix_table')->will(
             $this->returnValue(true)
@@ -86,12 +66,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
 
     public function testTable()
     {
-        /**
-         * @var Driver|\PHPUnit_Framework_MockObject_MockObject
-         */
-        $driver = $this->getMockBuilder(Driver::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $driver = $this->makeDriver();
 
         $database = new Database($driver, 'test', 'prefix_');
 
@@ -104,5 +79,13 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('prefix_table', $table->realName());
 
         $this->assertTrue($table->exists());
+    }
+
+    /**
+     * @return Driver|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private function makeDriver()
+    {
+        return $this->getMockBuilder(Driver::class)->disableOriginalConstructor()->getMock();
     }
 }

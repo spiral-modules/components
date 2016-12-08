@@ -292,9 +292,9 @@ class Container extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function restore(array $replacePayload)
+    public function restore(array $payload)
     {
-        list($alias, $resolver) = $replacePayload;
+        list($alias, $resolver) = $payload;
 
         unset($this->bindings[$alias]);
 

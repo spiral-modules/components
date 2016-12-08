@@ -36,9 +36,9 @@ interface ScoperInterface
      *
      * @see replace
      *
-     * @param array $replacePayload
+     * @param array $payload
      *
      * @throws ContainerException
      */
-    public function restore(array $replacePayload);
+    public function restore(array $payload);
 }

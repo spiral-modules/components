@@ -78,7 +78,8 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      */
     public function size($filename, int $size): bool
     {
-        if (empty($filename = $this->filename($filename, false))) {
+        $filename = $this->filename($filename, false);
+        if (empty($filename) || !is_string($filename)) {
             return false;
         }
 
@@ -117,7 +118,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
      *
      * @return string|bool
      */
-    protected function filename($filename, bool $onlyUploaded = true): bool
+    protected function filename($filename, bool $onlyUploaded = true)
     {
         if (empty($filename) || ($onlyUploaded && !$this->isUploaded($filename))) {
             return false;

@@ -52,7 +52,7 @@ class Paginator implements PredictableInterface, \Countable
     public function withPage(int $number): CountingInterface
     {
         $paginator = clone $this;
-        $paginator->pageNumber = abs(intval($number));
+        $paginator->pageNumber = max($number, 0);
 
         //Real page number
         return $paginator;
@@ -192,7 +192,7 @@ class Paginator implements PredictableInterface, \Countable
      */
     private function setCount(int $count): self
     {
-        $this->count = abs(intval($count));
+        $this->count = max($count, 0);
         if ($this->count > 0) {
             $this->countPages = (int)ceil($this->count / $this->limit);
         } else {

@@ -28,7 +28,7 @@ class Expression extends Fragment implements ExpressionInterface
      */
     public function getExpression(): string
     {
-        return parent::sqlStatement();
+        return $this->statement;
     }
 
     /**
@@ -38,7 +38,7 @@ class Expression extends Fragment implements ExpressionInterface
     {
         if (empty($compiler)) {
             //We might need to throw an exception here in some cases
-            return parent::sqlStatement();
+            return $this->statement;
         }
 
         return $compiler->quote(parent::sqlStatement());

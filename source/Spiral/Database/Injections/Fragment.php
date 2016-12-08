@@ -19,7 +19,7 @@ class Fragment implements FragmentInterface
     /**
      * @var string
      */
-    private $statement = null;
+    protected $statement = null;
 
     /**
      * @param string $statement

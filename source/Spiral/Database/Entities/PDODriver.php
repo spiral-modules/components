@@ -359,13 +359,14 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function prepare(
         string $statement,
-        string $class = 'PDOStatement',
+        $class = \PDOStatement::class,
         array $args = []
     ): \PDOStatement {
         $pdo = $this->getPDO();
+
         $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [$class, $args]);
 
-        return $this->getPDO()->prepare($statement);
+        return $pdo->prepare($statement);
     }
 
     /**
@@ -379,9 +380,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function lastInsertID(string $sequence = null)
     {
-        return $sequence
-            ? (int)$this->getPDO()->lastInsertId($sequence)
-            : (int)$this->getPDO()->lastInsertId();
+        $pdo = $this->getPDO();
+
+        return $sequence ? (int)$pdo->lastInsertId($sequence) : (int)$pdo->lastInsertId();
     }
 
     /**

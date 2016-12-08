@@ -9,8 +9,8 @@
 namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Cache\StoreInterface;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\Traits\JoinsTrait;
-use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
@@ -325,16 +325,16 @@ abstract class AbstractSelect extends AbstractWhere implements
 
         if (!empty($this->cacheLifetime)) {
             //Cached query
-            return $this->database->cached(
-                $this->cacheLifetime,
+            return $this->driver->cachedQuery(
                 $this->sqlStatement(),
                 $this->getParameters(),
+                $this->cacheLifetime,
                 $this->cacheKey,
                 $this->cacheStore
             );
         }
 
-        return $this->database->query($this->sqlStatement(), $this->getParameters());
+        return $this->driver->query($this->sqlStatement(), $this->getParameters());
     }
 
     /**
@@ -454,14 +454,6 @@ abstract class AbstractSelect extends AbstractWhere implements
     }
 
     /**
-     * Destructing.
-     */
-    public function __destruct()
-    {
-        $this->paginator = null;
-    }
-
-    /**
      * Applied to every potential parameter while having tokens generation.
      *
      * @return \Closure
@@ -470,6 +462,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     {
         return function ($parameter) {
             if ($parameter instanceof FragmentInterface) {
+
                 //We are only not creating bindings for plan fragments
                 if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
                     return $parameter;

@@ -9,7 +9,7 @@
 namespace Spiral\Database\Builders\Prototypes;
 
 use Psr\Log\LoggerAwareInterface;
-use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Debug\Traits\LoggerTrait;
 
@@ -35,12 +35,12 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
      * @param array  $where Initial set of where rules specified as array.
      */
     public function __construct(
-        Database $database,
+        Driver $driver,
         QueryCompiler $compiler,
         string $table = '',
         array $where = []
     ) {
-        parent::__construct($database, $compiler);
+        parent::__construct($driver, $compiler);
 
         $this->table = $table;
 

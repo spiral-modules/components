@@ -13,9 +13,6 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
 
-//use Spiral\Database\Drivers\Postgres\Schemas\Commander;
-//use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
-
 /**
  * Talks to postgres databases.
  */
@@ -133,7 +130,7 @@ class PostgresDriver extends Driver
     public function insertBuilder(string $prefix, array $parameters = []): InsertQuery
     {
         return $this->factory->make(
-            InsertQuery::class,
+            PostgresQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix),] + $parameters
         );
     }

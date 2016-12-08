@@ -8,6 +8,8 @@
 
 namespace Spiral\Database\Builders;
 
+use Interop\Container\ContainerInterface;
+use Spiral\Core\Component;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
@@ -19,7 +21,7 @@ use Spiral\Database\Injections\ParameterInterface;
  * QueryBuilder classes generate set of control tokens for query compilers, this is query level
  * abstraction.
  */
-abstract class QueryBuilder implements ExpressionInterface
+abstract class QueryBuilder extends Component implements ExpressionInterface
 {
     /**
      * @invisible
@@ -158,5 +160,14 @@ abstract class QueryBuilder implements ExpressionInterface
     protected function pdoStatement(): \PDOStatement
     {
         return $this->driver->statement($this->sqlStatement(), $this->getParameters());
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    protected function iocContainer()
+    {
+        //Falling back to driver specific container
+        return $this->driver->iocContainer();
     }
 }

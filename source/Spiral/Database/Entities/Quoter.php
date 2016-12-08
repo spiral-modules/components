@@ -46,10 +46,18 @@ class Quoter
      * @param PDODriver $driver Driver needed to correctly quote identifiers and string quotes.
      * @param string    $prefix
      */
-    public function __construct(PDODriver $driver, $prefix)
+    public function __construct(PDODriver $driver, string $prefix)
     {
         $this->driver = $driver;
         $this->prefix = $prefix;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrefix(): string
+    {
+        return $this->prefix;
     }
 
     /**

@@ -48,6 +48,16 @@ class QueryCompiler
     }
 
     /**
+     * Prefix associated with compiler.
+     *
+     * @return string
+     */
+    public function getPrefix(): string
+    {
+        return $this->quoter->getPrefix();
+    }
+
+    /**
      * Reset table aliases cache, required if same compiler used twice.
      *
      * @return self

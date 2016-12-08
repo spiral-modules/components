@@ -23,10 +23,8 @@ class PostgresInsertQuery extends InsertQuery
      */
     public function sqlStatement(AbstractCompiler $compiler = null): string
     {
-        $driver = $this->database->driver();
-
         if (
-            !$driver instanceof PostgresDriver
+            !$this->driver instanceof PostgresDriver
             || (!empty($compiler) && !$compiler instanceof PostgresCompiler)
         ) {
             throw new BuilderException(
@@ -34,23 +32,26 @@ class PostgresInsertQuery extends InsertQuery
             );
         }
 
-        //Resolve table primary key if any
-        $primary = $driver->getPrimary($this->database->getPrefix() . $this->table);
-
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();
         }
 
-        return $compiler->compileInsert($this->table, $this->columns, $this->rowsets, $primary);
+        return $compiler->compileInsert(
+            $this->table,
+            $this->columns,
+            $this->rowsets,
+            $this->driver->getPrimary($this->compiler->getPrefix(), $this->table)
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function run()
+    public function run(): int
     {
-        return (int)$this->database->statement(
-            $this->sqlStatement(), $this->getParameters()
+        return (int)$this->driver->statement(
+            $this->sqlStatement(),
+            $this->getParameters()
         )->fetchColumn();
     }
 }

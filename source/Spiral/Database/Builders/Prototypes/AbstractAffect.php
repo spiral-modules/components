@@ -54,10 +54,6 @@ abstract class AbstractAffect extends AbstractWhere
      */
     public function run(): int
     {
-        if (empty($this->whereTokens) && $this->driver->isProfiling()) {
-            $this->driver->logger()->warning('Affect query performed without any limiting condition');
-        }
-
         return $this->pdoStatement()->rowCount();
     }
 }

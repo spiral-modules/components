@@ -87,17 +87,18 @@ class PostgresDriver extends Driver
         return $tables;
     }
 
-//    /**
-//     * Get singular primary key associated with desired table. Used to emulate last insert id.
-//     *
-//     * @param string $table Fully specified table name, including postfix.
-//     *
-//     * @return string|null
-//     *
-//     * @throws DriverException
-//     */
-//    public function getPrimary(string $table)
-//    {
+    /**
+     * Get singular primary key associated with desired table. Used to emulate last insert id.
+     *
+     * @param string $prefix Database prefix if any.
+     * @param string $table  Fully specified table name, including postfix.
+     *
+     * @return string|null
+     *
+     * @throws DriverException
+     */
+    public function getPrimary(string $prefix, string $table): string
+    {
 //        if (!empty($this->cacheStore) && empty($this->primaryKeys)) {
 //            $this->primaryKeys = (array)$this->cacheStore->get($this->getSource() . '/keys');
 //        }
@@ -126,7 +127,8 @@ class PostgresDriver extends Driver
 //        }
 //
 //        return $this->primaryKeys[$table];
-//    }
+        return '';
+    }
 
     /**
      * {@inheritdoc}

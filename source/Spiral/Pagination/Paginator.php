@@ -36,6 +36,7 @@ class Paginator implements PredictableInterface, \Countable
 
     /**
      * @param int $limit
+     * @param int $count
      */
     public function __construct(int $limit = 25, int $count = 0)
     {
@@ -187,9 +188,9 @@ class Paginator implements PredictableInterface, \Countable
      *
      * @param int $count
      *
-     * @return Paginator
+     * @return self|$this
      */
-    private function setCount(int $count)
+    private function setCount(int $count): self
     {
         $this->count = abs(intval($count));
         if ($this->count > 0) {

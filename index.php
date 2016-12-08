@@ -32,4 +32,9 @@ foreach ($schema->getColumns() as $column) {
     print_R($column->abstractType() . "\n ");
 }
 
+foreach ($schema->getIndexes() as $index) {
+    print_r($index->getName());
+    print_r($index->getColumns());
+}
+
 print_r($schema->getPrimaryKeys());

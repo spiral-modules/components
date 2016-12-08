@@ -35,7 +35,10 @@ class TableSchema extends AbstractTable
             //Making new column instance
             $result[] = ColumnSchema::createInstance(
                 $this->getName(),
-                $schema + ['quoted' => $this->driver->quote($schema['name'])]
+                $schema + [
+                    'quoted'     => $this->driver->quote($schema['name']),
+                    'identifier' => $this->driver->identifier($schema['name'])
+                ]
             );
         }
 

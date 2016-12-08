@@ -38,14 +38,6 @@ use Spiral\Database\Schemas\ColumnInterface;
 abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 {
     /**
-     * PHP types for phpType() method.
-     */
-    const INT    = 'int';
-    const BOOL   = 'bool';
-    const STRING = 'string';
-    const FLOAT  = 'float';
-
-    /**
      * Default datetime value.
      */
     const DATETIME_DEFAULT = '1970-01-01 00:00:00';

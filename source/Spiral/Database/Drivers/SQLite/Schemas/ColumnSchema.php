@@ -125,10 +125,10 @@ class ColumnSchema extends AbstractColumn
 
         $enumValues = [];
         foreach ($this->enumValues as $value) {
-            $enumValues[] = $driver->getPDO()->quote($value);
+            $enumValues[] = $driver->quote($value);
         }
 
-        $quoted = $driver->getPDO()->quote($this->name);
+        $quoted = $driver->quote($this->name);
 
         return "$statement CHECK ({$quoted} IN (" . implode(', ', $enumValues) . '))';
     }
@@ -185,7 +185,7 @@ class ColumnSchema extends AbstractColumn
 
         if ($column->type == 'enum') {
             //Quoted column name
-            $quoted = $schema['quoted'];
+            $quoted = $schema['identifier'];
 
             foreach ($schema['tableStatement'] as $column) {
                 //Looking for enum values in column definition code

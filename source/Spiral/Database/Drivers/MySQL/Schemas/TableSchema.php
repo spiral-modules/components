@@ -89,7 +89,25 @@ class TableSchema extends AbstractTable
      */
     protected function fetchIndexes(): array
     {
-        return [];
+        $query = "SHOW INDEXES FROM {$this->driver->identifier($this->getName())}";
+
+        //Gluing all index definitions together
+        $schemas = [];
+        foreach ($this->driver->query($query) as $index) {
+            if ($index['Key_name'] == 'PRIMARY') {
+                //Skipping PRIMARY index
+                continue;
+            }
+
+            $schemas[$index['Key_name']][] = $index;
+        }
+
+        $result = [];
+        foreach ($schemas as $name => $index) {
+            $result[] = IndexSchema::createInstance($this->getName(), $name, $index);
+        }
+
+        return $result;
     }
 
     /**

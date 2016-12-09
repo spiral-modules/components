@@ -452,6 +452,8 @@ class ReflectionFile extends Component
     /**
      * Locate every function or static method call (including $this calls).
      *
+     * This is pretty old code, potentially to be improved using AST.
+     *
      * @param array $tokens
      * @param int   $invocationLevel
      */

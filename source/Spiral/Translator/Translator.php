@@ -66,7 +66,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      *
      * @var Catalogue|null
      */
-    private $fallbackCatalogue = null;
+    private $fallback = null;
 
     /**
      * To load locale data from application files.
@@ -283,8 +283,8 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
 
         $this->memory->saveData(static::MEMORY, []);
 
-        //Reloading fallback locale
-        $this->fallbackCatalogue = $this->loadCatalogue($this->config->fallbackLocale());
+        //Flushing fallback catalogue
+        $this->fallback = null;
 
         return $this;
     }
@@ -306,14 +306,16 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
             return $this->getCatalogue($locale)->get($domain, $string);
         }
 
-        if ($this->fallbackCatalogue->has($domain, $string)) {
-            return $this->fallbackCatalogue->get($domain, $string);
+        $fallback = $this->fallbackCatalogue();
+
+        if ($fallback->has($domain, $string)) {
+            return $fallback->get($domain, $string);
         }
 
         //Automatic message registration.
         if ($this->config->registerMessages()) {
-            $this->fallbackCatalogue->set($domain, $string, $string);
-            $this->fallbackCatalogue->saveDomains();
+            $fallback->set($domain, $string, $string);
+            $fallback->saveDomains();
         }
 
         //Unable to find translation
@@ -325,13 +327,11 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
      */
     protected function fallbackCatalogue(): Catalogue
     {
-        if (empty($this->fallbackCatalogue)) {
-            $this->fallbackCatalogue = $this->loadCatalogue(
-                $this->config->fallbackLocale()
-            );
+        if (empty($this->fallback)) {
+            $this->fallback = $this->loadCatalogue($this->config->fallbackLocale());
         }
 
-        return $this->fallbackCatalogue;
+        return $this->fallback;
     }
 
     /**

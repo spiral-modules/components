@@ -12,7 +12,6 @@ use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\Tokenizer\Exceptions\LocatorException;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
 use Spiral\Tokenizer\Tokenizer;
@@ -111,7 +110,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
                 ['class' => $class, 'message' => $e->getMessage()]
             );
 
-            throw new LoaderException($e->getMessage(), $e->getCode());
+            throw new LocatorException($e->getMessage(), $e->getCode());
         } finally {
             spl_autoload_unregister($loader);
         }

@@ -164,7 +164,7 @@ abstract class AbstractEntity extends MutableObject implements
         if (!empty($setter)) {
             try {
                 $this->fields[$name] = call_user_func($setter, $value);
-            } catch (\Error $e) {
+            } catch (\Exception $e) {
                 //Exceptional situation, we are choosing to keep original field value
             }
         } else {
@@ -200,7 +200,7 @@ abstract class AbstractEntity extends MutableObject implements
         if ($filter && !empty($getter)) {
             try {
                 return call_user_func($getter, $value);
-            } catch (\Error $e) {
+            } catch (\Exception $e) {
                 //Trying to filter null value, every filter must support it
                 return call_user_func($getter, null);
             }

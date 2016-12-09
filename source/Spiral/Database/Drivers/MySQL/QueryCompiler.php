@@ -20,7 +20,7 @@ class QueryCompiler extends AbstractCompiler
      * {@inheritdoc}
      */
     public function orderParameters(
-        int $queryType,
+        string $queryType,
         array $whereParameters = [],
         array $onParameters = [],
         array $havingParameters = [],

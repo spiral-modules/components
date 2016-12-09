@@ -94,16 +94,16 @@ class QueryCompiler
      * method was used at times when delete and update queries supported joins, i might need to
      * drop it now.
      *
-     * @param int   $queryType
-     * @param array $whereParameters
-     * @param array $onParameters
-     * @param array $havingParameters
-     * @param array $columnIdentifiers Column names (if any).
+     * @param string $queryType
+     * @param array  $whereParameters
+     * @param array  $onParameters
+     * @param array  $havingParameters
+     * @param array  $columnIdentifiers Column names (if any).
      *
      * @return array
      */
     public function orderParameters(
-        int $queryType,
+        string $queryType,
         array $whereParameters = [],
         array $onParameters = [],
         array $havingParameters = [],

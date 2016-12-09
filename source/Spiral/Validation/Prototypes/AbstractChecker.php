@@ -87,8 +87,11 @@ abstract class AbstractChecker extends Component implements CheckerInterface
         }
 
         //Looking for message in parent realization
-        $reflection = $reflection ?: new \ReflectionClass($this);
-        if ($reflection->getParentClass() && $reflection->getParentClass()->isSubclassOf(self::class)) {
+        $reflection = $reflection ?? new \ReflectionClass($this);
+        if (
+            $reflection->getParentClass()
+            && $reflection->getParentClass()->isSubclassOf(self::class)
+        ) {
             return $this->getMessage($method, $reflection->getParentClass());
         }
 

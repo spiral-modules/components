@@ -21,9 +21,6 @@ use Spiral\Storage\StorageInterface;
  */
 class StorageObject extends Component implements ObjectInterface
 {
-    /**
-     * We all love sugar.
-     */
     use SaturateTrait;
 
     /**
@@ -59,7 +56,7 @@ class StorageObject extends Component implements ObjectInterface
 
         //Trying to find bucket using address
         if (empty($address)) {
-            throw new ObjectException("Unable to create StorageObject with empty address.");
+            throw new ObjectException("Unable to create StorageObject with empty address");
         }
 
         $this->address = $address;

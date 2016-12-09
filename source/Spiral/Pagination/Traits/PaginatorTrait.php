@@ -9,7 +9,7 @@
 namespace Spiral\Pagination\Traits;
 
 use Interop\Container\ContainerInterface;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Pagination\CountingInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
 use Spiral\Pagination\PaginatorInterface;
@@ -80,7 +80,7 @@ trait PaginatorTrait
      *
      * @return $this
      *
-     * @throws SugarException
+     * @throws ScopeException
      */
     public function paginate(int $limit = 25, string $parameter = 'page')
     {
@@ -88,7 +88,7 @@ trait PaginatorTrait
         $container = $this->iocContainer();
 
         if (empty($container) || !$container->has(PaginatorsInterface::class)) {
-            throw new SugarException(
+            throw new ScopeException(
                 'Unable to create paginator, PaginatorsInterface binding is missing or container not set'
             );
         }

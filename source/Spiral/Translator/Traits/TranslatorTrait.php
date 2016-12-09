@@ -9,7 +9,7 @@
 namespace Spiral\Translator\Traits;
 
 use Interop\Container\ContainerInterface;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Translator\Translator;
 use Spiral\Translator\TranslatorInterface;
 
@@ -35,7 +35,7 @@ trait TranslatorTrait
      *
      * @return string
      *
-     * @throws SugarException
+     * @throws ScopeException
      */
     protected function say(string $string, array $options = [], $bundle = null): string
     {
@@ -46,7 +46,7 @@ trait TranslatorTrait
 
         $container = $this->iocContainer();
         if (empty($container) || !$container->has(TranslatorInterface::class)) {
-            throw new SugarException("Unable to get instance of 'TranslatorInterface'");
+            throw new ScopeException("Unable to get instance of 'TranslatorInterface'");
         }
 
         /**

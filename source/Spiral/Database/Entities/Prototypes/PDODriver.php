@@ -11,7 +11,7 @@ namespace Spiral\Database\Entities\Prototypes;
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Database\Exceptions\DriverException;
@@ -93,7 +93,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param string $name
      * @param array  $options
      *
-     * @throws SugarException
+     * @throws ScopeException
      */
     public function __construct(string $name, array $options)
     {

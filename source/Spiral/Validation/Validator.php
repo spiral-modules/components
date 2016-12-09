@@ -11,7 +11,7 @@ namespace Spiral\Validation;
 use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -107,7 +107,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @param ValidatorConfig    $config    Saturated using shared container
      * @param ContainerInterface $container Saturated using shared container
      *
-     * @throws SugarException
+     * @throws ScopeException
      */
     public function __construct(
         array $rules = [],

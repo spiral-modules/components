@@ -14,14 +14,13 @@ use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Debug\Dumper\Style;
-use Spiral\Debug\Traits\BenchmarkTrait;
 
 /**
  * One of the oldest spiral parts, used to dump variables content in user friendly way.
  */
 class Dumper extends Component implements SingletonInterface, LoggerAwareInterface
 {
-    use LoggerAwareTrait, BenchmarkTrait;
+    use LoggerAwareTrait;
 
     /**
      * Options for dump() function to specify output.
@@ -86,31 +85,24 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      */
     public function dump($value, int $output = self::OUTPUT_ECHO): string
     {
-        //Dumping is pretty slow operation, let's record it so we can exclude dump time from application
-        //timeline
-        $benchmark = $this->benchmark('dump');
-        try {
-            switch ($output) {
-                case self::OUTPUT_ECHO:
-                    echo $this->style->wrapContainer($this->dumpValue($value, '', 0));
-                    break;
+         switch ($output) {
+            case self::OUTPUT_ECHO:
+                echo $this->style->wrapContainer($this->dumpValue($value, '', 0));
+                break;
 
-                case self::OUTPUT_RETURN:
-                    return $this->style->wrapContainer($this->dumpValue($value, '', 0));
-                    break;
+            case self::OUTPUT_RETURN:
+                return $this->style->wrapContainer($this->dumpValue($value, '', 0));
+                break;
 
-                case self::OUTPUT_LOG:
-                    if (!empty($this->logger)) {
-                        $this->logger->debug($this->dump($value, self::OUTPUT_RETURN));
-                    }
-                    break;
-            }
-
-            //Nothing to return
-            return '';
-        } finally {
-            $this->benchmark($benchmark);
+            case self::OUTPUT_LOG:
+                if (!empty($this->logger)) {
+                    $this->logger->debug($this->dump($value, self::OUTPUT_RETURN));
+                }
+                break;
         }
+
+        //Nothing to return
+        return '';
     }
 
     /**

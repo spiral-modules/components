@@ -102,13 +102,13 @@ class Style
     /**
      * Stylize content using pre-defined style.
      *
-     * @param string $element
-     * @param string $type
-     * @param string $context
+     * @param string|null $element
+     * @param string      $type
+     * @param string      $context
      *
      * @return string
      */
-    public function apply(string $element, string $type, string $context = ''): string
+    public function apply($element, string $type, string $context = ''): string
     {
         if (!empty($style = $this->getStyle($type, $context))) {
             return \Spiral\interpolate(

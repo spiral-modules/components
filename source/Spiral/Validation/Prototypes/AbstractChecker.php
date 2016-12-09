@@ -9,7 +9,7 @@ namespace Spiral\Validation\Prototypes;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Validation\CheckerInterface;
@@ -43,7 +43,7 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     /**
      * @param ContainerInterface $container Needed for translations and other things, saturated
      *
-     * @throws SugarException
+     * @throws ScopeException
      */
     public function __construct(ContainerInterface $container = null)
     {

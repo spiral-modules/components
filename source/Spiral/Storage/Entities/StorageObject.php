@@ -9,7 +9,7 @@ namespace Spiral\Storage\Entities;
 
 use Psr\Http\Message\StreamInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ObjectException;
@@ -51,7 +51,7 @@ class StorageObject extends Component implements ObjectInterface
      * @param string                $address
      * @param StorageInterface|null $storage
      *
-     * @throws SugarException
+     * @throws ScopeException
      */
     public function __construct(string $address, StorageInterface $storage = null)
     {

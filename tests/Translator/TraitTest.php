@@ -22,7 +22,7 @@ class TraitTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\SugarException
+     * @expectedException \Spiral\Core\Exceptions\ScopeException
      * @expectedExceptionMessage Unable to get instance of 'TranslatorInterface'
      */
     public function testNoContainer()

@@ -10,7 +10,7 @@ namespace Spiral\Database\Exceptions;
 /**
  * Generic DBAL exception.
  */
-class DBALException extends \Error
+class DBALException extends \RuntimeException
 {
 
 }

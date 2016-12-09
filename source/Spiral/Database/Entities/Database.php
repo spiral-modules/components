@@ -16,10 +16,10 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Exceptions\DriverException;
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Entities\Query\CachedResult;
 use Spiral\Database\Entities\Query\PDOResult;
+use Spiral\Database\Exceptions\DriverException;
+use Spiral\Database\Exceptions\QueryException;
 
 /**
  * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
@@ -303,9 +303,6 @@ class Database implements DatabaseInterface, InjectableInterface
             $this->commit();
 
             return $result;
-        } catch (\Exception $e) {
-            $this->rollBack();
-            throw $e;
         } catch (\Throwable $e) {
             $this->rollBack();
             throw $e;

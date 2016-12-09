@@ -118,8 +118,8 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         $this->data = $data;
         $this->rules = $rules;
 
-        $this->container = $this->saturate($container, ContainerInterface::class);
         $this->config = $this->saturate($config, ValidatorConfig::class);
+        $this->container = $this->saturate($container, ContainerInterface::class);
     }
 
     /**

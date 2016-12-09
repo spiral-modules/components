@@ -186,7 +186,7 @@ class ColumnSchema extends AbstractColumn
         $column->type = $matches['type'];
 
         if (!empty($matches['options'])) {
-            $options = $matches['options'];
+            $options = explode(',', $matches['options']);
 
             if (count($options) > 1) {
                 $column->precision = (int)$options[0];

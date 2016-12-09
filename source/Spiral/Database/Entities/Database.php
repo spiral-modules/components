@@ -239,7 +239,7 @@ class Database implements DatabaseInterface, InjectableInterface
      */
     public function insert(string $table = ''): InsertQuery
     {
-        return $this->driver->insertBuilder($this, compact('table'));
+        return $this->driver->insertBuilder($this->prefix, compact('table'));
     }
 
     /**
@@ -253,7 +253,7 @@ class Database implements DatabaseInterface, InjectableInterface
      */
     public function update(string $table = '', array $values = [], array $where = []): UpdateQuery
     {
-        return $this->driver->updateBuilder($this, compact('table', 'where', 'values'));
+        return $this->driver->updateBuilder($this->prefix, compact('table', 'where', 'values'));
     }
 
     /**
@@ -266,7 +266,7 @@ class Database implements DatabaseInterface, InjectableInterface
      */
     public function delete(string $table = '', array $where = []): DeleteQuery
     {
-        return $this->driver->deleteBuilder($this, compact('table', 'where'));
+        return $this->driver->deleteBuilder($this->prefix, compact('table', 'where'));
     }
 
     /**
@@ -284,7 +284,7 @@ class Database implements DatabaseInterface, InjectableInterface
             $columns = $columns[0];
         }
 
-        return $this->driver->selectBuilder($this, ['columns' => $columns]);
+        return $this->driver->selectBuilder($this->prefix, ['columns' => $columns]);
     }
 
     /**

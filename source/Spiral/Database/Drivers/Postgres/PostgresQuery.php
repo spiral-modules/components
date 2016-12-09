@@ -36,6 +36,10 @@ class PostgresQuery extends InsertQuery
             $compiler = $this->compiler->resetQuoter();
         }
 
+        /**
+         * @var PostgresDriver $driver
+         * @var QueryCompiler $compiler
+         */
         return $compiler->compileInsert(
             $this->table,
             $this->columns,

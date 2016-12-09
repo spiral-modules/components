@@ -20,6 +20,7 @@ interface LoaderInterface
      * @param string $path
      *
      * @return string
+     *
      * @throws LoaderExceptionInterface
      */
     public function localFilename($path);
@@ -30,6 +31,7 @@ interface LoaderInterface
      * @param string $path
      *
      * @return string
+     *
      * @throws LoaderExceptionInterface
      */
     public function getSource($path);

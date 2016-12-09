@@ -7,6 +7,7 @@
  */
 namespace Spiral\Tokenizer;
 
+use Spiral\Tokenizer\Exceptions\LocatorException;
 use Spiral\Tokenizer\Prototypes\AbstractLocator;
 use Spiral\Tokenizer\Reflections\ReflectionInvocation;
 
@@ -75,8 +76,9 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
             return !$invocation->isMethod();
         }
 
-        if (empty($class = $this->classReflection($invocation->getClass()))) {
-            //Unable to get reflection
+        try {
+            $reflection = $this->classReflection($invocation->getClass());
+        } catch (LocatorException $e) {
             return false;
         }
 
@@ -90,6 +92,6 @@ class InvocationLocator extends AbstractLocator implements InvocationLocatorInte
             return in_array($target->getName(), $this->fetchTraits($invocation->getClass()));
         }
 
-        return $class->getName() == $target->getName() || $class->isSubclassOf($target);
+        return $reflection->getName() == $target->getName() || $reflection->isSubclassOf($target);
     }
 }

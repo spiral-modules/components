@@ -66,13 +66,8 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
         foreach ($this->finder->getIterator() as $file) {
             $reflection = $this->tokenizer->fileReflection((string)$file);
 
-            //We are not analyzing files which has includes, it's not safe to require such reflections
             if ($reflection->hasIncludes()) {
-                $this->logger()->warning(
-                    "File '{filename}' has includes and will be excluded from analysis",
-                    ['filename' => (string)$file]
-                );
-
+                //We are not analyzing files which has includes, it's not safe to require such reflections
                 continue;
             }
 

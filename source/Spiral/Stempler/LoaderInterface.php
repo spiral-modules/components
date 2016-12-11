@@ -23,7 +23,7 @@ interface LoaderInterface
      *
      * @throws LoaderExceptionInterface
      */
-    public function localFilename($path);
+    public function localFilename(string $path): string;
 
     /**
      * Get source for given name.

@@ -93,15 +93,15 @@ class Style
     /**
      * Highlight given token.
      *
-     * @param int    $tokenType PHP token type used to correctly resolve proper color.
-     * @param string $code      Token source code.
+     * @param int    $token PHP token type used to correctly resolve proper color.
+     * @param string $code  Token source code.
      *
      * @return string
      */
-    public function highlightToken(int $tokenType, string $code): string
+    public function highlightToken($token, string $code): string
     {
         foreach ($this->styles as $style => $tokens) {
-            if (!in_array($tokenType, $tokens)) {
+            if (!in_array($token, $tokens)) {
                 //Nothing to highlight
                 continue;
             }

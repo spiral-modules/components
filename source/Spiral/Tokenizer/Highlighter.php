@@ -54,7 +54,7 @@ class Highlighter
      *
      * @return self
      */
-    public function withSource($source): Highlighter
+    public function withSource(string $source): Highlighter
     {
         $highlighter = clone $this;
         $highlighter->tokens = $this->normalizeTokens(token_get_all($source));

@@ -313,6 +313,27 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     }
 
     /**
+     * Column creation/altering shortcut, call chain is identical to:
+     * AbstractTable->column($name)->$type($arguments).
+     *
+     * Example:
+     * $table->string("name");
+     * $table->text("some_column");
+     *
+     * @param string $type
+     * @param array  $arguments Type specific parameters.
+     *
+     * @return AbstractColumn
+     */
+    public function __call(string $type, array $arguments)
+    {
+        return call_user_func_array(
+            [$this->column($arguments[0]), $type],
+            array_slice($arguments, 1)
+        );
+    }
+
+    /**
      * Get/create instance of AbstractIndex associated with current table based on list of forming
      * column names.
      *
@@ -379,28 +400,6 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     //------
     //Altering operations
     //------
-
-
-    /**
-     * Column creation/altering shortcut, call chain is identical to:
-     * AbstractTable->column($name)->$type($arguments).
-     *
-     * Example:
-     * $table->string("name");
-     * $table->text("some_column");
-     *
-     * @param string $type
-     * @param array  $arguments Type specific parameters.
-     *
-     * @return AbstractColumn
-     */
-    public function __call(string $type, array $arguments)
-    {
-        return call_user_func_array(
-            [$this->column($arguments[0]), $type],
-            array_slice($arguments, 1)
-        );
-    }
 
     /**
      * Reset table state to new form.

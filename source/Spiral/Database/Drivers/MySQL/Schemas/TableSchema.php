@@ -129,7 +129,11 @@ class TableSchema extends AbstractTable
                 [$schema['CONSTRAINT_NAME'], $this->driver->getSource(), $this->getName()]
             )->fetch();
 
-            $result[] = ReferenceSchema::createInstance($this->getName(), $schema + $column);
+            $result[] = ReferenceSchema::createInstance(
+                $this->getName(),
+                $this->getPrefix(),
+                $schema + $column
+            );
         }
 
         return $result;

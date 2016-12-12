@@ -74,7 +74,11 @@ class TableSchema extends AbstractTable
 
         $result = [];
         foreach ($this->driver->query($query) as $schema) {
-            $result[] = ReferenceSchema::createInstance($this->getName(), $schema);
+            $result[] = ReferenceSchema::createInstance(
+                $this->getName(),
+                $this->getPrefix(),
+                $schema
+            );
         }
 
         return $result;

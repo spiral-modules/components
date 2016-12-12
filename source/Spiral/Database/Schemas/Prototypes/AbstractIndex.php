@@ -65,7 +65,42 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
         return $this->columns;
     }
 
-    //--MODIFICATIONS
+    /**
+     * Declare index type and behaviour to unique/non-unique state.
+     *
+     * @param bool $unique
+     *
+     * @return self
+     */
+    public function unique(bool $unique = true): AbstractIndex
+    {
+        $this->type = $unique ? self::UNIQUE : self::NORMAL;
+
+        return $this;
+    }
+
+    /**
+     * Change set of index forming columns. Method must support both array and string parameters.
+     *
+     * Example:
+     * $index->columns('key');
+     * $index->columns('key', 'key2');
+     * $index->columns(['key', 'key2']);
+     *
+     * @param string|array $columns Columns array or comma separated list of parameters.
+     *
+     * @return self
+     */
+    public function columns($columns): AbstractIndex
+    {
+        if (!is_array($columns)) {
+            $columns = func_get_args();
+        }
+
+        $this->columns = $columns;
+
+        return $this;
+    }
 
     /**
      * Index sql creation syntax.

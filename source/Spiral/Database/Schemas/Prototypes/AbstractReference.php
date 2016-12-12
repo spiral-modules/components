@@ -17,6 +17,13 @@ use Spiral\Database\Schemas\ReferenceInterface;
 abstract class AbstractReference extends AbstractElement implements ReferenceInterface
 {
     /**
+     * Parent table isolation prefix.
+     *
+     * @var string
+     */
+    protected $tablePrefix = '';
+
+    /**
      * Local column name (key name).
      *
      * @var string
@@ -118,7 +125,71 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
         return $this->updateRule;
     }
 
-    //--- MODIFICATIONS
+    /**
+     * Set local column name foreign key relates to. Make sure column type is the same as foreign
+     * column one.
+     *
+     * @param string $column
+     *
+     * @return self
+     */
+    public function column(string $column): AbstractReference
+    {
+        $this->column = $column;
+
+        return $this;
+    }
+
+    /**
+     * Set foreign table name and key local column must reference to. Make sure local and foreign
+     * column types are identical.
+     *
+     * @param string $table       Foreign table name with or without database prefix (see 3rd
+     *                            argument).
+     * @param string $column      Foreign key name (id by default).
+     * @param bool   $forcePrefix When true foreign table will get same prefix as table being
+     *                            modified.
+     *
+     * @return self
+     */
+    public function references(
+        string $table,
+        string $column = 'id',
+        bool $forcePrefix = true
+    ): AbstractReference {
+        $this->foreignTable = ($forcePrefix ? $this->tablePrefix : '') . $table;
+        $this->foreignKey = $column;
+
+        return $this;
+    }
+
+    /**
+     * Set foreign key delete behaviour.
+     *
+     * @param string $rule Possible values: NO ACTION, CASCADE, etc (driver specific).
+     *
+     * @return self
+     */
+    public function onDelete(string $rule = self::NO_ACTION): AbstractReference
+    {
+        $this->deleteRule = strtoupper($rule);
+
+        return $this;
+    }
+
+    /**
+     * Set foreign key update behaviour.
+     *
+     * @param string $rule Possible values: NO ACTION, CASCADE, etc (driver specific).
+     *
+     * @return self
+     */
+    public function onUpdate(string $rule = self::NO_ACTION): AbstractReference
+    {
+        $this->updateRule = strtoupper($rule);
+
+        return $this;
+    }
 
     /**
      * Foreign key creation syntax.

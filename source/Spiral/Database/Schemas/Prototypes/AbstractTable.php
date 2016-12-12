@@ -558,6 +558,9 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         return $this;
     }
 
+    //------------------- SAVE AND SYNC OPERATIONS!
+
+
     /**
      * @return AbstractColumn|string
      */

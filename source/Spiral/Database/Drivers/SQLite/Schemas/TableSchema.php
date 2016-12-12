@@ -6,6 +6,9 @@
  */
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
+use Spiral\Database\Schemas\Prototypes\AbstractIndex;
+use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 class TableSchema extends AbstractTable
@@ -119,5 +122,29 @@ class TableSchema extends AbstractTable
         }
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createColumn(string $name): AbstractColumn
+    {
+        return new ColumnSchema($this->getName(), $name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createIndex(string $name): AbstractIndex
+    {
+        return new IndexSchema($this->getName(), $name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createReference(string $column): AbstractReference
+    {
+        return new ReferenceSchema($this->getName(), $this->getPrefix(), $column);
     }
 }

@@ -59,6 +59,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
     /**
      * Alias for getDatabase().
      *
+     * @deprecated use getDatabase() instead.
      * @return Database
      */
     public function database(): Database

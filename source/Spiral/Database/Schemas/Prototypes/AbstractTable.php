@@ -259,7 +259,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      *
      * @return ReferenceInterface[]|AbstractReference[]
      */
-    public function getReferences(): array
+    public function getForeigns(): array
     {
         return $this->currentState->getForeigns();
     }
@@ -356,7 +356,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      *
      * @return AbstractReference
      */
-    public function references(string $column): AbstractReference
+    public function foreign(string $column): AbstractReference
     {
         if (!$this->currentState->hasColumn($column)) {
             throw new SchemaException("Undefined column '{$column}' of '{$this->getName()}'");
@@ -448,7 +448,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
             'primaryKeys' => $this->getPrimaryKeys(),
             'columns'     => array_values($this->getColumns()),
             'indexes'     => array_values($this->getIndexes()),
-            'references'  => array_values($this->getReferences()),
+            'references'  => array_values($this->getForeigns()),
         ];
     }
 

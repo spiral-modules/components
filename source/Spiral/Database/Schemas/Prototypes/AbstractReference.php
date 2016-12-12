@@ -150,7 +150,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @return self
      */
-    public function to(
+    public function references(
         string $table,
         string $column = 'id',
         bool $forcePrefix = true

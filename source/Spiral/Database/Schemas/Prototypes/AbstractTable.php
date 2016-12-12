@@ -259,7 +259,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      *
      * @return ReferenceInterface[]|AbstractReference[]
      */
-    public function getForeigns(): array
+    public function getReferences(): array
     {
         return $this->currentState->getForeigns();
     }
@@ -448,7 +448,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
             'primaryKeys' => $this->getPrimaryKeys(),
             'columns'     => array_values($this->getColumns()),
             'indexes'     => array_values($this->getIndexes()),
-            'references'  => array_values($this->getForeigns()),
+            'references'  => array_values($this->getReferences()),
         ];
     }
 

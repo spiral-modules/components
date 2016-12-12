@@ -81,7 +81,7 @@ interface TableInterface
      *
      * @return ReferenceInterface[]
      */
-    public function getForeigns(): array;
+    public function getReferences(): array;
 
     /**
      * Get list of table names current schema depends on, must include every table linked using

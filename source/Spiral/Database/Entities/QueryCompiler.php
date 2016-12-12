@@ -128,7 +128,9 @@ class QueryCompiler
     public function compileInsert(string $table, array $columns, array $rowsets): string
     {
         if (empty($columns)) {
-            throw new CompilerException('Unable to build insert statement, columns must be set');
+            throw new CompilerException(
+                'Unable to build insert statement, columns must be set'
+            );
         }
 
         if (empty($rowsets)) {
@@ -234,7 +236,7 @@ class QueryCompiler
         //Distinct flag (if any)
         $distinct = $this->optional(' ', $this->compileDistinct($distinct));
 
-        //Columns are compiled after table names and joins to enshure aliases and prefixes
+        //Columns are compiled after table names and joins to ensure aliases and prefixes
         $columns = $this->prepareColumns($columns);
 
         //A lot of constrain and other statements
@@ -475,13 +477,13 @@ class QueryCompiler
                     $activeGroup = true;
                 }
 
-                $postfix = ' ';
-                if ($context == '(') {
-                    //We don't need space after opening brace
-                    $postfix = '';
+                $statement .= ltrim("{$boolean} {$context} ");
+
+                if ($context == ')') {
+                    //We don't need trailing space
+                    $statement = rtrim($statement);
                 }
 
-                $statement .= ltrim("{$boolean} {$context}{$postfix}");
                 continue;
             }
 

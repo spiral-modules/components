@@ -466,9 +466,9 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $column = $state->findColumn($column);
         $state->forgetColumn($column);
 
-        if ($state->hasForeign($column)) {
+        if ($state->hasForeign($column->getName())) {
             //Dropping related foreign key
-            $state->forgetForeign($state->findForeign($column));
+            $state->forgetForeign($state->findForeign($column->getName()));
         }
 
         //Dropping related indexes

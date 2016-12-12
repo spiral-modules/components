@@ -422,11 +422,12 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
             return $this->currentState->findForeign($column);
         }
 
-        $foreign = $this->createReference($this->createIdentifier('foreign', [$column]));
+        $foreign = $this->createForeign($this->createIdentifier('foreign', [$column]));
         $foreign->column($column);
+
         $this->currentState->registerReference($foreign);
 
-        //Let's ensure index existence
+        //Let's ensure index existence to performance and compatibility reasons
         $this->index($column);
 
         return $foreign;
@@ -694,7 +695,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      *
      * @return AbstractReference
      */
-    abstract protected function createReference(string $name): AbstractReference;
+    abstract protected function createForeign(string $name): AbstractReference;
 
     /**
      * Generate unique name for indexes and foreign keys.

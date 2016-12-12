@@ -143,7 +143,7 @@ class TableSchema extends AbstractTable
     /**
      * {@inheritdoc}
      */
-    protected function createReference(string $column): AbstractReference
+    protected function createForeign(string $column): AbstractReference
     {
         return new ReferenceSchema($this->getName(), $this->getPrefix(), $column);
     }

@@ -353,12 +353,12 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $columns = is_array($columns) ? $columns : func_get_args();
 
         foreach ($columns as $column) {
-            if (!$this->currentState->hasColumn($column)) {
-                throw new SchemaException("Undefined column '{$column}' of '{$this->getName()}'");
+            if (!$this->hasColumn($column)) {
+                throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
             }
         }
 
-        if ($this->currentState->hasIndex($columns)) {
+        if ($this->hasIndex($columns)) {
             return $this->currentState->findIndex($columns);
         }
 
@@ -376,14 +376,16 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * @param string $column
      *
      * @return AbstractReference
+     *
+     * @throws SchemaException
      */
     public function foreign(string $column): AbstractReference
     {
-        if (!$this->currentState->hasColumn($column)) {
-            throw new SchemaException("Undefined column '{$column}' of '{$this->getName()}'");
+        if (!$this->hasColumn($column)) {
+            throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
         }
 
-        if ($this->currentState->hasForeign($column)) {
+        if ($this->hasForeign($column)) {
             return $this->currentState->findForeign($column);
         }
 
@@ -397,9 +399,133 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         return $foreign;
     }
 
-    //------
-    //Altering operations
-    //------
+    /**
+     * Rename column (only if column exists).
+     *
+     * @param string $column
+     * @param string $name New column name.
+     *
+     * @return self
+     *
+     * @throws SchemaException
+     */
+    public function renameColumn(string $column, string $name): AbstractTable
+    {
+        if (!$this->hasColumn($column)) {
+            throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
+        }
+
+        //Rename operation is simple about declaring new name
+        $this->column($column)->setName($name);
+
+        return $this;
+    }
+
+    /**
+     * Rename index (only if index exists).
+     *
+     * @param array  $columns Index forming columns.
+     * @param string $name    New index name.
+     *
+     * @return self
+     *
+     * @throws SchemaException
+     */
+    public function renameIndex(array $columns, string $name): AbstractTable
+    {
+        if (!$this->hasIndex($columns)) {
+            throw new SchemaException(
+                "Undefined index ['" . join("', '", $columns) . "'] in '{$this->getName()}'"
+            );
+        }
+
+        //Declaring new index name
+        $this->index($columns)->setName($name);
+
+        return $this;
+    }
+
+    /**
+     * Drop column by it's name.
+     *
+     * @param string $column
+     *
+     * @return self
+     *
+     * @throws SchemaException
+     */
+    public function dropColumn(string $column): AbstractTable
+    {
+        if (!$this->hasColumn($column)) {
+            throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
+        }
+
+        $state = $this->currentState;
+
+        //Removing column first
+        $column = $state->findColumn($column);
+        $state->forgetColumn($column);
+
+        if ($state->hasForeign($column)) {
+            //Dropping related foreign key
+            $state->forgetForeign($state->findForeign($column));
+        }
+
+        //Dropping related indexes
+        foreach ($state->getIndexes() as $index) {
+            if (in_array($column->getName(), $index->getColumns())) {
+                $state->forgetIndex($index);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Drop index by it's forming columns.
+     *
+     * @param array $columns
+     *
+     * @return self
+     *
+     * @throws SchemaException
+     */
+    public function dropIndex(array $columns): AbstractTable
+    {
+        if (!$this->hasIndex($columns)) {
+            throw new SchemaException(
+                "Undefined index ['" . join("', '", $columns) . "'] in '{$this->getName()}'"
+            );
+        }
+
+        //Dropping index from current schema
+        $this->currentState->forgetIndex($this->currentState->findIndex($columns));
+
+        return $this;
+    }
+
+    /**
+     * Drop foreign key by it's name.
+     *
+     * @param string $column
+     *
+     * @return self
+     *
+     * @throws SchemaException
+     */
+    public function dropForeign($column): AbstractTable
+    {
+        if (!$this->hasForeign($column)) {
+            throw new SchemaException(
+                "Undefined FK on '{$column}' in '{$this->getName()}'"
+            );
+        }
+
+        //Dropping foreign from current schema
+        $this->currentState->forgetForeign($this->currentState->findForeign($column));
+
+        return $this;
+    }
 
     /**
      * Reset table state to new form.

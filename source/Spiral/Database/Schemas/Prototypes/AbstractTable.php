@@ -55,11 +55,18 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     use LoggerTrait;
 
     /**
+     * Table states.
+     */
+    const STATUS_NEW     = 0;
+    const STATUS_EXISTS  = 1;
+    const STATUS_DROPPED = 2;
+
+    /**
      * Indication that table is exists and current schema is fetched from database.
      *
-     * @var bool
+     * @var int
      */
-    private $exists = false;
+    private $status = self::STATUS_NEW;
 
     /**
      * Database specific tablePrefix. Required for table renames.
@@ -105,14 +112,16 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $this->initialState = new TableState($this->prefix . $name);
         $this->currentState = new TableState($this->prefix . $name);
 
-        $this->exists = $this->driver->hasTable($this->getName());
+        if ($this->driver->hasTable($this->getName())) {
+            $this->status = self::STATUS_EXISTS;
+        }
 
-        if ($this->exists) {
+        if ($this->exists()) {
             //Initiating table schema
             $this->initSchema($this->initialState);
         }
 
-        $this->setState($this->initialState);
+        $this->setStatus($this->initialState);
     }
 
     /**
@@ -148,7 +157,17 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function exists(): bool
     {
-        return $this->exists;
+        return $this->status == self::STATUS_EXISTS || $this->status == self::STATUS_DROPPED;
+    }
+
+    /**
+     * Table status (see codes above).
+     *
+     * @return int
+     */
+    public function getStatus(): int
+    {
+        return $this->status;
     }
 
     /**
@@ -181,6 +200,20 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function getName(): string
     {
         return $this->currentState->getName();
+    }
+
+    /**
+     * Declare table as dropped, you have to sync table using "save" method in order to apply this
+     * change.
+     */
+    public function declareDropped()
+    {
+        if ($this->status == self::STATUS_NEW) {
+            throw new SchemaException("Unable to drop non existed table");
+        }
+
+        //Declaring as dropper
+        $this->status = self::STATUS_DROPPED;
     }
 
     /**
@@ -530,17 +563,17 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     /**
      * Reset table state to new form.
      *
-     * @param TableState $state Use null to flush table schema.
+     * @param TableState $status Use null to flush table schema.
      *
      * @return self|$this
      */
-    public function setState(TableState $state = null): AbstractTable
+    public function setStatus(TableState $status = null): AbstractTable
     {
         $this->currentState = new TableState($this->initialState->getName());
 
-        if (!empty($state)) {
-            $this->currentState->setName($state->getName());
-            $this->currentState->syncState($state);
+        if (!empty($status)) {
+            $this->currentState->setName($status->getName());
+            $this->currentState->syncState($status);
         }
 
         return $this;
@@ -553,13 +586,20 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function resetState(): AbstractTable
     {
-        $this->setState($this->initialState);
+        $this->setStatus($this->initialState);
 
         return $this;
     }
 
-    //------------------- SAVE AND SYNC OPERATIONS!
-
+    /**
+     * Save table schema including every column, index, foreign key creation/altering. If table
+     * does not exist it must be created. If table declared as dropped it will be removed from
+     * the database.
+     */
+    public function save()
+    {
+        //working in here
+    }
 
     /**
      * @return AbstractColumn|string

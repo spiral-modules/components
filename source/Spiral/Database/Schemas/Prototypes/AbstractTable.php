@@ -466,7 +466,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function renameIndex(array $columns, string $name): AbstractTable
     {
-        if (!$this->hasIndex($columns)) {
+        if ($this->hasIndex($columns)) {
             throw new SchemaException(
                 "Undefined index ['" . join("', '", $columns) . "'] in '{$this->getName()}'"
             );
@@ -489,7 +489,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropColumn(string $column): AbstractTable
     {
-        if (!empty($schema = $this->currentState->findColumn($column))) {
+        if (empty($schema = $this->currentState->findColumn($column))) {
             throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
         }
 
@@ -510,7 +510,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropIndex(array $columns): AbstractTable
     {
-        if (!empty($schema = $this->currentState->findIndex($columns))) {
+        if (empty($schema = $this->currentState->findIndex($columns))) {
             throw new SchemaException(
                 "Undefined index ['" . join("', '", $columns) . "'] in '{$this->getName()}'"
             );
@@ -580,10 +580,19 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * Save table schema including every column, index, foreign key creation/altering. If table
      * does not exist it must be created. If table declared as dropped it will be removed from
      * the database.
+     *
+     * @param int $behaviour Operation to be performed while table being saved. In some cases (when
+     *                       multiple tables are being updated) it is reasonable to drop foreing
+     *                       keys and indexes prior to dropping related columns. See sync bus class
+     *                       to get more details.
      */
-    public function save(int $behaviour)
+    public function save(int $behaviour = 1)
     {
+
+
         //working in here
+
+
     }
 
     /**

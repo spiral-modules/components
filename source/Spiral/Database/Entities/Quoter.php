@@ -91,7 +91,7 @@ class Quoter
             return $this->unpaired($identifier, $isTable);
         }
 
-        //Contain table.column statement
+        //Contain table.column statement (technically we can go deeper, but we should't)
         return $this->paired($identifier);
     }
 

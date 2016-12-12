@@ -450,10 +450,11 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     {
         $this->defaultValue = $value;
         if (
-            $this->abstractType() == 'timestamp'
-            && strtolower($value) == strtolower(Driver::TIMESTAMP_NOW)
+            ($this->abstractType() == 'timestamp' || $this->abstractType() == 'datetime')
+            && strtolower($value) == strtolower(self::DATETIME_DEFAULT)
         ) {
-            $this->defaultValue = $this->table->getDriver()->nowExpression();
+            //Making sure default value is driver specific
+            $this->defaultValue = static::DATETIME_DEFAULT;
         }
 
         return $this;

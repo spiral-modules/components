@@ -134,7 +134,10 @@ class TableState
         $primaryColumns = [];
         foreach ($this->getColumns() as $column) {
             if ($column->abstractType() == 'primary' || $column->abstractType() == 'bigPrimary') {
-                $primaryColumns[] = $column->getName();
+                if (!in_array($column->getName(), $this->primaryKeys)) {
+                    //Only columns not listed as primary keys already
+                    $primaryColumns[] = $column->getName();
+                }
             }
         }
 

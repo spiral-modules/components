@@ -370,6 +370,9 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $foreign->column($column);
         $this->currentState->registerReference($foreign);
 
+        //Let's ensure index existence
+        $this->index($column);
+
         return $foreign;
     }
 

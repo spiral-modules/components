@@ -316,6 +316,28 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     }
 
     /**
+     * @return AbstractColumn|string
+     */
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'name'        => $this->getName(),
+            'primaryKeys' => $this->getPrimaryKeys(),
+            'columns'     => array_values($this->getColumns()),
+            'indexes'     => array_values($this->getIndexes()),
+            'references'  => array_values($this->getForeigns()),
+        ];
+    }
+
+    /**
      * Populate table schema with values from database.
      *
      * @param TableState $state
@@ -366,28 +388,6 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * @return array
      */
     abstract protected function fetchPrimaryKeys(): array;
-
-    /**
-     * @return AbstractColumn|string
-     */
-    public function __toString(): string
-    {
-        return $this->getName();
-    }
-
-    /**
-     * @return array
-     */
-    public function __debugInfo()
-    {
-        return [
-            'name'        => $this->getName(),
-            'primaryKeys' => $this->getPrimaryKeys(),
-            'columns'     => array_values($this->getColumns()),
-            'indexes'     => array_values($this->getIndexes()),
-            'references'  => array_values($this->getForeigns()),
-        ];
-    }
 
     /**
      * @return ContainerInterface

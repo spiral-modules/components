@@ -121,10 +121,20 @@ class TableState
 
     /**
      * {@inheritdoc}
+     *
+     * Method combines primary keys with primary keys automatically calculated based on registred
+     * columns.
      */
     public function getPrimaryKeys()
     {
-        return $this->primaryKeys;
+        $primaryColumns = [];
+        foreach ($this->getColumns() as $column) {
+            if ($column->abstractType() == 'primary' || $column->abstractType() == 'bigPrimary') {
+                $primaryColumns[] = $column->getName();
+            }
+        }
+
+        return array_merge($this->primaryKeys, $primaryColumns);
     }
 
     /**

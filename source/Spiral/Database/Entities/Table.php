@@ -55,7 +55,6 @@ class Table implements \JsonSerializable, \IteratorAggregate
         return $this->database;
     }
 
-
     /**
      * Alias for getDatabase().
      *
@@ -204,7 +203,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
     }
 
     /**
-     * Retrieve an external iterator, SelectBuilder will return QueryResult as iterator.
+     * Retrieve an external iterator, SelectBuilder will return PDOResult as iterator.
      *
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
      *
@@ -216,7 +215,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
     }
 
     /**
-     * A simple alias for table query without condition.
+     * A simple alias for table query without condition (returns array of rows).
      *
      * @return array
      */

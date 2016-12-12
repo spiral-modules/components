@@ -190,14 +190,11 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * @param array $columns
      *
      * @return self
-     *
-     * @throws SchemaException
      */
     public function setPrimaryKeys(array $columns): AbstractTable
     {
-        if ($this->exists() && $this->initialState->getPrimaryKeys() != $columns) {
-            throw new SchemaException('Unable to change primary keys for already exists table');
-        }
+        //Originally we were forcing an exception when primary key were changed, now we should
+        //force it when table will be synced
 
         //Updating primary keys in current state
         $this->currentState->setPrimaryKeys($columns);
@@ -280,9 +277,127 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         return $tables;
     }
 
+    /**
+     * Get/create instance of AbstractColumn associated with current table.
+     *
+     * Examples:
+     * $table->column('name')->string();
+     *
+     * @param string $name
+     *
+     * @return AbstractColumn
+     */
+    public function column(string $name): AbstractColumn
+    {
+        if ($this->currentState->hasColumn($name)) {
+            //Column already exists
+            return $this->currentState->findColumn($name);
+        }
+
+        $column = $this->createColumn($name);
+        $this->currentState->registerColumn($column);
+
+        return $column;
+    }
+
+    /**
+     * Shortcut for column() method.
+     *
+     * @param string $column
+     *
+     * @return AbstractColumn
+     */
+    public function __get(string $column)
+    {
+        return $this->column($column);
+    }
+
+    /**
+     * Get/create instance of AbstractIndex associated with current table based on list of forming
+     * column names.
+     *
+     * Example:
+     * $table->index('key');
+     * $table->index('key', 'key2');
+     * $table->index(['key', 'key2']);
+     *
+     * @param mixed $columns Column name, or array of columns.
+     *
+     * @return AbstractIndex
+     *
+     * @throws SchemaException
+     */
+    public function index($columns): AbstractIndex
+    {
+        $columns = is_array($columns) ? $columns : func_get_args();
+
+        foreach ($columns as $column) {
+            if (!$this->currentState->hasColumn($column)) {
+                throw new SchemaException("Undefined column '{$column}' of '{$this->getName()}'");
+            }
+        }
+
+        if ($this->currentState->hasIndex($columns)) {
+            return $this->currentState->findIndex($columns);
+        }
+
+        $index = $this->createIndex($this->createIdentifier('index', $columns));
+        $index->columns($columns);
+        $this->currentState->registerIndex($index);
+
+        return $index;
+    }
+
+    /**
+     * Get/create instance of AbstractReference associated with current table based on local column
+     * name.
+     *
+     * @param string $column
+     *
+     * @return AbstractReference
+     */
+    public function references(string $column): AbstractReference
+    {
+        if (!$this->currentState->hasColumn($column)) {
+            throw new SchemaException("Undefined column '{$column}' of '{$this->getName()}'");
+        }
+
+        if ($this->currentState->hasForeign($column)) {
+            return $this->currentState->findForeign($column);
+        }
+
+        $foreign = $this->createReference($this->createIdentifier('foreign', [$column]));
+        $foreign->column($column);
+        $this->currentState->registerReference($foreign);
+
+        return $foreign;
+    }
+
     //------
     //Altering operations
     //------
+
+
+    /**
+     * Column creation/altering shortcut, call chain is identical to:
+     * AbstractTable->column($name)->$type($arguments).
+     *
+     * Example:
+     * $table->string("name");
+     * $table->text("some_column");
+     *
+     * @param string $type
+     * @param array  $arguments Type specific parameters.
+     *
+     * @return AbstractColumn
+     */
+    public function __call(string $type, array $arguments)
+    {
+        return call_user_func_array(
+            [$this->column($arguments[0]), $type],
+            array_slice($arguments, 1)
+        );
+    }
 
     /**
      * Reset table state to new form.
@@ -388,6 +503,53 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * @return array
      */
     abstract protected function fetchPrimaryKeys(): array;
+
+    /**
+     * Create column with a given name.
+     *
+     * @param string $name
+     *
+     * @return AbstractColumn
+     */
+    abstract protected function createColumn(string $name): AbstractColumn;
+
+    /**
+     * Create index for a given set of columns.
+     *
+     * @param string $name
+     *
+     * @return AbstractIndex
+     */
+    abstract protected function createIndex(string $name): AbstractIndex;
+
+    /**
+     * Create reference on a given column set.
+     *
+     * @param string $name
+     *
+     * @return AbstractReference
+     */
+    abstract protected function createReference(string $name): AbstractReference;
+
+    /**
+     * Generate unique name for indexes and foreign keys.
+     *
+     * @param string $type
+     * @param array  $columns
+     *
+     * @return string
+     */
+    protected function createIdentifier(string $type, array $columns): string
+    {
+        $name = $this->getName() . '_' . $type . '_' . join('_', $columns) . '_' . uniqid();
+
+        if (strlen($name) > 64) {
+            //Many DBMS has limitations on identifier length
+            $name = md5($name);
+        }
+
+        return $name;
+    }
 
     /**
      * @return ContainerInterface

@@ -39,19 +39,6 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
     /**
      * {@inheritdoc}
      */
-    public function getName(): string
-    {
-        if (empty($this->name)) {
-            //Let's generate index name on a fly
-            $this->setName($this->generateName());
-        }
-
-        return parent::getName();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function isUnique(): bool
     {
         return $this->type == self::UNIQUE;
@@ -135,23 +122,5 @@ abstract class AbstractIndex extends AbstractElement implements IndexInterface
     public function compare(IndexInterface $initial): bool
     {
         return $this == clone $initial;
-    }
-
-    /**
-     * Generate unique index name.
-     *
-     * @return string
-     */
-    protected function generateName(): string
-    {
-        //We can generate name
-        $name = $this->table . '_index_' . implode('_', $this->columns) . '_' . uniqid();
-
-        if (strlen($name) > 64) {
-            //Many dbs has limitations on identifier length
-            $name = md5($name);
-        }
-
-        return $name;
     }
 }

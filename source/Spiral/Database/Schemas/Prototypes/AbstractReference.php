@@ -59,6 +59,17 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     protected $updateRule = self::NO_ACTION;
 
     /**
+     * @param string $table
+     * @param string $tablePrefix
+     * @param string $name
+     */
+    public function __construct(string $table, string $tablePrefix, string $name)
+    {
+        parent::__construct($table, $name);
+        $this->tablePrefix = $tablePrefix;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string $name
@@ -70,19 +81,6 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
         }
 
         return parent::setName($name);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName(): string
-    {
-        if (empty($this->name)) {
-            //Generating name on a fly
-            $this->setName($this->generateName());
-        }
-
-        return parent::getName();
     }
 
     /**
@@ -152,7 +150,7 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
      *
      * @return self
      */
-    public function references(
+    public function to(
         string $table,
         string $column = 'id',
         bool $forcePrefix = true
@@ -222,22 +220,5 @@ abstract class AbstractReference extends AbstractElement implements ReferenceInt
     public function compare(ReferenceInterface $initial): bool
     {
         return $this == clone $initial;
-    }
-
-    /**
-     * Generate unique foreign key name.
-     *
-     * @return string
-     */
-    protected function generateName(): string
-    {
-        $name = $this->table . '_foreign_' . $this->column . '_' . uniqid();
-
-        if (strlen($name) > 64) {
-            //Many dbs has limitations on identifier length
-            $name = md5($name);
-        }
-
-        return $name;
     }
 }

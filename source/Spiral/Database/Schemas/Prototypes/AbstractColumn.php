@@ -18,6 +18,8 @@ use Spiral\Database\Schemas\ColumnInterface;
  *
  * Shortcuts for various column types:
  *
+ * @method AbstractColumn|$this primary()
+ * @method AbstractColumn|$this bigPrimary()
  * @method AbstractColumn|$this boolean()
  * @method AbstractColumn|$this integer()
  * @method AbstractColumn|$this tinyInteger()

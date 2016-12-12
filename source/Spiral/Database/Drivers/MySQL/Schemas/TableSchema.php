@@ -7,6 +7,9 @@
 namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\Exceptions\SchemaException;
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
+use Spiral\Database\Schemas\Prototypes\AbstractIndex;
+use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Database\Schemas\TableState;
 
@@ -156,5 +159,29 @@ class TableSchema extends AbstractTable
         }
 
         return $primaryKeys;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createColumn(string $name): AbstractColumn
+    {
+        return new ColumnSchema($this->getName(), $name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createIndex(string $name): AbstractIndex
+    {
+        return new IndexSchema($this->getName(), $name);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function createReference(string $column): AbstractReference
+    {
+        return new ReferenceSchema($this->getName(), $this->getPrefix(), $column);
     }
 }

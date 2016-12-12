@@ -8,6 +8,10 @@
 
 namespace Spiral\Database\Schemas;
 
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
+use Spiral\Database\Schemas\Prototypes\AbstractIndex;
+use Spiral\Database\Schemas\Prototypes\AbstractReference;
+
 /**
  * TableSchema helper used to store original table elements and run comparation between them.
  *
@@ -21,17 +25,17 @@ class TableState
     private $name = '';
 
     /**
-     * @var ColumnInterface[]
+     * @var AbstractColumn[]
      */
     private $columns = [];
 
     /**
-     * @var IndexInterface[]
+     * @var AbstractIndex[]
      */
     private $indexes = [];
 
     /**
-     * @var ReferenceInterface[]
+     * @var AbstractReference[]
      */
     private $foreigns = [];
 
@@ -74,7 +78,7 @@ class TableState
      *
      * Array key points to initial element name.
      *
-     * @return ColumnInterface[]
+     * @return AbstractColumn[]
      */
     public function getColumns()
     {
@@ -86,7 +90,7 @@ class TableState
      *
      * Array key points to initial element name.
      *
-     * @return IndexInterface[]
+     * @return AbstractIndex[]
      */
     public function getIndexes()
     {
@@ -98,7 +102,7 @@ class TableState
      *
      * Array key points to initial element name.
      *
-     * @return ReferenceInterface[]
+     * @return AbstractReference[]
      */
     public function getForeigns()
     {
@@ -134,7 +138,7 @@ class TableState
             }
         }
 
-        return array_merge($this->primaryKeys, $primaryColumns);
+        return array_unique(array_merge($this->primaryKeys, $primaryColumns));
     }
 
     /**
@@ -196,11 +200,11 @@ class TableState
     /**
      * Register new column element.
      *
-     * @param ColumnInterface $column
+     * @param AbstractColumn $column
      *
-     * @return ColumnInterface
+     * @return AbstractColumn
      */
-    public function registerColumn(ColumnInterface $column): ColumnInterface
+    public function registerColumn(AbstractColumn $column): AbstractColumn
     {
         $this->columns[$column->getName()] = $column;
 
@@ -210,11 +214,11 @@ class TableState
     /**
      * Register new index element.
      *
-     * @param IndexInterface $index
+     * @param AbstractIndex $index
      *
-     * @return IndexInterface
+     * @return AbstractIndex
      */
-    public function registerIndex(IndexInterface $index): IndexInterface
+    public function registerIndex(AbstractIndex $index): AbstractIndex
     {
         $this->indexes[$index->getName()] = $index;
 
@@ -224,11 +228,11 @@ class TableState
     /**
      * Register new foreign key element.
      *
-     * @param ReferenceInterface $foreign
+     * @param AbstractReference $foreign
      *
-     * @return ReferenceInterface
+     * @return AbstractReference
      */
-    public function registerReference(ReferenceInterface $foreign): ReferenceInterface
+    public function registerReference(AbstractReference $foreign): AbstractReference
     {
         $this->foreigns[$foreign->getName()] = $foreign;
 
@@ -238,11 +242,11 @@ class TableState
     /**
      * Drop column from table schema.
      *
-     * @param ColumnInterface $column
+     * @param AbstractColumn $column
      *
      * @return self
      */
-    public function forgetColumn(ColumnInterface $column): TableState
+    public function forgetColumn(AbstractColumn $column): TableState
     {
         foreach ($this->columns as $name => $columnSchema) {
             if ($columnSchema == $column) {
@@ -257,11 +261,11 @@ class TableState
     /**
      * Drop index from table schema using it's name or forming columns.
      *
-     * @param IndexInterface $index
+     * @param AbstractIndex $index
      *
      * @return self
      */
-    public function forgetIndex(IndexInterface $index): TableState
+    public function forgetIndex(AbstractIndex $index): TableState
     {
         foreach ($this->indexes as $name => $indexSchema) {
             if ($indexSchema == $index) {
@@ -276,11 +280,11 @@ class TableState
     /**
      * Drop foreign key from table schema using it's forming column.
      *
-     * @param ReferenceInterface $foreign
+     * @param AbstractReference $foreign
      *
      * @return self
      */
-    public function forgetForeign(ReferenceInterface $foreign): TableState
+    public function forgetForeign(AbstractReference $foreign): TableState
     {
         foreach ($this->foreigns as $name => $foreignSchema) {
             if ($foreignSchema == $foreign) {
@@ -297,7 +301,7 @@ class TableState
      *
      * @param string $name
      *
-     * @return null|ColumnInterface
+     * @return null|AbstractColumn
      */
     public function findColumn(string $name)
     {
@@ -315,7 +319,7 @@ class TableState
      *
      * @param array $columns
      *
-     * @return null|IndexInterface
+     * @return null|AbstractIndex
      */
     public function findIndex(array $columns)
     {
@@ -333,7 +337,7 @@ class TableState
      *
      * @param string $column
      *
-     * @return null|ReferenceInterface
+     * @return null|AbstractReference
      */
     public function findForeign(string $column)
     {

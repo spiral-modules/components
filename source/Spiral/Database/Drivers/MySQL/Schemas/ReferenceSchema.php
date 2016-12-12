@@ -19,8 +19,7 @@ class ReferenceSchema extends AbstractReference
      */
     public static function createInstance(string $table, string $tablePrefix, array $schema): self
     {
-        $reference = new self($table, $schema['CONSTRAINT_NAME']);
-        $reference->tablePrefix = $tablePrefix;
+        $reference = new self($table, $tablePrefix, $schema['CONSTRAINT_NAME']);
 
         $reference->column = $schema['COLUMN_NAME'];
 

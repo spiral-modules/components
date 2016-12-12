@@ -68,7 +68,7 @@ class Quoter
      * @param string $identifier Identifier can include simple column operations and functions,
      *                           having "." in it will automatically force table prefix to first
      *                           value.
-     * @param bool   $isTable    Set to true to let quote method know that identified is related
+     * @param bool   $isTable    Set to true to let quote method know that identifier is related
      *                           to table name.
      *
      * @return mixed|string

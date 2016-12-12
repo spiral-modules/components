@@ -129,14 +129,19 @@ class Isolator
      * be already called).
      *
      * @param string $source
+     * @param array  $blockIDs When non empty only given blocks will be replaced.
      *
      * @return string
      */
-    public function repairPHP(string $source): string
+    public function repairPHP(string $source, array $blockIDs = []): string
     {
         return preg_replace_callback(
             $this->blockRegex(),
-            function ($match) {
+            function ($match) use ($blockIDs) {
+                if (!empty($blockIDs) && !in_array($match['id'], $blockIDs)) {
+                    return $match[0];
+                }
+
                 if (!isset($this->phpBlocks[$match['id']])) {
                     return $match[0];
                 }

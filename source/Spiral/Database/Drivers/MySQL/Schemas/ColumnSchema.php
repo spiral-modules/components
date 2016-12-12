@@ -200,7 +200,7 @@ class ColumnSchema extends AbstractColumn
         if ($column->abstractType() == 'enum' && !empty($options)) {
             $column->enumValues = array_map(function ($value) {
                 return trim($value, $value[0]);
-            }, explode(',', $options));
+            }, $options);
 
             return $column;
         }

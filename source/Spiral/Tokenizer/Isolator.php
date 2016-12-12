@@ -129,16 +129,17 @@ class Isolator
      * be already called).
      *
      * @param string $source
-     * @param array  $blockIDs When non empty only given blocks will be replaced.
+     * @param bool   $partial  Set to true to restore only some blocks (listed in a 3rd paramater).
+     * @param array  $blockIDs Blocks to be restored when partial mode is on.
      *
      * @return string
      */
-    public function repairPHP(string $source, array $blockIDs = []): string
+    public function repairPHP(string $source, bool $partial = false, array $blockIDs = []): string
     {
         return preg_replace_callback(
             $this->blockRegex(),
-            function ($match) use ($blockIDs) {
-                if (!empty($blockIDs) && !in_array($match['id'], $blockIDs)) {
+            function ($match) use ($partial, $blockIDs) {
+                if ($partial && !in_array($match['id'], $blockIDs)) {
                     return $match[0];
                 }
 

@@ -489,27 +489,12 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropColumn(string $column): AbstractTable
     {
-        if (!$this->hasColumn($column)) {
+        if (!empty($schema = $this->currentState->findColumn($column))) {
             throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
         }
 
-        $state = $this->currentState;
-
-        //Removing column first
-        $column = $state->findColumn($column);
-        $state->forgetColumn($column);
-
-        if ($state->hasForeign($column->getName())) {
-            //Dropping related foreign key
-            $state->forgetForeign($state->findForeign($column->getName()));
-        }
-
-        //Dropping related indexes
-        foreach ($state->getIndexes() as $index) {
-            if (in_array($column->getName(), $index->getColumns())) {
-                $state->forgetIndex($index);
-            }
-        }
+        //Dropping column from current schema
+        $this->currentState->forgetColumn($schema);
 
         return $this;
     }
@@ -525,14 +510,14 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropIndex(array $columns): AbstractTable
     {
-        if (!$this->hasIndex($columns)) {
+        if (!empty($schema = $this->currentState->findIndex($columns))) {
             throw new SchemaException(
                 "Undefined index ['" . join("', '", $columns) . "'] in '{$this->getName()}'"
             );
         }
 
         //Dropping index from current schema
-        $this->currentState->forgetIndex($this->currentState->findIndex($columns));
+        $this->currentState->forgetIndex($schema);
 
         return $this;
     }
@@ -548,14 +533,14 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropForeign($column): AbstractTable
     {
-        if (!$this->hasForeign($column)) {
+        if (!empty($schema = $this->currentState->findForeign($column))) {
             throw new SchemaException(
                 "Undefined FK on '{$column}' in '{$this->getName()}'"
             );
         }
 
         //Dropping foreign from current schema
-        $this->currentState->forgetForeign($this->currentState->findForeign($column));
+        $this->currentState->forgetForeign($schema);
 
         return $this;
     }
@@ -596,7 +581,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * does not exist it must be created. If table declared as dropped it will be removed from
      * the database.
      */
-    public function save()
+    public function save(int $behaviour)
     {
         //working in here
     }

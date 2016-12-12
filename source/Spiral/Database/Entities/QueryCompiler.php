@@ -493,6 +493,7 @@ class QueryCompiler
                 continue;
             }
 
+            //Now we are operating with "class" where function, where we need 3 variables where(id, =, 1)
             if (!is_array($context)) {
                 throw new CompilerException('Invalid where token, context expected to be an array');
             }
@@ -516,7 +517,7 @@ class QueryCompiler
                 continue;
             }
 
-            //Compiler can switch equal to IN if value points to array
+            //Compiler can switch equal to IN if value points to array (do we need it?)
             $operator = $this->prepareOperator($value, $operator);
 
             $statement .= "{$boolean} {$identifier} {$operator} {$placeholder} ";
@@ -572,7 +573,7 @@ class QueryCompiler
             return $operator;
         }
 
-        if (is_array($parameter->getValue())) {
+        if ($parameter->isArray()) {
             //Automatically switching between equal and IN
             return 'IN';
         }

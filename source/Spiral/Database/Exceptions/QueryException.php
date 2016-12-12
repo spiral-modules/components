@@ -28,8 +28,13 @@ class QueryException extends DatabaseException
     /**
      * @return \PDOException
      */
-    public function pdoException()
+    public function pdoException(): \PDOException
     {
-        return $this->getPrevious();
+        /**
+         * @var \PDOException $previous
+         */
+        $previous = $this->getPrevious();
+
+        return $previous;
     }
 }

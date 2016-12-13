@@ -408,4 +408,22 @@ class TableState
 
         return $this;
     }
+
+    /**
+     * Cloning all elements.
+     */
+    public function __clone()
+    {
+        foreach ($this->columns as $name => $column) {
+            $this->columns[$name] = clone $column;
+        }
+
+        foreach ($this->indexes as $name => $index) {
+            $this->indexes[$name] = clone $index;
+        }
+
+        foreach ($this->foreigns as $name => $foreign) {
+            $this->foreigns[$name] = clone $foreign;
+        }
+    }
 }

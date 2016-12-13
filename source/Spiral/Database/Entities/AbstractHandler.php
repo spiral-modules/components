@@ -19,8 +19,6 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 /**
  * Handler class implements set of DBMS specific operations for schema manipulations. Can be used
  * on separate basis (for example in migrations).
- *
- * @todo custom exception classes
  */
 abstract class AbstractHandler
 {
@@ -139,9 +137,6 @@ abstract class AbstractHandler
          * This is schema synchronization code, if you are reading it you are either experiencing
          * VERY weird bug, or you are very curious. Please contact me in a any scenario :)
          */
-
-        //todo: indexes and foreign keys dropped with columns (!!!!)
-
         if ($behaviour & self::DROP_FOREIGNS) {
             foreach ($comparator->droppedForeigns() as $foreign) {
                 $this->log('Dropping foreign key [{statement}] from table {table}.', [
@@ -484,8 +479,6 @@ abstract class AbstractHandler
         if (!empty($this->logger)) {
             $this->logger->debug($message, $context);
         }
-
-        dump(\Spiral\interpolate($message, $context));
     }
 
     /**

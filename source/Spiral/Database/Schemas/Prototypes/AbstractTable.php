@@ -620,21 +620,42 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
             return;
         }
 
+        //To make sure that no pre-sync modifications will be reflected on current table
+        $target = clone $this;
+
+        /*
+         * In cases where columns are removed we have to automatically remove related indexes and
+         * foreign keys.
+         */
+        foreach ($this->getComparator()->droppedColumns() as $column) {
+            foreach ($target->getIndexes() as $index) {
+                if (in_array($column->getName(), $index->getColumns())) {
+                    $target->current->forgetIndex($index);
+                }
+            }
+
+            foreach ($target->getForeigns() as $foreign) {
+                if ($column->getName() == $foreign->getColumn()) {
+                    $target->current->forgetForeign($foreign);
+                }
+            }
+        }
+
         if ($this->status == self::STATUS_NEW) {
             //Executing table creation
-            $handler->createTable($this);
+            $handler->createTable($target);
             $this->status = self::STATUS_EXISTS;
         } else {
             //Executing table syncing
             if ($this->hasChanges()) {
-                $handler->syncTable($this, $behaviour);
+                $handler->syncTable($target, $behaviour);
             }
 
-            $this->status = self::STATUS_EXISTS;
+            $target->status = self::STATUS_EXISTS;
         }
 
         //Syncing our schemas
-        $this->initial->syncState($this->current);
+        $this->initial->syncState($target->current);
     }
 
     /**
@@ -643,6 +664,15 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function __toString(): string
     {
         return $this->getName();
+    }
+
+    /**
+     * Cloning schemas as well.
+     */
+    public function __clone()
+    {
+        $this->initial = clone $this->initial;
+        $this->current = clone $this->current;
     }
 
     /**

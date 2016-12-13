@@ -31,7 +31,7 @@ class SQLiteDriver extends Driver
     /**
      * Query compiler class.
      */
-    const QUERY_COMPILER = QueryCompiler::class;
+    const QUERY_COMPILER = SQLiteCompiler::class;
 
     /**
      * Get driver source database or file name.

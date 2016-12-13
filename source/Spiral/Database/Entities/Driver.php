@@ -8,6 +8,7 @@
 
 namespace Spiral\Database\Entities;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Database\Builders\DeleteQuery;
@@ -253,4 +254,14 @@ abstract class Driver extends PDODriver
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix)] + $parameters
         );
     }
+
+    /**
+     * Handler responsible for schema related operations. Handlers responsible for sync flow of
+     * tables and columns, provide logger to aggregate all logger operations.
+     *
+     * @param LoggerInterface $logger
+     *
+     * @return AbstractHandler
+     */
+    abstract public function getHandler(LoggerInterface $logger = null): AbstractHandler;
 }

@@ -14,7 +14,7 @@ use Spiral\Database\Injections\ParameterInterface;
 /**
  * MySQL syntax specific compiler.
  */
-class QueryCompiler extends AbstractCompiler
+class MySQLCompiler extends AbstractCompiler
 {
     /**
      * {@inheritdoc}

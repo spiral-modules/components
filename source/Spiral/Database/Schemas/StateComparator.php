@@ -8,6 +8,10 @@
 
 namespace Spiral\Database\Schemas;
 
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
+use Spiral\Database\Schemas\Prototypes\AbstractIndex;
+use Spiral\Database\Schemas\Prototypes\AbstractReference;
+
 /**
  * Compares two table states.
  */
@@ -38,11 +42,11 @@ class StateComparator
      */
     public function hasChanges(): bool
     {
-        if ($this->current->getName() != $this->initial->getName()) {
+        if ($this->isRenamed()) {
             return true;
         }
 
-        if ($this->current->getPrimaryKeys() != $this->initial->getPrimaryKeys()) {
+        if ($this->isPrimaryChanged()) {
             return true;
         }
 
@@ -62,7 +66,23 @@ class StateComparator
     }
 
     /**
-     * @return ColumnInterface[]
+     * @return bool
+     */
+    public function isRenamed(): bool
+    {
+        return $this->current->getName() != $this->initial->getName();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrimaryChanged(): bool
+    {
+        return $this->current->getPrimaryKeys() != $this->initial->getPrimaryKeys();
+    }
+
+    /**
+     * @return AbstractColumn[]
      */
     public function addedColumns(): array
     {
@@ -77,7 +97,7 @@ class StateComparator
     }
 
     /**
-     * @return ColumnInterface[]
+     * @return AbstractColumn[]
      */
     public function droppedColumns(): array
     {
@@ -116,7 +136,7 @@ class StateComparator
     }
 
     /**
-     * @return IndexInterface[]
+     * @return AbstractIndex[]
      */
     public function addedIndexes(): array
     {
@@ -131,7 +151,7 @@ class StateComparator
     }
 
     /**
-     * @return IndexInterface[]
+     * @return AbstractIndex[]
      */
     public function droppedIndexes(): array
     {
@@ -170,7 +190,7 @@ class StateComparator
     }
 
     /**
-     * @return ReferenceInterface[]
+     * @return AbstractReference[]
      */
     public function addedForeigns(): array
     {
@@ -185,7 +205,7 @@ class StateComparator
     }
 
     /**
-     * @return ReferenceInterface[]
+     * @return AbstractReference[]
      */
     public function droppedForeigns(): array
     {

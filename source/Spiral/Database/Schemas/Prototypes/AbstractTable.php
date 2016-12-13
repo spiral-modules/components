@@ -8,13 +8,17 @@ namespace Spiral\Database\Schemas\Prototypes;
 
 use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Exceptions\HandlerException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\ColumnInterface;
 use Spiral\Database\Schemas\IndexInterface;
 use Spiral\Database\Schemas\ReferenceInterface;
 use Spiral\Database\Schemas\StateComparator;
+use Spiral\Database\Schemas\Syncronizer;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Database\Schemas\TableState;
 use Spiral\Debug\Traits\LoggerTrait;
@@ -88,7 +92,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * @invisible
      * @var TableState
      */
-    protected $initialState = null;
+    protected $initial = null;
 
     /**
      * Currently defined table state.
@@ -96,7 +100,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * @invisible
      * @var TableState
      */
-    protected $currentState = null;
+    protected $current = null;
 
     /**
      * @param Driver $driver Parent driver.
@@ -109,8 +113,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         $this->prefix = $prefix;
 
         //Initializing states
-        $this->initialState = new TableState($this->prefix . $name);
-        $this->currentState = new TableState($this->prefix . $name);
+        $this->initial = new TableState($this->prefix . $name);
+        $this->current = new TableState($this->prefix . $name);
 
         if ($this->driver->hasTable($this->getName())) {
             $this->status = self::STATUS_EXISTS;
@@ -118,10 +122,10 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
 
         if ($this->exists()) {
             //Initiating table schema
-            $this->initSchema($this->initialState);
+            $this->initSchema($this->initial);
         }
 
-        $this->setStatus($this->initialState);
+        $this->setStatus($this->initial);
     }
 
     /**
@@ -139,7 +143,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function getComparator(): StateComparator
     {
-        return new StateComparator($this->initialState, $this->currentState);
+        return new StateComparator($this->initial, $this->current);
     }
 
     /**
@@ -189,7 +193,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function setName(string $name): string
     {
-        $this->currentState->setName($this->prefix . $name);
+        $this->current->setName($this->prefix . $name);
 
         return $this->getName();
     }
@@ -199,7 +203,17 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function getName(): string
     {
-        return $this->currentState->getName();
+        return $this->current->getName();
+    }
+
+    /**
+     * Table name before rename.
+     *
+     * @return string
+     */
+    public function getInitialName(): string
+    {
+        return $this->initial->getName();
     }
 
     /**
@@ -230,7 +244,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         //force it when table will be synced
 
         //Updating primary keys in current state
-        $this->currentState->setPrimaryKeys($columns);
+        $this->current->setPrimaryKeys($columns);
 
         return $this;
     }
@@ -240,7 +254,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function getPrimaryKeys(): array
     {
-        return $this->currentState->getPrimaryKeys();
+        return $this->current->getPrimaryKeys();
     }
 
     /**
@@ -248,7 +262,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function hasColumn(string $name): bool
     {
-        return $this->currentState->hasColumn($name);
+        return $this->current->hasColumn($name);
     }
 
     /**
@@ -258,7 +272,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function getColumns(): array
     {
-        return $this->currentState->getColumns();
+        return $this->current->getColumns();
     }
 
     /**
@@ -266,7 +280,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function hasIndex(array $columns = []): bool
     {
-        return $this->currentState->hasIndex($columns);
+        return $this->current->hasIndex($columns);
     }
 
     /**
@@ -276,7 +290,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function getIndexes(): array
     {
-        return $this->currentState->getIndexes();
+        return $this->current->getIndexes();
     }
 
     /**
@@ -284,7 +298,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function hasForeign(string $column): bool
     {
-        return $this->currentState->hasForeign($column);
+        return $this->current->hasForeign($column);
     }
 
     /**
@@ -294,7 +308,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function getForeigns(): array
     {
-        return $this->currentState->getForeigns();
+        return $this->current->getForeigns();
     }
 
     /**
@@ -303,7 +317,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     public function getDependencies(): array
     {
         $tables = [];
-        foreach ($this->currentState->getForeigns() as $foreign) {
+        foreach ($this->current->getForeigns() as $foreign) {
             $tables[] = $foreign->getForeignTable();
         }
 
@@ -322,13 +336,13 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function column(string $name): AbstractColumn
     {
-        if ($this->currentState->hasColumn($name)) {
+        if ($this->current->hasColumn($name)) {
             //Column already exists
-            return $this->currentState->findColumn($name);
+            return $this->current->findColumn($name);
         }
 
         $column = $this->createColumn($name);
-        $this->currentState->registerColumn($column);
+        $this->current->registerColumn($column);
 
         return $column;
     }
@@ -392,12 +406,12 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         }
 
         if ($this->hasIndex($columns)) {
-            return $this->currentState->findIndex($columns);
+            return $this->current->findIndex($columns);
         }
 
         $index = $this->createIndex($this->createIdentifier('index', $columns));
         $index->columns($columns);
-        $this->currentState->registerIndex($index);
+        $this->current->registerIndex($index);
 
         return $index;
     }
@@ -419,13 +433,13 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         }
 
         if ($this->hasForeign($column)) {
-            return $this->currentState->findForeign($column);
+            return $this->current->findForeign($column);
         }
 
         $foreign = $this->createForeign($this->createIdentifier('foreign', [$column]));
         $foreign->column($column);
 
-        $this->currentState->registerReference($foreign);
+        $this->current->registerReference($foreign);
 
         //Let's ensure index existence to performance and compatibility reasons
         $this->index($column);
@@ -490,12 +504,12 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropColumn(string $column): AbstractTable
     {
-        if (empty($schema = $this->currentState->findColumn($column))) {
+        if (empty($schema = $this->current->findColumn($column))) {
             throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");
         }
 
         //Dropping column from current schema
-        $this->currentState->forgetColumn($schema);
+        $this->current->forgetColumn($schema);
 
         return $this;
     }
@@ -511,14 +525,14 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropIndex(array $columns): AbstractTable
     {
-        if (empty($schema = $this->currentState->findIndex($columns))) {
+        if (empty($schema = $this->current->findIndex($columns))) {
             throw new SchemaException(
                 "Undefined index ['" . join("', '", $columns) . "'] in '{$this->getName()}'"
             );
         }
 
         //Dropping index from current schema
-        $this->currentState->forgetIndex($schema);
+        $this->current->forgetIndex($schema);
 
         return $this;
     }
@@ -534,14 +548,14 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function dropForeign($column): AbstractTable
     {
-        if (!empty($schema = $this->currentState->findForeign($column))) {
+        if (!empty($schema = $this->current->findForeign($column))) {
             throw new SchemaException(
                 "Undefined FK on '{$column}' in '{$this->getName()}'"
             );
         }
 
         //Dropping foreign from current schema
-        $this->currentState->forgetForeign($schema);
+        $this->current->forgetForeign($schema);
 
         return $this;
     }
@@ -555,11 +569,11 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function setStatus(TableState $status = null): AbstractTable
     {
-        $this->currentState = new TableState($this->initialState->getName());
+        $this->current = new TableState($this->initial->getName());
 
         if (!empty($status)) {
-            $this->currentState->setName($status->getName());
-            $this->currentState->syncState($status);
+            $this->current->setName($status->getName());
+            $this->current->syncState($status);
         }
 
         return $this;
@@ -572,7 +586,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function resetState(): AbstractTable
     {
-        $this->setStatus($this->initialState);
+        $this->setStatus($this->initial);
 
         return $this;
     }
@@ -582,18 +596,45 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      * does not exist it must be created. If table declared as dropped it will be removed from
      * the database.
      *
-     * @param int $behaviour Operation to be performed while table being saved. In some cases (when
-     *                       multiple tables are being updated) it is reasonable to drop foreing
-     *                       keys and indexes prior to dropping related columns. See sync bus class
-     *                       to get more details.
+     * @param int             $behaviour Operation to be performed while table being saved. In some
+     *                                   cases (when multiple tables are being updated) it is
+     *                                   reasonable to drop foreing keys and indexes prior to
+     *                                   dropping related columns. See sync bus class to get more
+     *                                   details.
+     * @param LoggerInterface $logger    Optional, aggregates messages for data syncing.
+     *
+     * @throws HandlerException
      */
-    public function save(int $behaviour = 1)
+    public function save(int $behaviour = AbstractHandler::DO_ALL, LoggerInterface $logger = null)
     {
+        //We need an instance of Handler of dbal operations
+        $handler = $this->driver->getHandler($logger);
 
+        if ($this->status == self::STATUS_DROPPED) {
+            //We don't need syncer for this operation
+            $handler->dropTable($this);
 
-        //working in here
+            //Flushing status
+            $this->status = self::STATUS_NEW;
 
+            return;
+        }
 
+        if ($this->status == self::STATUS_NEW) {
+            //Executing table creation
+            $handler->createTable($this);
+            $this->status = self::STATUS_EXISTS;
+        } else {
+            //Executing table syncing
+            if ($this->hasChanges()) {
+                $handler->syncTable($this, $behaviour);
+            }
+
+            $this->status = self::STATUS_EXISTS;
+        }
+
+        //Syncing our schemas
+        $this->initial->syncState($this->current);
     }
 
     /**

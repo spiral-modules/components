@@ -8,14 +8,14 @@ namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 
-class IndexSchema extends AbstractIndex
+class MySQLIndex extends AbstractIndex
 {
     /**
      * @param string $table
      * @param string $name
      * @param array  $schema
      *
-     * @return IndexSchema
+     * @return MySQLIndex
      */
     public static function createInstance(string $table, string $name, array $schema): self
     {

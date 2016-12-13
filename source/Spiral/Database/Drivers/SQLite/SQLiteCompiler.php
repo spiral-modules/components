@@ -13,7 +13,7 @@ use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 /**
  * SQLite specific syntax compiler.
  */
-class QueryCompiler extends AbstractCompiler
+class SQLiteCompiler extends AbstractCompiler
 {
     /**
      * {@inheritdoc}

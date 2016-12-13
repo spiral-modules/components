@@ -13,7 +13,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Database\Schemas\TableState;
 
-class TableSchema extends AbstractTable
+class MySQLTable extends AbstractTable
 {
     /**
      * List of most common MySQL table engines.
@@ -81,7 +81,7 @@ class TableSchema extends AbstractTable
 
         $result = [];
         foreach ($this->driver->query($query) as $schema) {
-            $result[] = ColumnSchema::createInstance($this->getName(), $schema);
+            $result[] = MySQLColumn::createInstance($this->getName(), $schema);
         }
 
         return $result;
@@ -107,7 +107,7 @@ class TableSchema extends AbstractTable
 
         $result = [];
         foreach ($schemas as $name => $index) {
-            $result[] = IndexSchema::createInstance($this->getName(), $name, $index);
+            $result[] = MySQLIndex::createInstance($this->getName(), $name, $index);
         }
 
         return $result;
@@ -132,7 +132,7 @@ class TableSchema extends AbstractTable
                 [$schema['CONSTRAINT_NAME'], $this->driver->getSource(), $this->getName()]
             )->fetch();
 
-            $result[] = ReferenceSchema::createInstance(
+            $result[] = MySQLReference::createInstance(
                 $this->getName(),
                 $this->getPrefix(),
                 $schema + $column
@@ -166,7 +166,7 @@ class TableSchema extends AbstractTable
      */
     protected function createColumn(string $name): AbstractColumn
     {
-        return new ColumnSchema($this->getName(), $name);
+        return new MySQLColumn($this->getName(), $name);
     }
 
     /**
@@ -174,7 +174,7 @@ class TableSchema extends AbstractTable
      */
     protected function createIndex(string $name): AbstractIndex
     {
-        return new IndexSchema($this->getName(), $name);
+        return new MySQLIndex($this->getName(), $name);
     }
 
     /**
@@ -182,6 +182,6 @@ class TableSchema extends AbstractTable
      */
     protected function createForeign(string $column): AbstractReference
     {
-        return new ReferenceSchema($this->getName(), $this->getPrefix(), $column);
+        return new MySQLReference($this->getName(), $this->getPrefix(), $column);
     }
 }

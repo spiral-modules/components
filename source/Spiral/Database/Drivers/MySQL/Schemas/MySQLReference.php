@@ -8,14 +8,14 @@ namespace Spiral\Database\Drivers\MySQL\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 
-class ReferenceSchema extends AbstractReference
+class MySQLReference extends AbstractReference
 {
     /**
      * @param string $table
      * @param string $tablePrefix
      * @param array  $schema
      *
-     * @return ReferenceSchema
+     * @return MySQLReference
      */
     public static function createInstance(string $table, string $tablePrefix, array $schema): self
     {

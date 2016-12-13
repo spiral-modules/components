@@ -10,7 +10,7 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 
-class ColumnSchema extends AbstractColumn
+class MySQLColumn extends AbstractColumn
 {
     /**
      * {@inheritdoc}
@@ -162,7 +162,7 @@ class ColumnSchema extends AbstractColumn
      * @param string $table Table name.
      * @param array  $schema
      *
-     * @return self
+     * @return MySQLColumn
      */
     public static function createInstance(string $table, array $schema): self
     {

@@ -9,8 +9,10 @@
 namespace Spiral\Database\Drivers\MySQL;
 
 use PDO;
+use Psr\Log\LoggerInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\MySQLTable;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 
 /**
@@ -26,12 +28,12 @@ class MySQLDriver extends Driver
     /**
      * Driver schemas.
      */
-    const TABLE_SCHEMA_CLASS = TableSchema::class;
+    const TABLE_SCHEMA_CLASS = MySQLTable::class;
 
     /**
      * Query compiler class.
      */
-    const QUERY_COMPILER = QueryCompiler::class;
+    const QUERY_COMPILER = MySQLCompiler::class;
 
     /**
      * Default timestamp expression.
@@ -84,5 +86,13 @@ class MySQLDriver extends Driver
         }
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandler(LoggerInterface $logger = null): AbstractHandler
+    {
+        return new MySQLHandler($this, $logger);
     }
 }

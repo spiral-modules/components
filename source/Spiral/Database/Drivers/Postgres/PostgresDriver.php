@@ -31,7 +31,7 @@ class PostgresDriver extends Driver
     /**
      * Query compiler class.
      */
-    const QUERY_COMPILER = QueryCompiler::class;
+    const QUERY_COMPILER = PostgresCompiler::class;
 
     /**
      * Default timestamp expression.

@@ -13,7 +13,7 @@ use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 /**
  * Postgres syntax specific compiler.
  */
-class QueryCompiler extends AbstractCompiler
+class PostgresCompiler extends AbstractCompiler
 {
     /**
      * {@inheritdoc}

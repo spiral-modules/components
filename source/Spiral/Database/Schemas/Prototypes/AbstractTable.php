@@ -268,7 +268,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     /**
      * {@inheritdoc}
      *
-     * @return ColumnInterface[]|AbstractColumn[]
+     * @return AbstractColumn[]
      */
     public function getColumns(): array
     {
@@ -286,7 +286,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     /**
      * {@inheritdoc}
      *
-     * @return IndexInterface[]|AbstractIndex[]
+     * @return AbstractIndex[]
      */
     public function getIndexes(): array
     {
@@ -304,7 +304,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     /**
      * {@inheritdoc}
      *
-     * @return ReferenceInterface[]|AbstractReference[]
+     * @return AbstractReference[]
      */
     public function getForeigns(): array
     {

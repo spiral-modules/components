@@ -7,9 +7,7 @@
 namespace Spiral\Database\Schemas\Prototypes;
 
 use Interop\Container\ContainerInterface;
-use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Core\Component;
 use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\HandlerException;
@@ -18,10 +16,8 @@ use Spiral\Database\Schemas\ColumnInterface;
 use Spiral\Database\Schemas\IndexInterface;
 use Spiral\Database\Schemas\ReferenceInterface;
 use Spiral\Database\Schemas\StateComparator;
-use Spiral\Database\Schemas\Syncronizer;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Database\Schemas\TableState;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * AbstractTable class used to describe and manage state of specified table. It provides ability to
@@ -54,10 +50,8 @@ use Spiral\Debug\Traits\LoggerTrait;
  * @method AbstractColumn tinyBinary($column)
  * @method AbstractColumn longBinary($column)
  */
-abstract class AbstractTable extends Component implements TableInterface, LoggerAwareInterface
+abstract class AbstractTable implements TableInterface
 {
-    use LoggerTrait;
-
     /**
      * Table states.
      */
@@ -833,14 +827,5 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
         }
 
         return $name;
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    protected function iocContainer()
-    {
-        //Falling back to driver specific container
-        return $this->driver->iocContainer();
     }
 }

@@ -159,6 +159,26 @@ class MySQLColumn extends AbstractColumn
     }
 
     /**
+     * {@inheritdoc}
+     */
+    protected function prepareDefault(Driver $driver): string
+    {
+        //todo: is it needed? fix!
+        if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue)) {
+            if (is_numeric($this->defaultValue)) {
+                //Nothing to do
+                return (int)$this->defaultValue;
+            }
+
+            $datetime = new \DateTime($this->defaultValue, $driver->getTimezone());
+
+            return $datetime->getTimestamp();
+        }
+
+        return parent::prepareDefault($driver);
+    }
+
+    /**
      * @param string $table Table name.
      * @param array  $schema
      *
@@ -220,25 +240,5 @@ class MySQLColumn extends AbstractColumn
         }
 
         return $column;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function prepareDefault(Driver $driver): string
-    {
-        //todo: is it needed?
-        if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue)) {
-            if (is_numeric($this->defaultValue)) {
-                //Nothing to do
-                return (int)$this->defaultValue;
-            }
-
-            $datetime = new \DateTime($this->defaultValue, $driver->getTimezone());
-
-            return $datetime->getTimestamp();
-        }
-
-        return parent::prepareDefault($driver);
     }
 }

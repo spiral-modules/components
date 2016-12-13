@@ -133,6 +133,16 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
+     * Return database specific table prefix.
+     *
+     * @return string
+     */
+    public function getPrefix(): string
+    {
+        return $this->prefix;
+    }
+
+    /**
      * @return StateComparator
      */
     public function getComparator(): StateComparator
@@ -166,16 +176,6 @@ abstract class AbstractTable implements TableInterface
     public function getStatus(): int
     {
         return $this->status;
-    }
-
-    /**
-     * Return database specific table prefix.
-     *
-     * @return string
-     */
-    public function getPrefix(): string
-    {
-        return $this->prefix;
     }
 
     /**

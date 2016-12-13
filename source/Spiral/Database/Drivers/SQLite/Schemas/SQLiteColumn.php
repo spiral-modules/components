@@ -133,6 +133,14 @@ class SQLiteColumn extends AbstractColumn
     }
 
     /**
+     * {@inheritdoc}
+     */
+    protected function prepareEnum(Driver $driver): string
+    {
+        return '';
+    }
+
+    /**
      * @param string $table Table name.
      * @param array  $schema
      *
@@ -208,13 +216,5 @@ class SQLiteColumn extends AbstractColumn
         }
 
         return $column;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function prepareEnum(Driver $driver): string
-    {
-        return '';
     }
 }

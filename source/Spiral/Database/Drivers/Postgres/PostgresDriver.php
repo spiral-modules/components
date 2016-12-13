@@ -54,7 +54,7 @@ class PostgresDriver extends Driver
      */
     public function hasTable(string $name): bool
     {
-        $query = 'SELECT "table_name" FROM "information_schema"."tables" WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?';
+        $query = "SELECT COUNT(table_name) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' AND table_name = ?";
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }
@@ -72,7 +72,7 @@ class PostgresDriver extends Driver
      */
     public function tableNames(): array
     {
-        $query = 'SELECT "table_name" FROM "information_schema"."tables" WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\'';
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
 
         $tables = [];
         foreach ($this->query($query) as $row) {

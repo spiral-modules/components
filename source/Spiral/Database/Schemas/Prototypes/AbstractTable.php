@@ -240,7 +240,7 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
      */
     public function setPrimaryKeys(array $columns): AbstractTable
     {
-        //Originally we were forcing an exception when primary key were changed, now we should
+        //Originally i were forcing an exception when primary key were changed, now we should
         //force it when table will be synced
 
         //Updating primary keys in current state

@@ -11,7 +11,7 @@ namespace Spiral\Database\Drivers\SQLite\Schemas;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 
-class ReferenceSchema extends AbstractReference
+class SQLiteReference extends AbstractReference
 {
     /**
      * {@inheritdoc}
@@ -37,7 +37,7 @@ class ReferenceSchema extends AbstractReference
      * @param string $tablePrefix
      * @param array  $schema
      *
-     * @return ReferenceSchema
+     * @return SQLiteReference
      */
     public static function createInstance(string $table, string $tablePrefix, array $schema): self
     {

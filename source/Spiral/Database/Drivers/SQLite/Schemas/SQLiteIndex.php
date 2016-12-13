@@ -10,14 +10,14 @@ namespace Spiral\Database\Drivers\SQLite\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 
-class IndexSchema extends AbstractIndex
+class SQLiteIndex extends AbstractIndex
 {
     /**
      * @param string $table
      * @param array  $schema
      * @param array  $columns
      *
-     * @return IndexSchema
+     * @return SQLiteIndex
      */
     public static function createInstance(string $table, array $schema, array $columns): self
     {

@@ -110,7 +110,7 @@ abstract class AbstractHandler
     {
         $this->log("Dropping table '{table}'.", ['table' => $table->getName()]);
 
-        $this->run("DROP TABLE {$this->identify($table)}");
+        $this->run("DROP TABLE {$this->identify($table->getInitialName())}");
     }
 
     /**

@@ -11,7 +11,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-class TableSchema extends AbstractTable
+class SQLiteTable extends AbstractTable
 {
     /**
      * {@inheritdoc}
@@ -22,7 +22,7 @@ class TableSchema extends AbstractTable
          * Parsing column definitions.
          */
         $definition = $this->driver->query(
-            "SELECT sql FROM 'sqlite_master' WHERE type = 'table' and name = ?",
+            "SELECT 'sql' FROM 'sqlite_master' WHERE type = 'table' and name = ?",
             [$this->getName()]
         )->fetchColumn();
 
@@ -36,7 +36,7 @@ class TableSchema extends AbstractTable
         $result = [];
         foreach ($this->columnSchemas(['table' => $definition]) as $schema) {
             //Making new column instance
-            $result[] = ColumnSchema::createInstance(
+            $result[] = SQLiteColumn::createInstance(
                 $this->getName(),
                 $schema + [
                     'quoted'     => $this->driver->quote($schema['name']),
@@ -58,10 +58,10 @@ class TableSchema extends AbstractTable
         $result = [];
         foreach ($this->driver->query($query) as $schema) {
             //Index schema and all related columns
-            $result[] = IndexSchema::createInstance(
+            $result[] = SQLiteIndex::createInstance(
                 $this->getName(),
                 $schema,
-                $this->driver->query("PRAGMA INDEX_INFO({$this->driver->quote($schema['id'])})")->fetchAll()
+                $this->driver->query("PRAGMA INDEX_INFO({$this->driver->quote($schema['name'])})")->fetchAll()
             );
         }
 
@@ -77,7 +77,7 @@ class TableSchema extends AbstractTable
 
         $result = [];
         foreach ($this->driver->query($query) as $schema) {
-            $result[] = ReferenceSchema::createInstance(
+            $result[] = SQLiteReference::createInstance(
                 $this->getName(),
                 $this->getPrefix(),
                 $schema
@@ -129,7 +129,7 @@ class TableSchema extends AbstractTable
      */
     protected function createColumn(string $name): AbstractColumn
     {
-        return new ColumnSchema($this->getName(), $name);
+        return new SQLiteColumn($this->getName(), $name);
     }
 
     /**
@@ -137,7 +137,7 @@ class TableSchema extends AbstractTable
      */
     protected function createIndex(string $name): AbstractIndex
     {
-        return new IndexSchema($this->getName(), $name);
+        return new SQLiteIndex($this->getName(), $name);
     }
 
     /**
@@ -145,6 +145,6 @@ class TableSchema extends AbstractTable
      */
     protected function createForeign(string $column): AbstractReference
     {
-        return new ReferenceSchema($this->getName(), $this->getPrefix(), $column);
+        return new SQLiteReference($this->getName(), $this->getPrefix(), $column);
     }
 }

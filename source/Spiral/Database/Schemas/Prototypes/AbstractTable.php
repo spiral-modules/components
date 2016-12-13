@@ -327,6 +327,8 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
     /**
      * Get/create instance of AbstractColumn associated with current table.
      *
+     * Attention, renamed column will be available by it's old name until being synced!
+     *
      * Examples:
      * $table->column('name')->string();
      *
@@ -620,6 +622,33 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
             return;
         }
 
+        //Ensure that columns references to valid indexes and et
+        $prepared = $this->prepareSchema();
+
+        if ($this->status == self::STATUS_NEW) {
+            //Executing table creation
+            $handler->createTable($prepared);
+            $this->status = self::STATUS_EXISTS;
+        } else {
+            //Executing table syncing
+            if ($this->hasChanges()) {
+                $handler->syncTable($prepared, $behaviour);
+            }
+
+            $prepared->status = self::STATUS_EXISTS;
+        }
+
+        //Syncing our schemas
+        $this->initial->syncState($prepared->current);
+    }
+
+    /**
+     * Ensure that no wrong indexes left in table.
+     *
+     * @return AbstractTable
+     */
+    protected function prepareSchema()
+    {
         //To make sure that no pre-sync modifications will be reflected on current table
         $target = clone $this;
 
@@ -641,21 +670,39 @@ abstract class AbstractTable extends Component implements TableInterface, Logger
             }
         }
 
-        if ($this->status == self::STATUS_NEW) {
-            //Executing table creation
-            $handler->createTable($target);
-            $this->status = self::STATUS_EXISTS;
-        } else {
-            //Executing table syncing
-            if ($this->hasChanges()) {
-                $handler->syncTable($target, $behaviour);
+        //We also have to adjusts indexes and foreign keys
+        foreach ($this->getComparator()->alteredColumns() as $pair) {
+            /**
+             * @var AbstractColumn $initial
+             * @var AbstractColumn $name
+             */
+            list($name, $initial) = $pair;
+
+            foreach ($target->getIndexes() as $index) {
+                if (in_array($initial->getName(), $index->getColumns())) {
+                    $columns = $index->getColumns();
+
+                    //Replacing column name
+                    foreach ($columns as &$column) {
+                        if ($column == $initial->getName()) {
+                            $column = $name->getName();
+                        }
+
+                        unset($column);
+                    }
+
+                    $index->columns($columns);
+                }
             }
 
-            $target->status = self::STATUS_EXISTS;
+            foreach ($target->getForeigns() as $foreign) {
+                if ($initial->getName() == $foreign->getColumn()) {
+                    $foreign->column($name->getName());
+                }
+            }
         }
 
-        //Syncing our schemas
-        $this->initial->syncState($target->current);
+        return $target;
     }
 
     /**

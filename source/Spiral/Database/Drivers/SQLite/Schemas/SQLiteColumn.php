@@ -9,7 +9,7 @@ namespace Spiral\Database\Drivers\SQLite\Schemas;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 
-class ColumnSchema extends AbstractColumn
+class SQLiteColumn extends AbstractColumn
 {
     /**
      * {@inheritdoc}
@@ -95,8 +95,7 @@ class ColumnSchema extends AbstractColumn
      *
      * @var bool
      */
-    private $primaryKey = false;
-
+    protected $primaryKey = false;
 
     /**
      * DBMS specific reverse mapping must map database specific type into limited set of abstract
@@ -137,7 +136,7 @@ class ColumnSchema extends AbstractColumn
      * @param string $table Table name.
      * @param array  $schema
      *
-     * @return self
+     * @return SQLiteColumn
      */
     public static function createInstance(string $table, array $schema): self
     {

@@ -8,8 +8,10 @@
 
 namespace Spiral\Database\Drivers\SQLite;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\SQLiteTable;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
 
@@ -26,7 +28,7 @@ class SQLiteDriver extends Driver
     /**
      * Driver schemas.
      */
-    const TABLE_SCHEMA_CLASS = TableSchema::class;
+    const TABLE_SCHEMA_CLASS = SQLiteTable::class;
 
     /**
      * Query compiler class.
@@ -51,7 +53,7 @@ class SQLiteDriver extends Driver
      */
     public function hasTable(string $name): bool
     {
-        $query = "SELECT 'sql' FROM sqlite_master WHERE type = 'table' and name = ?";
+        $query = "SELECT COUNT('sql') FROM 'sqlite_master' WHERE type = 'table' and name = ?";
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }
@@ -90,5 +92,13 @@ class SQLiteDriver extends Driver
                 compact('level')
             );
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandler(LoggerInterface $logger = null): AbstractHandler
+    {
+        return new SQLiteHandler($this, $logger);
     }
 }

@@ -15,6 +15,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Database\Schemas\StateComparator;
 
 /**
  * Handler class implements set of DBMS specific operations for schema manipulations. Can be used
@@ -138,122 +139,39 @@ abstract class AbstractHandler
          * VERY weird bug, or you are very curious. Please contact me in a any scenario :)
          */
         if ($behaviour & self::DROP_FOREIGNS) {
-            foreach ($comparator->droppedForeigns() as $foreign) {
-                $this->log('Dropping foreign key [{statement}] from table {table}.', [
-                    'statement' => $foreign->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->dropForeign($table, $foreign);
-            }
+            $this->dropForeigns($table, $comparator);
         }
 
         if ($behaviour & self::DROP_INDEXES) {
-            foreach ($comparator->droppedIndexes() as $index) {
-                $this->log('Dropping index [{statement}] from table {table}.', [
-                    'statement' => $index->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->dropIndex($table, $index);
-            }
+            $this->dropIndexes($table, $comparator);
         }
 
         if ($behaviour & self::DROP_COLUMNS) {
-            foreach ($comparator->droppedColumns() as $column) {
-                $this->log('Dropping column [{statement}] from table {table}.', [
-                    'statement' => $column->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->dropColumn($table, $column);
-            }
+            $this->dropColumns($table, $comparator);
         }
 
         if ($behaviour & self::CREATE_COLUMNS) {
-            foreach ($comparator->addedColumns() as $column) {
-                $this->log('Adding column [{statement}] into table {table}.', [
-                    'statement' => $column->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->createColumn($table, $column);
-            }
+            $this->createColumns($table, $comparator);
         }
 
         if ($behaviour & self::ALTER_COLUMNS) {
-            foreach ($comparator->alteredColumns() as $pair) {
-                /**
-                 * @var AbstractColumn $initial
-                 * @var AbstractColumn $current
-                 */
-                list($current, $initial) = $pair;
-
-                $this->log('Altering column [{statement}] to [{new}] in table {table}.', [
-                    'statement' => $initial->sqlStatement($this->driver),
-                    'new'       => $current->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->alterColumn($table, $initial, $current);
-            }
+            $this->alterColumns($table, $comparator);
         }
 
         if ($behaviour & self::CREATE_INDEXES) {
-            foreach ($comparator->addedIndexes() as $index) {
-                $this->log('Adding index [{statement}] into table {table}.', [
-                    'statement' => $index->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->createIndex($table, $index);
-            }
+            $this->createIndexes($table, $comparator);
         }
 
         if ($behaviour & self::ALTER_INDEXES) {
-            foreach ($comparator->alteredIndexes() as $pair) {
-                /**
-                 * @var AbstractIndex $initial
-                 * @var AbstractIndex $current
-                 */
-                list($current, $initial) = $pair;
-
-                $this->log('Altering index [{statement}] to [{new}] in table {table}.', [
-                    'statement' => $initial->sqlStatement($this->driver),
-                    'new'       => $current->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->alterIndex($table, $initial, $current);
-            }
+            $this->alterIndexes($table, $comparator);
         }
 
         if ($behaviour & self::CREATE_FOREIGNS) {
-            foreach ($comparator->addedForeigns() as $foreign) {
-                $this->log('Adding foreign key [{statement}] into table {table}.', [
-                    'statement' => $foreign->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->createForeign($table, $foreign);
-            }
+            $this->createForeigns($table, $comparator);
         }
 
         if ($behaviour & self::ALTER_FOREIGNS) {
-            foreach ($comparator->alteredForeigns() as $pair) {
-                /**
-                 * @var AbstractReference $initial
-                 * @var AbstractReference $current
-                 */
-                list($current, $initial) = $pair;
-
-                $this->log('Altering foreign key [{statement}] to [{new}] in {table}.', [
-                    'statement' => $initial->sqlStatement($this->driver),
-                    'table'     => $this->identify($table),
-                ]);
-
-                $this->alterForeign($table, $initial, $current);
-            }
+            $this->alterForeigns($table, $comparator);
         }
     }
 
@@ -499,5 +417,169 @@ abstract class AbstractHandler
         }
 
         return $this->driver->identifier($element->getName());
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function alterForeigns(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->alteredForeigns() as $pair) {
+            /**
+             * @var AbstractReference $initial
+             * @var AbstractReference $current
+             */
+            list($current, $initial) = $pair;
+
+            $this->log('Altering foreign key [{statement}] to [{new}] in {table}.', [
+                'statement' => $initial->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->alterForeign($table, $initial, $current);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function createForeigns(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->addedForeigns() as $foreign) {
+            $this->log('Adding foreign key [{statement}] into table {table}.', [
+                'statement' => $foreign->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->createForeign($table, $foreign);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function alterIndexes(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->alteredIndexes() as $pair) {
+            /**
+             * @var AbstractIndex $initial
+             * @var AbstractIndex $current
+             */
+            list($current, $initial) = $pair;
+
+            $this->log('Altering index [{statement}] to [{new}] in table {table}.', [
+                'statement' => $initial->sqlStatement($this->driver),
+                'new'       => $current->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->alterIndex($table, $initial, $current);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function createIndexes(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->addedIndexes() as $index) {
+            $this->log('Adding index [{statement}] into table {table}.', [
+                'statement' => $index->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->createIndex($table, $index);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function alterColumns(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->alteredColumns() as $pair) {
+            /**
+             * @var AbstractColumn $initial
+             * @var AbstractColumn $current
+             */
+            list($current, $initial) = $pair;
+
+            $this->log('Altering column [{statement}] to [{new}] in table {table}.', [
+                'statement' => $initial->sqlStatement($this->driver),
+                'new'       => $current->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->alterColumn($table, $initial, $current);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function createColumns(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->addedColumns() as $column) {
+            $this->log('Adding column [{statement}] into table {table}.', [
+                'statement' => $column->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->createColumn($table, $column);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function dropColumns(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->droppedColumns() as $column) {
+            $this->log('Dropping column [{statement}] from table {table}.', [
+                'statement' => $column->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->dropColumn($table, $column);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function dropIndexes(AbstractTable $table, StateComparator $comparator)
+    {
+        foreach ($comparator->droppedIndexes() as $index) {
+            $this->log('Dropping index [{statement}] from table {table}.', [
+                'statement' => $index->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->dropIndex($table, $index);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param StateComparator $comparator
+     */
+    protected function dropForeigns(AbstractTable $table, $comparator)
+    {
+        foreach ($comparator->droppedForeigns() as $foreign) {
+            $this->log('Dropping foreign key [{statement}] from table {table}.', [
+                'statement' => $foreign->sqlStatement($this->driver),
+                'table'     => $this->identify($table),
+            ]);
+
+            $this->dropForeign($table, $foreign);
+        }
     }
 }

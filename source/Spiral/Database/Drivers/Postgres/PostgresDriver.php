@@ -8,8 +8,10 @@
 
 namespace Spiral\Database\Drivers\Postgres;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
 
@@ -144,5 +146,13 @@ class PostgresDriver extends Driver
         $pdo->exec("SET NAMES 'UTF-8'");
 
         return $pdo;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandler(LoggerInterface $logger = null): AbstractHandler
+    {
+        //implement
     }
 }

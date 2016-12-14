@@ -44,6 +44,14 @@ abstract class Driver extends PDODriver
     const QUERY_COMPILER = '';
 
     /**
+     * Transaction level (count of nested transactions). Not all drives can support nested
+     * transactions.
+     *
+     * @var int
+     */
+    private $transactionLevel = 0;
+
+    /**
      * Associated cache store, if any.
      *
      * @var StoreInterface
@@ -263,4 +271,147 @@ abstract class Driver extends PDODriver
      * @return AbstractHandler
      */
     abstract public function getHandler(LoggerInterface $logger = null): AbstractHandler;
+
+    /**
+     * Start SQL transaction with specified isolation level (not all DBMS support it). Nested
+     * transactions are processed using savepoints.
+     *
+     * @link   http://en.wikipedia.org/wiki/Database_transaction
+     * @link   http://en.wikipedia.org/wiki/Isolation_(database_systems)
+     *
+     * @param string $isolationLevel
+     *
+     * @return bool
+     */
+    public function beginTransaction(string $isolationLevel = null): bool
+    {
+        ++$this->transactionLevel;
+
+        if ($this->transactionLevel == 1) {
+            if (!empty($isolationLevel)) {
+                $this->isolationLevel($isolationLevel);
+            }
+
+            if ($this->isProfiling()) {
+                $this->logger()->info('Begin transaction');
+            }
+
+            return $this->getPDO()->beginTransaction();
+        }
+
+        $this->savepointCreate($this->transactionLevel);
+
+        return true;
+    }
+
+    /**
+     * Commit the active database transaction.
+     *
+     * @return bool
+     */
+    public function commitTransaction(): bool
+    {
+        --$this->transactionLevel;
+
+        if ($this->transactionLevel == 0) {
+            if ($this->isProfiling()) {
+                $this->logger()->info('Commit transaction');
+            }
+
+            return $this->getPDO()->commit();
+        }
+
+        $this->savepointRelease($this->transactionLevel + 1);
+
+        return true;
+    }
+
+    /**
+     * Rollback the active database transaction.
+     *
+     * @return bool
+     */
+    public function rollbackTransaction(): bool
+    {
+        --$this->transactionLevel;
+
+        if ($this->transactionLevel == 0) {
+            if ($this->isProfiling()) {
+                $this->logger()->info('Rollback transaction');
+            }
+
+            return $this->getPDO()->rollBack();
+        }
+
+        $this->savepointRollback($this->transactionLevel + 1);
+
+        return true;
+    }
+
+    /**
+     * Set transaction isolation level, this feature may not be supported by specific database
+     * driver.
+     *
+     * @param string $level
+     */
+    protected function isolationLevel(string $level)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Set transaction isolation level to '{$level}'");
+        }
+
+        if (!empty($level)) {
+            $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
+        }
+    }
+
+    /**
+     * Create nested transaction save point.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     *
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
+     */
+    protected function savepointCreate(string $name)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Creating savepoint '{$name}'");
+        }
+
+        $this->statement('SAVEPOINT ' . $this->identifier("SVP{$name}"));
+    }
+
+    /**
+     * Commit/release savepoint.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     *
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
+     */
+    protected function savepointRelease(string $name)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Releasing savepoint '{$name}'");
+        }
+
+        $this->statement('RELEASE SAVEPOINT ' . $this->identifier("SVP{$name}"));
+    }
+
+    /**
+     * Rollback savepoint.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     *
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
+     */
+    protected function savepointRollback(string $name)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Rolling back savepoint '{$name}'");
+        }
+        $this->statement('ROLLBACK TO SAVEPOINT ' . $this->identifier("SVP{$name}"));
+    }
 }

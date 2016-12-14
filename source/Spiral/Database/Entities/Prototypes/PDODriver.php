@@ -50,14 +50,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     private $name = '';
 
     /**
-     * Transaction level (count of nested transactions). Not all drives can support nested
-     * transactions.
-     *
-     * @var int
-     */
-    private $transactionLevel = 0;
-
-    /**
      * @var PDO|null
      */
     private $pdo = null;
@@ -70,6 +62,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected $defaultOptions = [
         'profiling'  => false,
+
+        //All datetime objects will be converted relative to this timezone
+        'timezone'   => DatabaseManager::DEFAULT_TIMEZONE,
 
         //DSN
         'connection' => '',
@@ -147,13 +142,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Connection specific timezone, at this moment locked to UTC.
      *
-     * @todo Support connection specific timezones.
-     *
      * @return \DateTimeZone
      */
     public function getTimezone(): \DateTimeZone
     {
-        return new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE);
+        return new \DateTimeZone($this->options['timezone']);
     }
 
     /**
@@ -226,17 +219,18 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Change PDO instance associated with driver.
+     * Change PDO instance associated with driver. Returns new copy of driver.
      *
      * @param PDO $pdo
      *
      * @return self
      */
-    public function setPDO(PDO $pdo): PDODriver
+    public function withPDO(PDO $pdo): PDODriver
     {
-        $this->pdo = $pdo;
+        $driver = clone $this;
+        $driver->pdo = $pdo;
 
-        return $this;
+        return $driver;
     }
 
     /**
@@ -276,7 +270,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function quote($value, int $type = PDO::PARAM_STR): string
     {
         if ($value instanceof \DateTimeInterface) {
-            $value = $this->resolveDateTime($value);
+            $value = $this->normalizeTimestamp($value);
         }
 
         return $this->getPDO()->quote($value);
@@ -437,7 +431,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
                         //Original parameter must not be altered
                         $nestedParameter = $nestedParameter->withValue(
-                            $this->resolveDateTime($nestedParameter->getValue())
+                            $this->normalizeTimestamp($nestedParameter->getValue())
                         );
                     }
 
@@ -451,7 +445,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
                 if ($parameter->getValue() instanceof \DateTime) {
                     //Original parameter must not be altered
                     $parameter = $parameter->withValue(
-                        $this->resolveDateTime($parameter->getValue())
+                        $this->normalizeTimestamp($parameter->getValue())
                     );
                 }
 
@@ -465,82 +459,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         }
 
         return $flatten;
-    }
-
-    /**
-     * Start SQL transaction with specified isolation level (not all DBMS support it). Nested
-     * transactions are processed using savepoints.
-     *
-     * @link   http://en.wikipedia.org/wiki/Database_transaction
-     * @link   http://en.wikipedia.org/wiki/Isolation_(database_systems)
-     *
-     * @param string $isolationLevel
-     *
-     * @return bool
-     */
-    public function beginTransaction(string $isolationLevel = null): bool
-    {
-        ++$this->transactionLevel;
-
-        if ($this->transactionLevel == 1) {
-            if (!empty($isolationLevel)) {
-                $this->isolationLevel($isolationLevel);
-            }
-
-            if ($this->isProfiling()) {
-                $this->logger()->info('Begin transaction');
-            }
-
-            return $this->getPDO()->beginTransaction();
-        }
-
-        $this->savepointCreate($this->transactionLevel);
-
-        return true;
-    }
-
-    /**
-     * Commit the active database transaction.
-     *
-     * @return bool
-     */
-    public function commitTransaction(): bool
-    {
-        --$this->transactionLevel;
-
-        if ($this->transactionLevel == 0) {
-            if ($this->isProfiling()) {
-                $this->logger()->info('Commit transaction');
-            }
-
-            return $this->getPDO()->commit();
-        }
-
-        $this->savepointRelease($this->transactionLevel + 1);
-
-        return true;
-    }
-
-    /**
-     * Rollback the active database transaction.
-     *
-     * @return bool
-     */
-    public function rollbackTransaction(): bool
-    {
-        --$this->transactionLevel;
-
-        if ($this->transactionLevel == 0) {
-            if ($this->isProfiling()) {
-                $this->logger()->info('Rollback transaction');
-            }
-
-            return $this->getPDO()->rollBack();
-        }
-
-        $this->savepointRollback($this->transactionLevel + 1);
-
-        return true;
     }
 
     /**
@@ -586,73 +504,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     }
 
     /**
-     * Set transaction isolation level, this feature may not be supported by specific database
-     * driver.
-     *
-     * @param string $level
-     */
-    protected function isolationLevel(string $level)
-    {
-        if ($this->isProfiling()) {
-            $this->logger()->info("Set transaction isolation level to '{$level}'");
-        }
-
-        if (!empty($level)) {
-            $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
-        }
-    }
-
-    /**
-     * Create nested transaction save point.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     *
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database
-     *                     identifier.
-     */
-    protected function savepointCreate(string $name)
-    {
-        if ($this->isProfiling()) {
-            $this->logger()->info("Creating savepoint '{$name}'");
-        }
-
-        $this->statement('SAVEPOINT ' . $this->identifier("SVP{$name}"));
-    }
-
-    /**
-     * Commit/release savepoint.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     *
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database
-     *                     identifier.
-     */
-    protected function savepointRelease(string $name)
-    {
-        if ($this->isProfiling()) {
-            $this->logger()->info("Releasing savepoint '{$name}'");
-        }
-
-        $this->statement('RELEASE SAVEPOINT ' . $this->identifier("SVP{$name}"));
-    }
-
-    /**
-     * Rollback savepoint.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     *
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database
-     *                     identifier.
-     */
-    protected function savepointRollback(string $name)
-    {
-        if ($this->isProfiling()) {
-            $this->logger()->info("Rolling back savepoint '{$name}'");
-        }
-        $this->statement('ROLLBACK TO SAVEPOINT ' . $this->identifier("SVP{$name}"));
-    }
-
-    /**
      * Convert DateTime object into local database representation. Driver will automatically force
      * needed timezone.
      *
@@ -660,7 +511,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    protected function resolveDateTime(\DateTimeInterface $value): string
+    protected function normalizeTimestamp(\DateTimeInterface $value): string
     {
         $datetime = new \DateTime();
         $datetime->setTimestamp($value->getTimestamp());

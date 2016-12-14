@@ -49,50 +49,66 @@ class SQLServerHandler extends AbstractHandler
             throw new SchemaException('SQlServer handler can work only with SQLServer columns.');
         }
 
-//        if ($column->getName() != $initial->getName()) {
-//            //Renaming is separate operation
-//            $this->run("sp_rename ?, ?, 'COLUMN'", [
-//                $table->getName() . '.' . $initial->getName(),
-//                $column->getName(),
-//            ]);
-//        }
-//
-//        //In SQLServer we have to drop ALL related indexes and foreign keys while
-//        //applying type change... yeah...
-//
-//        $indexesBackup = [];
-//        $foreignBackup = [];
-//        foreach ($table->getIndexes() as $index) {
-//            if (in_array($column->getName(), $index->getColumns())) {
-//                $indexesBackup[] = $index;
-//                $this->dropIndex($table, $index);
-//            }
-//        }
-//
-//        foreach ($table->getForeigns() as $foreign) {
-//            if ($foreign->getColumn() == $column->getName()) {
-//                $foreignBackup[] = $foreign;
-//                $this->dropForeign($table, $foreign);
-//            }
-//        }
-//
-//        //Column will recreate needed constraints
-//        foreach ($column->getConstraints() as $constraint) {
-//            $this->dropConstrain($table, $constraint);
-//        }
-//
-//        foreach ($column->alteringOperations($initial) as $operation) {
-//            $this->run("ALTER TABLE {$table->getName(true)} {$operation}");
-//        }
-//
-//        //Restoring indexes and foreign keys
-//        foreach ($indexesBackup as $index) {
-//            $this->addIndex($table, $index);
-//        }
-//
-//        foreach ($foreignBackup as $foreign) {
-//            $this->addForeign($table, $foreign);
-//        }
+        //In SQLServer we have to drop ALL related indexes and foreign keys while
+        //applying type change... yeah...
+
+        $indexesBackup = [];
+        $foreignBackup = [];
+        foreach ($table->getIndexes() as $index) {
+            if (in_array($column->getName(), $index->getColumns())) {
+                $indexesBackup[] = $index;
+                $this->dropIndex($table, $index);
+            }
+        }
+
+        foreach ($table->getForeigns() as $foreign) {
+            if ($column->getName() == $foreign->getColumn()) {
+                $foreignBackup[] = $foreign;
+                $this->dropForeign($table, $foreign);
+            }
+        }
+
+        //Column will recreate needed constraints
+        foreach ($column->getConstraints() as $constraint) {
+            $this->dropConstrain($table, $constraint);
+        }
+
+        //Rename is separate operation
+        if ($column->getName() != $initial->getName()) {
+            $this->renameColumn($table, $initial, $column);
+
+            //This call is required to correctly built set of alter operations
+            $initial->setName($column->getName());
+        }
+
+        foreach ($column->alterOperations($this->driver, $initial) as $operation) {
+            $this->run("ALTER TABLE {$this->identify($table)} {$operation}");
+        }
+
+        //Restoring indexes and foreign keys
+        foreach ($indexesBackup as $index) {
+            $this->createIndex($table, $index);
+        }
+
+        foreach ($foreignBackup as $foreign) {
+            $this->createForeign($table, $foreign);
+        }
+    }
+
+    /**
+     * @param AbstractTable  $table
+     * @param AbstractColumn $initial
+     * @param AbstractColumn $column
+     */
+    private function renameColumn(
+        AbstractTable $table,
+        AbstractColumn $initial,
+        AbstractColumn $column
+    ) {
+        $this->run("sp_rename ?, ?, 'COLUMN'", [
+            $table->getName() . '.' . $initial->getName(),
+            $column->getName()
+        ]);
     }
 
     /**

@@ -223,8 +223,62 @@ class SQLServerColumn extends AbstractColumn
      */
     public function alterOperations(Driver $driver, AbstractColumn $initial): array
     {
+        $operations = [];
 
+        $currentType = [
+            $this->type,
+            $this->size,
+            $this->precision,
+            $this->scale,
+            $this->nullable,
+        ];
 
+        $initType = [
+            $initial->type,
+            $initial->size,
+            $initial->precision,
+            $initial->scale,
+            $initial->nullable,
+        ];
+
+        if ($currentType != $initType) {
+            if ($this->abstractType() == 'enum') {
+                //Getting longest value
+                $enumSize = $this->size;
+                foreach ($this->enumValues as $value) {
+                    $enumSize = max($enumSize, strlen($value));
+                }
+
+                $type = "ALTER COLUMN {$driver->identifier($this->getName())} varchar($enumSize)";
+                $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
+            } else {
+                $type = "ALTER COLUMN {$driver->identifier($this->getName())} {$this->type}";
+
+                if (!empty($this->size)) {
+                    $type .= "($this->size)";
+                } elseif ($this->type == 'varchar' || $this->type == 'varbinary') {
+                    $type .= '(max)';
+                } elseif (!empty($this->precision)) {
+                    $type .= "($this->precision, $this->scale)";
+                }
+
+                $operations[] = $type . ' ' . ($this->nullable ? 'NULL' : 'NOT NULL');
+            }
+        }
+
+        //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
+        if ($this->hasDefaultValue()) {
+            $operations[] = "ADD CONSTRAINT {$this->defaultConstrain()} "
+                . "DEFAULT {$this->prepareDefault($driver)} "
+                . "FOR {$driver->identifier($this->getName())}";
+        }
+
+        //Constraint should be already removed it this moment (see alterColumn in SQLServerHandler)
+        if ($this->abstractType() == 'enum') {
+            $operations[] = "ADD {$this->enumStatement($driver)}";
+        }
+
+        return $operations;
     }
 
     /**
@@ -376,6 +430,7 @@ class SQLServerColumn extends AbstractColumn
 
         foreach ($constraints as $constraint) {
             $column->enumConstraint = $constraint['name'];
+            $column->constrainedEnum = true;
 
             $name = preg_quote($driver->identifier($column->getName()));
 

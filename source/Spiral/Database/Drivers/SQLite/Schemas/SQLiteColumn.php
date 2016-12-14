@@ -14,7 +14,7 @@ class SQLiteColumn extends AbstractColumn
     /**
      * Default timestamp expression (driver specific).
      */
-    const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+    const DATETIME_NOW = 'CURRENT_TIMESTAMP';
 
     /**
      * {@inheritdoc}

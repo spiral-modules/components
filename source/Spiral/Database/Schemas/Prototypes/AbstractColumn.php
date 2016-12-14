@@ -44,7 +44,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * Default timestamp expression (driver specific).
      */
-    const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+    const DATETIME_NOW = 'CURRENT_TIMESTAMP';
 
     /**
      * Normalization for time and dates.
@@ -445,8 +445,8 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     public function defaultValue($value): AbstractColumn
     {
         //Forcing driver specific values
-        if ($value === self::DATETIME_CURRENT) {
-            $value = static::DATETIME_CURRENT;
+        if ($value === self::DATETIME_NOW) {
+            $value = static::DATETIME_NOW;
         }
 
         $this->defaultValue = $value;
@@ -711,7 +711,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      */
     protected function normalizeDatetime(string $type, $value)
     {
-        if ($value === static::DATETIME_CURRENT) {
+        if ($value === static::DATETIME_NOW) {
             //Dynamic default value
             return new Fragment($value);
         }

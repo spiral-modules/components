@@ -23,7 +23,7 @@ class SQLServerColumn extends AbstractColumn
     /**
      * Default timestamp expression (driver specific).
      */
-    const DATETIME_CURRENT = 'getdate()';
+    const DATETIME_NOW = 'getdate()';
 
     /**
      * {@inheritdoc}

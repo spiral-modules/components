@@ -19,7 +19,7 @@ class PostgresColumn extends AbstractColumn
     /**
      * Default timestamp expression (driver specific).
      */
-    const DATETIME_CURRENT = 'now()';
+    const DATETIME_NOW = 'now()';
 
     /**
      * {@inheritdoc}

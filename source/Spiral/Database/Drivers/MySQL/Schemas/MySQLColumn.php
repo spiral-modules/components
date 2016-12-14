@@ -10,12 +10,18 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 
+/**
+ * Attention! You can use only one timestamp or datetime with DATETIME_NOW setting! Thought, it will
+ * work on multiple fields with MySQL 5.6.6+ version.
+ *
+ * @todo create ON_UPDATE_NOW and automatically create a trigger for a column
+ */
 class MySQLColumn extends AbstractColumn
 {
     /**
      * Default timestamp expression (driver specific).
      */
-    const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+    const DATETIME_NOW = 'CURRENT_TIMESTAMP';
 
     /**
      * {@inheritdoc}

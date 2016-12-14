@@ -203,7 +203,7 @@ class SQLServerColumn extends AbstractColumn
         $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
 
         if ($this->hasDefaultValue()) {
-            $statement[] = "DEFAULT {$this->prepareDefault($driver)}";
+            $statement[] = "DEFAULT {$this->quoteDefault($driver)}";
         }
 
         return implode(' ', $statement);
@@ -212,9 +212,9 @@ class SQLServerColumn extends AbstractColumn
     /**
      * {@inheritdoc}
      */
-    protected function prepareDefault(Driver $driver): string
+    protected function quoteDefault(Driver $driver): string
     {
-        $defaultValue = parent::prepareDefault($driver);
+        $defaultValue = parent::quoteDefault($driver);
         if ($this->abstractType() == 'boolean') {
             $defaultValue = (int)$this->defaultValue;
         }
@@ -279,7 +279,7 @@ class SQLServerColumn extends AbstractColumn
         //Constraint should be already removed it this moment (see doColumnChange in TableSchema)
         if ($this->hasDefaultValue()) {
             $operations[] = "ADD CONSTRAINT {$this->defaultConstrain()} "
-                . "DEFAULT {$this->prepareDefault($driver)} "
+                . "DEFAULT {$this->quoteDefault($driver)} "
                 . "FOR {$driver->identifier($this->getName())}";
         }
 

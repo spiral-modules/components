@@ -140,7 +140,7 @@ class SQLiteColumn extends AbstractColumn
     /**
      * {@inheritdoc}
      */
-    protected function prepareEnum(Driver $driver): string
+    protected function quoteEnum(Driver $driver): string
     {
         return '';
     }

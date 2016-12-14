@@ -289,6 +289,8 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws DefaultValueException
      */
     public function getDefaultValue()
     {
@@ -297,6 +299,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         if ($this->defaultValue instanceof FragmentInterface) {
+            //Defined as SQL piece
             return $this->defaultValue;
         }
 
@@ -587,7 +590,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 
         if ($this->abstractType() == 'enum') {
             //Enum specific column options
-            if (!empty($enumDefinition = $this->prepareEnum($driver))) {
+            if (!empty($enumDefinition = $this->quoteEnum($driver))) {
                 $statement[] = $enumDefinition;
             }
         } elseif (!empty($this->precision)) {
@@ -599,7 +602,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         $statement[] = $this->nullable ? 'NULL' : 'NOT NULL';
 
         if ($this->defaultValue !== null) {
-            $statement[] = "DEFAULT {$this->prepareDefault($driver)}";
+            $statement[] = "DEFAULT {$this->quoteDefault($driver)}";
         }
 
         return implode(' ', $statement);
@@ -652,7 +655,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return string
      */
-    protected function prepareEnum(Driver $driver): string
+    protected function quoteEnum(Driver $driver): string
     {
         $enumValues = [];
         foreach ($this->enumValues as $value) {
@@ -673,7 +676,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @return string
      */
-    protected function prepareDefault(Driver $driver): string
+    protected function quoteDefault(Driver $driver): string
     {
         $defaultValue = $this->getDefaultValue();
         if ($defaultValue === null) {
@@ -736,7 +739,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             case 'datetime':
                 //no break
             case 'timestamp':
-                //Driver should handle conversion automatically
+                //Driver should handle conversion automatically in this case
                 return $datetime;
             case 'time':
                 return $datetime->format(static::TIME_FORMAT);

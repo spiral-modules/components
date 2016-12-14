@@ -266,7 +266,7 @@ class PostgresColumn extends AbstractColumn
             if (is_null($this->defaultValue)) {
                 $operations[] = "ALTER COLUMN {$identifier} DROP DEFAULT";
             } else {
-                $operations[] = "ALTER COLUMN {$identifier} SET DEFAULT {$this->prepareDefault($driver)}";
+                $operations[] = "ALTER COLUMN {$identifier} SET DEFAULT {$this->quoteDefault($driver)}";
             }
         }
 
@@ -291,7 +291,7 @@ class PostgresColumn extends AbstractColumn
     /**
      * {@inheritdoc}
      */
-    protected function prepareEnum(Driver $driver): string
+    protected function quoteEnum(Driver $driver): string
     {
         //Postgres enums are just constrained strings
         return '(' . $this->size . ')';

@@ -119,7 +119,7 @@ abstract class AbstractTable implements TableInterface
             $this->initSchema($this->initial);
         }
 
-        $this->setStatus($this->initial);
+        $this->setState($this->initial);
     }
 
     /**
@@ -559,17 +559,17 @@ abstract class AbstractTable implements TableInterface
     /**
      * Reset table state to new form.
      *
-     * @param TableState $status Use null to flush table schema.
+     * @param TableState $state Use null to flush table schema.
      *
      * @return self|$this
      */
-    public function setStatus(TableState $status = null): AbstractTable
+    public function setState(TableState $state = null): AbstractTable
     {
         $this->current = new TableState($this->initial->getName());
 
-        if (!empty($status)) {
-            $this->current->setName($status->getName());
-            $this->current->syncState($status);
+        if (!empty($state)) {
+            $this->current->setName($state->getName());
+            $this->current->syncState($state);
         }
 
         return $this;
@@ -582,7 +582,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function resetState(): AbstractTable
     {
-        $this->setStatus($this->initial);
+        $this->setState($this->initial);
 
         return $this;
     }

@@ -382,11 +382,11 @@ class TableState
      * Re-populate schema elements using other state as source. Elements will be cloned under their
      * schema name.
      *
-     * @param self $source
+     * @param TableState $source
      *
      * @return self
      */
-    public function syncState(self $source): self
+    public function syncState(TableState $source): self
     {
         $this->name = $source->name;
         $this->primaryKeys = $source->primaryKeys;

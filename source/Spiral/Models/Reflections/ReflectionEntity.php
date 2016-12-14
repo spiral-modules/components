@@ -241,14 +241,13 @@ class ReflectionEntity
     /**
      * Parent entity schema/
      *
-     * @return $this|self
+     * @return ReflectionEntity|null
      */
-    protected function parentSchema(): ReflectionEntity
+    protected function parentSchema()
     {
-        if (
-            !empty($this->getParentClass())
-            && $this->getParentClass()->getName() != static::BASE_CLASS
-        ) {
+        $parentClass = $this->reflection->getParentClass();
+
+        if (!empty($parentClass) && $parentClass->getName() != static::BASE_CLASS) {
             $parent = clone $this;
             $parent->reflection = $this->getParentClass();
 

@@ -39,7 +39,7 @@ class PostgresHandler extends AbstractHandler
         //Postgres columns should be altered using set of operations
         $operations = $column->alterOperations($this->driver, $initial);
         if (empty($operations)) {
-            return $this;
+            return;
         }
 
         //Postgres columns should be altered using set of operations

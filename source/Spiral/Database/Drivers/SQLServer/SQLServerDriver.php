@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Database\DatabaseInterface;
+use Spiral\Database\Drivers\SQLServer\Schemas\SQLServerTable;
 use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
@@ -21,6 +22,11 @@ class SQLServerDriver extends Driver
      * Driver type.
      */
     const TYPE = DatabaseInterface::SQL_SERVER;
+
+    /**
+     * Driver schemas.
+     */
+    const TABLE_SCHEMA_CLASS = SQLServerTable::class;
 
     /**
      * Query compiler class.

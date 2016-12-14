@@ -133,9 +133,7 @@ class PostgresColumn extends AbstractColumn
     }
 
     /**
-     * Overriding default magically happen method for custom logic.
-     *
-     * @return $this|AbstractColumn
+     * {@inheritdoc}
      */
     public function primary(): AbstractColumn
     {
@@ -150,9 +148,7 @@ class PostgresColumn extends AbstractColumn
     }
 
     /**
-     * Overriding default magically happen method for custom logic.
-     *
-     * @return $this|AbstractColumn
+     * {@inheritdoc}
      */
     public function bigPrimary(): AbstractColumn
     {
@@ -167,11 +163,7 @@ class PostgresColumn extends AbstractColumn
     }
 
     /**
-     * Postgres requires custom logic for enum values.
-     *
-     * @param array|string $values
-     *
-     * @return AbstractColumn
+     * {@inheritdoc}
      */
     public function enum($values): AbstractColumn
     {
@@ -339,11 +331,8 @@ class PostgresColumn extends AbstractColumn
      *
      * @return PostgresColumn
      */
-    public static function createInstance(
-        string $table,
-        array $schema,
-        Driver $driver
-    ): self {
+    public static function createInstance(string $table, array $schema, Driver $driver): self
+    {
         $column = new self($table, $schema['column_name']);
 
         $column->type = $schema['data_type'];

@@ -20,10 +20,10 @@ class SQLServerIndex extends AbstractIndex
     {
         //Schema is basically array of index columns merged with index meta
         $index = new self($table, current($schema)['indexName']);
+        $index->type = current($schema)['isUnique'] ? self::UNIQUE : self::NORMAL;
 
-        foreach ($schema as $index) {
-            $index->type = $index['isUnique'] ? self::UNIQUE : self::NORMAL;
-            $index->columns[] = $index['columnName'];
+        foreach ($schema as $indexColumn) {
+            $index->columns[] = $indexColumn['columnName'];
         }
 
         return $index;

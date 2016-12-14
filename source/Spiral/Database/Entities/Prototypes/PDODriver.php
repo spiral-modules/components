@@ -273,7 +273,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             $value = $this->normalizeTimestamp($value);
         }
 
-        return $this->getPDO()->quote($value);
+        return $this->getPDO()->quote($value, $type);
     }
 
     /**

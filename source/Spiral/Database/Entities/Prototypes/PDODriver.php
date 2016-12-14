@@ -12,7 +12,6 @@ use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
-use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
@@ -64,7 +63,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
         'profiling'  => false,
 
         //All datetime objects will be converted relative to this timezone
-        'timezone'   => DatabaseManager::DEFAULT_TIMEZONE,
+        'timezone'   => 'UTC',
 
         //DSN
         'connection' => '',

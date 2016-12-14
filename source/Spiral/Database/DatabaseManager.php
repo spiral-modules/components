@@ -20,16 +20,6 @@ use Spiral\Database\Exceptions\DBALException;
 class DatabaseManager extends Component implements SingletonInterface, InjectorInterface
 {
     /**
-     * By default spiral will force time conversion into single timezone before storing in
-     * database, it will help us to ensure that we have no problems with switching timezones and
-     * save a lot of time while development (potentially).
-     *
-     * Current implementation of drivers leaves a room and possibility to define driver/connection
-     * specific timezone.
-     */
-    const DEFAULT_TIMEZONE = 'UTC';
-
-    /**
      * @var Database[]
      */
     private $databases = [];

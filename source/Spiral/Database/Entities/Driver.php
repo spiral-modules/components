@@ -231,7 +231,6 @@ abstract class Driver extends PDODriver
      */
     public function deleteBuilder(string $prefix, array $parameters = []): DeleteQuery
     {
-
         return $this->factory->make(
             DeleteQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix)] + $parameters

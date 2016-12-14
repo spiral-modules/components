@@ -36,11 +36,6 @@ class MySQLDriver extends Driver
     const QUERY_COMPILER = MySQLCompiler::class;
 
     /**
-     * Default timestamp expression.
-     */
-    const DATETIME_NOW = 'CURRENT_TIMESTAMP';
-
-    /**
      * {@inheritdoc}
      */
     protected $options = [

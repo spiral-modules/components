@@ -37,11 +37,6 @@ class PostgresDriver extends Driver
     const QUERY_COMPILER = PostgresCompiler::class;
 
     /**
-     * Default timestamp expression.
-     */
-    const DATETIME_NOW = 'now()';
-
-    /**
      * Cached list of primary keys associated with their table names. Used by InsertBuilder to
      * emulate last insert id.
      *

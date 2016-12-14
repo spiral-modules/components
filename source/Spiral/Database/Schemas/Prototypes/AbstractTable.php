@@ -757,21 +757,21 @@ abstract class AbstractTable implements TableInterface
     /**
      * Fetch index declarations from database.
      *
-     * @return ColumnInterface[]
+     * @return AbstractColumn[]
      */
     abstract protected function fetchColumns(): array;
 
     /**
      * Fetch index declarations from database.
      *
-     * @return IndexInterface[]
+     * @return AbstractIndex[]
      */
     abstract protected function fetchIndexes(): array;
 
     /**
      * Fetch references declaration from database.
      *
-     * @return ReferenceInterface[]
+     * @return AbstractReference[]
      */
     abstract protected function fetchReferences(): array;
 

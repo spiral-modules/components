@@ -246,7 +246,7 @@ class QueryCompiler
 
         //Union statement has new line at beginning of every union
         $unionsStatement = $this->optional("\n", $this->compileUnions($unionTokens));
-        $orderingStatement = $this->optional("\nORDER BY ", $this->compileOrdering($ordering));
+        $orderingStatement = $this->optional("\nORDER BY", $this->compileOrdering($ordering));
 
         $limingStatement = $this->optional("\n", $this->compileLimit($limit, $offset));
 

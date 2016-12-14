@@ -53,7 +53,7 @@ trait LimitsTrait
      *
      * @return mixed
      */
-    public function offset(int $offset = 0): int
+    public function offset(int $offset = 0)
     {
         $this->offset = $offset;
 

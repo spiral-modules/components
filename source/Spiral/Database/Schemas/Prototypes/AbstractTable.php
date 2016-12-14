@@ -381,20 +381,17 @@ abstract class AbstractTable implements TableInterface
      * column names.
      *
      * Example:
-     * $table->index('key');
-     * $table->index('key', 'key2');
+     * $table->index(['key']);
      * $table->index(['key', 'key2']);
      *
-     * @param mixed $columns Column name, or array of columns.
+     * @param array $columns List of index columns.
      *
      * @return AbstractIndex
      *
      * @throws SchemaException
      */
-    public function index($columns): AbstractIndex
+    public function index(array $columns): AbstractIndex
     {
-        $columns = is_array($columns) ? $columns : func_get_args();
-
         foreach ($columns as $column) {
             if (!$this->hasColumn($column)) {
                 throw new SchemaException("Undefined column '{$column}' in '{$this->getName()}'");

@@ -544,7 +544,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function dropForeign($column): AbstractTable
     {
-        if (!empty($schema = $this->current->findForeign($column))) {
+        if (empty($schema = $this->current->findForeign($column))) {
             throw new SchemaException(
                 "Undefined FK on '{$column}' in '{$this->getName()}'"
             );

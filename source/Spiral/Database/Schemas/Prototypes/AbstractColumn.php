@@ -657,7 +657,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      *
      * @param Driver $driver
      *
-     * @return string.
+     * @return string
      */
     protected function prepareEnum(Driver $driver): string
     {

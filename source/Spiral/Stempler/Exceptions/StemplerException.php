@@ -24,9 +24,9 @@ class StemplerException extends RuntimeException
      * @param string     $message
      * @param array      $token
      * @param int        $code
-     * @param \Exception $previous
+     * @param \Throwable $previous
      */
-    public function __construct($message, array $token = [], $code = 0, \Exception $previous = null)
+    public function __construct($message, array $token = [], $code = 0, \Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->token = $token;

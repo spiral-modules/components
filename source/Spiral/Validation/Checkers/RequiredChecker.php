@@ -33,7 +33,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $with
      *
-     * @return bool|Validator::STOP_VALIDATION
+     * @return bool|int
      */
     public function with($value, array $with)
     {
@@ -57,7 +57,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $with
      *
-     * @return bool|Validator::STOP_VALIDATION
+     * @return bool|int
      */
     public function withAll($value, array $with)
     {
@@ -80,7 +80,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $without
      *
-     * @return bool|Validator::STOP_VALIDATION
+     * @return bool|int
      */
     public function without($value, array $without)
     {
@@ -104,7 +104,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
      * @param mixed $value
      * @param array $without
      *
-     * @return bool|Validator::STOP_VALIDATION
+     * @return bool|int
      */
     public function withoutAll($value, array $without)
     {

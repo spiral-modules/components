@@ -147,7 +147,7 @@ class HtmlTokenizer
                     }
 
                     //Token ended
-                    $this->handleToken(false, $buffer);
+                    $this->handleToken(null, $buffer);
 
                     //We are in a plain text now
                     $position = self::POSITION_PLAIN_TEXT;
@@ -302,8 +302,8 @@ class HtmlTokenizer
     /**
      * Handles single token and passes it to a callback function if specified.
      *
-     * @param int    $tokenType Token type.
-     * @param string $content   Non parsed token content.
+     * @param int|null $tokenType Token type.
+     * @param string   $content   Non parsed token content.
      */
     protected function handleToken($tokenType, $content)
     {

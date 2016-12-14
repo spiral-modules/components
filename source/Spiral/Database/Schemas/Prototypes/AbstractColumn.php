@@ -723,6 +723,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         $datetime = new \DateTime();
 
         if (is_numeric($value)) {
+            //Presumably timestamp
             $datetime->setTimestamp($value);
         } else {
             $timestamp = strtotime($value);

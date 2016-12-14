@@ -21,7 +21,6 @@ trait AliasTrait
     public function resolveAlias($alias)
     {
         while (is_string($alias) && isset($this->config['aliases'][$alias])) {
-            //Resolving database alias
             $alias = $this->config['aliases'][$alias];
         }
 

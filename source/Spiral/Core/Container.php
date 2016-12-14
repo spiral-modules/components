@@ -176,7 +176,7 @@ class Container extends Component implements
                 }
 
                 if ($parameter->isDefaultValueAvailable()) {
-                    //Or default value?
+                    //Default value on code level
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
                 }

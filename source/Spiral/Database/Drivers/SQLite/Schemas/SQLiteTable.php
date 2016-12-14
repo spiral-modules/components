@@ -22,7 +22,7 @@ class SQLiteTable extends AbstractTable
          * Parsing column definitions.
          */
         $definition = $this->driver->query(
-            "SELECT 'sql' FROM 'sqlite_master' WHERE type = 'table' and name = ?",
+            "SELECT sql FROM sqlite_master WHERE type = 'table' and name = ?",
             [$this->getName()]
         )->fetchColumn();
 

@@ -17,6 +17,11 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 class PostgresColumn extends AbstractColumn
 {
     /**
+     * Default timestamp expression (driver specific).
+     */
+    const DATETIME_CURRENT = 'NOW()';
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [

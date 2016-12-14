@@ -117,7 +117,7 @@ class SQLiteHandler extends AbstractHandler
     private function requiresRebuild(AbstractTable $table): bool
     {
         $comparator = $table->getComparator();
-
+dump($comparator->alteredColumns());
         $difference = [
             count($comparator->addedColumns()),
             count($comparator->droppedColumns()),

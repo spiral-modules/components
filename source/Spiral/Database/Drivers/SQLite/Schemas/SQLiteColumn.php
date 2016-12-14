@@ -127,7 +127,7 @@ class SQLiteColumn extends AbstractColumn
             $enumValues[] = $driver->quote($value);
         }
 
-        $quoted = $driver->quote($this->name);
+        $quoted = $driver->identifier($this->name);
 
         return "$statement CHECK ({$quoted} IN (" . implode(', ', $enumValues) . '))';
     }
@@ -192,13 +192,14 @@ class SQLiteColumn extends AbstractColumn
             //Quoted column name
             $quoted = $schema['identifier'];
 
-            foreach ($schema['tableStatement'] as $column) {
+            foreach ($schema['table'] as $columnSchema) {
                 //Looking for enum values in column definition code
                 if (preg_match(
                     "/{$quoted} +enum.*?CHECK *\\({$quoted} in \\((.*?)\\)\\)/i",
-                    trim($column),
+                    trim($columnSchema),
                     $matches
                 )) {
+
                     $enumValues = explode(',', $matches[1]);
                     foreach ($enumValues as &$value) {
                         //Trimming values

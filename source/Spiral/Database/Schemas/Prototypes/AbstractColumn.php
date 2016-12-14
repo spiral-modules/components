@@ -682,7 +682,8 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      */
     protected function prepareDefault(Driver $driver): string
     {
-        if (($defaultValue = $this->getDefaultValue()) === null) {
+        $defaultValue = $this->getDefaultValue();
+        if ($defaultValue === null) {
             return 'NULL';
         }
 

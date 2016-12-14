@@ -13,6 +13,11 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 class MySQLColumn extends AbstractColumn
 {
     /**
+     * Default timestamp expression (driver specific).
+     */
+    const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [

@@ -16,6 +16,16 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 class SQLServerColumn extends AbstractColumn
 {
     /**
+     * Default datetime value.
+     */
+    const DATETIME_DEFAULT = '1970-01-01T00:00:00';
+
+    /**
+     * Default timestamp expression (driver specific).
+     */
+    const DATETIME_CURRENT = 'getdate()';
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [

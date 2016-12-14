@@ -9,6 +9,10 @@ namespace Spiral\Database\Drivers\SQLServer\Schemas;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 
+/**
+ * @todo investigate potential issue with entity non handling enum correctly when multiple
+ * @todo column changes happen in one session (who the hell will do that?)
+ */
 class SQLServerColumn extends AbstractColumn
 {
     /**
@@ -160,7 +164,6 @@ class SQLServerColumn extends AbstractColumn
         return $this;
     }
 
-
     /**
      * {@inheritdoc}
      *
@@ -207,6 +210,68 @@ class SQLServerColumn extends AbstractColumn
         }
 
         return $defaultValue;
+    }
+
+    /**
+     * Generate set of operations need to change column.
+     *
+     * @param Driver         $driver
+     * @param AbstractColumn $initial
+     *
+     * @return array
+     */
+    public function alterOperations(Driver $driver, AbstractColumn $initial): array
+    {
+
+    }
+
+    /**
+     * Get/generate name of enum constraint.
+     *
+     * @return string
+     */
+    protected function enumConstraint()
+    {
+        if (empty($this->enumConstraint)) {
+            $this->enumConstraint = $this->table . '_' . $this->getName() . '_enum_' . uniqid();
+        }
+
+        return $this->enumConstraint;
+    }
+
+    /**
+     * Get/generate name of default constrain.
+     *
+     * @return string
+     */
+    protected function defaultConstrain(): string
+    {
+        if (empty($this->defaultConstraint)) {
+            $this->defaultConstraint = $this->table . '_' . $this->getName() . '_default_' . uniqid();
+        }
+
+        return $this->defaultConstraint;
+    }
+
+    /**
+     * In SQLServer we can emulate enums similar way as in Postgres via column constrain.
+     *
+     * @param Driver $driver
+     *
+     * @return string
+     */
+    private function enumStatement(Driver $driver): string
+    {
+        $enumValues = [];
+        foreach ($this->enumValues as $value) {
+            $enumValues[] = $driver->quote($value);
+        }
+
+        $constrain = $driver->identifier($this->enumConstraint());
+        $column = $driver->identifier($this->getName());
+        $enumValues = implode(', ', $enumValues);
+
+        return "CONSTRAINT {$constrain} CHECK ({$column} IN ({$enumValues}))";
     }
 
     /**

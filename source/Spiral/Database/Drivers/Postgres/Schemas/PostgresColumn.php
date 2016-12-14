@@ -10,6 +10,10 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 
+/**
+ * @todo investigate potential issue with entity non handling enum correctly when multiple
+ * @todo column changes happen in one session (who the hell will do that?)
+ */
 class PostgresColumn extends AbstractColumn
 {
     /**
@@ -290,9 +294,6 @@ class PostgresColumn extends AbstractColumn
 
     /**
      * Get/generate name for enum constraint.
-     *
-     * @todo investigate potential issue with entity non handling enum correctly when multiple
-     * @todo column changes happen in one session (who the hell will do that?)
      *
      * @return string
      */

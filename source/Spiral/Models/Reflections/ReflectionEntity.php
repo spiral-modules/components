@@ -228,6 +228,7 @@ class ReflectionEntity
             $parentValue = $parent->getProperty($property, $merge);
 
             if (is_array($parentValue)) {
+                //Class values prior to parent values
                 $value = array_merge($parentValue, $value);
             }
         }

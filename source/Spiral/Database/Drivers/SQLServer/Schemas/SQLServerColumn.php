@@ -167,13 +167,13 @@ class SQLServerColumn extends AbstractColumn
     /**
      * {@inheritdoc}
      *
-     * @param bool $ignoreEnum If true ENUM declaration statement will be returned only. Internal
-     *                         helper. todo check it.
+     * @param bool $withEnum When true enum constrain will be included into definition. Set to false
+     *                       if you want to create constrain separately.
      */
-    public function sqlStatement(Driver $driver, bool $ignoreEnum = false): string
+    public function sqlStatement(Driver $driver, bool $withEnum = true): string
     {
-        if (!$ignoreEnum && $this->abstractType() == 'enum') {
-            return "{$this->sqlStatement($driver, true)} {$this->enumStatement()}";
+        if ($withEnum && $this->abstractType() == 'enum') {
+            return "{$this->sqlStatement($driver, false)} {$this->enumStatement($driver)}";
         }
 
         $statement = [$driver->identifier($this->getName()), $this->type];
@@ -213,7 +213,8 @@ class SQLServerColumn extends AbstractColumn
     }
 
     /**
-     * Generate set of operations need to change column.
+     * Generate set of operations need to change column. We are expecting that column constrains
+     * will be dropped separately.
      *
      * @param Driver         $driver
      * @param AbstractColumn $initial
@@ -222,6 +223,7 @@ class SQLServerColumn extends AbstractColumn
      */
     public function alterOperations(Driver $driver, AbstractColumn $initial): array
     {
+
 
     }
 
@@ -349,43 +351,44 @@ class SQLServerColumn extends AbstractColumn
         }
 
         //Potential enum
-//        if ($column->type == 'varchar' && !empty($column->size)) {
-//            $column->resolveEnum($schema, $tableDriver);
-//        }
+        if ($column->type == 'varchar' && !empty($column->size)) {
+            self::resolveEnum($driver, $schema, $column);
+        }
 
         return $column;
     }
 
     /**
-     * Check if column is enum.
+     * Resolve enum values if any.
      *
-     * @param array  $schema
-     * @param Driver $tableDriver
+     * @param Driver          $driver
+     * @param array           $schema
+     * @param SQLServerColumn $column
      */
-//    private static function resolveEnum(array $schema, $tableDriver)
-//    {
-//        $query = 'SELECT object_definition(o.object_id) AS [definition], '
-//            . "OBJECT_NAME(o.OBJECT_ID) AS [name]\nFROM sys.objects AS o\n"
-//            . "JOIN sys.sysconstraints AS [c] ON o.object_id = [c].constid\n"
-//            . "WHERE type_desc = 'CHECK_CONSTRAINT' AND parent_object_id = ? AND [c].colid = ?";
-//
-//        $constraints = $tableDriver->query($query, [$schema['object_id'], $schema['column_id']]);
-//
-//        foreach ($constraints as $checkConstraint) {
-//            $this->enumConstraint = $checkConstraint['name'];
-//
-//            $name = preg_quote($this->getName(true));
-//
-//            //We made some assumptions here...
-//            if (preg_match_all(
-//                '/' . $name . '=[\']?([^\']+)[\']?/i',
-//                $checkConstraint['definition'],
-//                $matches
-//            )) {
-//                //Fetching enum values
-//                $this->enumValues = $matches[1];
-//                sort($this->enumValues);
-//            }
-//        }
-//    }
+    private static function resolveEnum(Driver $driver, array $schema, SQLServerColumn $column)
+    {
+        $query = 'SELECT object_definition([o].[object_id]) AS [definition], '
+            . "OBJECT_NAME([o].[object_id]) AS [name]\nFROM [sys].[objects] AS [o]\n"
+            . "JOIN [sys].[sysconstraints] AS [c] ON [o].[object_id] = [c].[constid]\n"
+            . "WHERE [type_desc] = 'CHECK_CONSTRAINT' AND [parent_object_id] = ? AND [c].[colid] = ?";
+
+        $constraints = $driver->query($query, [$schema['object_id'], $schema['column_id']]);
+
+        foreach ($constraints as $constraint) {
+            $column->enumConstraint = $constraint['name'];
+
+            $name = preg_quote($driver->identifier($column->getName()));
+
+            //We made some assumptions here...
+            if (preg_match_all(
+                '/' . $name . '=[\']?([^\']+)[\']?/i',
+                $constraint['definition'],
+                $matches
+            )) {
+                //Fetching enum values
+                $column->enumValues = $matches[1];
+                sort($column->enumValues);
+            }
+        }
+    }
 }

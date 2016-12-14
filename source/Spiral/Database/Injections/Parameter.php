@@ -31,9 +31,9 @@ class Parameter implements ParameterInterface
     /**
      * Parameter type.
      *
-     * @var int|null
+     * @var int
      */
-    private $type = null;
+    private $type = \PDO::PARAM_STR;
 
     /**
      * @param mixed $value
@@ -42,6 +42,7 @@ class Parameter implements ParameterInterface
     public function __construct($value, int $type = self::DETECT_TYPE)
     {
         $this->value = $value;
+
         $this->resolveType($value, $type);
     }
 
@@ -68,6 +69,7 @@ class Parameter implements ParameterInterface
     {
         $parameter = clone $this;
         $parameter->value = $value;
+
         $parameter->resolveType($value, $type);
 
         return $parameter;
@@ -142,6 +144,7 @@ class Parameter implements ParameterInterface
         return [
             'statement' => $this->sqlStatement(),
             'value'     => $this->value,
+            'type'      => $this->type
         ];
     }
 
@@ -151,7 +154,7 @@ class Parameter implements ParameterInterface
      */
     protected function resolveType($value, int $type)
     {
-        if ($type == self::DETECT_TYPE) {
+        if ($type === self::DETECT_TYPE) {
             if (!is_array($value)) {
                 $this->type = $this->detectType($value);
             } else {

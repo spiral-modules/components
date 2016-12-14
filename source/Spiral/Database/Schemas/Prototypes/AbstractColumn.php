@@ -728,7 +728,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             $timestamp = strtotime($value);
             if ($timestamp === false) {
                 throw new DefaultValueException(
-                    "Unable to normalize value '{$value}' for column type {$type} in " . get_class($this)
+                    "Unable to normalize timestamp '{$value}' for column type '{$type}' in " . get_class($this)
                 );
             }
 

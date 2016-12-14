@@ -104,7 +104,7 @@ class Parameter implements ParameterInterface
         foreach ($this->value as $value) {
             if (!$value instanceof ParameterInterface) {
                 //Self copy
-                $value = $this->withValue($value);
+                $value = $this->withValue($value, self::DETECT_TYPE);
             }
 
             $result = array_merge($result, $value->flatten());
@@ -149,7 +149,7 @@ class Parameter implements ParameterInterface
      * @param mixed $value
      * @param int   $type
      */
-    protected function resolveType($value, int $type): void
+    protected function resolveType($value, int $type)
     {
         if ($type == self::DETECT_TYPE) {
             if (!is_array($value)) {

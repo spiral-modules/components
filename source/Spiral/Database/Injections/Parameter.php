@@ -12,8 +12,7 @@ namespace Spiral\Database\Injections;
  * Default implementation of ParameterInterface, provides ability to mock value or array of values
  * and automatically create valid query placeholder at moment of query compilation (? vs (?, ?, ?)).
  *
- * In a nearest future Parameter class will be used for every QueryBuilder parameter, it can also
- * be used to detect value type automatically.
+ * @todo implement custom sqlStatement value?
  */
 class Parameter implements ParameterInterface
 {
@@ -43,17 +42,7 @@ class Parameter implements ParameterInterface
     public function __construct($value, int $type = self::DETECT_TYPE)
     {
         $this->value = $value;
-
-        if ($type == self::DETECT_TYPE) {
-            if (!is_array($value)) {
-                $this->type = $this->detectType($value);
-            } else {
-                //Default and quick fallback
-                $this->type = \PDO::PARAM_STR;
-            }
-        } else {
-            $this->type = $type;
-        }
+        $this->resolveType($value, $type);
     }
 
     /**
@@ -75,10 +64,11 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function withValue($value): Parameter
+    public function withValue($value, int $type = self::DETECT_TYPE): Parameter
     {
         $parameter = clone $this;
         $parameter->value = $value;
+        $parameter->resolveType($value, $type);
 
         return $parameter;
     }
@@ -153,6 +143,24 @@ class Parameter implements ParameterInterface
             'statement' => $this->sqlStatement(),
             'value'     => $this->value,
         ];
+    }
+
+    /**
+     * @param mixed $value
+     * @param int   $type
+     */
+    protected function resolveType($value, int $type): void
+    {
+        if ($type == self::DETECT_TYPE) {
+            if (!is_array($value)) {
+                $this->type = $this->detectType($value);
+            } else {
+                //Default and quick fallback
+                $this->type = \PDO::PARAM_STR;
+            }
+        } else {
+            $this->type = $type;
+        }
     }
 
     /**

@@ -155,8 +155,7 @@ class Parameter implements ParameterInterface
             if (!is_array($value)) {
                 $this->type = $this->detectType($value);
             } else {
-                //Default and quick fallback
-                $this->type = \PDO::PARAM_STR;
+                $this->type = \PDO::PARAM_STMT;
             }
         } else {
             $this->type = $type;

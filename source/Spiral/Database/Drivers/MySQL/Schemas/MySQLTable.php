@@ -125,10 +125,8 @@ class MySQLTable extends AbstractTable
 
         $result = [];
         foreach ($references as $schema) {
-            $references = 'SELECT * FROM `information_schema`.`key_column_usage` WHERE `constraint_name` = ? AND `table_schema` = ? AND `table_name` = ?';
-
             $column = $this->driver->query(
-                $references,
+                'SELECT * FROM `information_schema`.`key_column_usage` WHERE `constraint_name` = ? AND `table_schema` = ? AND `table_name` = ?',
                 [$schema['CONSTRAINT_NAME'], $this->driver->getSource(), $this->getName()]
             )->fetch();
 

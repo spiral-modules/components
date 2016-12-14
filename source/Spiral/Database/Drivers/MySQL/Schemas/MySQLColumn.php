@@ -66,10 +66,7 @@ class MySQLColumn extends AbstractColumn
         'datetime'    => 'datetime',
         'date'        => 'date',
         'time'        => 'time',
-        'timestamp'   => [
-            'type'         => 'timestamp',
-            'defaultValue' => self::DATETIME_DEFAULT,
-        ],
+        'timestamp'   => ['type' => 'timestamp', 'defaultValue' => null],
 
         //Binary types
         'binary'      => 'blob',
@@ -132,18 +129,6 @@ class MySQLColumn extends AbstractColumn
     /**
      * {@inheritdoc}
      */
-    public function getDefaultValue()
-    {
-        if (in_array($this->type, $this->forbiddenDefaults)) {
-            return null;
-        }
-
-        return parent::getDefaultValue();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function sqlStatement(Driver $driver): string
     {
         $defaultValue = $this->defaultValue;
@@ -161,26 +146,6 @@ class MySQLColumn extends AbstractColumn
         }
 
         return $statement;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function prepareDefault(Driver $driver): string
-    {
-        //todo: is it needed? fix!
-        if ($this->abstractType() == 'timestamp' && is_scalar($this->defaultValue)) {
-            if (is_numeric($this->defaultValue)) {
-                //Nothing to do
-                return (int)$this->defaultValue;
-            }
-
-            $datetime = new \DateTime($this->defaultValue, $driver->getTimezone());
-
-            return $datetime->getTimestamp();
-        }
-
-        return parent::prepareDefault($driver);
     }
 
     /**
@@ -240,7 +205,7 @@ class MySQLColumn extends AbstractColumn
             $column->abstractType() == 'timestamp'
             && $column->defaultValue == '0000-00-00 00:00:00'
         ) {
-            //Normalizing default value; todo: is it needed?
+            //Normalizing default value
             $column->defaultValue = self::DATETIME_DEFAULT;
         }
 

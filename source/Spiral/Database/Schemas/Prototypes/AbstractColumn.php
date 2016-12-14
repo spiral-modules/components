@@ -7,6 +7,7 @@
 namespace Spiral\Database\Schemas\Prototypes;
 
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Exceptions\DefaultValueException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Injections\FragmentInterface;
@@ -41,14 +42,15 @@ use Spiral\Database\Schemas\ColumnInterface;
 abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 {
     /**
-     * Default datetime value.
-     */
-    const DATETIME_DEFAULT = '1970-01-01 00:00:00';
-
-    /**
      * Default timestamp expression (driver specific).
      */
     const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+
+    /**
+     * Normalization for time and dates.
+     */
+    const DATE_FORMAT = 'Y-m-d';
+    const TIME_FORMAT = 'H:i:s';
 
     /**
      * Abstract type aliases (for consistency).
@@ -299,10 +301,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         if (in_array($this->abstractType(), ['time', 'date', 'datetime', 'timestamp'])) {
-            //Driver specific now expression
-            if (strtolower($this->defaultValue) == strtolower(static::DATETIME_CURRENT)) {
-                return new Fragment($this->defaultValue);
-            }
+            return $this->normalizeDatetime($this->abstractType(), $this->defaultValue);
         }
 
         switch ($this->phpType()) {
@@ -380,9 +379,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         return 'unknown';
     }
 
-    //--- MODIFICATIONS IS HERE
-
-
     /**
      * Give column new abstract type. DBMS specific implementation must map provided type into one
      * of internal database values.
@@ -448,14 +444,12 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      */
     public function defaultValue($value): AbstractColumn
     {
-        $this->defaultValue = $value;
-        if (
-            ($this->abstractType() == 'timestamp' || $this->abstractType() == 'datetime')
-            && strtolower($value) == strtolower(self::DATETIME_DEFAULT)
-        ) {
-            //Making sure default value is driver specific
-            $this->defaultValue = static::DATETIME_DEFAULT;
+        //Forcing driver specific values
+        if ($value === self::DATETIME_CURRENT) {
+            $value = static::DATETIME_CURRENT;
         }
+
+        $this->defaultValue = $value;
 
         return $this;
     }
@@ -611,7 +605,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         return implode(' ', $statement);
     }
 
-
     /**
      * Simplified way to dump information.
      *
@@ -704,5 +697,53 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         return $driver->quote($defaultValue);
+    }
+
+    /**
+     * Ensure that datetime fields are correctly formatted.
+     *
+     * @param string $type
+     * @param string $value
+     *
+     * @return string|FragmentInterface|\DateTime
+     *
+     * @throws DefaultValueException
+     */
+    protected function normalizeDatetime(string $type, $value)
+    {
+        if ($value === static::DATETIME_CURRENT) {
+            //Dynamic default value
+            return new Fragment($value);
+        }
+
+        //In order to correctly normalize date or time let's convert it into DateTime object first
+        $datetime = new \DateTime();
+
+        if (is_numeric($value)) {
+            $datetime->setTimestamp($value);
+        } else {
+            $timestamp = strtotime($value);
+            if ($timestamp === false) {
+                throw new DefaultValueException(
+                    "Unable to normalize value '{$value}' for column type {$type} in " . get_class($this)
+                );
+            }
+
+            $datetime->setTimestamp($timestamp);
+        }
+
+        switch ($type) {
+            case 'datetime':
+                //no break
+            case 'timestamp':
+                //Driver should handle conversion automatically
+                return $datetime;
+            case 'time':
+                return $datetime->format(static::TIME_FORMAT);
+            case 'date':
+                return $datetime->format(static::DATE_FORMAT);
+        }
+
+        return $value;
     }
 }

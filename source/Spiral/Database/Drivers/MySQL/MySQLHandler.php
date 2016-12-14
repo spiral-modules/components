@@ -24,7 +24,7 @@ class MySQLHandler extends AbstractHandler
         AbstractColumn $initial,
         AbstractColumn $column
     ) {
-        $this->run("ALTER TABLE {$this->identify($table)} CHANGE {$this->identify($column)} {$column->sqlStatement($this->driver)}");
+        $this->run("ALTER TABLE {$this->identify($table)} CHANGE {$this->identify($initial)} {$column->sqlStatement($this->driver)}");
     }
 
     /**

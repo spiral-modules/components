@@ -275,6 +275,10 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function quote($value, int $type = PDO::PARAM_STR): string
     {
+        if ($value instanceof \DateTimeInterface) {
+            $value = $this->resolveDateTime($value);
+        }
+
         return $this->getPDO()->quote($value);
     }
 
@@ -652,13 +656,17 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Convert DateTime object into local database representation. Driver will automatically force
      * needed timezone.
      *
-     * @param \DateTime $dateTime
+     * @param \DateTimeInterface $value
      *
      * @return string
      */
-    protected function resolveDateTime(\DateTime $dateTime): string
+    protected function resolveDateTime(\DateTimeInterface $value): string
     {
-        return $dateTime->setTimezone($this->getTimezone())->format(static::DATETIME);
+        $datetime = new \DateTime();
+        $datetime->setTimestamp($value->getTimestamp());
+        $datetime->setTimezone($this->getTimezone());
+
+        return $datetime->format(static::DATETIME);
     }
 
     /**

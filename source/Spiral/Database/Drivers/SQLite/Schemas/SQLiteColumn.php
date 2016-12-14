@@ -12,6 +12,11 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 class SQLiteColumn extends AbstractColumn
 {
     /**
+     * Default timestamp expression (driver specific).
+     */
+    const DATETIME_CURRENT = 'CURRENT_TIMESTAMP';
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -199,7 +204,6 @@ class SQLiteColumn extends AbstractColumn
                     trim($columnSchema),
                     $matches
                 )) {
-
                     $enumValues = explode(',', $matches[1]);
                     foreach ($enumValues as &$value) {
                         //Trimming values

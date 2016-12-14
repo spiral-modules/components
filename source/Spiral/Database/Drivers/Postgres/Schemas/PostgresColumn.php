@@ -19,7 +19,7 @@ class PostgresColumn extends AbstractColumn
     /**
      * Default timestamp expression (driver specific).
      */
-    const DATETIME_CURRENT = 'NOW()';
+    const DATETIME_CURRENT = 'now()';
 
     /**
      * {@inheritdoc}
@@ -59,7 +59,7 @@ class PostgresColumn extends AbstractColumn
         //Date and Time types
         'datetime'    => 'timestamp without time zone',
         'date'        => 'date',
-        'time'        => 'time',
+        'time'        => 'time without time zone',
         'timestamp'   => 'timestamp without time zone',
 
         //Binary types

@@ -59,7 +59,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @var array
      */
-    protected $defaultOptions = [
+    protected $options = [
         'profiling'  => false,
 
         //All datetime objects will be converted relative to this timezone
@@ -77,7 +77,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @var array
      */
-    protected $options = [
+    protected $pdoOptions = [
         PDO::ATTR_CASE              => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_STRINGIFY_FETCHES => true,
@@ -93,11 +93,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     {
         $this->name = $name;
 
-        $this->defaultOptions = $options + $this->defaultOptions;
+        $this->options = $options + $this->options;
 
         if (!empty($options['options'])) {
             //PDO connection options has to be stored under key "options" of config
-            $this->options = $options['options'] + $this->options;
+            $this->pdoOptions = $options['options'] + $this->pdoOptions;
         }
     }
 
@@ -120,7 +120,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function getSource(): string
     {
-        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->defaultOptions['connection'],
+        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->options['connection'],
             $matches)) {
             return $matches[1];
         }
@@ -157,7 +157,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function setProfiling(bool $enabled = true): PDODriver
     {
-        $this->defaultOptions['profiling'] = $enabled;
+        $this->options['profiling'] = $enabled;
 
         return $this;
     }
@@ -169,7 +169,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function isProfiling(): bool
     {
-        return $this->defaultOptions['profiling'];
+        return $this->options['profiling'];
     }
 
     /**
@@ -185,7 +185,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             return $this->pdo;
         }
 
-        $benchmark = $this->benchmark('connect', $this->defaultOptions['connection']);
+        $benchmark = $this->benchmark('connect', $this->options['connection']);
         try {
             $this->pdo = $this->createPDO();
         } finally {
@@ -466,11 +466,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function __debugInfo()
     {
         return [
-            'connection' => $this->defaultOptions['connection'],
+            'connection' => $this->options['connection'],
             'connected'  => $this->isConnected(),
             'profiling'  => $this->isProfiling(),
             'source'     => $this->getSource(),
-            'options'    => $this->options,
+            'options'    => $this->pdoOptions,
         ];
     }
 
@@ -482,10 +482,10 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     protected function createPDO(): PDO
     {
         return new PDO(
-            $this->defaultOptions['connection'],
-            $this->defaultOptions['username'],
-            $this->defaultOptions['password'],
-            $this->options
+            $this->options['connection'],
+            $this->options['username'],
+            $this->options['password'],
+            $this->pdoOptions
         );
     }
 

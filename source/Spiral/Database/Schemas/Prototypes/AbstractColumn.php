@@ -719,6 +719,10 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             return new Fragment($value);
         }
 
+        if ($value instanceof \DateTimeInterface) {
+            return clone $value;
+        }
+
         //In order to correctly normalize date or time let's convert it into DateTime object first
         $datetime = new \DateTime();
 

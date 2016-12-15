@@ -43,7 +43,7 @@ class SQLServerDriver extends Driver
     /**
      * @var array
      */
-    protected $options = [
+    protected $pdoOptions = [
         PDO::ATTR_CASE              => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_STRINGIFY_FETCHES => false,

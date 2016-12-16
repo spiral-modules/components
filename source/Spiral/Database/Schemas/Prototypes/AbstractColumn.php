@@ -720,24 +720,24 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         }
 
         if ($value instanceof \DateTimeInterface) {
-            return clone $value;
-        }
-
-        //In order to correctly normalize date or time let's convert it into DateTime object first
-        $datetime = new \DateTime();
-
-        if (is_numeric($value)) {
-            //Presumably timestamp
-            $datetime->setTimestamp($value);
+            $datetime = clone $value;
         } else {
-            $timestamp = strtotime($value);
-            if ($timestamp === false) {
-                throw new DefaultValueException(
-                    "Unable to normalize timestamp '{$value}' for column type '{$type}' in " . get_class($this)
-                );
-            }
+            //In order to correctly normalize date or time let's convert it into DateTime object first
+            $datetime = new \DateTime();
 
-            $datetime->setTimestamp($timestamp);
+            if (is_numeric($value)) {
+                //Presumably timestamp
+                $datetime->setTimestamp($value);
+            } else {
+                $timestamp = strtotime($value);
+                if ($timestamp === false) {
+                    throw new DefaultValueException(
+                        "Unable to normalize timestamp '{$value}' for column type '{$type}' in " . get_class($this)
+                    );
+                }
+
+                $datetime->setTimestamp($timestamp);
+            }
         }
 
         switch ($type) {

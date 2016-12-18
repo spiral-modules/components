@@ -18,6 +18,8 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 
 /**
  * Default implementation of CacheInterface. Better fit for spiral.
+ *
+ * @todo implement at top of good psr6 package?
  */
 class CacheManager extends Component implements SingletonInterface, CacheInterface, InjectorInterface
 {

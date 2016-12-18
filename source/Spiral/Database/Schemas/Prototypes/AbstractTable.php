@@ -435,7 +435,7 @@ abstract class AbstractTable implements TableInterface
         $this->current->registerReference($foreign);
 
         //Let's ensure index existence to performance and compatibility reasons
-        $this->index($column);
+        $this->index([$column]);
 
         return $foreign;
     }

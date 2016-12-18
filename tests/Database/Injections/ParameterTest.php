@@ -110,14 +110,14 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * At this moment arrays values are always treated as strings.
+     * At this moment arrays values are always treated as STMP parameter.
      */
     public function testAutoTypingArrays()
     {
         $parameter = new Parameter([1, 2, 3]);
-        $this->assertSame(\PDO::PARAM_STR, $parameter->getType());
+        $this->assertSame(\PDO::PARAM_STMT, $parameter->getType());
 
         $parameter = new Parameter(['1', '2', '3']);
-        $this->assertSame(\PDO::PARAM_STR, $parameter->getType());
+        $this->assertSame(\PDO::PARAM_STMT, $parameter->getType());
     }
 }

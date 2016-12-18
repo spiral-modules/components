@@ -430,6 +430,14 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
+     * Reset every field value.
+     */
+    protected function flushFields()
+    {
+        $this->fields = [];
+    }
+
+    /**
      * Create entity by passing fields thought setFields method
      *
      * @param array $fields

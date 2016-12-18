@@ -107,22 +107,14 @@ class MemcacheStore extends CacheStore
      *
      * Will apply MAX_EXPIRATION.
      */
-    public function set(string $name, $data, int $lifetime)
+    public function set(string $name, $data, $ttl = null)
     {
-        $lifetime = min(self::MAX_EXPIRATION + time(), $lifetime + time());
-        if ($lifetime < 0) {
-            $lifetime = 0;
+        $ttl = min(self::MAX_EXPIRATION + time(), $ttl + time());
+        if ($ttl < 0) {
+            $ttl = 0;
         }
 
-        return $this->driver->set($this->prefix . $name, $data, $lifetime);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function forever(string $name, $data)
-    {
-        return $this->driver->forever($this->prefix . $name, $data);
+        return $this->driver->set($this->prefix . $name, $data, $ttl);
     }
 
     /**
@@ -152,9 +144,9 @@ class MemcacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function clear()
     {
-        $this->driver->flush();
+        $this->driver->clear();
     }
 
     /**

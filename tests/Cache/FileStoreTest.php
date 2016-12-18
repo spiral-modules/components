@@ -157,7 +157,7 @@ class FileStoreTest extends \PHPUnit_Framework_TestCase
         $files->shouldReceive('getFiles')->with('cache/', 'cache')->andReturn(['abc']);
         $files->shouldReceive('delete')->with('abc');
 
-        $store->flush();
+        $store->clear();
     }
 
     public function testIncForever()

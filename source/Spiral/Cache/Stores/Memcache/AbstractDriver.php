@@ -8,12 +8,13 @@
 
 namespace Spiral\Cache\Stores\Memcache;
 
+use Spiral\Cache\ActiveStoreInterface;
 use Spiral\Cache\Prototypes\CacheStore;
 
 /**
  * Common functionality for Memcache and Memcached drivers.
  */
-abstract class AbstractDriver extends CacheStore implements DriverInterface
+abstract class AbstractDriver extends CacheStore implements DriverInterface, ActiveStoreInterface
 {
     /**
      * @var array

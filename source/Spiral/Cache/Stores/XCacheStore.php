@@ -55,17 +55,9 @@ class XCacheStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function set(string $name, $data, int $lifetime)
+    public function set(string $name, $data, $ttl = null)
     {
-        return xcache_set($this->prefix . $name, $data, $lifetime);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function forever(string $name, $data)
-    {
-        return xcache_set($this->prefix . $name, $data, 0);
+        return xcache_set($this->prefix . $name, $data, $this->lifetime($ttl, 0));
     }
 
     /**
@@ -97,7 +89,7 @@ class XCacheStore extends CacheStore
      *
      * @throws \ErrorException
      */
-    public function flush()
+    public function clear()
     {
         xcache_clear_cache(XC_TYPE_VAR);
     }

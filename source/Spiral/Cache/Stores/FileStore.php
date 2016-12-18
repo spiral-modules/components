@@ -101,22 +101,11 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function set(string $name, $data, int $lifetime)
+    public function set(string $name, $data, $ttl = null)
     {
         return $this->files->write(
             $this->makeFilename($name),
-            serialize([time() + $lifetime, $data])
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function forever(string $name, $data)
-    {
-        return $this->files->write(
-            $this->makeFilename($name),
-            serialize([0, $data])
+            serialize([$this->lifetime($ttl, 0, time()), $data])
         );
     }
 
@@ -136,7 +125,7 @@ class FileStore extends CacheStore
         $value = $this->get($name, $expiration) + $delta;
 
         if (empty($expiration)) {
-            $this->forever($name, $value);
+            $this->set($name, $value);
         } else {
             $this->set($name, $value, $expiration - time());
         }
@@ -152,7 +141,7 @@ class FileStore extends CacheStore
         $value = $this->get($name, $expiration) - $delta;
 
         if (empty($expiration)) {
-            $this->forever($name, $value);
+            $this->set($name, $value);
         } else {
             $this->set($name, $value, $expiration - time());
         }
@@ -163,7 +152,7 @@ class FileStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function clear()
     {
         foreach ($this->files->getFiles($this->directory, $this->extension) as $filename) {
             $this->files->delete($filename);

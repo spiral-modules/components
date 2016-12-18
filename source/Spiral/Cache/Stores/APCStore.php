@@ -90,21 +90,13 @@ class APCStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function set(string $name, $data, int $lifetime)
+    public function set(string $name, $data, $ttl = null)
     {
         if ($this->driverType == self::APCU_DRIVER) {
-            return apcu_store($this->prefix . $name, $data, $lifetime);
+            return apcu_store($this->prefix . $name, $data, $this->lifetime($ttl, 0));
         }
 
-        return apc_store($this->prefix . $name, $data, $lifetime);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function forever(string $name, $data)
-    {
-        return $this->set($name, $data, 0);
+        return apc_store($this->prefix . $name, $data, $this->lifetime($ttl, 0));
     }
 
     /**
@@ -148,7 +140,7 @@ class APCStore extends CacheStore
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function clear()
     {
         if ($this->driverType == self::APCU_DRIVER) {
             apcu_clear_cache();

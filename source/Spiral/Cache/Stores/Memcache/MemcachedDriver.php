@@ -70,17 +70,9 @@ class MemcachedDriver extends AbstractDriver
      *
      * @throws \MemcachedException
      */
-    public function set(string $name, $data, int $lifetime)
+    public function set(string $name, $data, $ttl = null)
     {
-        return $this->driver->set($name, $data, $lifetime);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function forever(string $name, $data)
-    {
-        $this->driver->set($name, $data);
+        return $this->driver->set($name, $data, $this->lifetime($ttl));
     }
 
     /**
@@ -97,7 +89,7 @@ class MemcachedDriver extends AbstractDriver
     public function inc(string $name, int $delta = 1): int
     {
         if (!$this->has($name)) {
-            $this->forever($name, $delta);
+            $this->set($name, $delta);
 
             return $delta;
         }
@@ -116,7 +108,7 @@ class MemcachedDriver extends AbstractDriver
     /**
      * {@inheritdoc}
      */
-    public function flush()
+    public function clear()
     {
         $this->driver->flush();
     }

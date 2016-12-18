@@ -8,6 +8,7 @@
 
 namespace Spiral\Cache\Prototypes;
 
+use Spiral\Cache\ActiveStoreInterface;
 use Spiral\Cache\CacheManager;
 use Spiral\Cache\StoreInterface;
 use Spiral\Core\Container\InjectableInterface;
@@ -15,7 +16,7 @@ use Spiral\Core\Container\InjectableInterface;
 /**
  * AbstractStore named like that for convenience and mapping.
  */
-abstract class CacheStore implements StoreInterface, InjectableInterface
+abstract class CacheStore implements StoreInterface, InjectableInterface, ActiveStoreInterface
 {
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
@@ -46,5 +47,28 @@ abstract class CacheStore implements StoreInterface, InjectableInterface
         }
 
         return $this->get($name);
+    }
+
+    /**
+     * Get lifetime in seconds based on a ttl, when ttl is null - null must be returned.
+     *
+     * @param null|int|\DateInterval $ttl
+     * @param mixed                  $onNull Value to return when ttl is null.
+     * @param int                    $offset Seconds to add to ttl when ttl is not null. Pass
+     *                                       time() in here to get expiration time.
+     *
+     * @return int|null
+     */
+    protected function lifetime($ttl, $onNull = null, int $offset = 0)
+    {
+        if ($ttl === null) {
+            return $onNull;
+        }
+
+        if ($ttl instanceof \DateInterval) {
+            return $offset + $ttl->s;
+        }
+
+        return $offset + min($ttl, 0);
     }
 }

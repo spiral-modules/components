@@ -31,11 +31,13 @@ class MixedCheckerTest extends \PHPUnit_Framework_TestCase
         $mock = $this->getMockBuilder(Validator::class)->disableOriginalConstructor()->getMock();
         $mock->method('getValue')->with('abc')->will($this->returnValue(123));
 
-        $this->assertTrue($checker->check('match', 123, ['abc'], $mock));
-        $this->assertFalse($checker->check('match', 234, ['abc'], $mock));
+        $checker = $checker->withValidator($mock);
 
-        $this->assertTrue($checker->check('match', '123', ['abc'], $mock));
-        $this->assertFalse($checker->check('match', '123', ['abc', true], $mock));
+        $this->assertTrue($checker->check('match', 123, ['abc']));
+        $this->assertFalse($checker->check('match', 234, ['abc']));
+
+        $this->assertTrue($checker->check('match', '123', ['abc']));
+        $this->assertFalse($checker->check('match', '123', ['abc', true]));
     }
 
     public function cardsProvider()

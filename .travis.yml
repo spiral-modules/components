@@ -2,7 +2,6 @@ language: php
 
 php:
   - 7.0
-  - hhvm
 
 before_install: phpenv config-add tests/php-travis.ini
 install: composer install --no-interaction --prefer-source

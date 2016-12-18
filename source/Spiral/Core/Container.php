@@ -170,8 +170,12 @@ class Container extends Component implements
 
             if (empty($class)) {
                 if (array_key_exists($name, $parameters)) {
+                    //Let's validate value type
+                    $this->assertType($parameter, $reflection, $parameters[$name]);
+
                     //Scalar value supplied by user
                     $arguments[] = $parameters[$name];
+
                     continue;
                 }
 
@@ -500,5 +504,42 @@ class Container extends Component implements
         //todo: additional registration operations?
 
         return $instance;
+    }
+
+    /**
+     * Assert that given value are matched parameter type.
+     *
+     * @param \ReflectionParameter        $parameter
+     * @param \ReflectionFunctionAbstract $context
+     * @param mixed                       $value
+     *
+     * @throws ArgumentException
+     */
+    private function assertType(
+        \ReflectionParameter $parameter,
+        \ReflectionFunctionAbstract $context,
+        $value
+    ) {
+        if (is_null($value)) {
+            if (!$parameter->isOptional()) {
+                throw new ArgumentException($parameter, $context);
+            }
+
+            return;
+        }
+
+        $type = $parameter->getType();
+
+        if ($type == 'array' && !is_array($value)) {
+            throw new ArgumentException($parameter, $context);
+        }
+
+        if (($type == 'int' || $type == 'float') && !is_numeric($value)) {
+            throw new ArgumentException($parameter, $context);
+        }
+
+        if ($type == 'bool' && !is_bool($value) && !is_numeric($value)) {
+            throw new ArgumentException($parameter, $context);
+        }
     }
 }

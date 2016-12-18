@@ -66,9 +66,24 @@ abstract class CacheStore implements StoreInterface, InjectableInterface, Active
         }
 
         if ($ttl instanceof \DateInterval) {
-            return $offset + $ttl->s;
+            return $offset + $this->dateIntervalToSeconds($ttl);
         }
 
         return $offset + min($ttl, 0);
+    }
+
+    /**
+     * @see http://stackoverflow.com/questions/3176609/calculate-total-seconds-in-php-dateinterval
+     *
+     * @param \DateInterval $interval
+     *
+     * @return int
+     */
+    private function dateIntervalToSeconds(\DateInterval $interval): int
+    {
+        $reference = new \DateTimeImmutable();
+        $endTime = $reference->add($interval);
+
+        return $endTime->getTimestamp() - $reference->getTimestamp();
     }
 }

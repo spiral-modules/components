@@ -12,12 +12,13 @@ use Interop\Container\ContainerInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Files\FilesInterface;
-use Spiral\Files\Streams\StreamableInterface;
-use Spiral\Files\Streams\StreamWrapper;
+use Spiral\Validation\Checkers\Traits\FileTrait;
 use Spiral\Validation\Prototypes\AbstractChecker;
 
 class FileChecker extends AbstractChecker implements SingletonInterface
 {
+    use FileTrait;
+
     /**
      * {@inheritdoc}
      */
@@ -27,11 +28,6 @@ class FileChecker extends AbstractChecker implements SingletonInterface
         'size'      => '[[File exceeds the maximum file size of {1}KB.]]',
         'extension' => '[[File has an invalid file format.]]',
     ];
-
-    /**
-     * @var FilesInterface
-     */
-    protected $files = null;
 
     /**
      * @param FilesInterface     $files
@@ -108,58 +104,5 @@ class FileChecker extends AbstractChecker implements SingletonInterface
         }
 
         return in_array($this->files->extension($filename), $extensions);
-    }
-
-    /**
-     * Internal method to fetch filename using multiple input formats.
-     *
-     * @param mixed|UploadedFileInterface $filename
-     * @param bool                        $onlyUploaded Check if file uploaded.
-     *
-     * @return string|bool
-     */
-    protected function filename($filename, bool $onlyUploaded = true)
-    {
-        if (empty($filename) || ($onlyUploaded && !$this->isUploaded($filename))) {
-            return false;
-        }
-
-        if (
-            $filename instanceof UploadedFileInterface
-            || $filename instanceof StreamableInterface
-        ) {
-            return StreamWrapper::getUri($filename->getStream());
-        }
-
-        if (is_array($filename)) {
-            $filename = $filename['tmp_name'];
-        }
-
-        return $this->files->exists($filename) ? $filename : false;
-    }
-
-    /**
-     * Check if file being uploaded.
-     *
-     * @param mixed|UploadedFileInterface $filename Filename or file array.
-     *
-     * @return bool
-     */
-    private function isUploaded($filename): bool
-    {
-        if (is_string($filename)) {
-            //We can use native method
-            return is_uploaded_file($filename);
-        }
-
-        if (is_array($filename)) {
-            return isset($filename['tmp_name']) && is_uploaded_file($filename['tmp_name']);
-        }
-
-        if ($filename instanceof UploadedFileInterface) {
-            return empty($filename->getError());
-        }
-
-        return false;
     }
 }

@@ -8,13 +8,19 @@
 
 namespace Spiral\Validation\Checkers;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Files\FilesInterface;
+use Spiral\Validation\Checkers\Traits\FileTrait;
+use Spiral\Validation\Prototypes\AbstractChecker;
 
 /**
  * Image based validations.
  */
-class ImageChecker extends FileChecker implements SingletonInterface
+class ImageChecker extends AbstractChecker implements SingletonInterface
 {
+    use FileTrait;
+
     /**
      * Getimagesize constants.
      */
@@ -56,6 +62,17 @@ class ImageChecker extends FileChecker implements SingletonInterface
         'wbmp',
         'xbm',
     ];
+
+    /**
+     * @param FilesInterface     $files
+     * @param ContainerInterface $container
+     */
+    public function __construct(FilesInterface $files, ContainerInterface $container = null)
+    {
+        $this->files = $files;
+
+        parent::__construct($container);
+    }
 
     /**
      * Check if image in a list of allowed image types.

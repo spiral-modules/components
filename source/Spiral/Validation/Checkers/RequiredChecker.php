@@ -20,7 +20,7 @@ class RequiredChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'with'       => '[[This field is required.]]',
         'withAll'    => '[[This field is required.]]',
         'without'    => '[[This field is required.]]',

@@ -19,7 +19,7 @@ class TypeChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'notEmpty' => '[[This field is required.]]',
         'boolean'  => '[[Not a valid boolean.]]',
         'datetime' => '[[Not a valid datetime.]]',

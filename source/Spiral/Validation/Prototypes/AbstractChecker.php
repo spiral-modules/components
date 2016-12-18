@@ -26,16 +26,16 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     use TranslatorTrait, SaturateTrait;
 
     /**
-     * @var ValidatorInterface
-     */
-    private $validator = null;
-
-    /**
      * Default error messages associated with checker method by name.
      *
      * @var array
      */
-    protected $messages = [];
+    const MESSAGES = [];
+
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator = null;
 
     /**
      * @var ContainerInterface
@@ -71,8 +71,9 @@ abstract class AbstractChecker extends Component implements CheckerInterface
      */
     public function getMessage(string $method): string
     {
-        if (isset($this->messages[$method])) {
-            return $this->say($this->messages[$method]);
+        $messages = static::MESSAGES;
+        if (isset($messages[$method])) {
+            return $this->say($messages[$method]);
         }
 
         return '';

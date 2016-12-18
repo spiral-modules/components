@@ -19,7 +19,7 @@ class AddressChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'email' => '[[Must be a valid email address.]]',
         'url'   => '[[Must be a valid URL address.]]',
     ];

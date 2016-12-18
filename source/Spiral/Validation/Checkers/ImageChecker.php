@@ -31,7 +31,7 @@ class ImageChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'type'    => '[[Image does not supported.]]',
         'valid'   => '[[Image does not supported (allowed JPEG, PNG or GIF).]]',
         'smaller' => '[[Image size should not exceed {0}x{1}px.]]',
@@ -43,7 +43,7 @@ class ImageChecker extends AbstractChecker implements SingletonInterface
      *
      * @var array
      */
-    protected $imageTypes = [
+    const IMAGE_TYPES = [
         'null',
         'gif',
         'jpeg',
@@ -92,7 +92,7 @@ class ImageChecker extends AbstractChecker implements SingletonInterface
             $types = array_slice(func_get_args(), 1);
         }
 
-        return in_array($this->imageTypes[$image[self::IMAGE_TYPE]], $types);
+        return in_array(self::IMAGE_TYPES[$image[self::IMAGE_TYPE]], $types);
     }
 
     /**

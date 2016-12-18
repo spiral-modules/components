@@ -19,7 +19,7 @@ class NumberChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'range'  => '[[Your value should be in range of {0}-{1}.]]',
         'higher' => '[[Your value should be higher than {0}.]]',
         'lower'  => '[[Your value should be lower than {0}.]]',

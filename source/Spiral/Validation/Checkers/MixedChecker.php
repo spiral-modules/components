@@ -19,7 +19,7 @@ class MixedChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'cardNumber' => '[[Please enter valid card number.]]',
     ];
 

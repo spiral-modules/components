@@ -22,7 +22,7 @@ class FileChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'exists'    => '[[File does not exists.]]',
         'uploaded'  => '[[File not received, please try again.]]',
         'size'      => '[[File exceeds the maximum file size of {1}KB.]]',

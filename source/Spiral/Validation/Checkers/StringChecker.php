@@ -19,7 +19,7 @@ class StringChecker extends AbstractChecker implements SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected $messages = [
+    const MESSAGES = [
         'regexp'  => '[[Your value does not match required pattern.]]',
         'shorter' => '[[Enter text shorter or equal to {0}.]]',
         'longer'  => '[[Your text must be longer or equal to {0}.]]',

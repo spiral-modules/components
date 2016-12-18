@@ -43,27 +43,10 @@ class SchematicEntity extends AbstractEntity
 
     /**
      * {@inheritdoc}
-     *
-     * Include every composition public data into result.
      */
-    public function publicFields(): array
+    public function isPublic(string $field): bool
     {
-        $result = [];
-
-        foreach ($this->getKeys() as $field => $value) {
-            if (in_array($field, $this->schema[self::SH_HIDDEN])) {
-                //We might need to use isset in future, for performance
-                continue;
-            }
-
-            if ($value instanceof PublishableInterface) {
-                $result[$field] = $value->publicFields();
-            } else {
-                $result[$field] = $value;
-            }
-        }
-
-        return $result;
+        return !in_array($field, $this->schema[self::SH_HIDDEN]);
     }
 
     /**

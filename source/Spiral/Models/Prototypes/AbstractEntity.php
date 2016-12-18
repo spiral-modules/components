@@ -368,6 +368,33 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * Include every composition public data into result.
+     */
+    public function publicFields(): array
+    {
+        $result = [];
+
+        foreach ($this->getKeys() as $field => $value) {
+            if (!$this->isPublic($field)) {
+                //We might need to use isset in future, for performance
+                continue;
+            }
+
+            $value = $this->getField($field);
+
+            if ($value instanceof PublishableInterface) {
+                $result[$field] = $value->publicFields();
+            } else {
+                $result[$field] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Alias for serializeData.
      *
      * @return array
@@ -394,6 +421,15 @@ abstract class AbstractEntity extends MutableObject implements
     {
         $this->fields = [];
     }
+
+    /**
+     * Indication that field in public and can be presented in published data.
+     *
+     * @param string $field
+     *
+     * @return bool
+     */
+    abstract protected function isPublic(string $field): bool;
 
     /**
      * Check if field is fillable.

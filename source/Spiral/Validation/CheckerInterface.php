@@ -20,22 +20,26 @@ interface CheckerInterface
     /**
      * Check value using checker method.
      *
-     * @param string             $method
-     * @param mixed              $value
-     * @param array              $arguments
-     * @param ValidatorInterface $validator Parent validator.
-     *
-     * @return bool|CheckerInterface Return self to indicate that error happen (used to properly
-     *                               resolve message). @todo optimize
+     * @param string $method
+     * @param mixed  $value
+     * @param array  $arguments
      *
      * @throws CheckerException
      */
     public function check(
         string $method,
         $value,
-        array $arguments = [],
-        ValidatorInterface $validator = null
+        array $arguments = []
     );
+
+    /**
+     * Version of checker with active local validator.
+     *
+     * @param ValidatorInterface $validator
+     *
+     * @return CheckerInterface
+     */
+    public function withValidator(ValidatorInterface $validator): CheckerInterface;
 
     /**
      * Return default error message for checker condition.

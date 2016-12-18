@@ -13,11 +13,13 @@ use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Validation\CheckerInterface;
-use Spiral\Validation\Exceptions\ValidationException;
+use Spiral\Validation\Exceptions\CheckerException;
 use Spiral\Validation\ValidatorInterface;
 
 /**
  * Checkers used to group set of validation rules under one roof.
+ *
+ * Depends on container due it's usual implementation provides env specific operations in some cases
  */
 abstract class AbstractChecker extends Component implements CheckerInterface
 {
@@ -61,41 +63,31 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     ) {
         array_unshift($arguments, $value);
 
-        $this->validator = $validator;
-        try {
-            $result = call_user_func_array([$this, $method], $arguments);
-        } finally {
-            $this->validator = null;
-        }
-
-        return $result;
+        return call_user_func_array([$this, $method], $arguments);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getMessage(string $method, \ReflectionClass $reflection = null): string
+    public function getMessage(string $method): string
     {
-        if (!empty($reflection)) {
-            $messages = $reflection->getDefaultProperties()['messages'];
-            if (isset($messages[$method])) {
-                //We are inheriting parent messages
-                return $this->say($messages[$method], [], $reflection->getName());
-            }
-        } elseif (isset($this->messages[$method])) {
+        if (isset($this->messages[$method])) {
             return $this->say($this->messages[$method]);
         }
 
-        //Looking for message in parent realization
-        $reflection = $reflection ?? new \ReflectionClass($this);
-        if (
-            $reflection->getParentClass()
-            && $reflection->getParentClass()->isSubclassOf(self::class)
-        ) {
-            return $this->getMessage($method, $reflection->getParentClass());
-        }
-
         return '';
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withValidator(ValidatorInterface $validator): CheckerInterface
+    {
+        $checker = clone $this;
+        $checker->validator = $validator;
+
+        return $checker;
     }
 
     /**
@@ -106,7 +98,7 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     protected function getValidator(): ValidatorInterface
     {
         if (empty($this->validator)) {
-            throw new ValidationException("Unable to receive parent checker validator");
+            throw new CheckerException("Unable to receive associated checker validator");
         }
 
         return $this->validator;

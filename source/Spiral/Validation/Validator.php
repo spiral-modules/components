@@ -319,7 +319,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                 $condition = explode(':', $condition);
                 if ($this->config->hasChecker($condition[0])) {
 
-                    $checker = $this->checker($condition[0]);
+                    $checker = $this->makeChecker($condition[0]);
                     if (!$result = $checker->check($condition[1], $value, $arguments, $this)) {
                         //To let validation() method know that message should be handled via Checker
                         return $checker;
@@ -367,7 +367,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
      * @return CheckerInterface
      * @throws ValidationException
      */
-    protected function checker(string $name): CheckerInterface
+    protected function makeChecker(string $name): CheckerInterface
     {
         if (!$this->config->hasChecker($name)) {
             throw new ValidationException(
@@ -375,7 +375,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
             );
         }
 
-        return $this->container->get($this->config->checkerClass($name));
+        return $this->container->get($this->config->checkerClass($name))->withValidator($this);
     }
 
     /**

@@ -19,7 +19,7 @@ use Spiral\Security\RulesInterface;
  * class AuthorOrModeratorRule extends BooleanRule
  * {
  *      const JOINER = self::BOOLEAN_OR;
- *      protected $rules= [AuthorRule::class, ModeratorRule::class];
+ *      const RULES  = [AuthorRule::class, ModeratorRule::class];
  * }
  *
  */
@@ -34,18 +34,16 @@ abstract class BooleanRule implements RuleInterface
     const JOINER = self::BOOLEAN_AND;
 
     /**
+     * List of rules to be composited.
+     */
+    const RULES = [];
+
+    /**
      * Rules repository.
      *
      * @var RulesInterface
      */
     private $repository = null;
-
-    /**
-     * Rule rule names.
-     *
-     * @var array
-     */
-    protected $rules = [];
 
     /**
      * @param RulesInterface $repository
@@ -61,7 +59,7 @@ abstract class BooleanRule implements RuleInterface
     public function allows(ActorInterface $actor, string $permission, array $context): bool
     {
         $allowed = 0;
-        foreach ($this->rules as $rule) {
+        foreach (static::RULES as $rule) {
             $rule = $this->repository->get($rule);
 
             if ($rule->allows($actor, $permission, $context)) {
@@ -75,6 +73,6 @@ abstract class BooleanRule implements RuleInterface
             }
         }
 
-        return $allowed === count($this->rules);
+        return $allowed === count(static::RULES);
     }
 }

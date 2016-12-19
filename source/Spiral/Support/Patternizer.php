@@ -38,8 +38,12 @@ class Patternizer
      */
     public function matches(string $string, string $pattern): bool
     {
+        if ($string === $pattern) {
+            return true;
+        }
+
         if (!$this->isPattern($pattern)) {
-            return $string === $pattern;
+            return false;
         }
 
         return (bool)preg_match($this->getRegex($pattern), $string);

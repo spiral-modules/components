@@ -89,7 +89,7 @@ trait GuardedTrait
     {
         if (defined('self::GUARD_NAMESPACE')) {
             //Yay! Isolation
-            $permission = constant(get_called_class() . '::' . 'GUARD_NAMESPACE') . GuardInterface::NS_SEPARATOR . $permission;
+            $permission = constant(get_called_class() . '::' . 'GUARD_NAMESPACE') . '.' . $permission;
         }
 
         return $permission;

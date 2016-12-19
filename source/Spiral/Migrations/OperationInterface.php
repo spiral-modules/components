@@ -18,9 +18,9 @@ interface OperationInterface
     /**
      * Database operation related to. Null forces to use default database.
      *
-     * @return string
+     * @return string|null
      */
-    public function getDatabase(): string;
+    public function getDatabase();
 
     /**
      * Table operation related to.
@@ -32,9 +32,9 @@ interface OperationInterface
     /**
      * Execute operation in a given context.
      *
-     * @param CapsuleInterface $context
+     * @param CapsuleInterface $capsule
      *
      * @throws OperationException
      */
-    public function execute(CapsuleInterface $context);
+    public function execute(CapsuleInterface $capsule);
 }

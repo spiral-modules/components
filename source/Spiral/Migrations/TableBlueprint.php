@@ -7,6 +7,21 @@
 namespace Spiral\Migrations;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Migrations\Operations\Columns\AddColumn;
+use Spiral\Migrations\Operations\Columns\AlterColumn;
+use Spiral\Migrations\Operations\Columns\DropColumn;
+use Spiral\Migrations\Operations\Columns\RenameColumn;
+use Spiral\Migrations\Operations\Indexes\AddIndex;
+use Spiral\Migrations\Operations\Indexes\AlterIndex;
+use Spiral\Migrations\Operations\Indexes\DropIndex;
+use Spiral\Migrations\Operations\References\AddReference;
+use Spiral\Migrations\Operations\References\AlterReference;
+use Spiral\Migrations\Operations\References\DropReference;
+use Spiral\Migrations\Operations\Table\CreateTable;
+use Spiral\Migrations\Operations\Table\DropTable;
+use Spiral\Migrations\Operations\Table\PrimaryKeys;
+use Spiral\Migrations\Operations\Table\RenameTable;
+use Spiral\Migrations\Operations\Table\UpdateTable;
 
 class TableBlueprint
 {
@@ -67,7 +82,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function addColumn($name, $type, array $options = [])
+    public function addColumn(string $name, string $type, array $options = []): self
     {
         return $this->addOperation(
             new AddColumn($this->database, $this->table, $name, $type, $options)
@@ -84,7 +99,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function alterColumn($name, $type, array $options = [])
+    public function alterColumn(string $name, string $type, array $options = []): self
     {
         return $this->addOperation(
             new AlterColumn($this->database, $this->table, $name, $type, $options)
@@ -100,7 +115,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function renameColumn($name, $newName)
+    public function renameColumn(string $name, string $newName): self
     {
         return $this->addOperation(
             new RenameColumn($this->database, $this->table, $name, $newName)
@@ -115,7 +130,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function dropColumn($name)
+    public function dropColumn(string $name): self
     {
         return $this->addOperation(
             new DropColumn($this->database, $this->table, $name)
@@ -131,7 +146,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function addIndex(array $columns, array $options = [])
+    public function addIndex(array $columns, array $options = []): self
     {
         return $this->addOperation(
             new AddIndex($this->database, $this->table, $columns, $options)
@@ -147,7 +162,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function alterIndex(array $columns, array $options)
+    public function alterIndex(array $columns, array $options): self
     {
         return $this->addOperation(
             new AlterIndex($this->database, $this->table, $columns, $options)
@@ -162,7 +177,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function dropIndex(array $columns)
+    public function dropIndex(array $columns): self
     {
         return $this->addOperation(
             new DropIndex($this->database, $this->table, $columns)
@@ -174,14 +189,18 @@ class TableBlueprint
      * $table->addForeignKey('user_id', 'users', 'id', ['delete' => 'CASCADE']);
      *
      * @param string $column
-     * @param string $foreignTable
+     * @param string $foreignTable Database isolation prefix will be automatically added.
      * @param string $foreignKey
      * @param array  $options
      *
      * @return TableBlueprint
      */
-    public function addForeignKey($column, $foreignTable, $foreignKey, array $options = [])
-    {
+    public function addForeignKey(
+        string $column,
+        string $foreignTable,
+        string $foreignKey,
+        array $options = []
+    ): self {
         return $this->addOperation(
             new AddReference(
                 $this->database,
@@ -206,8 +225,12 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function alterForeignKey($column, $foreignTable, $foreignKey, array $options = [])
-    {
+    public function alterForeignKey(
+        string $column,
+        string $foreignTable,
+        string $foreignKey,
+        array $options = []
+    ): self {
         return $this->addOperation(
             new AlterReference(
                 $this->database,
@@ -228,7 +251,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function dropForeignKey($column)
+    public function dropForeignKey(string $column): self
     {
         return $this->addOperation(
             new DropReference($this->database, $this->table, $column)
@@ -242,7 +265,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function setPrimaryKeys(array $keys)
+    public function setPrimaryKeys(array $keys): self
     {
         return $this->addOperation(
             new PrimaryKeys($this->database, $this->table, $keys)
@@ -250,7 +273,7 @@ class TableBlueprint
     }
 
     /**
-     * @return TableBlueprint
+     * Create table schema.
      */
     public function create()
     {
@@ -290,7 +313,7 @@ class TableBlueprint
      *
      * @param string $newName
      */
-    public function rename($newName)
+    public function rename(string $newName)
     {
         $this->addOperation(
             new RenameTable($this->database, $this->table, $newName)
@@ -306,7 +329,7 @@ class TableBlueprint
      *
      * @return TableBlueprint
      */
-    public function addOperation(OperationInterface $operation)
+    public function addOperation(OperationInterface $operation): self
     {
         $this->operations[] = $operation;
 

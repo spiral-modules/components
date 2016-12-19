@@ -55,7 +55,8 @@ interface PermissionsInterface
      * @param string $role
      * @param string $permission
      *
-     * @return int|RuleInterface
+     * @return bool|RuleInterface
+     *
      * @throws RoleException
      * @throws PermissionException
      */

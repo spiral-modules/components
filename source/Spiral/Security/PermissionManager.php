@@ -75,7 +75,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     public function addRole(string $role): PermissionManager
     {
         if ($this->hasRole($role)) {
-            throw new RoleException("Role '{$role}' already exists.");
+            throw new RoleException("Role '{$role}' already exists");
         }
 
         $this->associations[$role] = [];
@@ -91,7 +91,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     public function removeRole(string $role): PermissionManager
     {
         if (!$this->hasRole($role)) {
-            throw new RoleException("Undefined role '{$role}'.");
+            throw new RoleException("Undefined role '{$role}'");
         }
 
         unset($this->associations[$role]);
@@ -122,7 +122,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         }
 
         //Behaviour points to rule
-        return $this->rules->get($rule);
+        return $this->rules->get((string)$rule);
     }
 
     /**
@@ -140,7 +140,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         }
 
         if ($rule !== GuardInterface::ALLOW) {
-            if (!$this->rules->has($rule)) {
+            if (!$this->rules->has((string)$rule)) {
                 throw new PermissionException("Invalid permission rule '{$rule}'");
             }
         }

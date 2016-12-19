@@ -9,7 +9,6 @@ namespace Spiral\Security;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\FactoryInterface;
 use Spiral\Security\Exceptions\RuleException;
 use Spiral\Security\Rules\CallableRule;
 use Spiral\Support\Patternizer;
@@ -37,10 +36,10 @@ class RuleManager implements RulesInterface, SingletonInterface
     /**
      * RuleManager constructor.
      *
-     * @param FactoryInterface $container
-     * @param Patternizer|null $patternizer
+     * @param ContainerInterface $container
+     * @param Patternizer|null   $patternizer
      */
-    public function __construct(FactoryInterface $container, Patternizer $patternizer)
+    public function __construct(ContainerInterface $container, Patternizer $patternizer)
     {
         $this->container = $container;
         $this->patternizer = $patternizer;

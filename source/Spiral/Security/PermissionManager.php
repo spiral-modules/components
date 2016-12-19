@@ -149,12 +149,12 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         if (isset($this->associations[$role][$permission])) {
             //O(1) check
             return $this->associations[$role][$permission];
-        } else {
-            //Checking using star syntax
-            foreach ($this->associations[$role] as $pattern => $rule) {
-                if ($this->patternizer->matches($permission, $pattern)) {
-                    return $rule;
-                }
+        }
+
+        //Matching using star syntax
+        foreach ($this->associations[$role] as $pattern => $rule) {
+            if ($this->patternizer->matches($permission, $pattern)) {
+                return $rule;
             }
         }
 

@@ -16,6 +16,11 @@ use Spiral\Security\Exceptions\GuardException;
 class Guard extends Component implements GuardInterface
 {
     /**
+     * @var PermissionsInterface
+     */
+    private $permissions = null;
+
+    /**
      * @var ActorInterface|null
      */
     private $actor = null;
@@ -28,19 +33,14 @@ class Guard extends Component implements GuardInterface
     private $roles = [];
 
     /**
-     * @var PermissionsInterface
-     */
-    private $permissions = null;
-
-    /**
-     * @param array                $roles Session specific roles.
-     * @param ActorInterface       $actor
      * @param PermissionsInterface $permissions
+     * @param ActorInterface       $actor
+     * @param array                $roles Session specific roles.
      */
     public function __construct(
-        array $roles = [],
+        PermissionsInterface $permissions,
         ActorInterface $actor = null,
-        PermissionsInterface $permissions
+        array $roles = []
     ) {
         $this->roles = $roles;
         $this->actor = $actor;
@@ -63,7 +63,7 @@ class Guard extends Component implements GuardInterface
             }
 
             if ($rule instanceof RuleInterface) {
-                if ($rule->allows($this->actor, $permission, $context)) {
+                if ($rule->allows($this->getActor(), $permission, $context)) {
                     return true;
                 }
             }
@@ -81,7 +81,7 @@ class Guard extends Component implements GuardInterface
      */
     public function getRoles(): array
     {
-        return array_merge($this->roles, $this->actor->getRoles());
+        return array_merge($this->roles, $this->getActor()->getRoles());
     }
 
     /**

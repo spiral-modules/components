@@ -42,14 +42,15 @@ trait GuardedTrait
      */
     public function getGuard(): GuardInterface
     {
-        $container = $this->iocContainer();
-
-        if (empty($container)) {
-            throw new ScopeException("Unable to create guard, no container is available");
-        }
-
         if (empty($this->guard)) {
-            $this->guard = $this->iocContainer()->get(GuardInterface::class);
+
+            $container = $this->iocContainer();
+
+            if (empty($container)) {
+                throw new ScopeException("Unable to create guard, no container is available");
+            }
+
+            $this->guard = $container->get(GuardInterface::class);
         }
 
         return $this->guard;

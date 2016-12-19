@@ -21,7 +21,8 @@ use Spiral\Support\Patternizer;
  *
  * Example:
  * $associations->associate('admin', '*');
- * $associations->associate('editor', 'posts.*');
+ * $associations->associate('editor', 'posts.*', Allows::class);
+ * $associations->associate('user', 'posts.*', Forbid::class);
  */
 class PermissionManager extends Component implements PermissionsInterface, SingletonInterface
 {

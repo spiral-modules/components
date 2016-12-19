@@ -30,7 +30,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      *
      * @var array
      */
-    private $associations = [];
+    private $permissions = [];
 
     /**
      * @var RulesInterface
@@ -57,7 +57,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      */
     public function hasRole(string $role): bool
     {
-        return array_key_exists($role, $this->associations);
+        return array_key_exists($role, $this->permissions);
     }
 
     /**
@@ -71,7 +71,9 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
             throw new RoleException("Role '{$role}' already exists");
         }
 
-        $this->associations[$role] = [];
+        $this->permissions[$role] = [
+            //No associated permissions
+        ];
 
         return $this;
     }
@@ -87,7 +89,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
             throw new RoleException("Undefined role '{$role}'");
         }
 
-        unset($this->associations[$role]);
+        unset($this->permissions[$role]);
 
         return $this;
     }
@@ -97,7 +99,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      */
     public function getRoles(): array
     {
-        return array_keys($this->associations);
+        return array_keys($this->permissions);
     }
 
     /**
@@ -131,7 +133,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
             throw new PermissionException("Invalid permission rule '{$rule}'");
         }
 
-        $this->associations[$role][$permission] = $rule;
+        $this->permissions[$role][$permission] = $rule;
 
         return $this;
     }
@@ -146,13 +148,13 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      */
     private function findRule(string $role, string $permission): string
     {
-        if (isset($this->associations[$role][$permission])) {
+        if (isset($this->permissions[$role][$permission])) {
             //O(1) check
-            return $this->associations[$role][$permission];
+            return $this->permissions[$role][$permission];
         }
 
         //Matching using star syntax
-        foreach ($this->associations[$role] as $pattern => $rule) {
+        foreach ($this->permissions[$role] as $pattern => $rule) {
             if ($this->patternizer->matches($permission, $pattern)) {
                 return $rule;
             }

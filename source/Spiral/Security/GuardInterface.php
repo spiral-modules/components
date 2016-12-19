@@ -20,12 +20,6 @@ interface GuardInterface
     const NS_SEPARATOR = '.';
 
     /**
-     * Role/permissions association behaviour (rule).
-     */
-    const UNDEFINED = false;
-    const ALLOW     = true;
-
-    /**
      * Check if given operation are allowed. Has to check associations between operation and
      * actor/session roles based on given rules (binary vs context specific).
      *

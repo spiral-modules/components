@@ -11,6 +11,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Security\Exceptions\PermissionException;
 use Spiral\Security\Exceptions\RoleException;
+use Spiral\Security\Rules\NegativeRule;
 use Spiral\Support\Patternizer;
 
 /**
@@ -110,19 +111,14 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     /**
      * {@inheritdoc}
      */
-    public function getRule(string $role, string $permission)
+    public function getRule(string $role, string $permission): RuleInterface
     {
         if (!$this->hasRole($role)) {
             throw new RoleException("Undefined role '{$role}'");
         }
 
-        $rule = $this->findRule($role, $permission);
-        if ($rule === GuardInterface::ALLOW || $rule === GuardInterface::UNDEFINED) {
-            return $rule;
-        }
-
         //Behaviour points to rule
-        return $this->rules->get((string)$rule);
+        return $this->rules->get($this->findRule($role, $permission));
     }
 
     /**
@@ -133,16 +129,14 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     public function associate(
         string $role,
         string $permission,
-        $rule = GuardInterface::ALLOW
+        string $rule = 'Spiral\Security\Rules\PositiveRule'
     ): PermissionManager {
         if (!$this->hasRole($role)) {
             throw new RoleException("Undefined role '{$role}'");
         }
 
-        if ($rule !== GuardInterface::ALLOW) {
-            if (!$this->rules->has((string)$rule)) {
-                throw new PermissionException("Invalid permission rule '{$rule}'");
-            }
+        if (!$this->rules->has($rule)) {
+            throw new PermissionException("Invalid permission rule '{$rule}'");
         }
 
         $this->associations[$role][$permission] = $rule;
@@ -174,14 +168,17 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      * @param string $role
      * @param string $permission
      *
-     * @return bool|string
+     * @return string
+     *
+     * @throws PermissionException
      */
-    private function findRule(string $role, string $permission)
+    private function findRule(string $role, string $permission): string
     {
-        if (isset($this->deassociations[$role]) && in_array($permission,
-                $this->deassociations[$role])
+        if (
+            isset($this->deassociations[$role])
+            && in_array($permission, $this->deassociations[$role])
         ) {
-            return GuardInterface::UNDEFINED;
+            return NegativeRule::class;
         }
 
         if (isset($this->associations[$role][$permission])) {
@@ -189,13 +186,15 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
             return $this->associations[$role][$permission];
         } else {
             //Checking using star syntax
-            foreach ($this->associations[$role] as $pattern => $behaviour) {
+            foreach ($this->associations[$role] as $pattern => $rule) {
                 if ($this->patternizer->matches($permission, $pattern)) {
-                    return $behaviour;
+                    return $rule;
                 }
             }
         }
 
-        return GuardInterface::UNDEFINED;
+        throw new PermissionException(
+            "Unable to resolve role/permission association for '{$role}'/{$permission}"
+        );
     }
 }

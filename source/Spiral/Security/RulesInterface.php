@@ -58,6 +58,7 @@ interface RulesInterface
      * @param string $name
      *
      * @return RuleInterface
+     *
      * @throws RuleException
      */
     public function get(string $name): RuleInterface;

@@ -58,15 +58,9 @@ class Guard extends Component implements GuardInterface
             }
 
             $rule = $this->permissions->getRule($role, $permission);
-            if ($rule === self::ALLOW) {
-                return true;
-            }
 
-            if ($rule instanceof RuleInterface) {
-                if ($rule->allows($this->getActor(), $permission, $context)) {
-                    return true;
-                }
-            }
+            //Checking our rule
+            return $rule->allows($this->getActor(), $permission, $context);
         }
 
         return false;

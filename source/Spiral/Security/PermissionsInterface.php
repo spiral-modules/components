@@ -50,17 +50,15 @@ interface PermissionsInterface
     /**
      * Get role/permission behaviour.
      *
-     * @see GuardInterface::ALLOW
-     *
      * @param string $role
      * @param string $permission
      *
-     * @return bool|RuleInterface
+     * @return RuleInterface
      *
      * @throws RoleException
      * @throws PermissionException
      */
-    public function getRule(string $role, string $permission);
+    public function getRule(string $role, string $permission): RuleInterface;
 
     /**
      * Associate (allow) existed role with one or multiple permissions and specific behaviour.
@@ -76,15 +74,18 @@ interface PermissionsInterface
      * @see GuardInterface::ALLOW
      * @see addRole()
      *
-     * @param string      $role
-     * @param string      $permission
-     * @param bool|string $rule  When supplied as string rule must be pointing to RuleInterface
-     *                           class.
+     * @param string $role
+     * @param string $permission
+     * @param string $rule Rule name previously registered in RulesInterface.
      *
      * @throws RoleException
      * @throws PermissionException
      */
-    public function associate(string $role, string $permission, $rule = GuardInterface::ALLOW);
+    public function associate(
+        string $role,
+        string $permission,
+        string $rule = 'Spiral\Security\Rules\PositiveRule'
+    );
 
     /**
      * Deassociate (remove) role with one or multiple permissions. This is not forbid method,

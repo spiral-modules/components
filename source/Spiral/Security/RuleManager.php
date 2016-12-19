@@ -9,6 +9,7 @@ namespace Spiral\Security;
 
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Security\Exceptions\RuleException;
 use Spiral\Security\Rules\CallableRule;
 use Spiral\Support\Patternizer;
@@ -36,10 +37,10 @@ class RuleManager implements RulesInterface, SingletonInterface
     /**
      * RuleManager constructor.
      *
-     * @param ContainerInterface $container
-     * @param Patternizer|null   $patternizer
+     * @param FactoryInterface $container
+     * @param Patternizer|null $patternizer
      */
-    public function __construct(ContainerInterface $container, Patternizer $patternizer)
+    public function __construct(FactoryInterface $container, Patternizer $patternizer)
     {
         $this->container = $container;
         $this->patternizer = $patternizer;
@@ -56,7 +57,7 @@ class RuleManager implements RulesInterface, SingletonInterface
             $rule = $name;
         }
 
-        if (!$this->validateRule($rule)) {
+        if (!$this->validRule($rule)) {
             throw new RuleException("Unable to set rule '{$name}', invalid rule body");
         }
 
@@ -95,7 +96,8 @@ class RuleManager implements RulesInterface, SingletonInterface
             return true;
         }
 
-        return false;
+        //Relying on container binding
+        return $this->container->has($name);
     }
 
     /**
@@ -140,7 +142,7 @@ class RuleManager implements RulesInterface, SingletonInterface
      *
      * @return bool
      */
-    private function validateRule($rule): bool
+    private function validRule(string $rule): bool
     {
         if ($rule instanceof \Closure || $rule instanceof RuleInterface) {
             return true;

@@ -23,10 +23,10 @@ use Spiral\Security\RulesInterface;
  * }
  *
  */
-abstract class BooleanRule implements RuleInterface
+abstract class CompositeRule implements RuleInterface
 {
-    const BOOLEAN_AND = 'and';
-    const BOOLEAN_OR  = 'or';
+    const BOOLEAN_AND = 'AND';
+    const BOOLEAN_OR  = 'OR';
 
     /**
      * How to process results on sub rules.

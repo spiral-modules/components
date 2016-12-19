@@ -4,11 +4,10 @@
  *
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
-namespace Security;
+
+namespace Spiral\Security;
 
 use Spiral\Core\ResolverInterface;
-use Spiral\Security\ActorInterface;
-use Spiral\Security\Rule;
 
 /**
  * Class RuleTest

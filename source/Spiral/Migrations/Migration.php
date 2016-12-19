@@ -8,7 +8,6 @@
 namespace Spiral\Migrations;
 
 use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\Table;
 use Spiral\Migrations\Exceptions\MigrationException;
 use Spiral\Migrations\Migration\State;
 

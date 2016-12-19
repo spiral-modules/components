@@ -18,20 +18,19 @@ use Spiral\Security\RulesInterface;
  *
  * class AuthorOrModeratorRule extends BooleanRule
  * {
- *      const JOINER = self::BOOLEAN_OR;
- *      const RULES  = [AuthorRule::class, ModeratorRule::class];
+ *      const BEHAVIOUR = self::AT_LEAST_ONE;
+ *      const RULES     = [AuthorRule::class, ModeratorRule::class];
  * }
- *
  */
 abstract class CompositeRule implements RuleInterface
 {
-    const BOOLEAN_AND = 'AND';
-    const BOOLEAN_OR  = 'OR';
+    const ALL          = 'ALL';
+    const AT_LEAST_ONE = 'ONE';
 
     /**
      * How to process results on sub rules.
      */
-    const JOINER = self::BOOLEAN_AND;
+    const BEHAVIOUR = self::ALL;
 
     /**
      * List of rules to be composited.
@@ -63,12 +62,12 @@ abstract class CompositeRule implements RuleInterface
             $rule = $this->repository->get($rule);
 
             if ($rule->allows($actor, $permission, $context)) {
-                if (static::JOINER == self::BOOLEAN_OR) {
+                if (static::BEHAVIOUR == self::AT_LEAST_ONE) {
                     return true;
                 }
 
                 $allowed++;
-            } elseif (static::JOINER == self::BOOLEAN_AND) {
+            } elseif (static::BEHAVIOUR == self::ALL) {
                 return false;
             }
         }

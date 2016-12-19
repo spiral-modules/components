@@ -28,7 +28,7 @@ trait OptionsTrait
             return true;
         }
 
-        if (!isset($this->aliases[$name])) {
+        if (!isset($this->aliases) || !isset($this->aliases[$name])) {
             return false;
         }
 
@@ -55,7 +55,7 @@ trait OptionsTrait
             return $this->options[$name];
         }
 
-        if (!isset($this->aliases) && !isset($this->aliases[$name])) {
+        if (!isset($this->aliases) || !isset($this->aliases[$name])) {
             return false;
         }
 

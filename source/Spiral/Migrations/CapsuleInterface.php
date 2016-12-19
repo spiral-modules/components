@@ -25,24 +25,24 @@ interface CapsuleInterface
     public function getDatabase(string $database = null): Database;
 
     /**
-     * @param string      $table
      * @param string|null $database
+     * @param string      $table
      *
      * @return Table
      */
-    public function getTable(string $table, string $database = null): Table;
+    public function getTable($database, string $table): Table;
 
     /**
      * Get schema associated with given database and table.
      *
-     * @param string      $table
      * @param string|null $database
+     * @param string      $table
      *
      * @return AbstractTable
      *
      * @throws ContextException
      */
-    public function getSchema(string $table, string $database = null): AbstractTable;
+    public function getSchema($database, string $table): AbstractTable;
 
     /**
      * Execute given set of operations.

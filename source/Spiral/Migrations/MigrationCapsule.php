@@ -50,7 +50,7 @@ class MigrationCapsule implements CapsuleInterface
     /**
      * {@inheritdoc}
      */
-    public function getTable(string $table, string $database = null): Table
+    public function getTable($database, string $table): Table
     {
         return $this->dbal->database($database)->table($table);
     }
@@ -58,10 +58,10 @@ class MigrationCapsule implements CapsuleInterface
     /**
      * {@inheritdoc}
      */
-    public function getSchema(string $table, string $database = null): AbstractTable
+    public function getSchema($database, string $table): AbstractTable
     {
         if (!isset($this->schemas[$database . '.' . $table])) {
-            $schema = $this->getTable($table, $database)->getSchema();
+            $schema = $this->getTable($database, $table)->getSchema();
 
             //We have to declare existed to prevent dropping existed schema
             $this->schemas[$database . '.' . $table] = $schema;

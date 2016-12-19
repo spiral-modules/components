@@ -84,6 +84,6 @@ abstract class Migration implements MigrationInterface
             throw new MigrationException("Unable to get table blueprint, no capsule are set");
         }
 
-        return new TableBlueprint($this->capsule, $database, $table);
+        return new TableBlueprint($this->capsule, $table, $database);
     }
 }

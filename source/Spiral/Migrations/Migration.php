@@ -63,7 +63,7 @@ abstract class Migration implements MigrationInterface
      */
     public function database(string $database = null): Database
     {
-        if (!empty($this->capsule)) {
+        if (empty($this->capsule)) {
             throw new MigrationException("Unable to get database, no capsule are set");
         }
 
@@ -80,7 +80,7 @@ abstract class Migration implements MigrationInterface
      */
     public function table(string $table, string $database = null): TableBlueprint
     {
-        if (!empty($this->capsule)) {
+        if (empty($this->capsule)) {
             throw new MigrationException("Unable to get table blueprint, no capsule are set");
         }
 

@@ -12,7 +12,6 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
-use Spiral\Database\Schemas\TableInterface;
 
 /**
  * Represent table level abstraction with simplified access to SelectQuery associated with such
@@ -69,7 +68,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
     /**
      * {@inheritdoc}
      *
-     * @return TableInterface|AbstractTable
+     * @return AbstractTable
      */
     public function getSchema(): AbstractTable
     {

@@ -212,7 +212,9 @@ class MySQLColumn extends AbstractColumn
             && $column->defaultValue == '0000-00-00 00:00:00'
         ) {
             //Normalizing default value
-            $column->defaultValue = self::DATETIME_DEFAULT;
+            $column->defaultValue = 0;
+
+            //todo: driver specific datetime initialization (?)
         }
 
         return $column;

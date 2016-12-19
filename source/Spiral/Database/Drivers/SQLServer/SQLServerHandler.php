@@ -121,7 +121,7 @@ class SQLServerHandler extends AbstractHandler
      */
     public function dropIndex(AbstractTable $table, AbstractIndex $index)
     {
-        $this->run("DROP INDEX {$index->getName(true)} ON {$table->getName(true)}");
+        $this->run("DROP INDEX {$this->identify($index)} ON {$this->identify($table)}");
 
         return $this;
     }

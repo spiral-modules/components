@@ -13,7 +13,7 @@ use Spiral\Security\RuleInterface;
 /**
  * Always negative rule.
  */
-final class Forbid implements RuleInterface, SingletonInterface
+final class ForbidRule implements RuleInterface, SingletonInterface
 {
     /**
      * {@inheritdoc}

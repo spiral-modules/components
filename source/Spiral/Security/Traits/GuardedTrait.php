@@ -42,14 +42,15 @@ trait GuardedTrait
      */
     public function getGuard(): GuardInterface
     {
-        $container = $this->iocContainer();
-
-        if (empty($container)) {
-            throw new ScopeException("Unable to create guard, no container is available");
-        }
-
         if (empty($this->guard)) {
-            $this->guard = $this->iocContainer()->get(GuardInterface::class);
+
+            $container = $this->iocContainer();
+
+            if (empty($container)) {
+                throw new ScopeException("Unable to create guard, no container is available");
+            }
+
+            $this->guard = $container->get(GuardInterface::class);
         }
 
         return $this->guard;
@@ -88,7 +89,7 @@ trait GuardedTrait
     {
         if (defined('self::GUARD_NAMESPACE')) {
             //Yay! Isolation
-            $permission = constant(get_called_class() . '::' . 'GUARD_NAMESPACE') . GuardInterface::NS_SEPARATOR . $permission;
+            $permission = constant(get_called_class() . '::' . 'GUARD_NAMESPACE') . '.' . $permission;
         }
 
         return $permission;

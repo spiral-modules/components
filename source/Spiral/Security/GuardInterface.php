@@ -15,11 +15,6 @@ use Spiral\Security\Exceptions\GuardException;
 interface GuardInterface
 {
     /**
-     * Namespace separator in permission names. Only used as helper constant.
-     */
-    const NS_SEPARATOR = '.';
-
-    /**
      * Check if given operation are allowed. Has to check associations between operation and
      * actor/session roles based on given rules (binary vs context specific).
      *

@@ -13,7 +13,7 @@ use Spiral\Security\RuleInterface;
 /**
  * Always positive rule.
  */
-final class Allow implements RuleInterface, SingletonInterface
+final class AllowRule implements RuleInterface, SingletonInterface
 {
     /**
      * {@inheritdoc}

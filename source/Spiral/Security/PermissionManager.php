@@ -124,7 +124,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     public function associate(
         string $role,
         string $permission,
-        string $rule = 'Spiral\Security\Rules\Allow'
+        string $rule = 'Spiral\Security\Rules\AllowRule'
     ): PermissionManager {
         if (!$this->hasRole($role)) {
             throw new RoleException("Undefined role '{$role}'");

@@ -96,9 +96,7 @@ class SQLServerHandler extends AbstractHandler
     }
 
     /**
-     * @param AbstractTable  $table
-     * @param AbstractColumn $initial
-     * @param AbstractColumn $column
+     * {@inheritdoc}
      */
     private function renameColumn(
         AbstractTable $table,
@@ -112,17 +110,10 @@ class SQLServerHandler extends AbstractHandler
     }
 
     /**
-     * Driver specific index remove (drop) command.
-     *
-     * @param AbstractTable $table
-     * @param AbstractIndex $index
-     *
-     * @return self
+     * {@inheritdoc}
      */
     public function dropIndex(AbstractTable $table, AbstractIndex $index)
     {
         $this->run("DROP INDEX {$this->identify($index)} ON {$this->identify($table)}");
-
-        return $this;
     }
 }

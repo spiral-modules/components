@@ -11,6 +11,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Security\Exceptions\PermissionException;
 use Spiral\Security\Exceptions\RoleException;
+use Spiral\Security\Rules\ForbidRule;
 use Spiral\Support\Patternizer;
 
 /**
@@ -119,7 +120,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return $this|self
      */
     public function associate(
         string $role,
@@ -137,6 +138,22 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         $this->permissions[$role][$permission] = $rule;
 
         return $this;
+    }
+
+    /**
+     * Associate role/permission with Forbid rule.
+     *
+     * @param string $role
+     * @param string $permission
+     *
+     * @return $this|self
+     *
+     * @throws RoleException
+     * @throws PermissionException
+     */
+    public function deassociate(string $role, string $permission): PermissionManager
+    {
+        return $this->associate($role, $permission, ForbidRule::class);
     }
 
     /**

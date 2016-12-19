@@ -2,7 +2,7 @@
 /**
  * components
  *
- * @author    Wolfy-J
+ * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
 namespace Security;
 

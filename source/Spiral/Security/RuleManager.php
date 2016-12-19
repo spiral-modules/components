@@ -56,7 +56,7 @@ class RuleManager implements RulesInterface, SingletonInterface
             $rule = $name;
         }
 
-        if (!$this->validRule($rule)) {
+        if (!$this->validateRule($rule)) {
             throw new RuleException("Unable to set rule '{$name}', invalid rule body");
         }
 
@@ -141,7 +141,7 @@ class RuleManager implements RulesInterface, SingletonInterface
      *
      * @return bool
      */
-    private function validRule(string $rule): bool
+    private function validateRule(string $rule): bool
     {
         if ($rule instanceof \Closure || $rule instanceof RuleInterface) {
             return true;

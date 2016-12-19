@@ -71,7 +71,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
      *
      * @return TableInterface|AbstractTable
      */
-    public function getSchema(): TableInterface
+    public function getSchema(): AbstractTable
     {
         return $this->database->getDriver()->tableSchema($this->name, $this->database->getPrefix());
     }

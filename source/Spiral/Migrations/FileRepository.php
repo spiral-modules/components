@@ -128,7 +128,7 @@ class FileRepository implements RepositoryInterface
                 );
             }
 
-            if ($migration->getMeta()->getName() == $name) {
+            if ($migration->getState()->getName() == $name) {
                 throw new RepositoryException(
                     "Unable to register migration '{$name}', migration under same name already exists"
                 );

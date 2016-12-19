@@ -72,28 +72,14 @@ abstract class Migration implements MigrationInterface
     }
 
     /**
-     * @param string      $table
-     * @param string|null $database
+     * Get table schema builder (blueprint).
      *
-     * @return Table
-     */
-    public function table(string $table, string $database = null): Table
-    {
-        if (!empty($this->capsule)) {
-            throw new MigrationException("Unable to get table, no capsule are set");
-        }
-
-        return $this->capsule->getDatabase($database)->table($table);
-    }
-
-
-    /**
      * @param string      $table
      * @param string|null $database
      *
      * @return TableBlueprint
      */
-    public function blueprint(string $table, string $database = null): TableBlueprint
+    public function table(string $table, string $database = null): TableBlueprint
     {
         if (!empty($this->capsule)) {
             throw new MigrationException("Unable to get table blueprint, no capsule are set");

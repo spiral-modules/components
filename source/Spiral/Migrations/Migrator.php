@@ -139,6 +139,8 @@ class Migrator extends Component implements SingletonInterface
                 'migration'     => $migration->getState()->getName(),
                 'time_executed' => new \DateTime('now')
             ]);
+
+            return $migration;
         }
 
         return null;

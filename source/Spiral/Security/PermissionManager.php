@@ -5,15 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Security\Entities;
+namespace Spiral\Security;
 
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Security\Exceptions\PermissionException;
 use Spiral\Security\Exceptions\RoleException;
-use Spiral\Security\GuardInterface;
-use Spiral\Security\PermissionsInterface;
-use Spiral\Security\RulesInterface;
 use Spiral\Support\Patternizer;
 
 /**
@@ -139,7 +136,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         $rule = GuardInterface::ALLOW
     ): PermissionManager {
         if (!$this->hasRole($role)) {
-            throw new RoleException("Undefined role '{$role}'.");
+            throw new RoleException("Undefined role '{$role}'");
         }
 
         if ($rule !== GuardInterface::ALLOW) {

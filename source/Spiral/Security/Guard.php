@@ -5,14 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Security\Entities;
+namespace Spiral\Security;
 
 use Spiral\Core\Component;
-use Spiral\Security\ActorInterface;
 use Spiral\Security\Exceptions\GuardException;
-use Spiral\Security\GuardInterface;
-use Spiral\Security\PermissionsInterface;
-use Spiral\Security\RuleInterface;
 
 /**
  * Checks permissions using given actor.

@@ -84,18 +84,6 @@ interface PermissionsInterface
     public function associate(
         string $role,
         string $permission,
-        string $rule = 'Spiral\Security\Rules\PositiveRule'
+        string $rule = 'Spiral\Security\Rules\Allow'
     );
-
-    /**
-     * Deassociate (remove) role with one or multiple permissions. This is not forbid method,
-     * but rather remove association.
-     *
-     * @param string $role
-     * @param string $permission
-     *
-     * @throws RoleException
-     * @throws PermissionException
-     */
-    public function deassociate(string $role, string $permission);
 }

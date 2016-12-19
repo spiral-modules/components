@@ -11,15 +11,15 @@ use Spiral\Security\ActorInterface;
 use Spiral\Security\RuleInterface;
 
 /**
- * Always positive rule.
+ * Always negative rule.
  */
-final class PositiveRule implements RuleInterface, SingletonInterface
+final class Forbid implements RuleInterface, SingletonInterface
 {
     /**
      * {@inheritdoc}
      */
     public function allows(ActorInterface $actor, string $permission, array $context): bool
     {
-        return true;
+        return false;
     }
 }

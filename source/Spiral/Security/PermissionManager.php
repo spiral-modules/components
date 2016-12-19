@@ -11,7 +11,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Security\Exceptions\PermissionException;
 use Spiral\Security\Exceptions\RoleException;
-use Spiral\Security\Rules\NegativeRule;
 use Spiral\Support\Patternizer;
 
 /**
@@ -32,13 +31,6 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      * @var array
      */
     private $associations = [];
-
-    /**
-     * Roles deassociated with their permissions.
-     *
-     * @var array
-     */
-    private $deassociations = [];
 
     /**
      * @var RulesInterface
@@ -129,7 +121,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     public function associate(
         string $role,
         string $permission,
-        string $rule = 'Spiral\Security\Rules\PositiveRule'
+        string $rule = 'Spiral\Security\Rules\Allow'
     ): PermissionManager {
         if (!$this->hasRole($role)) {
             throw new RoleException("Undefined role '{$role}'");
@@ -145,26 +137,6 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return $this
-     */
-    public function deassociate(string $role, string $permission): PermissionManager
-    {
-        if (!$this->hasRole($role)) {
-            throw new RoleException("Undefined role '{$role}'");
-        }
-
-        if (!isset($this->associations[$role][$permission])) {
-            $this->deassociations[$role][] = $permission;
-        } else {
-            unset($this->associations[$role][$permission]);
-        }
-
-        return $this;
-    }
-
-    /**
      * @param string $role
      * @param string $permission
      *
@@ -174,13 +146,6 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
      */
     private function findRule(string $role, string $permission): string
     {
-        if (
-            isset($this->deassociations[$role])
-            && in_array($permission, $this->deassociations[$role])
-        ) {
-            return NegativeRule::class;
-        }
-
         if (isset($this->associations[$role][$permission])) {
             //O(1) check
             return $this->associations[$role][$permission];
@@ -194,7 +159,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         }
 
         throw new PermissionException(
-            "Unable to resolve role/permission association for '{$role}'/{$permission}"
+            "Unable to resolve role/permission association for '{$role}'/'{$permission}'"
         );
     }
 }

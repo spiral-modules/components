@@ -5,15 +5,16 @@
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
 
-namespace Spiral\Security\Actors;
+namespace Spiral\Tests\Security\Actors;
 
 use Spiral\Security\ActorInterface;
+use Spiral\Security\Actors\Actor;
 
 
 /**
  * Class ActorTest
  *
- * @package Spiral\Security\Actors
+ * @package Spiral\Tests\Security\Actors
  */
 class ActorTest extends \PHPUnit_Framework_TestCase
 {

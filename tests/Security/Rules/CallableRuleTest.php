@@ -5,16 +5,17 @@
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
 
-namespace Spiral\Security\Rules;
+namespace Spiral\Tests\Security\Rules;
 
 use Spiral\Security\ActorInterface;
 use Spiral\Security\RuleInterface;
+use Spiral\Security\Rules\CallableRule;
 
 
 /**
  * Class CallableRuleTest
  *
- * @package Spiral\Security\Rules
+ * @package Spiral\Tests\Security\Rules
  */
 class CallableRuleTest extends \PHPUnit_Framework_TestCase
 {

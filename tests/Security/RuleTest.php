@@ -5,14 +5,16 @@
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
 
-namespace Spiral\Security;
+namespace Spiral\Tests\Security;
 
 use Spiral\Core\ResolverInterface;
+use Spiral\Security\ActorInterface;
+use Spiral\Security\Rule;
 
 /**
  * Class RuleTest
  *
- * @package Spiral\Security
+ * @package Spiral\Tests\Security
  */
 class RuleTest extends \PHPUnit_Framework_TestCase
 {

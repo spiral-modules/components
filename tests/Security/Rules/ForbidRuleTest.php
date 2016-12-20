@@ -5,26 +5,27 @@
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
 
-namespace Spiral\Security\Rules;
+namespace Spiral\Tests\Security\Rules;
 
 use Spiral\Security\ActorInterface;
 use Spiral\Security\RuleInterface;
+use Spiral\Security\Rules\ForbidRule;
 
 
 /**
- * Class AllowTest
+ * Class ForbidRuleTest
  *
- * @package Spiral\Security\Rules
+ * @package Spiral\Tests\Security\Rules
  */
-class AllowTest extends \PHPUnit_Framework_TestCase
+class ForbidRuleTest extends \PHPUnit_Framework_TestCase
 {
     public function testAllow()
     {
         /** @var RuleInterface $rule */
-        $rule = new Allow();
+        $rule = new ForbidRule();
         /** @var ActorInterface $actor */
         $actor = $this->createMock(ActorInterface::class);
 
-        $this->assertTrue($rule->allows($actor, '', []));
+        $this->assertFalse($rule->allows($actor, '', []));
     }
 }

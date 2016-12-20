@@ -24,7 +24,7 @@ abstract class AbstractEntity extends MutableObject implements
     EntityInterface,
     \JsonSerializable,
     \IteratorAggregate,
-    ValueInterface,
+    AccessorInterface,
     PublishableInterface
 {
     /**
@@ -124,6 +124,26 @@ abstract class AbstractEntity extends MutableObject implements
         }
 
         throw new EntityException("Undefined method {$method}");
+    }
+
+    /**
+     * AccessorInterface dependency.
+     *
+     * {@inheritdoc}
+     */
+    public function setValue($data)
+    {
+        return $this->setFields($data);
+    }
+
+    /**
+     * AccessorInterface dependency.
+     *
+     * {@inheritdoc}
+     */
+    public function packValue()
+    {
+        return $this->packFields();
     }
 
     /**
@@ -362,9 +382,13 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * {@inheritdoc}
+     * Pack entity fields data into plain array.
+     *
+     * @return array
+     *
+     * @throws AccessorExceptionInterface
      */
-    public function packValue()
+    public function packFields(): array
     {
         $result = [];
         foreach ($this->fields as $field => $value) {
@@ -376,18 +400,6 @@ abstract class AbstractEntity extends MutableObject implements
         }
 
         return $result;
-    }
-
-    /**
-     * Pack entity fields data into plain array.
-     *
-     * @return array
-     *
-     * @throws AccessorExceptionInterface
-     */
-    public function packFields(): array
-    {
-        return $this->packValue();
     }
 
     /**

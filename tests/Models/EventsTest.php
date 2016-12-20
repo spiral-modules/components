@@ -8,33 +8,33 @@
 namespace Spiral\Tests\Models;
 
 use Mockery as m;
-use Spiral\Models\Prototypes\MutableObject;
+use Spiral\Models\DataEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
-class MutableObjectTest extends \PHPUnit_Framework_TestCase
+class EventsTest extends \PHPUnit_Framework_TestCase
 {
     public function testEventsDispatcher()
     {
-        $this->assertInstanceOf(EventDispatcherInterface::class, MutableClass::events());
-        $this->assertInstanceOf(EventDispatcherInterface::class, MutableObject::events());
-        $this->assertNotSame(MutableClass::events(), MutableObject::events());
+        $this->assertInstanceOf(EventDispatcherInterface::class, EventsTestEntity::events());
+        $this->assertInstanceOf(EventDispatcherInterface::class, DataEntity::events());
+        $this->assertNotSame(EventsTestEntity::events(), DataEntity::events());
 
-        $class = new MutableClass();
-        $this->assertSame(MutableClass::events(), $class->events());
+        $class = new EventsTestEntity();
+        $this->assertSame(EventsTestEntity::events(), $class->events());
     }
 
     public function testSetEventsDispatcher()
     {
         $events = m::mock(EventDispatcherInterface::class);
-        MutableClass::setEvents($events);
+        EventsTestEntity::setEvents($events);
 
-        $this->assertSame($events, MutableClass::events());
+        $this->assertSame($events, EventsTestEntity::events());
 
-        $class = new MutableClass();
+        $class = new EventsTestEntity();
         $this->assertSame($events, $class->events());
 
-        MutableClass::setEvents(null);
+        EventsTestEntity::setEvents(null);
 
         $this->assertInstanceOf(EventDispatcherInterface::class, $class->events());
         $this->assertNotSame($events, $class->events());
@@ -43,7 +43,7 @@ class MutableObjectTest extends \PHPUnit_Framework_TestCase
     public function testFireEvent()
     {
         $events = m::mock(EventDispatcherInterface::class);
-        MutableClass::setEvents($events);
+        EventsTestEntity::setEvents($events);
 
         $events->shouldReceive('dispatch')->with(
             'test',
@@ -54,13 +54,13 @@ class MutableObjectTest extends \PHPUnit_Framework_TestCase
             new GenericEvent('out subject')
         );
 
-        $class = new MutableClass();
+        $class = new EventsTestEntity();
         $this->assertInstanceOf(GenericEvent::class, $class->doSomething());
         $this->assertSame('out subject', $class->doSomething()->getSubject());
     }
 }
 
-class MutableClass extends MutableObject
+class EventsTestEntity extends DataEntity
 {
     public function doSomething()
     {

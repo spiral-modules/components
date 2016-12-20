@@ -132,7 +132,7 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         }
 
         if (!$this->rules->has($rule)) {
-            throw new PermissionException("Invalid permission rule '{$rule}'");
+            throw new PermissionException("Undefined rule '{$rule}'");
         }
 
         $this->permissions[$role][$permission] = $rule;

@@ -11,7 +11,6 @@ use Interop\Container\ContainerInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Security\Exceptions\RuleException;
 use Spiral\Security\Rules\CallableRule;
-use Spiral\Support\Patternizer;
 
 /**
  * Provides ability to request permissions rules based on it's name.
@@ -24,11 +23,6 @@ class RuleManager implements RulesInterface, SingletonInterface
     private $rules = [];
 
     /**
-     * @var Patternizer
-     */
-    private $patternizer = null;
-
-    /**
      * @var ContainerInterface
      */
     protected $container = null;
@@ -37,12 +31,10 @@ class RuleManager implements RulesInterface, SingletonInterface
      * RuleManager constructor.
      *
      * @param ContainerInterface $container
-     * @param Patternizer|null   $patternizer
      */
-    public function __construct(ContainerInterface $container, Patternizer $patternizer)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->patternizer = $patternizer;
     }
 
     /**
@@ -154,7 +146,7 @@ class RuleManager implements RulesInterface, SingletonInterface
         if (is_string($rule) && class_exists($rule)) {
             $reflection = new \ReflectionClass($rule);
 
-            return $reflection->isSubclassOf(RulesInterface::class);
+            return $reflection->isSubclassOf(RuleInterface::class);
         }
 
         return false;

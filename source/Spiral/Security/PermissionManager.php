@@ -114,7 +114,9 @@ class PermissionManager extends Component implements PermissionsInterface, Singl
         }
 
         //Behaviour points to rule
-        return $this->rules->get($this->findRule($role, $permission));
+        return $this->rules->get(
+            $this->findRule($role, $permission)
+        );
     }
 
     /**

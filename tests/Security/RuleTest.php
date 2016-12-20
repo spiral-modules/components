@@ -9,6 +9,7 @@ namespace Spiral\Tests\Security;
 
 use Spiral\Core\ResolverInterface;
 use Spiral\Security\ActorInterface;
+use Spiral\Security\Exceptions\RuleException;
 use Spiral\Security\Rule;
 
 /**
@@ -18,6 +19,11 @@ use Spiral\Security\Rule;
  */
 class RuleTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject|ActorInterface
+     */
+    private $actor;
+
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|ResolverInterface
      */
@@ -30,6 +36,7 @@ class RuleTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
+        $this->actor = $this->createMock(ActorInterface::class);
         $this->resolver = $this->createMock(ResolverInterface::class);
         $this->rule = $this->getMockBuilder(Rule::class)
             ->setConstructorArgs([$this->resolver])
@@ -45,11 +52,9 @@ class RuleTest extends \PHPUnit_Framework_TestCase
      */
     public function testAllows($permission, $context, $allowed)
     {
-        /** @var ActorInterface $actor */
-        $actor = $this->createMock(ActorInterface::class);
         $parameters = [
-                'actor'      => $actor,
-                'user'       => $actor,
+                'actor'      => $this->actor,
+                'user'       => $this->actor,
                 'permission' => $permission,
                 'context'    => $context,
             ] + $context;
@@ -64,7 +69,13 @@ class RuleTest extends \PHPUnit_Framework_TestCase
             ->method(Rule::CHECK_METHOD)
             ->with($parameters)
             ->willReturn($allowed);
-        $this->assertEquals($allowed, $this->rule->allows($actor, $permission, $context));
+        $this->assertEquals($allowed, $this->rule->allows($this->actor, $permission, $context));
+    }
+
+    public function testAllowsException()
+    {
+        $this->expectException(RuleException::class);
+        $this->rule->allows($this->actor, 'permission', []);
     }
 
     /**

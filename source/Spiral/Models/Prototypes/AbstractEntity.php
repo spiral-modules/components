@@ -28,13 +28,25 @@ abstract class AbstractEntity extends MutableObject implements
     PublishableInterface
 {
     /**
+     * When option is set to true, entity will throw an event "constructed" after initiating object
+     * paramaters.
+     *
+     * @protected
+     */
+    const EVENT_ON_CONSTRUCT = false;
+
+    /**
      * Field format declares how entity must process magic setters and getters. Available values:
      * camelCase, tableize.
+     *
+     * @protected
      */
     const FIELD_FORMAT = 'camelCase';
 
     /**
      * Field mutators.
+     *
+     * @private
      */
     const MUTATOR_GETTER   = 'getter';
     const MUTATOR_SETTER   = 'setter';
@@ -47,11 +59,15 @@ abstract class AbstractEntity extends MutableObject implements
 
     /**
      * @param array $fields
+     *
+     * @event constructed($entity)
      */
     public function __construct(array $fields = [])
     {
         $this->fields = $fields;
         parent::__construct();
+
+        static::EVENT_ON_CONSTRUCT && $entity->dispatch('constructed', new EntityEvent($this));
     }
 
     /**
@@ -107,7 +123,7 @@ abstract class AbstractEntity extends MutableObject implements
                 }
         }
 
-        throw new EntityException("Undefined method {$method}.");
+        throw new EntityException("Undefined method {$method}");
     }
 
     /**
@@ -486,17 +502,12 @@ abstract class AbstractEntity extends MutableObject implements
      * @param array $fields
      *
      * @return AbstractEntity
-     *
-     * @event created($entity)
      */
     public static function create($fields = [])
     {
         /**
          * @var self $entity
          */
-        $entity = (new static([]))->setFields($fields);
-        $entity->dispatch('created', new EntityEvent($entity));
-
-        return $entity;
+        return (new static([]))->setFields($fields);
     }
 }

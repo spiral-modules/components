@@ -13,7 +13,7 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 /**
  * Generic data entity instance.
  */
-interface EntityInterface
+interface EntityInterface extends \ArrayAccess
 {
     /**
      * Check if field known to entity, field value can be null!

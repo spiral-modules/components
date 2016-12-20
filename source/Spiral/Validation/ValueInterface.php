@@ -18,5 +18,5 @@ interface ValueInterface
      *
      * @return mixed
      */
-    public function serializeData();
+    public function packFields();
 }

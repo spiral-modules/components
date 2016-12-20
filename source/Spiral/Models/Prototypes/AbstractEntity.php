@@ -347,18 +347,18 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * Serialize entity data into plain array.
+     * Pack entity fields data into plain array.
      *
      * @return array
      *
      * @throws AccessorExceptionInterface
      */
-    public function serializeData()
+    public function packFields(): array
     {
         $result = [];
         foreach ($this->fields as $field => $value) {
             if ($value instanceof ValueInterface) {
-                $result[$field] = $value->serializeData();
+                $result[$field] = $value->packFields();
             } else {
                 $result[$field] = $value;
             }
@@ -401,7 +401,7 @@ abstract class AbstractEntity extends MutableObject implements
      */
     public function toArray(): array
     {
-        return $this->serializeData();
+        return $this->packFields();
     }
 
     /**

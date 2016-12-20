@@ -21,8 +21,6 @@ use Spiral\Models\Traits\EventsTrait;
  */
 abstract class MutableObject extends Component
 {
-    use EventsTrait;
-
     /**
      * Every entity might have set of traits which can be initiated manually or at moment of
      * construction model instance. Array will store already initiated model names.

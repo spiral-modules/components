@@ -10,11 +10,11 @@ namespace Spiral\Models\Prototypes;
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
-use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\FieldExceptionInterface;
 use Spiral\Models\PublishableInterface;
+use Spiral\Models\Traits\EventsTrait;
 use Spiral\Validation\ValueInterface;
 
 /**
@@ -27,6 +27,8 @@ abstract class AbstractEntity extends MutableObject implements
     AccessorInterface,
     PublishableInterface
 {
+    use EventsTrait;
+
     /**
      * When option is set to true, entity will throw an event "constructed" after initiating object
      * paramaters.
@@ -66,8 +68,6 @@ abstract class AbstractEntity extends MutableObject implements
     {
         $this->fields = $fields;
         parent::__construct();
-
-        static::EVENT_ON_CONSTRUCT && $this->dispatch('constructed', new EntityEvent($this));
     }
 
     /**

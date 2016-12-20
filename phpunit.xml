@@ -17,4 +17,10 @@
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory>source/Spiral</directory>
+        </whitelist>
+    </filter>
 </phpunit>

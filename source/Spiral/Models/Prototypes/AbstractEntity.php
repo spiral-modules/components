@@ -24,7 +24,6 @@ abstract class AbstractEntity extends MutableObject implements
     EntityInterface,
     \JsonSerializable,
     \IteratorAggregate,
-    \ArrayAccess,
     ValueInterface,
     PublishableInterface
 {

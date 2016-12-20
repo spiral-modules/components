@@ -1,22 +1,18 @@
 <?php
 /**
- * Spiral Framework.
+ * components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author    Wolfy-J
  */
-
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Prototypes\AbstractEntity;
 
 /**
- * DataEntity in spiral used to represent basic data set with validation rules, filters and
- * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity. In addition
- * it creates magic set of getters and setters for every field name (see validator trait) in model.
+ * This is analog of DataEntity based on constant arrays to define mutator and accessors.
  *
- * DataEntity provides ability to configure it's state using internal properties.
+ * @see DynamicEntity
  */
 class DataEntity extends AbstractEntity
 {
@@ -27,7 +23,7 @@ class DataEntity extends AbstractEntity
      *
      * @var array
      */
-    protected $hidden = [];
+    const HIDDEN = [];
 
     /**
      * Set of fields allowed to be filled using setFields() method.
@@ -36,7 +32,7 @@ class DataEntity extends AbstractEntity
      *
      * @var array
      */
-    protected $fillable = [];
+    const FILLABLE = [];
 
     /**
      * List of fields not allowed to be filled by setFields() method. Replace with and empty array
@@ -49,21 +45,21 @@ class DataEntity extends AbstractEntity
      *
      * @var array|string
      */
-    protected $secured = [];
+    const SECURED = [];
 
     /**
      * @see setField()
      *
      * @var array
      */
-    protected $setters = [];
+    const SETTERS = [];
 
     /**
      * @see getField()
      *
      * @var array
      */
-    protected $getters = [];
+    const GETTERS = [];
 
     /**
      * Accessor used to mock field data and filter every request thought itself.
@@ -73,14 +69,14 @@ class DataEntity extends AbstractEntity
      *
      * @var array
      */
-    protected $accessors = [];
+    const ACCESSORS = [];
 
     /**
      * {@inheritdoc}
      */
     public function isPublic(string $field): bool
     {
-        return !in_array($field, $this->hidden);
+        return !in_array($field, static::HIDDEN);
     }
 
     /**
@@ -96,15 +92,15 @@ class DataEntity extends AbstractEntity
      */
     protected function isFillable(string $field): bool
     {
-        if (!empty($this->fillable)) {
-            return in_array($field, $this->fillable);
+        if (!empty(static::FILLABLE)) {
+            return in_array($field, static::FILLABLE);
         }
 
-        if ($this->secured === '*') {
+        if (static::SECURED === '*') {
             return false;
         }
 
-        return !in_array($field, $this->secured);
+        return !in_array($field, static::SECURED);
     }
 
     /**
@@ -119,12 +115,21 @@ class DataEntity extends AbstractEntity
      */
     protected function getMutator(string $field, string $mutator)
     {
-        //We do support 3 mutators: getter, setter and accessor, all of them can be
-        //referenced to valid field name by adding "s" at the end
-        $mutator = $mutator . 's';
+        $target = [];
+        switch ($mutator) {
+            case self::MUTATOR_ACCESSOR:
+                $target = static::ACCESSORS;
+                break;
+            case self::MUTATOR_GETTER:
+                $target = static::GETTERS;
+                break;
+            case self::MUTATOR_SETTER:
+                $target = static::SETTERS;
+                break;
+        }
 
-        if (isset($this->{$mutator}[$field])) {
-            return $this->{$mutator}[$field];
+        if (isset($target[$field])) {
+            return $target[$field];
         }
 
         return null;

@@ -1,20 +1,24 @@
 <?php
 /**
- * components
+ * Spiral Framework.
  *
- * @author    Wolfy-J
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Prototypes\AbstractEntity;
 
 /**
- * This is analog of DataEntity based on constant arrays to define mutator and accessors.
+ * DataEntity in spiral used to represent basic data set with validation rules, filters and
+ * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity. In addition
+ * it creates magic set of getters and setters for every field name (see validator trait) in model.
  *
- * @see DataEntity
+ * DataEntity provides ability to configure it's state using internal properties.
  */
-class StaticDateEntity extends AbstractEntity
+class DynamicEntity extends AbstractEntity
 {
     /**
      * List of fields must be hidden from publicFields() method.
@@ -23,7 +27,7 @@ class StaticDateEntity extends AbstractEntity
      *
      * @var array
      */
-    const HIDDEN = [];
+    protected $hidden = [];
 
     /**
      * Set of fields allowed to be filled using setFields() method.
@@ -32,7 +36,7 @@ class StaticDateEntity extends AbstractEntity
      *
      * @var array
      */
-    const FILLABLE = [];
+    protected $fillable = [];
 
     /**
      * List of fields not allowed to be filled by setFields() method. Replace with and empty array
@@ -45,21 +49,21 @@ class StaticDateEntity extends AbstractEntity
      *
      * @var array|string
      */
-    const SECURED = [];
+    protected $secured = [];
 
     /**
      * @see setField()
      *
      * @var array
      */
-    const SETTERS = [];
+    protected $setters = [];
 
     /**
      * @see getField()
      *
      * @var array
      */
-    const GETTERS = [];
+    protected $getters = [];
 
     /**
      * Accessor used to mock field data and filter every request thought itself.
@@ -69,14 +73,14 @@ class StaticDateEntity extends AbstractEntity
      *
      * @var array
      */
-    const ACCESSORS = [];
+    protected $accessors = [];
 
     /**
      * {@inheritdoc}
      */
     public function isPublic(string $field): bool
     {
-        return !in_array($field, static::HIDDEN);
+        return !in_array($field, $this->hidden);
     }
 
     /**
@@ -92,15 +96,15 @@ class StaticDateEntity extends AbstractEntity
      */
     protected function isFillable(string $field): bool
     {
-        if (!empty(static::FILLABLE)) {
-            return in_array($field, static::FILLABLE);
+        if (!empty($this->fillable)) {
+            return in_array($field, $this->fillable);
         }
 
-        if (static::SECURED === '*') {
+        if ($this->secured === '*') {
             return false;
         }
 
-        return !in_array($field, static::SECURED);
+        return !in_array($field, $this->secured);
     }
 
     /**
@@ -115,21 +119,12 @@ class StaticDateEntity extends AbstractEntity
      */
     protected function getMutator(string $field, string $mutator)
     {
-        $target = [];
-        switch ($mutator) {
-            case self::MUTATOR_ACCESSOR:
-                $target = static::ACCESSORS;
-                break;
-            case self::MUTATOR_GETTER:
-                $target = static::GETTERS;
-                break;
-            case self::MUTATOR_SETTER:
-                $target = static::SETTERS;
-                break;
-        }
+        //We do support 3 mutators: getter, setter and accessor, all of them can be
+        //referenced to valid field name by adding "s" at the end
+        $mutator = $mutator . 's';
 
-        if (isset($target[$field])) {
-            return $target[$field];
+        if (isset($this->{$mutator}[$field])) {
+            return $this->{$mutator}[$field];
         }
 
         return null;

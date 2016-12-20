@@ -40,7 +40,7 @@ interface EntityInterface extends \ArrayAccess
      * @param string $name
      * @param mixed  $default
      *
-     * @return mixed|AccessorInterface
+     * @return mixed
      *
      * @throws EntityExceptionInterface
      */

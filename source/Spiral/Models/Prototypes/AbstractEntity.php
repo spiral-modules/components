@@ -67,7 +67,7 @@ abstract class AbstractEntity extends MutableObject implements
         $this->fields = $fields;
         parent::__construct();
 
-        static::EVENT_ON_CONSTRUCT && $entity->dispatch('constructed', new EntityEvent($this));
+        static::EVENT_ON_CONSTRUCT && $this->dispatch('constructed', new EntityEvent($this));
     }
 
     /**
@@ -401,7 +401,7 @@ abstract class AbstractEntity extends MutableObject implements
 
         foreach ($this->getKeys() as $field => $value) {
             if (!$this->isPublic($field)) {
-                //We might need to use isset in future, for performance
+                //We might need to use isset in future, for performance, for science
                 continue;
             }
 
@@ -418,13 +418,13 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * Alias for serializeData.
+     * Alias for packFields.
      *
      * @return array
      */
     public function toArray(): array
     {
-        return $this->packValue();
+        return $this->packFields();
     }
 
     /**

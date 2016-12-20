@@ -16,7 +16,7 @@ interface PublishableInterface
     /**
      * Shares only part of it's fields.
      *
-     * @return array|AccessorInterface[]
+     * @return array
      */
     public function publicFields(): array;
 }

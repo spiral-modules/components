@@ -27,7 +27,7 @@ interface AccessorInterface extends \JsonSerializable
     public function setValue($data);
 
     /**
-     * Convert object data into simple value (array or string for example).
+     * Convert object data into serialized value (array or string for example).
      *
      * @return mixed
      *

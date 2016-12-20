@@ -19,7 +19,7 @@ interface AccessorInterface extends ValueInterface, \JsonSerializable
     /**
      * Change mocked data.
      *
-     * @see packFields
+     * @see packValue
      *
      * @param mixed $data
      *

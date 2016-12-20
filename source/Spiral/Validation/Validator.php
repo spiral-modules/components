@@ -220,7 +220,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
     {
         $value = isset($this->data[$field]) ? $this->data[$field] : $default;
 
-        return $value instanceof ValueInterface ? $value->packFields() : $value;
+        return $value instanceof ValueInterface ? $value->packValue() : $value;
     }
 
     /**

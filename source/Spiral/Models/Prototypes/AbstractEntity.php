@@ -347,6 +347,23 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function packValue()
+    {
+        $result = [];
+        foreach ($this->fields as $field => $value) {
+            if ($value instanceof ValueInterface) {
+                $result[$field] = $value->packValue();
+            } else {
+                $result[$field] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Pack entity fields data into plain array.
      *
      * @return array
@@ -355,16 +372,7 @@ abstract class AbstractEntity extends MutableObject implements
      */
     public function packFields(): array
     {
-        $result = [];
-        foreach ($this->fields as $field => $value) {
-            if ($value instanceof ValueInterface) {
-                $result[$field] = $value->packFields();
-            } else {
-                $result[$field] = $value;
-            }
-        }
-
-        return $result;
+        return $this->packValue();
     }
 
     /**
@@ -401,7 +409,7 @@ abstract class AbstractEntity extends MutableObject implements
      */
     public function toArray(): array
     {
-        return $this->packFields();
+        return $this->packValue();
     }
 
     /**

@@ -8,7 +8,6 @@
 namespace Spiral\Models\Prototypes;
 
 use Spiral\Core\Component;
-use Spiral\Models\Traits\EventsTrait;
 
 /**
  * Entity with ability to alter it's behaviour using set of statically assigned events.
@@ -28,14 +27,6 @@ abstract class MutableObject extends Component
      * @var array
      */
     private static $initiated = [];
-
-    /**
-     * Initialize entity state.
-     */
-    public function __construct()
-    {
-        self::initialize(false);
-    }
 
     /**
      * Clear initiated objects list.

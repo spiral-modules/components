@@ -87,7 +87,7 @@ trait GuardedTrait
      */
     protected function resolvePermission(string $permission): string
     {
-        if (defined('self::GUARD_NAMESPACE')) {
+        if (defined('static::GUARD_NAMESPACE')) {
             //Yay! Isolation
             $permission = constant(get_called_class() . '::' . 'GUARD_NAMESPACE') . '.' . $permission;
         }

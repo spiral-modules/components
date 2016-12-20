@@ -244,9 +244,12 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             throw new StorageException("Bucket configuration must include server id");
         }
 
-        $parameters['server'] = $this->getServer($bucket['server']);
-        $parameters['storage'] = $this;
-
-        return $this->factory->make(StorageBucket::class, $parameters);
+        return $this->factory->make(
+            StorageBucket::class,
+            $parameters + [
+                'server'  => $this->getServer($bucket['server']),
+                'storage' => $this
+            ]
+        );
     }
 }

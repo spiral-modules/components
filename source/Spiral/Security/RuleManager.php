@@ -154,7 +154,7 @@ class RuleManager implements RulesInterface, SingletonInterface
         if (is_string($rule) && class_exists($rule)) {
             $reflection = new \ReflectionClass($rule);
 
-            return $reflection->isSubclassOf(RulesInterface::class);
+            return $reflection->isSubclassOf(RuleInterface::class);
         }
 
         return false;

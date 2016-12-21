@@ -18,7 +18,7 @@
     "container-interop/container-interop": "^1.1",
     "doctrine/inflector": "*",
     "guzzlehttp/guzzle": "~6.0",
-    "symfony/finder": "^2.7",
+    "symfony/finder": "^3.0",
     "symfony/event-dispatcher": "^3.0",
     "symfony/translation": "^3.0",
     "defuse/php-encryption": "^2.0",

@@ -21,6 +21,9 @@ use Spiral\Tests\Security\Rules\Fixtures\OneCompositeRule;
  */
 class CompositeRuleTest extends \PHPUnit_Framework_TestCase
 {
+    const OPERATION = 'test';
+    const CONTEXT   = [];
+
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|ActorInterface $callable
      */
@@ -44,37 +47,21 @@ class CompositeRuleTest extends \PHPUnit_Framework_TestCase
 
         /** @var RuleInterface $rule */
         $rule = new $compositeRuleClass($repository);
-        $this->assertEquals($expected, $rule->allows($this->actor, 'user.create', []));
+        $this->assertEquals($expected,
+            $rule->allows($this->actor, static::OPERATION, static::CONTEXT));
     }
 
     public function allowsProvider()
     {
+        $allowRule = $this->allowRule();
+        $forbidRule = $this->forbidRule();
+
         return [
-            [
-                true,
-                AllCompositeRule::class,
-                [$this->allowRule(), $this->allowRule(), $this->allowRule()]
-            ],
-            [
-                false,
-                AllCompositeRule::class,
-                [$this->allowRule(), $this->allowRule(), $this->forbidRule()]
-            ],
-            [
-                true,
-                OneCompositeRule::class,
-                [$this->allowRule(), $this->forbidRule(), $this->forbidRule()]
-            ],
-            [
-                true,
-                OneCompositeRule::class,
-                [$this->allowRule(), $this->allowRule(), $this->allowRule()]
-            ],
-            [
-                false,
-                OneCompositeRule::class,
-                [$this->forbidRule(), $this->forbidRule(), $this->forbidRule()]
-            ],
+            [true, AllCompositeRule::class, [$allowRule, $allowRule, $allowRule]],
+            [false, AllCompositeRule::class, [$allowRule, $allowRule, $forbidRule]],
+            [true, OneCompositeRule::class, [$allowRule, $forbidRule, $forbidRule]],
+            [true, OneCompositeRule::class, [$allowRule, $allowRule, $allowRule]],
+            [false, OneCompositeRule::class, [$forbidRule, $forbidRule, $forbidRule]],
         ];
     }
 

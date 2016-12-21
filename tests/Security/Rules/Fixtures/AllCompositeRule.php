@@ -17,6 +17,6 @@ use Spiral\Security\Rules\CompositeRule;
  */
 class AllCompositeRule extends CompositeRule
 {
-    const RULES = ['foo.create', 'bar.update', 'baz.delete'];
+    const RULES     = ['test.create', 'test.update', 'test.delete'];
     const BEHAVIOUR = self::ALL;
 }

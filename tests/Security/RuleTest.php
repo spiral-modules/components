@@ -19,6 +19,9 @@ use Spiral\Security\Rule;
  */
 class RuleTest extends \PHPUnit_Framework_TestCase
 {
+    const OPERATION = 'test';
+    const CONTEXT   = [];
+
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|ActorInterface
      */
@@ -58,24 +61,27 @@ class RuleTest extends \PHPUnit_Framework_TestCase
                 'permission' => $permission,
                 'context'    => $context,
             ] + $context;
+
         $method = new \ReflectionMethod($this->rule, Rule::CHECK_METHOD);
         $this->resolver
             ->expects($this->once())
             ->method('resolveArguments')
             ->with($method, $parameters)
             ->willReturn([$parameters]);
+
         $this->rule
             ->expects($this->once())
             ->method(Rule::CHECK_METHOD)
             ->with($parameters)
             ->willReturn($allowed);
+
         $this->assertEquals($allowed, $this->rule->allows($this->actor, $permission, $context));
     }
 
     public function testAllowsException()
     {
         $this->expectException(RuleException::class);
-        $this->rule->allows($this->actor, 'permission', []);
+        $this->rule->allows($this->actor, static::OPERATION, static::CONTEXT);
     }
 
     /**
@@ -84,10 +90,10 @@ class RuleTest extends \PHPUnit_Framework_TestCase
     public function allowsProvider()
     {
         return [
-            ['foo.create', [], false],
-            ['foo.create', [], true],
-            ['foo.create', ['a' => 'b'], false],
-            ['foo.create', ['a' => 'b'], true],
+            ['test.create', [], false],
+            ['test.create', [], true],
+            ['test.create', ['a' => 'b'], false],
+            ['test.create', ['a' => 'b'], true],
         ];
     }
 }

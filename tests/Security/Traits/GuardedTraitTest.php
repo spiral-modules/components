@@ -22,6 +22,9 @@ use Spiral\Tests\Security\Traits\Fixtures\GuardedWithNamespace;
  */
 class GuardedTraitTest extends \PHPUnit_Framework_TestCase
 {
+    const OPERATION = 'test';
+    const CONTEXT   = [];
+
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|GuardedTrait
      */
@@ -65,28 +68,24 @@ class GuardedTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testAllows()
     {
-        $permission = 'permission';
-        $context = [];
-
         $this->guard->method('allows')
-            ->with($permission, $context)
+            ->with(static::OPERATION, static::CONTEXT)
             ->will($this->returnValue(true));
+
         $guarded = new Guarded();
         $guarded->setGuard($this->guard);
 
-        $this->assertTrue($guarded->allows($permission, $context));
-        $this->assertFalse($guarded->denies($permission, $context));
+        $this->assertTrue($guarded->allows(static::OPERATION, static::CONTEXT));
+        $this->assertFalse($guarded->denies(static::OPERATION, static::CONTEXT));
     }
 
     public function testResolvePermission()
     {
-        $permission = 'permission';
-
         $guarded = new Guarded();
-        $this->assertEquals($permission, $guarded->resolvePermission($permission));
+        $this->assertEquals(static::OPERATION, $guarded->resolvePermission(static::OPERATION));
 
         $guarded = new GuardedWithNamespace();
-        $resolvedPermission = GuardedWithNamespace::GUARD_NAMESPACE . '.' . $permission;
-        $this->assertEquals($resolvedPermission, $guarded->resolvePermission($permission));
+        $resolvedPermission = GuardedWithNamespace::GUARD_NAMESPACE . '.' . static::OPERATION;
+        $this->assertEquals($resolvedPermission, $guarded->resolvePermission(static::OPERATION));
     }
 }

@@ -19,11 +19,13 @@ use Spiral\Security\Rules\CallableRule;
  */
 class CallableRuleTest extends \PHPUnit_Framework_TestCase
 {
+    const OPERATION = 'test';
+    const CONTEXT   = [];
+
     public function testAllow()
     {
         /** @var ActorInterface $actor */
         $actor = $this->createMock(ActorInterface::class);
-        $permission = 'foo';
         $context = [];
 
         /** @var \PHPUnit_Framework_MockObject_MockObject|callable $callable */
@@ -32,13 +34,13 @@ class CallableRuleTest extends \PHPUnit_Framework_TestCase
             ->getMock();
 
         $callable->method('__invoke')
-            ->with($actor, $permission, $context)
+            ->with($actor, static::OPERATION, $context)
             ->willReturn(true, false);
 
         /** @var RuleInterface $rule */
         $rule = new CallableRule($callable);
 
-        $this->assertTrue($rule->allows($actor, $permission, $context));
-        $this->assertFalse($rule->allows($actor, $permission, $context));
+        $this->assertTrue($rule->allows($actor, static::OPERATION, $context));
+        $this->assertFalse($rule->allows($actor, static::OPERATION, $context));
     }
 }

@@ -19,6 +19,9 @@ use Spiral\Security\Rules\ForbidRule;
  */
 class ForbidRuleTest extends \PHPUnit_Framework_TestCase
 {
+    const OPERATION = 'test';
+    const CONTEXT   = [];
+
     public function testAllow()
     {
         /** @var RuleInterface $rule */
@@ -26,6 +29,6 @@ class ForbidRuleTest extends \PHPUnit_Framework_TestCase
         /** @var ActorInterface $actor */
         $actor = $this->createMock(ActorInterface::class);
 
-        $this->assertFalse($rule->allows($actor, '', []));
+        $this->assertFalse($rule->allows($actor, static::OPERATION, static::CONTEXT));
     }
 }

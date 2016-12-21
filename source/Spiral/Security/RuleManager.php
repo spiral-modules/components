@@ -133,7 +133,7 @@ class RuleManager implements RulesInterface, SingletonInterface
      *
      * @return bool
      */
-    private function validateRule(string $rule): bool
+    private function validateRule($rule): bool
     {
         if ($rule instanceof \Closure || $rule instanceof RuleInterface) {
             return true;

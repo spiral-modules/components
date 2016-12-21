@@ -26,9 +26,9 @@ interface RulesInterface
      *
      * Technically you can use this method as you use container bindings.
      *
-     * @param string                 $name     Rule name in a string form.
-     * @param callable|RuleInterface $rule     Rule, if kept as null rule name must be treated as
-     *                                         class name for RuleInterface.
+     * @param string                              $name Rule name in a string form.
+     * @param string|array|callable|RuleInterface $rule Rule, if kept as null rule name must be
+     *                                                  treated as class name for RuleInterface.
      *
      * @throws RuleException
      */

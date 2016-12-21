@@ -15,6 +15,7 @@ use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\FieldExceptionInterface;
 use Spiral\Models\PublishableInterface;
+use Spiral\Models\Traits\EventsTrait;
 use Spiral\Validation\ValueInterface;
 
 /**
@@ -24,18 +25,31 @@ abstract class AbstractEntity extends MutableObject implements
     EntityInterface,
     \JsonSerializable,
     \IteratorAggregate,
-    \ArrayAccess,
-    ValueInterface,
+    AccessorInterface,
     PublishableInterface
 {
+    use EventsTrait;
+
+    /**
+     * When option is set to true, entity will throw an event "constructed" after initiating object
+     * paramaters.
+     *
+     * @protected
+     */
+    const EVENT_ON_CONSTRUCT = false;
+
     /**
      * Field format declares how entity must process magic setters and getters. Available values:
      * camelCase, tableize.
+     *
+     * @protected
      */
     const FIELD_FORMAT = 'camelCase';
 
     /**
      * Field mutators.
+     *
+     * @private
      */
     const MUTATOR_GETTER   = 'getter';
     const MUTATOR_SETTER   = 'setter';
@@ -48,11 +62,18 @@ abstract class AbstractEntity extends MutableObject implements
 
     /**
      * @param array $fields
+     *
+     * @event constructed($entity)
      */
     public function __construct(array $fields = [])
     {
         $this->fields = $fields;
-        parent::__construct();
+
+        //Initiating mutable object
+        static::initialize(false);
+
+        //Optional, firing event after entity construction
+        static::EVENT_ON_CONSTRUCT && self::events()->dispatch('construct', new EntityEvent($this));
     }
 
     /**
@@ -108,7 +129,27 @@ abstract class AbstractEntity extends MutableObject implements
                 }
         }
 
-        throw new EntityException("Undefined method {$method}.");
+        throw new EntityException("Undefined method {$method}");
+    }
+
+    /**
+     * AccessorInterface dependency.
+     *
+     * {@inheritdoc}
+     */
+    public function setValue($data)
+    {
+        return $this->setFields($data);
+    }
+
+    /**
+     * AccessorInterface dependency.
+     *
+     * {@inheritdoc}
+     */
+    public function packValue()
+    {
+        return $this->packFields();
     }
 
     /**
@@ -347,18 +388,18 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * Serialize entity data into plain array.
+     * Pack entity fields data into plain array.
      *
      * @return array
      *
      * @throws AccessorExceptionInterface
      */
-    public function serializeData()
+    public function packFields(): array
     {
         $result = [];
         foreach ($this->fields as $field => $value) {
             if ($value instanceof ValueInterface) {
-                $result[$field] = $value->serializeData();
+                $result[$field] = $value->packValue();
             } else {
                 $result[$field] = $value;
             }
@@ -378,7 +419,7 @@ abstract class AbstractEntity extends MutableObject implements
 
         foreach ($this->getKeys() as $field => $value) {
             if (!$this->isPublic($field)) {
-                //We might need to use isset in future, for performance
+                //We might need to use isset in future, for performance, for science
                 continue;
             }
 
@@ -395,13 +436,13 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * Alias for serializeData.
+     * Alias for packFields.
      *
      * @return array
      */
     public function toArray(): array
     {
-        return $this->serializeData();
+        return $this->packFields();
     }
 
     /**
@@ -479,17 +520,12 @@ abstract class AbstractEntity extends MutableObject implements
      * @param array $fields
      *
      * @return AbstractEntity
-     *
-     * @event created($entity)
      */
     public static function create($fields = [])
     {
         /**
          * @var self $entity
          */
-        $entity = (new static([]))->setFields($fields);
-        $entity->dispatch('created', new EntityEvent($entity));
-
-        return $entity;
+        return (new static([]))->setFields($fields);
     }
 }

@@ -54,7 +54,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         //Loading buckets
         foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->createBucket($name, $bucket);
+            $this->buckets[$name] = $this->constructBucket($name, $bucket);
         }
     }
 
@@ -65,7 +65,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @throws StorageException
      */
-    public function setBucket(BucketInterface $bucket): StorageManager
+    public function addBucket(BucketInterface $bucket): StorageManager
     {
         if (isset($this->buckets[$bucket->getName()])) {
             throw new StorageException("Unable to create bucket '{$bucket->getName()}', already exists");
@@ -80,7 +80,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * {@inheritdoc}
      */
-    public function registerBucket(
+    public function createBucket(
         string $name,
         string $prefix,
         $server,
@@ -102,7 +102,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             compact('storage', 'prefix', 'options', 'server')
         );
 
-        $this->setBucket($bucket);
+        $this->addBucket($bucket);
 
         return $bucket;
     }
@@ -135,7 +135,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @throws StorageException
      */
-    public function setServer($name, ServerInterface $server)
+    public function addServer($name, ServerInterface $server)
     {
         if (isset($this->servers[$name])) {
             throw new StorageException(
@@ -228,7 +228,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @throws StorageException
      */
-    private function createBucket(string $name, array $bucket): StorageBucket
+    private function constructBucket(string $name, array $bucket): StorageBucket
     {
         $parameters = $bucket + compact('name');
 

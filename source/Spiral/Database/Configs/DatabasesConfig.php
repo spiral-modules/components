@@ -56,7 +56,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasConnection(string $connection): bool
+    public function hasDriver(string $connection): bool
     {
         return isset($this->config['connections'][$connection]);
     }
@@ -72,7 +72,7 @@ class DatabasesConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function connectionNames(): array
+    public function driverNames(): array
     {
         return array_keys($this->config['connections']);
     }
@@ -82,7 +82,7 @@ class DatabasesConfig extends InjectableConfig
      *
      * @return string
      */
-    public function databaseConnection(string $database): string
+    public function databaseDriver(string $database): string
     {
         return $this->config['databases'][$database]['connection'];
     }
@@ -102,22 +102,22 @@ class DatabasesConfig extends InjectableConfig
     }
 
     /**
-     * @param string $connection
+     * @param string $driver
      *
      * @return string
      */
-    public function connectionDriver(string $connection): string
+    public function driverClass(string $driver): string
     {
-        return $this->config['connections'][$connection]['driver'];
+        return $this->config['connections'][$driver]['driver'];
     }
 
     /**
-     * @param string $connection
+     * @param string $driver
      *
      * @return array
      */
-    public function connectionOptions(string $connection): array
+    public function driverOptions(string $driver): array
     {
-        return $this->config['connections'][$connection];
+        return $this->config['connections'][$driver];
     }
 }

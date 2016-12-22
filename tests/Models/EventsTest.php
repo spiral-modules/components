@@ -64,7 +64,7 @@ class EventsTestEntity extends DataEntity
 {
     public function doSomething()
     {
-        return $this->dispatch('test', new GenericEvent(
+        return self::events()->dispatch('test', new GenericEvent(
             'subject'
         ));
     }

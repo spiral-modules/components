@@ -8,7 +8,6 @@
 
 namespace Spiral\Models\Traits;
 
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -22,24 +21,6 @@ trait EventsTrait
      * @var EventDispatcherInterface[]
      */
     private static $dispatchers = [];
-
-    /**
-     * Dispatch event. If no dispatched associated even will be returned without dispatching.
-     *
-     * @param string     $name  Event name.
-     * @param Event|null $event Event class if any.
-     *
-     * @return Event
-     */
-    protected function dispatch(string $name, Event $event = null): Event
-    {
-        if (empty(self::$dispatchers[static::class])) {
-            //We can bypass dispatcher creation
-            return $event;
-        }
-
-        return static::events()->dispatch($name, $event);
-    }
 
     /**
      * Set event dispatchers manually for current class. Can erase existed dispatcher by providing

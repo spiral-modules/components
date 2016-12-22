@@ -31,14 +31,6 @@ abstract class AbstractEntity extends MutableObject implements
     use EventsTrait;
 
     /**
-     * When option is set to true, entity will throw an event "constructed" after initiating object
-     * paramaters.
-     *
-     * @protected
-     */
-    const EVENT_ON_CONSTRUCT = false;
-
-    /**
      * Field format declares how entity must process magic setters and getters. Available values:
      * camelCase, tableize.
      *
@@ -71,9 +63,6 @@ abstract class AbstractEntity extends MutableObject implements
 
         //Initiating mutable object
         static::initialize(false);
-
-        //Optional, firing event after entity construction
-        static::EVENT_ON_CONSTRUCT && self::events()->dispatch('construct', new EntityEvent($this));
     }
 
     /**
@@ -460,6 +449,14 @@ abstract class AbstractEntity extends MutableObject implements
      */
     public function __destruct()
     {
+        $this->flushFields();
+    }
+
+    /**
+     * Reset every field value.
+     */
+    protected function flushFields()
+    {
         $this->fields = [];
     }
 
@@ -507,14 +504,6 @@ abstract class AbstractEntity extends MutableObject implements
     }
 
     /**
-     * Reset every field value.
-     */
-    protected function flushValues()
-    {
-        $this->fields = [];
-    }
-
-    /**
      * Create entity by passing fields thought setFields method
      *
      * @param array $fields
@@ -526,6 +515,11 @@ abstract class AbstractEntity extends MutableObject implements
         /**
          * @var self $entity
          */
-        return (new static([]))->setFields($fields);
+        $entity = (new static([]))->setFields($fields);
+
+        //Optional, firing event after entity construction
+        static::events()->dispatch('construct', new EntityEvent($entity));
+
+        return $entity;
     }
 }

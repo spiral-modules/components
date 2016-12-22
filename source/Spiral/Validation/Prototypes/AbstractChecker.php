@@ -58,8 +58,7 @@ abstract class AbstractChecker extends Component implements CheckerInterface
     public function check(
         string $method,
         $value,
-        array $arguments = [],
-        ValidatorInterface $validator = null
+        array $arguments = []
     ) {
         array_unshift($arguments, $value);
 
@@ -78,7 +77,6 @@ abstract class AbstractChecker extends Component implements CheckerInterface
 
         return '';
     }
-
 
     /**
      * {@inheritdoc}

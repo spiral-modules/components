@@ -83,10 +83,10 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function registerDatabase(string $name, string $prefix, $connection): Database
+    public function createDatabase(string $name, string $prefix, $connection): Database
     {
         if (!$connection instanceof Driver) {
-            $connection = $this->connection($connection);
+            $connection = $this->driver($connection);
         }
 
         $instance = $this->factory->make(
@@ -131,7 +131,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         $instance = $this->factory->make(Database::class, [
             'name'   => $database,
             'prefix' => $this->config->databasePrefix($database),
-            'driver' => $this->connection($this->config->databaseConnection($database)),
+            'driver' => $this->driver($this->config->databaseDriver($database)),
         ]);
 
         return $this->databases[$database] = $instance;
@@ -146,7 +146,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function addConnection(Driver $driver): DatabaseManager
+    public function addDriver(Driver $driver): DatabaseManager
     {
         if (isset($this->connections[$driver->getName()])) {
             throw new DBALException("Connection '{$driver->getName()}' already exists");
@@ -168,7 +168,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @return Driver
      */
-    public function registerConnection(
+    public function createDriver(
         string $name,
         string $driver,
         string $dns,
@@ -184,7 +184,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             ]
         ]);
 
-        $this->addConnection($instance);
+        $this->addDriver($instance);
 
         return $instance;
     }
@@ -199,21 +199,21 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DBALException
      */
-    public function connection(string $connection): Driver
+    public function driver(string $connection): Driver
     {
         if (isset($this->connections[$connection])) {
             return $this->connections[$connection];
         }
 
-        if (!$this->config->hasConnection($connection)) {
+        if (!$this->config->hasDriver($connection)) {
             throw new DBALException(
                 "Unable to create Driver, no presets for '{$connection}' found"
             );
         }
 
-        $instance = $this->factory->make($this->config->connectionDriver($connection), [
+        $instance = $this->factory->make($this->config->driverClass($connection), [
             'name'    => $connection,
-            'options' => $this->config->connectionOptions($connection),
+            'options' => $this->config->driverOptions($connection),
         ]);
 
         return $this->connections[$connection] = $instance;
@@ -243,11 +243,11 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      *
      * @throws DatabaseException
      */
-    public function getConnections(): array
+    public function getDrivers(): array
     {
         $result = [];
-        foreach ($this->config->connectionNames() as $name) {
-            $result[] = $this->connection($name);
+        foreach ($this->config->driverNames() as $name) {
+            $result[] = $this->driver($name);
         }
 
         return $result;

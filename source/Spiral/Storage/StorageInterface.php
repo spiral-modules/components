@@ -32,7 +32,7 @@ interface StorageInterface
      *
      * @throws StorageException
      */
-    public function registerBucket(
+    public function createBucket(
         string $name,
         string $prefix,
         $server,

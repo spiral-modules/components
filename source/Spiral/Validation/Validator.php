@@ -320,7 +320,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
                 if ($this->config->hasChecker($condition[0])) {
 
                     $checker = $this->makeChecker($condition[0]);
-                    if (!$result = $checker->check($condition[1], $value, $arguments, $this)) {
+                    if (!$result = $checker->check($condition[1], $value, $arguments)) {
                         //To let validation() method know that message should be handled via Checker
                         return $checker;
                     }

@@ -110,18 +110,4 @@ class RuleManagerTest extends \PHPUnit_Framework_TestCase
         $this->expectException(RuleException::class);
         $manager->get($ruleClass);
     }
-
-//    public function testValidateRule()
-//    {
-//        $manager = new RuleManager($this->container);
-//
-//        $reflector = new \ReflectionObject($manager);
-//        $method = $reflector->getMethod('validateRule');
-//        $method->setAccessible(true);
-//
-//        // \Closure
-//        $this->assertTrue($method->invoke($manager, $this->rule));
-//
-//        // RuleInterface
-//    }
 }

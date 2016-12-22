@@ -8,9 +8,11 @@
 
 namespace Spiral\Database\Helpers;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Core\Component;
+use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Schemas\AbstractTable;
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Support\DFSSorter;
 
@@ -68,23 +70,27 @@ class SynchronizationBus extends Component
     }
 
     /**
-     * Syncronize table schemas.
+     * Synchronize tables.
+     *
+     * @param LoggerInterface|null $logger
      *
      * @throws \Exception
+     * @throws \Throwable
      */
-    public function synchronize()
+    public function run(LoggerInterface $logger = null)
     {
         $this->beginTransaction();
 
         try {
-            //Dropping non declared foreign keys
-            $this->saveTables(false, false, true);
+            //Drop not-needed foreign keys and alter everything else
+            $this->runChanges(Behaviour::DROP_FOREIGNS, $logger);
 
-            //Dropping non declared indexes
-            $this->saveTables(false, true, true);
+            //Drop not-needed indexes
+            $this->runChanges(Behaviour::DROP_INDEXES, $logger);
 
-            //Dropping non declared columns
-            $this->saveTables(true, true, true);
+            //Other changes
+            $this->runChanges(Behaviour::DO_ALL, $logger);
+
         } catch (\Exception $e) {
             $this->rollbackTransaction();
             throw $e;
@@ -97,14 +103,17 @@ class SynchronizationBus extends Component
     }
 
     /**
-     * @param bool $forgetColumns
-     * @param bool $forgetIndexes
-     * @param bool $forgetForeigns
+     * Rum all tables.
+     *
+     * @param int                  $behaviour
+     * @param LoggerInterface|null $logger
      */
-    protected function saveTables(bool $forgetColumns, bool $forgetIndexes, bool $forgetForeigns)
-    {
+    protected function runChanges(
+        int $behaviour = Behaviour::DO_ALL,
+        LoggerInterface $logger = null
+    ) {
         foreach ($this->sortedTables() as $table) {
-            $table->save($forgetColumns, $forgetIndexes, $forgetForeigns);
+            $table->save($behaviour, $logger);
         }
     }
 

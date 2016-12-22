@@ -47,8 +47,12 @@ abstract class AbstractHandler
     //All index related operations
     const DO_INDEXES = self::DROP_INDEXES | self::ALTER_INDEXES | self::CREATE_INDEXES;
 
+    //Schema operations
+    const DO_RENAME = 0b10000000000;
+    const DO_DROP   = 0b01000000000;
+
     //All operations
-    const DO_ALL = self::DO_FOREIGNS | self::DO_INDEXES | self::DO_COLUMNS;
+    const DO_ALL = self::DO_FOREIGNS | self::DO_INDEXES | self::DO_COLUMNS | self::DO_DROP | self::DO_RENAME;
 
     /**
      * @var LoggerInterface|null

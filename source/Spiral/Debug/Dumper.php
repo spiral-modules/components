@@ -81,7 +81,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      * @param mixed $value
      * @param int   $output
      *
-     * @return null|string
+     * @return string
      */
     public function dump($value, int $output = self::OUTPUT_ECHO): string
     {

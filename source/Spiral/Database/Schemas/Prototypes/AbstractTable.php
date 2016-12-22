@@ -6,15 +6,11 @@
  */
 namespace Spiral\Database\Schemas\Prototypes;
 
-use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Database\Entities\AbstractHandler;
+use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\HandlerException;
 use Spiral\Database\Exceptions\SchemaException;
-use Spiral\Database\Schemas\ColumnInterface;
-use Spiral\Database\Schemas\IndexInterface;
-use Spiral\Database\Schemas\ReferenceInterface;
 use Spiral\Database\Schemas\StateComparator;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Database\Schemas\TableState;
@@ -595,13 +591,23 @@ abstract class AbstractTable implements TableInterface
      *                                   dropping related columns. See sync bus class to get more
      *                                   details.
      * @param LoggerInterface $logger    Optional, aggregates messages for data syncing.
+     * @param bool            $reset     When true schema will be marked as synced.
      *
      * @throws HandlerException
+     *
+     * @throws SchemaException
      */
-    public function save(int $behaviour = AbstractHandler::DO_ALL, LoggerInterface $logger = null)
-    {
+    public function save(
+        int $behaviour = Behaviour::DO_ALL,
+        LoggerInterface $logger = null,
+        $reset = true
+    ) {
         //We need an instance of Handler of dbal operations
         $handler = $this->driver->getHandler($logger);
+
+        if ($behaviour != Behaviour::DO_ALL && $reset) {
+            throw new SchemaException("Schema can only be reset with behaviour is DO_ALL");
+        }
 
         if ($this->status == self::STATUS_DROPPED) {
             //We don't need syncer for this operation
@@ -630,7 +636,9 @@ abstract class AbstractTable implements TableInterface
         }
 
         //Syncing our schemas
-        $this->initial->syncState($prepared->current);
+        if ($reset) {
+            $this->initial->syncState($prepared->current);
+        }
     }
 
     /**

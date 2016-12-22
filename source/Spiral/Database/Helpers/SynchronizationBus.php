@@ -89,7 +89,11 @@ class SynchronizationBus extends Component
             $this->runChanges(Behaviour::DROP_INDEXES, $logger);
 
             //Other changes
-            $this->runChanges(Behaviour::DO_ALL, $logger);
+            $this->runChanges(
+                Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES,
+                $logger,
+                true
+            );
 
         } catch (\Exception $e) {
             $this->rollbackTransaction();
@@ -107,13 +111,15 @@ class SynchronizationBus extends Component
      *
      * @param int                  $behaviour
      * @param LoggerInterface|null $logger
+     * @param bool                 $reset Reset schemas.
      */
     protected function runChanges(
         int $behaviour = Behaviour::DO_ALL,
-        LoggerInterface $logger = null
+        LoggerInterface $logger = null,
+        bool $reset = false
     ) {
         foreach ($this->sortedTables() as $table) {
-            $table->save($behaviour, $logger);
+            $table->save($behaviour, $logger, $reset);
         }
     }
 

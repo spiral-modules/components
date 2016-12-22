@@ -18,9 +18,9 @@ interface PredictableInterface extends CountingInterface
      *
      * @param int $limit
      *
-     * @return PredictableInterface
+     * @return self|$this
      */
-    public function withLimit(int $limit): PredictableInterface;
+    public function withLimit(int $limit): self;
 
     /**
      * Get pagination limit.
@@ -33,8 +33,10 @@ interface PredictableInterface extends CountingInterface
      * Set page number.
      *
      * @param int $number
+     *
+     * @return self|$this
      */
-    public function withPage(int $number);
+    public function withPage(int $number): self;
 
     /**
      * Get current page number.

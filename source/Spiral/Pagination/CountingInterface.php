@@ -19,5 +19,5 @@ interface CountingInterface extends PaginatorInterface
      *
      * @return self|$this
      */
-    public function withCount(int $count): CountingInterface;
+    public function withCount(int $count): self;
 }

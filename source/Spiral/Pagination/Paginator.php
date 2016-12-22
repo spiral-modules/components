@@ -47,9 +47,28 @@ class Paginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      *
-     * @return $this
+     * @return self
      */
-    public function withPage(int $number): CountingInterface
+    public function withLimit(int $limit): PredictableInterface
+    {
+        $paginator = clone $this;
+        $paginator->limit = $limit;
+
+        return $paginator;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getLimit(): int
+    {
+        return $this->limit;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withPage(int $number): PredictableInterface
     {
         $paginator = clone $this;
         $paginator->pageNumber = max($number, 0);
@@ -72,27 +91,6 @@ class Paginator implements PredictableInterface, \Countable
         }
 
         return $this->pageNumber;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return self
-     */
-    public function withLimit(int $limit): PredictableInterface
-    {
-        $paginator = clone $this;
-        $paginator->limit = $limit;
-
-        return $paginator;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getLimit(): int
-    {
-        return $this->limit;
     }
 
     /**

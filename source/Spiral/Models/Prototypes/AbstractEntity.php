@@ -449,6 +449,14 @@ abstract class AbstractEntity extends MutableObject implements
      */
     public function __destruct()
     {
+        $this->flushFields();
+    }
+
+    /**
+     * Reset every field value.
+     */
+    protected function flushFields()
+    {
         $this->fields = [];
     }
 
@@ -493,14 +501,6 @@ abstract class AbstractEntity extends MutableObject implements
     protected function createAccessor(string $accessor, $value): AccessorInterface
     {
         return new $accessor($value);
-    }
-
-    /**
-     * Reset every field value.
-     */
-    protected function flushValues()
-    {
-        $this->fields = [];
     }
 
     /**

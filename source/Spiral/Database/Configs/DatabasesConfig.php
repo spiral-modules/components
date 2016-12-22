@@ -24,6 +24,7 @@ class DatabasesConfig extends InjectableConfig
     const CONFIG = 'databases';
 
     /**
+     * @invisible
      * @var array
      */
     protected $config = [

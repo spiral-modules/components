@@ -206,20 +206,6 @@ class DocumentSelector extends Component implements
     }
 
     /**
-     * Create cursor with partial selection.
-     *
-     * Example: $selector->fetchFields(['name', ...])->toArray();
-     *
-     * @param array $fields
-     *
-     * @return Cursor
-     */
-    public function fetchFields(array $fields): Cursor
-    {
-        return $this->createCursor($fields);
-    }
-
-    /**
      * Fetch all documents.
      *
      * @return CompositableInterface[]
@@ -227,6 +213,20 @@ class DocumentSelector extends Component implements
     public function fetchAll(): array
     {
         return $this->getIterator()->fetchAll();
+    }
+
+    /**
+     * Create cursor with partial selection. Attention, you can not exclude _id from result!
+     *
+     * Example: $selector->fetchFields(['name', ...])->toArray();
+     *
+     * @param array $fields
+     *
+     * @return Cursor
+     */
+    public function getProjection(array $fields = []): Cursor
+    {
+        return $this->createCursor($fields);
     }
 
     /**
@@ -285,11 +285,22 @@ class DocumentSelector extends Component implements
      */
     protected function createCursor(array $fields = [])
     {
-        $cursor = $this->collection->find($this->query, $this->createOptions());
+        if ($this->hasPaginator()) {
+            $paginator = $this->configurePaginator($this->count());
 
-        //todo: this is important place
+            //Paginate in isolation
+            $selector = clone $this;
+            $selector->limit($paginator->getLimit())->offset($paginator->getOffset());
+            $options = $selector->createOptions();
+        } else {
+            $options = $this->createOptions();
+        }
 
-        return $cursor;
+        if (!empty($fields)) {
+            $options['projection'] = array_fill_keys($fields, 1);
+        }
+
+        return $this->collection->find($this->query, $options);
     }
 
     /**

@@ -72,6 +72,14 @@ class DocumentCursor extends \IteratorIterator
     }
 
     /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->fetchAll();
+    }
+
+    /**
      * Fetch all documents.
      *
      * @return CompositableInterface[]

@@ -137,6 +137,14 @@ class ArrayResult extends \ArrayIterator
     }
 
     /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->fetchAll();
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function fetchAll(): array

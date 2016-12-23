@@ -134,6 +134,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         parent::__construct($fields, $this->schema);
     }
 
+    public function withODM()
+    {
+        //?????
+    }
+
     /**
      * {@inheritdoc}
      */

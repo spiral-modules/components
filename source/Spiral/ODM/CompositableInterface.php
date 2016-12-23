@@ -4,15 +4,15 @@
  *
  * @author    Wolfy-J
  */
-
 namespace Spiral\ODM;
 
+use MongoDB\BSON\Serializable;
 use Spiral\Models\AccessorInterface;
 
 /**
  * Declares ability of object to be embedded into RecordEntity or represent set of embedded objects.
  */
-interface CompositableInterface extends AccessorInterface
+interface CompositableInterface extends AccessorInterface, Serializable
 {
     /**
      * Composition default state, this value is required in order to properly generate default model

@@ -6,7 +6,7 @@
  */
 namespace Spiral\ODM;
 
-class Document
+abstract class Document extends DocumentEntity
 {
 
 }

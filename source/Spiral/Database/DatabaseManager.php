@@ -229,6 +229,8 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     public function getDatabases(): array
     {
         $result = [];
+
+        //todo: include manually added databases
         foreach ($this->config->databaseNames() as $name) {
             $result[] = $this->database($name);
         }
@@ -246,6 +248,8 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     public function getDrivers(): array
     {
         $result = [];
+
+        //todo: include manually added drivers
         foreach ($this->config->driverNames() as $name) {
             $result[] = $this->driver($name);
         }

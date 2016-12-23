@@ -6,7 +6,9 @@
  */
 namespace Spiral\ODM;
 
-class DocumentEntity
+use Spiral\Models\SchematicEntity;
+
+abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
 
 }

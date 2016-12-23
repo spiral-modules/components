@@ -1,0 +1,197 @@
+<?php
+/**
+ * components
+ *
+ * @author    Wolfy-J
+ */
+namespace Spiral\ODM;
+
+use MongoDB\BSON\ObjectID;
+use MongoDB\Driver\Manager;
+use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
+use Spiral\ODM\Configs\ODMConfig;
+use Spiral\ODM\Entities\MongoDatabase;
+use Spiral\ODM\Exceptions\ODMException;
+
+class MongoManager implements InjectorInterface, SingletonInterface
+{
+    /**
+     * @var MongoDatabase[]
+     */
+    private $databases = [];
+
+    /**
+     * @var ODMConfig
+     */
+    protected $config;
+
+    /**
+     * @var FactoryInterface
+     */
+    protected $factory;
+
+    /**
+     * @param ODMConfig        $config
+     * @param FactoryInterface $factory
+     */
+    public function __construct(ODMConfig $config, FactoryInterface $factory)
+    {
+        $this->config = $config;
+        $this->factory = $factory;
+    }
+
+    /**
+     * Add new database in a database pull, database name will be automatically selected from given
+     * instance.
+     *
+     * @param string        $name Internal database name.
+     * @param MongoDatabase $database
+     *
+     * @return self|$this
+     *
+     * @throws ODMException
+     */
+    public function addDatabase(string $name, MongoDatabase $database): MongoManager
+    {
+        if (isset($this->databases[$name])) {
+            throw new ODMException("Database '{$name}' already exists");
+        }
+
+        $this->databases[$name] = $database;
+
+        return $this;
+    }
+
+    /**
+     * Register new mongo database using given name and connectio options (compatible with MongoDB
+     * class).
+     *
+     * @param string $name     Internal database name (for injections and etc).
+     * @param string $server   Server uri.
+     * @param string $database Database name.
+     * @param array  $driverOptions
+     * @param array  $options  Database options.
+     *
+     * @return MongoDatabase
+     */
+    public function createDatabase(
+        string $name,
+        string $server,
+        string $database,
+        array $driverOptions = [],
+        array $options = []
+    ): MongoDatabase {
+        /*
+         * Database will be automatically connected here.
+         */
+        $instance = $this->factory->make(MongoDatabase::class, [
+            'databaseName' => $database,
+            'manager'      => new Manager($server, $options, $driverOptions),
+            'options'      => $options
+        ]);
+
+        $this->addDatabase($name, $instance);
+
+        return $instance;
+    }
+
+    /**
+     * Create specified or select default instance of MongoDatabase.
+     *
+     * @param string $database Database name (internal).
+     *
+     * @return MongoDatabase
+     *
+     * @throws ODMException
+     */
+    public function database(string $database = null): MongoDatabase
+    {
+        if (empty($database)) {
+            $database = $this->config->defaultDatabase();
+        }
+
+        //Spiral support ability to link multiple virtual databases together using aliases
+        $database = $this->config->resolveAlias($database);
+
+        if (isset($this->databases[$database])) {
+            return $this->databases[$database];
+        }
+
+        if (!$this->config->hasDatabase($database)) {
+            throw new ODMException(
+                "Unable to initiate MongoDatabase, no presets for '{$database}' found"
+            );
+        }
+
+        $options = $this->config->databaseOptions($database);
+
+        //Initiating database instance
+        return $this->createDatabase(
+            $database,
+            $options['server'],
+            $options['database'],
+            $options['driverOptions'] ?? [],
+            $options['options'] ?? []
+        );
+    }
+
+    /**
+     * Get every know database.
+     *
+     * @return MongoDatabase[]
+     */
+    public function getDatabases(): array
+    {
+        $result = [];
+
+        //Include manually added databases
+        foreach ($this->config->databaseNames() as $name) {
+            $result[] = $this->database($name);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Automatic injection of MongoDatabase.
+     *
+     * {@inheritdoc}
+     *
+     * @return MongoDatabase
+     */
+    public function createInjection(\ReflectionClass $class, string $context = null)
+    {
+        return $this->database($context);
+    }
+
+    /**
+     * Create valid MongoId (ObjectID now) object based on string or id provided from client side.
+     *
+     * @param mixed $mongoID String or MongoId object.
+     *
+     * @return ObjectID|null
+     */
+    public static function mongoID($mongoID)
+    {
+        if (empty($mongoID)) {
+            return null;
+        }
+
+        if (!is_object($mongoID)) {
+            //Old versions of mongo api does not throws exception on invalid mongo id (1.2.1)
+            if (!is_string($mongoID) || !preg_match('/[0-9a-f]{24}/', $mongoID)) {
+                return null;
+            }
+
+            try {
+                $mongoID = new ObjectID($mongoID);
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+        return $mongoID;
+    }
+}

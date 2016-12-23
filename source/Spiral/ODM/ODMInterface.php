@@ -18,13 +18,13 @@ interface ODMInterface
     const D_COLLECTION   = 3;
 
     /**
-     * Get instance manager associated with given class.
-     *
-     * @todo do some shit here!
+     * Instantiate document/model instance based on a given class name and fieldset. Some ODM
+     * documents might return instances of their child if fields point to child model schema.
      *
      * @param string $class
+     * @param array  $fields
      *
-     * @return InstantiatorInterface
+     * @return CompositableInterface
      */
-    public function instantiator(string $class): InstantiatorInterface;
+    public function instantiate(string $class, $fields = []): CompositableInterface;
 }

@@ -6,7 +6,7 @@
  */
 namespace Spiral\ODM;
 
-use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\Exceptions\InstantionException;
 
 /**
  * Instantiate class based on a given field set.
@@ -17,11 +17,10 @@ interface InstantiatorInterface
      * Method must detect and construct appropriate class instance based on a given fields.
      *
      * @param array|\ArrayAccess $fields
-     * @param bool               $inheritance Set to false to disable inheritance.
      *
-     * @return mixed
+     * @return CompositableInterface
      *
-     * @throws ODMException
+     * @throws InstantionException
      */
-    public function instantiate($fields, bool $inheritance = true);
+    public function instantiate($fields): CompositableInterface;
 }

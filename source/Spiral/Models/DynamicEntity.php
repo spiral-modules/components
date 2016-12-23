@@ -49,7 +49,7 @@ class DynamicEntity extends AbstractEntity
      *
      * @var array|string
      */
-    protected $secured = [];
+    protected $secured = '*';
 
     /**
      * @see setField()

@@ -6,11 +6,34 @@
  */
 namespace Spiral\ODM;
 
+use Spiral\Core\Component;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
 use Spiral\ODM\Entities\DocumentInstantiator;
 
-abstract class DocumentEntity extends SchematicEntity// implements CompositableInterface
+/**
+ * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
+ * updates.
+ *
+ * You can use same properties to configure entity as in DataEntity + schema property.
+ *
+ * Example:
+ *
+ * class Test extends DocumentEntity
+ * {
+ *    const SCHEMA = [
+ *       'name' => 'string'
+ *    ];
+ * }
+ *
+ * Configuration properties:
+ * - schema
+ * - defaults
+ * - secured (* by default)
+ * - fillable
+ */
+abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
     use SaturateTrait;
 
@@ -62,34 +85,108 @@ abstract class DocumentEntity extends SchematicEntity// implements CompositableI
     /**
      * Model behaviour configurations.
      */
+    const SECURED   = '*';
     const HIDDEN    = [];
     const FILLABLE  = [];
     const SETTERS   = [];
     const GETTERS   = [];
     const ACCESSORS = [];
 
-//    /**
-//     * {@inheritdoc}
-//     *
-//     * @param array|null $schema
-//     */
-//    public function __construct(
-//        $fields,
-//        ODMInterface $odm = null,
-//        $schema = null
-//    ) {
-//        //We can use global container as fallback if no default values were provided
-//        $this->odm = $this->saturate($odm, ODMInterface::class);
-//        $this->odmSchema = !empty($schema) ? $schema : $this->odm->schema(static::class);
-//
-//        $fields = is_array($fields) ? $fields : [];
-//        if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
-//            /*
-//             * Merging with default values
-//             */
-//            $fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
-//        }
-//
-//        parent::__construct($fields, $this->odmSchema);
-//    }
+    /**
+     * Parent ODM instance, responsible for aggregations and lazy loading operations.
+     *
+     * @invisible
+     * @var ODMInterface
+     */
+    private $odm;
+
+    /**
+     * Document behaviour schema.
+     *
+     * @var array
+     */
+    private $schema = [];
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param ODMInterface $odm To lazy create nested document ang aggregations.
+     *
+     * @throws ScopeException When no ODM instance can be resolved.
+     */
+    public function __construct($fields, array $schema = null, ODMInterface $odm = null)
+    {
+        //We can use global container as fallback if no default values were provided
+        $this->odm = $this->saturate($odm, ODMInterface::class);
+
+        //Use supplied schema or fetch one from ODM
+        $this->schema = !empty($schema) ? $schema : $this->odm->schema(
+            static::class,
+            ODMInterface::D_SCHEMA
+        );
+
+        $fields = is_array($fields) ? $fields : [];
+        if (!empty($this->schema[self::SH_DEFAULTS])) {
+            //Merging with default values
+            $fields = array_replace_recursive($this->schema[self::SH_DEFAULTS], $fields);
+        }
+
+        parent::__construct($fields, $this->schema);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasUpdates(): bool
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildAtomics(string $container = ''): array
+    {
+        // TODO: Implement buildAtomics() method.
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flushUpdates()
+    {
+        // TODO: Implement flushUpdates() method.
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function bsonSerialize()
+    {
+        return $this->packValue();
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        return [
+            'fields'  => $this->getFields(),
+            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : []
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function iocContainer()
+    {
+        if (!empty($this->odm) || $this->odm instanceof Component) {
+            //Forwarding IoC scope to parent ODM instance
+            return $this->odm->iocContainer();
+        }
+
+        return parent::iocContainer();
+    }
 }

@@ -10,7 +10,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
-use Spiral\ODM\Entities\DocumentInstantiator;
 
 class ODM extends Component implements ODMInterface, SingletonInterface
 {
@@ -26,6 +25,15 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      * @var InstantiatorInterface[]
      */
     private $instantiators = [];
+
+    /**
+     * Set of classes responsible for document save operations.
+     *
+     * @invisible
+     *
+     * @var MapperInterface[]
+     */
+    private $mappers = [];
 
     /**
      * ODM schema.
@@ -74,33 +82,58 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         $this->schema = $s;
     }
 
+    protected function loadSchema()
+    {
+    }
+
+    protected function updateSchema()
+    {
+
+    }
+
+    /**
+     * Instantiate document/model instance based on a given class name and fieldset. Some ODM
+     * documents might return instances of their child if fields point to child model schema.
+     *
+     * @param string $class
+     * @param array  $fields
+     *
+     * @return CompositableInterface
+     */
+    public function instantiate(string $class, $fields = []): CompositableInterface
+    {
+        return $this->instantiator($class)->instantiate($fields);
+    }
+
+    public function selector(string $class)
+    {
+        //Selector!
+        return new DocumentSelector();
+    }
+
+    public function mapper(string $class)
+    {
+        return new DocumentMapper();
+    }
+
     /**
      * {@inheritdoc}
      */
-    public function instantiator(string $class): InstantiatorInterface
+    protected function instantiator(string $class): InstantiatorInterface
     {
         if (isset($this->instantiators[$class])) {
             return $this->instantiators[$class];
         }
 
-        if (!isset($this->schema[$class])) {
-
-        }
-
-        if ($this->schema[$class][self::D_INSTANTIATOR] == DocumentInstantiator::class) {
-            //Minor performance optimization
-            //bla bla bla bla bla!!!!
-        }
+        //Potential optimization
+        $instantiator = $this->factory->make($this->schema[$class][self::D_INSTANTIATOR], [
+            'class'  => $class,
+            'odm'    => $this,
+            'schema' => $this->schema[$class][self::D_SCHEMA]
+        ]);
 
         //Constructing instantiator and storing it in cache
-        return $this->instantiators[$class] = $this->factory->make(
-            $this->schema[$class][self::D_INSTANTIATOR],
-            [
-                'class'  => $class,
-                'odm'    => $this,
-                'schema' => $this->schema[$class][self::D_SCHEMA]
-            ]
-        );
+        return $this->instantiators[$class] = $instantiator;
     }
 
     /**
@@ -113,6 +146,6 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      */
     protected function schema(string $class, int $property)
     {
-
+        return [];
     }
 }

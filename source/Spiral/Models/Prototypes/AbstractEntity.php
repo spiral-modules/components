@@ -163,7 +163,6 @@ abstract class AbstractEntity extends MutableObject implements
         }
 
         if (!$filter) {
-
             //Bypassing all filters
             $this->fields[$name] = $value;
 

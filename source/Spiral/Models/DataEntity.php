@@ -45,7 +45,7 @@ class DataEntity extends AbstractEntity
      *
      * @var array|string
      */
-    const SECURED = [];
+    const SECURED = '*';
 
     /**
      * @see setField()

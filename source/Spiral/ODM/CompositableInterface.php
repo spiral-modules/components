@@ -15,14 +15,6 @@ use Spiral\Models\AccessorInterface;
 interface CompositableInterface extends AccessorInterface, Serializable
 {
     /**
-     * Composition default state, this value is required in order to properly generate default model
-     * state.
-     *
-     * @return mixed
-     */
-    public function defaultValue();
-
-    /**
      * Check if composition have any change.
      *
      * @return bool

@@ -6,6 +6,7 @@
  */
 namespace Spiral\ODM\Entities;
 
+use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\DefinitionException;
@@ -51,18 +52,16 @@ class DocumentInstantiator implements InstantiatorInterface
 
     /**
      * @param array|\ArrayAccess $fields
-     * @param bool               $inheritance
      *
-     * @todo move odm here???
-     * @return DocumentEntity|Document
+     * @return CompositableInterface|DocumentEntity|Document
      */
-    public function instantiate($fields, bool $inheritance = true)
+    public function instantiate($fields): CompositableInterface
     {
-        $class = $inheritance ? $this->defineClass($fields) : $this->class;
+        $class = $this->defineClass($fields);
 
         if ($class !== $this->class) {
             //We have to dedicate class creation to external instantiator (possibly children class)
-            return $this->odm->instantiator($class)->instantiate($fields, true);
+            return $this->odm->instantiate($class, $fields);
         }
 
         //Now we can construct needed class, in this case we are following DocumentEntity declaration

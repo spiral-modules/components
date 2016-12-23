@@ -62,9 +62,9 @@ class ReflectionEntity
     }
 
     /**
-     * @return array
+     * @return array|string
      */
-    public function getSecured(): array
+    public function getSecured()
     {
         if ($this->getProperty('secured', true) === '*') {
             return $this->getProperty('secured', true);

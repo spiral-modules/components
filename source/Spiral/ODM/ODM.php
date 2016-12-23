@@ -6,11 +6,17 @@
  */
 namespace Spiral\ODM;
 
+use MongoDB\Collection;
 use Spiral\Core\Component;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
+use Spiral\ODM\Entities\DocumentSelector;
+use Spiral\ODM\Entities\DocumentSource;
 
+/**
+ * @todo move schema to external class?
+ */
 class ODM extends Component implements ODMInterface, SingletonInterface
 {
     /**
@@ -25,15 +31,6 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      * @var InstantiatorInterface[]
      */
     private $instantiators = [];
-
-    /**
-     * Set of classes responsible for document save operations.
-     *
-     * @invisible
-     *
-     * @var MapperInterface[]
-     */
-    private $mappers = [];
 
     /**
      * ODM schema.
@@ -77,6 +74,21 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         $this->schema = (array)$memory->loadData(static::MEMORY);
     }
 
+    //---
+
+    /**
+     * Get property from cached schema.
+     *
+     * @param string $class
+     * @param int    $property See ODM constants.
+     *
+     * @return mixed
+     */
+    protected function schema(string $class, int $property)
+    {
+        return [];
+    }
+
     public function setSchema($s)
     {
         $this->schema = $s;
@@ -91,35 +103,59 @@ class ODM extends Component implements ODMInterface, SingletonInterface
 
     }
 
+    //---
+
+    public function source(string $class): DocumentSource
+    {
+
+    }
+
     /**
-     * Instantiate document/model instance based on a given class name and fieldset. Some ODM
-     * documents might return instances of their child if fields point to child model schema.
+     * Get DocumentSelector for a given class. Attention, due model inheritance selector WILL be
+     * associated with parent class.
+     *
+     * Example:
+     * Admin extends User
+     * $odm->selector(Admin::class)->getClass() == User::class
      *
      * @param string $class
-     * @param array  $fields
      *
-     * @return CompositableInterface
+     * @return DocumentSelector
+     */
+    public function selector(string $class): DocumentSelector
+    {
+        return new DocumentSelector(
+            $this->collection($class),
+            $class, //todo: resolve parent class
+            $this
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function collection(string $class): Collection
+    {
+        //do it
+        return $this->manager->database('')->selectCollection('');
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function instantiate(string $class, $fields = []): CompositableInterface
     {
         return $this->instantiator($class)->instantiate($fields);
     }
 
-    public function selector(string $class)
-    {
-        //Selector!
-        return new DocumentSelector();
-    }
-
-    public function mapper(string $class)
-    {
-        return new DocumentMapper();
-    }
-
     /**
-     * {@inheritdoc}
+     * Get object responsible for class instantiation.
+     *
+     * @param string $class
+     *
+     * @return InstantiatorInterface
      */
-    public function instantiator(string $class): InstantiatorInterface
+    protected function instantiator(string $class): InstantiatorInterface
     {
         if (isset($this->instantiators[$class])) {
             return $this->instantiators[$class];
@@ -134,18 +170,5 @@ class ODM extends Component implements ODMInterface, SingletonInterface
 
         //Constructing instantiator and storing it in cache
         return $this->instantiators[$class] = $instantiator;
-    }
-
-    /**
-     * Get property from cached schema.
-     *
-     * @param string $class
-     * @param int    $property See ODM constants.
-     *
-     * @return mixed
-     */
-    protected function schema(string $class, int $property)
-    {
-        return [];
     }
 }

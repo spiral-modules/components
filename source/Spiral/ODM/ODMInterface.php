@@ -7,6 +7,9 @@
 
 namespace Spiral\ODM;
 
+use MongoDB\Collection;
+use Spiral\ODM\Exceptions\ODMException;
+
 interface ODMInterface
 {
     /**
@@ -16,6 +19,17 @@ interface ODMInterface
     const D_SCHEMA       = 1;
     const D_DATABASE     = 2;
     const D_COLLECTION   = 3;
+
+    /**
+     * Get collection associated with given class.
+     *
+     * @param string $class
+     *
+     * @return Collection
+     *
+     * @throws ODMException
+     */
+    public function collection(string $class): Collection;
 
     /**
      * Instantiate document/model instance based on a given class name and fieldset. Some ODM

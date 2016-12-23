@@ -4,9 +4,9 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\ODM;
+namespace Spiral\ODM\Entities;
 
-interface MapperInterface
+class DocumentSource
 {
 
 }

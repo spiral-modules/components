@@ -79,6 +79,16 @@ class DocumentSelector extends Component implements
     }
 
     /**
+     * Associated class name.
+     *
+     * @return string
+     */
+    public function getClass(): string
+    {
+        return $this->class;
+    }
+
+    /**
      * Set additional query, fields will be merged to currently existed request using array_merge.
      * Alias for query.
      *

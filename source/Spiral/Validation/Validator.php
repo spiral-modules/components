@@ -318,7 +318,7 @@ class Validator extends Component implements ValidatorInterface, LoggerAwareInte
         $condition = str_replace('::', ':', $this->config->resolveAlias($condition));
 
         try {
-            if (strpos($condition, ':')) {
+            if (!is_array($condition) && strpos($condition, ':')) {
                 $condition = explode(':', $condition);
                 if ($this->config->hasChecker($condition[0])) {
 

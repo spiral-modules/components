@@ -12,6 +12,7 @@ use Interop\Container\ContainerInterface;
 use Spiral\Security\Exceptions\RuleException;
 use Spiral\Security\RuleInterface;
 use Spiral\Security\RuleManager;
+use Spiral\Security\Rules\CallableRule;
 
 /**
  * Class RuleManagerTest
@@ -51,6 +52,16 @@ class RuleManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($manager->has(self::RULE_NAME));
         $this->assertEquals($this->rule, $manager->get(self::RULE_NAME));
         $this->assertEquals($manager, $manager->remove(self::RULE_NAME));
+
+        // other rule types
+        $manager->set('RuleInterface', $this->rule);
+        $this->assertEquals($this->rule, $manager->get('RuleInterface'));
+        $manager->set('Closure', function () {
+            return true;
+        });
+        $this->assertTrue($manager->get('Closure') instanceof CallableRule);
+        $manager->set('Array', [$this, 'testFlow']);
+        $this->assertTrue($manager->get('Array') instanceof CallableRule);
     }
 
     public function testHasWithNotRegisteredClass()
@@ -99,18 +110,4 @@ class RuleManagerTest extends \PHPUnit_Framework_TestCase
         $this->expectException(RuleException::class);
         $manager->get($ruleClass);
     }
-
-//    public function testValidateRule()
-//    {
-//        $manager = new RuleManager($this->container);
-//
-//        $reflector = new \ReflectionObject($manager);
-//        $method = $reflector->getMethod('validateRule');
-//        $method->setAccessible(true);
-//
-//        // \Closure
-//        $this->assertTrue($method->invoke($manager, $this->rule));
-//
-//        // RuleInterface
-//    }
 }

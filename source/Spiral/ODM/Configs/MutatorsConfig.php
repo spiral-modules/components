@@ -16,7 +16,9 @@ class MutatorsConfig extends InjectableConfig
 {
     use AliasTrait;
 
-    //Associated config file (by default)
+    /**
+     * Configuration section.
+     */
     const CONFIG = 'schemas/documents';
 
     /**

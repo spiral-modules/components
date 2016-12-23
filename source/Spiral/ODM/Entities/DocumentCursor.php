@@ -16,7 +16,7 @@ use Spiral\ODM\ODMInterface;
 /**
  * Provides ability to construct Document and DocumentEntities with inheritance support.
  */
-class DocumentInstantiator implements InstantiatorInterface
+class DocumentCursor implements InstantiatorInterface
 {
     /**
      * @invisible

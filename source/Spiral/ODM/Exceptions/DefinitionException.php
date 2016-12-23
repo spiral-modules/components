@@ -6,13 +6,13 @@
  */
 namespace Spiral\ODM\Exceptions;
 
-use Spiral\ODM\Entities\DocumentInstantiator;
+use Spiral\ODM\Entities\DocumentCursor;
 
 /**
  * Raised what document class can not be resolved based on set of provided fields or using logic
  * method.
  *
- * @see DocumentInstantiator::defineClass();
+ * @see DocumentCursor::defineClass();
  */
 class DefinitionException extends ODMException
 {

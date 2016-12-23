@@ -10,7 +10,6 @@ namespace Spiral\Models\Prototypes;
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
-use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\FieldExceptionInterface;
@@ -54,8 +53,6 @@ abstract class AbstractEntity extends MutableObject implements
 
     /**
      * @param array $fields
-     *
-     * @event constructed($entity)
      */
     public function __construct(array $fields = [])
     {
@@ -503,25 +500,5 @@ abstract class AbstractEntity extends MutableObject implements
     {
         //Field as a context
         return new $accessor($value, compact('field'));
-    }
-
-    /**
-     * Create entity by passing fields thought setFields method
-     *
-     * @param array $fields
-     *
-     * @return AbstractEntity
-     */
-    public static function create($fields = [])
-    {
-        /**
-         * @var self $entity
-         */
-        $entity = (new static([]))->setFields($fields);
-
-        //Optional, firing event after entity construction
-        $entity->dispatch('created', new EntityEvent($entity));
-
-        return $entity;
     }
 }

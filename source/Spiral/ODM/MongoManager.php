@@ -11,7 +11,7 @@ use MongoDB\Driver\Manager;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
-use Spiral\ODM\Configs\ODMConfig;
+use Spiral\ODM\Configs\MongoConfig;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Exceptions\ODMException;
 
@@ -23,7 +23,7 @@ class MongoManager implements InjectorInterface, SingletonInterface
     private $databases = [];
 
     /**
-     * @var ODMConfig
+     * @var MongoConfig
      */
     protected $config;
 
@@ -33,10 +33,10 @@ class MongoManager implements InjectorInterface, SingletonInterface
     protected $factory;
 
     /**
-     * @param ODMConfig        $config
+     * @param MongoConfig      $config
      * @param FactoryInterface $factory
      */
-    public function __construct(ODMConfig $config, FactoryInterface $factory)
+    public function __construct(MongoConfig $config, FactoryInterface $factory)
     {
         $this->config = $config;
         $this->factory = $factory;

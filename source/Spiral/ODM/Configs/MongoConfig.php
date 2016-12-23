@@ -9,7 +9,7 @@ namespace Spiral\ODM\Configs;
 use Spiral\Core\InjectableConfig;
 use Spiral\Core\Traits\Config\AliasTrait;
 
-class ODMConfig extends InjectableConfig
+class MongoConfig extends InjectableConfig
 {
     use AliasTrait;
 
@@ -24,11 +24,7 @@ class ODMConfig extends InjectableConfig
     protected $config = [
         'default'   => '',
         'aliases'   => [],
-        'databases' => [],
-        'schemas'   => [
-            'mutators'       => [],
-            'mutatorAliases' => [],
-        ],
+        'databases' => []
     ];
 
     /**

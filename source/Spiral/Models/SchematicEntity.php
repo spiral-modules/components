@@ -17,12 +17,12 @@ use Spiral\Models\Reflections\ReflectionEntity;
 class SchematicEntity extends AbstractEntity
 {
     /**
-     * Schema constants. Starts with 4, but why not?
+     * Schema constants. Starts with 2, but why not?
      */
-    const SH_HIDDEN   = 4;
-    const SH_SECURED  = 5;
-    const SH_FILLABLE = 6;
-    const SH_MUTATORS = 7;
+    const SH_HIDDEN   = 2;
+    const SH_SECURED  = 3;
+    const SH_FILLABLE = 4;
+    const SH_MUTATORS = 5;
 
     /**
      * Behaviour schema.

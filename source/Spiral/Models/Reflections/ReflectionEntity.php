@@ -17,6 +17,7 @@ use Spiral\Models\Prototypes\AbstractEntity;
  * @method string getName()
  * @method string getShortName()
  * @method bool isSubclassOf($class)
+ * @method bool hasConstant($name)
  * @method mixed getConstant($name)
  * @method \ReflectionMethod[] getMethods()
  * @method \ReflectionClass|null getParentClass()
@@ -171,6 +172,70 @@ class ReflectionEntity
     }
 
     /**
+     * Read default model property value, will read "protected" and "private" properties. Method
+     * raises entity event "describe" to allow it traits modify needed values.
+     *
+     * @param string $property Property name.
+     * @param bool   $merge    If true value will be merged with all parent declarations.
+     *
+     * @return mixed
+     */
+    public function getProperty(string $property, bool $merge = false)
+    {
+        if (isset($this->cache[$property])) {
+            //Property merging and trait events are pretty slow
+            return $this->cache[$property];
+        }
+
+        $properties = $this->reflection->getDefaultProperties();
+        $constants = $this->reflection->getConstants();
+
+        if (isset($properties[$property])) {
+            //Read from default value
+            $value = $properties[$property];
+        } elseif (isset($constants[strtoupper($property)])) {
+            //Read from a constant
+            $value = $constants[strtoupper($property)];
+        } else {
+            return null;
+        }
+
+        //Merge with parent value requested
+        if ($merge && is_array($value) && !empty($parent = $this->parentReflection())) {
+            $parentValue = $parent->getProperty($property, $merge);
+
+            if (is_array($parentValue)) {
+                //Class values prior to parent values
+                $value = array_merge($parentValue, $value);
+            }
+        }
+
+        //To let traits apply schema changes
+        return $this->cache[$property] = call_user_func(
+            [$this->getName(), 'describeProperty'], $this, $property, $value
+        );
+    }
+
+    /**
+     * Parent entity schema/
+     *
+     * @return ReflectionEntity|null
+     */
+    public function parentReflection()
+    {
+        $parentClass = $this->reflection->getParentClass();
+
+        if (!empty($parentClass) && $parentClass->getName() != static::BASE_CLASS) {
+            $parent = clone $this;
+            $parent->reflection = $this->getParentClass();
+
+            return $parent;
+        }
+
+        return null;
+    }
+
+    /**
      * Bypassing call to reflection.
      *
      * @param string $name
@@ -197,69 +262,5 @@ class ReflectionEntity
     public function __clone()
     {
         $this->cache = [];
-    }
-
-    /**
-     * Read default model property value, will read "protected" and "private" properties. Method
-     * raises entity event "describe" to allow it traits modify needed values.
-     *
-     * @param string $property Property name.
-     * @param bool   $merge    If true value will be merged with all parent declarations.
-     *
-     * @return mixed
-     */
-    final protected function getProperty(string $property, bool $merge = false)
-    {
-        if (isset($this->cache[$property])) {
-            //Property merging and trait events are pretty slow
-            return $this->cache[$property];
-        }
-
-        $properties = $this->reflection->getDefaultProperties();
-        $constants = $this->reflection->getConstants();
-
-        if (isset($properties[$property])) {
-            //Read from default value
-            $value = $properties[$property];
-        } elseif (isset($constants[strtoupper($property)])) {
-            //Read from a constant
-            $value = $constants[strtoupper($property)];
-        } else {
-            return null;
-        }
-
-        //Merge with parent value requested
-        if ($merge && is_array($value) && !empty($parent = $this->parentSchema())) {
-            $parentValue = $parent->getProperty($property, $merge);
-
-            if (is_array($parentValue)) {
-                //Class values prior to parent values
-                $value = array_merge($parentValue, $value);
-            }
-        }
-
-        //To let traits apply schema changes
-        return $this->cache[$property] = call_user_func(
-            [$this->getName(), 'describeProperty'], $this, $property, $value
-        );
-    }
-
-    /**
-     * Parent entity schema/
-     *
-     * @return ReflectionEntity|null
-     */
-    protected function parentSchema()
-    {
-        $parentClass = $this->reflection->getParentClass();
-
-        if (!empty($parentClass) && $parentClass->getName() != static::BASE_CLASS) {
-            $parent = clone $this;
-            $parent->reflection = $this->getParentClass();
-
-            return $parent;
-        }
-
-        return null;
     }
 }

@@ -43,5 +43,5 @@ interface CompositableInterface extends AccessorInterface, Serializable
     /**
      * Indicate that composition been properly saved.
      */
-    public function commitChanges();
+    public function flushUpdates();
 }

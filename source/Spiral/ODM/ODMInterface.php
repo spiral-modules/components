@@ -21,8 +21,8 @@ interface ODMInterface
      * Instantiate document/model instance based on a given class name and fieldset. Some ODM
      * documents might return instances of their child if fields point to child model schema.
      *
-     * @param string $class
-     * @param array  $fields
+     * @param string             $class
+     * @param array|\ArrayAccess $fields
      *
      * @return CompositableInterface
      */

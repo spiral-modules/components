@@ -199,7 +199,7 @@ class DocumentSchema implements SchemaInterface
                 try {
                     $setter = $mutators[DocumentEntity::MUTATOR_SETTER][$field];
                     $default = call_user_func($setter, $default);
-                } catch (\ErrorException $exception) {
+                } catch (\Exception $exception) {
                     //Unable to generate default value, use null or empty array as fallback
                 }
             }

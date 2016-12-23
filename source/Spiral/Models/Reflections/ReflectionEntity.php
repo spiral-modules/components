@@ -117,7 +117,7 @@ class ReflectionEntity
      *
      * @return \ReflectionMethod[]
      */
-    public function getLocalMethods(): array
+    public function declareMethods(): array
     {
         $methods = [];
         foreach ($this->getMethods() as $method) {
@@ -216,9 +216,14 @@ class ReflectionEntity
         }
 
         $properties = $this->reflection->getDefaultProperties();
+        $constants = $this->reflection->getConstants();
 
         if (isset($properties[$property])) {
+            //Read from default value
             $value = $properties[$property];
+        } elseif (isset($constants[strtoupper($property)])) {
+            //Read from a constant
+            $value = $constants[strtoupper($property)];
         } else {
             return null;
         }

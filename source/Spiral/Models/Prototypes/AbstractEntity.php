@@ -179,7 +179,7 @@ abstract class AbstractEntity extends MutableObject implements
         if (!empty($accessor)) {
             $field = $this->fields[$name];
             if (empty($field) || !($field instanceof AccessorInterface)) {
-                $this->fields[$name] = $field = $this->createAccessor($accessor, $value);
+                $this->fields[$name] = $field = $this->createAccessor($accessor, $name, $value);
             }
 
             //Letting accessor to set value
@@ -221,7 +221,7 @@ abstract class AbstractEntity extends MutableObject implements
         $accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR);
 
         if (!empty($accessor)) {
-            return $this->fields[$name] = $this->createAccessor($accessor, $value);
+            return $this->fields[$name] = $this->createAccessor($accessor, $name, $value);
         }
 
         //Checking for getter
@@ -492,15 +492,17 @@ abstract class AbstractEntity extends MutableObject implements
      * Create instance of field accessor.
      *
      * @param string $accessor
+     * @param string $field
      * @param mixed  $value
      *
      * @return AccessorInterface
      *
      * @throws AccessorExceptionInterface
      */
-    protected function createAccessor(string $accessor, $value): AccessorInterface
+    protected function createAccessor(string $accessor, string $field, $value): AccessorInterface
     {
-        return new $accessor($value);
+        //Field as a context
+        return new $accessor($value, compact('field'));
     }
 
     /**
@@ -518,7 +520,7 @@ abstract class AbstractEntity extends MutableObject implements
         $entity = (new static([]))->setFields($fields);
 
         //Optional, firing event after entity construction
-        static::events()->dispatch('construct', new EntityEvent($entity));
+        $entity->dispatch('created', new EntityEvent($entity));
 
         return $entity;
     }

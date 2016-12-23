@@ -18,7 +18,7 @@ use Spiral\ODM\InstantiatorInterface;
  * Note: since new mongo drivers arrived you can emulate same functionality using '__pclass'
  * property.
  */
-class CursorInstantiator extends \IteratorIterator
+class InstantiableCursor extends \IteratorIterator
 {
     /**
      * @var Cursor
@@ -48,18 +48,18 @@ class CursorInstantiator extends \IteratorIterator
     }
 
     /**
-     * @return Cursor
-     */
-    public function getCursor(): Cursor
-    {
-        return $this->cursor;
-    }
-
-    /**
      * @return \Spiral\ODM\CompositableInterface
      */
     public function current(): CompositableInterface
     {
         return $this->instantiator->instantiate(parent::current());
+    }
+
+    /**
+     * @return Cursor
+     */
+    public function getCursor(): Cursor
+    {
+        return $this->cursor;
     }
 }

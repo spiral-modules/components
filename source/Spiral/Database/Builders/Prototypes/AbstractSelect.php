@@ -38,7 +38,6 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  */
 abstract class AbstractSelect extends AbstractWhere implements
     \IteratorAggregate,
-    \JsonSerializable,
     PaginatorAwareInterface
 {
     use JoinsTrait, LimitsTrait, PaginatorTrait;
@@ -445,14 +444,6 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function getIterator()
     {
         return $this->run();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->getIterator()->jsonSerialize();
     }
 
     /**

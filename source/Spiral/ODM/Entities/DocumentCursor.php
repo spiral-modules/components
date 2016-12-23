@@ -6,101 +6,83 @@
  */
 namespace Spiral\ODM\Entities;
 
+use MongoDB\Driver\Cursor;
 use Spiral\ODM\CompositableInterface;
-use Spiral\ODM\Document;
-use Spiral\ODM\DocumentEntity;
-use Spiral\ODM\Exceptions\DefinitionException;
-use Spiral\ODM\InstantiatorInterface;
 use Spiral\ODM\ODMInterface;
 
 /**
- * Provides ability to construct Document and DocumentEntities with inheritance support.
+ * Iterates over given cursor and convert its values in a proper objects using instantiation
+ * manager. Attention, this class is very important as it provides ability to story inherited
+ * documents in one collection.
+ *
+ * Note: since new mongo drivers arrived you can emulate same functionality using '__pclass'
+ * property.
  */
-class DocumentCursor implements InstantiatorInterface
+class DocumentCursor extends \IteratorIterator
 {
     /**
-     * @invisible
+     * @var Cursor
+     */
+    private $cursor;
+
+    /**
+     * @var string
+     */
+    private $class;
+
+    /**
      * @var ODMInterface
      */
     private $odm;
 
     /**
-     * Primary instantiation class.
-     *
-     * @var string
-     */
-    private $class = '';
-
-    /**
-     * Normalized schema delivered by DocumentSchema.
-     *
-     * @var array
-     */
-    private $schema = [];
-
-    /**
-     * @param ODMInterface $odm
+     * @param Cursor       $cursor
      * @param string       $class
-     * @param array        $schema
+     * @param ODMInterface $odm
      */
-    public function __construct(ODMInterface $odm, string $class, array $schema)
+    public function __construct(Cursor $cursor, string $class, ODMInterface $odm)
     {
-        $this->odm = $odm;
+        //Ensuring cursor fetch types
+        $cursor->setTypeMap([
+            'root'     => 'array',
+            'document' => 'array',
+            'array'    => 'array'
+        ]);
+
+        parent::__construct($cursor);
+
         $this->class = $class;
-        $this->schema = $schema;
+        $this->odm = $odm;
     }
 
     /**
-     * @param array|\ArrayAccess $fields
-     *
-     * @return CompositableInterface|DocumentEntity|Document
+     * @return \Spiral\ODM\CompositableInterface
      */
-    public function instantiate($fields): CompositableInterface
+    public function current(): CompositableInterface
     {
-        $class = $this->defineClass($fields);
-
-        if ($class !== $this->class) {
-            //We have to dedicate class creation to external instantiator (possibly children class)
-            return $this->odm->instantiate($class, $fields);
-        }
-
-        //Now we can construct needed class, in this case we are following DocumentEntity declaration
-        return new $class($fields, $this->schema, $this->odm);
+        return $this->odm->instantiate($this->class, parent::current());
     }
 
     /**
-     * Define document class using it's fieldset and definition.
-     *
-     * @param \ArrayAccess|array $fields
-     *
-     * @return string
-     *
-     * @throws DefinitionException
+     * @return Cursor
      */
-    protected function defineClass($fields)
+    public function getCursor(): Cursor
     {
-        //Rule to define class instance
-        $definition = $this->schema[DocumentEntity::SH_INSTANTIATION];
+        return $this->cursor;
+    }
 
-        if (is_string($definition)) {
-            //Document has no variations
-            return $definition;
+    /**
+     * Fetch all documents.
+     *
+     * @return CompositableInterface[]
+     */
+    public function fetchAll(): array
+    {
+        $result = [];
+        foreach ($this as $item) {
+            $result[] = $item;
         }
 
-        if (!is_array($fields)) {
-            //Unable to resolve for non array set, using same class as given
-            return $this->class;
-        }
-
-        $defined = $this->class;
-        foreach ($definition as $field => $child) {
-            if (array_key_exists($field, $fields)) {
-                //Apparently this is child
-                $defined = $child;
-                break;
-            }
-        }
-
-        return $defined;
+        return $result;
     }
 }

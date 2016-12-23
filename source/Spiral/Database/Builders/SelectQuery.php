@@ -17,7 +17,7 @@ use Spiral\Database\Injections\FragmentInterface;
  * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION
  * of multiple select queries.
  */
-class SelectQuery extends AbstractSelect
+class SelectQuery extends AbstractSelect implements \JsonSerializable
 {
     /**
      * Table names to select data from.
@@ -174,11 +174,19 @@ class SelectQuery extends AbstractSelect
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->fetchAll();
+    }
+
+    /**
      * Request all results as array.
      *
      * @return array
      */
-    public function all(): array
+    public function fetchAll(): array
     {
         return $this->getIterator()->fetchAll(\PDO::FETCH_ASSOC);
     }

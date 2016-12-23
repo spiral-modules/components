@@ -220,7 +220,7 @@ class Table implements \JsonSerializable, \IteratorAggregate
      */
     public function all(): array
     {
-        return $this->select()->all();
+        return $this->select()->fetchAll();
     }
 
     /**

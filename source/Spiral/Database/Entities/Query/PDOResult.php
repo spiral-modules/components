@@ -14,7 +14,7 @@ use Spiral\Database\Helpers\QueryInterpolator;
 /**
  * Works as prepared PDOStatement.
  */
-class PDOResult extends PDOStatement implements \JsonSerializable
+class PDOResult extends PDOStatement
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
@@ -98,7 +98,7 @@ class PDOResult extends PDOStatement implements \JsonSerializable
     /**
      * @return array
      */
-    public function jsonSerialize(): array
+    public function toArray(): array
     {
         return $this->fetchAll(\PDO::FETCH_ASSOC);
     }

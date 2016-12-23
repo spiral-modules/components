@@ -8,6 +8,7 @@ namespace Spiral\ODM\Entities;
 
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Collection;
+use MongoDB\Driver\Cursor;
 use Spiral\Core\Component;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\ODMInterface;
@@ -15,7 +16,14 @@ use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\Traits\LimitsTrait;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
-class DocumentSelector extends Component implements \Countable, PaginatorAwareInterface
+/**
+ * Provides fluent interface to build document selections.
+ */
+class DocumentSelector extends Component implements
+    \Countable,
+    \IteratorAggregate,
+    \JsonSerializable,
+    PaginatorAwareInterface
 {
     use LimitsTrait, PaginatorTrait;
 
@@ -161,21 +169,16 @@ class DocumentSelector extends Component implements \Countable, PaginatorAwareIn
             $query = $this->normalizeDates($query);
         }
 
-        $result = $this->collection->findOne(array_merge($this->query, $query), []);
+        $result = $this->collection->findOne(
+            array_merge($this->query, $query),
+            $this->createOptions()
+        );
 
-        //todo: process result
-    }
+        if (!is_null($result)) {
+            $result = $this->odm->instantiate($this->class, $result);
+        }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->getIterator();
-    }
-
-    public function getIterator()
-    {
+        return $result;
     }
 
     /**
@@ -186,10 +189,56 @@ class DocumentSelector extends Component implements \Countable, PaginatorAwareIn
     public function count(): int
     {
         //Create options?
-        return $this->collection->count($this->query, [
-            'skip'  => $this->offset,
-            'limit' => $this->limit
-        ]);
+        return $this->collection->count(
+            $this->query,
+            ['skip' => $this->offset, 'limit' => $this->limit]
+        );
+    }
+
+    /**
+     * Create cursor with partial selection.
+     *
+     * Example: $selector->fetchFields(['name', ...])->toArray();
+     *
+     * @param array $fields
+     *
+     * @return Cursor
+     */
+    public function fetchFields(array $fields): Cursor
+    {
+        return $this->createCursor($fields);
+    }
+
+    /**
+     * Fetch all documents.
+     *
+     * @return CompositableInterface[]
+     */
+    public function fetchAll(): array
+    {
+        return $this->getIterator()->fetchAll();
+    }
+
+    /**
+     * Create selection and wrap it using DocumentCursor.
+     *
+     * @return DocumentCursor
+     */
+    public function getIterator(): DocumentCursor
+    {
+        return new DocumentCursor(
+            $this->createCursor(),
+            $this->class,
+            $this->odm
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function jsonSerialize()
+    {
+        return $this->fetchAll();
     }
 
     /**
@@ -219,23 +268,38 @@ class DocumentSelector extends Component implements \Countable, PaginatorAwareIn
         $this->sort = null;
     }
 
-    protected function createCursor(array $query)
+    /**
+     * @param array $fields Fields to be selected (keep empty to select all).
+     *
+     * @return Cursor
+     */
+    protected function createCursor(array $fields = [])
     {
+        $cursor = $this->collection->find($this->query, $this->createOptions());
 
+        //todo: this is important place
+
+        return $cursor;
     }
 
     /**
      * Options to be send to find() method of MongoDB\Collection. Options are based on how selector
      * was configured.
+     **
      *
      * @return array
      */
     protected function createOptions(): array
     {
         return [
-            'skip' => $this->offset,
-            'limit'  => $this->limit,
-            'sort'   => $this->sort
+            'skip'    => $this->offset,
+            'limit'   => $this->limit,
+            'sort'    => $this->sort,
+            'typeMap' => [
+                'root'     => 'array',
+                'document' => 'array',
+                'array'    => 'array'
+            ]
         ];
     }
 

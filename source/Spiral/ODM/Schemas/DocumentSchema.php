@@ -11,7 +11,7 @@ use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
-use Spiral\ODM\Entities\DocumentCursor;
+use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\Exceptions\SchemaException;
 
 class DocumentSchema implements SchemaInterface
@@ -56,7 +56,7 @@ class DocumentSchema implements SchemaInterface
      */
     public function getInstantiator(): string
     {
-        return $this->reflection->getConstant('INSTANTIATOR') ?? DocumentCursor::class;
+        return $this->reflection->getConstant('INSTANTIATOR') ?? DocumentInstantiator::class;
     }
 
     /**
@@ -154,7 +154,7 @@ class DocumentSchema implements SchemaInterface
      */
     protected function instantiationOptions(SchemaBuilder $builder)
     {
-        if ($this->getInstantiator() != DocumentCursor::class) {
+        if ($this->getInstantiator() != DocumentInstantiator::class) {
             //Unable to define options for non default inheritance based instantiator
             return null;
         }

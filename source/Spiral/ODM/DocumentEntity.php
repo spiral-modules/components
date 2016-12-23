@@ -10,7 +10,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
-use Spiral\ODM\Entities\DocumentCursor;
+use Spiral\ODM\Entities\DocumentInstantiator;
 
 /**
  * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
@@ -48,7 +48,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * Class responsible for instance construction.
      */
-    const INSTANTIATOR = DocumentCursor::class;
+    const INSTANTIATOR = DocumentInstantiator::class;
 
     /**
      * Document fields, accessors and relations. ODM will generate setters and getters for some

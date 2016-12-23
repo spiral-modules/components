@@ -13,7 +13,7 @@ use Spiral\Tokenizer\Prototypes\AbstractLocator;
 /**
  * Can locate classes in a specified directory.
  */
-class ClassLocator extends AbstractLocator implements ClassLocatorInterface
+class ClassLocator extends AbstractLocator implements ClassesInterface
 {
     /**
      * {!@inheritdoc}

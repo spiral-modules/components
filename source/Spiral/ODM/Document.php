@@ -18,4 +18,16 @@ abstract class Document extends DocumentEntity
      * Document entities are able to define set of indexes for related collection.
      */
     const INDEXES = [];
+
+    //primary key?
+    //isLoaded?
+
+    public function save()
+    {
+        $mapper = $this->odm->mapper(static::class);
+    }
+
+    public function delete()
+    {
+    }
 }

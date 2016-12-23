@@ -98,7 +98,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      * @invisible
      * @var ODMInterface
      */
-    private $odm;
+    protected $odm;
 
     /**
      * Document behaviour schema.
@@ -156,14 +156,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function flushUpdates()
     {
         // TODO: Implement flushUpdates() method.
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bsonSerialize()
-    {
-        return $this->packValue();
     }
 
     /**

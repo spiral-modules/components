@@ -6,13 +6,12 @@
  */
 namespace Spiral\ODM;
 
-use MongoDB\BSON\Serializable;
 use Spiral\Models\AccessorInterface;
 
 /**
  * Declares ability of object to be embedded into RecordEntity or represent set of embedded objects.
  */
-interface CompositableInterface extends AccessorInterface, Serializable
+interface CompositableInterface extends AccessorInterface
 {
     /**
      * Check if composition have any change.

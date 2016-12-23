@@ -119,7 +119,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     /**
      * {@inheritdoc}
      */
-    protected function instantiator(string $class): InstantiatorInterface
+    public function instantiator(string $class): InstantiatorInterface
     {
         if (isset($this->instantiators[$class])) {
             return $this->instantiators[$class];

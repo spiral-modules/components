@@ -13,7 +13,7 @@ use Spiral\ODM\Exceptions\DefinitionException;
  * Helps to define sequence of fields needed to clearly distinguish one model from another based on
  * given data.
  */
-class InheritanceDefinition
+class InheritanceHelper
 {
     /**
      * @var DocumentSchema
@@ -154,6 +154,35 @@ class InheritanceDefinition
         }
 
         return $result;
+    }
+
+    /**
+     * Find primary class needed to represent model and model childs.
+     *
+     * @param bool $sameCollection Find only parent related to same collection as model.
+     *
+     * @return string
+     */
+    public function findPrimary(bool $sameCollection = true): string
+    {
+        $primary = $this->schema->getClass();
+        foreach ($this->schemas as $schema) {
+            //Only Document and DocumentEntity classes supported
+            if (!$schema instanceof DocumentSchema) {
+                continue;
+            }
+
+            if ($this->schema->getReflection()->isSubclassOf($schema->getClass())) {
+                if ($sameCollection && !$this->compareCollection($schema)) {
+                    //Child changed collection or database
+                    continue;
+                }
+
+                $primary = $schema->getClass();
+            }
+        }
+
+        return $primary;
     }
 
     /**

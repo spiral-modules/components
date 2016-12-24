@@ -179,7 +179,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     {
         return new DocumentSelector(
             $this->collection($class),
-            $class, //todo: resolve parent class
+            $this->schema($class, self::D_PRIMARY_CLASS),
             $this
         );
     }

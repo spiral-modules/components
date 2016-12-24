@@ -127,6 +127,17 @@ class DocumentSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
+    public function resolvePrimary(SchemaBuilder $builder): string
+    {
+        //Let's define a way how to separate one model from another based on given fields
+        $helper = new InheritanceHelper($this, $builder->getSchemas());
+
+        return $helper->findPrimary();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function packSchema(SchemaBuilder $builder): array
     {
         return [
@@ -166,7 +177,7 @@ class DocumentSchema implements SchemaInterface
         }
 
         //Let's define a way how to separate one model from another based on given fields
-        $helper = new InheritanceDefinition($this, $builder->getSchemas());
+        $helper = new InheritanceHelper($this, $builder->getSchemas());
 
         return $helper->makeDefinition();
     }

@@ -62,6 +62,16 @@ interface SchemaInterface
     public function getIndexes(): array;
 
     /**
+     * Since ODM support inheritance some model collections will be related to parent model, rather
+     * than child model. Attention, primary class MUST be related to the same collection as child.
+     *
+     * @param SchemaBuilder $builder
+     *
+     * @return string
+     */
+    public function resolvePrimary(SchemaBuilder $builder): string;
+
+    /**
      * Pack schema in a form compatible with entity class and selected mapper.
      *
      * @param SchemaBuilder $builder

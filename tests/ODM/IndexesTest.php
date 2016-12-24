@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace ODM;
+namespace Spiral\Tests\ODM;
 
 class IndexesTest extends \PHPUnit_Framework_TestCase
 {

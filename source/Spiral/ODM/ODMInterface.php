@@ -15,10 +15,11 @@ interface ODMInterface
     /**
      * Constants used in packed schema.
      */
-    const D_INSTANTIATOR = 0;
-    const D_SCHEMA       = 1;
-    const D_DATABASE     = 2;
-    const D_COLLECTION   = 3;
+    const D_INSTANTIATOR  = 0;
+    const D_PRIMARY_CLASS = 1;
+    const D_SCHEMA        = 2;
+    const D_DATABASE      = 3;
+    const D_COLLECTION    = 4;
 
     /**
      * Get collection associated with given class.

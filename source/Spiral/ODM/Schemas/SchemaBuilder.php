@@ -95,8 +95,10 @@ class SchemaBuilder
                 //Instantiator class
                 ODMInterface::D_INSTANTIATOR => $schema->getInstantiator(),
 
+                ODMInterface::D_PRIMARY_CLASS => $schema->resolvePrimary($this),
+
                 //Instantiator and entity specific schema
-                ODMInterface::D_SCHEMA       => $schema->packSchema($this)
+                ODMInterface::D_SCHEMA        => $schema->packSchema($this)
             ];
 
             if (!$schema->isEmbedded()) {

@@ -11,7 +11,6 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\SourceException;
-use Spiral\ODM\MongoManager;
 use Spiral\ODM\ODM;
 
 /**
@@ -95,7 +94,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function findByPK($id)
     {
-        return $this->findOne(['_id' => MongoManager::mongoID($id)]);
+        return $this->findOne(['_id' => ODM::mongoID($id)]);
     }
 
     /**

@@ -6,7 +6,7 @@
  */
 namespace Spiral\ODM\Accessors;
 
-use Spiral\ODM\MongoManager;
+use Spiral\ODM\ODM;
 
 /**
  * Provides ability to store array of MongoId (ObjectID).
@@ -18,6 +18,6 @@ class ObjectIDsArray extends AbstractArray
      */
     protected function filterValue($value)
     {
-        return MongoManager::mongoID($value);
+        return ODM::mongoID($value);
     }
 }

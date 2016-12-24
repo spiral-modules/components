@@ -6,7 +6,6 @@
  */
 namespace Spiral\ODM;
 
-use MongoDB\BSON\ObjectID;
 use MongoDB\Driver\Manager;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
@@ -164,34 +163,5 @@ class MongoManager implements InjectorInterface, SingletonInterface
     public function createInjection(\ReflectionClass $class, string $context = null)
     {
         return $this->database($context);
-    }
-
-    /**
-     * Create valid MongoId (ObjectID now) object based on string or id provided from client side.
-     *
-     * @param mixed $mongoID String or MongoId object.
-     *
-     * @return ObjectID|null
-     */
-    public static function mongoID($mongoID)
-    {
-        if (empty($mongoID)) {
-            return null;
-        }
-
-        if (!is_object($mongoID)) {
-            //Old versions of mongo api does not throws exception on invalid mongo id (1.2.1)
-            if (!is_string($mongoID) || !preg_match('/[0-9a-f]{24}/', $mongoID)) {
-                return null;
-            }
-
-            try {
-                $mongoID = new ObjectID($mongoID);
-            } catch (\Exception $e) {
-                return null;
-            }
-        }
-
-        return $mongoID;
     }
 }

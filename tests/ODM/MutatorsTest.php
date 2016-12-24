@@ -7,8 +7,6 @@
 namespace Spiral\Tests\ODM;
 
 use MongoDB\BSON\ObjectID;
-use Spiral\Models\Reflections\ReflectionEntity as RE;
-use Spiral\ODM\Schemas\DocumentSchema as DS;
 use Spiral\Tests\ODM\Fixtures\User;
 use Spiral\Tests\ODM\Traits\ODMTrait;
 
@@ -19,10 +17,9 @@ class MutatorsTest extends \PHPUnit_Framework_TestCase
     public function testSimpleFilter()
     {
         $builder = $this->makeBuilder();
-        $mutators = $this->mutatorsConfig();
         $odm = $this->makeODM();
 
-        $builder->addSchema(new DS(new RE(User::class), $mutators));
+        $builder->addSchema($this->makeSchema(User::class));
         $odm->setSchema($builder);
 
         $user = $odm->instantiate(User::class, []);
@@ -39,10 +36,9 @@ class MutatorsTest extends \PHPUnit_Framework_TestCase
     public function testComplexFilter()
     {
         $builder = $this->makeBuilder();
-        $mutators = $this->mutatorsConfig();
         $odm = $this->makeODM();
 
-        $builder->addSchema(new DS(new RE(User::class), $mutators));
+        $builder->addSchema($this->makeSchema(User::class));
         $odm->setSchema($builder);
 
         $user = $odm->instantiate(User::class, []);
@@ -54,6 +50,7 @@ class MutatorsTest extends \PHPUnit_Framework_TestCase
 
         $user->_id = '585d64a95a28e74be8004276';
         $this->assertInstanceOf(ObjectID::class, $user->_id);
-        $this->assertSame((string)new ObjectID('585d64a95a28e74be8004276'), (string)$user->_id);
+
+        $this->assertEquals((string)new ObjectID('585d64a95a28e74be8004276'), (string)$user->_id);
     }
 }

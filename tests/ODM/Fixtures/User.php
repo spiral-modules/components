@@ -13,8 +13,8 @@ class User extends Document
     const COLLECTION = 'users';
 
     const SCHEMA = [
-        '_id'     => 'MongoId',
-        'name'    => 'string',
+        '_id'   => 'MongoId',
+        'name'  => 'string',
         'piece' => DataPiece::class
     ];
 

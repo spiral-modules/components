@@ -109,7 +109,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
             array_push($this->values, $value);
         }
 
-        $this->atomics['$addToSet']['$each'] = $value;
+        $this->atomics['$addToSet'][] = $value;
 
         return $this;
     }
@@ -133,7 +133,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
             return $item != $value;
         });
 
-        $this->atomics['$pull'] = $value;
+        $this->atomics['$pull'][] = $value;
 
         return $this;
     }
@@ -176,8 +176,8 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
         }
 
         $atomics = [];
-        foreach ($this->atomics as $operation => $value) {
-            $atomics = [$operation => [$container => $value]];
+        foreach ($this->atomics as $operation => $values) {
+            $atomics[$operation] = [$container => $values];
         }
 
         return $atomics;

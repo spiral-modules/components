@@ -34,6 +34,15 @@ class DocumentSelector extends Component implements
     const DESCENDING = -1;
 
     /**
+     * Default selection type map.
+     */
+    const TYPE_MAP = [
+        'root'     => 'array',
+        'document' => 'array',
+        'array'    => 'array'
+    ];
+
+    /**
      * @var Collection
      */
     private $collection;
@@ -316,11 +325,7 @@ class DocumentSelector extends Component implements
             'skip'    => $this->offset,
             'limit'   => $this->limit,
             'sort'    => $this->sort,
-            'typeMap' => [
-                'root'     => 'array',
-                'document' => 'array',
-                'array'    => 'array'
-            ]
+            'typeMap' => self::TYPE_MAP
         ];
     }
 

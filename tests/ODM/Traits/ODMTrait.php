@@ -25,14 +25,16 @@ trait ODMTrait
     }
 
     /**
+     * @param MongoManager|null $manager
+     *
      * @return ODM
      */
-    protected function makeODM()
+    protected function makeODM(MongoManager $manager = null)
     {
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(ODM::MEMORY)->andReturn([]);
 
-        return new ODM(m::mock(MongoManager::class), $memory, new Container());
+        return new ODM($manager ?? m::mock(MongoManager::class), $memory, new Container());
     }
 
     /**

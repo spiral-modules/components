@@ -284,7 +284,7 @@ class DocumentSelector extends Component implements
         $this->odm = null;
         $this->paginator = null;
         $this->query = [];
-        $this->sort = null;
+        $this->sort = [];
     }
 
     /**

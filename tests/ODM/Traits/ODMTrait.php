@@ -51,7 +51,7 @@ trait ODMTrait
                 'bool'    => ['setter' => 'boolval'],
 
                 //Automatic casting of mongoID
-                'MongoId' => ['setter' => [ODM::class, 'mongoID']],
+                'MongoId' => ['setter' => [MongoManager::class, 'mongoID']],
 
                 //'array'     => ['accessor' => ScalarArray::class],
                 //'MongoDate' => ['accessor' => Accessors\MongoTimestamp::class],

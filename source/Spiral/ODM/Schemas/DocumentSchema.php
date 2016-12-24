@@ -7,6 +7,7 @@
 namespace Spiral\ODM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
+use Spiral\Models\AccessorInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\Document;
@@ -229,7 +230,7 @@ class DocumentSchema implements SchemaInterface
             DocumentEntity::SH_INSTANTIATION => $this->instantiationOptions($builder),
 
             //Default entity state (builder is needed to resolve recursive defaults)
-            DocumentEntity::SH_DEFAULTS      => $this->buildDefaults($builder),
+            DocumentEntity::SH_DEFAULTS      => $this->packDefaults($builder),
 
             //Entity behaviour
             DocumentEntity::SH_HIDDEN        => $this->reflection->getHidden(),
@@ -237,7 +238,7 @@ class DocumentSchema implements SchemaInterface
             DocumentEntity::SH_FILLABLE      => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ODM\SchemasConfig
-            DocumentEntity::SH_MUTATORS      => $this->buildMutators(),
+            DocumentEntity::SH_MUTATORS      => $this->packMutators(),
 
             //Document behaviours (we can mix them with accessors due potential inheritance)
             DocumentEntity::SH_COMPOSITIONS  => $this->packCompositions($builder),
@@ -270,16 +271,22 @@ class DocumentSchema implements SchemaInterface
      * Entity default values.
      *
      * @param SchemaBuilder $builder
+     * @param array         $overwriteDefaults Set of default values to replace user defined values.
      *
      * @return array
+     *
+     * @throws SchemaException
      */
-    protected function buildDefaults(SchemaBuilder $builder): array
+    protected function packDefaults(SchemaBuilder $builder, array $overwriteDefaults = []): array
     {
+        //Defined compositions
+        $compositions = $this->getCompositions($builder);
+
         //User defined default values
-        $userDefined = $this->reflection->getProperty('defaults');
+        $userDefined = $overwriteDefaults + $this->reflection->getProperty('defaults');
 
         //We need mutators to normalize default values
-        $mutators = $this->buildMutators();
+        $mutators = $this->packMutators();
 
         $defaults = [];
         foreach ($this->getFields() as $field => $type) {
@@ -305,16 +312,29 @@ class DocumentSchema implements SchemaInterface
                 }
             }
 
-            //todo: default accessors
-            //if (isset($accessors[$field])) {
-            //    $default = $this->accessorDefaults($accessors[$field], $type, $default);
-            //}
+            if (isset($mutators[DocumentEntity::MUTATOR_ACCESSOR][$field])) {
+                $accessor = $mutators[DocumentEntity::MUTATOR_ACCESSOR][$field];
 
-            //todo: compositions
-            //Using composition to resolve default value
-            //if (!empty($this->getCompositions()[$field])) {
-            //    $default = $this->compositionDefaults($field, $default);
-            //}
+                /**
+                 * @var AccessorInterface $instance
+                 */
+                $instance = new $accessor($default, [/*no context given*/]);
+                $default = $instance->packValue();
+
+                if (!is_scalar($default)) {
+                    //Some accessors might want to return objects (DateTime, StorageObject), default to null
+                    $default = null;
+                }
+            }
+
+            if (isset($compositions[$field])) {
+                if (is_null($default) && !array_key_exists($field, $userDefined)) {
+                    //Let's force default value for composite fields
+                    $default = [];
+                }
+
+                $default = $this->resolveDefault($default, $compositions[$field], $builder);
+            }
 
             //Registering default values
             $defaults[$field] = $default;
@@ -330,7 +350,7 @@ class DocumentSchema implements SchemaInterface
      * @see MutatorsConfig
      * @return array
      */
-    protected function buildMutators(): array
+    protected function packMutators(): array
     {
         $mutators = $this->reflection->getMutators();
 
@@ -363,15 +383,7 @@ class DocumentSchema implements SchemaInterface
         }
 
         //Some mutators may be described using aliases (for shortness)
-//        $mutators = $this->normalizeMutators($mutators);
-//
-//        //Every composition is counted as field accessor :)
-//        foreach ($this->getCompositions() as $field => $composition) {
-//            $mutators[AbstractEntity::MUTATOR_ACCESSOR][$field] = [
-//                $composition['type'] == ODM::CMP_MANY ? Compositor::class : ODM::CMP_ONE,
-//                $composition['class'],
-//            ];
-//        }
+        //$mutators = $this->normalizeMutators($mutators);
 
         return $mutators;
     }
@@ -442,5 +454,56 @@ class DocumentSchema implements SchemaInterface
         }
 
         return false;
+    }
+
+    /**
+     * Ensure default value for composite field,
+     *
+     * @param mixed                 $default
+     * @param CompositionDefinition $composition
+     * @param SchemaBuilder         $builder
+     *
+     * @return array
+     *
+     * @throws SchemaException
+     */
+    protected function resolveDefault(
+        $default,
+        CompositionDefinition $composition,
+        SchemaBuilder $builder
+    ) {
+        if (!is_array($default)) {
+            if ($composition->getType() == DocumentEntity::MANY) {
+                //Composition many must always defaults to array
+                return [];
+            }
+
+            //Composite ONE must always defaults to null if no default value are specified
+            return null;
+        }
+
+        //Nothing to do with value for composite many
+        if ($composition->getType() == DocumentEntity::MANY) {
+            return $default;
+        }
+
+        $embedded = $builder->getSchema($composition->getClass());
+        if (!$embedded instanceof self) {
+            //We can not normalize values handled by external schemas yet
+            return $default;
+        }
+
+        if ($embedded->getClass() == $this->getClass()) {
+            if (!empty($default)) {
+                throw new SchemaException(
+                    "Possible recursion issue in {$this->getClass()}, model refers to itself (has default value)"
+                );
+            }
+
+            //No recursions!
+            return null;
+        }
+
+        return $embedded->packDefaults($builder, $default);
     }
 }

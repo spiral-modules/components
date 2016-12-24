@@ -155,7 +155,6 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         //todo: implement
     }
 
-
     /**
      * Get DocumentSelector for a given class. Attention, due model inheritance selector WILL be
      * associated with parent class.

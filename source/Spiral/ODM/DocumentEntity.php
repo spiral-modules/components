@@ -162,6 +162,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function buildAtomics(string $container = ''): array
     {
         // TODO: Implement buildAtomics() method.
+        return [];
     }
 
     /**
@@ -169,6 +170,8 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function flushUpdates()
     {
+        //todo: do flush
+
         // TODO: Implement flushUpdates() method.
     }
 

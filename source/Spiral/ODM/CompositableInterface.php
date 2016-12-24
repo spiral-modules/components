@@ -21,6 +21,11 @@ interface CompositableInterface extends AccessorInterface
     public function hasUpdates(): bool;
 
     /**
+     * Indicate that composition been properly saved.
+     */
+    public function flushUpdates();
+
+    /**
      * Get generated and manually set document/object atomic updates.
      *
      * Example: $set: {'key': 'value'}
@@ -30,9 +35,4 @@ interface CompositableInterface extends AccessorInterface
      * @return array
      */
     public function buildAtomics(string $container = ''): array;
-
-    /**
-     * Indicate that composition been properly saved.
-     */
-    public function flushUpdates();
 }

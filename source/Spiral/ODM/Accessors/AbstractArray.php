@@ -164,6 +164,15 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * {@inheritdoc}
      */
+    public function flushUpdates()
+    {
+        $this->changed = false;
+        $this->atomics = [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function buildAtomics(string $container = ''): array
     {
         if (!$this->hasUpdates()) {
@@ -181,15 +190,6 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
         }
 
         return $atomics;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function flushUpdates()
-    {
-        $this->changed = false;
-        $this->atomics = [];
     }
 
     /**

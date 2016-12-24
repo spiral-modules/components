@@ -9,9 +9,11 @@ namespace Spiral\Tests\ODM\Traits;
 use Mockery as m;
 use Spiral\Core\Container;
 use Spiral\Core\MemoryInterface;
+use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\MongoManager;
 use Spiral\ODM\ODM;
+use Spiral\ODM\Schemas\DocumentSchema;
 use Spiral\ODM\Schemas\SchemaBuilder;
 use Spiral\ODM\Schemas\SchemaLocator;
 
@@ -23,6 +25,16 @@ trait ODMTrait
     protected function makeBuilder()
     {
         return new SchemaBuilder(m::mock(MongoManager::class));
+    }
+
+    /**
+     * @param string $class
+     *
+     * @return DocumentSchema
+     */
+    protected function makeSchema(string $class): DocumentSchema
+    {
+        return new DocumentSchema(new ReflectionEntity($class), $this->mutatorsConfig());
     }
 
     /**

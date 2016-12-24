@@ -40,6 +40,11 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function __construct($values)
     {
+        if (!is_array($values)) {
+            //Since we have to overwrite non array field
+            $this->solidState = true;
+        }
+
         $this->addValues($values);
     }
 
@@ -139,8 +144,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     public function setValue($data)
     {
         //Manually altered arrays must always end in solid state
-        $this->solidState = true;
-        $this->updated = true;
+        $this->solidState = $this->updated = true;
 
         //Flushing existed values
         $this->values = [];

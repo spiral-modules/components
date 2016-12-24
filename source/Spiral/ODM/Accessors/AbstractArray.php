@@ -26,7 +26,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      *
      * @var bool
      */
-    protected $updated = false;
+    protected $changed = false;
 
     /**
      * Low level atomic operations.
@@ -144,7 +144,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     public function setValue($data)
     {
         //Manually altered arrays must always end in solid state
-        $this->solidState = $this->updated = true;
+        $this->solidState = $this->changed = true;
 
         //Flushing existed values
         $this->values = [];
@@ -158,7 +158,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function hasUpdates(): bool
     {
-        return $this->updated || !empty($this->atomics);
+        return $this->changed || !empty($this->atomics);
     }
 
     /**
@@ -188,7 +188,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function flushUpdates()
     {
-        $this->updated = false;
+        $this->changed = false;
         $this->atomics = [];
     }
 
@@ -223,7 +223,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     {
         //Every cloned accessor must become solid and updated
         $this->solidState = true;
-        $this->updated = true;
+        $this->changed = true;
     }
 
     /**

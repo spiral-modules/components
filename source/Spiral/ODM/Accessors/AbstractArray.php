@@ -224,6 +224,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
         //Every cloned accessor must become solid and updated
         $this->solidState = true;
         $this->changed = true;
+        $this->atomics = [];
     }
 
     /**

@@ -9,6 +9,7 @@ namespace Spiral\ODM;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidStateTrait;
 use Spiral\ODM\Entities\DocumentInstantiator;
@@ -198,5 +199,16 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         return parent::iocContainer();
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * DocumentEntity will pass ODM instance as part of accessor context.
+     */
+    protected function createAccessor(string $accessor, string $field, $value): AccessorInterface
+    {
+        //Field as a context
+        return new $accessor($value, ['field' => $field, 'entity' => $this, 'odm' => $this->odm]);
     }
 }

@@ -18,7 +18,8 @@ use Spiral\ODM\Schemas\SchemaBuilder;
 use Spiral\ODM\Schemas\SchemaLocator;
 
 /**
- * @todo move schema to external class?
+ * Provides supporting functionality for ODM classes such as selectors, instantiators and schema
+ * builders.
  */
 class ODM extends Component implements ODMInterface, SingletonInterface
 {
@@ -162,6 +163,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     {
         //todo: implement
     }
+
 
     /**
      * Get DocumentSelector for a given class. Attention, due model inheritance selector WILL be

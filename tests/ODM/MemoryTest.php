@@ -14,12 +14,12 @@ class MemoryTest extends \PHPUnit_Framework_TestCase
 
     public function testLoadSchema()
     {
-
+        //todo: add tests
     }
 
     public function testSaveSchema()
     {
-
+        //todo: add tests
     }
 
     public function testAutolocation()

@@ -14,6 +14,7 @@ use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
+use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
 use Spiral\ODM\Schemas\Definitions\IndexDefinition;
 
 class DocumentSchema implements SchemaInterface
@@ -184,6 +185,30 @@ class DocumentSchema implements SchemaInterface
     }
 
     /**
+     * Find all composition definitions, attention method require builder instance in order to
+     * properly check that embedded class exists.
+     *
+     * @param SchemaBuilder $builder
+     *
+     * @return CompositionDefinition[]
+     */
+    public function getCompositions(SchemaBuilder $builder): array
+    {
+        $result = [];
+        foreach ($this->reflection->getFields() as $field => $type) {
+            if (is_string($type) && $builder->hasSchema($type)) {
+                $result[$field] = new CompositionDefinition(DocumentEntity::ONE, $type);
+            }
+
+            if (is_array($type) && isset($type[0]) && $builder->hasSchema($type[0])) {
+                $result[$field] = new CompositionDefinition(DocumentEntity::MANY, $type[0]);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function resolvePrimary(SchemaBuilder $builder): string
@@ -215,7 +240,7 @@ class DocumentSchema implements SchemaInterface
             DocumentEntity::SH_MUTATORS      => $this->buildMutators(),
 
             //Document behaviours (we can mix them with accessors due potential inheritance)
-            DocumentEntity::SH_COMPOSITIONS  => $this->buildCompositions($builder),
+            DocumentEntity::SH_COMPOSITIONS  => $this->packCompositions($builder),
             DocumentEntity::SH_AGGREGATIONS  => $this->packAggregations($builder),
         ];
     }
@@ -351,9 +376,23 @@ class DocumentSchema implements SchemaInterface
         return $mutators;
     }
 
-    public function buildCompositions(SchemaBuilder $builder): array
+    /**
+     * Pack compositions into simple array definition.
+     *
+     * @param SchemaBuilder $builder
+     *
+     * @return array
+     *
+     * @throws SchemaException
+     */
+    public function packCompositions(SchemaBuilder $builder): array
     {
-        return [];
+        $result = [];
+        foreach ($this->getCompositions($builder) as $name => $composition) {
+            $result[$name] = $composition->packSchema();
+        }
+
+        return $result;
     }
 
     /**

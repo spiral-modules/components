@@ -46,6 +46,18 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     const SH_COMPOSITIONS  = 7;
 
     /**
+     * Constants used to describe aggregation relations (also used internally to identify
+     * composition).
+     *
+     * Example:
+     * 'items' => [self::MANY => Item::class, ['parentID' => 'key::_id']]
+     *
+     * @see DocumentEntity::SCHEMA
+     */
+    const MANY = 778;
+    const ONE  = 899;
+
+    /**
      * Class responsible for instance construction.
      */
     const INSTANTIATOR = DocumentInstantiator::class;

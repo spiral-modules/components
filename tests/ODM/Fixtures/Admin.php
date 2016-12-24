@@ -10,7 +10,7 @@ class Admin extends User
 {
     const SCHEMA = [
         'admins' => 'string',
-        'manyYo' => [DataPiece::class]
+        'pieces' => [DataPiece::class]
     ];
 
     const DEFAULTS = [

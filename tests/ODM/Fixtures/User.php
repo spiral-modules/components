@@ -15,7 +15,7 @@ class User extends Document
     const SCHEMA = [
         '_id'     => 'MongoId',
         'name'    => 'string',
-        'superYo' => DataPiece::class
+        'piece' => DataPiece::class
     ];
 
     const INDEXES = [

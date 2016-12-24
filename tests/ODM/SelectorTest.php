@@ -224,7 +224,7 @@ class SelectorTest extends \PHPUnit_Framework_TestCase
 
         $database = m::mock(MongoDatabase::class);
         $manager->shouldReceive('database')->with('external')->andReturn($database);
-        $database->shouldReceive('selectCollection')->with('externalDSs')->andReturn(m::mock(Collection::class));
+        $database->shouldReceive('selectCollection')->with('externalDBs')->andReturn(m::mock(Collection::class));
 
         $selector = $odm->selector(ExternalDB::class);
 

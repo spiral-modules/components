@@ -13,6 +13,7 @@ use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\MongoManager;
 use Spiral\ODM\ODM;
 use Spiral\ODM\Schemas\SchemaBuilder;
+use Spiral\ODM\Schemas\SchemaLocator;
 
 trait ODMTrait
 {
@@ -29,12 +30,17 @@ trait ODMTrait
      *
      * @return ODM
      */
-    protected function makeODM(MongoManager $manager = null)
+    protected function makeODM(MongoManager $manager = null, SchemaLocator $locator = null)
     {
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(ODM::MEMORY)->andReturn([]);
 
-        return new ODM($manager ?? m::mock(MongoManager::class), $memory, new Container());
+        return new ODM(
+            $manager ?? m::mock(MongoManager::class),
+            $locator ?? m::mock(SchemaLocator::class),
+            $memory,
+            new Container()
+        );
     }
 
     /**

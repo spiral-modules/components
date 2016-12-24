@@ -13,7 +13,9 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
+use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\Schemas\SchemaBuilder;
+use Spiral\ODM\Schemas\SchemaLocator;
 
 /**
  * @todo move schema to external class?
@@ -47,6 +49,11 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     protected $manager;
 
     /**
+     * @var SchemaLocator
+     */
+    protected $locator;
+
+    /**
      * @invisible
      * @var MemoryInterface
      */
@@ -58,57 +65,102 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     protected $factory;
 
     /**
+     * ODM constructor.
+     *
      * @param MongoManager     $manager
+     * @param SchemaLocator    $locator
      * @param MemoryInterface  $memory
      * @param FactoryInterface $factory
      */
     public function __construct(
         MongoManager $manager,
+        SchemaLocator $locator,
         MemoryInterface $memory,
         FactoryInterface $factory
     ) {
         $this->manager = $manager;
+        $this->locator = $locator;
+
         $this->memory = $memory;
         $this->factory = $factory;
 
         //Loading schema from memory (if any)
-        $this->schema = (array)$memory->loadData(static::MEMORY);
+        $this->schema = $this->loadSchema();
     }
 
-    //---
+    /**
+     * Update ODM schema with automatic indexations.
+     *
+     * @param bool $locate Set to true to automatically locate available documents in a project
+     *                     (based on tokenizer scope).
+     *
+     * @return SchemaBuilder
+     */
+    public function schemaBuilder(bool $locate = true): SchemaBuilder
+    {
+        $builder = new SchemaBuilder($this->manager);
+
+        if ($locate) {
+            foreach ($this->locator->locateSchemas() as $schema) {
+                $builder->addSchema($schema);
+            }
+        }
+
+        return $builder;
+    }
 
     /**
-     * Get property from cached schema.
+     * Specify behaviour schema for ODM to be used.
+     *
+     * @param SchemaBuilder $builder
+     * @param bool          $remember Set to true to remember packed schema in memory.
+     */
+    public function setSchema(SchemaBuilder $builder, bool $remember = false)
+    {
+        $this->schema = $builder->packSchema();
+
+        if ($remember) {
+            $this->memory->saveData(static::MEMORY, $this->schema);
+        }
+    }
+
+    /**
+     * Get property from cached schema. Attention, ODM will automatically load schema if it's empty.
+     *
+     * Example:
+     * $odm->getSchema(User::class, ODM::D_INSTANTIATOR);
      *
      * @param string $class
      * @param int    $property See ODM constants.
      *
      * @return mixed
+     *
+     * @throws ODMException
      */
-    protected function schema(string $class, int $property)
+    public function schema(string $class, int $property)
     {
-        return [];
-    }
+        if (empty($this->schema)) {
+            //Update and remember
+            $this->setSchema($this->schemaBuilder(), true);
+        }
 
-    public function setSchema(SchemaBuilder $builder)
-    {
-        $this->schema = $builder->packSchema();
-    }
+        //Check value
+        if (!isset($this->schema[$class])) {
+            throw new ODMException("Undefined ODM schema item '{$class}', make sure schema is updated");
+        }
 
-    protected function loadSchema()
-    {
-    }
+        if (!array_key_exists($property, $this->schema[$class])) {
+            throw new ODMException("Undefined ODM schema property '{$class}'.'{$property}'");
+        }
 
-    protected function updateSchema()
-    {
-
+        return $this->schema[$class][$property];
     }
 
     //---
 
     public function source(string $class): DocumentSource
     {
-
+        //todo: implement
     }
 
     /**
@@ -137,8 +189,11 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      */
     public function collection(string $class): Collection
     {
-        //do it
-        return $this->manager->database('')->selectCollection('');
+        return $this->manager->database(
+            $this->schema($class, self::D_DATABASE)
+        )->selectCollection(
+            $this->schema($class, self::D_COLLECTION)
+        );
     }
 
     /**
@@ -163,13 +218,23 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         }
 
         //Potential optimization
-        $instantiator = $this->factory->make($this->schema[$class][self::D_INSTANTIATOR], [
+        $instantiator = $this->factory->make($this->schema($class, self::D_INSTANTIATOR), [
             'class'  => $class,
             'odm'    => $this,
-            'schema' => $this->schema[$class][self::D_SCHEMA]
+            'schema' => $this->schema($class, self::D_SCHEMA)
         ]);
 
         //Constructing instantiator and storing it in cache
         return $this->instantiators[$class] = $instantiator;
+    }
+
+    /**
+     * Load packed schema from memory.
+     *
+     * @return array
+     */
+    protected function loadSchema(): array
+    {
+        return (array)$this->memory->loadData(static::MEMORY);
     }
 }

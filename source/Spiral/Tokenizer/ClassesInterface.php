@@ -20,7 +20,7 @@ interface ClassesInterface
      *
      * Output format:
      * $result['CLASS_NAME'] = [
-     *      'class'    => 'CLASS_NAME',
+     *      'name'     => 'CLASS_NAME',
      *      'filename' => 'FILENAME',
      *      'abstract' => 'ABSTRACT_BOOL'
      * ]

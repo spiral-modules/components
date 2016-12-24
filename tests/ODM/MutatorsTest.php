@@ -24,13 +24,36 @@ class MutatorsTest extends \PHPUnit_Framework_TestCase
 
         $user = $odm->instantiate(User::class, []);
         $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('', $user->name);
+    }
+
+    public function testSimpleWithDefaultValue()
+    {
+        $builder = $this->makeBuilder();
+        $odm = $this->makeODM();
+
+        $builder->addSchema($this->makeSchema(User::class));
+        $odm->setSchema($builder);
 
         $user = $odm->instantiate(User::class, ['name' => 'test']);
         $this->assertInstanceOf(User::class, $user);
         $this->assertSame('test', $user->name);
+    }
+
+    public function testTypecasting()
+    {
+        $builder = $this->makeBuilder();
+        $odm = $this->makeODM();
+
+        $builder->addSchema($this->makeSchema(User::class));
+        $odm->setSchema($builder);
+
+        $user = $odm->instantiate(User::class);
+        $this->assertInstanceOf(User::class, $user);
 
         $user->name = 123;
         $this->assertInternalType('string', $user->name);
+        $this->assertSame('123', $user->name);
     }
 
     public function testComplexFilter()

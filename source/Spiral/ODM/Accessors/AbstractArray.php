@@ -252,7 +252,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     protected function addValues($values)
     {
-        if (!is_array($values) && $values instanceof \Traversable) {
+        if (!is_array($values) && !$values instanceof \Traversable) {
             //Unable to process values
             return;
         }
@@ -260,7 +260,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
         foreach ($values as $value) {
             //Passing every value thought the filter
             $value = $this->filterValue($value);
-            if (is_null($value)) {
+            if (!is_null($value)) {
                 $this->values[] = $value;
             }
         }

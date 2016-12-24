@@ -107,19 +107,19 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     const ACCESSORS = [];
 
     /**
+     * Document behaviour schema.
+     *
+     * @var array
+     */
+    private $schema = [];
+
+    /**
      * Parent ODM instance, responsible for aggregations and lazy loading operations.
      *
      * @invisible
      * @var ODMInterface
      */
     protected $odm;
-
-    /**
-     * Document behaviour schema.
-     *
-     * @var array
-     */
-    private $schema = [];
 
     /**
      * {@inheritdoc}

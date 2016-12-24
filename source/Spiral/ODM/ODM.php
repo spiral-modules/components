@@ -127,19 +127,9 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     }
 
     /**
-     * Get property from cached schema. Attention, ODM will automatically load schema if it's empty.
-     *
-     * Example:
-     * $odm->getSchema(User::class, ODM::D_INSTANTIATOR);
-     *
-     * @param string $class
-     * @param int    $property See ODM constants.
-     *
-     * @return mixed
-     *
-     * @throws ODMException
+     * {@inheritdoc}
      */
-    public function schema(string $class, int $property)
+    public function define(string $class, int $property)
     {
         if (empty($this->schema)) {
             //Update and remember
@@ -182,7 +172,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     {
         return new DocumentSelector(
             $this->collection($class),
-            $this->schema($class, self::D_PRIMARY_CLASS),
+            $this->define($class, self::D_PRIMARY_CLASS),
             $this
         );
     }
@@ -193,9 +183,9 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     public function collection(string $class): Collection
     {
         return $this->manager->database(
-            $this->schema($class, self::D_DATABASE)
+            $this->define($class, self::D_DATABASE)
         )->selectCollection(
-            $this->schema($class, self::D_COLLECTION)
+            $this->define($class, self::D_COLLECTION)
         );
     }
 
@@ -221,10 +211,10 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         }
 
         //Potential optimization
-        $instantiator = $this->factory->make($this->schema($class, self::D_INSTANTIATOR), [
+        $instantiator = $this->factory->make($this->define($class, self::D_INSTANTIATOR), [
             'class'  => $class,
             'odm'    => $this,
-            'schema' => $this->schema($class, self::D_SCHEMA)
+            'schema' => $this->define($class, self::D_SCHEMA)
         ]);
 
         //Constructing instantiator and storing it in cache

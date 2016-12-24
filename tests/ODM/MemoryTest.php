@@ -37,7 +37,7 @@ class MemoryTest extends \PHPUnit_Framework_TestCase
             new Container()
         );
 
-        $this->assertSame('user-database', $odm->schema(User::class, ODM::D_DATABASE));
+        $this->assertSame('user-database', $odm->define(User::class, ODM::D_DATABASE));
     }
 
     public function testSetSchema()
@@ -57,7 +57,7 @@ class MemoryTest extends \PHPUnit_Framework_TestCase
             new Container()
         );
 
-        $this->assertSame('user-database', $odm->schema(User::class, ODM::D_DATABASE));
+        $this->assertSame('user-database', $odm->define(User::class, ODM::D_DATABASE));
 
         $builder = m::mock(SchemaBuilder::class);
 
@@ -70,6 +70,6 @@ class MemoryTest extends \PHPUnit_Framework_TestCase
         $memory->shouldNotReceive('saveData');
 
         $odm->setSchema($builder, false);
-        $this->assertSame('new-database', $odm->schema(User::class, ODM::D_DATABASE));
+        $this->assertSame('new-database', $odm->define(User::class, ODM::D_DATABASE));
     }
 }

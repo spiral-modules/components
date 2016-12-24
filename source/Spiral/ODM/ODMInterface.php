@@ -22,6 +22,21 @@ interface ODMInterface
     const D_COLLECTION    = 4;
 
     /**
+     * Define property from ODM schema. Attention, ODM will automatically load schema if it's empty.
+     *
+     * Example:
+     * $odm->define(User::class, ODM::D_INSTANTIATOR);
+     *
+     * @param string $class
+     * @param int    $property See ODM constants.
+     *
+     * @return mixed
+     *
+     * @throws ODMException
+     */
+    public function define(string $class, int $property);
+
+    /**
      * Get collection associated with given class.
      *
      * @param string $class

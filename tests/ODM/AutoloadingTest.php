@@ -38,7 +38,7 @@ class AutoloadingTest extends \PHPUnit_Framework_TestCase
             $locator, $memory,
             $container = new Container()
         );
-        $this->assertSame('user-database', $odm->schema(User::class, ODM::D_DATABASE));
+        $this->assertSame('user-database', $odm->define(User::class, ODM::D_DATABASE));
 
         $builder = new SchemaBuilder(m::mock(MongoManager::class));
         $container->bind(SchemaBuilder::class, $builder);

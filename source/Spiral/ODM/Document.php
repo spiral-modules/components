@@ -15,6 +15,17 @@ abstract class Document extends DocumentEntity
     const COLLECTION = null;
 
     /**
+     * Constants used to describe aggregation relations.
+     *
+     * Example:
+     * 'items' => [self::MANY => Item::class, ['parentID' => 'key::_id']]
+     *
+     * @see Document::$schema
+     */
+    const MANY = 778;
+    const ONE  = 899;
+
+    /**
      * Set of indexes to be created for associated collection. Use "@options" for additional
      * index options.
      *

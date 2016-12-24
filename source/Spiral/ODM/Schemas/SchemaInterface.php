@@ -7,6 +7,7 @@
 namespace Spiral\ODM\Schemas;
 
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\Schemas\Definitions\IndexDefinition;
 
 /**
  * Describes document or class schema to be cached on ODM memory.
@@ -51,6 +52,13 @@ interface SchemaInterface
      * @throws SchemaException
      */
     public function getCollection(): string;
+
+    /**
+     * Get list of declared fields associated with type.
+     *
+     * @return array
+     */
+    public function getFields(): array;
 
     /**
      * Get list of indexes to defined in associated collection.

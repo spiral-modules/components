@@ -13,6 +13,8 @@ use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
+use Spiral\ODM\Schemas\Definitions\IndexDefinition;
 
 class DocumentSchema implements SchemaInterface
 {
@@ -22,6 +24,8 @@ class DocumentSchema implements SchemaInterface
     private $reflection;
 
     /**
+     * @invisible
+     *
      * @var MutatorsConfig
      */
     private $mutators;
@@ -111,6 +115,24 @@ class DocumentSchema implements SchemaInterface
     }
 
     /**
+     * Get every embedded entity field (excluding declarations of aggregations).
+     *
+     * @return array
+     */
+    public function getFields(): array
+    {
+        $fields = $this->reflection->getFields();
+
+        foreach ($fields as $field => $type) {
+            if ($this->isAggregation($type)) {
+                unset($fields[$field]);
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getIndexes(): array
@@ -138,6 +160,27 @@ class DocumentSchema implements SchemaInterface
         }
 
         return array_unique($result);
+    }
+
+    /**
+     * @return AggregationDefinition[]
+     */
+    public function getAggregations(): array
+    {
+        $result = [];
+        foreach ($this->reflection->getFields() as $field => $type) {
+            if ($this->isAggregation($type)) {
+                $aggregationType = isset($type[Document::ONE]) ? Document::ONE : Document::MANY;
+
+                $result[$field] = new AggregationDefinition(
+                    $aggregationType,        //Aggregation type
+                    $type[$aggregationType], //Class name
+                    array_pop($type)         //Query template
+                );
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -173,7 +216,7 @@ class DocumentSchema implements SchemaInterface
 
             //Document behaviours (we can mix them with accessors due potential inheritance)
             DocumentEntity::SH_COMPOSITIONS  => $this->buildCompositions($builder),
-            DocumentEntity::SH_AGGREGATIONS  => $this->buildAggregations($builder),
+            DocumentEntity::SH_AGGREGATIONS  => $this->packAggregations($builder),
         ];
     }
 
@@ -308,24 +351,57 @@ class DocumentSchema implements SchemaInterface
         return $mutators;
     }
 
-    protected function buildCompositions(SchemaBuilder $builder): array
+    public function buildCompositions(SchemaBuilder $builder): array
     {
-        return [];
-    }
-
-    protected function buildAggregations(SchemaBuilder $builder): array
-    {
-
         return [];
     }
 
     /**
-     * Get every embedded entity field (excluding declarations of aggregations).
+     * Pack aggregations into simple array definition.
+     *
+     * @param SchemaBuilder $builder
      *
      * @return array
+     *
+     * @throws SchemaException
      */
-    protected function getFields(): array
+    protected function packAggregations(SchemaBuilder $builder): array
     {
-        return $this->reflection->getFields();
+        $result = [];
+        foreach ($this->getAggregations() as $name => $aggregation) {
+            if (!$builder->hasSchema($aggregation->getClass())) {
+                throw new SchemaException(
+                    "Aggregation {$this->getClass()}.'{$name}' refers to undefined document '{$aggregation->getClass()}'"
+                );
+            }
+
+            if ($builder->getSchema($aggregation->getClass())->isEmbedded()) {
+                throw new SchemaException(
+                    "Aggregation {$this->getClass()}.'{$name}' refers to non storable document '{$aggregation->getClass()}'"
+                );
+            }
+
+            $result[$name] = $aggregation->packSchema();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if field schema/type defines aggregation.
+     *
+     * @param mixed $type
+     *
+     * @return bool
+     */
+    protected function isAggregation($type): bool
+    {
+        if (is_array($type)) {
+            if (isset($type[Document::ONE]) || isset($type[Document::MANY])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

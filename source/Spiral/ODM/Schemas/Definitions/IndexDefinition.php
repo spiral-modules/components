@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\ODM\Schemas;
+namespace Spiral\ODM\Schemas\Definitions;
 
 /**
  * Index definition options.

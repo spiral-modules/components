@@ -4,16 +4,13 @@
  *
  * @author    Wolfy-J
  */
-namespace ODM;
+namespace Spiral\Tests\ODM;
 
 use Mockery as m;
 use Spiral\Models\Reflections\ReflectionEntity as RE;
-use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\Entities\DocumentInstantiator;
-use Spiral\ODM\MongoManager;
-use Spiral\ODM\ODM;
+use Spiral\ODM\ODMInterface;
 use Spiral\ODM\Schemas\DocumentSchema as DS;
-use Spiral\ODM\Schemas\SchemaBuilder;
 use Spiral\Tests\ODM\Fixtures\Admin;
 use Spiral\Tests\ODM\Fixtures\DataPiece;
 use Spiral\Tests\ODM\Fixtures\ExternalDB;
@@ -21,9 +18,12 @@ use Spiral\Tests\ODM\Fixtures\Moderator;
 use Spiral\Tests\ODM\Fixtures\SuperAdministrator;
 use Spiral\Tests\ODM\Fixtures\SuperModerator;
 use Spiral\Tests\ODM\Fixtures\User;
+use Spiral\Tests\ODM\Traits\ODMTrait;
 
 class SchemasTest extends \PHPUnit_Framework_TestCase
 {
+    use ODMTrait;
+
     public function testGetSchema()
     {
         $builder = $this->makeBuilder();
@@ -307,47 +307,58 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $piece->getIndexes();
     }
 
-    /**
-     * @return SchemaBuilder
-     */
-    protected function makeBuilder()
+    public function testSchemaPackSimple()
     {
-        return new SchemaBuilder(m::mock(MongoManager::class));
+        $builder = $this->makeBuilder();
+        $mutators = $this->mutatorsConfig();
+
+        $builder->addSchema(new DS(new RE(User::class), $mutators));
+        $builder->addSchema(new DS(new RE(Admin::class), $mutators));
+        $builder->addSchema(new DS(new RE(Moderator::class), $mutators));
+
+        $this->assertCount(3, $builder->getSchemas());
+
+        //Packing
+        $packed = $builder->packSchema();
+
+        $this->assertArrayHasKey(User::class, $packed);
+        $this->assertArrayHasKey(Admin::class, $packed);
+        $this->assertArrayHasKey(Moderator::class, $packed);
+
+        //Checking all keys
+        foreach ($packed as $item) {
+            $this->assertInternalType('array', $item);
+
+            $this->assertArrayHasKey(ODMInterface::D_INSTANTIATOR, $item);
+            $this->assertArrayHasKey(ODMInterface::D_SCHEMA, $item);
+            $this->assertArrayHasKey(ODMInterface::D_DATABASE, $item);
+            $this->assertArrayHasKey(ODMInterface::D_DATABASE, $item);
+        }
     }
 
-    /**
-     * @return MutatorsConfig
-     */
-    protected function mutatorsConfig()
+
+    public function testSchemaPackSimpleEmbedded()
     {
-        return new MutatorsConfig([
-            /*
-            * Set of mutators to be applied for specific field types.
-            */
-            'mutators' => [
-                'int'     => ['setter' => 'intval'],
-                'float'   => ['setter' => 'floatval'],
-                'string'  => ['setter' => 'strval'],
-                'bool'    => ['setter' => 'boolval'],
+        $builder = $this->makeBuilder();
+        $mutators = $this->mutatorsConfig();
 
-                //Automatic casting of mongoID
-                'MongoId' => ['setter' => [ODM::class, 'mongoID']],
+        $builder->addSchema(new DS(new RE(DataPiece::class), $mutators));
 
-                //'array'     => ['accessor' => ScalarArray::class],
-                //'MongoDate' => ['accessor' => Accessors\MongoTimestamp::class],
-                //'timestamp' => ['accessor' => Accessors\MongoTimestamp::class],
-                /*{{mutators}}*/
-            ],
-            /*
-             * Mutator aliases can be used to declare custom getter and setter filter methods.
-             */
-            'aliases'  => [
-                'integer' => 'int',
-                'long'    => 'int',
-                'text'    => 'string',
+        $this->assertCount(1, $builder->getSchemas());
 
-                /*{{mutators.aliases}}*/
-            ]
-        ]);
+        //Packing
+        $packed = $builder->packSchema();
+
+        $this->assertArrayHasKey(DataPiece::class, $packed);
+
+        //Checking all keys
+        foreach ($packed as $item) {
+            $this->assertInternalType('array', $item);
+
+            $this->assertArrayHasKey(ODMInterface::D_INSTANTIATOR, $item);
+            $this->assertArrayHasKey(ODMInterface::D_SCHEMA, $item);
+            $this->assertArrayNotHasKey(ODMInterface::D_DATABASE, $item);
+            $this->assertArrayNotHasKey(ODMInterface::D_DATABASE, $item);
+        }
     }
 }

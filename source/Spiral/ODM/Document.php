@@ -34,7 +34,7 @@ abstract class Document extends DocumentEntity
 
     public function save()
     {
-        $mapper = $this->odm->mapper(static::class);
+
     }
 
     public function delete()

@@ -56,6 +56,8 @@ interface SchemaInterface
      * Get list of indexes to defined in associated collection.
      *
      * @return IndexDefinition[]
+     *
+     * @throws SchemaException
      */
     public function getIndexes(): array;
 

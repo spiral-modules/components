@@ -114,6 +114,12 @@ class DocumentSchema implements SchemaInterface
      */
     public function getIndexes(): array
     {
+        if ($this->isEmbedded()) {
+            throw new SchemaException(
+                "Unable to get indexes for embedded model {$this->reflection}"
+            );
+        }
+
         //todo: create indexes (keep collections)
         return [];
     }

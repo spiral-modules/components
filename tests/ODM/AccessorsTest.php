@@ -51,4 +51,52 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($entity->tags->has('c'));
         $this->assertFalse($entity->tags->has('d'));
     }
+
+    public function testArrayAccessorAdd()
+    {
+        $builder = $this->makeBuilder();
+        $odm = $this->makeODM();
+
+        $builder->addSchema($this->makeSchema(Accessed::class));
+        $odm->setSchema($builder);
+
+        $entity = $odm->instantiate(Accessed::class, [
+            'tags' => ['a', 'b', 'c']
+        ]);
+        $this->assertInstanceOf(Accessed::class, $entity);
+
+        $this->assertInstanceOf(StringArray::class, $entity->tags);
+        $this->assertCount(3, $entity->tags);
+
+        $this->assertTrue($entity->tags->has('a'));
+        $this->assertTrue($entity->tags->has('b'));
+        $this->assertTrue($entity->tags->has('c'));
+
+        $entity->tags->add('d');
+        $this->assertTrue($entity->tags->has('d'));
+    }
+
+    public function testArrayAccessorPull()
+    {
+        $builder = $this->makeBuilder();
+        $odm = $this->makeODM();
+
+        $builder->addSchema($this->makeSchema(Accessed::class));
+        $odm->setSchema($builder);
+
+        $entity = $odm->instantiate(Accessed::class, [
+            'tags' => ['a', 'b', 'c']
+        ]);
+        $this->assertInstanceOf(Accessed::class, $entity);
+
+        $this->assertInstanceOf(StringArray::class, $entity->tags);
+        $this->assertCount(3, $entity->tags);
+
+        $this->assertTrue($entity->tags->has('a'));
+        $this->assertTrue($entity->tags->has('b'));
+        $this->assertTrue($entity->tags->has('c'));
+
+        $entity->tags->pull('c');
+        $this->assertFalse($entity->tags->has('c'));
+    }
 }

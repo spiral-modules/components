@@ -496,7 +496,7 @@ class DocumentSchema implements SchemaInterface
         if ($embedded->getClass() == $this->getClass()) {
             if (!empty($default)) {
                 throw new SchemaException(
-                    "Possible recursion issue in {$this->getClass()}, model refers to itself (has default value)"
+                    "Possible recursion issue in '{$this->getClass()}', model refers to itself (has default value)"
                 );
             }
 

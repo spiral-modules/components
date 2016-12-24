@@ -6,9 +6,11 @@
  */
 namespace Spiral\Tests\ODM;
 
-use Spiral\Models\Reflections\ReflectionEntity as RE;
-use Spiral\ODM\Schemas\DocumentSchema as DS;
+use Spiral\ODM\ODM;
 use Spiral\Tests\ODM\Fixtures\Admin;
+use Spiral\Tests\ODM\Fixtures\BadRecursivePiece;
+use Spiral\Tests\ODM\Fixtures\DataPiece;
+use Spiral\Tests\ODM\Fixtures\RecursivePiece;
 use Spiral\Tests\ODM\Fixtures\User;
 use Spiral\Tests\ODM\Traits\ODMTrait;
 
@@ -19,11 +21,11 @@ class DefaultsTest extends \PHPUnit_Framework_TestCase
     public function testEmptyDefaults()
     {
         $builder = $this->makeBuilder();
-        $mutators = $this->mutatorsConfig();
+
         $odm = $this->makeODM();
 
-        $builder->addSchema(new DS(new RE(User::class), $mutators));
-        $builder->addSchema(new DS(new RE(Admin::class), $mutators));
+        $builder->addSchema($this->makeSchema(User::class));
+        $builder->addSchema($this->makeSchema(Admin::class));
         $odm->setSchema($builder);
 
         $user = $odm->instantiate(User::class, []);
@@ -36,11 +38,10 @@ class DefaultsTest extends \PHPUnit_Framework_TestCase
     public function testUserDefaults()
     {
         $builder = $this->makeBuilder();
-        $mutators = $this->mutatorsConfig();
         $odm = $this->makeODM();
 
-        $builder->addSchema(new DS(new RE(User::class), $mutators));
-        $builder->addSchema(new DS(new RE(Admin::class), $mutators));
+        $builder->addSchema($this->makeSchema(User::class));
+        $builder->addSchema($this->makeSchema(Admin::class));
         $odm->setSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, []);
@@ -51,6 +52,62 @@ class DefaultsTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('all', $admin->admins);
     }
 
-    //todo: test composited models
+    public function testCompositeDefaults()
+    {
+        $builder = $this->makeBuilder();
+
+        $builder->addSchema($this->makeSchema(User::class));
+        $builder->addSchema($this->makeSchema(Admin::class));
+        $builder->addSchema($this->makeSchema(DataPiece::class));
+
+        $schema = $builder->packSchema();
+
+        $userDefaults = $schema[User::class][ODM::D_SCHEMA][User::SH_DEFAULTS];
+        $adminDefaults = $schema[Admin::class][ODM::D_SCHEMA][User::SH_DEFAULTS];
+
+        $this->assertNotSame($userDefaults, $adminDefaults);
+
+        $this->assertEquals(['value' => ''], $userDefaults['piece']);
+        $this->assertEquals(['value' => 'admin-value'], $adminDefaults['piece']);
+    }
+
+    public function testCompositeDefaultsMissingClasses()
+    {
+        $builder = $this->makeBuilder();
+        $builder->addSchema($this->makeSchema(User::class));
+        $schema = $builder->packSchema();
+
+        $userDefaults = $schema[User::class][ODM::D_SCHEMA][User::SH_DEFAULTS];
+
+        $this->assertNull($userDefaults['piece']);
+    }
+
+    public function testRecursiveDefaults()
+    {
+        $builder = $this->makeBuilder();
+
+        $builder->addSchema($this->makeSchema(RecursivePiece::class));
+
+        $schema = $builder->packSchema();
+
+        $defaults = $schema[RecursivePiece::class][ODM::D_SCHEMA][User::SH_DEFAULTS];
+        $this->assertNull($defaults['child']);
+    }
+
+    /**
+     * @expectedException \Spiral\ODM\Exceptions\SchemaException
+     * @expectedExceptionMessage Possible recursion issue in
+     *                           'Spiral\Tests\ODM\Fixtures\BadRecursivePiece', model refers to
+     *                           itself (has default value)
+     */
+    public function testRecursiveDefaultsWithException()
+    {
+        $builder = $this->makeBuilder();
+
+        $builder->addSchema($this->makeSchema(BadRecursivePiece::class));
+
+        $builder->packSchema();
+    }
+
     //todo: test accessors?
 }

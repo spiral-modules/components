@@ -14,7 +14,10 @@ class Admin extends User
     ];
 
     const DEFAULTS = [
-        'admins' => 'all'
+        'admins' => 'all',
+        'piece'  => [
+            'value' => 'admin-value'
+        ]
     ];
 
     const INDEXES = [

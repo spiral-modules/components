@@ -134,7 +134,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         $this->odm = $this->saturate($odm, ODMInterface::class);
 
         //Use supplied schema or fetch one from ODM
-        $this->schema = !empty($schema) ? $schema : $this->odm->schema(
+        $this->schema = !empty($schema) ? $schema : $this->odm->define(
             static::class,
             ODMInterface::D_SCHEMA
         );

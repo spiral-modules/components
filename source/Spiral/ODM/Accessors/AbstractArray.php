@@ -12,7 +12,7 @@ use Spiral\ODM\CompositableInterface;
 /**
  * Provides ability to perform scalar operations on arrays.
  */
-class AbstractArray implements CompositableInterface, \Countable
+abstract class AbstractArray implements CompositableInterface, \Countable, \IteratorAggregate
 {
     use SolidStateTrait;
 
@@ -40,7 +40,97 @@ class AbstractArray implements CompositableInterface, \Countable
      */
     public function __construct($values)
     {
-        $this->setValue($values);
+        $this->addValues($values);
+    }
+
+    /**
+     * Check if value presented in array.
+     *
+     * @param mixed $needle
+     * @param bool  $strict
+     *
+     * @return bool
+     */
+    public function has($needle, bool $strict = true): bool
+    {
+        foreach ($this->values as $value) {
+            if ($strict && $value === $needle) {
+                return true;
+            }
+
+            if ($strict && $value == $needle) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Alias for atomic operation $push. Only values passed type filter will be added.
+     *
+     * @param mixed $value
+     *
+     * @return self|$this
+     */
+    public function push($value): AbstractArray
+    {
+        $value = $this->filterValue($value);
+        if (is_null($value)) {
+            return $this;
+        }
+
+        array_push($this->values, $value);
+        $this->atomics['$push']['$each'][] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Alias for atomic operation $addToSet. Only values passed type filter will be added.
+     *
+     * @param mixed $value
+     *
+     * @return self|$this
+     */
+    public function add($value): AbstractArray
+    {
+        $value = $this->filterValue($value);
+        if (is_null($value)) {
+            return $this;
+        }
+
+        if (!in_array($value, $this->values)) {
+            array_push($this->values, $value);
+        }
+
+        $this->atomics['$addToSet']['$each'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Alias for atomic operation $pull. Only values passed type filter will be added.
+     *
+     * @param mixed $value
+     *
+     * @return self|$this
+     */
+    public function pull($value): AbstractArray
+    {
+        $value = $this->filterValue($value);
+        if (is_null($value)) {
+            return $this;
+        }
+
+        //Removing values from array (non strict)
+        $this->values = array_filter($this->values, function ($item) use ($value) {
+            return $item != $value;
+        });
+
+        $this->atomics['$pull'] = $value;
+
+        return $this;
     }
 
     /**
@@ -48,7 +138,15 @@ class AbstractArray implements CompositableInterface, \Countable
      */
     public function setValue($data)
     {
-        // TODO: Implement setValue() method.
+        //Manually altered arrays must always end in solid state
+        $this->solidState = true;
+        $this->updated = true;
+
+        //Flushing existed values
+        $this->values = [];
+
+        //Pushing filtered values in array
+        $this->addValues($data);
     }
 
     /**
@@ -56,7 +154,7 @@ class AbstractArray implements CompositableInterface, \Countable
      */
     public function hasUpdates(): bool
     {
-        return $this->updated;
+        return $this->updated || !empty($this->atomics);
     }
 
     /**
@@ -64,7 +162,21 @@ class AbstractArray implements CompositableInterface, \Countable
      */
     public function buildAtomics(string $container = ''): array
     {
-        // TODO: Implement buildAtomics() method.
+        if (!$this->hasUpdates()) {
+            return [];
+        }
+
+        if ($this->solidState) {
+            //We don't care about atomics in solid state
+            return ['$set' => [$container => $this->packValue()]];
+        }
+
+        $atomics = [];
+        foreach ($this->atomics as $operation => $value) {
+            $atomics = [$operation => [$container => $value]];
+        }
+
+        return $atomics;
     }
 
     /**
@@ -72,7 +184,8 @@ class AbstractArray implements CompositableInterface, \Countable
      */
     public function flushUpdates()
     {
-        // TODO: Implement flushUpdates() method.
+        $this->updated = false;
+        $this->atomics = [];
     }
 
     /**
@@ -89,6 +202,14 @@ class AbstractArray implements CompositableInterface, \Countable
     public function count(): int
     {
         return count($this->values);
+    }
+
+    /**
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->values);
     }
 
     /**
@@ -119,4 +240,34 @@ class AbstractArray implements CompositableInterface, \Countable
     {
         return $this->packValue();
     }
+
+    /**
+     * Add values matched with filter.
+     *
+     * @param mixed $values
+     */
+    protected function addValues($values)
+    {
+        if (!is_array($values) && $values instanceof \Traversable) {
+            //Unable to process values
+            return;
+        }
+
+        foreach ($values as $value) {
+            //Passing every value thought the filter
+            $value = $this->filterValue($value);
+            if (is_null($value)) {
+                $this->values[] = $value;
+            }
+        }
+    }
+
+    /**
+     * Filter value, MUST return null if value is invalid.
+     *
+     * @param mixed $value
+     *
+     * @return mixed|null
+     */
+    abstract protected function filterValue($value);
 }

@@ -6,20 +6,18 @@
  */
 namespace Spiral\ODM\Accessors;
 
+use Spiral\ODM\MongoManager;
+
 /**
- * Provides ability to store array of strings.
+ * Provides ability to store array of MongoId (ObjectID).
  */
-class StringArray extends AbstractArray
+class ObjectIDsArray extends AbstractArray
 {
     /**
      * {@inheritdoc}
      */
     protected function filterValue($value)
     {
-        if (!is_string($value)) {
-            return null;
-        }
-
-        return strval($value);
+        return MongoManager::mongoID($value);
     }
 }

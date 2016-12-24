@@ -7,19 +7,19 @@
 namespace Spiral\ODM\Accessors;
 
 /**
- * Provides ability to store array of strings.
+ * Allows to store only integer values.
  */
-class StringArray extends AbstractArray
+class IntegerArray extends AbstractArray
 {
     /**
      * {@inheritdoc}
      */
     protected function filterValue($value)
     {
-        if (!is_string($value)) {
+        if (!is_numeric($value)) {
             return null;
         }
 
-        return strval($value);
+        return intval($value);
     }
 }

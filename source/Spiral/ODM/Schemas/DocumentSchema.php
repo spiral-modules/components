@@ -13,6 +13,7 @@ use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\DocumentInstantiator;
+use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
 use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
@@ -313,18 +314,10 @@ class DocumentSchema implements SchemaInterface
             }
 
             if (isset($mutators[DocumentEntity::MUTATOR_ACCESSOR][$field])) {
-                $accessor = $mutators[DocumentEntity::MUTATOR_ACCESSOR][$field];
-
-                /**
-                 * @var AccessorInterface $instance
-                 */
-                $instance = new $accessor($default, [/*no context given*/]);
-                $default = $instance->packValue();
-
-                if (!is_scalar($default)) {
-                    //Some accessors might want to return objects (DateTime, StorageObject), default to null
-                    $default = null;
-                }
+                $default = $this->accessorDefault(
+                    $default,
+                    $mutators[DocumentEntity::MUTATOR_ACCESSOR][$field]
+                );
             }
 
             if (isset($compositions[$field])) {
@@ -333,7 +326,7 @@ class DocumentSchema implements SchemaInterface
                     $default = [];
                 }
 
-                $default = $this->resolveDefault($default, $compositions[$field], $builder);
+                $default = $this->compositionDefault($default, $compositions[$field], $builder);
             }
 
             //Registering default values
@@ -381,9 +374,6 @@ class DocumentSchema implements SchemaInterface
                 }
             }
         }
-
-        //Some mutators may be described using aliases (for shortness)
-        //$mutators = $this->normalizeMutators($mutators);
 
         return $mutators;
     }
@@ -457,6 +447,32 @@ class DocumentSchema implements SchemaInterface
     }
 
     /**
+     * Pass value thought accessor to ensure it's default.
+     *
+     * @param mixed  $default
+     * @param string $accessor
+     *
+     * @return mixed
+     *
+     * @throws AccessorException
+     */
+    protected function accessorDefault($default, string $accessor)
+    {
+        /**
+         * @var AccessorInterface $instance
+         */
+        $instance = new $accessor($default, [/*no context given*/]);
+        $default = $instance->packValue();
+
+        if (!is_scalar($default)) {
+            //Some accessors might want to return objects (DateTime, StorageObject), default to null
+            $default = null;
+        }
+
+        return $default;
+    }
+
+    /**
      * Ensure default value for composite field,
      *
      * @param mixed                 $default
@@ -467,7 +483,7 @@ class DocumentSchema implements SchemaInterface
      *
      * @throws SchemaException
      */
-    protected function resolveDefault(
+    protected function compositionDefault(
         $default,
         CompositionDefinition $composition,
         SchemaBuilder $builder

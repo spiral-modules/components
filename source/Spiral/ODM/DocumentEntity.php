@@ -10,6 +10,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
+use Spiral\Models\Traits\SolidStateTrait;
 use Spiral\ODM\Entities\DocumentInstantiator;
 
 /**
@@ -35,7 +36,7 @@ use Spiral\ODM\Entities\DocumentInstantiator;
  */
 abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
-    use SaturateTrait;
+    use SaturateTrait, SolidStateTrait;
 
     /**
      * Set of schema sections needed to describe entity behaviour.

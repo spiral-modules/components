@@ -6,7 +6,7 @@
  */
 namespace ODM;
 
-class IndexesTest
+class IndexesTest extends \PHPUnit_Framework_TestCase
 {
     //todo: do indexes first
 }

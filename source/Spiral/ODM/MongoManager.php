@@ -65,7 +65,7 @@ class MongoManager implements InjectorInterface, SingletonInterface
     }
 
     /**
-     * Register new mongo database using given name and connectio options (compatible with MongoDB
+     * Register new mongo database using given name and connection options (compatible with MongoDB
      * class).
      *
      * @param string $name     Internal database name (for injections and etc).

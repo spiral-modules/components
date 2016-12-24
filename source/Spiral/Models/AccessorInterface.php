@@ -15,7 +15,7 @@ use Spiral\Models\Exceptions\AccessorExceptionInterface;
  */
 interface AccessorInterface extends \JsonSerializable
 {
-    //By internal agreement accessors will receive value and accessor context (field name, parent component and etc)
+    //By internal agreement accessors will receive value and accessor context (field, entity)
     //public function __construct($value, array $context = []);
 
     /**

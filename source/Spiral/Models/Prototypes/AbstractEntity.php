@@ -498,6 +498,6 @@ abstract class AbstractEntity extends MutableObject implements
     protected function createAccessor(string $accessor, string $field, $value): AccessorInterface
     {
         //Field as a context
-        return new $accessor($value, compact('field'));
+        return new $accessor($value, ['field' => $field, 'entity' => $this]);
     }
 }

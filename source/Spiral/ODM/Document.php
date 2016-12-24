@@ -15,7 +15,17 @@ abstract class Document extends DocumentEntity
     const COLLECTION = null;
 
     /**
-     * Document entities are able to define set of indexes for related collection.
+     * Set of indexes to be created for associated collection. Use "@options" for additional
+     * index options.
+     *
+     * Example:
+     * const INDEXES = [
+     *      ['email' => 1, '@options' => ['unique' => true]],
+     *      ['name' => 1]
+     * ];
+     *
+     * @link http://php.net/manual/en/mongocollection.ensureindex.php
+     * @var array
      */
     const INDEXES = [];
 

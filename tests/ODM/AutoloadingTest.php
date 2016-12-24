@@ -18,7 +18,7 @@ use Spiral\Tests\ODM\Fixtures\User;
 use Spiral\Tests\ODM\Traits\ODMTrait;
 use Mockery as m;
 
-class AutoloadingTest
+class AutoloadingTest extends \PHPUnit_Framework_TestCase
 {
     use ODMTrait;
 

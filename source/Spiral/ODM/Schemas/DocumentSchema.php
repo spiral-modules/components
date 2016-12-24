@@ -120,8 +120,23 @@ class DocumentSchema implements SchemaInterface
             );
         }
 
-        //todo: create indexes (keep collections)
-        return [];
+        $indexes = $this->reflection->getProperty('indexes', true);
+        if (empty($indexes) || !is_array($indexes)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($indexes as $index) {
+            $options = [];
+            if (isset($index['@options'])) {
+                $options = $index['@options'];
+                unset($index['@options']);
+            }
+
+            $result[] = new IndexDefinition($index, $options);
+        }
+
+        return array_unique($result);
     }
 
     /**

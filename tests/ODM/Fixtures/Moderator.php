@@ -17,4 +17,8 @@ class Moderator extends User
     const DEFAULTS = [
         'moderates' => 'forums'
     ];
+
+    const INDEXES = [
+        ['moderates']
+    ];
 }

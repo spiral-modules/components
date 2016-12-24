@@ -11,6 +11,7 @@ use Spiral\Models\Reflections\ReflectionEntity as RE;
 use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\ODMInterface;
 use Spiral\ODM\Schemas\DocumentSchema as DS;
+use Spiral\ODM\Schemas\IndexDefinition;
 use Spiral\Tests\ODM\Fixtures\Admin;
 use Spiral\Tests\ODM\Fixtures\DataPiece;
 use Spiral\Tests\ODM\Fixtures\ExternalDB;
@@ -70,7 +71,9 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $user->getDatabase());
 
         $this->assertSame(false, $user->isEmbedded());
-        $this->assertSame([], $user->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true])
+        ], $user->getIndexes());
     }
 
     public function testSchemaValuesExternal()
@@ -79,17 +82,17 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $mutators = $this->mutatorsConfig();
 
         $builder->addSchema(new DS(new RE(ExternalDB::class), $mutators));
-        $user = $builder->getSchema(ExternalDB::class);
+        $ext = $builder->getSchema(ExternalDB::class);
 
-        $this->assertSame(DocumentInstantiator::class, $user->getInstantiator());
-        $this->assertSame(ExternalDB::class, $user->getClass());
+        $this->assertSame(DocumentInstantiator::class, $ext->getInstantiator());
+        $this->assertSame(ExternalDB::class, $ext->getClass());
 
         //Auto collection name
-        $this->assertSame('externalDBs', $user->getCollection());
-        $this->assertSame('external', $user->getDatabase());
+        $this->assertSame('externalDBs', $ext->getCollection());
+        $this->assertSame('external', $ext->getDatabase());
 
-        $this->assertSame(false, $user->isEmbedded());
-        $this->assertSame([], $user->getIndexes());
+        $this->assertSame(false, $ext->isEmbedded());
+        $this->assertEquals([], $ext->getIndexes());
     }
 
     public function testCollectionInheritance()
@@ -112,7 +115,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($user->getDatabase(), $admin->getDatabase());
 
         $this->assertSame(false, $admin->isEmbedded());
-        $this->assertSame([], $admin->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['admins'])
+        ], $admin->getIndexes());
 
         //2nd level
         $superAdmin = $builder->getSchema(SuperAdministrator::class);
@@ -125,7 +131,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($admin->getDatabase(), $superAdmin->getDatabase());
 
         $this->assertSame(false, $superAdmin->isEmbedded());
-        $this->assertSame([], $superAdmin->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['admins'])
+        ], $superAdmin->getIndexes());
     }
 
     public function testCollectionInheritanceDifferentOrder()
@@ -148,7 +157,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($user->getDatabase(), $admin->getDatabase());
 
         $this->assertSame(false, $admin->isEmbedded());
-        $this->assertSame([], $admin->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['admins'])
+        ], $admin->getIndexes());
 
         //2nd level
         $superAdmin = $builder->getSchema(SuperAdministrator::class);
@@ -161,7 +173,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($admin->getDatabase(), $superAdmin->getDatabase());
 
         $this->assertSame(false, $superAdmin->isEmbedded());
-        $this->assertSame([], $superAdmin->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['admins'])
+        ], $superAdmin->getIndexes());
     }
 
     public function testCollectionRedefinition()
@@ -185,7 +200,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $moderator->getDatabase());
 
         $this->assertSame(false, $moderator->isEmbedded());
-        $this->assertSame([], $moderator->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['moderates'])
+        ], $moderator->getIndexes());
 
         //2nd level
         $superModerator = $builder->getSchema(SuperModerator::class);
@@ -198,7 +216,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($moderator->getDatabase(), $superModerator->getDatabase());
 
         $this->assertSame(false, $superModerator->isEmbedded());
-        $this->assertSame([], $superModerator->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['moderates'])
+        ], $superModerator->getIndexes());
     }
 
     public function testCollectionRedefinitionDifferentOrder()
@@ -222,7 +243,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $moderator->getDatabase());
 
         $this->assertSame(false, $moderator->isEmbedded());
-        $this->assertSame([], $moderator->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['moderates'])
+        ], $moderator->getIndexes());
 
         //2nd level
         $superModerator = $builder->getSchema(SuperModerator::class);
@@ -235,7 +259,10 @@ class SchemasTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($moderator->getDatabase(), $superModerator->getDatabase());
 
         $this->assertSame(false, $superModerator->isEmbedded());
-        $this->assertSame([], $superModerator->getIndexes());
+        $this->assertEquals([
+            new IndexDefinition(['name'], ['unique' => true]),
+            new IndexDefinition(['moderates'])
+        ], $superModerator->getIndexes());
     }
 
     public function testEmbedded()

@@ -12,9 +12,13 @@ class User extends Document
 {
     const COLLECTION = 'users';
 
-    const SCHEMA     = [
+    const SCHEMA = [
         '_id'     => 'MongoId',
         'name'    => 'string',
         'superYo' => DataPiece::class
+    ];
+
+    const INDEXES = [
+        ['name', '@options' => ['unique' => true]]
     ];
 }

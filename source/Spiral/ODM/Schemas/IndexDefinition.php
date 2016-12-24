@@ -46,4 +46,17 @@ final class IndexDefinition
     {
         return $this->options;
     }
+
+    /**
+     * So we can compare indexes.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode([
+            $this->index,
+            $this->options
+        ]);
+    }
 }

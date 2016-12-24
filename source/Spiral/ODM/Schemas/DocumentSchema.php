@@ -28,6 +28,7 @@ class DocumentSchema implements SchemaInterface
 
     /**
      * @param ReflectionEntity $reflection
+     * @param MutatorsConfig   $config
      */
     public function __construct(ReflectionEntity $reflection, MutatorsConfig $config)
     {

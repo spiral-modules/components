@@ -13,6 +13,7 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
+use Spiral\ODM\Schemas\SchemaBuilder;
 
 /**
  * @todo move schema to external class?
@@ -89,9 +90,9 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         return [];
     }
 
-    public function setSchema($s)
+    public function setSchema(SchemaBuilder $builder)
     {
-        $this->schema = $s;
+        $this->schema = $builder->packSchema();
     }
 
     protected function loadSchema()

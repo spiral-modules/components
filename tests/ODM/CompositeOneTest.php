@@ -192,4 +192,24 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $model->piece = null;
         $this->assertNull($model->piece);
     }
+
+    public function setComposite()
+    {
+        $builder = $this->makeBuilder();
+        $builder->addSchema($this->makeSchema(NullableComposition::class));
+        $builder->addSchema($this->makeSchema(DataPiece::class));
+
+        $odm = $this->makeODM();
+        $odm->setSchema($builder);
+
+        $model = $odm->instantiate(NullableComposition::class, ['piece' => ['value' => 'abc']]);
+
+        $this->assertInstanceOf(DataPiece::class, $model->piece);
+        $this->assertSame('abc', $model->piece->value);
+
+        $model->piece = $odm->instantiate(DataPiece::class, ['value' => 'another-value']);
+
+        $this->assertInstanceOf(DataPiece::class, $model->piece);
+        $this->assertSame('another-value', $model->piece->value);
+    }
 }

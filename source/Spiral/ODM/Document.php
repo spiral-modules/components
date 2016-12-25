@@ -212,6 +212,4 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
 
         $this->dispatch('deleted', new DocumentEvent($this));
     }
-
-    //Aggregations???
 }

@@ -13,6 +13,7 @@
     "php": ">=7.0",
     "ext-mbstring": "*",
     "ext-openssl": "*",
+    "ext-mongodb": "*",
     "psr/log": "*",
     "psr/http-message": "^1.0",
     "container-interop/container-interop": "^1.1",

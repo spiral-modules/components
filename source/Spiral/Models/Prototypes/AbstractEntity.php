@@ -15,6 +15,7 @@ use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\FieldExceptionInterface;
 use Spiral\Models\PublishableInterface;
 use Spiral\Models\Traits\EventsTrait;
+use Spiral\ODM\Exceptions\FieldException;
 use Spiral\Validation\ValueInterface;
 
 /**
@@ -152,6 +153,7 @@ abstract class AbstractEntity extends MutableObject implements
      * @param bool $filter If false, associated field setter or accessor will be ignored.
      *
      * @throws AccessorExceptionInterface
+     * @throws FieldException
      */
     public function setField(string $name, $value, bool $filter = true)
     {

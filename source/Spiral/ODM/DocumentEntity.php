@@ -13,6 +13,7 @@ use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidStateTrait;
 use Spiral\ODM\Entities\DocumentInstantiator;
+use Spiral\ODM\Exceptions\FieldException;
 
 /**
  * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
@@ -128,13 +129,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     private $updates = [];
 
     /**
-     * User specified set of atomic operation to be applied to document on save() call.
-     *
-     * @var array
-     */
-    private $atomics = [];
-
-    /**
      * Parent ODM instance, responsible for aggregations and lazy loading operations.
      *
      * @invisible
@@ -169,31 +163,114 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         parent::__construct($fields, $this->schema);
     }
 
-    public function getField(string $name, $default = null, bool $filter = true)
-    {
-        return parent::getField($name, $default, $filter);
-    }
-
+    /**
+     * {@inheritdoc}
+     *
+     * Tracks field changes.
+     */
     public function setField(string $name, $value, bool $filter = true)
     {
-        return parent::setField($name, $value, $filter);
+        if (!$this->hasField($name)) {
+            //We are only allowing to modify existed fields, this is strict schema
+            throw new FieldException("Undefined field '{$name}' in '" . static::class . "'");
+        }
+
+        //Original field value
+        $original = $this->getField($name, null, false);
+
+        parent::setField($name, $value, $filter);
+
+        if (!array_key_exists($name, $this->updates)) {
+            //Let's keep track of how field looked before first change
+            $this->updates[$name] = $original instanceof AccessorInterface
+                ? $original->packValue()
+                : $original;
+        }
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @param string $field Check once specific field changes.
      */
-    public function hasUpdates(): bool
+    public function hasUpdates(string $field = null): bool
     {
+        //Check updates for specific field
+        if (!empty($field)) {
+            if (array_key_exists($field, $this->updates)) {
+                return true;
+            }
+
+            //Do not force accessor creation
+            $value = $this->getField($field, null, false);
+            if ($value instanceof CompositableInterface && $value->hasUpdates()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        if (!empty($this->updates)) {
+            return true;
+        }
+
+        //Do not force accessor creation
+        foreach ($this->getFields(false) as $value) {
+            //Checking all fields for changes (handled internally)
+            if ($value instanceof CompositableInterface && $value->hasUpdates()) {
+                return true;
+            }
+        }
+
         return false;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function buildAtomics(string $container = ''): array
+    public function buildAtomics(string $container = null): array
     {
-        // TODO: Implement buildAtomics() method.
-        return [];
+        if (!$this->hasUpdates() && !$this->isSolid()) {
+            return [];
+        }
+
+        if ($this->isSolid()) {
+            if (!empty($container)) {
+                //Simple nested document in solid state
+                return ['$set' => $this->packValue(false)];
+            }
+
+            //No parent container
+            return ['$set' => $this->packValue(false)];
+        }
+
+        //Aggregate atomics from every nested composition
+        $atomics = [];
+
+        foreach ($this->getFields(false) as $field => $value) {
+            if ($value instanceof CompositableInterface) {
+                $atomics = array_merge_recursive(
+                    $atomics,
+                    $value->buildAtomics((!empty($container) ? $container . '.' : '') . $field)
+                );
+
+                continue;
+            }
+
+            foreach ($atomics as $atomic => $operations) {
+                if (array_key_exists($field, $operations) && $atomic != '$set') {
+                    //Property already changed by atomic operation
+                    continue;
+                }
+            }
+
+            if (array_key_exists($field, $this->updates)) {
+                //Generating set operation for changed field
+                $atomics['$set'][(!empty($container) ? $container . '.' : '') . $field] = $value;
+            }
+        }
+
+        return $atomics;
     }
 
     /**
@@ -201,13 +278,40 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function flushUpdates()
     {
-        $this->updates = $this->atomics = [];
+        $this->updates = [];
 
         foreach ($this->getFields(false) as $value) {
             if ($value instanceof CompositableInterface) {
                 $value->flushUpdates();
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $includeID Set to false to exclude _id from packed fields.
+     */
+    public function packValue(bool $includeID = true)
+    {
+        $values = parent::packValue();
+
+        if (!$includeID) {
+            unset($values['_id']);
+        }
+
+        return $values;
+    }
+
+    /**
+     * Since most of ODM documents might contain ObjectIDs and other fields we will try to normalize
+     * them into string values.
+     *
+     * @return array
+     */
+    public function publicFields(): array
+    {
+        return parent::publicFields();
     }
 
     /**

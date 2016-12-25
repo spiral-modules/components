@@ -6,7 +6,57 @@
  */
 namespace Spiral\ODM;
 
-abstract class Document extends DocumentEntity
+use MongoDB\BSON\ObjectID;
+use Spiral\Models\ActiveEntityInterface;
+use Spiral\ODM\Events\DocumentEvent;
+
+/**
+ * DocumentEntity with added ActiveRecord methods and ability to connect to associated source.
+ * Document also provides an ability to specify aggregations using it's schema:
+ *
+ * const SCHEMA = [
+ *     ...,
+ *     'outer' => [
+ *          self::ONE => Outer::class, [ //Reference to outer document using internal
+ *              '_id' => 'self::outerID' //outerID value
+ *          ]
+ *      ],
+ *     'many' => [
+ *          self::MANY => Outer::class, [ //Reference to many outer document using
+ *              'innerID' => 'self::_id'  //document primary key
+ *          ]
+ *     ]
+ * ];
+ *
+ * Note: self::{name} construction will be replaced with document value in resulted query, even
+ * in case of arrays ;) You can also use dot notation to get value from nested document.
+ *
+ * Attention, document will be linked to default database and named collection by default, use
+ * properties database and collection to define your own custom database and collection.
+ *
+ * You can use property "index" to declare needed document indexes:
+ *
+ * Set of indexes to be created for associated collection. Use self::INDEX_OPTIONS or "@options"
+ * for additional parameters.
+ *
+ * Example:
+ * const INDEXES = [
+ *      ['email' => 1, '@options' => ['unique' => true]],
+ *      ['name' => 1]
+ * ];
+ *
+ * @link http://php.net/manual/en/mongocollection.ensureindex.php
+ *
+ * Configuration properties:
+ * - database
+ * - collection
+ * - schema
+ * - indexes
+ * - defaults
+ * - secured (* by default)
+ * - fillable
+ */
+abstract class Document extends DocumentEntity implements ActiveEntityInterface
 {
     /**
      * Associated collection and database names, by default will be resolved based on a class name.
@@ -29,15 +79,112 @@ abstract class Document extends DocumentEntity
      */
     const INDEXES = [];
 
-    //primary key?
-    //isLoaded?
+    /**
+     * Documents must ALWAYS have _id field.
+     */
+    const SCHEMA = [
+        '_id' => ObjectID::class
+    ];
 
-    public function save()
+    /**
+     * _id is always nullable.
+     */
+    const DEFAULTS = [
+        '_id' => null
+    ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct($fields = [], array $schema = [], ODMInterface $odm = null)
     {
+        parent::__construct($fields, $schema, $odm);
 
+        if (!$this->isLoaded()) {
+            //Automatically force solidState for newly created documents
+            $this->solidState(true);
+        }
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function isLoaded(): bool
+    {
+        return !is_null($this->primaryKey());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function primaryKey()
+    {
+        return $this->getField('_id', null, false);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @event creating(DocumentEvent)
+     * @event created(DocumentEvent)
+     * @event updating(DocumentEvent)
+     * @event updated(DocumentEvent)
+     */
+    public function save(): int
+    {
+        if (!$this->isLoaded()) {
+            $this->dispatch('creating', new DocumentEvent($this));
+
+            //Performing creation
+            $result = $this->odm->collection(static::class)->insertOne(
+                $this->packValue(false)
+            );
+
+            $this->setField('_id', $result->getInsertedId());
+            //Done with creation
+
+            $this->dispatch('created', new DocumentEvent($this));
+
+        } elseif ($this->isSolid() || $this->hasUpdates()) {
+
+            /*
+             * Performing an update using ODM class mapper.
+             */
+            $this->dispatch('updating', new DocumentEvent($this));
+
+            //Performing an update
+            $this->odm->collection(static::class)->updateOne(
+                ['_id' => $this->primaryKey()],
+                $this->buildAtomics()
+            );
+            //Done with update
+
+            $this->dispatch('updated', new DocumentEvent($this));
+        }
+
+        $this->flushUpdates();
+
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @event deleting(DocumentEvent)
+     * @event deleted(DocumentEvent)
+     */
     public function delete()
     {
+        $this->dispatch('deleting', new DocumentEvent($this));
+
+        /*
+         * Performing deletion using ODM class mapper.
+         */
+        if ($this->isLoaded()) {
+            $this->odm->collection(static::class)->deleteOne(['_id' => $this->primaryKey()]);
+            $this->setField('_id', null, false);
+        }
+
+        $this->dispatch('deleted', new DocumentEvent($this));
     }
 }

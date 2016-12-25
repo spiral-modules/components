@@ -85,6 +85,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * Documents can extend each other, in this case schema will also be inherited.
      *
+     * Attention, make sure you properly set FILLABLE option in parent class to use constructions
+     * like:
+     * $parent->child = [...];
+     *
+     * or
+     * $parent->setFields(['child'=>[...]]);
+     *
      * @var array
      */
     const SCHEMA = [];
@@ -112,6 +119,20 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      * @var array
      */
     private $schema = [];
+
+    /**
+     * Document field updates (changed values).
+     *
+     * @var array
+     */
+    private $updates = [];
+
+    /**
+     * User specified set of atomic operation to be applied to document on save() call.
+     *
+     * @var array
+     */
+    private $atomics = [];
 
     /**
      * Parent ODM instance, responsible for aggregations and lazy loading operations.
@@ -148,6 +169,16 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         parent::__construct($fields, $this->schema);
     }
 
+    public function getField(string $name, $default = null, bool $filter = true)
+    {
+        return parent::getField($name, $default, $filter);
+    }
+
+    public function setField(string $name, $value, bool $filter = true)
+    {
+        return parent::setField($name, $value, $filter);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -170,9 +201,25 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function flushUpdates()
     {
-        //todo: do flush
+        $this->updates = $this->atomics = [];
 
-        // TODO: Implement flushUpdates() method.
+        foreach ($this->getFields(false) as $value) {
+            if ($value instanceof CompositableInterface) {
+                $value->flushUpdates();
+            }
+        }
+    }
+
+    /**
+     * Cloning will be called when object will be embedded into another document.
+     */
+    public function __clone()
+    {
+        //Since document embedded as one piece let's ensure that it is solid
+        $this->solidState = true;
+
+        //De-serialize document in order to ensure that all compositions are recreated
+        $this->setValue($this->packValue());
     }
 
     /**
@@ -189,6 +236,63 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      */
+    protected function getMutator(string $field, string $mutator)
+    {
+        /**
+         * Every document composition is valid accessor but defined a bit differently.
+         */
+        if (isset($this->schema[self::SH_COMPOSITIONS][$field])) {
+            return $this->schema[self::SH_COMPOSITIONS][$field];
+        }
+
+        return parent::getMutator($field, $mutator);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function isNullable(string $field): bool
+    {
+        if (array_key_exists($field, $this->schema[self::SH_DEFAULTS])) {
+            //Only fields with default null value can be nullable
+            return is_null($this->schema[self::SH_DEFAULTS][$field]);
+        }
+
+        //You can redefine custom logic to indicate what fields are nullable
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * DocumentEntity will pass ODM instance as part of accessor context.
+     */
+    protected function createAccessor(
+        $accessor,
+        string $field,
+        $value,
+        array $context = []
+    ): AccessorInterface {
+        if (is_array($accessor)) {
+            /**
+             * We are working with definition of composition.
+             */
+            switch ($accessor[0]) {
+                case self::ONE:
+                    //Singular embedded document
+                    return $this->odm->instantiate($accessor[1], $value);
+                case self::MANY:
+                    return 'compositor';
+            }
+        }
+
+        //Field as a context
+        return parent::createAccessor($accessor, $field, $value, $context + ['odm' => $this->odm]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function iocContainer()
     {
         if (!empty($this->odm) || $this->odm instanceof Component) {
@@ -197,16 +301,5 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         return parent::iocContainer();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * DocumentEntity will pass ODM instance as part of accessor context.
-     */
-    protected function createAccessor(string $accessor, string $field, $value): AccessorInterface
-    {
-        //Field as a context
-        return new $accessor($value, ['field' => $field, 'entity' => $this, 'odm' => $this->odm]);
     }
 }

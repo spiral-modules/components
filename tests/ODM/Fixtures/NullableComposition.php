@@ -8,7 +8,7 @@ namespace Spiral\Tests\ODM\Fixtures;
 
 use Spiral\ODM\Document;
 
-class User extends Document
+class NullableComposition extends Document
 {
     const COLLECTION = 'users';
 
@@ -18,8 +18,8 @@ class User extends Document
         'piece' => DataPiece::class
     ];
 
-    const FILLABLE = [
-        'piece'
+    const DEFAULTS = [
+        'piece' => null
     ];
 
     const INDEXES = [

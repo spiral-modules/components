@@ -16,7 +16,7 @@ interface InstantiatorInterface
     /**
      * Method must detect and construct appropriate class instance based on a given fields.
      *
-     * @param array|\ArrayAccess $fields
+     * @param array|\ArrayAccess|mixed $fields
      *
      * @return CompositableInterface
      *

@@ -162,7 +162,7 @@ abstract class AbstractEntity extends MutableObject implements
             return;
         }
 
-        if (!$filter) {
+        if (!$filter || (is_null($value) && $this->isNullable($name))) {
             //Bypassing all filters
             $this->fields[$name] = $value;
 
@@ -209,7 +209,7 @@ abstract class AbstractEntity extends MutableObject implements
     {
         $value = $this->hasField($name) ? $this->fields[$name] : $default;
 
-        if ($value instanceof AccessorInterface) {
+        if ($value instanceof AccessorInterface || (is_null($value) && $this->isNullable($name))) {
             return $value;
         }
 
@@ -485,19 +485,43 @@ abstract class AbstractEntity extends MutableObject implements
     abstract protected function getMutator(string $field, string $type);
 
     /**
+     * Nullable fields would not require automatic accessor creation.
+     *
+     * @param string $field
+     *
+     * @return bool
+     */
+    protected function isNullable(string $field): bool
+    {
+        return false;
+    }
+
+    /**
      * Create instance of field accessor.
      *
-     * @param string $accessor
-     * @param string $field
-     * @param mixed  $value
+     * @param mixed|string $accessor Might be entity implementation specific.
+     * @param string       $field
+     * @param mixed        $value
+     * @param array        $context  Custom accessor context.
      *
-     * @return AccessorInterface
+     * @return AccessorInterface|null
      *
      * @throws AccessorExceptionInterface
+     * @throws EntityException
      */
-    protected function createAccessor(string $accessor, string $field, $value): AccessorInterface
-    {
+    protected function createAccessor(
+        $accessor,
+        string $field,
+        $value,
+        array $context = []
+    ): AccessorInterface {
+        if (!is_string($accessor) || !class_exists($accessor)) {
+            throw new EntityException(
+                "Unable to create accessor for field {$field} in " . static::class
+            );
+        }
+
         //Field as a context
-        return new $accessor($value, ['field' => $field, 'entity' => $this]);
+        return new $accessor($value, $context + ['field' => $field, 'entity' => $this]);
     }
 }

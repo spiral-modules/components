@@ -51,7 +51,7 @@ class DocumentInstantiator implements InstantiatorInterface
     }
 
     /**
-     * @param array|\ArrayAccess $fields
+     * {@inheritdoc}
      *
      * @return CompositableInterface|DocumentEntity|Document
      */

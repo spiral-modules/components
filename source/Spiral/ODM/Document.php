@@ -190,15 +190,17 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      */
     public function delete()
     {
+        if (!$this->isLoaded()) {
+            //Nothing to do, do we need exception here?
+            return;
+        }
+
         $this->dispatch('deleting', new DocumentEvent($this));
 
-        /*
-         * Performing deletion using ODM class mapper.
-         */
-        if ($this->isLoaded()) {
-            $this->odm->collection(static::class)->deleteOne(['_id' => $this->primaryKey()]);
-            $this->setField('_id', null, false);
-        }
+        //Performing deletion
+        $this->odm->collection(static::class)->deleteOne(['_id' => $this->primaryKey()]);
+        $this->setField('_id', null, false);
+        //Done with deletion
 
         $this->dispatch('deleted', new DocumentEvent($this));
     }

@@ -135,45 +135,38 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * @event creating(DocumentEvent)
+     * @event create(DocumentEvent)
      * @event created(DocumentEvent)
-     * @event updating(DocumentEvent)
+     * @event update(DocumentEvent)
      * @event updated(DocumentEvent)
      */
     public function save(): int
     {
         if (!$this->isLoaded()) {
-            $this->dispatch('creating', new DocumentEvent($this));
+            $this->dispatch('create', new DocumentEvent($this));
 
             //Performing creation
-            $result = $this->odm->collection(static::class)->insertOne(
-                $this->packValue(false)
-            );
-
+            $result = $this->odm->collection(static::class)->insertOne($this->packValue(false));
             $this->setField('_id', $result->getInsertedId());
+            $this->flushUpdates();
             //Done with creation
 
-            $this->flushUpdates();
             $this->dispatch('created', new DocumentEvent($this));
 
             return self::CREATED;
         }
 
         if ($this->isSolid() || $this->hasUpdates()) {
-
-            /*
-             * Performing an update using ODM class mapper.
-             */
-            $this->dispatch('updating', new DocumentEvent($this));
+            $this->dispatch('update', new DocumentEvent($this));
 
             //Performing an update
             $this->odm->collection(static::class)->updateOne(
                 ['_id' => $this->primaryKey()],
                 $this->buildAtomics()
             );
+            $this->flushUpdates();
             //Done with update
 
-            $this->flushUpdates();
             $this->dispatch('updated', new DocumentEvent($this));
 
             return self::UPDATED;
@@ -185,17 +178,17 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      *
-     * @event deleting(DocumentEvent)
+     * @event delete(DocumentEvent)
      * @event deleted(DocumentEvent)
      */
     public function delete()
     {
         if (!$this->isLoaded()) {
-            //Nothing to do, do we need exception here?
+            //Nothing to do, do we need an exception here?
             return;
         }
 
-        $this->dispatch('deleting', new DocumentEvent($this));
+        $this->dispatch('delete', new DocumentEvent($this));
 
         //Performing deletion
         $this->odm->collection(static::class)->deleteOne(['_id' => $this->primaryKey()]);

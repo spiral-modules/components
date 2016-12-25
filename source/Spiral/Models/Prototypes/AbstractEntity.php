@@ -16,7 +16,6 @@ use Spiral\Models\Exceptions\FieldExceptionInterface;
 use Spiral\Models\PublishableInterface;
 use Spiral\Models\Traits\EventsTrait;
 use Spiral\ODM\Exceptions\FieldException;
-use Spiral\Validation\ValueInterface;
 
 /**
  * AbstractEntity with ability to define field mutators and access
@@ -385,7 +384,7 @@ abstract class AbstractEntity extends MutableObject implements
     {
         $result = [];
         foreach ($this->fields as $field => $value) {
-            if ($value instanceof ValueInterface) {
+            if ($value instanceof AccessorInterface) {
                 $result[$field] = $value->packValue();
             } else {
                 $result[$field] = $value;

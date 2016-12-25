@@ -13,8 +13,9 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
  */
 interface ActiveEntityInterface
 {
-    const CREATED = 1;
-    const UPDATED = 2;
+    const CREATED   = 1;
+    const UPDATED   = 2;
+    const UNCHANGED = 3;
 
     /**
      * Indication that entity was fetched from it's primary source (database usually) and not just
@@ -34,7 +35,7 @@ interface ActiveEntityInterface
     /**
      * Create entity or update entity state in database.
      *
-     * @return int Must return one of constants self::CREATED, self::UPDATED.
+     * @return int Must return one of constants self::CREATED, self::UPDATED, self::UNCHANGED
      * @throws EntityExceptionInterface
      */
     public function save(): int;

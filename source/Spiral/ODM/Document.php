@@ -143,9 +143,13 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             $this->setField('_id', $result->getInsertedId());
             //Done with creation
 
+            $this->flushUpdates();
             $this->dispatch('created', new DocumentEvent($this));
 
-        } elseif ($this->isSolid() || $this->hasUpdates()) {
+            return self::CREATED;
+        }
+
+        if ($this->isSolid() || $this->hasUpdates()) {
 
             /*
              * Performing an update using ODM class mapper.
@@ -159,12 +163,13 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             );
             //Done with update
 
+            $this->flushUpdates();
             $this->dispatch('updated', new DocumentEvent($this));
+
+            return self::UPDATED;
         }
 
-        $this->flushUpdates();
-
-        return true;
+        return self::UNCHANGED;
     }
 
     /**

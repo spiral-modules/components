@@ -16,7 +16,10 @@ use Spiral\Models\Traits\SolidStateTrait;
 use Spiral\ODM\Entities\DocumentCompositor;
 use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\Exceptions\AccessorException;
+use Spiral\ODM\Exceptions\AggregationException;
 use Spiral\ODM\Exceptions\FieldException;
+use Spiral\ODM\Helpers\AggregationHelper;
+use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
 
 /**
  * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
@@ -206,6 +209,29 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     }
 
     /**
+     * Provides ability to invoke document aggregation.
+     *
+     * @param string $method
+     * @param array  $arguments
+     *
+     * @return mixed|null|AccessorInterface|CompositableInterface|Document|Entities\DocumentSelector
+     */
+    public function __call(string $method, array $arguments)
+    {
+        if (isset($this->schema[self::SH_AGGREGATIONS][$method])) {
+            if (!empty($arguments)) {
+                throw new AggregationException("Aggregation method call except 0 parameters");
+            }
+
+            $helper = new AggregationHelper($this, $this->schema, $this->odm);
+
+            return $helper->createAggregation($method);
+        }
+
+        return parent::__call($method, $arguments);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string $field Check once specific field changes.
@@ -364,6 +390,8 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
     /**
      * {@inheritdoc}
+     *
+     * @see CompositionDefinition
      */
     protected function getMutator(string $field, string $mutator)
     {
@@ -395,6 +423,8 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      * {@inheritdoc}
      *
      * DocumentEntity will pass ODM instance as part of accessor context.
+     *
+     * @see CompositionDefinition
      */
     protected function createAccessor(
         $accessor,

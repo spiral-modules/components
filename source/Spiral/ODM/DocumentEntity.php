@@ -194,6 +194,20 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      *
+     * Will restore default value if presented.
+     */
+    public function __unset($offset)
+    {
+        if (!$this->isNullable($offset)) {
+            throw new FieldException("Unable to unset not nullable field '{$offset}'");
+        }
+
+        $this->setField($offset, null, false);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @param string $field Check once specific field changes.
      */
     public function hasUpdates(string $field = null): bool

@@ -404,7 +404,7 @@ abstract class AbstractEntity extends MutableObject implements
     {
         $result = [];
 
-        foreach ($this->getKeys() as $field => $value) {
+        foreach ($this->getKeys() as $field) {
             if (!$this->isPublic($field)) {
                 //We might need to use isset in future, for performance, for science
                 continue;

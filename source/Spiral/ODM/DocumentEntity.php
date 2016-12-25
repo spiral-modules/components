@@ -6,13 +6,16 @@
  */
 namespace Spiral\ODM;
 
+use MongoDB\BSON\ObjectID;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidStateTrait;
+use Spiral\ODM\Entities\DocumentCompositor;
 use Spiral\ODM\Entities\DocumentInstantiator;
+use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\Exceptions\FieldException;
 
 /**
@@ -311,7 +314,15 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function publicFields(): array
     {
-        return parent::publicFields();
+        $public = parent::publicFields();
+
+        array_walk_recursive($public, function (&$value) {
+            if ($value instanceof ObjectID) {
+                $value = (string)$value;
+            }
+        });
+
+        return $public;
     }
 
     /**
@@ -378,16 +389,16 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         array $context = []
     ): AccessorInterface {
         if (is_array($accessor)) {
-            /**
-             * We are working with definition of composition.
-             */
+            //We are working with definition of composition.
             switch ($accessor[0]) {
                 case self::ONE:
                     //Singular embedded document
                     return $this->odm->instantiate($accessor[1], $value);
                 case self::MANY:
-                    return 'compositor';
+                    return new DocumentCompositor($accessor[1], $value, $this->odm);
             }
+
+            throw new AccessorException("Invalid accessor definition for field '{$field}'");
         }
 
         //Field as a context

@@ -25,6 +25,13 @@ class SchemaBuilder
     private $schemas = [];
 
     /**
+     * Class names of sources associated with specific class.
+     *
+     * @var array
+     */
+    private $sources = [];
+
+    /**
      * @param MongoManager $manager
      */
     public function __construct(MongoManager $manager)
@@ -82,6 +89,8 @@ class SchemaBuilder
         return $this->schemas;
     }
 
+    //todo: add source
+
     /**
      * Pack declared schemas in a normalized form.
      *
@@ -100,7 +109,8 @@ class SchemaBuilder
                 //Instantiator and entity specific schema
                 ODMInterface::D_SCHEMA        => $schema->packSchema($this),
 
-                ODMInterface::D_SOURCE_CLASS => null
+                //Looking for an assigned source
+                ODMInterface::D_SOURCE_CLASS  => null
             ];
 
             if (!$schema->isEmbedded()) {

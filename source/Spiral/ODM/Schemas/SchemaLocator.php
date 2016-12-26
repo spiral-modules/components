@@ -10,6 +10,7 @@ use Interop\Container\ContainerInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\DocumentEntity;
+use Spiral\ODM\Entities\DocumentSource;
 use Spiral\Tokenizer\ClassesInterface;
 
 /**
@@ -62,5 +63,34 @@ class SchemaLocator
         }
 
         return $schemas;
+    }
+
+    /**
+     * Locate all DocumentSources defined by user. Must return values in a form of
+     * Document::class => Source::class.
+     *
+     * @return array
+     */
+    public function locateSources(): array
+    {
+        if (!$this->container->has(ClassesInterface::class)) {
+            return [];
+        }
+
+        /**
+         * @var ClassesInterface $classes
+         */
+        $classes = $this->container->get(ClassesInterface::class);
+
+        $result = [];
+        foreach ($classes->getClasses(DocumentSource::class) as $class) {
+            if ($class['abstract'] || empty($class::DOCUMENT)) {
+                continue;
+            }
+
+            $result[$class::DOCUMENT] = $class['name'];
+        }
+
+        return $result;
     }
 }

@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\ODM;
 
-class AggregationsTest
+class SourceTraitTest
 {
 
 }

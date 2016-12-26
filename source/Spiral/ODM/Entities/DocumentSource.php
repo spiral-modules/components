@@ -111,7 +111,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function findOne(array $query = [], array $sortBy = [])
     {
-        return $this->getIterator()->sortBy($sortBy)->findOne($query);
+        return $this->getSelector()->sortBy($sortBy)->findOne($query);
     }
 
     /**
@@ -123,7 +123,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function find(array $query = []): DocumentSelector
     {
-        return $this->getIterator()->where($query);
+        return $this->getSelector()->where($query);
     }
 
     /**
@@ -131,7 +131,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function count(): int
     {
-        return $this->getIterator()->count();
+        return $this->getSelector()->count();
     }
 
     /**
@@ -139,14 +139,8 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function getIterator(): DocumentSelector
     {
-        if (empty($this->selector)) {
-            //Requesting selector on demand
-            $this->selector = $this->odm->selector($this->class);
-        }
-
-        return clone $this->selector;
+        return $this->getSelector();
     }
-
 
     /**
      * Create source with new associated selector.
@@ -171,6 +165,21 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     protected function setSelector(DocumentSelector $selector)
     {
         $this->selector = clone $selector;
+    }
+
+    /**
+     * Get associated selector.
+     *
+     * @return DocumentSelector
+     */
+    protected function getSelector(): DocumentSelector
+    {
+        if (empty($this->selector)) {
+            //Requesting selector on demand
+            $this->selector = $this->odm->selector($this->class);
+        }
+
+        return clone $this->selector;
     }
 
     /**

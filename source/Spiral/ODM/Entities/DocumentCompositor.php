@@ -65,8 +65,8 @@ class DocumentCompositor implements
         $this->class = $class;
         $this->odm = $odm;
 
-        //todo: construct entities here
-        $this->entities = $this->instantiateEntities($data);
+        //Instantiating composed entities (no data filtering)
+        $this->entities = $this->createEntities($data, false);
     }
 
     /**
@@ -79,26 +79,131 @@ class DocumentCompositor implements
         return $this->class;
     }
 
-    //atomics and other things :)
+    /**
+     *
+     *
+     * Be aware that any added entity will be cloned in order to detach it from passed object:
+     * $user->addresses->push($address);
+     * $address->city = 'Minsk'; //this will have no effect of $user->addresses
+     *
+     * @param CompositableInterface $entity
+     *
+     * @return DocumentCompositor
+     */
+    public function push(CompositableInterface $entity): DocumentCompositor
+    {
+        //todo: implement
+        return $this;
+    }
 
-    //has
-    //find
-    //findOne
-    //push
-    //pull
-    //add
+    /**
+     *
+     *
+     * Be aware that any added entity will be cloned in order to detach it from passed object:
+     * $user->addresses->add($address);
+     * $address->city = 'Minsk'; //this will have no effect of $user->addresses
+     *
+     * @param $entity
+     *
+     * @return DocumentCompositor
+     */
+    public function add(CompositableInterface $entity): DocumentCompositor
+    {
+        //todo: implement
+        return $this;
+    }
+
+    public function pull($query): DocumentCompositor
+    {
+        //todo: implement
+        return $this;
+    }
+
+    /**
+     * Check if composition contains desired document or document matching query.
+     *
+     * Example:
+     * $user->cards->has(['active' => true]);
+     * $user->cards->has(new Card(...));
+     *
+     * @param CompositableInterface|array $query
+     *
+     * @return bool
+     */
+    public function has($query): bool
+    {
+        return !empty($this->findOne($query));
+    }
+
+    /**
+     * Find document in composition based on given entity or matching query.
+     *
+     * $user->cards->findOne(['active' => true]);
+     * $user->cards->findOne(new Card(...));
+     *
+     * @param CompositableInterface|array $query
+     *
+     * @return CompositableInterface|null
+     */
+    public function findOne($query)
+    {
+        $entities = $this->find($query);
+        if (empty($entities)) {
+            return null;
+        }
+
+        return current($entities);
+    }
+
+    /**
+     * Find all entities matching given query (query can be provided in a form of
+     * CompositableInterface).
+     *
+     * $user->cards->find(['active' => true]);
+     * $user->cards->find(new Card(...));     //Attention, this will likely to return only on match
+     *
+     * @param CompositableInterface|array $query
+     *
+     * @return CompositableInterface[]
+     */
+    public function find($query): array
+    {
+        if ($query instanceof CompositableInterface) {
+            //Intersecting using values
+            $query = $query->fetchValue();
+        }
+
+        $result = [];
+        foreach ($this->entities as $entity) {
+            //Looking for entities using key intersection
+            if (empty($query) || (array_intersect_assoc($entity->fetchValue(), $query) == $query)) {
+                $result[] = $entity;
+            }
+        }
+
+        return $result;
+    }
 
     /**
      * {@inheritdoc}
+     *
+     * Be aware that any added entity will be cloned in order to detach it from passed object:
+     * $user->addresses->mountValue([$address]);
+     * $address->city = 'Minsk'; //this will have no effect of $user->addresses
      */
-    public function mountValue($data)
+    public function stateValue($data)
     {
         //Manually altered compositions must always end in solid state
         $this->solidState = $this->changed = true;
+        $this->entities = [];
 
-        //Flushing existed entities
-        //todo: double check
-        $this->entities = $this->instantiateEntities($data);
+        if (!is_array($data)) {
+            //Unable to initiate
+            return;
+        }
+
+        //Instantiating entities (with filtering enabled)
+        $this->entities = $this->createEntities($data, true);
     }
 
     /**
@@ -106,12 +211,7 @@ class DocumentCompositor implements
      */
     public function fetchValue(): array
     {
-        $result = [];
-        foreach ($this->entities as $entity) {
-            $result[] = $entity->fetchValue();
-        }
-
-        return $result;
+        return $this->fetchValues($this->entities);
     }
 
     /**
@@ -150,6 +250,17 @@ class DocumentCompositor implements
      */
     public function buildAtomics(string $container = ''): array
     {
+        if (!$this->hasUpdates()) {
+            return [];
+        }
+
+        //Mongo does not support multiple operations for one field, switching to $set (make sure it's
+        //reasonable)
+        if ($this->solidState || count($this->atomics) > 1) {
+            //We don't care about atomics in solid state
+            return ['$set' => [$container => $this->fetchValue()]];
+        }
+
         return [];
     }
 
@@ -204,7 +315,7 @@ class DocumentCompositor implements
         $this->atomics = [];
 
         //De-serialize composition in order to ensure that all compositions are recreated
-        $this->mountValue($this->fetchValue());
+        $this->stateValue($this->fetchValue());
     }
 
     /**
@@ -213,7 +324,6 @@ class DocumentCompositor implements
     public function __debugInfo()
     {
         return [
-            //todo: pack entities
             'entities' => $this->entities,
             'atomics'  => $this->buildAtomics('@compositor')
         ];
@@ -230,7 +340,7 @@ class DocumentCompositor implements
     {
         if (!is_object($entity) || !is_a($entity, $this->class)) {
             throw new CompositorException(sprintf(
-                "Only instances of '%s' supported, %s given",
+                "Only instances of '%s' supported, '%s' given",
                 $this->class,
                 is_object($entity) ? get_class($entity) : gettype($entity)
             ));
@@ -241,13 +351,43 @@ class DocumentCompositor implements
      * Instantiate every entity in composition.
      *
      * @param array $data
+     * @param bool  $filter
      *
      * @return CompositableInterface[]
      *
      * @throws CompositorException
      */
-    protected function instantiateEntities(array $data): array
+    private function createEntities(array $data, bool $filter = true): array
     {
-        return $data;
+        $result = [];
+        foreach ($data as $item) {
+            if ($item instanceof CompositableInterface) {
+                $this->assertSupported($item);
+
+                //Always clone to detach from original value
+                $result[] = clone $item;
+            } else {
+                $result[] = $this->odm->instantiate($this->class, $item, $filter);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Pack multiple entities into array form.
+     *
+     * @param CompositableInterface[] $entities
+     *
+     * @return array
+     */
+    private function fetchValues(array $entities): array
+    {
+        $result = [];
+        foreach ($entities as $entity) {
+            $result[] = $entity->fetchValue();
+        }
+
+        return $result;
     }
 }

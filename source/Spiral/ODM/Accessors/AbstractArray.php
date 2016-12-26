@@ -141,7 +141,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * {@inheritdoc}
      */
-    public function mountValue($data)
+    public function stateValue($data)
     {
         //Manually altered arrays must always end in solid state
         $this->solidState = $this->changed = true;
@@ -179,7 +179,9 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
             return [];
         }
 
-        if ($this->solidState) {
+        //Mongo does not support multiple operations for one field, switching to $set (make sure it's
+        //reasonable)
+        if ($this->solidState || count($this->atomics) > 1) {
             //We don't care about atomics in solid state
             return ['$set' => [$container => $this->fetchValue()]];
         }

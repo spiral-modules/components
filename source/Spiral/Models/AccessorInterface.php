@@ -29,7 +29,7 @@ interface AccessorInterface extends \JsonSerializable
      *
      * @throws AccessorExceptionInterface
      */
-    public function mountValue($data);
+    public function stateValue($data);
 
     /**
      * Convert object data into serialized value (array or string for example).

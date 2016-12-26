@@ -24,8 +24,12 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     /**
      * Linked document model. ODM can automatically index and link user sources to models based on
      * value of this constant.
+     *
+     * Use this constant in custom source implementation in order to automatically link it to
+     * appropriate model AND be able to create source as constructor or method injection without
+     * ODM dependency.
      */
-    const DOCUMENT = null;
+    const HANDLE = null;
 
     /**
      * @var DocumentSelector
@@ -55,11 +59,11 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     public function __construct(string $class = null, ODM $odm = null)
     {
         if (empty($class)) {
-            if (empty(static::DOCUMENT)) {
+            if (empty(static::HANDLE)) {
                 throw new SourceException('Unable to create source without associated class');
             }
 
-            $class = static::DOCUMENT;
+            $class = static::HANDLE;
         }
 
         $this->class = $class;

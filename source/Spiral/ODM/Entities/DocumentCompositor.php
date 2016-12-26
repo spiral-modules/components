@@ -400,11 +400,11 @@ class DocumentCompositor implements
     /**
      * Assert that given entity supported by composition.
      *
-     * @param mixed $entity
+     * @param CompositableInterface $entity
      *
      * @throws CompositorException
      */
-    protected function assertSupported($entity)
+    protected function assertSupported(CompositableInterface $entity)
     {
         if (!is_object($entity) || !is_a($entity, $this->class)) {
             throw new CompositorException(sprintf(

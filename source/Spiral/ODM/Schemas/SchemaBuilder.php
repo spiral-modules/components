@@ -90,7 +90,8 @@ class SchemaBuilder
     }
 
     /**
-     * Associate source class with entity class.
+     * Associate source class with entity class. Source will be automatically associated with given
+     * class and all classes from the same collection which extends it.
      *
      * @param string $class
      * @param string $source
@@ -105,7 +106,26 @@ class SchemaBuilder
             throw new SchemaException("Unable to add source to '{$class}', class is unknown to ODM");
         }
 
-        //todo: how to add?????
+        //See usage below
+        $scope = [
+            $this->getSchema($class)->getDatabase(),
+            $this->getSchema($class)->getCollection()
+        ];
+
+        //Ensuring same source for all children classes from same collection
+        foreach ($this->schemas as $schema) {
+            if (isset($this->sources[$schema->getClass()])) {
+                //Already set
+                continue;
+            }
+
+            if (is_a($schema->getClass(), $class, true)) {
+                //Only for entities from the same collection
+                if ([$schema->getDatabase(), $schema->getCollection()] == $scope) {
+                    $this->sources[$schema->getClass()] = $source;
+                }
+            }
+        }
 
         return $this;
     }
@@ -149,19 +169,17 @@ class SchemaBuilder
         foreach ($this->schemas as $class => $schema) {
             $item = [
                 //Instantiator class
-                ODMInterface::D_INSTANTIATOR  => $schema->getInstantiator(),
+                ODMInterface::D_INSTANTIATOR => $schema->getInstantiator(),
 
                 //Primary collection class
                 ODMInterface::D_PRIMARY_CLASS => $schema->resolvePrimary($this),
 
                 //Instantiator and entity specific schema
-                ODMInterface::D_SCHEMA        => $schema->packSchema($this),
-
-                //Looking for an assigned source
-                ODMInterface::D_SOURCE_CLASS  => $this->getSource($class)
+                ODMInterface::D_SCHEMA => $schema->packSchema($this),
             ];
 
             if (!$schema->isEmbedded()) {
+                $item[ODMInterface::D_SOURCE_CLASS] = $this->getSource($class);
                 $item[ODMInterface::D_DATABASE] = $schema->getDatabase();
                 $item[ODMInterface::D_COLLECTION] = $schema->getCollection();
             }

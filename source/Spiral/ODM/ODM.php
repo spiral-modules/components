@@ -106,6 +106,9 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      */
     public function schemaBuilder(bool $locate = true): SchemaBuilder
     {
+        /**
+         * @var SchemaBuilder $builder
+         */
         $builder = $this->factory->make(SchemaBuilder::class, ['manager' => $this->manager]);
 
         if ($locate) {
@@ -114,7 +117,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
             }
 
             foreach ($this->locator->locateSources() as $class => $source) {
-                $builder->addSchema($class, $source);
+                $builder->addSource($class, $source);
             }
         }
 

@@ -255,20 +255,21 @@ class DocumentCompositor implements
 
     /**
      * {@inheritdoc}
+     *
+     * @param bool $changedEntities Reference, will be set to true if any of entities changed
+     *                              internally.
      */
-    public function hasUpdates(): bool
+    public function hasUpdates(bool &$changedEntities = null): bool
     {
-        if (!empty($this->atomics)) {
-            return true;
-        }
-
         foreach ($this->entities as $entity) {
             if ($entity->hasUpdates()) {
+                $changedEntities = true;
+
                 return true;
             }
         }
 
-        return false;
+        return !empty($this->atomics);
     }
 
     /**
@@ -288,13 +289,14 @@ class DocumentCompositor implements
      */
     public function buildAtomics(string $container = ''): array
     {
-        if (!$this->hasUpdates()) {
+        //$changedEntities will be set to true if any of internal entities were changed directly
+        if (!$this->hasUpdates($changedEntities)) {
             return [];
         }
 
         //Mongo does not support multiple operations for one field, switching to $set (make sure it's
         //reasonable)
-        if ($this->solidState || count($this->atomics) > 1) {
+        if ($this->solidState || count($this->atomics) > 1 || $changedEntities) {
             //We don't care about atomics in solid state
             return ['$set' => [$container => $this->packValue()]];
         }

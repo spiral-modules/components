@@ -12,7 +12,7 @@ use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
-use Spiral\Models\Traits\SolidStateTrait;
+use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ODM\Entities\DocumentCompositor;
 use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\Exceptions\AccessorException;
@@ -44,7 +44,7 @@ use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
  */
 abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
-    use SaturateTrait, SolidStateTrait;
+    use SaturateTrait, SolidableTrait;
 
     /**
      * Set of schema sections needed to describe entity behaviour.
@@ -189,7 +189,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         if (!array_key_exists($name, $this->updates)) {
             //Let's keep track of how field looked before first change
             $this->updates[$name] = $original instanceof AccessorInterface
-                ? $original->packValue()
+                ? $original->fetchValue()
                 : $original;
         }
     }
@@ -223,7 +223,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
                 throw new AggregationException("Aggregation method call except 0 parameters");
             }
 
-            $helper = new AggregationHelper($this, $this->schema, $this->odm);
+            $helper = new AggregationHelper($this, $this->odm);
 
             return $helper->createAggregation($method);
         }
@@ -280,11 +280,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         if ($this->isSolid()) {
             if (!empty($container)) {
                 //Simple nested document in solid state
-                return ['$set' => $this->packValue(false)];
+                return ['$set' => $this->fetchValue(false)];
             }
 
             //No parent container
-            return ['$set' => $this->packValue(false)];
+            return ['$set' => $this->fetchValue(false)];
         }
 
         //Aggregate atomics from every nested composition
@@ -335,9 +335,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @param bool $includeID Set to false to exclude _id from packed fields.
      */
-    public function packValue(bool $includeID = true)
+    public function fetchValue(bool $includeID = true)
     {
-        $values = parent::packValue();
+        $values = parent::fetchValue();
 
         if (!$includeID) {
             unset($values['_id']);
@@ -370,11 +370,12 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function __clone()
     {
+        //De-serialize document in order to ensure that all compositions are recreated
+        $this->mountValue($this->fetchValue());
+
         //Since document embedded as one piece let's ensure that it is solid
         $this->solidState = true;
-
-        //De-serialize document in order to ensure that all compositions are recreated
-        $this->setValue($this->packValue());
+        $this->updates = [];
     }
 
     /**
@@ -437,7 +438,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             switch ($accessor[0]) {
                 case self::ONE:
                     //Singular embedded document
-                    return $this->odm->instantiate($accessor[1], $value);
+                    return $this->odm->instantiate($accessor[1], $value, false);
                 case self::MANY:
                     return new DocumentCompositor($accessor[1], $value, $this->odm);
             }
@@ -454,7 +455,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     protected function iocContainer()
     {
-        if (!empty($this->odm) || $this->odm instanceof Component) {
+        if ($this->odm instanceof Component) {
             //Forwarding IoC scope to parent ODM instance
             return $this->odm->iocContainer();
         }

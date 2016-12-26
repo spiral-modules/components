@@ -161,7 +161,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             $this->dispatch('create', new DocumentEvent($this));
 
             //Performing creation
-            $result = $this->odm->collection(static::class)->insertOne($this->packValue(false));
+            $result = $this->odm->collection(static::class)->insertOne($this->fetchValue(false));
             $this->setField('_id', $result->getInsertedId());
             $this->flushUpdates();
             //Done with creation

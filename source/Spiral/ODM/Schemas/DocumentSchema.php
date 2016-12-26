@@ -462,7 +462,7 @@ class DocumentSchema implements SchemaInterface
          * @var AccessorInterface $instance
          */
         $instance = new $accessor($default, [/*no context given*/]);
-        $default = $instance->packValue();
+        $default = $instance->fetchValue();
 
         if (is_object($default)) {
             //Some accessors might want to return objects (DateTime, StorageObject), default to null

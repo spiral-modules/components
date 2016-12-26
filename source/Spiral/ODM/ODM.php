@@ -191,9 +191,12 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     /**
      * {@inheritdoc}
      */
-    public function instantiate(string $class, $fields = []): CompositableInterface
-    {
-        return $this->instantiator($class)->instantiate($fields);
+    public function instantiate(
+        string $class,
+        $fields = [],
+        bool $filter = true
+    ): CompositableInterface {
+        return $this->instantiator($class)->instantiate($fields, $filter);
     }
 
     /**

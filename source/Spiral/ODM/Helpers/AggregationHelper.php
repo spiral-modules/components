@@ -25,14 +25,14 @@ use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
 class AggregationHelper
 {
     /**
-     * @var DocumentEntity
-     */
-    private $source;
-
-    /**
      * @var array
      */
     private $schema = [];
+
+    /**
+     * @var DocumentEntity
+     */
+    protected $source;
 
     /**
      * @var ODMInterface
@@ -41,13 +41,12 @@ class AggregationHelper
 
     /**
      * @param DocumentEntity $source
-     * @param array          $schema DocumentEntity schema.
      * @param ODMInterface   $odm
      */
-    public function __construct(DocumentEntity $source, array $schema, ODMInterface $odm)
+    public function __construct(DocumentEntity $source, ODMInterface $odm)
     {
+        $this->schema = $odm->define(get_class($source), ODMInterface::D_SCHEMA);
         $this->source = $source;
-        $this->schema = $schema;
         $this->odm = $odm;
     }
 
@@ -63,9 +62,11 @@ class AggregationHelper
     public function createAggregation(string $aggregation)
     {
         if (!isset($this->schema[DocumentEntity::SH_AGGREGATIONS][$aggregation])) {
-            throw new AggregationException(
-                "Undefined aggregation '{$aggregation}' in '" . get_class($this->source) . "'"
-            );
+            throw new AggregationException(sprintf(
+                "Undefined aggregation '%s' in '%s'",
+                $aggregation,
+                get_class($this->source)
+            ));
         }
 
         $schema = $this->schema[DocumentEntity::SH_AGGREGATIONS][$aggregation];

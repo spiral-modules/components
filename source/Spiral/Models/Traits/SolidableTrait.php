@@ -12,7 +12,7 @@ namespace Spiral\Models\Traits;
  *
  * Note: it's not the same as solid state relay :)
  */
-trait SolidStateTrait
+trait SolidableTrait
 {
     /**
      * SolidState MUST force object to be saved as one big dataset without any atomic operations

@@ -84,14 +84,14 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
 
         $entity->setField('a', false);
         $this->assertInternalType('int', $entity->getField('a'));
-        $this->assertInternalType('bool', $entity->packValue()['a']);
+        $this->assertInternalType('bool', $entity->fetchValue()['a']);
 
         $entity->a = 8000.1;
         $this->assertInternalType('int', $entity->a);
-        $this->assertInternalType('float', $entity->packValue()['a']);
+        $this->assertInternalType('float', $entity->fetchValue()['a']);
 
         $entity->setA('400');
         $this->assertInternalType('int', $entity->getA());
-        $this->assertInternalType('string', $entity->packValue()['a']);
+        $this->assertInternalType('string', $entity->fetchValue()['a']);
     }
 }

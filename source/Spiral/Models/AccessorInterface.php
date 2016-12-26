@@ -19,15 +19,17 @@ interface AccessorInterface extends \JsonSerializable
     //public function __construct($value, array $context = []);
 
     /**
-     * Change mocked data.
+     * Change value of accessor, no keyword "set" used to keep compatibility with model magic
+     * methods. Attention, method declaration MUST contain internal validation and filters, MUST NOT
+     * affect mocked data directly.
      *
-     * @see packValue
+     * @see fetchValue
      *
      * @param mixed $data
      *
      * @throws AccessorExceptionInterface
      */
-    public function setValue($data);
+    public function mountValue($data);
 
     /**
      * Convert object data into serialized value (array or string for example).
@@ -36,5 +38,5 @@ interface AccessorInterface extends \JsonSerializable
      *
      * @throws AccessorExceptionInterface
      */
-    public function packValue();
+    public function fetchValue();
 }

@@ -6,7 +6,7 @@
  */
 namespace Spiral\ODM\Accessors;
 
-use Spiral\Models\Traits\SolidStateTrait;
+use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ODM\CompositableInterface;
 
 /**
@@ -14,7 +14,7 @@ use Spiral\ODM\CompositableInterface;
  */
 abstract class AbstractArray implements CompositableInterface, \Countable, \IteratorAggregate
 {
-    use SolidStateTrait;
+    use SolidableTrait;
 
     /**
      * @var array
@@ -141,7 +141,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * {@inheritdoc}
      */
-    public function setValue($data)
+    public function mountValue($data)
     {
         //Manually altered arrays must always end in solid state
         $this->solidState = $this->changed = true;
@@ -181,7 +181,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
 
         if ($this->solidState) {
             //We don't care about atomics in solid state
-            return ['$set' => [$container => $this->packValue()]];
+            return ['$set' => [$container => $this->fetchValue()]];
         }
 
         $atomics = [];
@@ -195,7 +195,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * @return array
      */
-    public function packValue()
+    public function fetchValue(): array
     {
         return $this->values;
     }
@@ -221,9 +221,8 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function __clone()
     {
-        //Every cloned accessor must become solid and updated
         $this->solidState = true;
-        $this->changed = true;
+        $this->changed = false;
         $this->atomics = [];
     }
 
@@ -233,7 +232,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     public function __debugInfo()
     {
         return [
-            'values'  => $this->packValue(),
+            'values'  => $this->fetchValue(),
             'atomics' => $this->buildAtomics('@scalarArray'),
         ];
     }
@@ -243,7 +242,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function jsonSerialize()
     {
-        return $this->packValue();
+        return $this->fetchValue();
     }
 
     /**

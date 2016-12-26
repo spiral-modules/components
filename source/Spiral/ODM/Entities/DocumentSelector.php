@@ -194,7 +194,7 @@ class DocumentSelector extends Component implements
         );
 
         if (!is_null($result)) {
-            $result = $this->odm->instantiate($this->class, $result);
+            $result = $this->odm->instantiate($this->class, $result, false);
         }
 
         return $result;

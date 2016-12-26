@@ -10,6 +10,7 @@ use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Exceptions\DefinitionException;
+use Spiral\ODM\Exceptions\InstantionException;
 use Spiral\ODM\InstantiatorInterface;
 use Spiral\ODM\ODMInterface;
 
@@ -54,18 +55,36 @@ class DocumentInstantiator implements InstantiatorInterface
      * {@inheritdoc}
      *
      * @return CompositableInterface|DocumentEntity|Document
+     *
+     * @throws InstantionException
      */
-    public function instantiate($fields): CompositableInterface
+    public function instantiate($fields, bool $filter = true): CompositableInterface
     {
         $class = $this->defineClass($fields);
 
         if ($class !== $this->class) {
             //We have to dedicate class creation to external instantiator (possibly children class)
-            return $this->odm->instantiate($class, $fields);
+            return $this->odm->instantiate($class, $fields, $filter);
         }
 
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
-        return new $class($fields, $this->schema, $this->odm);
+        if (!$filter) {
+            //No need to filter values, passing directly in constructor
+            return new $class($fields, $this->schema, $this->odm);
+        } else {
+            $entity = new $class($fields, $this->schema, $this->odm);
+
+            if (!$entity instanceof CompositableInterface) {
+                throw new InstantionException(
+                    "Unable to set filtered values for {$class}, must be instance of CompositableInterface"
+                );
+            }
+
+            //Must pass value thought all needed filters
+            $entity->mountValue($fields);
+
+            return $entity;
+        }
     }
 
     /**

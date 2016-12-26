@@ -53,8 +53,15 @@ interface ODMInterface
      *
      * @param string                   $class
      * @param array|\ArrayAccess|mixed $fields
+     * @param bool                     $filter When set to true values MUST be passed thought model
+     *                                         filters to ensure their types and filter any user
+     *                                         data. This will slow down model creation.
      *
      * @return CompositableInterface
      */
-    public function instantiate(string $class, $fields = []): CompositableInterface;
+    public function instantiate(
+        string $class,
+        $fields = [],
+        bool $filter = true
+    ): CompositableInterface;
 }

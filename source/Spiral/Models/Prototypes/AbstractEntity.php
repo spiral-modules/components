@@ -123,7 +123,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * {@inheritdoc}
      */
-    public function setValue($data)
+    public function mountValue($data)
     {
         return $this->setFields($data);
     }
@@ -133,7 +133,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * {@inheritdoc}
      */
-    public function packValue()
+    public function fetchValue()
     {
         return $this->packFields();
     }
@@ -180,7 +180,7 @@ abstract class AbstractEntity extends MutableObject implements
             }
 
             //Letting accessor to set value
-            $field->setValue($value);
+            $field->mountValue($value);
 
             return;
         }
@@ -385,7 +385,7 @@ abstract class AbstractEntity extends MutableObject implements
         $result = [];
         foreach ($this->fields as $field => $value) {
             if ($value instanceof AccessorInterface) {
-                $result[$field] = $value->packValue();
+                $result[$field] = $value->fetchValue();
             } else {
                 $result[$field] = $value;
             }

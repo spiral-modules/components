@@ -47,6 +47,6 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
         $data = ['a' => 123, 'b' => null, 'c' => 'test'];
 
         $entity = new DynamicEntity($data);
-        $this->assertEquals($data, $entity->packValue());
+        $this->assertEquals($data, $entity->fetchValue());
     }
 }

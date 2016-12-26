@@ -60,7 +60,7 @@ class DocumentCursor extends \IteratorIterator
      */
     public function current(): CompositableInterface
     {
-        return $this->odm->instantiate($this->class, parent::current());
+        return $this->odm->instantiate($this->class, parent::current(), false);
     }
 
     /**

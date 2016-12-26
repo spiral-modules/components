@@ -64,7 +64,6 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
 
         $this->class = $class;
         $this->odm = $this->saturate($odm, ODM::class);
-        $this->selector = $this->odm->selector($this->class);
     }
 
     /**
@@ -80,7 +79,8 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function create($fields = [], string $class = null)
     {
-        return $this->odm->instantiate($class ?? $this->class, $fields);
+        //Create model with filtered set of fields
+        return $this->odm->instantiate($class ?? $this->class, $fields, true);
     }
 
     /**
@@ -135,6 +135,11 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      */
     public function getIterator(): DocumentSelector
     {
+        if (empty($this->selector)) {
+            //Requesting selector on demand
+            $this->selector = $this->odm->selector($this->class);
+        }
+
         return clone $this->selector;
     }
 

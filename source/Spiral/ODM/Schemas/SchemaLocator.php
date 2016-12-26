@@ -89,7 +89,7 @@ class SchemaLocator
                 continue;
             }
 
-            $result[$class::DOCUMENT] = $source;
+            $result[$source::DOCUMENT] = $source;
         }
 
         return $result;

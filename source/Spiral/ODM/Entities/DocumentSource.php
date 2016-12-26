@@ -29,7 +29,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      * appropriate model AND be able to create source as constructor or method injection without
      * ODM dependency.
      */
-    const HANDLE = null;
+    const DOCUMENT = null;
 
     /**
      * @var DocumentSelector
@@ -59,11 +59,11 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     public function __construct(string $class = null, ODM $odm = null)
     {
         if (empty($class)) {
-            if (empty(static::HANDLE)) {
+            if (empty(static::DOCUMENT)) {
                 throw new SourceException('Unable to create source without associated class');
             }
 
-            $class = static::HANDLE;
+            $class = static::DOCUMENT;
         }
 
         $this->class = $class;

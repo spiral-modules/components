@@ -167,15 +167,15 @@ class ODM extends Component implements ODMInterface, SingletonInterface
             $source = DocumentSource::class;
         }
 
-        //All sources are linked to primary class (i.e. Admin source => User class), unless specified
-        //in source directly
-        $handle = $source::HANDLE;
-        if (empty($handle)) {
-            $handle = $this->define($class, self::D_PRIMARY_CLASS);
+        $handles = $source::DOCUMENT;
+        if (empty($handles)) {
+            //All sources are linked to primary class (i.e. Admin source => User class), unless specified
+            //in source directly
+            $handles = $this->define($class, self::D_PRIMARY_CLASS);
         }
 
         return $this->factory->make($source, [
-            'class' => $handle,
+            'class' => $handles,
             'odm'   => $this
         ]);
     }

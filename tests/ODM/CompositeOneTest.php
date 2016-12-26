@@ -4,8 +4,6 @@
  *
  * @author    Wolfy-J
  */
-namespace ODM;
-
 namespace Spiral\Tests\ODM;
 
 use Mockery as m;

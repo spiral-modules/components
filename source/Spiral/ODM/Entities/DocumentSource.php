@@ -9,7 +9,7 @@ namespace Spiral\ODM\Entities;
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\ODM\CompositableInterface;
-use Spiral\ODM\DocumentEntity;
+use Spiral\ODM\Document;
 use Spiral\ODM\Exceptions\SourceException;
 use Spiral\ODM\ODM;
 
@@ -79,7 +79,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      * @param string $class  Due ODM models can be inherited you can use this argument to specify
      *                       custom model class.
      *
-     * @return CompositableInterface|DocumentEntity
+     * @return CompositableInterface|Document
      */
     public function create($fields = [], string $class = null)
     {
@@ -94,7 +94,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      *
      * @param string|\MongoId $id Primary key value.
      *
-     * @return CompositableInterface|DocumentEntity|null
+     * @return CompositableInterface|Document|null
      */
     public function findByPK($id)
     {
@@ -107,7 +107,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
      * @param array $query  Fields and conditions to query by.
      * @param array $sortBy Always specify sort by to ensure that results are stable.
      *
-     * @return CompositableInterface|DocumentEntity|null
+     * @return CompositableInterface|Document|null
      */
     public function findOne(array $query = [], array $sortBy = [])
     {

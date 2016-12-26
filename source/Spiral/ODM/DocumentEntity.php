@@ -125,7 +125,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @var array
      */
-    private $schema = [];
+    private $documentSchema = [];
 
     /**
      * Document field updates (changed values).
@@ -155,18 +155,18 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         $this->odm = $this->saturate($odm, ODMInterface::class);
 
         //Use supplied schema or fetch one from ODM
-        $this->schema = !empty($schema) ? $schema : $this->odm->define(
+        $this->documentSchema = !empty($schema) ? $schema : $this->odm->define(
             static::class,
             ODMInterface::D_SCHEMA
         );
 
         $fields = is_array($fields) ? $fields : [];
-        if (!empty($this->schema[self::SH_DEFAULTS])) {
+        if (!empty($this->documentSchema[self::SH_DEFAULTS])) {
             //Merging with default values
-            $fields = array_replace_recursive($this->schema[self::SH_DEFAULTS], $fields);
+            $fields = array_replace_recursive($this->documentSchema[self::SH_DEFAULTS], $fields);
         }
 
-        parent::__construct($fields, $this->schema);
+        parent::__construct($fields, $this->documentSchema);
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function __call(string $method, array $arguments)
     {
-        if (isset($this->schema[self::SH_AGGREGATIONS][$method])) {
+        if (isset($this->documentSchema[self::SH_AGGREGATIONS][$method])) {
             if (!empty($arguments)) {
                 throw new AggregationException("Aggregation method call except 0 parameters");
             }
@@ -399,8 +399,8 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         /**
          * Every document composition is valid accessor but defined a bit differently.
          */
-        if (isset($this->schema[self::SH_COMPOSITIONS][$field])) {
-            return $this->schema[self::SH_COMPOSITIONS][$field];
+        if (isset($this->documentSchema[self::SH_COMPOSITIONS][$field])) {
+            return $this->documentSchema[self::SH_COMPOSITIONS][$field];
         }
 
         return parent::getMutator($field, $mutator);
@@ -411,9 +411,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     protected function isNullable(string $field): bool
     {
-        if (array_key_exists($field, $this->schema[self::SH_DEFAULTS])) {
+        if (array_key_exists($field, $this->documentSchema[self::SH_DEFAULTS])) {
             //Only fields with default null value can be nullable
-            return is_null($this->schema[self::SH_DEFAULTS][$field]);
+            return is_null($this->documentSchema[self::SH_DEFAULTS][$field]);
         }
 
         //You can redefine custom logic to indicate what fields are nullable

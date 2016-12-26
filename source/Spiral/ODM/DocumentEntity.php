@@ -189,7 +189,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         if (!array_key_exists($name, $this->changes)) {
             //Let's keep track of how field looked before first change
             $this->changes[$name] = $original instanceof AccessorInterface
-                ? $original->fetchValue()
+                ? $original->packValue()
                 : $original;
         }
     }
@@ -280,11 +280,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         if ($this->isSolid()) {
             if (!empty($container)) {
                 //Simple nested document in solid state
-                return ['$set' => $this->fetchValue(false)];
+                return ['$set' => $this->packValue(false)];
             }
 
             //No parent container
-            return ['$set' => $this->fetchValue(false)];
+            return ['$set' => $this->packValue(false)];
         }
 
         //Aggregate atomics from every nested composition
@@ -335,9 +335,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @param bool $includeID Set to false to exclude _id from packed fields.
      */
-    public function fetchValue(bool $includeID = true)
+    public function packValue(bool $includeID = true)
     {
-        $values = parent::fetchValue();
+        $values = parent::packValue();
 
         if (!$includeID) {
             unset($values['_id']);
@@ -371,7 +371,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function __clone()
     {
         //De-serialize document in order to ensure that all compositions are recreated
-        $this->stateValue($this->fetchValue());
+        $this->stateValue($this->packValue());
 
         //Since document embedded as one piece let's ensure that it is solid
         $this->solidState = true;

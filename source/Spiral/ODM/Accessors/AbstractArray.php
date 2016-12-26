@@ -105,7 +105,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
             array_push($this->values, $value);
         }
 
-        $this->atomics['$addToSet'][] = $value;
+        $this->atomics['$addToSet']['$each'][] = $value;
 
         return $this;
     }
@@ -129,7 +129,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
             return $item != $value;
         });
 
-        $this->atomics['$pull'][] = $value;
+        $this->atomics['$pull']['$in'][] = $value;
 
         return $this;
     }
@@ -178,7 +178,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
         //reasonable)
         if ($this->solidState || count($this->atomics) > 1) {
             //We don't care about atomics in solid state
-            return ['$set' => [$container => $this->fetchValue()]];
+            return ['$set' => [$container => $this->packValue()]];
         }
 
         $atomics = [];
@@ -192,7 +192,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * @return array
      */
-    public function fetchValue(): array
+    public function packValue(): array
     {
         return $this->values;
     }
@@ -228,7 +228,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     public function __debugInfo()
     {
         return [
-            'values'  => $this->fetchValue(),
+            'values'  => $this->packValue(),
             'atomics' => $this->buildAtomics('@scalarArray'),
         ];
     }
@@ -238,7 +238,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function jsonSerialize()
     {
-        return $this->fetchValue();
+        return $this->packValue();
     }
 
     /**

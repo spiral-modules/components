@@ -133,7 +133,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * {@inheritdoc}
      */
-    public function fetchValue()
+    public function packValue()
     {
         return $this->packFields();
     }
@@ -385,7 +385,7 @@ abstract class AbstractEntity extends MutableObject implements
         $result = [];
         foreach ($this->fields as $field => $value) {
             if ($value instanceof AccessorInterface) {
-                $result[$field] = $value->fetchValue();
+                $result[$field] = $value->packValue();
             } else {
                 $result[$field] = $value;
             }

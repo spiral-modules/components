@@ -131,26 +131,24 @@ class DocumentCompositor implements
     }
 
     /**
-     * Pull all entities matched to a given query from a set, query can be provided in a form
-     * of CompositableInterface (i.e. object to be pulled).
+     * Pull mathced entities from composition.
      *
      * $user->addresses->pull($address);
-     * $user->cards->pull(['active' => 'false']);
      *
-     * @param CompositableInterface|array $query
+     * @param CompositableInterface $entity
      *
      * @return DocumentCompositor
      */
-    public function pull($query): DocumentCompositor
+    public function pull(CompositableInterface $entity): DocumentCompositor
     {
         //Passing true to get all entity offsets
-        $targets = $this->find($query, true);
+        $targets = $this->find($entity, true);
 
         foreach ($targets as $offset => $target) {
             unset($this->entities[$offset]);
         }
 
-        $this->atomics['$pull'][] = is_object($query) ? clone $query : $query;
+        $this->atomics['$pull'][] = clone $entity;
 
         return $this;
     }
@@ -207,13 +205,13 @@ class DocumentCompositor implements
     {
         if ($query instanceof CompositableInterface) {
             //Intersecting using values
-            $query = $query->fetchValue();
+            $query = $query->packValue();
         }
 
         $result = [];
         foreach ($this->entities as $offset => $entity) {
             //Looking for entities using key intersection
-            if (empty($query) || (array_intersect_assoc($entity->fetchValue(), $query) == $query)) {
+            if (empty($query) || (array_intersect_assoc($entity->packValue(), $query) == $query)) {
                 $result[$offset] = $entity;
             }
         }
@@ -250,9 +248,9 @@ class DocumentCompositor implements
     /**
      * {@inheritdoc}
      */
-    public function fetchValue(): array
+    public function packValue(): array
     {
-        return $this->fetchValues($this->entities);
+        return $this->packValues($this->entities);
     }
 
     /**
@@ -298,10 +296,39 @@ class DocumentCompositor implements
         //reasonable)
         if ($this->solidState || count($this->atomics) > 1) {
             //We don't care about atomics in solid state
-            return ['$set' => [$container => $this->fetchValue()]];
+            return ['$set' => [$container => $this->packValue()]];
         }
 
-        return [];
+        //Aggregate composition specific atomics (pull, push, addToSet) and entity specific atomics
+        $atomics = [];
+
+        //If entity already presented in any of composition atomics we are not insluding it's own
+        //offset specific operations into atomics
+        $excluded = [];
+
+        foreach ($this->atomics as $operation => $items) {
+            //Collect all atomics handled on
+            $excluded = array_merge($excluded, $items);
+
+            //Into array form
+            $atomics[$operation][$container][$operation == '$pull' ? '$in' : '$each'] = $this->packValues($items);
+        }
+
+        //Document specific atomic operations (excluding document which are colliding with composition
+        //specific operations)
+        foreach ($this->entities as $offset => $document) {
+            if (in_array($document, $excluded)) {
+                //Handler on higher level
+                continue;
+            }
+
+            $atomics = array_merge(
+                $atomics,
+                $document->buildAtomics((!empty($container) ? $container . '.' : '') . $offset)
+            );
+        }
+
+        return $atomics;
     }
 
     /**
@@ -354,7 +381,7 @@ class DocumentCompositor implements
         $this->atomics = [];
 
         //De-serialize composition in order to ensure that all compositions are recreated
-        $this->stateValue($this->fetchValue());
+        $this->stateValue($this->packValue());
     }
 
     /**
@@ -420,11 +447,11 @@ class DocumentCompositor implements
      *
      * @return array
      */
-    private function fetchValues(array $entities): array
+    private function packValues(array $entities): array
     {
         $result = [];
         foreach ($entities as $entity) {
-            $result[] = $entity->fetchValue();
+            $result[] = $entity->packValue();
         }
 
         return $result;

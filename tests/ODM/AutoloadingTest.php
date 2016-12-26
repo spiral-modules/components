@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\ODM;
 
+use Mockery as m;
 use Spiral\Core\Container;
 use Spiral\Core\MemoryInterface;
 use Spiral\ODM\MongoManager;
@@ -16,13 +17,12 @@ use Spiral\Tests\ODM\Fixtures\Admin;
 use Spiral\Tests\ODM\Fixtures\Moderator;
 use Spiral\Tests\ODM\Fixtures\User;
 use Spiral\Tests\ODM\Traits\ODMTrait;
-use Mockery as m;
 
 class AutoloadingTest extends \PHPUnit_Framework_TestCase
 {
     use ODMTrait;
 
-    public function testAutolocation()
+    public function testAutolocationOfDocuments()
     {
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(ODM::MEMORY)->andReturn([
@@ -51,6 +51,8 @@ class AutoloadingTest extends \PHPUnit_Framework_TestCase
             $sA = $this->makeSchema(User::class),
             $sB = $this->makeSchema(Admin::class)
         ]);
+
+        $locator->shouldReceive('locateSources')->andReturn([]);
 
         $odmBuilder = $odm->schemaBuilder(true);
         $this->assertSame($odmBuilder, $builder);

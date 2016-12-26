@@ -15,6 +15,7 @@ use Spiral\Core\MemoryInterface;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\Schemas\SchemaBuilder;
 use Spiral\ODM\Schemas\SchemaLocator;
 
@@ -96,10 +97,12 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     /**
      * Update ODM schema with automatic indexations.
      *
-     * @param bool $locate Set to true to automatically locate available documents in a project
-     *                     (based on tokenizer scope).
+     * @param bool $locate Set to true to automatically locate available documents and document
+     *                     sources in a project files (based on tokenizer scope).
      *
      * @return SchemaBuilder
+     *
+     * @throws SchemaException
      */
     public function schemaBuilder(bool $locate = true): SchemaBuilder
     {
@@ -108,6 +111,10 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         if ($locate) {
             foreach ($this->locator->locateSchemas() as $schema) {
                 $builder->addSchema($schema);
+            }
+
+            foreach ($this->locator->locateSources() as $class => $source) {
+                $builder->addSchema($class, $source);
             }
         }
 

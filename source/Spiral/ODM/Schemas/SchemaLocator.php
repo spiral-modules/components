@@ -84,11 +84,12 @@ class SchemaLocator
 
         $result = [];
         foreach ($classes->getClasses(DocumentSource::class) as $class) {
-            if ($class['abstract'] || empty($class::DOCUMENT)) {
+            $source = $class['name'];
+            if ($class['abstract'] || empty($source::DOCUMENT)) {
                 continue;
             }
 
-            $result[$class::DOCUMENT] = $class['name'];
+            $result[$class::DOCUMENT] = $source;
         }
 
         return $result;

@@ -89,7 +89,54 @@ class SchemaBuilder
         return $this->schemas;
     }
 
-    //todo: add source
+    /**
+     * Associate source class with entity class.
+     *
+     * @param string $class
+     * @param string $source
+     *
+     * @return SchemaBuilder
+     *
+     * @throws SchemaException
+     */
+    public function addSource(string $class, string $source): SchemaBuilder
+    {
+        if (!$this->hasSchema($class)) {
+            throw new SchemaException("Unable to add source to '{$class}', class is unknown to ODM");
+        }
+
+        //todo: how to add?????
+
+        return $this;
+    }
+
+    /**
+     * Check if given entity has associated source.
+     *
+     * @param string $class
+     *
+     * @return bool
+     */
+    public function hasSource(string $class): bool
+    {
+        return array_key_exists($class, $this->sources);
+    }
+
+    /**
+     * Get source associated with specific class, if any.
+     *
+     * @param string $class
+     *
+     * @return string|null
+     */
+    public function getSource(string $class)
+    {
+        if (!$this->hasSource($class)) {
+            return null;
+        }
+
+        return $this->sources[$class];
+    }
 
     /**
      * Pack declared schemas in a normalized form.
@@ -102,15 +149,16 @@ class SchemaBuilder
         foreach ($this->schemas as $class => $schema) {
             $item = [
                 //Instantiator class
-                ODMInterface::D_INSTANTIATOR => $schema->getInstantiator(),
+                ODMInterface::D_INSTANTIATOR  => $schema->getInstantiator(),
 
+                //Primary collection class
                 ODMInterface::D_PRIMARY_CLASS => $schema->resolvePrimary($this),
 
                 //Instantiator and entity specific schema
                 ODMInterface::D_SCHEMA        => $schema->packSchema($this),
 
                 //Looking for an assigned source
-                ODMInterface::D_SOURCE_CLASS  => null
+                ODMInterface::D_SOURCE_CLASS  => $this->getSource($class)
             ];
 
             if (!$schema->isEmbedded()) {

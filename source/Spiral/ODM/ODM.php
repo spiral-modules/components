@@ -21,6 +21,9 @@ use Spiral\ODM\Schemas\SchemaLocator;
 /**
  * Provides supporting functionality for ODM classes such as selectors, instantiators and schema
  * builders.
+ *
+ * @todo add ODM strict mode which must thrown an exception in AbstractArray and DocumentCompositor
+ * @todo when multiple atomic operations applied to a field instead of forcing $set command.
  */
 class ODM extends Component implements ODMInterface, SingletonInterface
 {
@@ -148,11 +151,26 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         return $this->schema[$class][$property];
     }
 
-    //---
-
+    /**
+     * Get source (selection repository) for specific entity class.
+     *
+     * @param string $class
+     *
+     * @return DocumentSource
+     */
     public function source(string $class): DocumentSource
     {
-        //todo: implement
+        $source = $this->define($class, self::D_SOURCE_CLASS);
+
+        if (empty($source)) {
+            //Let's use default source
+            $source = DocumentSource::class;
+        }
+
+        return $this->factory->make($source, [
+            'class' => $class,
+            'odm'   => $this
+        ]);
     }
 
     /**

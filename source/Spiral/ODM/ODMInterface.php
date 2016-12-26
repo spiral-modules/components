@@ -18,8 +18,9 @@ interface ODMInterface
     const D_INSTANTIATOR  = 0;
     const D_PRIMARY_CLASS = 1;
     const D_SCHEMA        = 2;
-    const D_DATABASE      = 3;
-    const D_COLLECTION    = 4;
+    const D_SOURCE_CLASS  = 3;
+    const D_DATABASE      = 4;
+    const D_COLLECTION    = 5;
 
     /**
      * Define property from ODM schema. Attention, ODM will automatically load schema if it's empty.

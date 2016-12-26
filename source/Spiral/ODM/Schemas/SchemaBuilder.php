@@ -98,7 +98,9 @@ class SchemaBuilder
                 ODMInterface::D_PRIMARY_CLASS => $schema->resolvePrimary($this),
 
                 //Instantiator and entity specific schema
-                ODMInterface::D_SCHEMA        => $schema->packSchema($this)
+                ODMInterface::D_SCHEMA        => $schema->packSchema($this),
+
+                ODMInterface::D_SOURCE_CLASS => null
             ];
 
             if (!$schema->isEmbedded()) {

@@ -143,6 +143,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
         return clone $this->selector;
     }
 
+
     /**
      * Create source with new associated selector.
      *
@@ -153,9 +154,19 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     public function withSelector(DocumentSelector $selector): DocumentSource
     {
         $source = clone $this;
-        $source->selector = $selector;
+        $source->setSelector($selector);
 
         return $source;
+    }
+
+    /**
+     * Set initial selector.
+     *
+     * @param DocumentSelector $selector
+     */
+    protected function setSelector(DocumentSelector $selector)
+    {
+        $this->selector = clone $selector;
     }
 
     /**

@@ -11,6 +11,9 @@ use Spiral\ODM\CompositableInterface;
 
 /**
  * Provides ability to perform scalar operations on arrays.
+ *
+ * Attention, array will be saved as one big $set operation in case when multiple atomic
+ * operations applied to it (not supported by Mongo).
  */
 abstract class AbstractArray implements CompositableInterface, \Countable, \IteratorAggregate
 {
@@ -20,13 +23,6 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      * @var array
      */
     protected $values = [];
-
-    /**
-     * Indication that values were updated.
-     *
-     * @var bool
-     */
-    protected $changed = false;
 
     /**
      * Low level atomic operations.
@@ -144,7 +140,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     public function stateValue($data)
     {
         //Manually altered arrays must always end in solid state
-        $this->solidState = $this->changed = true;
+        $this->solidState = true;
 
         //Flushing existed values
         $this->values = [];
@@ -158,7 +154,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function hasUpdates(): bool
     {
-        return $this->changed || !empty($this->atomics);
+        return !empty($this->atomics);
     }
 
     /**
@@ -166,7 +162,6 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function flushUpdates()
     {
-        $this->changed = false;
         $this->atomics = [];
     }
 
@@ -224,7 +219,6 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     public function __clone()
     {
         $this->solidState = true;
-        $this->changed = false;
         $this->atomics = [];
     }
 

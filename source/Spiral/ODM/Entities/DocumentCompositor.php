@@ -14,6 +14,9 @@ use Spiral\ODM\ODMInterface;
 
 /**
  * Provides ability to composite multiple documents in a form of array.
+ *
+ * Attention, composition will be saved as one big $set operation in case when multiple atomic
+ * operations applied to it (not supported by Mongo).
  */
 class DocumentCompositor implements
     CompositableInterface,
@@ -36,13 +39,6 @@ class DocumentCompositor implements
      * @var array
      */
     protected $atomics = [];
-
-    /**
-     * Indication that composition state was changed directly (via setValue).
-     *
-     * @var bool
-     */
-    protected $changed = false;
 
     /**
      * @var string
@@ -80,7 +76,7 @@ class DocumentCompositor implements
     }
 
     /**
-     *
+     * Push new entity to end of set.
      *
      * Be aware that any added entity will be cloned in order to detach it from passed object:
      * $user->addresses->push($address);
@@ -89,33 +85,73 @@ class DocumentCompositor implements
      * @param CompositableInterface $entity
      *
      * @return DocumentCompositor
+     *
+     * @throws CompositorException When entity is invalid type.
      */
     public function push(CompositableInterface $entity): DocumentCompositor
     {
-        //todo: implement
+        //Detaching entity
+        $entity = clone $entity;
+
+        $this->assertSupported($entity);
+
+        $this->entities[] = $entity;
+        $this->atomics['$push'][] = $entity;
+
         return $this;
     }
 
     /**
-     *
+     * Add entity to set, only one instance of document must be presented.
      *
      * Be aware that any added entity will be cloned in order to detach it from passed object:
      * $user->addresses->add($address);
      * $address->city = 'Minsk'; //this will have no effect of $user->addresses
      *
-     * @param $entity
+     * @param CompositableInterface $entity
      *
      * @return DocumentCompositor
+     *
+     * @throws CompositorException When entity is invalid type.
      */
     public function add(CompositableInterface $entity): DocumentCompositor
     {
-        //todo: implement
+        //Detaching entity
+        $entity = clone $entity;
+
+        $this->assertSupported($entity);
+
+        if (!$this->has($entity)) {
+            $this->entities[] = $entity;
+        }
+
+        $this->atomics['$addToSet'][] = $entity;
+
         return $this;
     }
 
+    /**
+     * Pull all entities matched to a given query from a set, query can be provided in a form
+     * of CompositableInterface (i.e. object to be pulled).
+     *
+     * $user->addresses->pull($address);
+     * $user->cards->pull(['active' => 'false']);
+     *
+     * @param CompositableInterface|array $query
+     *
+     * @return DocumentCompositor
+     */
     public function pull($query): DocumentCompositor
     {
-        //todo: implement
+        //Passing true to get all entity offsets
+        $targets = $this->find($query, true);
+
+        foreach ($targets as $offset => $target) {
+            unset($this->entities[$offset]);
+        }
+
+        $this->atomics['$pull'][] = is_object($query) ? clone $query : $query;
+
         return $this;
     }
 
@@ -163,10 +199,11 @@ class DocumentCompositor implements
      * $user->cards->find(new Card(...));     //Attention, this will likely to return only on match
      *
      * @param CompositableInterface|array $query
+     * @param bool                        $preserveKeys Set to true to keep original offsets.
      *
      * @return CompositableInterface[]
      */
-    public function find($query): array
+    public function find($query, bool $preserveKeys = false): array
     {
         if ($query instanceof CompositableInterface) {
             //Intersecting using values
@@ -174,11 +211,15 @@ class DocumentCompositor implements
         }
 
         $result = [];
-        foreach ($this->entities as $entity) {
+        foreach ($this->entities as $offset => $entity) {
             //Looking for entities using key intersection
             if (empty($query) || (array_intersect_assoc($entity->fetchValue(), $query) == $query)) {
-                $result[] = $entity;
+                $result[$offset] = $entity;
             }
+        }
+
+        if (!$preserveKeys) {
+            return array_values($result);
         }
 
         return $result;
@@ -194,7 +235,7 @@ class DocumentCompositor implements
     public function stateValue($data)
     {
         //Manually altered compositions must always end in solid state
-        $this->solidState = $this->changed = true;
+        $this->solidState = true;
         $this->entities = [];
 
         if (!is_array($data)) {
@@ -219,7 +260,7 @@ class DocumentCompositor implements
      */
     public function hasUpdates(): bool
     {
-        if ($this->changed || !empty($this->atomics)) {
+        if (!empty($this->atomics)) {
             return true;
         }
 
@@ -237,7 +278,6 @@ class DocumentCompositor implements
      */
     public function flushUpdates()
     {
-        $this->changed = false;
         $this->atomics = [];
 
         foreach ($this->entities as $entity) {
@@ -311,7 +351,6 @@ class DocumentCompositor implements
     public function __clone()
     {
         $this->solidState = true;
-        $this->changed = false;
         $this->atomics = [];
 
         //De-serialize composition in order to ensure that all compositions are recreated
@@ -324,7 +363,7 @@ class DocumentCompositor implements
     public function __debugInfo()
     {
         return [
-            'entities' => $this->entities,
+            'entities' => array_values($this->entities),
             'atomics'  => $this->buildAtomics('@compositor')
         ];
     }

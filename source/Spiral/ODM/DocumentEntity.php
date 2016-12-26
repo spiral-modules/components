@@ -132,7 +132,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @var array
      */
-    private $updates = [];
+    private $changes = [];
 
     /**
      * Parent ODM instance, responsible for aggregations and lazy loading operations.
@@ -186,9 +186,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         parent::setField($name, $value, $filter);
 
-        if (!array_key_exists($name, $this->updates)) {
+        if (!array_key_exists($name, $this->changes)) {
             //Let's keep track of how field looked before first change
-            $this->updates[$name] = $original instanceof AccessorInterface
+            $this->changes[$name] = $original instanceof AccessorInterface
                 ? $original->fetchValue()
                 : $original;
         }
@@ -240,7 +240,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         //Check updates for specific field
         if (!empty($field)) {
-            if (array_key_exists($field, $this->updates)) {
+            if (array_key_exists($field, $this->changes)) {
                 return true;
             }
 
@@ -253,7 +253,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             return false;
         }
 
-        if (!empty($this->updates)) {
+        if (!empty($this->changes)) {
             return true;
         }
 
@@ -307,7 +307,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
                 }
             }
 
-            if (array_key_exists($field, $this->updates)) {
+            if (array_key_exists($field, $this->changes)) {
                 //Generating set operation for changed field
                 $atomics['$set'][(!empty($container) ? $container . '.' : '') . $field] = $value;
             }
@@ -321,7 +321,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function flushUpdates()
     {
-        $this->updates = [];
+        $this->changes = [];
 
         foreach ($this->getFields(false) as $value) {
             if ($value instanceof CompositableInterface) {
@@ -375,7 +375,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
         //Since document embedded as one piece let's ensure that it is solid
         $this->solidState = true;
-        $this->updates = [];
+        $this->changes = [];
     }
 
     /**

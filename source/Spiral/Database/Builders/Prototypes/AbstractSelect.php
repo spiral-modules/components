@@ -8,10 +8,8 @@
 
 namespace Spiral\Database\Builders\Prototypes;
 
-use Spiral\Cache\StoreInterface;
 use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\Traits\JoinsTrait;
-use Spiral\Database\Entities\Query\CachedResult;
 use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
@@ -99,27 +97,6 @@ abstract class AbstractSelect extends AbstractWhere implements
      * @var array
      */
     protected $grouping = [];
-
-    /**
-     * Associated cache store.
-     *
-     * @var StoreInterface
-     */
-    protected $cacheStore = null;
-
-    /**
-     * Cache lifetime in seconds.
-     *
-     * @var int
-     */
-    protected $cacheLifetime = 0;
-
-    /**
-     * User specified cache key (optional).
-     *
-     * @var string
-     */
-    protected $cacheKey = '';
 
     /**
      * {@inheritdoc}
@@ -271,36 +248,11 @@ abstract class AbstractSelect extends AbstractWhere implements
     }
 
     /**
-     * Mark selection as cached one, result will be passed thought database->cached() method and
-     * will be stored in cache storage for specified amount of seconds.
-     *
-     * @see Database::cached()
-     *
-     * @param int            $lifetime Cache lifetime in seconds.
-     * @param string         $key      Optional, Database will generate key based on query.
-     * @param StoreInterface $store    Optional, Database will resolve cache store using container.
-     *
-     * @return self|$this
-     */
-    public function cache(
-        int $lifetime,
-        string $key = '',
-        StoreInterface $store = null
-    ): AbstractSelect {
-
-        $this->cacheLifetime = $lifetime;
-        $this->cacheKey = $key;
-        $this->cacheStore = $store;
-
-        return $this;
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @param bool $paginate Apply pagination to result, can be disabled in honor of count method.
      *
-     * @return PDOResult|CachedResult
+     * @return PDOResult
      */
     public function run(bool $paginate = true)
     {
@@ -323,17 +275,6 @@ abstract class AbstractSelect extends AbstractWhere implements
 
             //No inner pagination
             return $select->run(false);
-        }
-
-        if (!empty($this->cacheLifetime)) {
-            //Cached query
-            return $this->driver->cachedQuery(
-                $this->sqlStatement(),
-                $this->getParameters(),
-                $this->cacheLifetime,
-                $this->cacheKey,
-                $this->cacheStore
-            );
         }
 
         return $this->driver->query($this->sqlStatement(), $this->getParameters());

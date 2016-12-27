@@ -7,10 +7,11 @@
 
 namespace Spiral\ORM;
 
+use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 
 /**
- * ORM provides ability to instantiate any custom class.
+ * Instantiates ORM entities.
  */
 interface InstantiatorInterface
 {
@@ -22,9 +23,9 @@ interface InstantiatorInterface
      *                                         filters to ensure their types and filter any user
      *                                         data. This will slow down model creation.
      *
-     * @return mixed
+     * @return ActiveEntityInterface
      *
      * @throws InstantionException
      */
-    public function instantiate($fields, bool $filter = true);
+    public function instantiate($fields, bool $filter = true): ActiveEntityInterface;
 }

@@ -11,6 +11,7 @@ use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Database\DatabaseManager;
+use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\SchemaBuilder;
@@ -159,7 +160,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $fields = [],
         bool $filter = true,
         bool $cache = false
-    ) {
+    ): ActiveEntityInterface {
         //todo: cache
         return $this->instantiator($class)->instantiate($fields, $filter);
     }

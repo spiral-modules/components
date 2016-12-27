@@ -16,9 +16,6 @@ use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Prototypes\PDODriver;
-use Spiral\Database\Entities\Query\CachedResult;
-use Spiral\Database\Exceptions\DriverException;
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 /**
@@ -51,12 +48,6 @@ abstract class Driver extends PDODriver
      */
     private $transactionLevel = 0;
 
-    /**
-     * Associated cache store, if any.
-     *
-     * @var StoreInterface
-     */
-    protected $cacheStore = null;
 
     /**
      * @var FactoryInterface
@@ -67,18 +58,12 @@ abstract class Driver extends PDODriver
      * @param string           $name
      * @param array            $options
      * @param FactoryInterface $factory Required to build instances of query builders and compilers.
-     * @param StoreInterface   $store   Cache store associated with driver (optional).
      */
-    public function __construct(
-        string $name,
-        array $options,
-        FactoryInterface $factory,
-        StoreInterface $store = null
-    ) {
+    public function __construct(string $name, array $options, FactoryInterface $factory)
+    {
         parent::__construct($name, $options);
 
         $this->factory = $factory;
-        $this->cacheStore = $store;
     }
 
     /**
@@ -93,48 +78,6 @@ abstract class Driver extends PDODriver
         $this->cacheStore = $store;
 
         return $this;
-    }
-
-    /**
-     * Execute statement or fetch result from cache and return cached query iterator.
-     *
-     * @param string         $query
-     * @param array          $parameters Parameters to be binded into query.
-     * @param int            $lifetime   Cache lifetime in seconds.
-     * @param string         $key        Cache key to be used to store query result.
-     * @param StoreInterface $store      Cache store to store result in, if null default store will
-     *                                   be used.
-     *
-     * @return CachedResult
-     *
-     * @throws DriverException
-     * @throws QueryException
-     */
-    public function cachedQuery(
-        string $query,
-        array $parameters = [],
-        int $lifetime,
-        string $key = '',
-        StoreInterface $store = null
-    ) {
-        if (empty($store)) {
-            if (empty($this->cacheStore)) {
-                throw new DriverException("StoreInterface is missing");
-            }
-
-            $store = $this->cacheStore;
-        }
-
-        if (empty($key)) {
-            //Trying to build unique query id based on provided options and environment.
-            $key = md5(serialize([$query, $parameters, $this->getName()]));
-        }
-
-        $data = $store->remember($key, $lifetime, function () use ($query, $parameters) {
-            return $this->query($query, $parameters)->fetchAll();
-        });
-
-        return new CachedResult($data, $parameters, $query, $key, $store);
     }
 
     /**

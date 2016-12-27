@@ -7,6 +7,7 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Table;
+use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
 
@@ -75,12 +76,12 @@ interface ORMInterface
      *                                         data. This will slow down model creation.
      * @param bool                     $cache  Add entity into EntityCache.
      *
-     * @return mixed
+     * @return ActiveEntityInterface
      */
     public function instantiate(
         string $class,
         $fields = [],
         bool $filter = true,
         bool $cache = false
-    );
+    ): ActiveEntityInterface;
 }

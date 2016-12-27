@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 use Spiral\ORM\InstantiatorInterface;
 use Spiral\ORM\ORMInterface;
@@ -51,11 +52,11 @@ class RecordInstantiator implements InstantiatorInterface
     /**
      * {@inheritdoc}
      *
-     * @return Record
+     * @return ActiveEntityInterface
      *
      * @throws InstantionException
      */
-    public function instantiate($fields, bool $filter = true): Record
+    public function instantiate($fields, bool $filter = true): ActiveEntityInterface
     {
         if (!is_array($fields)) {
             $fields = $this->normalizeFields($fields);

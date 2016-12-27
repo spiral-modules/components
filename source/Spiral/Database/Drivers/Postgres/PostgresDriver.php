@@ -9,6 +9,8 @@
 namespace Spiral\Database\Drivers\Postgres;
 
 use Psr\Log\LoggerInterface;
+use Spiral\Core\FactoryInterface;
+use Spiral\Core\MemoryInterface;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\Postgres\Schemas\PostgresTable;
@@ -43,6 +45,29 @@ class PostgresDriver extends Driver
      * @var array
      */
     private $primaryKeys = [];
+
+    /**
+     * Used to store information about associated primary keys.
+     *
+     * @var MemoryInterface
+     */
+    protected $memory = null;
+
+    /**
+     * @param string           $name
+     * @param array            $options
+     * @param FactoryInterface $factory
+     * @param MemoryInterface  $memory Optional.
+     */
+    public function __construct(
+        $name,
+        array $options,
+        FactoryInterface $factory,
+        MemoryInterface $memory = null
+    ) {
+        parent::__construct($name, $options, $factory);
+        $this->memory = $memory;
+    }
 
     /**
      * {@inheritdoc}
@@ -89,8 +114,8 @@ class PostgresDriver extends Driver
      */
     public function getPrimary(string $prefix, string $table): string
     {
-        if (!empty($this->cacheStore) && empty($this->primaryKeys)) {
-            $this->primaryKeys = (array)$this->cacheStore->get($this->getSource() . '/keys');
+        if (!empty($this->memory) && empty($this->primaryKeys)) {
+            $this->primaryKeys = (array)$this->memory->loadData($this->getSource() . '.keys');
         }
 
         if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
@@ -112,8 +137,8 @@ class PostgresDriver extends Driver
         }
 
         //Caching
-        if (!empty($this->cacheStore)) {
-            $this->cacheStore->set($this->getSource() . '/keys', $this->primaryKeys);
+        if (!empty($this->memory)) {
+            $this->memory->saveData($this->getSource() . ',keys', $this->primaryKeys);
         }
 
         return $this->primaryKeys[$table];

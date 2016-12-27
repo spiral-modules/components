@@ -45,7 +45,7 @@ class AggregationHelper
      */
     public function __construct(DocumentEntity $source, ODMInterface $odm)
     {
-        $this->schema = $odm->define(get_class($source), ODMInterface::D_SCHEMA);
+        $this->schema = (array)$odm->define(get_class($source), ODMInterface::D_SCHEMA);
         $this->source = $source;
         $this->odm = $odm;
     }

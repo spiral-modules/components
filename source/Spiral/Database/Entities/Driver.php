@@ -47,7 +47,6 @@ abstract class Driver extends PDODriver
      */
     private $transactionLevel = 0;
 
-
     /**
      * @var FactoryInterface
      */
@@ -63,20 +62,6 @@ abstract class Driver extends PDODriver
         parent::__construct($name, $options);
 
         $this->factory = $factory;
-    }
-
-    /**
-     * Set cache store to be used by driver.
-     *
-     * @param StoreInterface $store
-     *
-     * @return self|$this
-     */
-    public function setStore(StoreInterface $store): Driver
-    {
-        $this->cacheStore = $store;
-
-        return $this;
     }
 
     /**

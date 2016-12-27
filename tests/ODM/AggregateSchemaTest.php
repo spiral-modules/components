@@ -57,7 +57,7 @@ class AggregateSchemaTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals([
             'user'  => new AggregationDefinition(Document::ONE, User::class,
-                ['_id' => 'key::userId']),
+                ['_id' => 'self::userId']),
             'users' => new AggregationDefinition(Document::MANY, User::class, []),
         ], $aggregates->getAggregations());
     }

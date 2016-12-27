@@ -191,16 +191,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     }
 
     /**
-     * Get DocumentSelector for a given class. Attention, due model inheritance selector WILL be
-     * associated with parent class.
-     *
-     * Example:
-     * Admin extends User
-     * $odm->selector(Admin::class)->getClass() == User::class
-     *
-     * @param string $class
-     *
-     * @return DocumentSelector
+     * {@inheritdoc}
      */
     public function selector(string $class): DocumentSelector
     {

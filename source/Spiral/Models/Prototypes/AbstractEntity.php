@@ -85,7 +85,7 @@ abstract class AbstractEntity extends MutableObject implements
 
         if (strlen($method) <= 3) {
             //Get/set needs exactly 0-1 argument
-            throw new EntityException("Undefined method {$method}");
+            throw new EntityException("Undefined method '{$method}'");
         }
 
         $field = substr($method, 3);
@@ -115,7 +115,7 @@ abstract class AbstractEntity extends MutableObject implements
                 }
         }
 
-        throw new EntityException("Undefined method {$method}");
+        throw new EntityException("Undefined method '{$method}'");
     }
 
     /**

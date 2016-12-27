@@ -14,7 +14,7 @@ class GoodAggregates extends Document
         '_id'    => 'MongoId',
         'userId' => 'MongoId',
 
-        'user'  => [self::ONE => User::class, ['_id' => 'key::userId']],
+        'user'  => [self::ONE => User::class, ['_id' => 'self::userId']],
         'users' => [self::MANY => User::class, []]
     ];
 }

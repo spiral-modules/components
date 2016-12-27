@@ -72,11 +72,7 @@ class AggregationHelper
         $schema = $this->schema[DocumentEntity::SH_AGGREGATIONS][$aggregation];
 
         //Let's create selector
-        $selector = new DocumentSelector(
-            $this->odm->collection($schema[1]),
-            $schema[1],
-            $this->odm
-        );
+        $selector = $this->odm->selector($schema[1]);
 
         //Ensure selection query
         $selector = $this->configureSelector($selector, $schema);

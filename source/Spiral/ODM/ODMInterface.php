@@ -8,6 +8,7 @@
 namespace Spiral\ODM;
 
 use MongoDB\Collection;
+use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Exceptions\ODMException;
 
 interface ODMInterface
@@ -36,6 +37,20 @@ interface ODMInterface
      * @throws ODMException
      */
     public function define(string $class, int $property);
+
+    /**
+     * Get DocumentSelector for a given class. Attention, due model inheritance selector WILL be
+     * associated with parent class.
+     *
+     * Example:
+     * Admin extends User
+     * $odm->selector(Admin::class)->getClass() == User::class
+     *
+     * @param string $class
+     *
+     * @return DocumentSelector
+     */
+    public function selector(string $class): DocumentSelector;
 
     /**
      * Get collection associated with given class.

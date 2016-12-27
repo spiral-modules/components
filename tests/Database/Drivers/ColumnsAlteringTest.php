@@ -67,7 +67,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     //Verification test #2
@@ -76,7 +76,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema = $this->sampleSchema('table');
         $this->assertTrue($schema->exists());
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     //Verification test #3
@@ -88,7 +88,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema = $this->schema('table');
         $this->assertTrue($schema->exists());
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddColumn()
@@ -99,7 +99,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->string('new_column');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddColumnWithDefaultValue()
@@ -110,7 +110,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->string('new_column')->defaultValue('some_value');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddColumnNullable()
@@ -121,7 +121,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->string('new_column')->nullable(true);
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddColumnNotNullable()
@@ -132,7 +132,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->string('new_column')->nullable(false);
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddColumnEnum()
@@ -143,7 +143,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->enum('new_column', ['a', 'b', 'c'])->nullable('a');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddColumnEnumNullDefault()
@@ -154,7 +154,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->enum('new_column', ['a', 'b', 'c'])->defaultValue(null);
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testAddMultipleColumns()
@@ -167,7 +167,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->enum('new_column', ['a', 'b', 'c'])->nullable('a');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testDropColumn()
@@ -178,7 +178,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->dropColumn('first_name');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testDropMultipleColumns()
@@ -190,7 +190,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->dropColumn('last_name');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testRenameColumn()
@@ -201,7 +201,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->renameColumn('first_name', 'another_name');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testRenameMultipleColumns()
@@ -217,7 +217,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testChangeColumnFromNullToNotNull()
@@ -229,7 +229,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testChangeColumnFromNotNullToNull()
@@ -241,7 +241,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testRenameAndDropColumn()
@@ -253,7 +253,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->dropColumn('last_name');
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testRenameAndChangeToNotNull()
@@ -266,7 +266,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testRenameAndChangeToNullAndSetNulL()
@@ -279,7 +279,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
     public function testRenameAndChangeToNullAndSetNullDefaultValue()
@@ -292,13 +292,10 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $schema->save();
 
-        $this->assertProperlySaved($schema);
+        $this->assertSameAsInDB($schema);
     }
 
-    /**
-     * @param AbstractTable $current
-     */
-    protected function assertProperlySaved(AbstractTable $current)
+    protected function assertSameAsInDB(AbstractTable $current)
     {
         $comparator = new StateComparator(
             $current->getState(),
@@ -317,7 +314,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         }
 
         if ($comparator->droppedColumns()) {
-            return "Table '{$table}' not synced, columns missing.";
+            return "Table '{$table}' not synced, columns are missing.";
         }
 
         if ($comparator->addedColumns()) {

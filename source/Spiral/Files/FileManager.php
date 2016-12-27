@@ -340,10 +340,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      */
     public function getFiles(string $location, string $pattern = null, Finder $finder = null): array
     {
-        if (empty($finder)) {
-            $finder = new Finder();
-        }
-
+        $finder = $finder ?? new Finder();
         $finder->files()->in($location);
 
         if (!empty($pattern)) {

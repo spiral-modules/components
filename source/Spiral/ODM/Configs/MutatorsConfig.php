@@ -22,6 +22,14 @@ class MutatorsConfig extends InjectableConfig
     const CONFIG = 'schemas/documents';
 
     /**
+     * @var array
+     */
+    protected $config = [
+        'aliases'  => [],
+        'mutators' => []
+    ];
+
+    /**
      * Get list of mutators associated with given field type.
      *
      * @param string $type

@@ -75,20 +75,19 @@ class DocumentInstantiator implements InstantiatorInterface
         if (!$filter) {
             //No need to filter values, passing directly in constructor
             return new $class($fields, $this->schema, $this->odm);
-        } else {
-            $entity = new $class($fields, $this->schema, $this->odm);
-
-            if (!$entity instanceof CompositableInterface) {
-                throw new InstantionException(
-                    "Unable to set filtered values for {$class}, must be instance of CompositableInterface"
-                );
-            }
-
-            //Must pass value thought all needed filters
-            $entity->stateValue($fields);
-
-            return $entity;
         }
+
+        $entity = new $class($fields, $this->schema, $this->odm);
+        if (!$entity instanceof CompositableInterface) {
+            throw new InstantionException(
+                "Unable to set filtered values for {$class}, must be instance of CompositableInterface"
+            );
+        }
+
+        //Must pass value thought all needed filters
+        $entity->stateValue($fields);
+
+        return $entity;
     }
 
     /**

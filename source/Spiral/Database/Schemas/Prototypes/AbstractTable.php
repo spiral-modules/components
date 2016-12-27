@@ -551,6 +551,16 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
+     * Get current table state (detached).
+     *
+     * @return TableState
+     */
+    public function getState(): TableState
+    {
+        return clone $this->current;
+    }
+
+    /**
      * Reset table state to new form.
      *
      * @param TableState $state Use null to flush table schema.

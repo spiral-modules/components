@@ -406,6 +406,7 @@ class TableState
             $this->foreigns[$name] = clone $reference;
         }
 
+        $this->remountElements();
         return $this;
     }
 
@@ -425,5 +426,7 @@ class TableState
         foreach ($this->foreigns as $name => $foreign) {
             $this->foreigns[$name] = clone $foreign;
         }
+
+        $this->remountElements();
     }
 }

@@ -8,6 +8,7 @@ namespace Spiral\Database\Drivers\Postgres\Schemas;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\Fragment;
+use Spiral\Database\Schemas\ColumnInterface;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 
 /**
@@ -450,5 +451,24 @@ class PostgresColumn extends AbstractColumn
                 strpos($column->defaultValue, $column->type) - 4
             );
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function compare(ColumnInterface $initial): bool
+    {
+        if (parent::compare($initial)) {
+            return true;
+        }
+
+        if (
+            $initial->getType() == $this->getType() && $initial->getDefaultValue() != $this->getDefaultValue()
+        ) {
+            //PG adds default values to primary keys
+            return true;
+        }
+
+        return false;
     }
 }

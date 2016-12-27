@@ -11,7 +11,8 @@ use Spiral\ODM\DocumentEntity;
 class DataPiece extends DocumentEntity
 {
     const SCHEMA = [
-        'value' => 'string'
+        'value'     => 'string',
+        'something' => 'int'
     ];
 
     //to allow parent->piece = [];

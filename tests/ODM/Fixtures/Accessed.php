@@ -12,9 +12,8 @@ use Spiral\ODM\Document;
 class Accessed extends Document
 {
     const SCHEMA = [
-        '_id'  => ObjectID::class,
-        'name' => 'string',
-
+        '_id'        => ObjectID::class,
+        'name'       => 'string',
         'tags'       => ['string'],
         'relatedIDs' => [ObjectID::class]
     ];

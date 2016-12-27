@@ -280,7 +280,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         if ($this->isSolid()) {
             if (!empty($container)) {
                 //Simple nested document in solid state
-                return ['$set' => $this->packValue(false)];
+                return ['$set' => [$container => $this->packValue(false)]];
             }
 
             //No parent container

@@ -67,8 +67,8 @@ class DefaultsTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNotSame($userDefaults, $adminDefaults);
 
-        $this->assertEquals(['value' => ''], $userDefaults['piece']);
-        $this->assertEquals(['value' => 'admin-value'], $adminDefaults['piece']);
+        $this->assertEquals(['value' => '', 'something' => 0], $userDefaults['piece']);
+        $this->assertEquals(['value' => 'admin-value', 'something' => 0], $adminDefaults['piece']);
     }
 
     public function testCompositeDefaultsMissingClasses()

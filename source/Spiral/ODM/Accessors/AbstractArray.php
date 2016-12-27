@@ -194,7 +194,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function packValue(): array
     {
-        return $this->values;
+        return array_values($this->values);
     }
 
     /**

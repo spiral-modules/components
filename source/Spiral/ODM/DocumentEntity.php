@@ -216,7 +216,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @return mixed|null|AccessorInterface|CompositableInterface|Document|Entities\DocumentSelector
      */
-    public function __call(string $method, array $arguments)
+    public function __call($method, array $arguments)
     {
         if (isset($this->documentSchema[self::SH_AGGREGATIONS][$method])) {
             if (!empty($arguments)) {

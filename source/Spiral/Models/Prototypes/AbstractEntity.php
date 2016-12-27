@@ -75,7 +75,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @throws EntityException
      */
-    public function __call(string $method, array $arguments)
+    public function __call($method, array $arguments)
     {
         if (method_exists($this, $method)) {
             throw new EntityException(

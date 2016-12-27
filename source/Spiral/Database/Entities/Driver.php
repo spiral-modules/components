@@ -9,7 +9,6 @@
 namespace Spiral\Database\Entities;
 
 use Psr\Log\LoggerInterface;
-use Spiral\Cache\StoreInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;

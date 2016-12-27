@@ -189,6 +189,19 @@ abstract class ConsistencyTest extends AbstractTest
         $this->assertTrue($schema->column('target')->compare($column));
     }
 
+    public function testJson()
+    {
+        $schema = $this->schema('table');
+        $this->assertFalse($schema->exists());
+
+        $column = $schema->json('target');
+
+        $schema->save();
+        $schema = $this->schema('table');
+        $this->assertTrue($schema->exists());
+        $this->assertTrue($schema->column('target')->compare($column));
+    }
+
     public function testTinyInteger()
     {
         $schema = $this->schema('table');
@@ -273,6 +286,58 @@ abstract class ConsistencyTest extends AbstractTest
         $this->assertFalse($schema->exists());
 
         $column = $schema->longBinary('target');
+
+        $schema->save();
+        $schema = $this->schema('table');
+        $this->assertTrue($schema->exists());
+        $this->assertTrue($schema->column('target')->compare($column));
+    }
+
+    public function testTimestamp()
+    {
+        $schema = $this->schema('table');
+        $this->assertFalse($schema->exists());
+
+        $column = $schema->timestamp('target');
+
+        $schema->save();
+        $schema = $this->schema('table');
+        $this->assertTrue($schema->exists());
+        $this->assertTrue($schema->column('target')->compare($column));
+    }
+
+    public function testDatetime()
+    {
+        $schema = $this->schema('table');
+        $this->assertFalse($schema->exists());
+
+        $column = $schema->datetime('target');
+
+        $schema->save();
+        $schema = $this->schema('table');
+        $this->assertTrue($schema->exists());
+        $this->assertTrue($schema->column('target')->compare($column));
+    }
+
+    public function testDate()
+    {
+        $schema = $this->schema('table');
+        $this->assertFalse($schema->exists());
+
+        $column = $schema->date('target');
+
+        $schema->save();
+        $schema = $this->schema('table');
+        $this->assertTrue($schema->exists());
+        $this->assertTrue($schema->column('target')->compare($column));
+    }
+
+    public function testTime()
+    {
+        $schema = $this->schema('table');
+        $this->assertFalse($schema->exists());
+
+        $column = $schema->time('target');
 
         $schema->save();
         $schema = $this->schema('table');

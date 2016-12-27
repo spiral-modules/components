@@ -36,6 +36,7 @@ use Spiral\Database\Schemas\TableState;
  * @method AbstractColumn text($column)
  * @method AbstractColumn tinyText($column)
  * @method AbstractColumn longText($column)
+ * @method AbstractColumn json($column)
  * @method AbstractColumn double($column)
  * @method AbstractColumn float($column)
  * @method AbstractColumn datetime($column)

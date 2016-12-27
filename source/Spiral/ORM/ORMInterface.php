@@ -24,6 +24,7 @@ interface ORMInterface
     const R_SOURCE_CLASS = 2;
     const R_DATABASE     = 3;
     const R_TABLE        = 4;
+    const R_RELATIONS    = 5;
 
     /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.

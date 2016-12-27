@@ -9,7 +9,6 @@ namespace Spiral\ORM\Schemas;
 use Interop\Container\ContainerInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Configs\MutatorsConfig;
-use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Record;
 use Spiral\Tokenizer\ClassesInterface;
@@ -59,8 +58,7 @@ class SchemaLocator
 
             $schemas[] = new RecordSchema(
                 new ReflectionEntity($class['name']),
-                $this->container->get(MutatorsConfig::class),
-                $this->container->get(RelationsConfig::class)
+                $this->container->get(MutatorsConfig::class)
             );
         }
 

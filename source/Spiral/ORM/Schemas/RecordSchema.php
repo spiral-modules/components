@@ -10,7 +10,6 @@ use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Configs\MutatorsConfig;
-use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
 
 class RecordSchema implements SchemaInterface
@@ -27,24 +26,13 @@ class RecordSchema implements SchemaInterface
     private $mutatorsConfig;
 
     /**
-     * @invisible
-     * @var RelationsConfig
-     */
-    private $relationsConfig;
-
-    /**
      * @param ReflectionEntity $reflection
      * @param MutatorsConfig   $mutators
-     * @param RelationsConfig  $relations
      */
-    public function __construct(
-        ReflectionEntity $reflection,
-        MutatorsConfig $mutators,
-        RelationsConfig $relations
-    ) {
+    public function __construct(ReflectionEntity $reflection, MutatorsConfig $mutators)
+    {
         $this->reflection = $reflection;
         $this->mutatorsConfig = $mutators;
-        $this->relationsConfig = $relations;
     }
 
     /**
@@ -121,6 +109,14 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
+    public function getRelations(): array
+    {
+        return [];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function defineTable(AbstractTable $table): AbstractTable
     {
         return $table;
@@ -129,7 +125,7 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function packSchema(SchemaBuilder $builder): array
+    public function packSchema(SchemaBuilder $builder, AbstractTable $table = null): array
     {
         return [];
     }

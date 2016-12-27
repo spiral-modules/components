@@ -134,7 +134,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     {
         if (empty($this->schema)) {
             //Update and remember
-            $this->setSchema($this->schemaBuilder(), true);
+            $this->setSchema($this->schemaBuilder()->renderSchema(), true);
         }
 
         //Check value

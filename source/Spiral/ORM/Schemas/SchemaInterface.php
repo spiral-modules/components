@@ -8,6 +8,7 @@ namespace Spiral\ORM\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\SchemaException;
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 
 interface SchemaInterface
 {
@@ -46,9 +47,20 @@ interface SchemaInterface
     /**
      * Get list of declared fields associated with type.
      *
+     * Attention, this set of field is not necessary same set as will be stored in schema!
+     *
      * @return array
      */
     public function getFields(): array;
+
+    /**
+     * Get all defined record relations.
+     *
+     * @return RelationDefinition[]
+     *
+     * @throws SchemaException
+     */
+    public function getRelations(): array;
 
     /**
      * Define needed columns, indexes and foreign keys in a record related table.
@@ -65,10 +77,11 @@ interface SchemaInterface
      * Pack schema in a form compatible with entity class and selected mapper.
      *
      * @param SchemaBuilder $builder
+     * @param AbstractTable $table
      *
      * @return array
      *
      * @throws SchemaException
      */
-    public function packSchema(SchemaBuilder $builder): array;
+    public function packSchema(SchemaBuilder $builder, AbstractTable $table = null): array;
 }

@@ -121,7 +121,7 @@ class InformationTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($files->exists($filename));
         $files->write($filename, 'data');
-        $this->assertSame($filename, $files->localUri($filename));
+        $this->assertSame($filename, $files->localPath($filename));
     }
 
     /**
@@ -134,7 +134,7 @@ class InformationTest extends \PHPUnit_Framework_TestCase
         $filename = FIXTURE_DIRECTORY . '/test.txt';
 
         $this->assertFalse($files->exists($filename));
-        $files->localUri($filename);
+        $files->localPath($filename);
     }
 
     public function testIsFile()

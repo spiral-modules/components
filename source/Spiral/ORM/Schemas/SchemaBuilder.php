@@ -6,7 +6,13 @@
  */
 namespace Spiral\ORM\Schemas;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Exceptions\DBALException;
+use Spiral\Database\Exceptions\DriverException;
+use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Helpers\SynchronizationBus;
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORMInterface;
 
@@ -16,6 +22,11 @@ class SchemaBuilder
      * @var DatabaseManager
      */
     private $manager;
+
+    /**
+     * @var AbstractTable[]
+     */
+    private $tables = [];
 
     /**
      * @var SchemaInterface[]
@@ -138,20 +149,96 @@ class SchemaBuilder
     }
 
     /**
-     * Pack declared schemas in a normalized form.
+     * Process all added schemas and relations in order to created needed tables, indexes and etc.
+     * Attention, this method will return new instance of SchemaBuilder without affecting original
+     * object. You MUST call this method before calling packSchema() method.
+     *
+     * Attention, this methods DOES NOT write anything into database, use pushSchema() to push
+     * changes into database using automatic diff generation. You can also access list of
+     * generated/changed tables via getTables() to create your own migrations.
+     *
+     * @see packSchema()
+     * @see pushSchema()
+     * @see getTables()
+     *
+     * @return SchemaBuilder
+     */
+    public function renderSchema(): SchemaBuilder
+    {
+        //bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla!
+
+        //START YOUR WORK HERE!
+
+        return $this;
+    }
+
+    /**
+     * Get all defined tables, make sure to call renderSchema() first. Attention, all given tables
+     * will be returned in detached state.
+     *
+     * @return AbstractTable[]
+     *
+     * @throws SchemaException
+     */
+    public function getTables(): array
+    {
+        if (empty($this->tables) && !empty($this->schemas)) {
+            throw new SchemaException(
+                "Unable to get tables, no defined tables were found, call defineTables() first"
+            );
+        }
+
+        $result = [];
+        foreach ($this->tables as $table) {
+            //Detaching
+            $result[] = clone $table;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Save every change made to generated tables. Method utilizes default DBAL diff mechanism,
+     * use getTables() method in order to generate your own migrations.
+     *
+     * @param LoggerInterface|null $logger
+     *
+     * @throws SchemaException
+     * @throws DBALException
+     * @throws QueryException
+     * @throws DriverException
+     */
+    public function pushSchema(LoggerInterface $logger = null)
+    {
+        $bus = new SynchronizationBus($this->getTables());
+        $bus->run($logger);
+    }
+
+    /**
+     * Pack declared schemas in a normalized form, make sure to call renderSchema() first.
      *
      * @return array
+     *
+     * @throws SchemaException
      */
     public function packSchema(): array
     {
+        if (empty($this->tables) && !empty($this->schemas)) {
+            throw new SchemaException(
+                "Unable to pack schema, no defined tables were found, call defineTables() first"
+            );
+        }
+
         $result = [];
         foreach ($this->schemas as $class => $schema) {
             $result[$class][] = [
                 ORMInterface::R_INSTANTIATOR => $schema->getInstantiator(),
-                ORMInterface::R_SCHEMA       => $schema->packSchema($this),
+                ORMInterface::R_SCHEMA       => $schema->packSchema($this, null),
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
                 ORMInterface::R_DATABASE     => $schema->getDatabase(),
-                ORMInterface::R_TABLE        => $schema->getTable()
+                ORMInterface::R_TABLE        => $schema->getTable(),
+                ORMInterface::R_RELATIONS    => [/*external manager*/]
+                //relations???
             ];
         }
 

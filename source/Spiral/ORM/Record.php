@@ -10,7 +10,9 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 
-class Record extends SchematicEntity
+abstract class Record extends SchematicEntity
 {
     use SaturateTrait, SolidableTrait;
+
+    const SCHEMA = [];
 }

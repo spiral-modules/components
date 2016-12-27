@@ -26,7 +26,7 @@ class PostgresColumn extends AbstractColumn
      */
     const EXCLUDE_FROM_COMPARE = [
         'constrained',
-        'constraint'
+        'constrainName'
     ];
 
     /**

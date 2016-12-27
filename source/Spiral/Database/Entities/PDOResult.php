@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities\Query;
+namespace Spiral\Database\Entities;
 
 use PDOStatement;
 use Spiral\Database\Helpers\QueryInterpolator;

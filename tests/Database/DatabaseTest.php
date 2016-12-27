@@ -11,7 +11,7 @@ namespace Spiral\tests\Cases\Database;
 use Mockery as m;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\Query\PDOResult;
+use Spiral\Database\Entities\PDOResult;
 use Spiral\Database\Entities\Table;
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase

@@ -16,8 +16,6 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
-use Spiral\Database\Entities\Query\CachedResult;
-use Spiral\Database\Entities\Query\PDOResult;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 
@@ -203,31 +201,6 @@ class Database implements DatabaseInterface, InjectableInterface
     public function statement(string $query, array $parameters = []): \PDOStatement
     {
         return $this->driver->statement($query, $parameters);
-    }
-
-    /**
-     * Execute statement or fetch result from cache and return cached query iterator.
-     *
-     * @param string         $query
-     * @param array          $parameters Parameters to be binded into query.
-     * @param int            $lifetime   Cache lifetime in seconds.
-     * @param string         $key        Cache key to be used to store query result.
-     * @param StoreInterface $store      Cache store to store result in, if null default store will
-     *                                   be used.
-     *
-     * @return CachedResult
-     *
-     * @throws DriverException
-     * @throws QueryException
-     */
-    public function cachedQuery(
-        string $query,
-        array $parameters = [],
-        int $lifetime,
-        string $key = '',
-        StoreInterface $store = null
-    ) {
-        return $this->driver->cachedQuery($query, $parameters, $lifetime, $key, $store);
     }
 
     /**

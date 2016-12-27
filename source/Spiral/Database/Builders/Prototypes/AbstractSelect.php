@@ -10,7 +10,7 @@ namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\Traits\JoinsTrait;
-use Spiral\Database\Entities\Query\PDOResult;
+use Spiral\Database\Entities\PDOResult;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;

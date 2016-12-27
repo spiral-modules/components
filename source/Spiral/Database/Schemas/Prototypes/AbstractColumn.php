@@ -609,6 +609,14 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     }
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->table . '.' . $this->getName();
+    }
+
+    /**
      * Simplified way to dump information.
      *
      * @return array

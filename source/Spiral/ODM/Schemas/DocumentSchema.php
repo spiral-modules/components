@@ -136,6 +136,16 @@ class DocumentSchema implements SchemaInterface
     }
 
     /**
+     * Default defined values.
+     *
+     * @return array
+     */
+    public function getDefaults(): array
+    {
+        return $this->reflection->getProperty('defaults') ?? [];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getIndexes(): array
@@ -239,7 +249,7 @@ class DocumentSchema implements SchemaInterface
             DocumentEntity::SH_FILLABLE      => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ODM\SchemasConfig
-            DocumentEntity::SH_MUTATORS      => $this->packMutators(),
+            DocumentEntity::SH_MUTATORS      => $this->resolveMutators(),
 
             //Document behaviours (we can mix them with accessors due potential inheritance)
             DocumentEntity::SH_COMPOSITIONS  => $this->packCompositions($builder),
@@ -284,10 +294,10 @@ class DocumentSchema implements SchemaInterface
         $compositions = $this->getCompositions($builder);
 
         //User defined default values
-        $userDefined = $overwriteDefaults + $this->reflection->getProperty('defaults');
+        $userDefined = $overwriteDefaults + $this->getDefaults();
 
         //We need mutators to normalize default values
-        $mutators = $this->packMutators();
+        $mutators = $this->resolveMutators();
 
         $defaults = [];
         foreach ($this->getFields() as $field => $type) {
@@ -343,7 +353,7 @@ class DocumentSchema implements SchemaInterface
      * @see MutatorsConfig
      * @return array
      */
-    protected function packMutators(): array
+    protected function resolveMutators(): array
     {
         $mutators = $this->reflection->getMutators();
 

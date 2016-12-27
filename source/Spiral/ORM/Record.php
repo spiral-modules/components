@@ -15,6 +15,14 @@ abstract class Record extends SchematicEntity implements ActiveEntityInterface
 {
     use SaturateTrait, SolidableTrait;
 
+    /**
+     * Constants used to declare indexes in record schema.
+     *
+     * @see Record::$indexes
+     */
+    const INDEX  = 1000;            //Default index type
+    const UNIQUE = 2000;            //Unique index definition
+
     const SCHEMA = [];
 
     public function isLoaded(): bool

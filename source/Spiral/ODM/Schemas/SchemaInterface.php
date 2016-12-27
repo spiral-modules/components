@@ -54,22 +54,13 @@ interface SchemaInterface
     public function getCollection(): string;
 
     /**
-     * Get list of declared fields associated with type.
-     *
-     * @return array
-     *
-     * @throws SchemaException
-     */
-    public function getFields(): array;
-
-    /**
      * Get list of indexes to defined in associated collection.
      *
-     * @return IndexDefinition[]
+     * @return IndexDefinition[]|\Generator
      *
      * @throws SchemaException
      */
-    public function getIndexes(): array;
+    public function getIndexes();
 
     /**
      * Since ODM support inheritance some model collections will be related to parent model, rather

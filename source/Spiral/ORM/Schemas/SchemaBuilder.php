@@ -13,6 +13,7 @@ use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Helpers\SynchronizationBus;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\Exceptions\DoubleReferenceException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORMInterface;
 
@@ -162,12 +163,32 @@ class SchemaBuilder
      * @see getTables()
      *
      * @return SchemaBuilder
+     *
+     * @throws SchemaException
      */
     public function renderSchema(): SchemaBuilder
     {
-        //bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla!
+        $builder = clone $this;
 
-        //START YOUR WORK HERE!
+        //Relation manager?
+
+        foreach ($builder->schemas as $schema) {
+            //Get table state (empty one)
+            $table = $this->requestTable($schema->getTable(), $schema->getDatabase(), true, true);
+
+            //Define it's schema
+            $table = $schema->defineTable($table);
+
+            //Working with indexes
+            foreach ($schema->getIndexes() as $index) {
+                $table->index($index->getColumns())->unique($index->isUnique());
+            }
+
+            //And put it back :)
+            $this->pushTable($table, $schema->getDatabase());
+        }
+
+        //Working with defined relations
 
         return $this;
     }
@@ -243,5 +264,63 @@ class SchemaBuilder
         }
 
         return $result;
+    }
+
+    /**
+     * Request table schema by name/database combination.
+     *
+     * @param string      $table
+     * @param string|null $database
+     * @param bool        $resetState When set to true current table state will be reset in order
+     *                                to
+     *                                allows model to redefine it's schema.
+     * @param bool        $unique     Set to true (default), to throw an exception when table
+     *                                already referenced by another model.
+     *
+     * @return AbstractTable          Unlinked.
+     *
+     * @throws DoubleReferenceException When two records refers to same table and unique option
+     *                                  set.
+     */
+    protected function requestTable(
+        string $table,
+        string $database = null,
+        bool $unique = true,
+        bool $resetState = false
+    ): AbstractTable {
+        if (isset($this->tables[$database . '.table'])) {
+            $schema = $this->tables[$database . '.table'];
+
+            if ($unique) {
+                throw new DoubleReferenceException(
+                    "Table '{$table}' of '{$database} 'been requested by multiple models"
+                );
+            }
+        } else {
+            //Requesting thought DatabaseManager
+            $schema = $this->manager->database($database)->table($table)->getSchema();
+            $this->tables[$database . '.' . $table] = $schema;
+        }
+
+        $schema = clone $schema;
+
+        if ($resetState) {
+            //Emptying our current state (initial not affected)
+            $schema->setState(null);
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Update table state.
+     *
+     * @param AbstractTable $table
+     * @param string|null   $database
+     */
+    protected function pushTable(AbstractTable $table, string $database = null)
+    {
+        $this->tables[$database . '.' . $table->getName()] = $table;
+
     }
 }

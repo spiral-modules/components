@@ -11,6 +11,10 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
+use Spiral\ORM\Exceptions\DefinitionException;
+use Spiral\ORM\Helpers\ColumnRenderer;
+use Spiral\ORM\Record;
+use Spiral\ORM\Schemas\Definitions\IndexDefinition;
 
 class RecordSchema implements SchemaInterface
 {
@@ -26,13 +30,23 @@ class RecordSchema implements SchemaInterface
     private $mutatorsConfig;
 
     /**
-     * @param ReflectionEntity $reflection
-     * @param MutatorsConfig   $mutators
+     * @var ColumnRenderer
      */
-    public function __construct(ReflectionEntity $reflection, MutatorsConfig $mutators)
-    {
+    private $renderer;
+
+    /**
+     * @param ReflectionEntity    $reflection
+     * @param MutatorsConfig      $mutators
+     * @param ColumnRenderer|null $rendered
+     */
+    public function __construct(
+        ReflectionEntity $reflection,
+        MutatorsConfig $mutators,
+        ColumnRenderer $rendered = null
+    ) {
         $this->reflection = $reflection;
         $this->mutatorsConfig = $mutators;
+        $this->renderer = $rendered ?? new ColumnRenderer();
     }
 
     /**
@@ -89,21 +103,40 @@ class RecordSchema implements SchemaInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Returns set of declared indexes.
      *
-     * //todo: do we need it?
+     * Example:
+     * const INDEXES = [
+     *      [self::UNIQUE, 'email'],
+     *      [self::INDEX, 'status', 'balance'],
+     *      [self::INDEX, 'public_id']
+     * ];
+     *
+     * @do generator
+     *
+     * @return \Generator|IndexDefinition[]
+     *
+     * @throws DefinitionException
      */
-    public function getFields(): array
+    public function getIndexes(): \Generator
     {
-        $fields = $this->reflection->getFields();
+        $definitions = $this->reflection->getProperty('indexes') ?? [];
 
-        foreach ($fields as $field => $type) {
-            if ($this->isRelation($type)) {
-                unset($fields[$field]);
-            }
+        foreach ($definitions as $definition) {
+            yield $this->castIndex($definition);
         }
+    }
 
-        return $fields;
+    /**
+     * {@inheritdoc}
+     */
+    public function defineTable(AbstractTable $table): AbstractTable
+    {
+        return $this->renderer->renderColumns(
+            $this->getFields(),
+            $this->createDefaults(),
+            $table
+        );
     }
 
     /**
@@ -117,17 +150,25 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function defineTable(AbstractTable $table): AbstractTable
+    public function packSchema(SchemaBuilder $builder, AbstractTable $table = null): array
     {
-        return $table;
+        return [];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function packSchema(SchemaBuilder $builder, AbstractTable $table = null): array
+    protected function getFields(): array
     {
-        return [];
+        $fields = $this->reflection->getFields();
+
+        foreach ($fields as $field => $type) {
+            if ($this->isRelation($type)) {
+                unset($fields[$field]);
+            }
+        }
+
+        return $fields;
     }
 
     /**
@@ -144,5 +185,52 @@ class RecordSchema implements SchemaInterface
         }
 
         return false;
+    }
+
+    /**
+     * @param array $definition
+     *
+     * @return IndexDefinition
+     *
+     * @throws DefinitionException
+     */
+    protected function castIndex(array $definition)
+    {
+        $unique = null;
+        $columns = [];
+
+        foreach ($definition as $chunk) {
+            if ($chunk == Record::INDEX || $chunk == Record::UNIQUE) {
+                $unique = $chunk === Record::UNIQUE;
+                continue;
+            }
+
+            $columns[] = $chunk;
+        }
+
+        if (is_null($unique)) {
+            throw new DefinitionException(
+                "Record '{$this}' has index definition with unspecified index type"
+            );
+        }
+
+        if (empty($columns)) {
+            throw new DefinitionException(
+                "Record '{$this}' has index definition without any column associated to"
+            );
+        }
+
+        return new IndexDefinition($columns, $unique);
+    }
+
+    /**
+     * Default defined values.
+     *
+     * @return array
+     */
+    protected function createDefaults(): array
+    {
+        //Process defaults
+        return $this->reflection->getProperty('defaults') ?? [];
     }
 }

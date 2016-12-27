@@ -211,10 +211,8 @@ class MySQLColumn extends AbstractColumn
             $column->abstractType() == 'timestamp'
             && $column->defaultValue == '0000-00-00 00:00:00'
         ) {
-            //Normalizing default value
+            //Normalizing default value for timestamps
             $column->defaultValue = 0;
-
-            //todo: driver specific datetime initialization (?)
         }
 
         return $column;

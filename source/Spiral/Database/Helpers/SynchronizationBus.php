@@ -94,10 +94,6 @@ class SynchronizationBus extends Component
                 $logger,
                 true
             );
-
-        } catch (\Exception $e) {
-            $this->rollbackTransaction();
-            throw $e;
         } catch (\Throwable $e) {
             $this->rollbackTransaction();
             throw $e;

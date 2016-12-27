@@ -68,7 +68,7 @@ class DocumentInstantiator implements InstantiatorInterface
         }
 
         if (!is_array($fields)) {
-            $fields = $this->normalizeFields($fields);
+            $fields = iterator_to_array($fields);
         }
 
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
@@ -76,6 +76,10 @@ class DocumentInstantiator implements InstantiatorInterface
             //No need to filter values, passing directly in constructor
             return new $class($fields, $this->schema, $this->odm);
         }
+
+        /*
+         * Filtering entity
+         */
 
         $entity = new $class($fields, $this->schema, $this->odm);
         if (!$entity instanceof CompositableInterface) {
@@ -124,23 +128,5 @@ class DocumentInstantiator implements InstantiatorInterface
         }
 
         return $defined;
-    }
-
-    /**
-     * @param \Traversable|\ArrayAccess $fields
-     *
-     * @return array
-     */
-    private function normalizeFields($fields): array
-    {
-        $result = [];
-        if (!is_scalar($fields)) {
-            //Trying to iterate over
-            foreach ($fields as $name => $value) {
-                $result[$name] = $value;
-            }
-        }
-
-        return $result;
     }
 }

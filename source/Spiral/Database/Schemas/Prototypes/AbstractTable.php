@@ -600,14 +600,10 @@ abstract class AbstractTable implements TableInterface
     public function save(
         int $behaviour = Behaviour::DO_ALL,
         LoggerInterface $logger = null,
-        $reset = true
+        bool $reset = true
     ) {
         //We need an instance of Handler of dbal operations
         $handler = $this->driver->getHandler($logger);
-
-        if ($behaviour != Behaviour::DO_ALL && $reset) {
-            throw new SchemaException("Schema can only be reset with behaviour is DO_ALL");
-        }
 
         if ($this->status == self::STATUS_DROPPED) {
             //We don't need syncer for this operation

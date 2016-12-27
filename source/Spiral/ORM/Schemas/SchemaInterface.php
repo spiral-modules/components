@@ -8,6 +8,7 @@ namespace Spiral\ORM\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\SchemaException;
+use Spiral\ORM\Schemas\Definitions\IndexDefinition;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 
 interface SchemaInterface
@@ -45,13 +46,13 @@ interface SchemaInterface
     public function getTable(): string;
 
     /**
-     * Get list of declared fields associated with type.
+     * Get indexes declared by model.
      *
-     * Attention, this set of field is not necessary same set as will be stored in schema!
+     * @return IndexDefinition[]
      *
-     * @return array
+     * @throws SchemaException
      */
-    public function getFields(): array;
+    public function getIndexes();
 
     /**
      * Get all defined record relations.
@@ -60,7 +61,7 @@ interface SchemaInterface
      *
      * @throws SchemaException
      */
-    public function getRelations(): array;
+    public function getRelations();
 
     /**
      * Define needed columns, indexes and foreign keys in a record related table.

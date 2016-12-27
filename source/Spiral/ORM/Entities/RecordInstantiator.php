@@ -59,7 +59,7 @@ class RecordInstantiator implements InstantiatorInterface
     public function instantiate($fields, bool $filter = true): ActiveEntityInterface
     {
         if (!is_array($fields)) {
-            $fields = $this->normalizeFields($fields);
+            $fields = iterator_to_array($fields);
         }
 
         $class = $this->class;
@@ -69,6 +69,10 @@ class RecordInstantiator implements InstantiatorInterface
             //No need to filter values, passing directly in constructor
             return new $class($fields, $this->schema, $this->orm);
         }
+
+        /*
+         * Filtering entity
+         */
 
         $entity = new $class($fields, $this->schema, $this->orm);
         if (!$entity instanceof Record) {
@@ -83,21 +87,4 @@ class RecordInstantiator implements InstantiatorInterface
         return $entity;
     }
 
-    /**
-     * @param \Traversable|\ArrayAccess $fields
-     *
-     * @return array
-     */
-    private function normalizeFields($fields): array
-    {
-        $result = [];
-        if (!is_scalar($fields)) {
-            //Trying to iterate over
-            foreach ($fields as $name => $value) {
-                $result[$name] = $value;
-            }
-        }
-
-        return $result;
-    }
 }

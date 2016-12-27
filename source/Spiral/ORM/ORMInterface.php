@@ -19,11 +19,11 @@ interface ORMInterface
     /**
      * Constants used in packed schema.
      */
-    const D_INSTANTIATOR = 0;
-    const D_SCHEMA       = 1;
-    const D_SOURCE_CLASS = 2;
-    const D_DATABASE     = 3;
-    const D_TABLE        = 4;
+    const R_INSTANTIATOR = 0;
+    const R_SCHEMA       = 1;
+    const R_SOURCE_CLASS = 2;
+    const R_DATABASE     = 3;
+    const R_TABLE        = 4;
 
     /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.
@@ -51,7 +51,7 @@ interface ORMInterface
      *
      * @return RecordSelector
      */
-    public function selector(string $class): RecordSelector;
+    //public function selector(string $class): RecordSelector;
 
     /**
      * Get collection associated with given class.
@@ -62,17 +62,17 @@ interface ORMInterface
      *
      * @throws ORMException
      */
-    public function table(string $class): Table;
+    //public function table(string $class): Table;
 
     /**
      * Instantiate record/model instance based on a given class name and fieldset.
      *
-     * @param string $class
+     * @param string                   $class
      * @param array|\ArrayAccess|mixed $fields
-     * @param bool $filter                     When set to true values MUST be passed thought model
+     * @param bool                     $filter When set to true values MUST be passed thought model
      *                                         filters to ensure their types and filter any user
      *                                         data. This will slow down model creation.
-     * @param bool $cache                      Add entity into EntityCache.
+     * @param bool                     $cache  Add entity into EntityCache.
      *
      * @return mixed
      */

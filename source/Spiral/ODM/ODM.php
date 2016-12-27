@@ -237,11 +237,14 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         }
 
         //Potential optimization
-        $instantiator = $this->factory->make($this->define($class, self::D_INSTANTIATOR), [
-            'class'  => $class,
-            'odm'    => $this,
-            'schema' => $this->define($class, self::D_SCHEMA)
-        ]);
+        $instantiator = $this->factory->make(
+            $this->define($class, self::D_INSTANTIATOR),
+            [
+                'class'  => $class,
+                'odm'    => $this,
+                'schema' => $this->define($class, self::D_SCHEMA)
+            ]
+        );
 
         //Constructing instantiator and storing it in cache
         return $this->instantiators[$class] = $instantiator;

@@ -45,7 +45,7 @@ interface SchemaInterface
     public function getDatabase();
 
     /**
-     * Name of associated collection if any.
+     * Name of associated collection.
      *
      * @return string
      *
@@ -57,6 +57,8 @@ interface SchemaInterface
      * Get list of declared fields associated with type.
      *
      * @return array
+     *
+     * @throws SchemaException
      */
     public function getFields(): array;
 
@@ -76,6 +78,8 @@ interface SchemaInterface
      * @param SchemaBuilder $builder
      *
      * @return string
+     *
+     * @throws SchemaException
      */
     public function resolvePrimary(SchemaBuilder $builder): string;
 
@@ -85,6 +89,8 @@ interface SchemaInterface
      * @param SchemaBuilder $builder
      *
      * @return array
+     *
+     * @throws SchemaException
      */
     public function packSchema(SchemaBuilder $builder): array;
 }

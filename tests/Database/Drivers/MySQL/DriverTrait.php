@@ -12,17 +12,24 @@ use Spiral\Database\Entities\Driver;
 
 trait DriverTrait
 {
+    private $driver;
+
     public function getDriver(): Driver
     {
-        return new MySQLDriver(
-            'mysql',
-            [
-                'connection' => 'mysql:host=localhost;dbname=phpunit',
-                'username'   => 'root',
-                'password'   => '',
-                'options'    => []
-            ],
-            new Container()
-        );
+        return $this->driver ?? $this->driver = new MySQLDriver(
+                'mysql',
+                [
+                    'connection' => 'mysql:host=localhost;dbname=phpunit',
+                    'username'   => 'root',
+                    'password'   => '',
+                    'options'    => []
+                ],
+                new Container()
+            );
+    }
+
+    protected function driverID(): string
+    {
+        return 'mysql';
     }
 }

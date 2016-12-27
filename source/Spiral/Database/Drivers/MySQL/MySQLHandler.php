@@ -8,6 +8,7 @@ namespace Spiral\Database\Drivers\MySQL;
 
 use Spiral\Database\Drivers\MySQL\Schemas\MySQLTable;
 use Spiral\Database\Entities\AbstractHandler;
+use Spiral\Database\Exceptions\Drivers\MySQLDriverException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
@@ -69,5 +70,22 @@ class MySQLHandler extends AbstractHandler
         }
 
         return parent::createStatement($table) . " ENGINE {$table->getEngine()}";
+    }
+
+    /**
+     * @param AbstractColumn $column
+     *
+     * @throws MySQLDriverException
+     */
+    protected function assertValid(AbstractColumn $column)
+    {
+        if (
+            in_array($column->abstractType(), ['text', 'tinyText', 'longText'])
+            && is_string($column->getDefaultValue()) && $column->getDefaultValue() !== ''
+        ) {
+            throw new MySQLDriverException(
+                "Column {$column} of type text/blob can not have non empty default value"
+            );
+        }
     }
 }

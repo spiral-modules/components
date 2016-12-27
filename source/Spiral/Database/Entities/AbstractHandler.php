@@ -8,6 +8,7 @@ namespace Spiral\Database\Entities;
 
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Exceptions\InvalidArgumentException;
+use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\HandlerException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
@@ -349,6 +350,7 @@ abstract class AbstractHandler
 
         //Columns
         foreach ($table->getColumns() as $column) {
+            $this->assertValid($column);
             $innerStatement[] = $column->sqlStatement($this->driver);
         }
 
@@ -518,6 +520,7 @@ abstract class AbstractHandler
                 'table'     => $this->identify($table),
             ]);
 
+            $this->assertValid($current);
             $this->alterColumn($table, $initial, $current);
         }
     }
@@ -534,6 +537,7 @@ abstract class AbstractHandler
                 'table'     => $this->identify($table),
             ]);
 
+            $this->assertValid($column);
             $this->createColumn($table, $column);
         }
     }
@@ -584,5 +588,17 @@ abstract class AbstractHandler
 
             $this->dropForeign($table, $foreign);
         }
+    }
+
+    /**
+     * Applied to every column in order to make sure that driver support it.
+     *
+     * @param AbstractColumn $column
+     *
+     * @throws DriverException
+     */
+    protected function assertValid(AbstractColumn $column)
+    {
+        //All valid by default
     }
 }

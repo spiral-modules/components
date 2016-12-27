@@ -12,17 +12,24 @@ use Spiral\Database\Entities\Driver;
 
 trait DriverTrait
 {
+    private $driver;
+
     public function getDriver(): Driver
     {
-        return new PostgresDriver(
-            'mysql',
-            [
-                'connection' => 'pgsql:host=127.0.0.1;dbname=spiral',
-                'username'   => 'postgres',
-                'password'   => 'postgres',
-                'options'    => []
-            ],
-            new Container()
-        );
+        return $this->driver ?? $this->driver = new PostgresDriver(
+                'mysql',
+                [
+                    'connection' => 'pgsql:host=127.0.0.1;dbname=spiral',
+                    'username'   => 'postgres',
+                    'password'   => 'postgres',
+                    'options'    => []
+                ],
+                new Container()
+            );
+    }
+
+    protected function driverID(): string
+    {
+        return 'postgres';
     }
 }

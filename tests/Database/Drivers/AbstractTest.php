@@ -11,6 +11,8 @@ use Spiral\Database\Entities\Driver;
 
 abstract class AbstractTest extends \PHPUnit_Framework_TestCase
 {
+    static $driversCache = [];
+
     /**
      * @param string $name
      * @param string $prefix
@@ -19,13 +21,24 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
      */
     protected function database($name = 'default', $prefix = ''): Database
     {
-        return new Database($this->getDriver(), $name, $prefix);
+        if (isset(self::$driversCache[$this->driverID()])) {
+            $driver = self::$driversCache[$this->driverID()];
+        } else {
+            self::$driversCache[$this->driverID()] = $driver = $this->getDriver();
+        }
+
+        return new Database($driver, $name, $prefix);
     }
 
     /**
      * @return Driver
      */
     abstract protected function getDriver(): Driver;
+
+    /**
+     * @return string
+     */
+    abstract protected function driverID(): string;
 
     /**
      * Drop all tables in db.

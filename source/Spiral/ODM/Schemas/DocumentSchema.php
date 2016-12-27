@@ -35,12 +35,12 @@ class DocumentSchema implements SchemaInterface
 
     /**
      * @param ReflectionEntity $reflection
-     * @param MutatorsConfig   $config
+     * @param MutatorsConfig   $mutators
      */
-    public function __construct(ReflectionEntity $reflection, MutatorsConfig $config)
+    public function __construct(ReflectionEntity $reflection, MutatorsConfig $mutators)
     {
         $this->reflection = $reflection;
-        $this->mutators = $config;
+        $this->mutators = $mutators;
     }
 
     /**
@@ -87,7 +87,7 @@ class DocumentSchema implements SchemaInterface
             );
         }
 
-        $database = $this->reflection->getConstant('DATABASE');
+        $database = $this->reflection->getProperty('database');
         if (empty($database)) {
             //Empty database to be used
             return null;
@@ -107,7 +107,7 @@ class DocumentSchema implements SchemaInterface
             );
         }
 
-        $collection = $this->reflection->getConstant('COLLECTION');
+        $collection = $this->reflection->getProperty('collection');
         if (empty($collection)) {
             //Generate collection using short class name
             $collection = Inflector::camelize($this->reflection->getShortName());

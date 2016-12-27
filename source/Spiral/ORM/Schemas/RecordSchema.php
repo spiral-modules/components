@@ -6,16 +6,61 @@
  */
 namespace Spiral\ORM\Schemas;
 
+use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Models\Reflections\ReflectionEntity;
+use Spiral\ORM\Configs\MutatorsConfig;
+use Spiral\ORM\Configs\RelationsConfig;
+use Spiral\ORM\Entities\RecordInstantiator;
 
 class RecordSchema implements SchemaInterface
 {
+    /**
+     * @var ReflectionEntity
+     */
+    private $reflection;
+
+    /**
+     * @invisible
+     * @var MutatorsConfig
+     */
+    private $mutators;
+
+    /**
+     * @invisible
+     * @var RelationsConfig
+     */
+    private $relations;
+
+    /**
+     * @param ReflectionEntity $reflection
+     * @param MutatorsConfig   $mutators
+     * @param RelationsConfig  $relations
+     */
+    public function __construct(
+        ReflectionEntity $reflection,
+        MutatorsConfig $mutators,
+        RelationsConfig $relations
+    ) {
+        $this->reflection = $reflection;
+        $this->mutators = $mutators;
+        $this->relations = $relations;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function getClass(): string
     {
-        // TODO: Implement getClass() method.
+        return $this->reflection->getName();
+    }
+
+    /**
+     * @return ReflectionEntity
+     */
+    public function getReflection(): ReflectionEntity
+    {
+        return $this->reflection;
     }
 
     /**
@@ -23,7 +68,7 @@ class RecordSchema implements SchemaInterface
      */
     public function getInstantiator(): string
     {
-        // TODO: Implement getInstantiator() method.
+        return $this->reflection->getConstant('INSTANTIATOR') ?? RecordInstantiator::class;
     }
 
     /**
@@ -31,7 +76,13 @@ class RecordSchema implements SchemaInterface
      */
     public function getDatabase()
     {
-        // TODO: Implement getDatabase() method.
+        $database = $this->reflection->getProperty('database');
+        if (empty($database)) {
+            //Empty database to be used
+            return null;
+        }
+
+        return $database;
     }
 
     /**
@@ -39,7 +90,14 @@ class RecordSchema implements SchemaInterface
      */
     public function getTable(): string
     {
-        // TODO: Implement getTable() method.
+        $table = $this->reflection->getProperty('table');
+        if (empty($table)) {
+            //Generate collection using short class name
+            $table = Inflector::camelize($this->reflection->getShortName());
+            $table = Inflector::pluralize($table);
+        }
+
+        return $table;
     }
 
     /**
@@ -47,7 +105,15 @@ class RecordSchema implements SchemaInterface
      */
     public function getFields(): array
     {
-        // TODO: Implement getFields() method.
+        $fields = $this->reflection->getFields();
+
+        foreach ($fields as $field => $type) {
+            if ($this->isRelation($type)) {
+                unset($fields[$field]);
+            }
+        }
+
+        return $fields;
     }
 
     /**
@@ -55,7 +121,7 @@ class RecordSchema implements SchemaInterface
      */
     public function defineTable(AbstractTable $table): AbstractTable
     {
-        // TODO: Implement defineTable() method.
+        return $table;
     }
 
     /**
@@ -63,7 +129,23 @@ class RecordSchema implements SchemaInterface
      */
     public function packSchema(SchemaBuilder $builder): array
     {
-        // TODO: Implement packSchema() method.
+        return [];
     }
 
+
+    /**
+     * Check if field schema/type defines relation.
+     *
+     * @param mixed $type
+     *
+     * @return bool
+     */
+    protected function isRelation($type): bool
+    {
+        if (is_array($type)) {
+            return true;
+        }
+
+        return false;
+    }
 }

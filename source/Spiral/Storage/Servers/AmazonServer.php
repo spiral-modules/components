@@ -337,6 +337,7 @@ class AmazonServer extends StorageServer
             $mimetype = self::DEFAULT_MIMETYPE;
         };
 
+        //Possible to add custom headers into the bucket
         $headers = $bucket->getOption('headers', []);
 
         if (!empty($maxAge = $bucket->getOption('maxAge', 0))) {

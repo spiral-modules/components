@@ -213,6 +213,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         //I have no idea what will happen at moment i write this comment
         $schema->renameColumn('last_name', 'first_name');
+        //it worked O_o
 
         $schema->save();
 
@@ -293,9 +294,6 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
         $this->assertProperlySaved($schema);
     }
-
-    //Type conversion (only expectable)
-
 
     /**
      * @param AbstractTable $current

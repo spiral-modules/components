@@ -14,7 +14,7 @@ use Spiral\Tokenizer\Reflections\ReflectionInvocation;
  * Analog of LocatorInterface for method/function invocations. Can only work with simple invocations
  * such as $this->method, self::method, static::method, or ClassName::method.
  */
-interface InvocationInterface
+interface InvocationsInterface
 {
     /**
      * Find all possible invocations of given function or method. Make sure you know about location

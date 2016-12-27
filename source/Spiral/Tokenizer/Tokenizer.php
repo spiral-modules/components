@@ -111,13 +111,13 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
      * @param array  $exclude
      * @param Finder $finder
      *
-     * @return InvocationInterface
+     * @return InvocationsInterface
      */
     public function invocationLocator(
         array $directories = [],
         array $exclude = [],
         Finder $finder = null
-    ): InvocationInterface {
+    ): InvocationsInterface {
         return new InvocationsLocator($this, $this->prepareFinder($finder, $directories, $exclude));
     }
 
@@ -130,7 +130,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     {
         if ($class->isSubclassOf(ClassesInterface::class)) {
             return $this->classLocator();
-        } elseif ($class->isSubclassOf(InvocationInterface::class)) {
+        } elseif ($class->isSubclassOf(InvocationsInterface::class)) {
             return $this->invocationLocator();
         }
 

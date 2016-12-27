@@ -96,8 +96,8 @@ class SQLServerDriver extends Driver
         $query = "SELECT [table_name] FROM [information_schema].[tables] WHERE [table_type] = 'BASE TABLE'";
 
         $tables = [];
-        foreach ($this->query($query)->fetch(PDO::FETCH_NUM) as $name) {
-            $tables[] = $name;
+        foreach ($this->query($query)->fetchAll(PDO::FETCH_NUM) as $name) {
+            $tables[] = $name[0];
         }
 
         return $tables;

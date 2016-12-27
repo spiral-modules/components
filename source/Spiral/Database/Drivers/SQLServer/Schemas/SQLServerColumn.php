@@ -26,6 +26,16 @@ class SQLServerColumn extends AbstractColumn
     const DATETIME_NOW = 'getdate()';
 
     /**
+     * Private state related values.
+     */
+    const EXCLUDE_FROM_COMPARE = [
+        'constrainedDefault',
+        'defaultConstraint',
+        'constrainedEnum',
+        'enumConstraint'
+    ];
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [

@@ -22,6 +22,14 @@ class PostgresColumn extends AbstractColumn
     const DATETIME_NOW = 'now()';
 
     /**
+     * Private state related values.
+     */
+    const EXCLUDE_FROM_COMPARE = [
+        'constrained',
+        'constraint'
+    ];
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [

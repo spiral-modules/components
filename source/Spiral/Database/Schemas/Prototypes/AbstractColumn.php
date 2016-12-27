@@ -47,6 +47,11 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     const DATETIME_NOW = 'CURRENT_TIMESTAMP';
 
     /**
+     * Value to be excluded from comparation.
+     */
+    const EXCLUDE_FROM_COMPARE = [];
+
+    /**
      * Normalization for time and dates.
      */
     const DATE_FORMAT = 'Y-m-d';
@@ -563,6 +568,10 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
 
         $difference = [];
         foreach ($columnVars as $name => $value) {
+            if (in_array($name, static::EXCLUDE_FROM_COMPARE)) {
+                continue;
+            }
+
             if ($name == 'defaultValue') {
 
                 //Default values has to compared using type-casted value

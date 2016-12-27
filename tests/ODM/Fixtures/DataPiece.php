@@ -10,7 +10,7 @@ use Spiral\ODM\DocumentEntity;
 
 class DataPiece extends DocumentEntity
 {
-    const SCHEMA   = [
+    const SCHEMA = [
         'value' => 'string'
     ];
 

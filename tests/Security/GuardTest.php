@@ -1,6 +1,6 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
@@ -22,7 +22,7 @@ use Spiral\Security\RuleInterface;
 class GuardTest extends \PHPUnit_Framework_TestCase
 {
     const OPERATION = 'test';
-    const CONTEXT = [];
+    const CONTEXT   = [];
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|PermissionsInterface

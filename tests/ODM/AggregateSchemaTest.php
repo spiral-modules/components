@@ -1,6 +1,6 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Wolfy-J
  */
@@ -56,7 +56,8 @@ class AggregateSchemaTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $aggregates->getAggregations());
 
         $this->assertEquals([
-            'user'  => new AggregationDefinition(Document::ONE, User::class, ['_id' => 'key::userId']),
+            'user'  => new AggregationDefinition(Document::ONE, User::class,
+                ['_id' => 'key::userId']),
             'users' => new AggregationDefinition(Document::MANY, User::class, []),
         ], $aggregates->getAggregations());
     }

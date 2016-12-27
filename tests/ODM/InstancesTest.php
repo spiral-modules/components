@@ -1,6 +1,6 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Wolfy-J
  */
@@ -93,7 +93,7 @@ class InstancesTest extends \PHPUnit_Framework_TestCase
 
         $admin = $odm->instantiate(User::class, ['admins' => 'everything']);
         $this->assertInstanceOf(Admin::class, $admin);
-        
+
         $admin = $odm->instantiate(User::class, ['admins' => 'everything', 'super' => 'yes']);
         $this->assertInstanceOf(SuperAdministrator::class, $admin);
     }

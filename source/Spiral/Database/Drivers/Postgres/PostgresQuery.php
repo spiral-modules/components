@@ -9,7 +9,6 @@
 namespace Spiral\Database\Drivers\Postgres;
 
 use Spiral\Database\Builders\InsertQuery;
-use Spiral\Database\Drivers\Postgres\PostgresCompiler as PostgresCompiler;
 use Spiral\Database\Entities\QueryCompiler as AbstractCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 

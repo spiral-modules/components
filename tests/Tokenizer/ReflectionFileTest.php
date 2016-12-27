@@ -1,17 +1,17 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Wolfy-J
  */
 namespace Spiral\Tests\Tokenizer;
 
+use Mockery as m;
 use Spiral\Core\MemoryInterface;
 use Spiral\Files\FileManager;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Reflections\ReflectionArgument;
 use Spiral\Tokenizer\Tokenizer;
-use Mockery as m;
 
 class ReflectionFileTest extends \PHPUnit_Framework_TestCase
 {

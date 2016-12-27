@@ -18,8 +18,8 @@ abstract class IndexOperation extends TableOperation
 
     /**
      * @param string|null $database
-     * @param string $table
-     * @param array  $columns
+     * @param string      $table
+     * @param array       $columns
      */
     public function __construct($database, string $table, array $columns)
     {

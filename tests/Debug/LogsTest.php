@@ -12,7 +12,6 @@ use Interop\Container\ContainerInterface;
 use Mockery as m;
 use Psr\Log\NullLogger;
 use Spiral\Core\Component;
-use Spiral\Core\Container;
 use Spiral\Debug\LogsInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Tests\Core\Fixtures\SampleComponent;

@@ -127,6 +127,7 @@ class RequiredCheckerTest extends \PHPUnit_Framework_TestCase
     /**
      * @param array $rules
      * @param array $data
+     *
      * @return Validator
      */
     protected function createValidator(array $rules, array $data = [])

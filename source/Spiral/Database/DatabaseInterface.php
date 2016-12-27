@@ -8,8 +8,8 @@
 
 namespace Spiral\Database;
 
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Entities\Query\PDOResult;
+use Spiral\Database\Exceptions\QueryException;
 
 /**
  * DatabaseInterface is high level abstraction used to represent single database. You must always

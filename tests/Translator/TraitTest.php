@@ -91,6 +91,7 @@ class SayClass extends Component
 
     /**
      * @param string $name
+     *
      * @return string
      */
     public function sayMessage($name)

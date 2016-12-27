@@ -85,7 +85,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
      */
     public function dump($value, int $output = self::OUTPUT_ECHO): string
     {
-         switch ($output) {
+        switch ($output) {
             case self::OUTPUT_ECHO:
                 echo $this->style->wrapContainer($this->dumpValue($value, '', 0));
                 break;

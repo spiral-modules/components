@@ -1,6 +1,6 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Wolfy-J
  */
@@ -169,13 +169,13 @@ class SchemaBuilder
         foreach ($this->schemas as $class => $schema) {
             $item = [
                 //Instantiator class
-                ODMInterface::D_INSTANTIATOR => $schema->getInstantiator(),
+                ODMInterface::D_INSTANTIATOR  => $schema->getInstantiator(),
 
                 //Primary collection class
                 ODMInterface::D_PRIMARY_CLASS => $schema->resolvePrimary($this),
 
                 //Instantiator and entity specific schema
-                ODMInterface::D_SCHEMA => $schema->packSchema($this),
+                ODMInterface::D_SCHEMA        => $schema->packSchema($this),
             ];
 
             if (!$schema->isEmbedded()) {

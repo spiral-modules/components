@@ -1,11 +1,12 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Wolfy-J
  */
 namespace Spiral\Tests\Tokenizer;
 
+use Mockery as m;
 use Spiral\Core\MemoryInterface;
 use Spiral\Files\FileManager;
 use Spiral\Tests\Tokenizer\Classes\ClassA;
@@ -14,7 +15,6 @@ use Spiral\Tests\Tokenizer\Classes\ClassC;
 use Spiral\Tests\Tokenizer\Classes\Inner\ClassD;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Tokenizer;
-use Mockery as m;
 
 class ClassLocatorTest extends \PHPUnit_Framework_TestCase
 {

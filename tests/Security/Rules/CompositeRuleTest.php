@@ -1,6 +1,6 @@
 <?php
 /**
- * components
+ * Spiral Framework, Core Components
  *
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */
@@ -67,6 +67,7 @@ class CompositeRuleTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param array $rules
+     *
      * @return RulesInterface
      */
     private function createRepository(array $rules): RulesInterface

@@ -15,7 +15,6 @@ use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
-use Spiral\Database\Entities\Prototypes\PDODriver;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 /**

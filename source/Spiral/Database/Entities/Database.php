@@ -8,7 +8,6 @@
 
 namespace Spiral\Database\Entities;
 
-use Spiral\Cache\StoreInterface;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;

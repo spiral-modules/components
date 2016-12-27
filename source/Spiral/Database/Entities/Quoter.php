@@ -9,8 +9,6 @@
 
 namespace Spiral\Database\Entities;
 
-use Spiral\Database\Entities\Prototypes\PDODriver;
-
 /**
  * Class responsible for "intelligent" table and column name quoting.
  *

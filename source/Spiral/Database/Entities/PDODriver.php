@@ -6,13 +6,12 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Database\Entities\Prototypes;
+namespace Spiral\Database\Entities;
 
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
-use Spiral\Database\Entities\PDOResult;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Helpers\QueryInterpolator;

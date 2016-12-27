@@ -13,7 +13,7 @@ use Spiral\Database\Drivers\MySQL\MySQLDriver;
 use Spiral\Database\Drivers\Postgres\PostgresDriver;
 use Spiral\Database\Drivers\SQLite\SQLiteDriver;
 use Spiral\Database\Drivers\SQLServer\SQLServerDriver;
-use Spiral\Database\Entities\Prototypes\PDODriver;
+use Spiral\Database\Entities\PDODriver;
 use Spiral\Database\Entities\Quoter;
 
 class QuoterTest extends \PHPUnit_Framework_TestCase

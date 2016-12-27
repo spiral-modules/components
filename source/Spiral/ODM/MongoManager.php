@@ -82,9 +82,7 @@ class MongoManager implements InjectorInterface, SingletonInterface
         array $driverOptions = [],
         array $options = []
     ): MongoDatabase {
-        /*
-         * Database will be automatically connected here.
-         */
+        //Database will be automatically connected here.
         $instance = $this->factory->make(MongoDatabase::class, [
             'databaseName' => $database,
             'manager'      => new Manager($server, $options, $driverOptions),

@@ -14,9 +14,7 @@ class MutatorsConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new MutatorsConfig([
             'mutators' => [
-                'string' => [
-                    'setter' => 'strval'
-                ]
+                'string' => ['setter' => 'strval']
             ]
         ]);
 
@@ -32,9 +30,7 @@ class MutatorsConfigTest extends \PHPUnit_Framework_TestCase
                 'str' => 'string'
             ],
             'mutators' => [
-                'string' => [
-                    'setter' => 'strval'
-                ]
+                'string' => ['setter' => 'strval']
             ]
         ]);
 

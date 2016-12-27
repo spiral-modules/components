@@ -135,8 +135,11 @@ class DocumentInstantiator implements InstantiatorInterface
     private function normalizeFields($fields): array
     {
         $result = [];
-        foreach ($fields as $name => $value) {
-            $result[$name] = $value;
+        if (!is_scalar($fields)) {
+            //Trying to iterate over
+            foreach ($fields as $name => $value) {
+                $result[$name] = $value;
+            }
         }
 
         return $result;

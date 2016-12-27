@@ -7,9 +7,12 @@
 namespace Spiral\Tests\ODM\Fixtures;
 
 use Spiral\ODM\Document;
+use Spiral\ODM\Traits\SourceTrait;
 
 class User extends Document
 {
+    use SourceTrait;
+
     const COLLECTION = 'users';
 
     const SCHEMA = [

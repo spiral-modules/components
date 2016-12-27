@@ -37,13 +37,13 @@ class RecordInstantiator implements InstantiatorInterface
     private $schema = [];
 
     /**
-     * @param ORMInterface $odm
+     * @param ORMInterface $orm
      * @param string       $class
      * @param array        $schema
      */
-    public function __construct(ORMInterface $odm, string $class, array $schema)
+    public function __construct(ORMInterface $orm, string $class, array $schema)
     {
-        $this->orm = $odm;
+        $this->orm = $orm;
         $this->class = $class;
         $this->schema = $schema;
     }
@@ -72,7 +72,7 @@ class RecordInstantiator implements InstantiatorInterface
         $entity = new $class($fields, $this->schema, $this->orm);
         if (!$entity instanceof Record) {
             throw new InstantionException(
-                "Unable to set filtered values for {$class}, must be instance of Record"
+                "Unable to set filtered values for '{$class}', must be instance of Record"
             );
         }
 

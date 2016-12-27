@@ -71,8 +71,6 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     protected $factory;
 
     /**
-     * ODM constructor.
-     *
      * @param MongoManager     $manager
      * @param SchemaLocator    $locator
      * @param MemoryInterface  $memory
@@ -95,7 +93,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     }
 
     /**
-     * Update ODM schema with automatic indexations.
+     * Create instance of ORM SchemaBuilder.
      *
      * @param bool $locate Set to true to automatically locate available documents and document
      *                     sources in a project files (based on tokenizer scope).

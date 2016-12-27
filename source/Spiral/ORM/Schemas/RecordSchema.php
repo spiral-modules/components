@@ -24,13 +24,13 @@ class RecordSchema implements SchemaInterface
      * @invisible
      * @var MutatorsConfig
      */
-    private $mutators;
+    private $mutatorsConfig;
 
     /**
      * @invisible
      * @var RelationsConfig
      */
-    private $relations;
+    private $relationsConfig;
 
     /**
      * @param ReflectionEntity $reflection
@@ -43,8 +43,8 @@ class RecordSchema implements SchemaInterface
         RelationsConfig $relations
     ) {
         $this->reflection = $reflection;
-        $this->mutators = $mutators;
-        $this->relations = $relations;
+        $this->mutatorsConfig = $mutators;
+        $this->relationsConfig = $relations;
     }
 
     /**
@@ -102,6 +102,8 @@ class RecordSchema implements SchemaInterface
 
     /**
      * {@inheritdoc}
+     *
+     * //todo: do we need it?
      */
     public function getFields(): array
     {
@@ -131,7 +133,6 @@ class RecordSchema implements SchemaInterface
     {
         return [];
     }
-
 
     /**
      * Check if field schema/type defines relation.

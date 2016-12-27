@@ -31,7 +31,7 @@ class DocumentSchema implements SchemaInterface
      *
      * @var MutatorsConfig
      */
-    private $mutators;
+    private $mutatorsConfig;
 
     /**
      * @param ReflectionEntity $reflection
@@ -40,7 +40,7 @@ class DocumentSchema implements SchemaInterface
     public function __construct(ReflectionEntity $reflection, MutatorsConfig $mutators)
     {
         $this->reflection = $reflection;
-        $this->mutators = $mutators;
+        $this->mutatorsConfig = $mutators;
     }
 
     /**
@@ -355,14 +355,14 @@ class DocumentSchema implements SchemaInterface
             if (
                 is_array($type)
                 && is_scalar($type[0])
-                && $filter = $this->mutators->getMutators('array::' . $type[0])
+                && $filter = $this->mutatorsConfig->getMutators('array::' . $type[0])
             ) {
                 //Mutator associated to array with specified type
                 $resolved += $filter;
-            } elseif (is_array($type) && $filter = $this->mutators->getMutators('array')) {
+            } elseif (is_array($type) && $filter = $this->mutatorsConfig->getMutators('array')) {
                 //Default array mutator
                 $resolved += $filter;
-            } elseif (!is_array($type) && $filter = $this->mutators->getMutators($type)) {
+            } elseif (!is_array($type) && $filter = $this->mutatorsConfig->getMutators($type)) {
                 //Mutator associated with type directly
                 $resolved += $filter;
             }

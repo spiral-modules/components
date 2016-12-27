@@ -17,6 +17,9 @@ use Spiral\ODM\ODMInterface;
  *
  * Note: since new mongo drivers arrived you can emulate same functionality using '__pclass'
  * property.
+ *
+ * Note #2: ideally this class to be tested, but Cursor is final class and it seems unrealistic
+ * without adding extra layer which will harm core readability .
  */
 class DocumentCursor extends \IteratorIterator
 {

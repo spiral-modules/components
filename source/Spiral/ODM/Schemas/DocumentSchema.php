@@ -64,7 +64,7 @@ class DocumentSchema implements SchemaInterface
      */
     public function getInstantiator(): string
     {
-        return $this->reflection->getConstant('INSTANTIATOR') ?? DocumentInstantiator::class;
+        return $this->reflection->getProperty('instantiator') ?? DocumentInstantiator::class;
     }
 
     /**

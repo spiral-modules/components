@@ -68,7 +68,7 @@ class RecordSchema implements SchemaInterface
      */
     public function getInstantiator(): string
     {
-        return $this->reflection->getConstant('INSTANTIATOR') ?? RecordInstantiator::class;
+        return $this->reflection->getProperty('instantiator') ?? RecordInstantiator::class;
     }
 
     /**

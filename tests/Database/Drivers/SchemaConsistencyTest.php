@@ -4,12 +4,12 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Database\Schemas;
+namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-abstract class ConsistencyTest extends AbstractTest
+abstract class SchemaConsistencyTest extends AbstractTest
 {
     /**
      * @var Database

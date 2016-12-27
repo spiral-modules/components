@@ -4,22 +4,22 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Database\Schemas\Postgres;
+namespace Spiral\Tests\Database\Drivers\SQLServer;
 
 use Spiral\Core\Container;
-use Spiral\Database\Drivers\Postgres\PostgresDriver;
+use Spiral\Database\Drivers\SQLServer\SQLServerDriver;
 use Spiral\Database\Entities\Driver;
 
 trait DriverTrait
 {
     public function getDriver(): Driver
     {
-        return new PostgresDriver(
+        return new SQLServerDriver(
             'mysql',
             [
-                'connection' => 'pgsql:host=127.0.0.1;dbname=spiral',
-                'username'   => 'postgres',
-                'password'   => 'postgres',
+                'connection' => 'sqlsrv:Server=WOLFY-PC;Database=spiral',
+                'username'   => '',
+                'password'   => '',
                 'options'    => []
             ],
             new Container()

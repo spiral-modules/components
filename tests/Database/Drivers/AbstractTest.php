@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Database\Schemas;
+namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;

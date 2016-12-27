@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Database\Schemas\MySQL;
+namespace Spiral\Tests\Database\Drivers\MySQL;
 
 use Spiral\Core\Container;
 use Spiral\Database\Drivers\MySQL\MySQLDriver;

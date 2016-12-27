@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Database\Schemas\SQLite;
+namespace Spiral\Tests\Database\Drivers\SQLite;
 
 use Spiral\Core\Container;
 use Spiral\Database\Drivers\SQLite\SQLiteDriver;

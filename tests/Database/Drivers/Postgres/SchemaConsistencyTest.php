@@ -4,11 +4,11 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Database\Schemas\Postgres;
+namespace Spiral\Tests\Database\Drivers\Postgres;
 
 use Spiral\Database\Injections\FragmentInterface;
 
-class ConsistencyTest extends \Spiral\Tests\Database\Schemas\ConsistencyTest
+class SchemaConsistencyTest extends \Spiral\Tests\Database\Drivers\SchemaConsistencyTest
 {
     use DriverTrait;
 

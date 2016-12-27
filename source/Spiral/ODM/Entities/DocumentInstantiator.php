@@ -67,6 +67,10 @@ class DocumentInstantiator implements InstantiatorInterface
             return $this->odm->instantiate($class, $fields, $filter);
         }
 
+        if (!is_array($fields)) {
+            $fields = $this->normalizeFields($fields);
+        }
+
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
         if (!$filter) {
             //No need to filter values, passing directly in constructor
@@ -121,5 +125,20 @@ class DocumentInstantiator implements InstantiatorInterface
         }
 
         return $defined;
+    }
+
+    /**
+     * @param \Traversable|\ArrayAccess $fields
+     *
+     * @return array
+     */
+    private function normalizeFields($fields): array
+    {
+        $result = [];
+        foreach ($fields as $name => $value) {
+            $result[$name] = $value;
+        }
+
+        return $result;
     }
 }

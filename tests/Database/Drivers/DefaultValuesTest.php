@@ -11,7 +11,11 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 /**
  * @todo need more validations and test for:
- *       - binary, has default
+ *       - binary, non empty string
+ *       - binary, empty string
+ *       - enum invalid value
+ *       - decimal, invalid value
+ *       - string, too long default value
  */
 abstract class DefaultValuesTest extends AbstractTest
 {
@@ -319,32 +323,32 @@ abstract class DefaultValuesTest extends AbstractTest
         $this->assertTrue($schema->column('target')->compare($column));
     }
 
-    public function testBinaryDefaultValueEmpty()
+    public function testEnumDefaultValueNull()
     {
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
 
         //This WILL fail in MySQL!
-        $column = $schema->binary('target')->defaultValue('');
-
-        $schema->save();
-        $schema = $this->schema('table');
-        $this->assertTrue($schema->exists());
-        $this->assertTrue($schema->column('target')->compare($column));
-    }
-
-    public function testBinaryDefaultValueNull()
-    {
-        $schema = $this->schema('table');
-        $this->assertFalse($schema->exists());
-
-        //This WILL fail in MySQL!
-        $column = $schema->binary('target')->defaultValue(null);
+        $column = $schema->enum('target', ['a', 'b', 'c'])->defaultValue(null);
 
         $schema->save();
         $schema = $this->schema('table');
         $this->assertTrue($schema->exists());
         $this->assertTrue($schema->column('target')->compare($column));
         $this->assertNull($schema->column('target')->getDefaultValue());
+    }
+
+    public function testEnumDefaultValueValid()
+    {
+        $schema = $this->schema('table');
+        $this->assertFalse($schema->exists());
+
+        //This WILL fail in MySQL!
+        $column = $schema->enum('target', ['a', 'b', 'c'])->defaultValue('a');
+
+        $schema->save();
+        $schema = $this->schema('table');
+        $this->assertTrue($schema->exists());
+        $this->assertTrue($schema->column('target')->compare($column));
     }
 }

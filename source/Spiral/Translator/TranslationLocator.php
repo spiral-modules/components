@@ -21,7 +21,7 @@ use Symfony\Component\Translation\MessageCatalogue;
 /**
  * Can load translation data from multiple different formats.
  */
-class TranslationSource extends Component implements SourceInterface
+class TranslationLocator extends Component implements LocatorInterface
 {
     use LoggerTrait;
 

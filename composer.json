@@ -14,14 +14,19 @@
     "ext-mbstring": "*",
     "ext-openssl": "*",
     "ext-mongodb": "*",
+
     "psr/log": "*",
     "psr/http-message": "^1.0",
     "container-interop/container-interop": "^1.1",
+
     "doctrine/inflector": "*",
+
     "guzzlehttp/guzzle": "~6.0",
+
     "symfony/finder": "^3.0",
     "symfony/event-dispatcher": "^3.0",
     "symfony/translation": "^3.0",
+
     "defuse/php-encryption": "^2.0",
     "mongodb/mongodb": "^1.1"
   },

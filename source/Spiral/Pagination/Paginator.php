@@ -103,6 +103,8 @@ class Paginator implements PredictableInterface, \Countable
 
     /**
      * {@inheritdoc}
+     *
+     * @return self
      */
     public function withCount(int $count): CountingInterface
     {

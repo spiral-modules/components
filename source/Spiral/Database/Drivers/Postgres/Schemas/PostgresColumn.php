@@ -463,7 +463,8 @@ class PostgresColumn extends AbstractColumn
         }
 
         if (
-            $initial->getType() == $this->getType() && $initial->getDefaultValue() != $this->getDefaultValue()
+            in_array($this->abstractType(), ['primary', 'bigPrimary'])
+            && $initial->getDefaultValue() != $this->getDefaultValue()
         ) {
             //PG adds default values to primary keys
             return true;

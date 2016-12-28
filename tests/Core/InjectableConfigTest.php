@@ -79,6 +79,23 @@ class InjectableConfigTest extends \PHPUnit_Framework_TestCase
         unset($config['keyA']);
     }
 
+    /**
+     * @expectedException \Spiral\Core\Exceptions\ConfigException
+     * @expectedExceptionMessage Undefined configuration key 'keyC'
+     */
+    public function testGetError()
+    {
+        $config = new InjectableConfig([
+            'keyA' => 'value',
+            'keyB' => 'valueB',
+        ]);
+
+        $config['keyC'];
+    }
+
+    /**
+     * @covers \Spiral\Core\InjectableConfig::__set_state()
+     */
     public function testSerialize()
     {
         $config = new InjectableConfig([
@@ -87,6 +104,7 @@ class InjectableConfigTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $serialized = serialize($config);
+
         $this->assertEquals($config, unserialize($serialized));
     }
 }

@@ -557,7 +557,10 @@ abstract class AbstractTable implements TableInterface
      */
     public function getState(): TableState
     {
-        return clone $this->current;
+        $state = clone $this->current;
+        $state->remountElements();
+
+        return $state;
     }
 
     /**

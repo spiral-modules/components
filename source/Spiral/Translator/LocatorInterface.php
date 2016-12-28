@@ -14,7 +14,7 @@ use Symfony\Component\Translation\MessageCatalogue;
 /**
  * Translation source interface, responsible for feeding translation with domains data.
  */
-interface SourceInterface
+interface LocatorInterface
 {
     /**
      * Check if given locale known to source.

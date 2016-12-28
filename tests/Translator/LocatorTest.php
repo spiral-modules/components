@@ -13,27 +13,27 @@ use Spiral\Files\FileManager;
 use Spiral\Files\FilesInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
 use Spiral\Translator\Loaders\PhpFileLoader;
-use Spiral\Translator\SourceInterface;
-use Spiral\Translator\TranslationSource;
+use Spiral\Translator\LocatorInterface;
+use Spiral\Translator\TranslationLocator;
 use Symfony\Component\Translation\Loader\PoFileLoader;
 use Symfony\Component\Translation\MessageCatalogue;
 
-class SourceTest extends \PHPUnit_Framework_TestCase
+class LocatorTest extends \PHPUnit_Framework_TestCase
 {
     public function testSource()
     {
         $config = m::mock(TranslatorConfig::class);
         $files = m::mock(FilesInterface::class);
-        $source = new TranslationSource($config, $files);
+        $source = new TranslationLocator($config, $files);
 
-        $this->assertInstanceOf(SourceInterface::class, $source);
+        $this->assertInstanceOf(LocatorInterface::class, $source);
     }
 
     public function testHasLocale()
     {
         $config = m::mock(TranslatorConfig::class);
         $files = m::mock(FilesInterface::class);
-        $source = new TranslationSource($config, $files);
+        $source = new TranslationLocator($config, $files);
 
         $config->shouldReceive('localeDirectory')->with('ru')->andReturn('locales/ru');
         $files->shouldReceive('isDirectory')->with('locales/ru')->andReturn(true);
@@ -45,7 +45,7 @@ class SourceTest extends \PHPUnit_Framework_TestCase
     public function testGetLocales()
     {
         $config = m::mock(TranslatorConfig::class);
-        $source = new TranslationSource($config, new FileManager());
+        $source = new TranslationLocator($config, new FileManager());
 
         $config->shouldReceive('localesDirectory')->andReturn(__DIR__ . '/fixtures/locales/');
 
@@ -56,7 +56,7 @@ class SourceTest extends \PHPUnit_Framework_TestCase
     {
         $config = m::mock(TranslatorConfig::class);
 
-        $source = new TranslationSource($config, new FileManager());
+        $source = new TranslationLocator($config, new FileManager());
 
         $config->shouldReceive('localeDirectory')->with('ru')->andReturn(
             __DIR__ . '/fixtures/locales/ru'

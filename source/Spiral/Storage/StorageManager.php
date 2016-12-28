@@ -17,6 +17,8 @@ use Spiral\Storage\Exceptions\StorageException;
 
 /**
  * Default implementation of StorageInterface.
+ *
+ * @todo tests are required!
  */
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {

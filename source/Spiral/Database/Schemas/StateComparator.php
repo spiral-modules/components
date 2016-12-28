@@ -87,8 +87,10 @@ class StateComparator
     public function addedColumns(): array
     {
         $difference = [];
+
+        $initialColumns = $this->initial->getColumns();
         foreach ($this->current->getColumns() as $name => $column) {
-            if (!$this->initial->knowsColumn($name)) {
+            if (!isset($initialColumns[$name])) {
                 $difference[] = $column;
             }
         }
@@ -102,8 +104,10 @@ class StateComparator
     public function droppedColumns(): array
     {
         $difference = [];
+
+        $currentColumns = $this->current->getColumns();
         foreach ($this->initial->getColumns() as $name => $column) {
-            if (!$this->current->knowsColumn($name)) {
+            if (!isset($currentColumns[$name])) {
                 $difference[] = $column;
             }
         }
@@ -122,7 +126,7 @@ class StateComparator
 
         $initialColumns = $this->initial->getColumns();
         foreach ($this->current->getColumns() as $name => $column) {
-            if (!$this->initial->knowsColumn($name)) {
+            if (!isset($initialColumns[$name])) {
                 //Added into schema
                 continue;
             }

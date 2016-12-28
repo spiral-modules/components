@@ -11,7 +11,7 @@ namespace Spiral\Tests\Translator;
 use Mockery as m;
 use Spiral\Core\MemoryInterface;
 use Spiral\Translator\Configs\TranslatorConfig;
-use Spiral\Translator\TranslationSource;
+use Spiral\Translator\TranslationLocator;
 use Spiral\Translator\Translator;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\MessageSelector;
@@ -30,7 +30,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $translator = new Translator(
             $config,
             $memory,
-            $source = m::mock(TranslationSource::class),
+            $source = m::mock(TranslationLocator::class),
             $selector = m::mock(MessageSelector::class)
         );
 
@@ -49,7 +49,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $translator = new Translator(
             $config,
             $memory,
-            $source = m::mock(TranslationSource::class),
+            $source = m::mock(TranslationLocator::class),
             $selector = m::mock(MessageSelector::class)
         );
 
@@ -71,7 +71,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
             'by' => true
         ]);
 
-        $source = m::mock(TranslationSource::class);
+        $source = m::mock(TranslationLocator::class);
 
         $translator = new Translator(
             $config,
@@ -92,7 +92,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
-        $source = m::mock(TranslationSource::class);
+        $source = m::mock(TranslationLocator::class);
 
         $translator = new Translator(
             $config,
@@ -119,7 +119,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
-        $source = m::mock(TranslationSource::class);
+        $source = m::mock(TranslationLocator::class);
 
         $translator = new Translator(
             $config,
@@ -141,7 +141,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
-        $source = m::mock(TranslationSource::class);
+        $source = m::mock(TranslationLocator::class);
 
         $translator = new Translator(
             $config,
@@ -195,7 +195,7 @@ class TranslatorTest extends \PHPUnit_Framework_TestCase
         $memory = m::mock(MemoryInterface::class);
         $memory->shouldReceive('loadData')->with(Translator::MEMORY)->andReturn([]);
 
-        $source = m::mock(TranslationSource::class);
+        $source = m::mock(TranslationLocator::class);
 
         $translator = new Translator(
             $config,

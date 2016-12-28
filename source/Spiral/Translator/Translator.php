@@ -71,7 +71,7 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * To load locale data from application files.
      *
-     * @var SourceInterface
+     * @var LocatorInterface
      */
     protected $source = null;
 
@@ -83,13 +83,13 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     /**
      * @param TranslatorConfig $config
      * @param MemoryInterface  $memory
-     * @param SourceInterface  $source
+     * @param LocatorInterface $source
      * @param MessageSelector  $selector
      */
     public function __construct(
         TranslatorConfig $config,
         MemoryInterface $memory,
-        SourceInterface $source,
+        LocatorInterface $source,
         MessageSelector $selector = null
     ) {
         $this->config = $config;
@@ -104,9 +104,9 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     }
 
     /**
-     * @return SourceInterface
+     * @return LocatorInterface
      */
-    public function getSource(): SourceInterface
+    public function getSource(): LocatorInterface
     {
         return $this->source;
     }

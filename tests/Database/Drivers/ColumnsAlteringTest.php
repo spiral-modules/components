@@ -33,7 +33,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
         return $this->database->table($table)->getSchema();
     }
 
-    protected function sampleSchema(string $table): AbstractTable
+    public function sampleSchema(string $table): AbstractTable
     {
         $schema = $this->schema($table);
 

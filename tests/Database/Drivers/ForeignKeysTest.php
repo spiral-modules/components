@@ -34,7 +34,7 @@ abstract class ForeignKeysTest extends AbstractTest
         return $this->database->table($table)->getSchema();
     }
 
-    protected function sampleSchema(string $table): AbstractTable
+    public function sampleSchema(string $table): AbstractTable
     {
         $schema = $this->schema($table);
 
@@ -42,6 +42,7 @@ abstract class ForeignKeysTest extends AbstractTest
             $schema->primary('id');
 
             $schema->integer('secondary_id');
+            $schema->index(['secondary_id'])->unique(true); //Index is required
 
             $schema->string('first_name')->nullable(false);
             $schema->string('last_name')->nullable(false);

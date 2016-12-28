@@ -58,10 +58,10 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             'default'   => 'database-1',
             'databases' => [
                 'test'  => [
-                    'prefix' => 'abc'
+                    'tablePrefix' => 'abc'
                 ],
                 'test2' => [
-                    'prefix' => 'bce'
+                    'tablePrefix' => 'bce'
                 ],
             ]
         ]);
@@ -131,13 +131,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testDriverClass()
     {
         $config = new DatabasesConfig([
-            'default'   => 'database-1',
             'connections' => [
                 'test'  => [
-                    'class' => 'abc'
+                    'driver' => 'abc'
                 ],
                 'test2' => [
-                    'class' => 'bce'
+                    'driver' => 'bce'
                 ],
             ]
         ]);

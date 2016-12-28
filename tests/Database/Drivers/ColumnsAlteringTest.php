@@ -35,7 +35,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
     protected function sampleSchema(string $table): AbstractTable
     {
-        $schema = $this->database->table($table)->getSchema();
+        $schema = $this->schema($table);
 
         if (!$schema->exists()) {
             $schema->primary('id');
@@ -50,7 +50,7 @@ abstract class ColumnsAlteringTest extends AbstractTest
 
             //Some dates
             $schema->timestamp('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
-            $schema->datetime('datetime')->datetime('2017-01-01 00:00:00');
+            $schema->datetime('datetime')->defaultValue('2017-01-01 00:00:00');
             $schema->date('datetime')->nullable(true);
             $schema->time('datetime')->defaultValue('00:00');
 

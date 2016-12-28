@@ -81,7 +81,13 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
         }
 
         if ($comparator->alteredColumns()) {
-            return "Table '{$table}' not synced, columns not identical.";
+
+            $names = [];
+            foreach ($comparator->alteredColumns() as $pair) {
+                $names[] = $pair[0]->getName();
+            }
+
+            return "Table '{$table}' not synced, column(s) '" . join("', '", $names) . "' have been changed.";
         }
 
         return "Table '{$table}' not synced, no idea why, add more messages :P";

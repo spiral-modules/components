@@ -146,14 +146,18 @@ class SQLiteColumn extends AbstractColumn
     }
 
     /**
-     * @param string $table
-     * @param array  $schema
+     * @param string        $table
+     * @param array         $schema
+     * @param \DateTimeZone $timezone
      *
      * @return SQLiteColumn
      */
-    public static function createInstance(string $table, array $schema): self
-    {
-        $column = new self($table, $schema['name']);
+    public static function createInstance(
+        string $table,
+        array $schema,
+        \DateTimeZone $timezone = null
+    ): self {
+        $column = new self($table, $schema['name'], $timezone);
 
         $column->nullable = !$schema['notnull'];
         $column->type = $schema['type'];

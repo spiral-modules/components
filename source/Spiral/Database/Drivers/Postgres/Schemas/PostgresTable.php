@@ -172,7 +172,7 @@ class PostgresTable extends AbstractTable
      */
     protected function createColumn(string $name): AbstractColumn
     {
-        return new PostgresColumn($this->getName(), $name);
+        return new PostgresColumn($this->getName(), $name, $this->driver->getTimezone());
     }
 
     /**

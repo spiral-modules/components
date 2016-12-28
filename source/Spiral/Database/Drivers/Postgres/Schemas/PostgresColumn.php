@@ -26,6 +26,7 @@ class PostgresColumn extends AbstractColumn
      * Private state related values.
      */
     const EXCLUDE_FROM_COMPARE = [
+        'timezone',
         'constrained',
         'constrainName'
     ];
@@ -348,7 +349,7 @@ class PostgresColumn extends AbstractColumn
      */
     public static function createInstance(string $table, array $schema, Driver $driver): self
     {
-        $column = new self($table, $schema['column_name']);
+        $column = new self($table, $schema['column_name'], $driver->getTimezone());
 
         $column->type = $schema['data_type'];
         $column->defaultValue = $schema['column_default'];

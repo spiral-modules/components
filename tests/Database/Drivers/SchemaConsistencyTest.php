@@ -19,6 +19,7 @@ abstract class SchemaConsistencyTest extends AbstractTest
     public function setUp()
     {
         $this->database = $this->database();
+        $this->database = $this->database();
     }
 
     public function tearDown()

@@ -41,7 +41,8 @@ class SQLiteTable extends AbstractTable
                 $schema + [
                     'quoted'     => $this->driver->quote($schema['name']),
                     'identifier' => $this->driver->identifier($schema['name'])
-                ]
+                ],
+                $this->driver->getTimezone()
             );
         }
 
@@ -129,7 +130,7 @@ class SQLiteTable extends AbstractTable
      */
     protected function createColumn(string $name): AbstractColumn
     {
-        return new SQLiteColumn($this->getName(), $name);
+        return new SQLiteColumn($this->getName(), $name, $this->driver->getTimezone());
     }
 
     /**

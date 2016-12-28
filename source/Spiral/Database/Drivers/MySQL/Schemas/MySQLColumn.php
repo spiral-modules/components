@@ -155,14 +155,18 @@ class MySQLColumn extends AbstractColumn
     }
 
     /**
-     * @param string $table
-     * @param array  $schema
+     * @param string        $table
+     * @param array         $schema
+     * @param \DateTimeZone $timezone
      *
      * @return MySQLColumn
      */
-    public static function createInstance(string $table, array $schema): self
-    {
-        $column = new self($table, $schema['Field']);
+    public static function createInstance(
+        string $table,
+        array $schema,
+        \DateTimeZone $timezone = null
+    ): self {
+        $column = new self($table, $schema['Field'], $timezone);
 
         $column->type = $schema['Type'];
         $column->nullable = strtolower($schema['Null']) == 'yes';

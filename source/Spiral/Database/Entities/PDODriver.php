@@ -511,9 +511,8 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function normalizeTimestamp(\DateTimeInterface $value): string
     {
-        $datetime = new \DateTime();
+        $datetime = new \DateTime('now', $this->getTimezone());
         $datetime->setTimestamp($value->getTimestamp());
-        $datetime->setTimezone($this->getTimezone());
 
         return $datetime->format(static::DATETIME);
     }

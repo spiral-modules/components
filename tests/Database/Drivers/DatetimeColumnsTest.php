@@ -60,6 +60,8 @@ abstract class DatetimeColumnsTest extends AbstractTest
         return $schema;
     }
 
+    //timestamp
+
     public function testTimestampWithNullDefaultAndNullable()
     {
         $schema = $this->schema('sampleSchema');
@@ -94,53 +96,217 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $this->assertSameAsInDB($schema);
     }
 
-//    public function testTimestampDatetime()
-//    {
-//        $schema = $this->schema('sampleSchema');
-//        $this->assertFalse($schema->exists());
-//
-//        $schema->timestamp('target')->defaultValue(new \DateTime('1980-01-01 19:00:00'));
-//        $schema->save();
-//
-//        $savedSchema = $this->schema('sampleSchema');
-//        $this->assertSame(
-//            $schema->column('target')->getDefaultValue()->getTimestamp(),
-//            $savedSchema->column('target')->getDefaultValue()->getTimestamp()
-//        );
-//    }
-
-//    public function testTimestampDatetimeString()
-//    {
-//        $schema = $this->schema('sampleSchema');
-//        $this->assertFalse($schema->exists());
-//
-//        $schema->timestamp('target')->defaultValue('1980-01-01 19:00:00');
-//        $schema->save();
-//
-//        $savedSchema = $this->schema('sampleSchema');
-//        $this->assertSame(
-//            $schema->column('target')->getDefaultValue()->getTimestamp(),
-//            $savedSchema->column('target')->getDefaultValue()->getTimestamp()
-//        );
-//    }
-
-//    public function testTimestampDatetimeZero()
-//    {
-//        $schema = $this->schema('sampleSchema');
-//        $this->assertFalse($schema->exists());
-//
-//        $schema->timestamp('target')->defaultValue(0);
-//        $schema->save();
-//
-//        $savedSchema = $this->schema('sampleSchema');
-//        $this->assertSame(
-//            $schema->column('target')->getDefaultValue()->getTimestamp(),
-//            $savedSchema->column('target')->getDefaultValue()->getTimestamp()
-//        );
-//    }
-
-    protected function assertSameDate(\DateTime $a, \DateTime $b)
+    public function testTimestampDatetimeZero()
     {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
 
+        $schema->timestamp('target')->defaultValue(0);
+        $schema->save();
+
+        $savedSchema = $this->schema('sampleSchema');
+        $this->assertSame(
+            $schema->column('target')->getDefaultValue()->getTimestamp(),
+            $savedSchema->column('target')->getDefaultValue()->getTimestamp()
+        );
+    }
+
+    //datetime
+
+    public function testDatetimeWithNullDefaultAndNullable()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('timestamp')->nullable(true)->defaultValue(null);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDatetimeCurrentTimestamp()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testMultipleDatetimeCurrentTimestamp()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->datetime('timestamp2')->defaultValue(AbstractColumn::DATETIME_NOW);
+
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDatetimeDatetimeWithTimezone()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('target')->defaultValue(
+            new \DateTime('1980-01-01 19:00:00', new \DateTimeZone('UTC'))
+        );
+        $schema->save();
+
+        $savedSchema = $this->schema('sampleSchema');
+        $this->assertEquals(
+            $schema->column('target')->getDefaultValue(),
+            $savedSchema->column('target')->getDefaultValue()
+        );
+    }
+
+    public function testDatetimeDatetimeString()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('target')->defaultValue('1980-01-01 19:00:00');
+        $schema->save();
+
+        $savedSchema = $this->schema('sampleSchema');
+        $this->assertSame(
+            $schema->column('target')->getDefaultValue()->getTimestamp(),
+            $savedSchema->column('target')->getDefaultValue()->getTimestamp()
+        );
+    }
+
+    public function testDatetimeDatetimeZero()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('target')->defaultValue(0);
+        $schema->save();
+
+        $savedSchema = $this->schema('sampleSchema');
+        $this->assertSame(
+            $schema->column('target')->getDefaultValue()->getTimestamp(),
+            $savedSchema->column('target')->getDefaultValue()->getTimestamp()
+        );
+    }
+
+    //time
+
+    public function testTimeWithNullValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue(null);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+
+    public function testTimeWithZeroValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue(0);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testTimeWithStringValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('12:00');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testTimeWithCustomStringValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('12am');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testTimeWithLongStringValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('1910-11-10 12am');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    //date
+
+    public function testDateWithNullValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue(null);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDateWithZeroValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue(0);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDateWithStringValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('last friday');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDateWithCustomStringValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('1910-11-10');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDateWithLongStringValue()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('1910-11-10 12am');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
     }
 }

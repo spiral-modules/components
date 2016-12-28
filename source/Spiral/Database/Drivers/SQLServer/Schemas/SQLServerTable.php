@@ -138,7 +138,7 @@ class SQLServerTable extends AbstractTable
      */
     protected function createColumn(string $name): AbstractColumn
     {
-        return new SQLServerColumn($this->getName(), $name);
+        return new SQLServerColumn($this->getName(), $name, $this->driver->getTimezone());
     }
 
     /**

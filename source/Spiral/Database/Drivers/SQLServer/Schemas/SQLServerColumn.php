@@ -29,6 +29,7 @@ class SQLServerColumn extends AbstractColumn
      * Private state related values.
      */
     const EXCLUDE_FROM_COMPARE = [
+        'timezone',
         'constrainedDefault',
         'defaultConstraint',
         'constrainedEnum',
@@ -386,7 +387,7 @@ class SQLServerColumn extends AbstractColumn
      */
     public static function createInstance(string $table, array $schema, Driver $driver): self
     {
-        $column = new self($table, $schema['COLUMN_NAME']);
+        $column = new self($table, $schema['COLUMN_NAME'], $driver->getTimezone());
 
         $column->type = $schema['DATA_TYPE'];
         $column->nullable = strtoupper($schema['IS_NULLABLE']) == 'YES';

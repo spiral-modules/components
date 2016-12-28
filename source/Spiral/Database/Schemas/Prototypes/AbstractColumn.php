@@ -49,7 +49,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     /**
      * Value to be excluded from comparation.
      */
-    const EXCLUDE_FROM_COMPARE = [];
+    const EXCLUDE_FROM_COMPARE = ['timezone'];
 
     /**
      * Normalization for time and dates.
@@ -187,6 +187,11 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     protected $type = '';
 
     /**
+     * @var \DateTimeZone
+     */
+    protected $timezone = null;
+
+    /**
      * Indicates that column can contain null values.
      *
      * @var bool
@@ -228,6 +233,17 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      * @var array
      */
     protected $enumValues = [];
+
+    /**
+     * @param string        $table
+     * @param string        $name
+     * @param \DateTimeZone $timezone
+     */
+    public function __construct(string $table, string $name, \DateTimeZone $timezone)
+    {
+        parent::__construct($table, $name);
+        $this->timezone = $timezone;
+    }
 
     /**
      * {@inheritdoc}
@@ -573,7 +589,6 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             }
 
             if ($name == 'defaultValue') {
-
                 //Default values has to compared using type-casted value
                 if ($this->getDefaultValue() != $initial->getDefaultValue()) {
                     $difference[] = $name;
@@ -739,21 +754,12 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         if ($value instanceof \DateTimeInterface) {
             $datetime = clone $value;
         } else {
-            //In order to correctly normalize date or time let's convert it into DateTime object first
-            $datetime = new \DateTime('now');
-
             if (is_numeric($value)) {
                 //Presumably timestamp
+                $datetime = new \DateTime('now', $this->timezone);
                 $datetime->setTimestamp($value);
             } else {
-                $timestamp = strtotime($value);
-                if ($timestamp === false) {
-                    throw new DefaultValueException(
-                        "Unable to normalize timestamp '{$value}' for column type '{$type}' in " . get_class($this)
-                    );
-                }
-
-                $datetime->setTimestamp($timestamp);
+                $datetime = new \DateTime($value, $this->timezone);
             }
         }
 

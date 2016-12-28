@@ -81,7 +81,11 @@ class MySQLTable extends AbstractTable
 
         $result = [];
         foreach ($this->driver->query($query) as $schema) {
-            $result[] = MySQLColumn::createInstance($this->getName(), $schema);
+            $result[] = MySQLColumn::createInstance(
+                $this->getName(),
+                $schema,
+                $this->driver->getTimezone()
+            );
         }
 
         return $result;
@@ -164,7 +168,7 @@ class MySQLTable extends AbstractTable
      */
     protected function createColumn(string $name): AbstractColumn
     {
-        return new MySQLColumn($this->getName(), $name);
+        return new MySQLColumn($this->getName(), $name, $this->driver->getTimezone());
     }
 
     /**

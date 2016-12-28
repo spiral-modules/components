@@ -17,4 +17,12 @@ class DatetimeColumnsTest extends \Spiral\Tests\Database\Drivers\DatetimeColumns
     {
         parent::testMultipleTimestampCurrentTimestamp();
     }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\HandlerException
+     */
+    public function testMultipleDatetimeCurrentTimestamp()
+    {
+        parent::testMultipleDatetimeCurrentTimestamp();
+    }
 }

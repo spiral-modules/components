@@ -144,8 +144,8 @@ class SQLiteTable extends AbstractTable
     /**
      * {@inheritdoc}
      */
-    protected function createForeign(string $column): AbstractReference
+    protected function createForeign(string $name): AbstractReference
     {
-        return new SQLiteReference($this->getName(), $this->getPrefix(), $column);
+        return new SQLiteReference($this->getName(), $this->getPrefix(), $name);
     }
 }

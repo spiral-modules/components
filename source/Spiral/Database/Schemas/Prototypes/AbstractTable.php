@@ -219,6 +219,7 @@ abstract class AbstractTable implements TableInterface
 
         //Declaring as dropper
         $this->status = self::STATUS_DROPPED;
+        $this->status = self::STATUS_DROPPED;
     }
 
     /**
@@ -429,7 +430,7 @@ abstract class AbstractTable implements TableInterface
         $foreign = $this->createForeign($this->createIdentifier('foreign', [$column]));
         $foreign->column($column);
 
-        $this->current->registerReference($foreign);
+        $this->current->registerForeign($foreign);
 
         //Let's ensure index existence to performance and compatibility reasons
         $this->index([$column]);
@@ -761,7 +762,7 @@ abstract class AbstractTable implements TableInterface
         }
 
         foreach ($this->fetchReferences() as $foreign) {
-            $state->registerReference($foreign);
+            $state->registerForeign($foreign);
         }
 
         $state->setPrimaryKeys($this->fetchPrimaryKeys());

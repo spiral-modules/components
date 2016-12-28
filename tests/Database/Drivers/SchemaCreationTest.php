@@ -70,6 +70,8 @@ abstract class SchemaCreationTest extends AbstractTest
         $schema = $this->schema('table');
         $this->assertTrue($schema->exists());
         $this->assertSameAsInDB($schema);
+
+        $this->assertSame(['active', 'disabled'], $schema->column('status')->getEnumValues());
     }
 
     public function testCreateAndDrop()

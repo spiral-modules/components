@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\Database\Drivers;
 
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
@@ -49,6 +50,16 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
     {
         foreach ($database->getTables() as $table) {
             $schema = $table->getSchema();
+
+            foreach ($schema->getForeigns() as $foreign) {
+                $schema->dropForeign($foreign->getColumn());
+            }
+
+            $schema->save(AbstractHandler::DROP_FOREIGNS);
+        }
+
+        foreach ($database->getTables() as $table) {
+            $schema = $table->getSchema();
             $schema->declareDropped();
             $schema->save();
         }
@@ -87,8 +98,18 @@ abstract class AbstractTest extends \PHPUnit_Framework_TestCase
                 $names[] = $pair[0]->getName();
             }
 
-            return "Table '{$table}' not synced, column(s) '" . join("', '", $names) . "' have been changed.";
+            return "Table '{$table}' not synced, column(s) '" . join("', '",
+                    $names) . "' have been changed.";
         }
+
+        if ($comparator->droppedForeigns()) {
+            return "Table '{$table}' not synced, FKs are missing.";
+        }
+
+        if ($comparator->addedForeigns()) {
+            return "Table '{$table}' not synced, new FKs found.";
+        }
+
 
         return "Table '{$table}' not synced, no idea why, add more messages :P";
     }

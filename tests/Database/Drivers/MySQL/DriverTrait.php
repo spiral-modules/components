@@ -19,7 +19,7 @@ trait DriverTrait
         return $this->driver ?? $this->driver = new MySQLDriver(
                 'mysql',
                 [
-                    'connection' => 'mysql:host=localhost;dbname=phpunit',
+                    'connection' => 'mysql:host=localhost;dbname=spiral',
                     'username'   => 'root',
                     'password'   => '',
                     'options'    => []

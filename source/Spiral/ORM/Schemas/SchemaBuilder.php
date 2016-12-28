@@ -11,7 +11,7 @@ use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DBALException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Helpers\SynchronizationBus;
+use Spiral\Database\Helpers\SynchronizationPool;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\DoubleReferenceException;
 use Spiral\ORM\Exceptions\SchemaException;
@@ -231,7 +231,7 @@ class SchemaBuilder
      */
     public function pushSchema(LoggerInterface $logger = null)
     {
-        $bus = new SynchronizationBus($this->getTables());
+        $bus = new SynchronizationPool($this->getTables());
         $bus->run($logger);
     }
 

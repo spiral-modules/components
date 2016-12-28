@@ -182,8 +182,8 @@ class MySQLTable extends AbstractTable
     /**
      * {@inheritdoc}
      */
-    protected function createForeign(string $column): AbstractReference
+    protected function createForeign(string $name): AbstractReference
     {
-        return new MySQLReference($this->getName(), $this->getPrefix(), $column);
+        return new MySQLReference($this->getName(), $this->getPrefix(), $name);
     }
 }

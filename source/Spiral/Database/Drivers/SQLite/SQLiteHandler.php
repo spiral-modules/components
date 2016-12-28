@@ -131,7 +131,9 @@ class SQLiteHandler extends AbstractHandler
     }
 
     /**
-     * Temporary table.
+     * Temporary table based on parent.
+     *
+     * @param AbstractTable $table
      *
      * @return AbstractTable
      */
@@ -141,7 +143,7 @@ class SQLiteHandler extends AbstractHandler
         $temporary = clone $table;
         $temporary->setName('spiral_temp_' . $table->getName() . '_' . uniqid());
 
-        //We don't need any index in temporary table
+        //We don't need any indexes in temporary table
         foreach ($temporary->getIndexes() as $index) {
             $temporary->dropIndex($index->getColumns());
         }

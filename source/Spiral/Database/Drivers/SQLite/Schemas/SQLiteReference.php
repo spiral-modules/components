@@ -10,9 +10,20 @@ namespace Spiral\Database\Drivers\SQLite\Schemas;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
+use Spiral\Database\Schemas\ReferenceInterface;
 
 class SQLiteReference extends AbstractReference
 {
+    /**
+     * In SQLite we have no predictable name.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->tablePrefix . $this->table . '_' . $this->column . '_fk';
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -33,6 +44,26 @@ class SQLiteReference extends AbstractReference
     }
 
     /**
+     * Name insensitive compare.
+     *
+     * @param ReferenceInterface $initial
+     *
+     * @return bool
+     */
+    public function compare(ReferenceInterface $initial): bool
+    {
+        if (parent::compare($initial)) {
+            return true;
+        }
+
+        return $this->getColumn() == $initial->getColumn()
+            && $this->getForeignTable() == $initial->getForeignTable()
+            && $this->getForeignKey() == $initial->getForeignKey()
+            && $this->getUpdateRule() == $initial->getUpdateRule()
+            && $this->getDeleteRule() == $initial->getDeleteRule();
+    }
+
+    /**
      * @param string $table
      * @param string $tablePrefix
      * @param array  $schema
@@ -47,6 +78,9 @@ class SQLiteReference extends AbstractReference
 
         $reference->foreignTable = $schema['table'];
         $reference->foreignKey = $schema['to'];
+
+        //In SQLLite we have to work with pre-defined reference names
+        $reference->name = $reference->getName();
 
         $reference->deleteRule = $schema['on_delete'];
         $reference->updateRule = $schema['on_update'];

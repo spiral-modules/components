@@ -19,7 +19,7 @@ use Spiral\Support\DFSSorter;
 /**
  * Saves multiple linked tables at once but treating their cross dependency.
  */
-class SynchronizationBus extends Component
+class SynchronizationPool extends Component
 {
     use LoggerTrait;
 

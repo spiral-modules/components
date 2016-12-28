@@ -235,7 +235,7 @@ class TableState
      *
      * @return AbstractReference
      */
-    public function registerReference(AbstractReference $foreign): AbstractReference
+    public function registerForeign(AbstractReference $foreign): AbstractReference
     {
         $this->foreigns[$foreign->getName()] = $foreign;
 

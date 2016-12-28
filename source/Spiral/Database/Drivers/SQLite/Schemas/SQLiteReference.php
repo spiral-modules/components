@@ -52,10 +52,6 @@ class SQLiteReference extends AbstractReference
      */
     public function compare(ReferenceInterface $initial): bool
     {
-        if (parent::compare($initial)) {
-            return true;
-        }
-
         return $this->getColumn() == $initial->getColumn()
             && $this->getForeignTable() == $initial->getForeignTable()
             && $this->getForeignKey() == $initial->getForeignKey()

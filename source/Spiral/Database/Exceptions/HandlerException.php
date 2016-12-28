@@ -19,11 +19,6 @@ class HandlerException extends DriverException implements QueryExceptionInterfac
         parent::__construct($e->getMessage(), $e->getCode(), $e);
     }
 
-    public function __toString()
-    {
-        parent::__toString();
-    }
-
     /**
      * {@inheritdoc}
      */

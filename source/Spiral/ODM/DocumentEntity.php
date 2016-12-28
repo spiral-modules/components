@@ -416,8 +416,8 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             return is_null($this->documentSchema[self::SH_DEFAULTS][$field]);
         }
 
-        //You can redefine custom logic to indicate what fields are nullable
-        return false;
+        //Values unknown to schema always nullable
+        return true;
     }
 
     /**

@@ -146,7 +146,7 @@ class SQLiteColumn extends AbstractColumn
     }
 
     /**
-     * @param string $table Table name.
+     * @param string $table
      * @param array  $schema
      *
      * @return SQLiteColumn

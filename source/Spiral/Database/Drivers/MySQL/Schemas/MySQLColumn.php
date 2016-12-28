@@ -155,7 +155,7 @@ class MySQLColumn extends AbstractColumn
     }
 
     /**
-     * @param string $table Table name.
+     * @param string $table
      * @param array  $schema
      *
      * @return MySQLColumn

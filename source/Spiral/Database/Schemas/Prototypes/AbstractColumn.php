@@ -740,7 +740,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
             $datetime = clone $value;
         } else {
             //In order to correctly normalize date or time let's convert it into DateTime object first
-            $datetime = new \DateTime();
+            $datetime = new \DateTime('now');
 
             if (is_numeric($value)) {
                 //Presumably timestamp

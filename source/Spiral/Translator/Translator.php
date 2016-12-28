@@ -131,6 +131,8 @@ class Translator extends Component implements SingletonInterface, TranslatorInte
     {
         $translator = clone $this;
         $translator->setLocale($locale);
+
+        //Keep direct reference, check if needed
         $translator->catalogues = &$this->catalogues;
         $translator->loadedLocales = &$this->loadedLocales;
 

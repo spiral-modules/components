@@ -15,7 +15,7 @@ use Spiral\Database\Exceptions\BuilderException;
 /**
  * Postgres driver requires little bit different way to handle last insert id.
  */
-class PostgresQuery extends InsertQuery
+class PostgresInsertQuery extends InsertQuery
 {
     /**
      * {@inheritdoc}

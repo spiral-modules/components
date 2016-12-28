@@ -10,6 +10,7 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 
 /**
@@ -116,6 +117,10 @@ class InsertQuery extends QueryBuilder
     {
         if (!is_array($rowsets)) {
             return $this->values(func_get_args());
+        }
+
+        if (empty($rowsets)) {
+            throw new BuilderException("Insert rowsets must not be empty");
         }
 
         //Checking if provided set is array of multiple

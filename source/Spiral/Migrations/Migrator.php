@@ -135,7 +135,7 @@ class Migrator extends Component implements SingletonInterface
             });
 
             //Registering record in database
-            $this->stateTable()->insert([
+            $this->stateTable()->insertOne([
                 'migration'     => $migration->getState()->getName(),
                 'time_executed' => new \DateTime('now')
             ]);

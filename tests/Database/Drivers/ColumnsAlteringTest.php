@@ -61,15 +61,6 @@ abstract class ColumnsAlteringTest extends BaseTest
     }
 
     //Verification test #1
-    public function testSelfCompareNew()
-    {
-        $schema = $this->schema('table');
-        $this->assertFalse($schema->exists());
-
-        $this->assertSameAsInDB($schema);
-    }
-
-    //Verification test #2
     public function testSelfComparePreparedSameInstance()
     {
         $schema = $this->sampleSchema('table');
@@ -78,7 +69,7 @@ abstract class ColumnsAlteringTest extends BaseTest
         $this->assertSameAsInDB($schema);
     }
 
-    //Verification test #3
+    //Verification test #2
     public function testSelfComparePreparedReselected()
     {
         $schema = $this->sampleSchema('table');

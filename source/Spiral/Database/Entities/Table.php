@@ -11,6 +11,7 @@ namespace Spiral\Database\Entities;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
+use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 /**
@@ -50,17 +51,6 @@ class Table implements \JsonSerializable, \IteratorAggregate
      * @return Database
      */
     public function getDatabase(): Database
-    {
-        return $this->database;
-    }
-
-    /**
-     * Alias for getDatabase().
-     *
-     * @deprecated use getDatabase() instead.
-     * @return Database
-     */
-    public function database(): Database
     {
         return $this->database;
     }
@@ -127,9 +117,18 @@ class Table implements \JsonSerializable, \IteratorAggregate
     }
 
     /**
-     * {@inheritdoc}
+     * Insert one fieldset into table and return last inserted id.
+     *
+     * Example:
+     * $table->insertOne(["name" => "Wolfy-J", "balance" => 10]);
+     *
+     * @param array $rowset
+     *
+     * @return int
+     *
+     * @throws BuilderException
      */
-    public function insert(array $rowset = [])
+    public function insertOne(array $rowset = []): int
     {
         return $this->database->insert($this->name)->values($rowset)->run();
     }
@@ -139,14 +138,14 @@ class Table implements \JsonSerializable, \IteratorAggregate
      * with column names provided in first argument. Method will return lastInsertID on success.
      *
      * Example:
-     * $table->insert(["name", "balance"], array(["Bob", 10], ["Jack", 20]))
+     * $table->insertMultiple(["name", "balance"], array(["Bob", 10], ["Jack", 20]))
      *
      * @param array $columns Array of columns.
      * @param array $rowsets Array of rowsets.
      *
      * @return mixed
      */
-    public function batchInsert(array $columns = [], array $rowsets = [])
+    public function insertMultiple(array $columns = [], array $rowsets = [])
     {
         return $this->database->insert($this->name)->columns($columns)->values($rowsets)->run();
     }

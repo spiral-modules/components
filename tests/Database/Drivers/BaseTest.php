@@ -24,7 +24,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      *
      * @return Database
      */
-    protected function database($name = 'default', $prefix = ''): Database
+    protected function database(string $name = 'default', string $prefix = ''): Database
     {
         if (isset(self::$driversCache[$this->driverID()])) {
             $driver = self::$driversCache[$this->driverID()];

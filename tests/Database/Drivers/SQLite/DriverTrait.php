@@ -20,45 +20,46 @@ trait DriverTrait
 
     public function getDriver(): Driver
     {
-        //Issues with SQL getting calls from multiple tests
-        $db = md5(get_called_class());
+        if (!isset($this->driver)) {
+            $this->driver = new SQLiteDriver(
+                'sqlite',
+                [
+                    'connection' => 'sqlite:' . __DIR__ . '/fixture/runtime.db',
+                    'username'   => 'sqlite',
+                    'password'   => '',
+                    'options'    => []
+                ],
+                new Container()
+            );
+        }
 
-        //$driver = $this->driver ??
-        $this->driver = new SQLiteDriver(
-            'sqlite',
-            [
-                'connection' => 'sqlite:' . __DIR__ . '/fixture/' . $db . '.db',
-                'username'   => 'sqlite',
-                'password'   => '',
-                'options'    => []
-            ],
-            new Container()
+        $driver = $this->driver;
 
-        );
-
-        $this->driver->setProfiling(static::PROFILING)->setLogger(new class implements LoggerInterface
-        {
-            use LoggerTrait;
-
-            public function log($level, $message, array $context = [])
+        if (static::PROFILING) {
+            $driver->setProfiling(static::PROFILING)->setLogger(new class implements LoggerInterface
             {
-                if ($level == LogLevel::ERROR) {
-                    echo " \n! \033[31m" . $message . "\033[0m";
-                } elseif ($level == LogLevel::ALERT) {
-                    echo " \n! \033[35m" . $message . "\033[0m";
-                } elseif (strpos($message, 'PRAGMA') === 0) {
-                    echo " \n> \033[34m" . $message . "\033[0m";
-                } else {
-                    if (strpos($message, 'SELECT') === 0) {
-                        echo " \n> \033[32m" . $message . "\033[0m";
+                use LoggerTrait;
+
+                public function log($level, $message, array $context = [])
+                {
+                    if ($level == LogLevel::ERROR) {
+                        echo " \n! \033[31m" . $message . "\033[0m";
+                    } elseif ($level == LogLevel::ALERT) {
+                        echo " \n! \033[35m" . $message . "\033[0m";
+                    } elseif (strpos($message, 'PRAGMA') === 0) {
+                        echo " \n> \033[34m" . $message . "\033[0m";
                     } else {
-                        echo " \n> \033[33m" . $message . "\033[0m";
+                        if (strpos($message, 'SELECT') === 0) {
+                            echo " \n> \033[32m" . $message . "\033[0m";
+                        } else {
+                            echo " \n> \033[33m" . $message . "\033[0m";
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
-        return $this->driver;
+        return $driver;
     }
 
     protected function driverID(): string

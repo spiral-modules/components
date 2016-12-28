@@ -7,7 +7,6 @@
 namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Entities\AbstractHandler;
-use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 abstract class IsolationTest extends BaseTest
@@ -19,9 +18,7 @@ abstract class IsolationTest extends BaseTest
 
     public function schema(string $prefix, string $table): AbstractTable
     {
-        $db = new Database($this->getDriver(), $prefix, $prefix);
-
-        return $db->table($table)->getSchema();
+        return $this->database('default', $prefix)->table($table)->getSchema();
     }
 
     public function testGetPrefix()
@@ -38,7 +35,7 @@ abstract class IsolationTest extends BaseTest
         $this->assertTrue($this->schema('prefix_', 'table')->exists());
     }
 
-    public function testSetPrefix()
+    public function testChangeName()
     {
         $schema = $this->schema('prefix_', 'table');
         $this->assertFalse($schema->exists());
@@ -52,11 +49,11 @@ abstract class IsolationTest extends BaseTest
         $schema->primary('id');
         $schema->save(AbstractHandler::DO_ALL);
 
-        $this->assertTrue($this->schema('prefix_', 'new_name')->exists());
         $this->assertTrue($this->schema('prefix_new_', 'name')->exists());
+        $this->assertTrue($this->schema('prefix_', 'new_name')->exists());
     }
 
-    public function testRenamePrefixed()
+    public function testRename()
     {
         $schema = $this->schema('prefix_', 'table');
         $this->assertFalse($schema->exists());

@@ -14,6 +14,21 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 class SQLiteHandler extends AbstractHandler
 {
+    /**
+     * Drop table from database.
+     *
+     * @param AbstractTable $table
+     *
+     * @throws HandlerException
+     */
+    public function dropTable(AbstractTable $table)
+    {
+        parent::dropTable($table);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function syncTable(AbstractTable $table, int $behaviour = self::DO_ALL)
     {
         if (!$this->requiresRebuild($table)) {
@@ -117,6 +132,10 @@ class SQLiteHandler extends AbstractHandler
     private function requiresRebuild(AbstractTable $table): bool
     {
         $comparator = $table->getComparator();
+
+//        if ($comparator->isRenamed()) {
+//            return true;
+//        }
 
         $difference = [
             count($comparator->addedColumns()),

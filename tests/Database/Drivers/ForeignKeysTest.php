@@ -40,6 +40,9 @@ abstract class ForeignKeysTest extends AbstractTest
 
         if (!$schema->exists()) {
             $schema->primary('id');
+
+            $schema->integer('secondary_id');
+
             $schema->string('first_name')->nullable(false);
             $schema->string('last_name')->nullable(false);
             $schema->string('email', 64)->nullable(false);
@@ -74,6 +77,7 @@ abstract class ForeignKeysTest extends AbstractTest
         $schema->save(AbstractHandler::DO_ALL);
 
         $this->assertSameAsInDB($schema);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
     }
 
     public function testCreateWithReferenceToExistedTableCascade()
@@ -92,6 +96,7 @@ abstract class ForeignKeysTest extends AbstractTest
         $schema->save(AbstractHandler::DO_ALL);
 
         $this->assertSameAsInDB($schema);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
     }
 
     public function testCreateWithReferenceToExistedTableNoAction()
@@ -107,6 +112,163 @@ abstract class ForeignKeysTest extends AbstractTest
             ->onDelete(AbstractReference::NO_ACTION)
             ->onUpdate(AbstractReference::NO_ACTION);
 
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertSameAsInDB($schema);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+    }
+
+    public function testDropExistedReference()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::NO_ACTION)
+            ->onUpdate(AbstractReference::NO_ACTION);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $schema->dropForeign('external_id');
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertFalse($this->schema('schema')->hasForeign('external_id'));
+    }
+
+    public function testChangeReferenceForeignKey()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::NO_ACTION)
+            ->onUpdate(AbstractReference::NO_ACTION);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $schema->foreign('external_id')->references('external', 'secondary_id');
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeReferenceForeignTable()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::NO_ACTION)
+            ->onUpdate(AbstractReference::NO_ACTION);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $this->assertTrue($this->sampleSchema('external2')->exists());
+
+        $schema->foreign('external_id')->references('external2', 'secondary_id');
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeUpdateRuleToCascade()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::NO_ACTION)
+            ->onUpdate(AbstractReference::NO_ACTION);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $schema->foreign('external_id')->onUpdate(AbstractReference::CASCADE);
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeUpdateRuleToNoAction()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::CASCADE)
+            ->onUpdate(AbstractReference::CASCADE);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $schema->foreign('external_id')->onUpdate(AbstractReference::NO_ACTION);
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeDeleteRuleToCascade()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::NO_ACTION)
+            ->onUpdate(AbstractReference::NO_ACTION);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $schema->foreign('external_id')->onDelete(AbstractReference::CASCADE);
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeDeleteRuleToNoAction()
+    {
+        $schema = $this->schema('schema');
+        $this->assertFalse($schema->exists());
+        $this->assertTrue($this->sampleSchema('external')->exists());
+
+        $schema->primary('id');
+        $schema->integer('external_id');
+
+        $schema->foreign('external_id')->references('external', 'id')
+            ->onDelete(AbstractReference::CASCADE)
+            ->onUpdate(AbstractReference::CASCADE);
+
+        $schema->save(AbstractHandler::DO_ALL);
+        $this->assertTrue($this->schema('schema')->hasForeign('external_id'));
+
+        $schema->foreign('external_id')->onDelete(AbstractReference::NO_ACTION);
         $schema->save(AbstractHandler::DO_ALL);
 
         $this->assertSameAsInDB($schema);

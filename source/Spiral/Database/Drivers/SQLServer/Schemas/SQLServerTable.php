@@ -6,6 +6,8 @@
  */
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
+use Psr\Log\LoggerInterface;
+use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
@@ -13,6 +15,28 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 class SQLServerTable extends AbstractTable
 {
+    /**
+     * {@inheritdoc}
+     *
+     * SQLServer will reload schemas after successful savw.
+     */
+    public function save(
+        int $behaviour = Behaviour::DO_ALL,
+        LoggerInterface $logger = null,
+        bool $reset = true
+    ) {
+        parent::save($behaviour, $logger, $reset);
+
+        if ($reset) {
+            foreach ($this->fetchColumns() as $column) {
+                //SQLServer is going to add some automatic constrains, let's handle them
+                $this->current->registerColumn($column);
+            }
+
+            $this->initial->syncState($this->current);
+        }
+    }
+
     /**
      * {@inheritdoc}
      */

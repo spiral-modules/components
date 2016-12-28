@@ -35,7 +35,7 @@ abstract class IsolationTest extends BaseTest
         $this->assertTrue($this->schema('prefix_', 'table')->exists());
     }
 
-    public function testChangeName()
+    public function testChangeNameBeforeSave()
     {
         $schema = $this->schema('prefix_', 'table');
         $this->assertFalse($schema->exists());
@@ -68,5 +68,32 @@ abstract class IsolationTest extends BaseTest
 
         $this->assertFalse($this->schema('prefix_', 'table')->exists());
         $this->assertTrue($this->schema('prefix_', 'abc')->exists());
+    }
+
+    public function testCreateAndMakeReferenceInSelfScope()
+    {
+        $schema = $this->schema('prefix_', 'a');
+        $this->assertFalse($schema->exists());
+
+        $schema->primary('id');
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $schema = $this->schema('prefix_', 'b');
+        $this->assertFalse($schema->exists());
+
+        $schema->primary('id');
+        $schema->integer('to_a');
+        $schema->foreign('to_a')->references('a', 'id');
+
+        $this->assertSame('prefix_a',   $schema->foreign('to_a')->getForeignTable());
+
+        $schema->save(AbstractHandler::DO_ALL);
+
+        $this->assertTrue($this->schema('prefix_', 'a')->exists());
+        $this->assertTrue($this->schema('prefix_', 'b')->exists());
+
+        $foreign = $this->schema('prefix_', 'b')->foreign('to_a');
+
+        $this->assertSame('prefix_a', $foreign->getForeignTable());
     }
 }

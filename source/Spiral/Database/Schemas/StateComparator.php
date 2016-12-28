@@ -246,32 +246,4 @@ class StateComparator
 
         return $difference;
     }
-
-    /**
-     * @return array
-     */
-    public function __debugInfo()
-    {
-        return [
-            'name'        => [
-                'initial' => $this->initial->getName(),
-                'current' => $this->current->getName(),
-            ],
-            'columns'     => [
-                'added'   => $this->addedColumns(),
-                'dropped' => $this->droppedColumns(),
-                'altered' => $this->alteredColumns(),
-            ],
-            'indexes'     => [
-                'added'   => $this->addedIndexes(),
-                'dropped' => $this->droppedIndexes(),
-                'altered' => $this->alteredIndexes(),
-            ],
-            'foreignKeys' => [
-                'added'   => $this->addedForeigns(),
-                'dropped' => $this->droppedForeigns(),
-                'altered' => $this->alteredForeigns(),
-            ],
-        ];
-    }
 }

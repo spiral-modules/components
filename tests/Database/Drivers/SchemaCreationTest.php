@@ -82,6 +82,8 @@ abstract class SchemaCreationTest extends BaseTest
         $schema->primary('id');
         $schema->save();
 
+        $this->assertSame('table', $schema->column('id')->getTable());
+
         $this->assertTrue($schema->exists());
 
         $schema->declareDropped();
@@ -89,6 +91,8 @@ abstract class SchemaCreationTest extends BaseTest
 
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
+
+
     }
 
     public function testCreateNoPrimary()

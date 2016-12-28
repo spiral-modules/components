@@ -83,40 +83,33 @@ class SynchronizationPool extends Component
 
         try {
             //Drop not-needed foreign keys and alter everything else
-            $this->runChanges(Behaviour::DROP_FOREIGNS, $logger);
+            foreach ($this->sortedTables() as $table) {
+                if ($table->exists()) {
+                    $table->save(Behaviour::DROP_FOREIGNS, $logger, false);
+                }
+            }
 
             //Drop not-needed indexes
-            $this->runChanges(Behaviour::DROP_INDEXES, $logger);
+            foreach ($this->sortedTables() as $table) {
+                if ($table->exists()) {
+                    $table->save(Behaviour::DROP_INDEXES, $logger, false);
+                }
+            }
 
             //Other changes
-            $this->runChanges(
-                Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES,
-                $logger,
-                true
-            );
+            foreach ($this->sortedTables() as $table) {
+                $table->save(
+                    Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES,
+                    $logger,
+                    false
+                );
+            }
         } catch (\Throwable $e) {
             $this->rollbackTransaction();
             throw $e;
         }
 
         $this->commitTransaction();
-    }
-
-    /**
-     * Rum all tables.
-     *
-     * @param int                  $behaviour
-     * @param LoggerInterface|null $logger
-     * @param bool                 $reset Reset schemas.
-     */
-    protected function runChanges(
-        int $behaviour = Behaviour::DO_ALL,
-        LoggerInterface $logger = null,
-        bool $reset = false
-    ) {
-        foreach ($this->sortedTables() as $table) {
-            $table->save($behaviour, $logger, $reset);
-        }
     }
 
     /**

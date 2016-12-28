@@ -85,6 +85,7 @@ abstract class IsolationTest extends BaseTest
         $schema->integer('to_a');
         $schema->foreign('to_a')->references('a', 'id');
 
+        $this->assertSame('prefix_b', $schema->column('id')->getTable());
         $this->assertSame('prefix_a',   $schema->foreign('to_a')->getForeignTable());
 
         $schema->save(AbstractHandler::DO_ALL);

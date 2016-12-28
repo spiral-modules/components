@@ -13,7 +13,6 @@ use Spiral\Core\Container;
 use Spiral\Database\Drivers\SQLite\SQLiteDriver;
 use Spiral\Database\Entities\Driver;
 
-//@todo investigate issue about renaming tables cause 17 error in SQLite on schema read!
 trait DriverTrait
 {
     private $driver;

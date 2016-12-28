@@ -128,7 +128,7 @@ abstract class AbstractHandler
     {
         $comparator = $table->getComparator();
 
-        if ($comparator->isRenamed()) {
+        if ($comparator->isRenamed() && $behaviour & self::DO_RENAME) {
             $this->log('Renaming table {table} to {name}.', [
                 'table' => $this->identify($table->getInitialName()),
                 'name'  => $this->identify($table->getName())

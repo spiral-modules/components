@@ -102,6 +102,8 @@ abstract class IndexesTest extends BaseTest
         $schema->save(AbstractHandler::DO_ALL);
 
         $this->assertSameAsInDB($schema);
+
+        $this->assertFalse($this->schema('table')->index(['value'])->isUnique());
     }
 
     public function testCreateWithUniqueIndex()
@@ -116,6 +118,8 @@ abstract class IndexesTest extends BaseTest
         $schema->save(AbstractHandler::DO_ALL);
 
         $this->assertSameAsInDB($schema);
+
+        $this->assertTrue($this->schema('table')->index(['value'])->isUnique());
     }
 
     public function testCreateWithComplexIndex()

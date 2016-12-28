@@ -10,7 +10,6 @@ use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
-use Spiral\Database\Schemas\StateComparator;
 
 abstract class ColumnsAlteringTest extends AbstractTest
 {
@@ -293,38 +292,5 @@ abstract class ColumnsAlteringTest extends AbstractTest
         $schema->save();
 
         $this->assertSameAsInDB($schema);
-    }
-
-    protected function assertSameAsInDB(AbstractTable $current)
-    {
-        $comparator = new StateComparator(
-            $current->getState(),
-            $this->schema($current->getName())->getState()
-        );
-
-        if ($comparator->hasChanges()) {
-            $this->fail($this->makeMessage($current->getName(), $comparator));
-        }
-    }
-
-    protected function makeMessage(string $table, StateComparator $comparator)
-    {
-        if ($comparator->isPrimaryChanged()) {
-            return "Table '{$table}' not synced, primary indexes are different.";
-        }
-
-        if ($comparator->droppedColumns()) {
-            return "Table '{$table}' not synced, columns are missing.";
-        }
-
-        if ($comparator->addedColumns()) {
-            return "Table '{$table}' not synced, new columns found.";
-        }
-
-        if ($comparator->alteredColumns()) {
-            return "Table '{$table}' not synced, columns not identical.";
-        }
-
-        return "Table '{$table}' not synced, no idea why, add more messages :P";
     }
 }

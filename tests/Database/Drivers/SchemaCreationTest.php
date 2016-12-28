@@ -52,6 +52,7 @@ abstract class SchemaCreationTest extends AbstractTest
 
         $schema = $this->schema('table');
         $this->assertTrue($schema->exists());
+        $this->assertSameAsInDB($schema);
     }
 
     public function testMultipleColumns()
@@ -68,6 +69,7 @@ abstract class SchemaCreationTest extends AbstractTest
 
         $schema = $this->schema('table');
         $this->assertTrue($schema->exists());
+        $this->assertSameAsInDB($schema);
     }
 
     public function testCreateAndDrop()

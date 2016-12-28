@@ -20,7 +20,7 @@ class QueryInterpolator
 {
     /**
      * Helper method used to interpolate SQL query with set of parameters, must be used only for
-     * development purposes and never for real query.
+     * development purposes and never for real query!
      *
      * @param string               $query
      * @param ParameterInterface[] $parameters Parameters to be binded into query. Named list are

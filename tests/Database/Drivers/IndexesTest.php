@@ -10,7 +10,7 @@ use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-abstract class IndexesTest extends AbstractTest
+abstract class IndexesTest extends BaseTest
 {
     /**
      * @var Database

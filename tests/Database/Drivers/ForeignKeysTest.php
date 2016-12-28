@@ -12,7 +12,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-abstract class ForeignKeysTest extends AbstractTest
+abstract class ForeignKeysTest extends BaseTest
 {
     /**
      * @var Database

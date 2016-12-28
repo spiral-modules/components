@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Database\Drivers;
 
-abstract class SynchronizationPoolTest extends AbstractTest
+abstract class SynchronizationPoolTest extends BaseTest
 {
 
 }

@@ -9,7 +9,7 @@ namespace Spiral\Tests\Database\Drivers;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-abstract class SchemaCreationTest extends AbstractTest
+abstract class SchemaCreationTest extends BaseTest
 {
     /**
      * @var Database

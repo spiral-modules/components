@@ -6,9 +6,9 @@
  */
 namespace Spiral\Database\Drivers\SQLServer;
 
+use Interop\Container\ContainerInterface;
 use PDO;
 use Psr\Log\LoggerInterface;
-use Spiral\Core\FactoryInterface;
 use Spiral\Database\DatabaseInterface;
 use Spiral\Database\Drivers\SQLServer\Schemas\SQLServerTable;
 use Spiral\Database\Entities\AbstractHandler;
@@ -53,9 +53,9 @@ class SQLServerDriver extends Driver
      *
      * @throws DriverException
      */
-    public function __construct($name, array $options, FactoryInterface $factory)
+    public function __construct($name, array $options, ContainerInterface $container)
     {
-        parent::__construct($name, $options, $factory);
+        parent::__construct($name, $options, $container);
 
         if ((int)$this->getPDO()->getAttribute(\PDO::ATTR_SERVER_VERSION) < 12) {
             throw new DriverException("SQLServer driver supports only 12+ version of SQLServer");

@@ -11,7 +11,7 @@ use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-abstract class ColumnsAlteringTest extends AbstractTest
+abstract class ColumnsAlteringTest extends BaseTest
 {
     /**
      * @var Database

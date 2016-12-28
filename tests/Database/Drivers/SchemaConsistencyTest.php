@@ -9,7 +9,7 @@ namespace Spiral\Tests\Database\Drivers;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
-abstract class SchemaConsistencyTest extends AbstractTest
+abstract class SchemaConsistencyTest extends BaseTest
 {
     /**
      * @var Database
@@ -89,7 +89,6 @@ abstract class SchemaConsistencyTest extends AbstractTest
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
 
-
         $column = $schema->string('target');
 
         $schema->save();
@@ -102,7 +101,6 @@ abstract class SchemaConsistencyTest extends AbstractTest
     {
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
-
 
         $column = $schema->string('target', 100);
 

@@ -8,7 +8,9 @@
 
 namespace Spiral\Database\Entities;
 
+use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
@@ -47,20 +49,27 @@ abstract class Driver extends PDODriver
     private $transactionLevel = 0;
 
     /**
-     * @var FactoryInterface
+     * Defines IoC scope for all driver specific builders.
+     *
+     * @var ContainerInterface
      */
-    protected $factory = null;
+    protected $container = null;
 
     /**
-     * @param string           $name
-     * @param array            $options
-     * @param FactoryInterface $factory Required to build instances of query builders and compilers.
+     * @param string             $name
+     * @param array              $options
+     * @param ContainerInterface $container Required to build instances of query builders and
+     *                                      compilers. Also provides support for scope specific
+     *                                      functionality like magic paginators and logs (yes, you
+     *                                      can store LogsInterface in this container set profiling
+     *                                      listener.
      */
-    public function __construct(string $name, array $options, FactoryInterface $factory)
+    public function __construct(string $name, array $options, ContainerInterface $container = null)
     {
         parent::__construct($name, $options);
 
-        $this->factory = $factory;
+        //Factory with default fallback
+        $this->container = $container ?? new Container();
     }
 
     /**
@@ -98,7 +107,7 @@ abstract class Driver extends PDODriver
      */
     public function tableSchema(string $table, string $prefix = ''): AbstractTable
     {
-        return $this->factory->make(
+        return $this->getFactory()->make(
             static::TABLE_SCHEMA_CLASS,
             ['driver' => $this, 'name' => $table, 'prefix' => $prefix]
         );
@@ -114,7 +123,7 @@ abstract class Driver extends PDODriver
      */
     public function queryCompiler(string $prefix = ''): QueryCompiler
     {
-        return $this->factory->make(
+        return $this->getFactory()->make(
             static::QUERY_COMPILER,
             ['driver' => $this, 'quoter' => new Quoter($this, $prefix)]
         );
@@ -131,7 +140,7 @@ abstract class Driver extends PDODriver
      */
     public function insertBuilder(string $prefix, array $parameters = []): InsertQuery
     {
-        return $this->factory->make(
+        return $this->getFactory()->make(
             InsertQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix)] + $parameters
         );
@@ -148,7 +157,7 @@ abstract class Driver extends PDODriver
      */
     public function selectBuilder(string $prefix, array $parameters = []): SelectQuery
     {
-        return $this->factory->make(
+        return $this->getFactory()->make(
             SelectQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix)] + $parameters
         );
@@ -165,7 +174,7 @@ abstract class Driver extends PDODriver
      */
     public function deleteBuilder(string $prefix, array $parameters = []): DeleteQuery
     {
-        return $this->factory->make(
+        return $this->getFactory()->make(
             DeleteQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix)] + $parameters
         );
@@ -182,7 +191,7 @@ abstract class Driver extends PDODriver
      */
     public function updateBuilder(string $prefix, array $parameters = []): UpdateQuery
     {
-        return $this->factory->make(
+        return $this->getFactory()->make(
             UpdateQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix)] + $parameters
         );
@@ -272,6 +281,20 @@ abstract class Driver extends PDODriver
         $this->savepointRollback($this->transactionLevel + 1);
 
         return true;
+    }
+
+    /**
+     * Get driver specific factory.
+     *
+     * @return FactoryInterface
+     */
+    protected function getFactory(): FactoryInterface
+    {
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
+        }
+
+        return $this->container->get(FactoryInterface::class);
     }
 
     /**

@@ -12,9 +12,11 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Database\Schemas\StateComparator;
 
-abstract class AbstractTest extends \PHPUnit_Framework_TestCase
+abstract class BaseTest extends \PHPUnit_Framework_TestCase
 {
     static $driversCache = [];
+
+    const PROFILING = false;
 
     /**
      * @param string $name

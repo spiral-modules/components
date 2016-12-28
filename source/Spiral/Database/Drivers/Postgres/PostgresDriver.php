@@ -8,8 +8,8 @@
 
 namespace Spiral\Database\Drivers\Postgres;
 
+use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
@@ -54,18 +54,18 @@ class PostgresDriver extends Driver
     protected $memory = null;
 
     /**
-     * @param string           $name
-     * @param array            $options
-     * @param FactoryInterface $factory
-     * @param MemoryInterface  $memory Optional.
+     * @param string             $name
+     * @param array              $options
+     * @param ContainerInterface $container
+     * @param MemoryInterface    $memory Optional.
      */
     public function __construct(
         $name,
         array $options,
-        FactoryInterface $factory,
+        ContainerInterface $container,
         MemoryInterface $memory = null
     ) {
-        parent::__construct($name, $options, $factory);
+        parent::__construct($name, $options, $container);
         $this->memory = $memory;
     }
 
@@ -151,7 +151,7 @@ class PostgresDriver extends Driver
      */
     public function insertBuilder(string $prefix, array $parameters = []): InsertQuery
     {
-        return $this->factory->make(
+        return $this->container->make(
             PostgresQuery::class,
             ['driver' => $this, 'compiler' => $this->queryCompiler($prefix),] + $parameters
         );

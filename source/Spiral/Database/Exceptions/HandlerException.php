@@ -9,13 +9,26 @@ namespace Spiral\Database\Exceptions;
 /**
  * Schema sync related exception.
  */
-class HandlerException extends DriverException
+class HandlerException extends DriverException implements QueryExceptionInterface
 {
     /**
      * @param QueryException $e
      */
     public function __construct(QueryException $e)
     {
-        parent::__construct($e->getMessage(), $e->getCode(), $e->getPrevious());
+        parent::__construct($e->getMessage(), $e->getCode(), $e);
+    }
+
+    public function __toString()
+    {
+        parent::__toString();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQuery(): string
+    {
+        return $this->getPrevious()->getQuery();
     }
 }

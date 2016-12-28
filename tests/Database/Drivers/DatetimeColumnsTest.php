@@ -11,6 +11,7 @@ use Spiral\Database\Entities\Database;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
+//See MySQL Driver!
 abstract class DatetimeColumnsTest extends AbstractTest
 {
     /**
@@ -67,7 +68,7 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $schema = $this->schema('sampleSchema');
         $this->assertFalse($schema->exists());
 
-        $schema->timestamp('timestamp')->nullable(true)->defaultValue(null);
+        $schema->timestamp('target')->nullable(true)->defaultValue(null);
         $schema->save();
 
         $this->assertSameAsInDB($schema);
@@ -78,7 +79,18 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $schema = $this->schema('sampleSchema');
         $this->assertFalse($schema->exists());
 
-        $schema->timestamp('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->timestamp('target')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testTimestampCurrentTimestampNotNull()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->timestamp('target')->nullable(false)->defaultValue(AbstractColumn::DATETIME_NOW);
         $schema->save();
 
         $this->assertSameAsInDB($schema);
@@ -89,8 +101,8 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $schema = $this->schema('sampleSchema');
         $this->assertFalse($schema->exists());
 
-        $schema->timestamp('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
-        $schema->timestamp('timestamp2')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->timestamp('target')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->timestamp('target2')->defaultValue(AbstractColumn::DATETIME_NOW);
         $schema->save();
 
         $this->assertSameAsInDB($schema);
@@ -118,7 +130,7 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $schema = $this->schema('sampleSchema');
         $this->assertFalse($schema->exists());
 
-        $schema->datetime('timestamp')->nullable(true)->defaultValue(null);
+        $schema->datetime('target')->nullable(true)->defaultValue(null);
         $schema->save();
 
         $this->assertSameAsInDB($schema);
@@ -129,7 +141,18 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $schema = $this->schema('sampleSchema');
         $this->assertFalse($schema->exists());
 
-        $schema->datetime('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->datetime('target')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDatetimeCurrentTimestampNotNull()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->datetime('target')->nullable(false)->defaultValue(AbstractColumn::DATETIME_NOW);
         $schema->save();
 
         $this->assertSameAsInDB($schema);
@@ -140,8 +163,8 @@ abstract class DatetimeColumnsTest extends AbstractTest
         $schema = $this->schema('sampleSchema');
         $this->assertFalse($schema->exists());
 
-        $schema->datetime('timestamp')->defaultValue(AbstractColumn::DATETIME_NOW);
-        $schema->datetime('timestamp2')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->datetime('target')->defaultValue(AbstractColumn::DATETIME_NOW);
+        $schema->datetime('target2')->defaultValue(AbstractColumn::DATETIME_NOW);
 
         $schema->save();
 

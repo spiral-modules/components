@@ -13,16 +13,30 @@ namespace Spiral\Database\Exceptions;
  *
  * @todo add more sub exceptions
  */
-class QueryException extends DatabaseException
+class QueryException extends DatabaseException implements QueryExceptionInterface
 {
+    /**
+     * @var string
+     */
+    private $query;
+
     /**
      * {@inheritdoc}
      *
      * @param \PDOException $exception
      */
-    public function __construct(\PDOException $exception)
+    public function __construct(\PDOException $exception, string $query)
     {
         parent::__construct($exception->getMessage(), (int)$exception->getCode(), $exception);
+        $this->query = $query;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQuery(): string
+    {
+        return $this->query;
     }
 
     /**

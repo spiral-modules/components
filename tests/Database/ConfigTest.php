@@ -63,11 +63,15 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
                 'test2' => [
                     'tablePrefix' => 'bce'
                 ],
+                'test3' => [
+
+                ]
             ]
         ]);
 
         $this->assertSame('abc', $config->databasePrefix('test'));
         $this->assertSame('bce', $config->databasePrefix('test2'));
+        $this->assertSame('', $config->databasePrefix('test3'));
     }
 
     public function testDatabaseNames()

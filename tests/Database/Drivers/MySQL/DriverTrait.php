@@ -17,6 +17,17 @@ trait DriverTrait
 {
     private $driver;
 
+    public function setUp()
+    {
+        if (!in_array('mysql', \PDO::getAvailableDrivers())) {
+            $this->markTestSkipped(
+                'The MySQL PDO extension is not available.'
+            );
+        }
+
+        parent::setUp();
+    }
+
     public function getDriver(): Driver
     {
         if (!isset($this->driver)) {

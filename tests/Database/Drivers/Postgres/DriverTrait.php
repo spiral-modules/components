@@ -17,6 +17,17 @@ trait DriverTrait
 {
     private $driver;
 
+    public function setUp()
+    {
+        if (!in_array('pgsql', \PDO::getAvailableDrivers())) {
+            $this->markTestSkipped(
+                'The Postgres PDO extension is not available.'
+            );
+        }
+
+        parent::setUp();
+    }
+
     public function getDriver(): Driver
     {
         if (!isset($this->driver)) {

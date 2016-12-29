@@ -96,13 +96,17 @@ class SynchronizationPool extends Component
                 }
             }
 
-            //Other changes
+            //Other changes [NEW TABLES WILL BE CREATED HERE!]
             foreach ($this->sortedTables() as $table) {
                 $table->save(
-                    Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES,
-                    $logger,
-                    false
+                    Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES ^ Behaviour::CREATE_FOREIGNS,
+                    $logger
                 );
+            }
+
+            //Finishing with new foreign keys
+            foreach ($this->sortedTables() as $table) {
+                $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);
             }
         } catch (\Throwable $e) {
             $this->rollbackTransaction();

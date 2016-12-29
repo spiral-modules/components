@@ -133,14 +133,11 @@ class SQLiteHandler extends AbstractHandler
     {
         $comparator = $table->getComparator();
 
-//        if ($comparator->isRenamed()) {
-//            return true;
-//        }
-
         $difference = [
             count($comparator->addedColumns()),
             count($comparator->droppedColumns()),
             count($comparator->alteredColumns()),
+
             count($comparator->addedForeigns()),
             count($comparator->droppedForeigns()),
             count($comparator->alteredForeigns()),

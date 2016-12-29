@@ -34,8 +34,6 @@ class SQLServerTable extends AbstractTable
                     $this->current->registerColumn($column);
                 }
             }
-
-            $this->initial->syncState($this->current);
         }
     }
 

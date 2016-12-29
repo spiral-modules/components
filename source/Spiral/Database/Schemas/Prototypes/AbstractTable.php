@@ -631,23 +631,21 @@ abstract class AbstractTable implements TableInterface
         }
 
         //Ensure that columns references to valid indexes and et
-        $prepared = $this->prepareSchema();
+        $prepared = $this->prepareSchema($behaviour & Behaviour::CREATE_FOREIGNS);
 
         if ($this->status == self::STATUS_NEW) {
             //Executing table creation
             $handler->createTable($prepared);
-            $this->status = self::STATUS_EXISTS;
         } else {
             //Executing table syncing
             if ($this->hasChanges()) {
                 $handler->syncTable($prepared, $behaviour);
             }
-
-            $prepared->status = self::STATUS_EXISTS;
         }
 
         //Syncing our schemas
         if ($reset) {
+            $this->status = self::STATUS_EXISTS;
             $this->initial->syncState($prepared->current);
         }
     }
@@ -655,9 +653,11 @@ abstract class AbstractTable implements TableInterface
     /**
      * Ensure that no wrong indexes left in table.
      *
+     * @param bool $withForeigns
+     *
      * @return AbstractTable
      */
-    protected function prepareSchema()
+    protected function prepareSchema(bool $withForeigns = true)
     {
         //To make sure that no pre-sync modifications will be reflected on current table
         $target = clone $this;
@@ -709,6 +709,13 @@ abstract class AbstractTable implements TableInterface
                 if ($initial->getName() == $foreign->getColumn()) {
                     $foreign->column($name->getName());
                 }
+            }
+        }
+
+        if (!$withForeigns) {
+            foreach ($this->getComparator()->addedForeigns() as $foreign) {
+                //Excluding from creation
+                $target->current->forgetForeign($foreign);
             }
         }
 

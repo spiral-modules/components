@@ -72,15 +72,15 @@ class QueryCompiler
     /**
      * Query query identifier, if identified stated as table - table prefix must be added.
      *
-     * @param string $identifier Identifier can include simple column operations and functions,
-     *                           having "." in it will automatically force table prefix to first
-     *                           value.
-     * @param bool   $isTable    Set to true to let quote method know that identified is related
-     *                           to table name.
+     * @param string|FragmentInterface $identifier Identifier can include simple column operations
+     *                                             and functions, having "." in it will
+     *                                             automatically force table prefix to first value.
+     * @param bool                     $isTable    Set to true to let quote method know that
+     *                                             identified is related to table name.
      *
      * @return string
      */
-    public function quote(string $identifier, bool $isTable = false): string
+    public function quote($identifier, bool $isTable = false): string
     {
         if ($identifier instanceof FragmentInterface) {
             return $this->prepareFragment($identifier);

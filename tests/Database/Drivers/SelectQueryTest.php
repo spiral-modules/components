@@ -8,8 +8,11 @@ namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Injections\Expression;
+use Spiral\Database\Injections\Fragment;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Pagination\PaginatorAwareInterface;
 
 abstract class SelectQueryTest extends BaseQueryTest
 {
@@ -33,6 +36,8 @@ abstract class SelectQueryTest extends BaseQueryTest
         $this->assertInstanceOf(SelectQuery::class, $this->database->select());
         $this->assertInstanceOf(SelectQuery::class, $this->database->table('table')->select());
         $this->assertInstanceOf(SelectQuery::class, $this->database->table->select());
+        $this->assertInstanceOf(\IteratorAggregate::class, $this->database->table->select());
+        $this->assertInstanceOf(PaginatorAwareInterface::class, $this->database->table->select());
     }
 
     //Generic behaviours
@@ -94,6 +99,21 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()->distinct()->from(['users'])
             ->where('balance', 'NOT BETWEEN', 0, 1000);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} WHERE {balance} NOT BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Between statements expects exactly 2 values
+     */
+    public function testSelectWithWhereBetweenBadValue()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])
+            ->where('balance', 'BETWEEN', 0);
 
         $this->assertSameQuery(
             "SELECT DISTINCT * FROM {users} WHERE {balance} NOT BETWEEN ? AND ?",
@@ -282,6 +302,54 @@ abstract class SelectQueryTest extends BaseQueryTest
         );
     }
 
+    public function testShortWhereWithBetweenCondition()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where([
+                'value' => [
+                    'between' => [1, 2]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {value} BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    public function testShortWhereWithNotBetweenCondition()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where([
+                'value' => [
+                    'not between' => [1, 2]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {value} NOT BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Exactly 2 array values are required for between statement
+     */
+    public function testShortWhereWithBetweenConditionBadArguments()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where([
+                'value' => [
+                    'between' => [1]
+                ]
+            ]);
+
+    }
+
     public function testShortWhereMultiple()
     {
         $select = $this->database->select()
@@ -395,6 +463,24 @@ abstract class SelectQueryTest extends BaseQueryTest
         );
     }
 
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Nested conditions should have defined operator
+     */
+    public function testBadShortExpression()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where([
+                'status' => ['active', 'blocked']
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} = ?",
+            $select
+        );
+    }
+
     //Order By
 
     public function testOrderByAsc()
@@ -469,6 +555,22 @@ abstract class SelectQueryTest extends BaseQueryTest
             ->where(['name' => 'Anton'])
             ->orderBy('value', SelectQuery::SORT_ASC)
             ->orderBy('name', SelectQuery::SORT_DESC);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {name} = ? ORDER BY {value} ASC, {name} DESC",
+            $select
+        );
+    }
+
+    public function testMultipleOrderByViaArray()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where(['name' => 'Anton'])
+            ->orderBy([
+                'value' => SelectQuery::SORT_ASC,
+                'name'  => SelectQuery::SORT_DESC
+            ]);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} WHERE {name} = ? ORDER BY {value} ASC, {name} DESC",
@@ -749,16 +851,769 @@ abstract class SelectQueryTest extends BaseQueryTest
         );
     }
 
-    //Having
+    public function testColumnsWithFunctions()
+    {
+        $select = $this->database->select()
+            ->columns(['SUM(u.balance)', 'COUNT(*)'])
+            ->from(['users as u'])
+            ->where(['name' => 'Anton'])
+            ->groupBy('balance');
 
+        $this->assertSameQuery(
+            "SELECT SUM({u}.{balance}), COUNT(*) FROM {users} AS {u} WHERE {name} = ? GROUP BY {balance}",
+            $select
+        );
+    }
 
-    //Fragments!!!!!
+    //HAVING, Generic behaviours
 
-    //Parameters
+    public function testHavingSelectWithSimpleHaving()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])->having('name', 'Anton');
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {name} = ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithHavingWithOperator()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])
+            ->having('name', 'LIKE', 'Anton%');
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {name} LIKE ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithHavingWithBetween()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])
+            ->having('balance', 'BETWEEN', 0, 1000);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {balance} BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithHavingWithNotBetween()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])
+            ->having('balance', 'NOT BETWEEN', 0, 1000);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {balance} NOT BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Between statements expects exactly 2 values
+     */
+    public function testHavingSelectWithHavingBetweenBadValue()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])
+            ->having('balance', 'BETWEEN', 0);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {balance} NOT BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithFullySpecificColumnNameInHaving()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])
+            ->having('users.balance', 12);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {users}.{balance} = ?",
+            $select
+        );
+    }
+
+    public function testHavingPrefixedSelectWithFullySpecificColumnNameInHaving()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()->distinct()->from(['users'])
+            ->having('users.balance', 12);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {prefix_users} HAVING {prefix_users}.{balance} = ?",
+            $select
+        );
+    }
+
+    public function testHavingPrefixedSelectWithFullySpecificColumnNameInHavingButAliased()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()->distinct()->from(['users as u'])
+            ->having('u.balance', 12);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {prefix_users} AS {u} HAVING {u}.{balance} = ?",
+            $select
+        );
+    }
+
+    //HAVING, Simple combinations testing
+
+    public function testHavingSelectWithHavingAndHaving()
+    {
+        $select = $this->database->select()->distinct()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->andHaving('balance', '>', 1);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {name} = ? AND {balance} > ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithHavingAndFallbackHaving()
+    {
+        $select = $this->database->select()->distinct()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->having('balance', '>', 1);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {name} = ? AND {balance} > ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithHavingOrHaving()
+    {
+        $select = $this->database->select()->distinct()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->orHaving('balance', '>', 1);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {name} = ? OR {balance} > ?",
+            $select
+        );
+    }
+
+    public function testHavingSelectWithHavingOrHavingAndHaving()
+    {
+        $select = $this->database->select()->distinct()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->orHaving('balance', '>', 1)
+            ->andHaving('value', 'IN', new Parameter([10, 12]));
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} HAVING {name} = ? OR {balance} > ? AND {value} IN (?, ?)",
+            $select
+        );
+    }
+
+    //HAVING, Combinations thought closures
+
+    public function testHavingHavingOfOrHaving()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->andHaving(function (SelectQuery $select) {
+                $select->orHaving('value', '>', 10)->orHaving('value', '<', 1000);
+            });
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? AND ({value} > ? OR {value} < ?)",
+            $select
+        );
+    }
+
+    public function testHavingHavingOfAndHaving()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->andHaving(function (SelectQuery $select) {
+                $select->having('value', '>', 10)->andHaving('value', '<', 1000);
+            });
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? AND ({value} > ? AND {value} < ?)",
+            $select
+        );
+    }
+
+    public function testHavingOrHavingOfOrHaving()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->orHaving(function (SelectQuery $select) {
+                $select->orHaving('value', '>', 10)->orHaving('value', '<', 1000);
+            });
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? OR ({value} > ? OR {value} < ?)",
+            $select
+        );
+    }
+
+    public function testHavingOrHavingOfAndHaving()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having('name', 'Anton')
+            ->orHaving(function (SelectQuery $select) {
+                $select->having('value', '>', 10)->andHaving('value', '<', 1000);
+            });
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? OR ({value} > ? AND {value} < ?)",
+            $select
+        );
+    }
+
+    //HAVING, Short having form
+
+    public function testHavingShortHaving()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ?",
+            $select
+        );
+    }
+
+    public function testHavingShortHavingWithCondition()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having([
+                'name' => [
+                    'like' => 'Anton',
+                    '!='   => 'Antony'
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING ({name} LIKE ? AND {name} != ?)",
+            $select
+        );
+    }
+
+    public function testHavingShortHavingWithBetweenCondition()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having([
+                'value' => [
+                    'between' => [1, 2]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {value} BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    public function testHavingShortHavingWithNotBetweenCondition()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having([
+                'value' => [
+                    'not between' => [1, 2]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {value} NOT BETWEEN ? AND ?",
+            $select
+        );
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Exactly 2 array values are required for between statement
+     */
+    public function testHavingShortHavingWithBetweenConditionBadArguments()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having([
+                'value' => [
+                    'between' => [1]
+                ]
+            ]);
+
+    }
+
+    public function testHavingShortHavingMultiple()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having([
+                'name'  => 'Anton',
+                'value' => 1
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING ({name} = ? AND {value} = ?)",
+            $select
+        );
+    }
+
+    public function testHavingShortHavingMultipleButNotInAGroup()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton'])
+            ->having(['value' => 1]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? AND {value} = ?",
+            $select
+        );
+    }
+
+    public function testHavingShortHavingOrHaving()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton'])
+            ->orHaving(['value' => 1]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? OR {value} = ?",
+            $select
+        );
+    }
+
+    public function testHavingAndShortHavingOR()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton'])
+            ->andHaving([
+                '@or' => [
+                    ['value' => 1],
+                    ['value' => ['>' => 12]]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? AND ({value} = ? OR {value} > ?)",
+            $select
+        );
+    }
+
+    public function testHavingOrShortHavingOR()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton'])
+            ->orHaving([
+                '@or' => [
+                    ['value' => 1],
+                    ['value' => ['>' => 12]]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? OR ({value} = ? OR {value} > ?)",
+            $select
+        );
+    }
+
+    public function testHavingAndShortHavingAND()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton'])
+            ->andHaving([
+                '@and' => [
+                    ['value' => 1],
+                    ['value' => ['>' => 12]]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? AND ({value} = ? AND {value} > ?)",
+            $select
+        );
+    }
+
+    public function testHavingOrShortHavingAND()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->having(['name' => 'Anton'])
+            ->orHaving([
+                '@and' => [
+                    ['value' => 1],
+                    ['value' => ['>' => 12]]
+                ]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} HAVING {name} = ? OR ({value} = ? AND {value} > ?)",
+            $select
+        );
+    }
+
+    //Limit and offset, ATTENTION THIS SECTION IS DRIVER SPECIFIC
+
+    public function testLimitNoOffset()
+    {
+        $select = $this->database->select()->from(['users'])->limit(10);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LIMIT 10",
+            $select
+        );
+    }
+
+    public function testLimitAndOffset()
+    {
+        $select = $this->database->select()->from(['users'])->limit(10)->offset(20);
+
+        $this->assertSame(10, $select->getLimit());
+        $this->assertSame(20, $select->getOffset());
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LIMIT 10 OFFSET 20",
+            $select
+        );
+    }
+
+    public function testOffsetNoLimit()
+    {
+        $select = $this->database->select()->from(['users'])->offset(20);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} OFFSET 20",
+            $select
+        );
+    }
+
+    //Fragments
+
+    public function testColumnNameAsFragment()
+    {
+        $select = $this->database->select(new Fragment('_ROW_ID_'))->from(['users']);
+
+        $this->assertSameQuery(
+            "SELECT _ROW_ID_ FROM {users}",
+            $select
+        );
+    }
+
+    public function testWhereValueAsFragment()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where('balance', '=', new Fragment('(1 + 2) / 3'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} = (1 + 2) / 3",
+            $select
+        );
+    }
+
+    public function testShortWhereValueAsFragment()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where(['balance' => new Fragment('(1 + 2) / 3')]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} = (1 + 2) / 3",
+            $select
+        );
+    }
+
+    public function testWhereOperatorAsFragment()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where('name', new Fragment('SUPERLIKE'), 'Anton');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {name} SUPERLIKE ?",
+            $select
+        );
+    }
+
+    public function testOrderByFragment()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->orderBy(new Fragment('RAND()'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} ORDER BY RAND() ASC",
+            $select
+        );
+    }
+
+    //Please not this example
+    public function testGroupByFragment()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->groupBy(new Fragment('RESOLVE_USER(users.id)'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} GROUP BY RESOLVE_USER(users.id)",
+            $select
+        );
+
+        //Note: see Expressions
+    }
+
+    //Expressions
+
+    public function testColumnNameAsExpression()
+    {
+        $select = $this->database->select(new Expression('name'))->from(['users']);
+
+        $this->assertSameQuery(
+            "SELECT {name} FROM {users}",
+            $select
+        );
+    }
+
+    public function testColumnNameAndTableAsExpression()
+    {
+        $select = $this->database->select(new Expression('users.name'))->from(['users']);
+
+        $this->assertSameQuery(
+            "SELECT {users}.{name} FROM {users}",
+            $select
+        );
+    }
+
+    public function testColumnNameAndTableAsExpressionPrefixed()
+    {
+        $select = $this->database('prefixed', 'prefix_')
+            ->select(new Expression('users.name'))
+            ->from(['users']);
+
+        $this->assertSameQuery(
+            "SELECT {prefix_users}.{name} FROM {prefix_users}",
+            $select
+        );
+    }
+
+    public function testColumnNameAndTableAsExpressionPrefixedAliased()
+    {
+        $select = $this->database('prefixed', 'prefix_')
+            ->select(new Expression('u.name'))
+            ->from(['users as u']);
+
+        $this->assertSameQuery(
+            "SELECT {u}.{name} FROM {prefix_users} AS {u}",
+            $select
+        );
+    }
+
+    public function testWhereValueAsExpression()
+    {
+        $select = $this->database->select()->from(['users'])
+            ->where('balance', '>', new Expression('origin_balance'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} > {origin_balance}",
+            $select
+        );
+    }
+
+    public function testWhereValueAndTableAsExpression()
+    {
+        $select = $this->database->select()->from(['users'])
+            ->where('balance', '>', new Expression('users.origin_balance'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} > {users}.{origin_balance}",
+            $select
+        );
+    }
+
+    public function testWhereValueAndTableAsExpressionPrefixed()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()->from(['users'])
+            ->where('balance', '>', new Expression('users.origin_balance'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} WHERE {balance} > {prefix_users}.{origin_balance}",
+            $select
+        );
+    }
+
+    public function testWhereValueAndTableAsExpressionPrefixedAliased()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()->from(['users as u'])
+            ->where('balance', '>', new Expression('u.origin_balance'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} AS {u} WHERE {balance} > {u}.{origin_balance}",
+            $select
+        );
+    }
+
+    public function testShortWhereValueAsExpressionPrefixed()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()->from(['users'])
+            ->where([
+                'balance' => ['>' => new Expression('users.origin_balance')]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} WHERE {balance} > {prefix_users}.{origin_balance}",
+            $select
+        );
+    }
+
+    public function testOrderByExpression()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()->from(['users'])
+            ->orderBy(new Expression('users.balance'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} ORDER BY {prefix_users}.{balance} ASC",
+            $select
+        );
+    }
+
+    public function testGroupByExpression()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->groupBy(new Expression('RESOLVE_USER(users.id)'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} GROUP BY RESOLVE_USER({users}.{id})",
+            $select
+        );
+    }
+
+    public function testGroupByExpressionWithPrefix()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()
+            ->from(['users'])
+            ->groupBy(new Expression('RESOLVE_USER(users.id)'));
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} GROUP BY RESOLVE_USER({prefix_users}.{id})",
+            $select
+        );
+    }
+
+    //Parameters (writing only)
+
+    public function testWhereValueAsParameter()
+    {
+        $p = new Parameter(null);
+
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where('balance', $p);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} = ?",
+            $select
+        );
+    }
+
+    public function testShortWhereValueAsParameter()
+    {
+        $p = new Parameter(null);
+
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where(['balance' => $p]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {balance} = ?",
+            $select
+        );
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Arrays must be wrapped with Parameter instance
+     */
+    public function testBadArrayParameter()
+    {
+        $this->database->select()
+            ->from(['users'])
+            ->where('status', 'IN', ['active', 'blocked']);
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     * @expectedExceptionMessage Arrays must be wrapped with Parameter instance
+     */
+    public function testBadArrayParameterInShortWhere()
+    {
+        $this->database->select()
+            ->from(['users'])
+            ->where([
+                'status' => ['IN' => ['active', 'blocked']]
+            ]);
+    }
+
+    public function testGoodArrayParameter()
+    {
+        $p = new Parameter(['active', 'blocked']);
+
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where('status', 'IN', $p);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {status} IN (?, ?)",
+            $select
+        );
+
+        $p->setValue(['active']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {status} IN (?)",
+            $select
+        );
+    }
+
+    public function testGoodArrayParameterInShortWhere()
+    {
+        $p = new Parameter(['active', 'blocked']);
+
+        $select = $this->database->select()
+            ->from(['users'])
+            ->where([
+                'status' => ['IN' => $p]
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {status} IN (?, ?)",
+            $select
+        );
+
+        $p->setValue(['active']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} WHERE {status} IN (?)",
+            $select
+        );
+    }
 
     //Nested queries
-
-    //having
 
     //Complex examples
 }

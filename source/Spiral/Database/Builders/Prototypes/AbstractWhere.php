@@ -242,6 +242,10 @@ abstract class AbstractWhere extends QueryBuilder
                 $tokens[] = [$joiner, [$identifier, '=', $wrapper($valueA)]];
                 break;
             case 3:
+                if (in_array(strtoupper($valueA), ['BETWEEN', 'NOT BETWEEN'])) {
+                    throw new BuilderException('Between statements expects exactly 2 values');
+                }
+
                 //AND|OR [identifier] [valueA: OPERATION] [valueA]
                 $tokens[] = [$joiner, [$identifier, strtoupper($valueA), $wrapper($valueB)]];
                 break;
@@ -357,7 +361,7 @@ abstract class AbstractWhere extends QueryBuilder
 
             if (!is_array($value) || count($value) != 2) {
                 throw new BuilderException(
-                    'Exactly 2 array values are required for between statement.'
+                    'Exactly 2 array values are required for between statement'
                 );
             }
 

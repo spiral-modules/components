@@ -10,7 +10,10 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Driver;
+use Spiral\Database\Entities\PDOResult;
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\BuilderException;
+use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\FragmentInterface;
 
 /**
@@ -146,6 +149,154 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
         }
 
         return $parameters;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $paginate Apply pagination to result, can be disabled in honor of count method.
+     *
+     * @return PDOResult
+     */
+    public function run(bool $paginate = true)
+    {
+        if ($paginate && $this->hasPaginator()) {
+            /**
+             * To prevent original select builder altering
+             *
+             * @var SelectQuery $select
+             */
+            $select = clone $this;
+
+            //Getting selection specific paginator
+            $paginator = $this->configurePaginator($this->count());
+
+            //We have to ensure that selection works inside given pagination window
+            $select = $select->limit(min($this->getLimit(), $paginator->getLimit()));
+
+            //Making sure that window is shifted
+            $select = $select->offset($this->getOffset() + $paginator->getOffset());
+
+            //No inner pagination
+            return $select->run(false);
+        }
+
+        return $this->driver->query($this->sqlStatement(), $this->getParameters());
+    }
+
+    /**
+     * Iterate thought result using smaller data chinks with defined size and walk function.
+     *
+     * Example:
+     * $select->chunked(100, function(PDOResult $result, $offset, $count) {
+     *      dump($result);
+     * });
+     *
+     * You must return FALSE from walk function to stop chunking.
+     *
+     * @param int      $limit
+     * @param callable $callback
+     */
+    public function runChunks(int $limit, callable $callback)
+    {
+        $count = $this->count();
+
+        //To keep original query untouched
+        $select = clone $this;
+
+        $select->limit($limit);
+
+        $offset = 0;
+        while ($offset + $limit <= $count) {
+            $result = call_user_func_array(
+                $callback,
+                [$select->offset($offset)->getIterator(), $offset, $count]
+            );
+
+            if ($result === false) {
+                //Stop iteration
+                return;
+            }
+
+            $offset += $limit;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Count number of rows in query. Limit, offset, order by, group by values will be ignored. Do
+     * not count united queries, or queries in complex joins.
+     *
+     * @param string $column Column to count by (every column by default).
+     *
+     * @return int
+     */
+    public function count(string $column = '*'): int
+    {
+        /**
+         * @var AbstractSelect $select
+         */
+        $select = clone $this;
+        $select->columns = ["COUNT({$column})"];
+        $select->ordering = [];
+        $select->grouping = [];
+
+        return (int)$select->run(false)->fetchColumn();
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Shortcut to execute one of aggregation methods (AVG, MAX, MIN, SUM) using method name as
+     * reference.
+     *
+     * Example:
+     * echo $select->sum('user.balance');
+     *
+     * @param string $method
+     * @param array  $arguments
+     *
+     * @return int|float
+     *
+     * @throws BuilderException
+     * @throws QueryException
+     */
+    public function __call(string $method, array $arguments)
+    {
+        if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
+            throw new BuilderException("Unknown method '{$method}' in '" . get_class($this) . "'");
+        }
+
+        if (!isset($arguments[0]) || count($arguments) > 1) {
+            throw new BuilderException('Aggregation methods can support exactly one column');
+        }
+
+        /**
+         * @var AbstractSelect $select
+         */
+        $select = clone $this;
+        $select->columns = ["{$method}({$arguments[0]})"];
+
+        $result = $select->run(false)->fetchColumn();
+
+        //Selecting type between int and float
+        if ((float)$result == $result && (int)$result != $result) {
+            //Find more elegant check
+            return (float)$result;
+        }
+
+        return (int)$result;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return \PDOStatement|PDOResult
+     */
+    public function getIterator()
+    {
+        return $this->run();
     }
 
     /**

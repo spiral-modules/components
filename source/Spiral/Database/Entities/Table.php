@@ -142,12 +142,11 @@ class Table implements \JsonSerializable, \IteratorAggregate
      *
      * @param array $columns Array of columns.
      * @param array $rowsets Array of rowsets.
-     *
-     * @return mixed
      */
     public function insertMultiple(array $columns = [], array $rowsets = [])
     {
-        return $this->database->insert($this->name)->columns($columns)->values($rowsets)->run();
+        //No return value
+        $this->database->insert($this->name)->columns($columns)->values($rowsets)->run();
     }
 
     /**
@@ -236,9 +235,9 @@ class Table implements \JsonSerializable, \IteratorAggregate
      * @param string $method
      * @param array  $arguments
      *
-     * @return SelectQuery
+     * @return SelectQuery|mixed
      */
-    public function __call($method, array $arguments): SelectQuery
+    public function __call($method, array $arguments)
     {
         return call_user_func_array([$this->select(), $method], $arguments);
     }

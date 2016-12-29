@@ -17,7 +17,7 @@ class InsertQueryTest extends \Spiral\Tests\Database\Drivers\InsertQueryTest
         parent::setUp();
 
         //To test PG insert behaviour rendering
-        $schema = $this->database->table('table')->getSchema();
+        $schema = $this->database->table('target_table')->getSchema();
         $schema->primary('target_id');
         $schema->save();
     }
@@ -37,37 +37,37 @@ class InsertQueryTest extends \Spiral\Tests\Database\Drivers\InsertQueryTest
 
     public function testSimpleInsert()
     {
-        $insert = $this->database->insert()->into('table')->values([
+        $insert = $this->database->insert()->into('target_table')->values([
             'name' => 'Anton'
         ]);
 
         $this->assertSameQuery(
-            "INSERT INTO {table} ({name}) VALUES (?) RETURNING {target_id}",
+            "INSERT INTO {target_table} ({name}) VALUES (?) RETURNING {target_id}",
             $insert
         );
     }
 
     public function testSimpleInsertWithStatesValues()
     {
-        $insert = $this->database->insert()->into('table')
+        $insert = $this->database->insert()->into('target_table')
             ->columns('name', 'balance')
             ->values('Anton', 100);
 
         $this->assertSameQuery(
-            "INSERT INTO {table} ({name}, {balance}) VALUES (?, ?) RETURNING {target_id}",
+            "INSERT INTO {target_table} ({name}, {balance}) VALUES (?, ?) RETURNING {target_id}",
             $insert
         );
     }
 
     public function testSimpleInsertMultipleRows()
     {
-        $insert = $this->database->insert()->into('table')
+        $insert = $this->database->insert()->into('target_table')
             ->columns('name', 'balance')
             ->values('Anton', 100)
             ->values('John', 200);
 
         $this->assertSameQuery(
-            "INSERT INTO {table} ({name}, {balance}) VALUES (?, ?), (?, ?) RETURNING {target_id}",
+            "INSERT INTO {target_table} ({name}, {balance}) VALUES (?, ?), (?, ?) RETURNING {target_id}",
             $insert
         );
     }

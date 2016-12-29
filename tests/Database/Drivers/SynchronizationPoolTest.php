@@ -11,8 +11,6 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 abstract class SynchronizationPoolTest extends BaseTest
 {
-    const PROFILING = true;
-
     public function tearDown()
     {
         $this->dropAll($this->database());
@@ -209,6 +207,156 @@ abstract class SynchronizationPoolTest extends BaseTest
         $this->assertSameAsInDB($schemaB);
         $this->assertSameAsInDB($schemaC);
     }
+
+    public function testAddColumnsToTables()
+    {
+        $schemaA = $this->schema('a');
+        $this->assertFalse($schemaA->exists());
+
+        $schemaB = $this->schema('b');
+        $this->assertFalse($schemaB->exists());
+
+        $schemaA->primary('id');
+        $schemaA->integer('value');
+
+        $schemaA->integer('b_id');
+        $schemaA->foreign('b_id')->references('b', 'id');
+
+        $schemaB->primary('id');
+        $schemaB->string('value');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+
+        $schemaA->enum('status', ['active', 'disabled'])->defaultValue('active');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+    }
+
+    public function testDropColumnsFromTables()
+    {
+        $schemaA = $this->schema('a');
+        $this->assertFalse($schemaA->exists());
+
+        $schemaB = $this->schema('b');
+        $this->assertFalse($schemaB->exists());
+
+        $schemaA->primary('id');
+        $schemaA->integer('value');
+
+        $schemaA->integer('b_id');
+        $schemaA->foreign('b_id')->references('b', 'id');
+
+        $schemaB->primary('id');
+        $schemaB->string('value');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+
+        $schemaA->dropColumn('value');
+        $schemaB->dropColumn('value');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+    }
+
+    public function testRenameColumnsInTables()
+    {
+        $schemaA = $this->schema('a');
+        $this->assertFalse($schemaA->exists());
+
+        $schemaB = $this->schema('b');
+        $this->assertFalse($schemaB->exists());
+
+        $schemaA->primary('id');
+        $schemaA->integer('value');
+
+        $schemaA->integer('b_id');
+        $schemaA->foreign('b_id')->references('b', 'id');
+
+        $schemaB->primary('id');
+        $schemaB->string('value');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+
+        $schemaA->renameColumn('value', 'valueA');
+        $schemaB->renameColumn('value', 'valueB');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+    }
+
+    public function testAddIndexesToTables()
+    {
+        $schemaA = $this->schema('a');
+        $this->assertFalse($schemaA->exists());
+
+        $schemaB = $this->schema('b');
+        $this->assertFalse($schemaB->exists());
+
+        $schemaA->primary('id');
+        $schemaA->integer('value');
+
+        $schemaA->integer('b_id');
+        $schemaA->foreign('b_id')->references('b', 'id');
+
+        $schemaB->primary('id');
+        $schemaB->string('value');
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+
+        $schemaA->enum('status', ['active', 'disabled'])->defaultValue('active');
+        $schemaA->index(['status']);
+        $schemaB->index(['value']);
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+    }
+
+    public function testDropIndexesFromTables()
+    {
+        $schemaA = $this->schema('a');
+        $this->assertFalse($schemaA->exists());
+
+        $schemaB = $this->schema('b');
+        $this->assertFalse($schemaB->exists());
+
+        $schemaA->primary('id');
+        $schemaA->integer('value');
+
+        $schemaA->integer('b_id');
+        $schemaA->foreign('b_id')->references('b', 'id');
+
+        $schemaA->enum('status', ['active', 'disabled'])->defaultValue('active');
+        $schemaA->index(['status']);
+
+        $schemaB->primary('id');
+        $schemaB->string('value');
+        $schemaB->index(['value']);
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+
+        $schemaA->dropIndex(['status']);
+        $schemaB->dropIndex(['value']);
+
+        $this->saveTables([$schemaA, $schemaB]);
+        $this->assertSameAsInDB($schemaA);
+        $this->assertSameAsInDB($schemaB);
+    }
+
 
     protected function saveTables(array $tables)
     {

@@ -1519,7 +1519,7 @@ abstract class SelectQueryTest extends BaseQueryTest
 
     public function testWhereValueAsParameter()
     {
-        $p = new Parameter(null);
+        $p = new Parameter(12);
 
         $select = $this->database->select()
             ->from(['users'])
@@ -1533,7 +1533,7 @@ abstract class SelectQueryTest extends BaseQueryTest
 
     public function testShortWhereValueAsParameter()
     {
-        $p = new Parameter(null);
+        $p = new Parameter(12);
 
         $select = $this->database->select()
             ->from(['users'])
@@ -1613,7 +1613,333 @@ abstract class SelectQueryTest extends BaseQueryTest
         );
     }
 
-    //Nested queries
+    //Joins
 
-    //Complex examples
+    public function testLeftJoin0()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->join('LEFT', 'photos', ['photos.user_id' => 'users.id']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testLeftJoin1()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->join('LEFT', 'photos')->on('photos.user_id', 'users.id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testLeftJoin2()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')->on('photos.user_id', 'users.id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testLeftJoin3()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos', ['photos.user_id' => 'users.id']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testRightJoin0()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->join('RIGHT', 'photos', ['photos.user_id' => 'users.id']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} RIGHT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testRightJoin1()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->join('RIGHT', 'photos')->on('photos.user_id', 'users.id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} RIGHT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testRightJoin2()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->rightJoin('photos')->on('photos.user_id', 'users.id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} RIGHT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testRightJoin3()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->rightJoin('photos', ['photos.user_id' => 'users.id']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} RIGHT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testInnerJoin0()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->join('INNER', 'photos', ['photos.user_id' => 'users.id']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} INNER JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testInnerJoin1()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->join('INNER', 'photos')->on('photos.user_id', 'users.id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} INNER JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testInnerJoin2()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->innerJoin('photos')->on('photos.user_id', 'users.id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} INNER JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    public function testInnerJoin3()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->innerJoin('photos', ['photos.user_id' => 'users.id']);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} INNER JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
+            $select
+        );
+    }
+
+    //Join with WHERE
+
+    public function testJoinWithComplexWhere()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')->on('photos.user_id', 'users.id')->onWhere('photos.public', true);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id} AND {photos}.{public} = ?",
+            $select
+        );
+    }
+
+    public function testJoinWithComplexOrWhere()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')
+            ->on('photos.user_id', 'users.id')
+            ->orOn('photos.group_id', 'users.group_id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id} OR {photos}.{group_id} = {users}.{group_id}",
+            $select
+        );
+    }
+
+    public function testJoinWithComplexAndWhere()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')
+            ->on('photos.user_id', 'users.id')
+            ->andOn('photos.group_id', 'users.group_id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id} AND {photos}.{group_id} = {users}.{group_id}",
+            $select
+        );
+    }
+
+    public function testJoinWithComplexAndWhereDefaults()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')
+            ->on('photos.user_id', 'users.id')
+            ->on('photos.group_id', 'users.group_id');
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id} AND {photos}.{group_id} = {users}.{group_id}",
+            $select
+        );
+    }
+
+    public function testJoinWithComplexWhereAndOR()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')
+            ->on('photos.user_id', 'users.id')
+            ->onWhere('photos.public', true)
+            ->orOnWhere('photos.magic', '>', 900);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} "
+            . "ON {photos}.{user_id} = {users}.{id} AND {photos}.{public} = ? OR {photos}.{magic} > ?",
+            $select
+        );
+    }
+
+    public function testJoinWithComplexWhereAnd()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')
+            ->on('photos.user_id', 'users.id')
+            ->onWhere('photos.public', true)
+            ->andOnWhere('photos.magic', '>', 900);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} "
+            . "ON {photos}.{user_id} = {users}.{id} AND {photos}.{public} = ? AND {photos}.{magic} > ?",
+            $select
+        );
+    }
+
+    public function testJoinWithComplexWhereAndDefaults()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos')
+            ->on('photos.user_id', 'users.id')
+            ->onWhere('photos.public', true)
+            ->onWhere('photos.magic', '>', 900);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} "
+            . "ON {photos}.{user_id} = {users}.{id} AND {photos}.{public} = ? AND {photos}.{magic} > ?",
+            $select
+        );
+    }
+
+    //Join aliases
+
+    public function testJoinAliases()
+    {
+        $select = $this->database->select()
+            ->from(['users'])
+            ->leftJoin('photos as p')
+            ->on([
+                'p.user_id' => 'users.id',
+                'p.public'  => new Parameter(true)
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} LEFT JOIN {photos} AS {p} "
+            . "ON ({p}.{user_id} = {users}.{id} AND {p}.{public} = ?)",
+            $select
+        );
+    }
+
+    public function testJoinAliasesWithPrefixes()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()
+            ->from(['users'])
+            ->leftJoin('photos as p')
+            ->on([
+                'p.user_id' => 'users.id',
+                'p.public'  => new Parameter(true)
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} LEFT JOIN {prefix_photos} AS {p} "
+            . "ON ({p}.{user_id} = {prefix_users}.{id} AND {p}.{public} = ?)",
+            $select
+        );
+    }
+
+    public function testJoinAliasesWithPrefixesAndAliases()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()
+            ->from(['users as u'])
+            ->leftJoin('photos as p')
+            ->on([
+                'p.user_id' => 'u.id',
+                'p.public'  => new Parameter(true)
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} AS {u} LEFT JOIN {prefix_photos} AS {p} "
+            . "ON ({p}.{user_id} = {u}.{id} AND {p}.{public} = ?)",
+            $select
+        );
+    }
+
+    //Complex verification example
+
+    public function testComplexExample()
+    {
+        $statuses = new Parameter(['active', 'disabled']);
+
+        $select = $this->database('prefixed', 'prefix_')
+            ->select('COUNT(*)', 'groups.id', 'u.id', 'SUM(t.amount)')
+            ->from(['users as u'])
+            ->leftJoin('transactions as t')->on(['t.user_id' => 'u.id'])
+            ->rightJoin('groups')->on(['groups.id' => 'u.group_id'])->onWhere('groups.public', true)
+            ->where('u.status', 'IN', $statuses)
+            ->orderBy('u.name', 'DESC')
+            ->groupBy('u.id');
+
+        $this->assertSameQuery(
+            "SELECT COUNT(*), {prefix_groups}.{id}, {u}.{id}, SUM({t}.{amount}) "
+            . "FROM {prefix_users} AS {u}"
+            . "LEFT JOIN {prefix_transactions} AS {t} ON {t}.{user_id} = {u}.{id}"
+            . "RIGHT JOIN {prefix_groups} ON {prefix_groups}.{id} = {u}.{group_id} AND {prefix_groups}.{public} = ?"
+            . "WHERE {u}.{status} IN (?,?)"
+            . "GROUP BY {u}.{id}"
+            . "ORDER BY {u}.{name} DESC",
+            $select
+        );
+    }
 }

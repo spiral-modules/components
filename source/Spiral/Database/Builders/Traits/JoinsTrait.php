@@ -248,7 +248,7 @@ trait JoinsTrait
     public function orOn($joined = null, $operator = null, $outer = null)
     {
         $this->whereToken(
-            'AND',
+            'OR',
             func_get_args(),
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
@@ -329,7 +329,7 @@ trait JoinsTrait
     public function orOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
     {
         $this->whereToken(
-            'AND',
+            'OR',
             func_get_args(),
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWhereWrapper()

@@ -366,8 +366,13 @@ class QueryCompiler
 
         $statement = '';
         foreach ($unionTokens as $union) {
-            //First key is union type, second united query (no need to share compiler)
-            $statement .= "\nUNION {$union[1]}\n({$union[0]})";
+            if (!empty($union[0])) {
+                //First key is union type, second united query (no need to share compiler)
+                $statement .= "\nUNION {$union[0]}\n({$union[1]})";
+            } else {
+                //No extra space
+                $statement .= "\nUNION \n({$union[1]})";
+            }
         }
 
         return ltrim($statement, "\n");

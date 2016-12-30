@@ -15,7 +15,7 @@ class QueryResultTest extends \Spiral\Tests\Database\Drivers\QueryResultTest
     //ROW NUMBER COLUMN! FALLBACK
     public function testCountColumns()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $result = $table->select()->limit(1)->getIterator();
 
         $this->assertSame(4, $result->countColumns());
@@ -23,7 +23,7 @@ class QueryResultTest extends \Spiral\Tests\Database\Drivers\QueryResultTest
 
     public function testCountColumnsWithProperOrder()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $result = $table->select()->limit(1)->orderBy('id')->getIterator();
 
         $this->assertSame(3, $result->countColumns());
@@ -32,7 +32,7 @@ class QueryResultTest extends \Spiral\Tests\Database\Drivers\QueryResultTest
     //ROW NUMBER COLUMN! FALLBACK
     public function testToArray()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->limit(1)->getIterator();

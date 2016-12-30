@@ -146,8 +146,8 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
 
         //Unions always located at the end of query.
         foreach ($this->unionTokens as $union) {
-            if ($union[0] instanceof QueryBuilder) {
-                $parameters = array_merge($parameters, $union[0]->getParameters($compiler));
+            if ($union[1] instanceof QueryBuilder) {
+                $parameters = array_merge($parameters, $union[1]->getParameters($compiler));
             }
         }
 

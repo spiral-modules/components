@@ -93,7 +93,7 @@ class IncludeBehaviour implements BehaviourInterface
         //Outer blocks (usually user attributes) can be exported to template using non default
         //rendering technique, for example every "extra" attribute can be passed to specific
         //template location. Stempler to decide.
-        foreach ($this->supervisor->syntax()->blockExporters() as $exporter) {
+        foreach ($this->supervisor->getSyntax()->blockExporters() as $exporter) {
             $content = $exporter->mountBlocks($content, $dynamic);
         }
 

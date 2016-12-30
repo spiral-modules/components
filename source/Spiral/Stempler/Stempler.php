@@ -32,8 +32,11 @@ class Stempler
      * @param SyntaxInterface $syntax
      * @param array           $options
      */
-    public function __construct($loader, SyntaxInterface $syntax, array $options = [])
-    {
+    public function __construct(
+        LoaderInterface $loader,
+        SyntaxInterface $syntax,
+        array $options = []
+    ) {
         $this->loader = $loader;
         $this->syntax = $syntax;
         $this->options = $options;
@@ -46,9 +49,9 @@ class Stempler
      *
      * @return string
      */
-    public function compile($path)
+    public function compile(string $path): string
     {
-        return $this->supervisor()->createNode($path);
+        return $this->getSupervisor()->createNode($path)->compile();
     }
 
     /**
@@ -58,9 +61,9 @@ class Stempler
      *
      * @return string
      */
-    public function compileString($source)
+    public function compileString(string $source): string
     {
-        $node = new Node($this->supervisor(), 'root', $source);
+        $node = new Node($this->getSupervisor(), 'root', $source);
 
         return $node->compile();
     }
@@ -70,7 +73,7 @@ class Stempler
      *
      * @return Supervisor
      */
-    protected function supervisor()
+    protected function getSupervisor(): Supervisor
     {
         return new Supervisor($this->loader, $this->syntax);
     }

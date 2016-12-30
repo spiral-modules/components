@@ -253,7 +253,7 @@ class Node
                         break;
 
                     case HtmlTokenizer::TAG_CLOSE:
-                        if ($this->supervisor->syntax()->isStrict()) {
+                        if ($this->supervisor->getSyntax()->isStrict()) {
                             throw new StrictModeException(
                                 "Unpaired close tag '{$token[HtmlTokenizer::TOKEN_NAME]}'.", $token
                             );
@@ -356,7 +356,7 @@ class Node
         }
 
         //Looking for short tag definitions (${title|DEFAULT})
-        if (preg_match($this->supervisor->syntax()->shortTags(), $content, $matches)) {
+        if (preg_match($this->supervisor->getSyntax()->shortTags(), $content, $matches)) {
             $chunks = explode($matches[0], $content);
 
             //We expecting first chunk to be string (before block)

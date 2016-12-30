@@ -21,7 +21,7 @@ interface SupervisorInterface
     /**
      * @return SyntaxInterface
      */
-    public function syntax();
+    public function getSyntax(): SyntaxInterface;
 
     /**
      * Define html tag behaviour based on supervisor syntax settings.

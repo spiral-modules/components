@@ -57,7 +57,7 @@ class Supervisor implements SupervisorInterface
     /**
      * {@inheritdoc}
      */
-    public function syntax()
+    public function getSyntax(): SyntaxInterface
     {
         return $this->syntax;
     }

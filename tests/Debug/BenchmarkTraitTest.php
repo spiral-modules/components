@@ -15,7 +15,7 @@ use Spiral\Debug\BenchmarkerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Tests\Core\Fixtures\SampleComponent;
 
-class BenchmarksTest extends \PHPUnit_Framework_TestCase
+class BenchmarkTraitTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {

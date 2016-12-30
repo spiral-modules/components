@@ -16,7 +16,7 @@ use Spiral\Debug\LogsInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Tests\Core\Fixtures\SampleComponent;
 
-class LogsTest extends \PHPUnit_Framework_TestCase
+class LoggerTraitTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {

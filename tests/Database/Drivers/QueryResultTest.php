@@ -8,6 +8,8 @@ namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryResult;
+use Spiral\Database\Entities\Table;
+use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Pagination\Paginator;
 
@@ -22,7 +24,7 @@ abstract class QueryResultTest extends BaseQueryTest
     {
         $this->database = $this->database();
 
-        $schema = $this->database->table('table')->getSchema();
+        $schema = $this->database->table('sample_table')->getSchema();
         $schema->primary('id');
         $schema->string('name', 64);
         $schema->integer('value');
@@ -34,9 +36,9 @@ abstract class QueryResultTest extends BaseQueryTest
         return $this->database->table($table)->getSchema();
     }
 
-    public function fillData()
+    public function fillData(Table $table = null)
     {
-        $table = $this->database->table('table');
+        $table = $table ?? $this->database->table('sample_table');
 
         for ($i = 0; $i < 10; $i++) {
             $table->insertOne([
@@ -53,7 +55,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testInstance()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
 
         $this->assertInstanceOf(QueryResult::class, $table->select()->getIterator());
         $this->assertInstanceOf(\PDOStatement::class, $table->select()->getIterator());
@@ -63,7 +65,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testCountColumns()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $result = $table->select()->getIterator();
 
         $this->assertSame(3, $result->countColumns());
@@ -71,7 +73,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testIterateOver()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->getIterator();
@@ -85,7 +87,7 @@ abstract class QueryResultTest extends BaseQueryTest
         }
 
         $this->assertSameQuery(
-            'SELECT * FROM {table}',
+            'SELECT * FROM {sample_table}',
             $result->queryString()
         );
 
@@ -94,7 +96,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testIterateOverLimit()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->limit(5)->getIterator();
@@ -112,7 +114,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testIterateOverOffset()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->offset(5)->getIterator();
@@ -130,7 +132,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testIterateOverOffsetAndLimit()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->offset(5)->limit(2)->getIterator();
@@ -148,7 +150,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testPaginate()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $paginator = new Paginator(2);
@@ -207,18 +209,18 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testDebugString()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $result = $table->select()->getIterator();
 
         $this->assertSameQuery(
-            'SELECT * FROM {table}',
+            'SELECT * FROM {sample_table}',
             $result->queryString()
         );
     }
 
     public function testToArray()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->limit(1)->getIterator();
@@ -230,7 +232,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testClone()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
         $result = $table->select()->getIterator();
 
@@ -239,7 +241,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testBindByName()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->getIterator();
@@ -253,7 +255,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
     public function testBindByNumber()
     {
-        $table = $this->database->table('table');
+        $table = $this->database->table('sample_table');
         $this->fillData();
 
         $result = $table->select()->getIterator();
@@ -264,5 +266,68 @@ abstract class QueryResultTest extends BaseQueryTest
         foreach ($result as $item) {
             $this->assertSame($name, $item['name']);
         }
+    }
+
+    public function testNativeParameters()
+    {
+        $this->fillData();
+
+        $row = $this->database->query(
+            'SELECT * FROM sample_table WHERE id = ?',
+            [6]
+        )->fetch();
+
+        $i = 5;
+        $this->assertEquals(md5($i), $row['name']);
+        $this->assertEquals($i * 10, $row['value']);
+
+        $row = $this->database->query(
+            'SELECT * FROM sample_table WHERE id = :id',
+            [':id' => 5]
+        )->fetch();
+
+        $i = 4;
+        $this->assertEquals(md5($i), $row['name']);
+        $this->assertEquals($i * 10, $row['value']);
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\DriverException
+     * @expectedExceptionMessage Array parameters can not be named
+     */
+    public function testNativeParametersError()
+    {
+        $this->fillData();
+
+        $row = $this->database->query(
+            'SELECT * FROM sample_table WHERE id = :id',
+            [':id' => [1, 2]]
+        )->fetch();
+
+        $i = 4;
+        $this->assertEquals(md5($i), $row['name']);
+        $this->assertEquals($i * 10, $row['value']);
+    }
+
+    public function testUnpackArrayFromParameter()
+    {
+        $this->fillData();
+
+        $rows = $this->database->query(
+            'SELECT * FROM sample_table WHERE id IN (?, ?, ?) ORDER BY id ASC',
+            [new Parameter([1, 2, 3])]
+        )->fetchAll();
+
+        $i = 0;
+        $this->assertEquals(md5($i), $rows[0]['name']);
+        $this->assertEquals($i * 10, $rows[0]['value']);
+
+        $i = 1;
+        $this->assertEquals(md5($i), $rows[1]['name']);
+        $this->assertEquals($i * 10, $rows[1]['value']);
+
+        $i = 2;
+        $this->assertEquals(md5($i), $rows[2]['name']);
+        $this->assertEquals($i * 10, $rows[2]['value']);
     }
 }

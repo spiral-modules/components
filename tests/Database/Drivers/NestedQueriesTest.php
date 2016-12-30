@@ -6,8 +6,10 @@
  */
 namespace Spiral\Tests\Database\Drivers;
 
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Pagination\PaginatorAwareInterface;
 
@@ -44,5 +46,13 @@ abstract class NestedQueriesTest extends BaseQueryTest
         $this->assertSameQuery("SELECT * FROM {table}", $select);
     }
 
+    protected function assertParameters(array $parameters, QueryBuilder $builder)
+    {
+        $builderParameters = $builder->getParameters();
+        QueryInterpolator::flattenParameters($builderParameters);
 
+        foreach ($parameters as $parameter) {
+
+        }
+    }
 }

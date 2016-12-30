@@ -58,8 +58,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
      * Get ordered list of builder parameters in a form of ParameterInterface array.
      *
      * @param QueryCompiler $compiler Compiler is needed to validly sort parameters from different
-     *                                query parts (potentially deprecated). Associated compiled to
-     *                                be used by default.
+     *                                query parts (potentially deprecated; you said that year ago).
      *
      * @return array|ParameterInterface[]
      *

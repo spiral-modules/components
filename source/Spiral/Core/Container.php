@@ -43,7 +43,12 @@ class Container extends Component implements
      *
      * @var array
      */
-    protected $bindings = [];
+    protected $bindings = [
+        ContainerInterface::class => self::class,
+        FactoryInterface::class   => self::class,
+        ResolverInterface::class  => self::class,
+        ScoperInterface::class    => self::class
+    ];
 
     /**
      * Registered injectors.
@@ -54,6 +59,15 @@ class Container extends Component implements
      * @var array
      */
     protected $injectors = [];
+
+    /**
+     * Container constructor.
+     */
+    public function __construct()
+    {
+        $this->bindings[static::class] = self::class;
+        $this->bindings[self::class] = $this;
+    }
 
     /**
      * {@inheritdoc}

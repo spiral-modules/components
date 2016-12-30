@@ -96,4 +96,24 @@ class DumperTest extends \PHPUnit_Framework_TestCase
         $this->assertNotContains('test value', $dump);
         $this->assertNotContains('_invisible_', $dump);
     }
+
+    public function dumpObjectDebugInfo()
+    {
+        $dumper = new Dumper(10);
+
+        $dump = $dumper->dump(new class
+        {
+            public function __debugInfo()
+            {
+                return [
+                    '_magic_' => '_value_'
+                ];
+            }
+
+        }, Dumper::OUTPUT_RETURN);
+
+        $this->assertContains(self::class, $dump);
+        $this->assertContains('_magic_', $dump);
+        $this->assertContains('_value_', $dump);
+    }
 }

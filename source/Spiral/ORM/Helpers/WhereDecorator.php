@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Helpers;
+namespace Spiral\ORM\Helpers;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Exceptions\BuilderException;

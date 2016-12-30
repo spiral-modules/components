@@ -24,7 +24,7 @@ abstract class TableTest extends BaseTest
 
         $schema = $this->database->table('table')->getSchema();
         $schema->primary('id');
-        $schema->string('name', 64);
+        $schema->text('name');
         $schema->integer('value');
         $schema->save();
     }
@@ -60,7 +60,7 @@ abstract class TableTest extends BaseTest
 
         $this->assertSame([
             'id'    => 'primary',
-            'name'  => 'string',
+            'name'  => 'text',
             'value' => 'integer'
         ], $table->getColumns());
     }

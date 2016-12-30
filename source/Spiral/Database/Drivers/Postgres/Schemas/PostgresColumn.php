@@ -327,7 +327,16 @@ class PostgresColumn extends AbstractColumn
     private function normalizeDefault()
     {
         if ($this->hasDefaultValue()) {
-            if (preg_match('/^[\(\']?(.*?)[\)\']?::(.+)/', $this->defaultValue, $matches)) {
+            if ($this->phpType() == self::FLOAT || $this->phpType() == self::INT) {
+                if (preg_match('/^\(?(.*?)\)?(?!::(.+))?$/', $this->defaultValue, $matches)) {
+                    //Negative numeric values
+                    $this->defaultValue = $matches[1];
+                }
+
+                return;
+            }
+
+            if (preg_match('/^\'?(.*?)\'?::(.+)/', $this->defaultValue, $matches)) {
                 //In database: 'value'::TYPE
                 $this->defaultValue = $matches[1];
             } elseif ($this->type == 'bit') {

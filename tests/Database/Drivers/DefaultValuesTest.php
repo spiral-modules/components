@@ -76,6 +76,7 @@ abstract class DefaultValuesTest extends BaseTest
         $schema->save();
         $schema = $this->schema('table');
         $this->assertTrue($schema->exists());
+
         $this->assertTrue($schema->column('target')->compare($column));
     }
 

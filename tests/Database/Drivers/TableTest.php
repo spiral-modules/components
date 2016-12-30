@@ -10,6 +10,7 @@ use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Injections\Expression;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Pagination\Paginator;
 
 abstract class TableTest extends BaseTest
 {

@@ -174,8 +174,12 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
             //Getting selection specific paginator
             $paginator = $this->configurePaginator($this->count());
 
-            //We have to ensure that selection works inside given pagination window
-            $select = $select->limit(min($this->getLimit(), $paginator->getLimit()));
+            if (!empty($this->getLimit()) && $this->getLimit() > $paginator->getLimit()) {
+                //We have to ensure that selection works inside given pagination window
+                $select = $select->limit($this->getLimit());
+            } else {
+                $select->limit($paginator->getLimit());
+            }
 
             //Making sure that window is shifted
             $select = $select->offset($this->getOffset() + $paginator->getOffset());

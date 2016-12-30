@@ -105,6 +105,9 @@ class Table implements \JsonSerializable, \IteratorAggregate
     /**
      * Get list of column names associated with their abstract types.
      *
+     * Attention, this is helper function, avoid using it while working with schemas.
+     *
+     * @see getSchema()
      * @return array
      */
     public function getColumns(): array

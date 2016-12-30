@@ -9,9 +9,11 @@ namespace Spiral\Tests\Database\Drivers;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryResult;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Pagination\Paginator;
 
 abstract class QueryResultTest extends BaseQueryTest
 {
+    const PROFILING = true;
     /**
      * @var Database
      */
@@ -143,6 +145,65 @@ abstract class QueryResultTest extends BaseQueryTest
         }
 
         $this->assertSame(7, $i);
+    }
+
+    public function testPaginate()
+    {
+        $table = $this->database->table('table');
+        $this->fillData();
+
+        $paginator = new Paginator(2);
+
+        $select = $table->select();
+
+        $select->setPaginator($paginator->withPage(1));
+
+        $i = 0;
+        foreach ($select as $item) {
+            $this->assertEquals(md5($i), $item['name']);
+            $this->assertEquals($i * 10, $item['value']);
+
+            $i++;
+        }
+
+        $this->assertSame(2, $i);
+
+        $select->setPaginator($paginator->withPage(2));
+
+        $i = 2;
+        foreach ($select as $item) {
+            $this->assertEquals(md5($i), $item['name']);
+            $this->assertEquals($i * 10, $item['value']);
+
+            $i++;
+        }
+
+        $this->assertSame(4, $i);
+
+        $select->setPaginator($paginator->withPage(3));
+
+        $i = 4;
+        foreach ($select as $item) {
+            $this->assertEquals(md5($i), $item['name']);
+            $this->assertEquals($i * 10, $item['value']);
+
+            $i++;
+        }
+
+        $this->assertSame(6, $i);
+
+        $paginator = $paginator->withLimit(6);
+        $select->setPaginator($paginator->withPage(4)); //Forced last page
+
+        $i = 6;
+        foreach ($select as $item) {
+            $this->assertEquals(md5($i), $item['name']);
+            $this->assertEquals($i * 10, $item['value']);
+
+            $i++;
+        }
+
+        $this->assertSame(10, $i);
     }
 
     public function testDebugString()

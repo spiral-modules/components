@@ -8,6 +8,7 @@ namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Table;
+use Spiral\Database\Injections\Expression;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 abstract class TableTest extends BaseTest
@@ -229,5 +230,69 @@ abstract class TableTest extends BaseTest
 
         $this->assertSame(4, $table->count());
         $this->assertSame(13.75, $table->avg('value'));
+    }
+
+    public function testDeleteWithWhere()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 15],
+                ['Charlie', 10]
+            ]
+        );
+
+        $this->assertSame(4, $table->count());
+        $this->assertSame(2, $table->delete(['value' => 10])->run());
+        $this->assertSame(0, $table->select()->where(['value' => 10])->count());
+    }
+
+    public function testUpdateWithWhere()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 15],
+                ['Charlie', 10]
+            ]
+        );
+
+        $this->assertSame(4, $table->count());
+        $this->assertSame(2, $table->update(['value' => 100])->where('value', 10)->run());
+        $this->assertSame(2, $table->select()->where(['value' => 100])->count());
+    }
+
+    public function testUpdateWithFragment()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 15],
+                ['Charlie', 10]
+            ]
+        );
+
+        $this->assertSame(4, $table->count());
+        $this->assertSame(
+            2,
+            $table->update(['value' => new Expression('value * 2')])->where('value', 10)->run()
+        );
+
+        $this->assertSame(3, $table->select()->where(['value' => 20])->count());
     }
 }

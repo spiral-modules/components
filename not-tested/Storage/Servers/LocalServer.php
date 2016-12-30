@@ -63,7 +63,7 @@ class LocalServer extends StorageServer
         }
 
         //localUri call is required to mock filesystem operations
-        return $this->files->localPath($this->getPath($bucket, $name));
+        return $this->files->localFilename($this->getPath($bucket, $name));
     }
 
     /**

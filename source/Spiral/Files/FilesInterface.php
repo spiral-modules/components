@@ -108,7 +108,7 @@ interface FilesInterface
      *
      * @return string
      */
-    public function localPath(string $filename): string;
+    public function localFilename(string $filename): string;
 
     /**
      * Delete local file if possible. No error should be raised if file does not exists.

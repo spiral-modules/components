@@ -149,7 +149,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function localPath(string $filename): string
+    public function localFilename(string $filename): string
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);

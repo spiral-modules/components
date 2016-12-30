@@ -108,34 +108,33 @@ abstract class TableTest extends BaseTest
         );
     }
 
-    //@todo fails in sqlite
-//    public function testInsertMultiple()
-//    {
-//        $table = $this->database->table('table');
-//        $this->assertSame(0, $table->count());
-//
-//        $table->insertMultiple(
-//            ['name', 'value'],
-//            [
-//                ['Anton', 10],
-//                ['John', 20],
-//                ['Bob', 30],
-//                ['Charlie', 40]
-//            ]
-//        );
-//
-//        $this->assertSame(4, $table->count());
-//
-//        $this->assertEquals(
-//            [
-//                ['id' => 1, 'name' => 'Anton', 'value' => 10],
-//                ['id' => 2, 'name' => 'John', 'value' => 20],
-//                ['id' => 3, 'name' => 'Bob', 'value' => 30],
-//                ['id' => 4, 'name' => 'Charlie', 'value' => 40],
-//            ],
-//            $table->fetchAll()
-//        );
-//    }
+    public function testInsertMultiple()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 30],
+                ['Charlie', 40]
+            ]
+        );
+
+        $this->assertSame(4, $table->count());
+
+        $this->assertEquals(
+            [
+                ['id' => 1, 'name' => 'Anton', 'value' => 10],
+                ['id' => 2, 'name' => 'John', 'value' => 20],
+                ['id' => 3, 'name' => 'Bob', 'value' => 30],
+                ['id' => 4, 'name' => 'Charlie', 'value' => 40],
+            ],
+            $table->fetchAll()
+        );
+    }
 
     public function testAggregationByPass()
     {

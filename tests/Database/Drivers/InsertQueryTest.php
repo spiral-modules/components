@@ -32,6 +32,11 @@ abstract class InsertQueryTest extends BaseQueryTest
         $this->assertInstanceOf(InsertQuery::class, $this->database->insert());
     }
 
+    public function testQueryInstanceViaTable()
+    {
+        $this->assertInstanceOf(InsertQuery::class, $this->database->table->insert());
+    }
+
     //Generic behaviours
 
     public function testSimpleInsert()

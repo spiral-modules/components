@@ -9,6 +9,7 @@
 namespace Spiral\Database\Entities;
 
 use Spiral\Database\Builders\DeleteQuery;
+use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Exceptions\BuilderException;
@@ -147,6 +148,16 @@ class Table implements \JsonSerializable, \IteratorAggregate
     {
         //No return value
         $this->database->insert($this->name)->columns($columns)->values($rowsets)->run();
+    }
+
+    /**
+     * Get insert builder specific to current table.
+     *
+     * @return InsertQuery
+     */
+    public function insert()
+    {
+        return $this->database->insert($this->name);
     }
 
     /**

@@ -179,9 +179,9 @@ class Database implements DatabaseInterface, InjectableInterface
     /**
      * {@inheritdoc}
      *
-     * @return PDOResult
+     * @return QueryResult
      */
-    public function query(string $query, array $parameters = []): PDOResult
+    public function query(string $query, array $parameters = []): QueryResult
     {
         return $this->driver->query($query, $parameters);
     }

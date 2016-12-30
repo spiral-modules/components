@@ -10,7 +10,7 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\PDOResult;
+use Spiral\Database\Entities\QueryResult;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
@@ -156,7 +156,7 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
      *
      * @param bool $paginate Apply pagination to result, can be disabled in honor of count method.
      *
-     * @return PDOResult
+     * @return QueryResult
      */
     public function run(bool $paginate = true)
     {
@@ -292,7 +292,7 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
     /**
      * {@inheritdoc}
      *
-     * @return \PDOStatement|PDOResult
+     * @return \PDOStatement|QueryResult
      */
     public function getIterator()
     {

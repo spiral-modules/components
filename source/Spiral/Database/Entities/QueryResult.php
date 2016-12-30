@@ -14,7 +14,7 @@ use Spiral\Database\Helpers\QueryInterpolator;
 /**
  * Works as prepared PDOStatement.
  */
-class PDOResult extends PDOStatement
+class QueryResult extends PDOStatement
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
@@ -42,7 +42,7 @@ class PDOResult extends PDOStatement
      *
      * @return self|$this
      */
-    public function bind($columnID, &$variable): PDOResult
+    public function bind($columnID, &$variable): QueryResult
     {
         if (is_numeric($columnID)) {
             //PDO columns are 1-indexed

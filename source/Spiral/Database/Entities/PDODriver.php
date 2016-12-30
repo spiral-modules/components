@@ -280,15 +280,15 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param string $statement
      * @param array  $parameters
      *
-     * @return PDOResult
+     * @return QueryResult
      */
-    public function query(string $statement, array $parameters = []): PDOResult
+    public function query(string $statement, array $parameters = []): QueryResult
     {
         //Forcing specific return class
-        $result = $this->statement($statement, $parameters, PDOResult::class, [$parameters]);
+        $result = $this->statement($statement, $parameters, QueryResult::class, [$parameters]);
 
         /**
-         * @var PDOResult $result
+         * @var QueryResult $result
          */
         return $result;
     }
@@ -309,7 +309,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function statement(
         string $query,
         array $parameters = [],
-        $class = PDOResult::class,
+        $class = QueryResult::class,
         array $args = []
     ): \PDOStatement {
 

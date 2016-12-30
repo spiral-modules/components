@@ -327,7 +327,7 @@ class PostgresColumn extends AbstractColumn
     private function normalizeDefault()
     {
         if ($this->hasDefaultValue()) {
-            if (preg_match("/^'?(.*?)'?::(.+)/", $this->defaultValue, $matches)) {
+            if (preg_match('/^[\(\']?(.*?)[\)\']?::(.+)/', $this->defaultValue, $matches)) {
                 //In database: 'value'::TYPE
                 $this->defaultValue = $matches[1];
             } elseif ($this->type == 'bit') {

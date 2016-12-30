@@ -8,7 +8,7 @@
 
 namespace Spiral\Database;
 
-use Spiral\Database\Entities\PDOResult;
+use Spiral\Database\Entities\QueryResult;
 use Spiral\Database\Exceptions\QueryException;
 
 /**
@@ -57,7 +57,7 @@ interface DatabaseInterface
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      *
-     * @return PDOResult
+     * @return QueryResult
      *
      * @throws QueryException
      */

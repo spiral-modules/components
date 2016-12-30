@@ -18,7 +18,7 @@ class InsertQueryTest extends \Spiral\Tests\Database\Drivers\InsertQueryTest
             ->values('John', 200);
 
         $this->assertSameQuery(
-            "INSERT INTO {table} ({name}, {balance}) SELECT ? AS {name}, ? AS {balance} UNION SELECT ?, ?",
+            "INSERT INTO {table} ({name}, {balance}) SELECT ? AS {name}, ? AS {balance} UNION ALL SELECT ?, ?",
             $insert
         );
     }
@@ -33,8 +33,8 @@ class InsertQueryTest extends \Spiral\Tests\Database\Drivers\InsertQueryTest
 
         $this->assertSameQuery(
             "INSERT INTO {table} ({name}, {balance}) SELECT ? AS {name}, ? AS {balance}"
-            . " UNION SELECT ?, ?"
-            . " UNION SELECT ?, ?",
+            . " UNION ALL SELECT ?, ?"
+            . " UNION ALL SELECT ?, ?",
             $insert
         );
     }

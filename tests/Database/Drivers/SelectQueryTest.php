@@ -26,7 +26,7 @@ abstract class SelectQueryTest extends BaseQueryTest
         $this->database = $this->database();
     }
 
-    public function schema(string $table): AbstractTable
+       public function schema(string $table): AbstractTable
     {
         return $this->database->table($table)->getSchema();
     }

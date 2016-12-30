@@ -66,25 +66,12 @@ class QueryResult extends PDOStatement
 
     /**
      * {@inheritdoc}
+     *
+     * Attention: DO NOT USE THIS METHOD FOR ANYTHING DIFFERENT THAN DEBUGGING.
      */
     public function queryString(): string
     {
         return QueryInterpolator::interpolate($this->queryString, $this->parameters);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Attention, this method will return 0 for SQLite databases.
-     *
-     * @link http://php.net/manual/en/pdostatement.rowcount.php
-     * @link http://stackoverflow.com/questions/15003232/pdo-returns-wrong-rowcount-after-select-statement
-     *
-     * @return int
-     */
-    public function count(): int
-    {
-        return $this->rowCount();
     }
 
     /**

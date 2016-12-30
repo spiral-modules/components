@@ -13,10 +13,10 @@ abstract class BaseQueryTest extends BaseTest
     /**
      * Send sample query in a form where all quotation symbols replaced with { and }.
      *
-     * @param string            $query
-     * @param FragmentInterface $fragment
+     * @param string                   $query
+     * @param string|FragmentInterface $fragment
      */
-    protected function assertSameQuery(string $query, FragmentInterface $fragment)
+    protected function assertSameQuery(string $query, $fragment)
     {
         //Preparing query
         $query = str_replace(
@@ -27,7 +27,7 @@ abstract class BaseQueryTest extends BaseTest
 
         $this->assertSame(
             preg_replace('/\s+/', '', $query),
-            preg_replace('/\s+/', '', $fragment->sqlStatement())
+            preg_replace('/\s+/', '', (string)$fragment)
         );
     }
 }

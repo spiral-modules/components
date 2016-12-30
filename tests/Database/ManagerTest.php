@@ -6,7 +6,9 @@
  */
 namespace Spiral\tests\Cases\Database;
 
-class ManagerTest
+use Spiral\Database\DatabaseManager;
+
+class ManagerTest extends \PHPUnit_Framework_TestCase
 {
 
 }

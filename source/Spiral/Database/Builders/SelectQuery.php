@@ -10,11 +10,12 @@ namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\QueryResult;
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Entities\QueryResult;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\FragmentInterface;
+use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION
@@ -22,6 +23,8 @@ use Spiral\Database\Injections\FragmentInterface;
  */
 class SelectQuery extends AbstractSelect implements \JsonSerializable
 {
+    use LoggerTrait;
+
     /**
      * Table names to select data from.
      *
@@ -306,6 +309,12 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
     {
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();
+        }
+
+        if ((!empty($this->getLimit()) || !empty($this->getOffset())) && empty($this->ordering)) {
+            $this->logger()->warning(
+                "Usage of LIMIT/OFFSET without proper ORDER BY statement is ambiguous"
+            );
         }
 
         //11 parameters!

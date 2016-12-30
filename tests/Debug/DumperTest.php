@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Debug;
+namespace Spiral\Tests\Debug;
 
 use Spiral\Debug\Dumper;
 
@@ -69,40 +69,42 @@ class DumperTest extends \PHPUnit_Framework_TestCase
      */
     protected $_invisible_ = 'invisible value';
 
-    public function dumpObject()
+    public function testDumpObject()
     {
         $dumper = new Dumper();
 
         $dump = $dumper->dump($this, Dumper::OUTPUT_RETURN);
 
         $this->assertContains(self::class, $dump);
-        $this->assertContains('invisible value', $dump);
+        $this->assertNotContains('invisible value', $dump);
         $this->assertContains('_value_', $dump);
 
-        $this->assertNotContains('test value', $dump);
+        $this->assertContains('test value', $dump);
         $this->assertNotContains('_invisible_', $dump);
     }
 
-    public function dumpObjectOtherStyle()
+    public function testDumpObjectOtherStyle()
     {
         $dumper = new Dumper(10, new Dumper\InversedStyle());
 
         $dump = $dumper->dump($this, Dumper::OUTPUT_RETURN);
 
         $this->assertContains(self::class, $dump);
-        $this->assertContains('invisible value', $dump);
+        $this->assertNotContains('invisible value', $dump);
         $this->assertContains('_value_', $dump);
 
-        $this->assertNotContains('test value', $dump);
+        $this->assertContains('test value', $dump);
         $this->assertNotContains('_invisible_', $dump);
     }
 
-    public function dumpObjectDebugInfo()
+    public function testDumpObjectDebugInfo()
     {
-        $dumper = new Dumper(10);
+        $dumper = new Dumper();
 
         $dump = $dumper->dump(new class
         {
+            protected $_inner_ = '_kk_';
+
             public function __debugInfo()
             {
                 return [
@@ -112,8 +114,10 @@ class DumperTest extends \PHPUnit_Framework_TestCase
 
         }, Dumper::OUTPUT_RETURN);
 
-        $this->assertContains(self::class, $dump);
         $this->assertContains('_magic_', $dump);
         $this->assertContains('_value_', $dump);
+
+        $this->assertNotContains('_inner_', $dump);
+        $this->assertNotContains('_kk_', $dump);
     }
 }

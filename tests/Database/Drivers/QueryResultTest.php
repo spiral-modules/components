@@ -13,7 +13,6 @@ use Spiral\Pagination\Paginator;
 
 abstract class QueryResultTest extends BaseQueryTest
 {
-    const PROFILING = true;
     /**
      * @var Database
      */

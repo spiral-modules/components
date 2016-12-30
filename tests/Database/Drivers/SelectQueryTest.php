@@ -1302,6 +1302,22 @@ abstract class SelectQueryTest extends BaseQueryTest
         );
     }
 
+
+    //NO FALLBACK
+    public function testLimitAndOffsetAndOrderBy()
+    {
+        $select = $this->database->select()->from(['users'])->limit(10)->orderBy('name')->offset(20);
+
+        $this->assertSame(10, $select->getLimit());
+        $this->assertSame(20, $select->getOffset());
+
+        $this->assertSameQuery(
+            "SELECT * FROM {users} ORDER BY {name} ASC OFFSET 20 LIMIT 10",
+            $select
+        );
+    }
+
+
     //Fragments
 
     public function testColumnNameAsFragment()

@@ -9,4 +9,23 @@ namespace Spiral\Tests\Database\Drivers\Postgres;
 class TableTest extends \Spiral\Tests\Database\Drivers\TableTest
 {
     use DriverTrait;
+
+    //Applause, PG
+    public function testGetColumns()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $expected = [
+            'id'    => 'primary',
+            'name'  => 'text',
+            'value' => 'integer'
+        ];
+        arsort($expected);
+
+        $columns = $table->getColumns();
+        arsort($columns);
+
+        $this->assertSame($expected, $columns);
+    }
 }

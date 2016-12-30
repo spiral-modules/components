@@ -54,6 +54,7 @@ abstract class TableTest extends BaseTest
         $this->assertSame(0, $table->count());
     }
 
+    //see old versions of postgres
     public function testGetColumns()
     {
         $table = $this->database->table('table');

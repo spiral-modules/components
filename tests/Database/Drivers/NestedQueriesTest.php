@@ -37,13 +37,12 @@ abstract class NestedQueriesTest extends BaseQueryTest
         $this->assertInstanceOf(PaginatorAwareInterface::class, $this->database->table->select());
     }
 
-    //Generic behaviours
-
     public function testSimpleSelection()
     {
         $select = $this->database->select()->from('table');
 
         $this->assertSameQuery("SELECT * FROM {table}", $select);
     }
+
 
 }

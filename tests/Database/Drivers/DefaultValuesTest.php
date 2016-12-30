@@ -329,7 +329,6 @@ abstract class DefaultValuesTest extends BaseTest
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
 
-        //This WILL fail in MySQL!
         $column = $schema->enum('target', ['a', 'b', 'c'])->defaultValue(null);
 
         $schema->save();
@@ -344,7 +343,6 @@ abstract class DefaultValuesTest extends BaseTest
         $schema = $this->schema('table');
         $this->assertFalse($schema->exists());
 
-        //This WILL fail in MySQL!
         $column = $schema->enum('target', ['a', 'b', 'c'])->defaultValue('a');
 
         $schema->save();

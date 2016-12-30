@@ -295,4 +295,24 @@ abstract class TableTest extends BaseTest
 
         $this->assertSame(3, $table->select()->where(['value' => 20])->count());
     }
+
+    public function testTruncate()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 15],
+                ['Charlie', 10]
+            ]
+        );
+
+        $this->assertSame(4, $table->count());
+        $table->truncateData();
+        $this->assertSame(0, $table->count());
+    }
 }

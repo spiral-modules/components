@@ -106,4 +106,6 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($db, $manager->database('test'));
     }
+
+    //todo: possibly add few more tests
 }

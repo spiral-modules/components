@@ -37,7 +37,8 @@ class ConstantAggregator extends DeclarationAggregator
         if (!$this->has($name)) {
             //Automatically creating constant
             $constant = new ConstantDeclaration($name, null);
-            $this->add($constant);
+
+            parent::add($constant);
 
             return $constant;
         }

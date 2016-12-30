@@ -112,7 +112,7 @@ class ParameterDeclaration extends NamedDeclaration
      */
     public function setDefault($defaultValue): ParameterDeclaration
     {
-        $this->isOptional = null;
+        $this->isOptional = true;
         $this->defaultValue = $defaultValue;
 
         return $this;

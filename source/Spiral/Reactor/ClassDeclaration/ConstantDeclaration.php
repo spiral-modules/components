@@ -44,7 +44,9 @@ class ConstantDeclaration extends NamedDeclaration
      */
     public function setName(string $name): ConstantDeclaration
     {
-        return parent::setName(strtoupper(Inflector::tableize($name)));
+        return parent::setName(
+            strtoupper(Inflector::tableize(strtolower($name)))
+        );
     }
 
     /**

@@ -97,8 +97,8 @@ class QueryResult extends PDOStatement
     {
         return [
             'query' => $this->queryString(),
-            'count' => $this->count(),
-            'rows'  => $this->count() > static::DUMP_LIMIT ? '[TOO MANY ROWS]' : $this->fetchAll(\PDO::FETCH_ASSOC)
+            'count' => $this->rowCount(),
+            'rows'  => $this->rowCount() > static::DUMP_LIMIT ? '[TOO MANY ROWS]' : $this->fetchAll(\PDO::FETCH_ASSOC)
         ];
     }
 }

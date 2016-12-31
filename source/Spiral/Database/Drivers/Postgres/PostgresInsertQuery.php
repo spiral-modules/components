@@ -19,6 +19,8 @@ class PostgresInsertQuery extends InsertQuery
 {
     /**
      * {@inheritdoc}
+     *
+     * @throws BuilderException
      */
     public function sqlStatement(AbstractCompiler $compiler = null): string
     {

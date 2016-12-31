@@ -5,9 +5,9 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests;
+namespace Spiral\Tests\Support;
 
-class FunctionsTest extends \PHPUnit_Framework_TestCase
+class InterpolateTest extends \PHPUnit_Framework_TestCase
 {
     //Base test to verify function is working
     public function testInterpolate()

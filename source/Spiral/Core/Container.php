@@ -13,7 +13,6 @@ use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\Exceptions\ConfigException;
 use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\AutowireException;
 use Spiral\Core\Exceptions\Container\ContainerException;
@@ -393,7 +392,7 @@ class Container extends Component implements
         $instance = $this->createInstance($class, $parameters, $context, $reflector);
 
         if (empty($reflector)) {
-            throw new ConfigException("Unable to receive ReflectionClass instance");
+            throw new ContainerException("Unable to receive ReflectionClass instance");
         }
 
         return $this->registerInstance($instance, $reflector, $parameters);

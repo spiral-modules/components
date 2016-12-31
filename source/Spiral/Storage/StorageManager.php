@@ -230,6 +230,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     private function constructBucket(string $name, array $bucket): StorageBucket
     {
         $parameters = $bucket + compact('name');
+        unset($parameters['server']);
 
         if (!array_key_exists('options', $bucket)) {
             throw new StorageException("Bucket configuration must include options");
@@ -246,8 +247,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         return $this->factory->make(
             StorageBucket::class,
             $parameters + [
-                'server'  => $this->getServer($bucket['server']),
-                'storage' => $this
+                'server' => $this->getServer($bucket['server'])
             ]
         );
     }

@@ -20,14 +20,14 @@ use Psr\Http\Message\UriInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in Amazon S3 cloud.
  */
-class AmazonServer extends StorageServer
+class AmazonServer extends AbstractServer
 {
     /**
+     * @invisible
      * @var array
      */
     protected $options = [
@@ -38,6 +38,7 @@ class AmazonServer extends StorageServer
     ];
 
     /**
+     * @invisible
      * @var ClientInterface
      */
     protected $client = null;
@@ -106,7 +107,7 @@ class AmazonServer extends StorageServer
     public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->exists($bucket, $name, $response)) {
-            return false;
+            return null;
         }
 
         /**

@@ -12,12 +12,11 @@ use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located at remove FTP server.
  */
-class FtpServer extends StorageServer
+class FtpServer extends AbstractServer
 {
     /**
      * @var array

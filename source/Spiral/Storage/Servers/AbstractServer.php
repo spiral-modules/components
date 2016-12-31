@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  * @copyright ©2009-2011
  */
-namespace Spiral\Storage\Prototypes;
+namespace Spiral\Storage\Servers;
 
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -22,7 +22,7 @@ use Spiral\Storage\ServerInterface;
 /**
  * AbstractServer implementation with different naming.
  */
-abstract class StorageServer extends Component implements ServerInterface
+abstract class AbstractServer extends Component implements ServerInterface
 {
     /**
      * Default mimetype to be used when nothing else can be applied.
@@ -166,9 +166,12 @@ abstract class StorageServer extends Component implements ServerInterface
             return false;
         }
 
-        if (!preg_match('/^([-\.\w]+)$/', $source)) {
+        if (!preg_match('/[^A-Za-z0-9.#\\-$]/', $source)) {
             return false;
         }
+
+        //To filter out binary strings
+        $source = strval(str_replace("\0", "", $source));
 
         return file_exists($source);
     }

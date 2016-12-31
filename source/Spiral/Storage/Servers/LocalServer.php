@@ -12,12 +12,11 @@ use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in local filesystem.
  */
-class LocalServer extends StorageServer
+class LocalServer extends AbstractServer
 {
     /**
      * {@inheritdoc}
@@ -62,7 +61,7 @@ class LocalServer extends StorageServer
             );
         }
 
-        //localUri call is required to mock filesystem operations
+        //localFilename call is required to mock filesystem operations (clone file in a future?)
         return $this->files->localFilename($this->getPath($bucket, $name));
     }
 

@@ -390,6 +390,8 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      * {@inheritdoc}
      *
      * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
+     *
+     * @todo http://stackoverflow.com/questions/4049856/replace-phps-realpath/4050444#4050444
      */
     public function relativePath(string $path, string $from): string
     {

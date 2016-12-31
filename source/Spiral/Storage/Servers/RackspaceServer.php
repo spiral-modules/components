@@ -22,12 +22,11 @@ use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in Rackspace cloud.
  */
-class RackspaceServer extends StorageServer implements LoggerAwareInterface
+class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 {
     use LoggerTrait;
 

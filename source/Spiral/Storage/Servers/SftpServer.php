@@ -12,12 +12,11 @@ use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\Prototypes\StorageServer;
 
 /**
  * Provides abstraction level to work with data located at remove SFTP server.
  */
-class SftpServer extends StorageServer
+class SftpServer extends AbstractServer
 {
     /**
      * Authorization methods.

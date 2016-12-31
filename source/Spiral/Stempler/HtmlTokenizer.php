@@ -93,7 +93,7 @@ class HtmlTokenizer
      * @param bool     $isolatePHP PHP block should be isolated and enabled by default
      * @param Isolator $isolator
      */
-    public function __construct($isolatePHP = true, Isolator $isolator = null)
+    public function __construct(bool $isolatePHP = true, Isolator $isolator = null)
     {
         $this->isolatePHP = $isolatePHP;
         $this->isolator = !empty($isolator) ? $isolator : new Isolator();
@@ -106,7 +106,7 @@ class HtmlTokenizer
      *
      * @return array
      */
-    public function parse($source)
+    public function parse(string $source): array
     {
         //Cleaning list of already parsed tokens
         $this->tokens = [];
@@ -189,7 +189,7 @@ class HtmlTokenizer
      *
      * @return string
      */
-    public function compile(array $token)
+    public function compile(array $token): string
     {
         if (in_array($token[self::TOKEN_TYPE], [self::PLAIN_TEXT, self::TAG_CLOSE])) {
             //Nothing to compile
@@ -225,7 +225,7 @@ class HtmlTokenizer
      *
      * @return array
      */
-    protected function parseToken($content)
+    protected function parseToken(string $content): array
     {
         $token = [
             self::TOKEN_NAME       => '',
@@ -305,7 +305,7 @@ class HtmlTokenizer
      * @param int|null $tokenType Token type.
      * @param string   $content   Non parsed token content.
      */
-    protected function handleToken($tokenType, $content)
+    protected function handleToken($tokenType, string $content)
     {
         if ($tokenType == self::PLAIN_TEXT) {
             if (empty($content)) {
@@ -330,7 +330,7 @@ class HtmlTokenizer
      *
      * @return string
      */
-    protected function repairPHP($source)
+    protected function repairPHP(string $source): string
     {
         if (!$this->isolatePHP) {
             return $source;

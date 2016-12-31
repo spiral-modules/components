@@ -52,4 +52,5 @@ if (file_exists(dirname(__DIR__) . '/../.env')) {
     $loader->load();
 }
 
-define('ENABLE_PROFILING', true);
+//Set to true to enter the Matrix
+define('ENABLE_PROFILING', false);

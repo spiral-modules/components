@@ -37,6 +37,17 @@ abstract class OperationsTest extends BaseTest
         $this->assertTrue($bucket->exists('target'));
     }
 
+    public function testPutEmptyString()
+    {
+        $bucket = $this->getBucket();
+
+        $this->assertFalse($bucket->exists('target'));
+
+        $bucket->put('target', '');
+        $this->assertTrue($bucket->exists('target'));
+        $this->assertSame(0, $bucket->size('target'));
+    }
+
     public function testPutStream()
     {
         $bucket = $this->getBucket();
@@ -225,6 +236,38 @@ abstract class OperationsTest extends BaseTest
 
         $this->assertSame($content->getSize(), $stream->getSize());
         $this->assertSame($content->getContents(), $stream->getContents());
+    }
+
+    public function testReplaceContent()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $content = $this->getStreamSource();
+
+        $bucket->put('target', $content);
+        $this->assertTrue($bucket->exists('target'));
+
+        //Written!
+        $content->rewind();
+
+        $stream = $bucket->allocateStream('target');
+
+        $this->assertSame($content->getSize(), $stream->getSize());
+        $this->assertSame($content->getContents(), $stream->getContents());
+
+        $newContent = $this->getStreamSource();
+
+        $bucket->put('target', $newContent);
+        $this->assertTrue($bucket->exists('target'));
+
+        //Written!
+        $newContent->rewind();
+
+        $stream = $bucket->allocateStream('target');
+
+        $this->assertSame($newContent->getSize(), $stream->getSize());
+        $this->assertSame($newContent->getContents(), $stream->getContents());
     }
 
     public function testRenameLongName()

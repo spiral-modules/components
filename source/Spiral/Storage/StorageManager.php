@@ -196,6 +196,10 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             }
         }
 
+        if (empty($bestBucket)) {
+            throw new StorageException("Unable to locate bucket for a given address '{$address}'");
+        }
+
         return $bestBucket;
     }
 

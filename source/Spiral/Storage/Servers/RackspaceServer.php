@@ -75,7 +75,7 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
      */
     public function __construct(
         array $options,
-        FilesInterface $files,
+        FilesInterface $files = null,
         CacheInterface $cache = null,
         ClientInterface $client = null
     ) {

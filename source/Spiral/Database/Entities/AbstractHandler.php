@@ -142,41 +142,7 @@ abstract class AbstractHandler
          * This is schema synchronization code, if you are reading it you are either experiencing
          * VERY weird bug, or you are very curious. Please contact me in a any scenario :)
          */
-        if ($behaviour & self::DROP_FOREIGNS) {
-            $this->dropForeigns($table, $comparator);
-        }
-
-        if ($behaviour & self::DROP_INDEXES) {
-            $this->dropIndexes($table, $comparator);
-        }
-
-        if ($behaviour & self::DROP_COLUMNS) {
-            $this->dropColumns($table, $comparator);
-        }
-
-        if ($behaviour & self::CREATE_COLUMNS) {
-            $this->createColumns($table, $comparator);
-        }
-
-        if ($behaviour & self::ALTER_COLUMNS) {
-            $this->alterColumns($table, $comparator);
-        }
-
-        if ($behaviour & self::CREATE_INDEXES) {
-            $this->createIndexes($table, $comparator);
-        }
-
-        if ($behaviour & self::ALTER_INDEXES) {
-            $this->alterIndexes($table, $comparator);
-        }
-
-        if ($behaviour & self::CREATE_FOREIGNS) {
-            $this->createForeigns($table, $comparator);
-        }
-
-        if ($behaviour & self::ALTER_FOREIGNS) {
-            $this->alterForeigns($table, $comparator);
-        }
+        $this->runChanges($table, $behaviour, $comparator);
     }
 
     /**
@@ -370,6 +336,50 @@ abstract class AbstractHandler
         $statement[] = ')';
 
         return join("\n", $statement);
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param int             $behaviour
+     * @param StateComparator $comparator
+     */
+    protected function runChanges(AbstractTable $table, int $behaviour, StateComparator $comparator)
+    {
+        if ($behaviour & self::DROP_FOREIGNS) {
+            $this->dropForeigns($table, $comparator);
+        }
+
+        if ($behaviour & self::DROP_INDEXES) {
+            $this->dropIndexes($table, $comparator);
+        }
+
+        if ($behaviour & self::DROP_COLUMNS) {
+            $this->dropColumns($table, $comparator);
+        }
+
+        if ($behaviour & self::CREATE_COLUMNS) {
+            $this->createColumns($table, $comparator);
+        }
+
+        if ($behaviour & self::ALTER_COLUMNS) {
+            $this->alterColumns($table, $comparator);
+        }
+
+        if ($behaviour & self::CREATE_INDEXES) {
+            $this->createIndexes($table, $comparator);
+        }
+
+        if ($behaviour & self::ALTER_INDEXES) {
+            $this->alterIndexes($table, $comparator);
+        }
+
+        if ($behaviour & self::CREATE_FOREIGNS) {
+            $this->createForeigns($table, $comparator);
+        }
+
+        if ($behaviour & self::ALTER_FOREIGNS) {
+            $this->alterForeigns($table, $comparator);
+        }
     }
 
     /**

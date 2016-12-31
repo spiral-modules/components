@@ -213,13 +213,20 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
      * {@inheritdoc}
      *
      * @todo debug to figure out why Rackspace is not reliable
+     * @see https://github.com/rackspace/php-opencloud/issues/477
      */
-    public function delete(BucketInterface $bucket, string $name)
+    public function delete(BucketInterface $bucket, string $name, bool $retry = true)
     {
         try {
             $this->client->send($this->buildRequest('DELETE', $bucket, $name));
         } catch (ClientException $e) {
-            if ($e->getCode() == 401) {
+            if ($e->getCode() == 409 && $retry) {
+
+                //Giving retry in 0.5 seconds, hate myself for doing so
+                usleep(500000);
+                $this->delete($bucket, $name, false);
+
+            } elseif ($e->getCode() == 401) {
                 $this->reconnect();
                 $this->delete($bucket, $name);
             } elseif ($e->getCode() != 404) {

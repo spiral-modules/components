@@ -8,6 +8,7 @@
 namespace Spiral\Storage;
 
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Storage\Configs\StorageConfig;
@@ -49,10 +50,10 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      * @param StorageConfig    $config
      * @param FactoryInterface $factory
      */
-    public function __construct(StorageConfig $config, FactoryInterface $factory)
+    public function __construct(StorageConfig $config, FactoryInterface $factory = null)
     {
         $this->config = $config;
-        $this->factory = $factory;
+        $this->factory = $factory ?? new Container();
 
         //Loading buckets (we need all instances to properly allocate bucket name by address) (really?)
         foreach ($this->config->getBuckets() as $name => $bucket) {

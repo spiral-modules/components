@@ -6,7 +6,274 @@
  */
 namespace Spiral\Tests\Storage\Servers;
 
-class ObjectTest
-{
+use Psr\Http\Message\StreamInterface;
+use Spiral\Storage\BucketInterface;
+use Spiral\Storage\Configs\StorageConfig;
+use Spiral\Storage\ObjectInterface;
+use Spiral\Storage\ServerInterface;
+use Spiral\Storage\StorageInterface;
+use Spiral\Storage\StorageManager;
 
+abstract class ObjectTest extends \PHPUnit_Framework_TestCase
+{
+    const PROFILING = true;
+
+    protected $skipped = false;
+
+    public function tearDown()
+    {
+        if ($this->skipped) {
+            return;
+        }
+
+        $this->getBucket()->exists('target') && $this->getBucket()->delete('target');
+        $this->getBucket()->exists('targetB') && $this->getBucket()->delete('targetB');
+        $this->getBucket()->exists('targetDir/targetName') && $this->getBucket()->delete('targetDir/targetName');
+    }
+
+    public function testObject()
+    {
+        $this->assertInstanceOf(
+            ObjectInterface::class,
+            $this->getStorage()->open($this->makeAddress('target'))
+        );
+    }
+
+    public function testObjectExists()
+    {
+        $object = $this->getStorage()->open($this->makeAddress('target'));
+
+        $this->assertFalse($object->exists());
+        $this->assertNull($object->getSize());
+
+        $this->assertSame($this->getBucket(), $object->getBucket());
+    }
+
+    /**
+     * @expectedException \Spiral\Storage\Exceptions\ServerException
+     * @expectedExceptionMessage Source must be a valid resource, stream or filename, invalid value
+     *                           given
+     */
+    public function testObjectPutString()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        //By Name
+        $this->getStorage()->put($this->getBucket()->getName(), 'target', 'STRING');
+    }
+
+    public function testPutStream()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            $this->getStreamSource()
+        );
+
+        $this->assertTrue($object->exists());
+    }
+
+    public function testPutStreamLongName()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('targetDir/targetName'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'targetDir/targetName',
+            $this->getStreamSource()
+        );
+
+        $this->assertTrue($object->exists());
+    }
+
+    public function testPutFilename()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue($object->exists());
+    }
+
+    public function testPutResource()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            fopen(__FILE__, 'rb')
+        );
+
+        $this->assertTrue($object->exists());
+    }
+
+    public function testAddress()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            fopen(__FILE__, 'rb')
+        );
+
+        $address = $object->getAddress();
+
+        $this->assertNotNull($address);
+        $this->assertSame($bucket->getPrefix() . 'target', $address);
+    }
+
+    public function testPutStreamIntegrity()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            $content = $this->getStreamSource()
+        );
+
+        $this->assertTrue($object->exists());
+
+        $content->rewind();
+        $this->assertSame($content->getContents(), $object->getStream()->getContents());
+    }
+
+    public function testPutStreamLongNameIntegrity()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('targetDir/targetName'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'targetDir/targetName',
+            $content = $this->getStreamSource()
+        );
+
+        $this->assertTrue($object->exists());
+
+        $content->rewind();
+        $this->assertSame($content->getContents(), $object->getStream()->getContents());
+    }
+
+    public function testPutFilenameIntegrity()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue($object->exists());
+        $this->assertSame(file_get_contents(__FILE__), $object->getStream()->getContents());
+    }
+
+    public function testPutResourceIntegrity()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            fopen(__FILE__, 'rb')
+        );
+
+        $this->assertTrue($object->exists());
+        $this->assertSame(file_get_contents(__FILE__), $object->getStream()->getContents());
+    }
+
+    public function testSize()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue($object->exists());
+        $this->assertSame(filesize(__FILE__), $object->getSize());
+    }
+
+    public function testRename()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue($object->exists());
+
+        $object->rename('targetB');
+
+        $this->assertSame('targetB', $object->getName());
+        $this->assertSame($bucket->getPrefix() . 'targetB', $object->getAddress());
+    }
+
+    public function testDelete()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue($object->exists());
+
+        $object->delete();
+
+        $this->assertFalse($object->exists());
+    }
+
+    protected function makeAddress(string $name): string
+    {
+        return $this->getBucket()->getPrefix() . $name;
+    }
+
+    protected function getStorage(): StorageInterface
+    {
+        $storage = new StorageManager(new StorageConfig(['buckets' => []]));
+        $storage->addBucket($this->getBucket());
+
+        //Open by address
+        return $storage;
+    }
+
+    protected function getStreamSource(): StreamInterface
+    {
+        $content = random_bytes(mt_rand(100, 100000));
+
+        return \GuzzleHttp\Psr7\stream_for($content);
+    }
+
+    abstract protected function getBucket(): BucketInterface;
+
+    abstract protected function getServer(): ServerInterface;
 }

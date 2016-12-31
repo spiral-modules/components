@@ -202,7 +202,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     {
         $bucket = is_string($bucket) ? $this->getBucket($bucket) : $bucket;
 
-        return $bucket->put($name, $source);
+        return $this->open($bucket->put($name, $source));
     }
 
     /**

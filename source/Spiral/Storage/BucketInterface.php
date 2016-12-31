@@ -103,12 +103,12 @@ interface BucketInterface
      * @param string                                     $name
      * @param string|StreamInterface|StreamableInterface $source
      *
-     * @return ObjectInterface
+     * @return string Return inserted object address.
      *
      * @throws ServerException
      * @throws BucketException
      */
-    public function put(string $name, $source): ObjectInterface;
+    public function put(string $name, $source): string;
 
     /**
      * Must return filename which is valid in associated FilesInterface instance. Must trow an

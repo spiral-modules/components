@@ -14,12 +14,9 @@ use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\BucketInterface;
-use Spiral\Storage\ObjectInterface;
 use Spiral\Storage\ServerInterface;
-use Spiral\Storage\StorageInterface;
 use Spiral\Storage\StorageManager;
 
 /**
@@ -58,34 +55,18 @@ class StorageBucket extends Component implements
     private $options = [];
 
     /**
-     * @invisible
-     * @var StorageInterface
-     */
-    protected $storage = null;
-
-    /**
-     * @invisible
-     * @var FilesInterface
-     */
-    protected $files = null;
-
-    /**
      * {@inheritdoc}
      */
     public function __construct(
         string $name,
         string $prefix,
         array $options,
-        ServerInterface $server,
-        StorageInterface $storage,
-        FilesInterface $files
+        ServerInterface $server
     ) {
         $this->name = $name;
         $this->prefix = $prefix;
         $this->options = $options;
         $this->server = $server;
-        $this->storage = $storage;
-        $this->files = $files;
     }
 
     /**
@@ -178,7 +159,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function put(string $name, $source): ObjectInterface
+    public function put(string $name, $source): string
     {
         $this->logger()->info(
             "Put '{$this->buildAddress($name)}' at '{$this->getName()}' server."
@@ -198,7 +179,7 @@ class StorageBucket extends Component implements
             $this->server->put($this, $name, $source);
 
             //Reopening
-            return $this->storage->open($this->buildAddress($name));
+            return $this->buildAddress($name);
         } finally {
             $this->benchmark($benchmark);
         }

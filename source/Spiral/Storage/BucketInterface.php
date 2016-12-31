@@ -35,6 +35,19 @@ interface BucketInterface
      */
     public function getServer(): ServerInterface;
 
+
+    /**
+     * Get bucket version with some options changed.
+     *
+     * $bucket->withOption('public', false)->put(...)
+     *
+     * @param string $name
+     * @param mixed  $value
+     *
+     * @return self
+     */
+    public function withOption(string $name, $value): BucketInterface;
+
     /**
      * Get server specific bucket option or return default value.
      *

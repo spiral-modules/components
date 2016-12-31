@@ -88,6 +88,17 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
+    public function withOption(string $name, $value): BucketInterface
+    {
+        $bucket = clone $this;
+        $bucket->options[$name] = $value;
+
+        return $bucket;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getOption(string $name, $default = null)
     {
         return isset($this->options[$name]) ? $this->options[$name] : $default;

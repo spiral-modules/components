@@ -7,15 +7,9 @@
 namespace Spiral\Tests\Storage\Servers;
 
 use Psr\Http\Message\StreamInterface;
-use Spiral\Storage\BucketInterface;
-use Spiral\Storage\ServerInterface;
 
-abstract class OperationsTest extends \PHPUnit_Framework_TestCase
+abstract class OperationsTest extends BaseTest
 {
-    const PROFILING = true;
-
-    protected $skipped = false;
-
     public function tearDown()
     {
         if ($this->skipped) {
@@ -275,15 +269,4 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
         $bucket->delete('target');
         $this->assertFalse($bucket->exists('target'));
     }
-
-    protected function getStreamSource(): StreamInterface
-    {
-        $content = random_bytes(mt_rand(100, 100000));
-
-        return \GuzzleHttp\Psr7\stream_for($content);
-    }
-
-    abstract protected function getBucket(): BucketInterface;
-
-    abstract protected function getServer(): ServerInterface;
 }

@@ -6,20 +6,13 @@
  */
 namespace Spiral\Tests\Storage\Servers;
 
-use Psr\Http\Message\StreamInterface;
-use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\ObjectInterface;
-use Spiral\Storage\ServerInterface;
 use Spiral\Storage\StorageInterface;
 use Spiral\Storage\StorageManager;
 
-abstract class ObjectTest extends \PHPUnit_Framework_TestCase
+abstract class ObjectTest extends BaseTest
 {
-    const PROFILING = true;
-
-    protected $skipped = false;
-
     public function tearDown()
     {
         if ($this->skipped) {
@@ -265,15 +258,4 @@ abstract class ObjectTest extends \PHPUnit_Framework_TestCase
         //Open by address
         return $storage;
     }
-
-    protected function getStreamSource(): StreamInterface
-    {
-        $content = random_bytes(mt_rand(100, 100000));
-
-        return \GuzzleHttp\Psr7\stream_for($content);
-    }
-
-    abstract protected function getBucket(): BucketInterface;
-
-    abstract protected function getServer(): ServerInterface;
 }

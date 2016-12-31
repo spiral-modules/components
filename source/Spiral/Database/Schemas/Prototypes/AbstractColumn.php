@@ -239,10 +239,10 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      * @param string        $name
      * @param \DateTimeZone $timezone
      */
-    public function __construct(string $table, string $name, \DateTimeZone $timezone)
+    public function __construct(string $table, string $name, \DateTimeZone $timezone = null)
     {
         parent::__construct($table, $name);
-        $this->timezone = $timezone;
+        $this->timezone = $timezone ?? new \DateTimeZone(date_default_timezone_get());
     }
 
     /**

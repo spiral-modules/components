@@ -73,13 +73,11 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->assertSame([
-            'buckets' => [
-                'amazon' => [
-                    'server' => AmazonServer::class
-                ],
-                'local'  => [
-                    'server' => LocalServer::class
-                ]
+            'amazon' => [
+                'server' => AmazonServer::class
+            ],
+            'local'  => [
+                'server' => LocalServer::class
             ]
         ], $config->getBuckets());
     }

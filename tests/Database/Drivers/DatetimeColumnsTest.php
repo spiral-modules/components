@@ -231,7 +231,6 @@ abstract class DatetimeColumnsTest extends BaseTest
         $this->assertSameAsInDB($schema);
     }
 
-
     public function testTimeWithZeroValue()
     {
         $schema = $this->schema('sampleSchema');
@@ -328,6 +327,17 @@ abstract class DatetimeColumnsTest extends BaseTest
         $this->assertFalse($schema->exists());
 
         $schema->time('target')->defaultValue('1910-11-10 12am');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testDateWithLongStringValueOtherFormat()
+    {
+        $schema = $this->schema('sampleSchema');
+        $this->assertFalse($schema->exists());
+
+        $schema->time('target')->defaultValue('May 10, 2010');
         $schema->save();
 
         $this->assertSameAsInDB($schema);

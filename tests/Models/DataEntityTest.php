@@ -42,6 +42,12 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($entity->hasField('abc'));
     }
 
+    public function testPackingSimple()
+    {
+        $entity = new DynamicEntity(['a' => 'b']);
+        $this->assertSame(['a' => 'b'], $entity->packFields());
+    }
+
     public function testSerialize()
     {
         $data = ['a' => 123, 'b' => null, 'c' => 'test'];

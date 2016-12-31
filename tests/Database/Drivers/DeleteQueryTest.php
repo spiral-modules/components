@@ -13,8 +13,8 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 abstract class DeleteQueryTest extends BaseQueryTest
 {
     /**
- * @var Database
- */
+     * @var Database
+     */
     protected $database;
 
     public function setUp()
@@ -46,6 +46,14 @@ abstract class DeleteQueryTest extends BaseQueryTest
     public function testDeletionWithWhere()
     {
         $delete = $this->database->delete()->from('table')->where('name', 'Anton');
+
+        $this->assertSameQuery("DELETE FROM {table} WHERE {name} = ?", $delete);
+    }
+
+
+    public function testDeletionWithShortWhere()
+    {
+        $delete = $this->database->delete()->from('table')->where(['name' => 'Anton']);
 
         $this->assertSameQuery("DELETE FROM {table} WHERE {name} = ?", $delete);
     }

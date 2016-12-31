@@ -71,7 +71,8 @@ trait ServerTrait
             'login'    => env('STORAGE_FTP_USERNAME'),
             'password' => env('STORAGE_FTP_PASSWORD'),
             'home'     => '/',
-            'passive'  => true
+            'passive'  => true,
+            'chmod'    => false
         ]);
     }
 }

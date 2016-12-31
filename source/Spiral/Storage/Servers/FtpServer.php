@@ -28,7 +28,8 @@ class FtpServer extends AbstractServer
         'login'    => '',
         'password' => '',
         'home'     => '/',
-        'passive'  => true
+        'passive'  => true,
+        'chmod'    => false
     ];
 
     /**
@@ -71,7 +72,7 @@ class FtpServer extends AbstractServer
             return $size;
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -273,6 +274,11 @@ class FtpServer extends AbstractServer
      */
     protected function refreshPermissions(BucketInterface $bucket, string $name): bool
     {
+        if (!$this->options['chmod']) {
+            //No CHMOD altering
+            return true;
+        }
+
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
 
         return ftp_chmod($this->connection, $mode, $this->getPath($bucket, $name)) !== false;

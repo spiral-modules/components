@@ -102,7 +102,7 @@ interface BucketInterface
      *
      * @param string $name
      *
-     * @return int|bool
+     * @return int|null
      *
      * @throws ServerException
      * @throws BucketException
@@ -113,8 +113,9 @@ interface BucketInterface
      * Put given content under given name in associated bucket server. Must replace already existed
      * object.
      *
-     * @param string                                     $name
-     * @param string|StreamInterface|StreamableInterface $source
+     * @param string                                              $name
+     * @param string|StreamInterface|StreamableInterface|resource $source String can only be
+     *                                                                    filename.
      *
      * @return string Return inserted object address.
      *

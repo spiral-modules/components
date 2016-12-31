@@ -29,7 +29,7 @@ class StreamsTest extends \PHPUnit_Framework_TestCase
     public function testGetUri()
     {
         $stream = \GuzzleHttp\Psr7\stream_for('sample text');
-        $filename = StreamWrapper::getUri($stream);
+        $filename = StreamWrapper::localFilename($stream);
 
         $this->assertFileExists($filename);
         $this->assertSame(strlen('sample text'), filesize($filename));

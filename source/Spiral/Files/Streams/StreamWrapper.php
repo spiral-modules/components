@@ -226,7 +226,7 @@ class StreamWrapper
      *
      * @return string
      */
-    public static function getUri(StreamInterface $stream)
+    public static function localFilename(StreamInterface $stream)
     {
         self::register();
 
@@ -271,7 +271,7 @@ class StreamWrapper
             throw new WrapperException("Stream is not available in read or write modes");
         }
 
-        return fopen(self::getUri($stream), $mode);
+        return fopen(self::localFilename($stream), $mode);
     }
 
     /**

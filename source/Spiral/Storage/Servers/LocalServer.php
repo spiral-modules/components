@@ -33,7 +33,7 @@ class LocalServer extends StorageServer
     public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->files->exists($this->getPath($bucket, $name))) {
-            return false;
+            return null;
         }
 
         return $this->files->size($this->getPath($bucket, $name));

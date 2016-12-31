@@ -60,7 +60,7 @@ abstract class StorageServer extends Component implements ServerInterface
 
         //Default implementation will use stream to create temporary filename, such filename
         //can't be used outside php scope
-        return StreamWrapper::getUri($stream);
+        return StreamWrapper::localFilename($stream);
     }
 
     /**
@@ -98,14 +98,16 @@ abstract class StorageServer extends Component implements ServerInterface
     protected function castFilename($source): string
     {
         if (empty($source)) {
-            return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for(''));
+            return StreamWrapper::localFilename(\GuzzleHttp\Psr7\stream_for(''));
         }
 
         if (is_string($source)) {
-            if ($this->files->exists($source)) {
-                return $source;
+            if ($this->isFilename($source)) {
+                $source = \GuzzleHttp\Psr7\stream_for(fopen($source, 'rb'));
             } else {
-                return StreamWrapper::getUri(\GuzzleHttp\Psr7\stream_for($source));
+                throw new ServerException(
+                    "Source must be a valid resource, stream or filename, invalid value given"
+                );
             }
         }
 
@@ -114,7 +116,7 @@ abstract class StorageServer extends Component implements ServerInterface
         }
 
         if ($source instanceof StreamInterface) {
-            return StreamWrapper::getUri($source);
+            return StreamWrapper::localFilename($source);
         }
 
         throw new ServerException("Unable to get filename for non Stream instance");
@@ -142,10 +144,32 @@ abstract class StorageServer extends Component implements ServerInterface
             return \GuzzleHttp\Psr7\stream_for('');
         }
 
-        if (is_string($source) && $this->files->exists($source)) {
-            $source = fopen($source, 'rb');
+        if ($this->isFilename($source)) {
+            return \GuzzleHttp\Psr7\stream_for(fopen($source, 'rb'));
         }
 
-        return \GuzzleHttp\Psr7\stream_for($source);
+        throw new ServerException(
+            "Source must be a valid resource, stream or filename, invalid value given"
+        );
+    }
+
+    /**
+     * Check if given string is proper filename.
+     *
+     * @param mixed $source
+     *
+     * @return bool
+     */
+    protected function isFilename($source): bool
+    {
+        if (!is_string($source)) {
+            return false;
+        }
+
+        if (!preg_match('/^([-\.\w]+)$/', $source)) {
+            return false;
+        }
+
+        return file_exists($source);
     }
 }

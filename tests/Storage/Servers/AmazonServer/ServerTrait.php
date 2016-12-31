@@ -27,7 +27,7 @@ trait ServerTrait
 
         $bucket = new StorageBucket(
             'amazon',
-            env('STORAGE_AMAZON_PUBLIC_PREFIX'),
+            env('STORAGE_AMAZON_PREFIX'),
             [
                 'bucket' => env('STORAGE_AMAZON_BUCKET'),
                 'public' => false

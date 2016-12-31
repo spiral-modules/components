@@ -18,7 +18,7 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
     {
         $this->getBucket()->delete('target');
         $this->getBucket()->delete('targetB');
-        $this->getBucket()->delete('targetC');
+        $this->getBucket()->delete('targetDir/targetName');
     }
 
     /**
@@ -47,6 +47,18 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
         $bucket->put('target', $content);
 
         $this->assertTrue($bucket->exists('target'));
+    }
+
+    public function testPutStreamLongName()
+    {
+        $bucket = $this->getBucket();
+
+        $this->assertFalse($bucket->exists('target'));
+
+        $content = $this->getStreamSource();
+        $bucket->put('targetDir/targetName', $content);
+
+        $this->assertTrue($bucket->exists('targetDir/targetName'));
     }
 
     public function testPutFilename()
@@ -101,7 +113,7 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($content->getContents(), $stream->getContents());
     }
 
-    public function testResource()
+    public function testResourceIntegrity()
     {
         $bucket = $this->getBucket();
 
@@ -202,6 +214,30 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($bucket->exists('targetB'));
 
         $stream = $bucket->allocateStream('targetB');
+        $this->assertInstanceOf(StreamInterface::class, $stream);
+
+        //Written!
+        $content->rewind();
+
+        $this->assertSame($content->getSize(), $stream->getSize());
+        $this->assertSame($content->getContents(), $stream->getContents());
+    }
+
+    public function testRenameLongName()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $content = $this->getStreamSource();
+
+        $bucket->put('target', $content);
+        $this->assertTrue($bucket->exists('target'));
+
+        $bucket->rename('target', 'targetDir/targetName');
+        $this->assertFalse($bucket->exists('target'));
+        $this->assertTrue($bucket->exists('targetDir/targetName'));
+
+        $stream = $bucket->allocateStream('targetDir/targetName');
         $this->assertInstanceOf(StreamInterface::class, $stream);
 
         //Written!

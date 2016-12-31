@@ -57,7 +57,10 @@ class StorageConfig extends InjectableConfig
      */
     public function serverOptions(string $server): array
     {
-        return $this->config['servers'][$server];
+        $options = $this->config['servers'][$server];
+        unset($options['class']);
+
+        return $options;
     }
 
     /**

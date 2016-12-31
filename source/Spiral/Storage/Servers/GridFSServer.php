@@ -75,6 +75,12 @@ class GridFSServer extends AbstractServer
 
     /**
      * {@inheritdoc}
+     *
+     * This method must be improved in future versions!
+     *
+     * @see https://github.com/mongodb/mongo-php-library/issues/317
+     * @see https://github.com/slimphp/Slim/issues/2112
+     * @see https://jira.mongodb.org/browse/PHPLIB-213
      */
     public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
@@ -85,9 +91,17 @@ class GridFSServer extends AbstractServer
             );
         }
 
-        return \GuzzleHttp\Psr7\stream_for(
-            $this->gridFS($bucket)->openDownloadStream($file->_id)
-        );
+        //We have to use temporary file now due to issues with seeking (should be fixed soon)
+        $resource = fopen('php://memory', 'rw');
+
+        //Copying from non seekable to seekable stream
+        stream_copy_to_stream($this->gridFS($bucket)->openDownloadStream($file->_id), $resource);
+
+        //Working thought the memory, WILL FAIL on very huge files
+        rewind($resource);
+
+        //Ugly :/
+        return \GuzzleHttp\Psr7\stream_for($resource);
     }
 
     /**

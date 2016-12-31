@@ -16,7 +16,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 {
     static $driversCache = [];
 
-    const PROFILING = false;
+    const PROFILING = ENABLE_PROFILING;
 
     /**
      * @param string $name

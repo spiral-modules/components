@@ -16,7 +16,7 @@ use Spiral\Storage\ServerInterface;
 
 abstract class BaseTest extends \PHPUnit_Framework_TestCase
 {
-    const PROFILING = false;
+    const PROFILING = ENABLE_PROFILING;
 
     protected $skipped = false;
 

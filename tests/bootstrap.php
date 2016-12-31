@@ -51,3 +51,5 @@ if (file_exists(dirname(__DIR__) . '/../.env')) {
     $loader = new \Dotenv\Loader(dirname(__DIR__) . '/../.env');
     $loader->load();
 }
+
+define('ENABLE_PROFILING', true);

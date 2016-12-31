@@ -17,8 +17,6 @@ use Spiral\Storage\Exceptions\StorageException;
 
 /**
  * Default implementation of StorageInterface.
- *
- * @todo tests are required!
  */
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {
@@ -53,7 +51,7 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         $this->config = $config;
         $this->factory = $factory;
 
-        //Loading buckets
+        //Loading buckets (we need all instances to properly allocate bucket name by address) (really?)
         foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
             $this->buckets[$name] = $this->constructBucket($name, $bucket);
@@ -76,7 +74,6 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
         $this->buckets[$bucket->getName()] = $bucket;
 
         return $this;
-
     }
 
     /**

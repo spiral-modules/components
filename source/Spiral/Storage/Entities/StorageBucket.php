@@ -33,8 +33,7 @@ class StorageBucket extends Component implements
     use BenchmarkTrait, LoggerTrait;
 
     /**
-     * This is magick constant used by Spiral Constant, it helps system to resolve controllable
-     * injections, once set - Container will ask specific binding for injection.
+     * To let IoC who need to inject us.
      */
     const INJECTOR = StorageManager::class;
 

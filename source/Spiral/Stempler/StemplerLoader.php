@@ -4,27 +4,26 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Stempler;
+namespace Spiral\Stempler;
 
+use Spiral\Files\FileManager;
 use Spiral\Files\FilesInterface;
-use Spiral\Stempler\LoaderInterface;
+use Spiral\Stempler\Exceptions\LoaderException;
 
 /**
- * RIP Off from default spiral view loader.
+ * Simple loader with ability to use multiple namespaces. Copy from TwigLoader.
  */
-class FixtureLoader implements LoaderInterface
+class StemplerLoader implements LoaderInterface
 {
+    const DEFAULT_NAMESPACE = 'default';
+    const FILE_EXTENSION    = 'php';
+
+    /**
+     * Path chunks.
+     */
     const VIEW_FILENAME  = 0;
     const VIEW_NAMESPACE = 1;
     const VIEW_NAME      = 2;
-
-    /**
-     * Such extensions will automatically be added to every file but only if no other extension
-     * specified in view name. As result you are able to render "home" view, instead of "home.twig".
-     *
-     * @var string|null
-     */
-    protected $extension = 'php';
 
     /**
      * Available view namespaces associated with their directories.
@@ -42,18 +41,10 @@ class FixtureLoader implements LoaderInterface
      * @param array          $namespaces
      * @param FilesInterface $files
      */
-    public function __construct(array $namespaces, FilesInterface $files)
+    public function __construct(array $namespaces, FilesInterface $files = null)
     {
         $this->namespaces = $namespaces;
-        $this->files = $files;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSource($path): string
-    {
-        return $this->files->read($this->locateView($path)[self::VIEW_FILENAME]);
+        $this->files = $files ?? new FileManager();
     }
 
     /**
@@ -67,17 +58,9 @@ class FixtureLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function fetchNamespace(string $path): string
+    public function getSource($path): string
     {
-        return $this->locateView($path)[self::VIEW_NAMESPACE];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function fetchName(string $path): string
-    {
-        return $this->locateView($path)[self::VIEW_NAME];
+        return $this->files->read($this->locateView($path)[self::VIEW_FILENAME]);
     }
 
     /**
@@ -87,12 +70,12 @@ class FixtureLoader implements LoaderInterface
      *
      * @return array [namespace, name]
      *
-     * @throws \LogicException
+     * @throws LoaderException
      */
     protected function locateView(string $path): array
     {
         //Making sure requested name is valid
-        $this->validateName($path);
+        $this->validatePath($path);
 
         list($namespace, $filename) = $this->parsePath($path);
 
@@ -102,12 +85,12 @@ class FixtureLoader implements LoaderInterface
                 return [
                     self::VIEW_FILENAME  => $directory . $filename,
                     self::VIEW_NAMESPACE => $namespace,
-                    self::VIEW_NAME      => $this->resolveName($filename)
+                    self::VIEW_NAME      => $this->fetchName($filename)
                 ];
             }
         }
 
-        throw new \LogicException("Unable to locate view '{$filename}' in namespace '{$namespace}'");
+        throw new LoaderException("Unable to locate view '{$filename}' in namespace '{$namespace}'");
     }
 
     /**
@@ -116,16 +99,17 @@ class FixtureLoader implements LoaderInterface
      * @param string $path
      *
      * @return array
-     * @throws \LogicException
+     *
+     * @throws LoaderException
      */
     protected function parsePath(string $path): array
     {
         //Cutting extra symbols (see Twig)
         $filename = preg_replace('#/{2,}#', '/', str_replace('\\', '/', (string)$path));
 
-        if (strpos($filename, '.') === false && !empty($this->extension)) {
+        if (strpos($filename, '.') === false) {
             //Forcing default extension
-            $filename .= '.' . $this->extension;
+            $filename .= '.' . static::FILE_EXTENSION;
         }
 
         if (strpos($filename, ':') !== false) {
@@ -135,7 +119,7 @@ class FixtureLoader implements LoaderInterface
         //Twig like namespaces
         if (isset($filename[0]) && $filename[0] == '@') {
             if (($separator = strpos($filename, '/')) === false) {
-                throw new \LogicException(sprintf(
+                throw new LoaderException(sprintf(
                     'Malformed namespaced template name "%s" (expecting "@namespace/template_name")',
                     $path
                 ));
@@ -148,24 +132,24 @@ class FixtureLoader implements LoaderInterface
         }
 
         //Let's force default namespace
-        return ['default', $filename];
+        return [static::DEFAULT_NAMESPACE, $filename];
     }
 
     /**
      * Make sure view filename is OK. Same as in twig.
      *
-     * @param string $name
+     * @param string $path
      *
-     * @throws \LogicException
+     * @throws LoaderException
      */
-    protected function validateName(string $name)
+    protected function validatePath(string $path)
     {
-        if (false !== strpos($name, "\0")) {
-            throw new \LogicException('A template name cannot contain NUL bytes');
+        if (false !== strpos($path, "\0")) {
+            throw new LoaderException('A template name cannot contain NUL bytes');
         }
 
-        $name = ltrim($name, '/');
-        $parts = explode('/', $name);
+        $path = ltrim($path, '/');
+        $parts = explode('/', $path);
         $level = 0;
         foreach ($parts as $part) {
             if ('..' === $part) {
@@ -175,9 +159,9 @@ class FixtureLoader implements LoaderInterface
             }
 
             if ($level < 0) {
-                throw new \LogicException(sprintf(
+                throw new LoaderException(sprintf(
                     'Looks like you try to load a template outside configured directories (%s)',
-                    $name
+                    $path
                 ));
             }
         }
@@ -190,7 +174,7 @@ class FixtureLoader implements LoaderInterface
      *
      * @return string
      */
-    private function resolveName(string $filename): string
+    protected function fetchName(string $filename): string
     {
         if (empty($this->extension)) {
             return $filename;

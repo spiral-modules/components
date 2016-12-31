@@ -21,7 +21,6 @@
     "doctrine/inflector": "*",
     "symfony/finder": "^3.0",
     "symfony/event-dispatcher": "^3.0",
-    "defuse/php-encryption": "^2.0",
     "guzzlehttp/guzzle": "~6.0",
     "mongodb/mongodb": "^1.1"
   },

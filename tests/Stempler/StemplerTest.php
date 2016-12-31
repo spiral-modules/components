@@ -7,8 +7,8 @@
  */
 namespace Spiral\Tests\Stempler;
 
-use Spiral\Files\FileManager;
 use Spiral\Stempler\Stempler;
+use Spiral\Stempler\StemplerLoader;
 use Spiral\Stempler\Syntaxes\DarkSyntax;
 
 class StemplerTest extends \PHPUnit_Framework_TestCase
@@ -103,19 +103,14 @@ class StemplerTest extends \PHPUnit_Framework_TestCase
     protected function render($view)
     {
         $stempler = new Stempler(
-            new FixtureLoader([
-                'default'   => [
-                    __DIR__ . '/fixtures/stempler/default/'
-                ],
-                'namespace' => [
-                    __DIR__ . '/fixtures/stempler/namespace/',
-                ]
-            ], new FileManager()),
+            new StemplerLoader([
+                'default'   => [__DIR__ . '/fixtures/default/'],
+                'namespace' => [__DIR__ . '/fixtures/namespace/',]
+            ]),
             new DarkSyntax()
         );
 
         $lines = explode("\n", self::normalizeEndings($stempler->compile($view)));
-
         return array_values(array_map('trim', array_filter($lines, 'trim')));
     }
 

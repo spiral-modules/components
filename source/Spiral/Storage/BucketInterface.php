@@ -20,7 +20,7 @@ use Spiral\Storage\Exceptions\StorageException;
 interface BucketInterface
 {
     /**
-     * Bucker name.
+     * Bucket name.
      *
      * @return string
      */

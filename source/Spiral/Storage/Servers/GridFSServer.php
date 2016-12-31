@@ -20,7 +20,7 @@ use Spiral\Storage\Prototypes\StorageServer;
  *
  * Attention, server depends on ODM!
  */
-class GridFsServer extends StorageServer
+class GridFSServer extends StorageServer
 {
     /**
      * @var Database
@@ -29,13 +29,12 @@ class GridFsServer extends StorageServer
 
     /**
      * @param FilesInterface $files
-     * @param Database       $database
      * @param array          $options
+     * @param Database       $database
      */
-    public function __construct(FilesInterface $files, Database $database, array $options)
+    public function __construct(array $options, Database $database, FilesInterface $files = null)
     {
-        parent::__construct($files, $options);
-
+        parent::__construct($options, $files);
         $this->database = $database;
     }
 
@@ -47,7 +46,7 @@ class GridFsServer extends StorageServer
     public function exists(BucketInterface $bucket, string $name): bool
     {
         //todo: check it
-        return $this->getGridFs($bucket)->findOne(['filename' => $name]);
+        return $this->gridFS($bucket)->findOne(['filename' => $name]);
     }
 
     /**
@@ -86,7 +85,7 @@ class GridFsServer extends StorageServer
         $tempFilename = $this->files->tempFilename();
         copy($this->castFilename($source), $tempFilename);
 
-        if (!$this->getGridFs($bucket)->storeFile($tempFilename, ['filename' => $name])) {
+        if (!$this->gridFS($bucket)->storeFile($tempFilename, ['filename' => $name])) {
             throw new ServerException("Unable to store {$name} in GridFS server");
         }
 
@@ -114,7 +113,7 @@ class GridFsServer extends StorageServer
      */
     public function delete(BucketInterface $bucket, string $name)
     {
-        $this->getGridFs($bucket)->remove(['filename' => $name]);
+        $this->gridFS($bucket)->remove(['filename' => $name]);
     }
 
     /**
@@ -124,7 +123,7 @@ class GridFsServer extends StorageServer
     {
         $this->delete($bucket, $newName);
 
-        return $this->getGridFs($bucket)->update(
+        return $this->gridFS($bucket)->update(
             ['filename' => $oldName],
             ['$set' => ['filename' => $newName]]
         );
@@ -137,7 +136,7 @@ class GridFsServer extends StorageServer
      *
      * @return Bucket
      */
-    protected function getGridFs(BucketInterface $bucket): Bucket
+    protected function gridFS(BucketInterface $bucket): Bucket
     {
         return $this->database->selectGridFSBucket($bucket->getOption('collection'));
     }

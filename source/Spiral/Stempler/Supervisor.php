@@ -205,7 +205,10 @@ class Supervisor implements SupervisorInterface
         foreach ($lines as $number => $line) {
             if (strpos($line, $target) !== false) {
                 //We found where token were used (!!)
-                $exception->setLocation($this->loader->localFilename($path), $number + 1);
+                $exception->setLocation(
+                    $this->loader->localFilename($path),
+                    $number + 1
+                );
 
                 break;
             }

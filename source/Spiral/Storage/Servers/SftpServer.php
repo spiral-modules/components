@@ -85,7 +85,7 @@ class SftpServer extends AbstractServer
     public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->exists($bucket, $name)) {
-            return false;
+            return null;
         }
 
         return filesize($this->getUri($bucket, $name));

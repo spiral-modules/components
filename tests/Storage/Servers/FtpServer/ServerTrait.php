@@ -30,8 +30,8 @@ trait ServerTrait
             'ftp',
             env('STORAGE_FTP_PREFIX'),
             [
-                'bucket' => env('STORAGE_FTP_DIRECTORY'),
-                'mode'   => FilesInterface::READONLY
+                'directory' => env('STORAGE_FTP_DIRECTORY'),
+                'mode'      => FilesInterface::READONLY
             ],
             $this->getServer()
         );
@@ -69,10 +69,7 @@ trait ServerTrait
         return new FtpServer([
             'host'     => env('STORAGE_FTP_HOST'),
             'login'    => env('STORAGE_FTP_USERNAME'),
-            'password' => env('STORAGE_FTP_PASSWORD'),
-            'home'     => '/',
-            'passive'  => true,
-            'chmod'    => false
+            'password' => env('STORAGE_FTP_PASSWORD')
         ]);
     }
 }

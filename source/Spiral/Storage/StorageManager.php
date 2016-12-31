@@ -17,6 +17,9 @@ use Spiral\Storage\Exceptions\StorageException;
 
 /**
  * Default implementation of StorageInterface.
+ *
+ * @todo check if i still need Guzzle dependency or there is something lighter for PSR7 curl
+ * @todo wrappers
  */
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {

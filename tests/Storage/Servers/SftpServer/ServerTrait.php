@@ -20,6 +20,14 @@ trait ServerTrait
 {
     protected $bucket;
 
+    public function setUp()
+    {
+        if (empty(env('STORAGE_SFTP_USERNAME'))) {
+            $this->skipped = true;
+            $this->markTestSkipped('SFTP credentials are not set');
+        }
+    }
+
     protected function getBucket(): BucketInterface
     {
         if (!empty($this->bucket)) {

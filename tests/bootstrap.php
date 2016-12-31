@@ -46,7 +46,8 @@ if (!function_exists('env')) {
     }
 }
 
-if (file_exists(dirname(__DIR__) . '/.env')) {
-    $loader = new \Dotenv\Loader(dirname(__DIR__) . '/.env');
+//Always keep it outside of repo.
+if (file_exists(dirname(__DIR__) . '/../.env')) {
+    $loader = new \Dotenv\Loader(dirname(__DIR__) . '/../.env');
     $loader->load();
 }

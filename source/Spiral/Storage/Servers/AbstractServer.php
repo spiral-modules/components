@@ -94,6 +94,8 @@ abstract class AbstractServer extends Component implements ServerInterface
      * @param string|StreamInterface $source
      *
      * @return string
+     *
+     * @throws ServerException
      */
     protected function castFilename($source): string
     {

@@ -20,6 +20,14 @@ trait ServerTrait
 {
     protected $bucket;
 
+    public function setUp()
+    {
+        if (empty(env('STORAGE_FTP_USERNAME'))) {
+            $this->skipped = true;
+            $this->markTestSkipped('FTP credentials are not set');
+        }
+    }
+
     protected function getBucket(): BucketInterface
     {
         if (!empty($this->bucket)) {

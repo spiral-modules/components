@@ -150,7 +150,7 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
     public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->exists($bucket, $name, $response)) {
-            return false;
+            return null;
         }
 
         /**
@@ -211,6 +211,8 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @todo debug to figure out why Rackspace is not reliable
      */
     public function delete(BucketInterface $bucket, string $name)
     {

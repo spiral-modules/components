@@ -165,7 +165,12 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     public function delete(string $filename)
     {
         if ($this->exists($filename)) {
-            return unlink($filename);
+            $result = unlink($filename);
+
+            //Wiping out changes in local file cache
+            clearstatcache(false, $filename);
+
+            return $result;
         }
 
         return false;

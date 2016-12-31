@@ -14,11 +14,17 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
 {
     const PROFILING = true;
 
+    protected $skipped = false;
+
     public function tearDown()
     {
-        $this->getBucket()->delete('target');
-        $this->getBucket()->delete('targetB');
-        $this->getBucket()->delete('targetDir/targetName');
+        if ($this->skipped) {
+            return;
+        }
+
+        $this->getBucket()->exists('target') && $this->getBucket()->delete('target');
+        $this->getBucket()->exists('targetB') && $this->getBucket()->delete('targetB');
+        $this->getBucket()->exists('targetDir/targetName') && $this->getBucket()->delete('targetDir/targetName');
     }
 
     /**
@@ -209,7 +215,11 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
         $bucket->put('target', $content);
         $this->assertTrue($bucket->exists('target'));
 
-        $bucket->rename('target', 'targetB');
+        $newAddress = $bucket->rename('target', 'targetB');
+
+        $this->assertNotNull($newAddress);
+        $this->assertSame($bucket->getPrefix() . 'targetB', $newAddress);
+
         $this->assertFalse($bucket->exists('target'));
         $this->assertTrue($bucket->exists('targetB'));
 
@@ -233,7 +243,11 @@ abstract class OperationsTest extends \PHPUnit_Framework_TestCase
         $bucket->put('target', $content);
         $this->assertTrue($bucket->exists('target'));
 
-        $bucket->rename('target', 'targetDir/targetName');
+        $newAddress = $bucket->rename('target', 'targetDir/targetName');
+
+        $this->assertNotNull($newAddress);
+        $this->assertSame($bucket->getPrefix() . 'targetDir/targetName', $newAddress);
+
         $this->assertFalse($bucket->exists('target'));
         $this->assertTrue($bucket->exists('targetDir/targetName'));
 

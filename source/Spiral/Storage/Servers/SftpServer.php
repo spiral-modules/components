@@ -76,7 +76,7 @@ class SftpServer extends AbstractServer
      */
     public function exists(BucketInterface $bucket, string $name): bool
     {
-        return file_exists($this->getUri($bucket, $name));
+        return file_exists($this->castRemoteFilename($bucket, $name));
     }
 
     /**
@@ -88,7 +88,7 @@ class SftpServer extends AbstractServer
             return null;
         }
 
-        return filesize($this->getUri($bucket, $name));
+        return filesize($this->castRemoteFilename($bucket, $name));
     }
 
     /**
@@ -96,24 +96,22 @@ class SftpServer extends AbstractServer
      */
     public function put(BucketInterface $bucket, string $name, $source): bool
     {
-        if ($source instanceof StreamInterface) {
-            $expectedSize = $source->getSize();
-            $source = StreamWrapper::getResource($source);
-        } else {
-            $expectedSize = filesize($source);
-            $source = fopen($source, 'r');
-        }
+        //Converting into stream
+        $stream = $this->castStream($source);
+
+        $expectedSize = $stream->getSize();
+        $resource = StreamWrapper::getResource($stream);
 
         //Make sure target directory exists
         $this->ensureLocation($bucket, $name);
 
         //Remote file
-        $destination = fopen($this->getUri($bucket, $name), 'w');
+        $destination = fopen($this->castRemoteFilename($bucket, $name), 'w');
 
         //We can check size here
-        $size = stream_copy_to_stream($source, $destination);
+        $size = stream_copy_to_stream($resource, $destination);
 
-        fclose($source);
+        fclose($resource);
         fclose($destination);
 
         return $expectedSize == $size && $this->refreshPermissions($bucket, $name);
@@ -124,7 +122,10 @@ class SftpServer extends AbstractServer
      */
     public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
-        return \GuzzleHttp\Psr7\stream_for(fopen($this->getUri($bucket, $name), 'rb'));
+        //Thought native sftp resource
+        return \GuzzleHttp\Psr7\stream_for(
+            fopen($this->castRemoteFilename($bucket, $name), 'rb')
+        );
     }
 
     /**
@@ -133,7 +134,10 @@ class SftpServer extends AbstractServer
     public function delete(BucketInterface $bucket, string $name)
     {
         if ($this->exists($bucket, $name)) {
-            ssh2_sftp_unlink($this->sftp, $this->getPath($bucket, $name));
+            ssh2_sftp_unlink($this->sftp, $path = $this->castPath($bucket, $name));
+
+            //Cleaning file cache for removed file
+            clearstatcache(false, $path);
         }
     }
 
@@ -149,14 +153,14 @@ class SftpServer extends AbstractServer
         }
 
         $location = $this->ensureLocation($bucket, $newName);
-        if (file_exists($this->getUri($bucket, $newName))) {
+        if (file_exists($this->castRemoteFilename($bucket, $newName))) {
             //We have to clean location before renaming
             $this->delete($bucket, $newName);
         }
 
-        if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldName), $location)) {
+        if (!ssh2_sftp_rename($this->sftp, $this->castPath($bucket, $oldName), $location)) {
             throw new ServerException(
-                "Unable to rename storage object '{$oldName}' to '{$newName}'."
+                "Unable to rename storage object '{$oldName}' to '{$newName}'"
             );
         }
 
@@ -208,21 +212,6 @@ class SftpServer extends AbstractServer
     }
 
     /**
-     * Get full file location on server including homedir.
-     *
-     * @param BucketInterface $bucket
-     * @param string          $name
-     *
-     * @return string
-     */
-    protected function getPath(BucketInterface $bucket, string $name): string
-    {
-        return $this->files->normalizePath(
-            $this->options['home'] . '/' . $bucket->getOption('directory') . '/' . $name
-        );
-    }
-
-    /**
      * Get ssh2 specific uri which can be used in default php functions. Assigned to ssh2.sftp
      * stream wrapper.
      *
@@ -231,9 +220,24 @@ class SftpServer extends AbstractServer
      *
      * @return string
      */
-    protected function getUri(BucketInterface $bucket, string $name): string
+    protected function castRemoteFilename(BucketInterface $bucket, string $name): string
     {
-        return 'ssh2.sftp://' . $this->sftp . $this->getPath($bucket, $name);
+        return 'ssh2.sftp://' . $this->sftp . $this->castPath($bucket, $name);
+    }
+
+    /**
+     * Get full file location on server including homedir.
+     *
+     * @param BucketInterface $bucket
+     * @param string          $name
+     *
+     * @return string
+     */
+    protected function castPath(BucketInterface $bucket, string $name): string
+    {
+        return $this->files->normalizePath(
+            $this->options['home'] . '/' . $bucket->getOption('directory') . '/' . $name
+        );
     }
 
     /**
@@ -247,7 +251,7 @@ class SftpServer extends AbstractServer
      */
     protected function ensureLocation(BucketInterface $bucket, string $name): string
     {
-        $directory = dirname($this->getPath($bucket, $name));
+        $directory = dirname($this->castPath($bucket, $name));
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
         if (file_exists('ssh2.sftp://' . $this->sftp . $directory)) {
@@ -255,7 +259,7 @@ class SftpServer extends AbstractServer
                 ssh2_sftp_chmod($this->sftp, $directory, $mode | 0111);
             }
 
-            return $this->getPath($bucket, $name);
+            return $this->castPath($bucket, $name);
         }
 
         $directories = explode('/', substr($directory, strlen($this->options['home'])));
@@ -281,7 +285,7 @@ class SftpServer extends AbstractServer
             }
         }
 
-        return $this->getPath($bucket, $name);
+        return $this->castPath($bucket, $name);
     }
 
     /**
@@ -300,7 +304,7 @@ class SftpServer extends AbstractServer
 
         return ssh2_sftp_chmod(
             $this->sftp,
-            $this->getPath($bucket, $name),
+            $this->castPath($bucket, $name),
             $bucket->getOption('mode', FilesInterface::RUNTIME)
         );
     }

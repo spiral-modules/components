@@ -17,6 +17,16 @@ use Spiral\Storage\Servers\RackspaceServer;
 
 trait ServerTrait
 {
+    protected $bucket;
+
+    public function setUp()
+    {
+        if (empty(env('STORAGE_RACKSPACE_USERNAME'))) {
+            $this->skipped = true;
+            $this->markTestSkipped('Rackspace credentials are not set');
+        }
+    }
+
     protected function getBucket(): BucketInterface
     {
         if (!empty($this->bucket)) {
@@ -25,7 +35,7 @@ trait ServerTrait
 
         $bucket = new StorageBucket(
             'rackspace',
-            env('STORAGE_AMAZON_PREFIX'),
+            env('STORAGE_RACKSPACE_PREFIX'),
             [
                 'container' => env('STORAGE_RACKSPACE_CONTAINER'),
                 'region'    => env('STORAGE_RACKSPACE_REGION')
@@ -64,8 +74,8 @@ trait ServerTrait
     protected function getServer(): ServerInterface
     {
         return new RackspaceServer([
-            'username'  => env('STORAGE_RACKSPACE_USERNAME'),
-            'secretKey' => env('STORAGE_RACKSPACE_API_KEY')
+            'username' => env('STORAGE_RACKSPACE_USERNAME'),
+            'apiKey'   => env('STORAGE_RACKSPACE_API_KEY')
         ]);
     }
 }

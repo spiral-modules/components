@@ -19,6 +19,14 @@ trait ServerTrait
 {
     protected $bucket;
 
+    public function setUp()
+    {
+        if (empty(env('STORAGE_AMAZON_KEY'))) {
+            $this->skipped = true;
+            $this->markTestSkipped('Amazon credentials are not set');
+        }
+    }
+
     protected function getBucket(): BucketInterface
     {
         if (!empty($this->bucket)) {

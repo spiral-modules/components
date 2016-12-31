@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Storage\Servers;
 
-class MovingTest
+class CrossStorageTest
 {
 
 }

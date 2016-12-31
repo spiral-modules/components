@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Storage\Servers\GridFSServer;
 
-class OperationsTest extends \Spiral\Tests\Storage\Servers\OperationsTest
+class ObjectTest extends \Spiral\Tests\Storage\Servers\ObjectTest
 {
     use ServerTrait;
 }

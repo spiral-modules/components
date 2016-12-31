@@ -11,6 +11,7 @@ namespace Spiral\Storage\Prototypes;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Spiral\Core\Component;
+use Spiral\Files\FileManager;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Files\Streams\StreamWrapper;
@@ -39,12 +40,12 @@ abstract class StorageServer extends Component implements ServerInterface
     protected $options = [];
 
     /**
-     * @param FilesInterface $files   Required for local filesystem operations.
      * @param array          $options Server specific options.
+     * @param FilesInterface $files   Required for operations with local filesystem.
      */
-    public function __construct(FilesInterface $files, array $options)
+    public function __construct(array $options, FilesInterface $files = null)
     {
-        $this->files = $files;
+        $this->files = $files ?? new FileManager();
         $this->options = $options + $this->options;
     }
 

@@ -38,20 +38,24 @@ class AmazonServer extends StorageServer
     ];
 
     /**
-     * @todo DI in constructor
      * @var ClientInterface
      */
     protected $client = null;
 
     /**
-     * {@inheritdoc}
+     * @param array                $options
+     * @param FilesInterface|null  $files
+     * @param ClientInterface|null $client
      */
-    public function __construct(FilesInterface $files, array $options)
-    {
-        parent::__construct($files, $options);
+    public function __construct(
+        array $options,
+        FilesInterface $files = null,
+        ClientInterface $client = null
+    ) {
+        parent::__construct($options, $files);
 
         //This code is going to use additional abstraction layer to connect storage and guzzle
-        $this->client = new Client($this->options);
+        $this->setClient($client ?? new Client($this->options));
     }
 
     /**

@@ -58,9 +58,9 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function __construct(FilesInterface $files, array $options)
+    public function __construct(array $options, FilesInterface $files = null)
     {
-        parent::__construct($files, $options);
+        parent::__construct($options, $files);
 
         if (!extension_loaded('ssh2')) {
             throw new ServerException(

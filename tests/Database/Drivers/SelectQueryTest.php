@@ -26,7 +26,7 @@ abstract class SelectQueryTest extends BaseQueryTest
         $this->database = $this->database();
     }
 
-       public function schema(string $table): AbstractTable
+    public function schema(string $table): AbstractTable
     {
         return $this->database->table($table)->getSchema();
     }
@@ -66,6 +66,26 @@ abstract class SelectQueryTest extends BaseQueryTest
     public function testSelectWithSimpleWhere()
     {
         $select = $this->database->select()->distinct()->from(['users'])->where('name', 'Anton');
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} WHERE {name} = ?",
+            $select
+        );
+    }
+
+    public function testSelectWithSimpleWhereNull()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])->where('name', null);
+
+        $this->assertSameQuery(
+            "SELECT DISTINCT * FROM {users} WHERE {name} = ?",
+            $select
+        );
+    }
+
+    public function testSelectWithSimpleWhereNotNull()
+    {
+        $select = $this->database->select()->distinct()->from(['users'])->where('name', '!=', null);
 
         $this->assertSameQuery(
             "SELECT DISTINCT * FROM {users} WHERE {name} = ?",

@@ -20,6 +20,8 @@ use Spiral\Stempler\ExporterInterface;
  *
  * Prefix will allow you to match some attributes to specific spot, use exclude pattern (with star)
  * to remove attributes like that from other places.
+ *
+ * @todo add few tests
  */
 abstract class ConditionalExporter implements ExporterInterface
 {

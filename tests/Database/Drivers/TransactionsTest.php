@@ -130,6 +130,4 @@ abstract class TransactionsTest extends BaseTest
         $this->database->commit();
         $this->assertSame(1, $this->database->table->count());
     }
-
-
 }

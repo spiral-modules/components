@@ -10,7 +10,7 @@ namespace Spiral\Tests\Core\Fixtures;
 
 use Interop\Container\ContainerInterface;
 
-class OtherComponent extends SampleComponent
+class OtherComponent extends SharedComponent
 {
     /**
      * @var ContainerInterface

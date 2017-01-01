@@ -26,7 +26,7 @@ class DefaultsTest extends \PHPUnit_Framework_TestCase
 
         $builder->addSchema($this->makeSchema(User::class));
         $builder->addSchema($this->makeSchema(Admin::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, []);
         $this->assertInstanceOf(User::class, $user);
@@ -42,7 +42,7 @@ class DefaultsTest extends \PHPUnit_Framework_TestCase
 
         $builder->addSchema($this->makeSchema(User::class));
         $builder->addSchema($this->makeSchema(Admin::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, []);
         $this->assertInstanceOf(Admin::class, $admin);

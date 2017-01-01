@@ -101,6 +101,8 @@ class DocumentSelector extends Component implements
      * Set additional query, fields will be merged to currently existed request using array_merge.
      * Alias for query.
      *
+     * Attention, MongoDB is strictly typed!
+     *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      *
      * @see  query()
@@ -120,9 +122,11 @@ class DocumentSelector extends Component implements
      * Set additional query, fields will be merged to currently existed request using array_merge.
      * Alias for query.
      *
+     * Attention, MongoDB is strictly typed!
+     *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
      *
-     * @see  query()
+     * @see  find()
      *
      * @param array $query          Fields and conditions to query by.
      * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
@@ -175,6 +179,8 @@ class DocumentSelector extends Component implements
     /**
      * Select one document or it's fields from collection.
      *
+     * Attention, MongoDB is strictly typed!
+     *
      * @param array $query          Fields and conditions to query by. Query will not be added to an
      *                              existed query array.
      * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
@@ -203,13 +209,17 @@ class DocumentSelector extends Component implements
     /**
      * Count collection. Attention, this method depends on current values set for limit and offset!
      *
+     * Attention, MongoDB is strictly typed!
+     *
+     * @param array $query
+     *
      * @return int
      */
-    public function count(): int
+    public function count(array $query = []): int
     {
         //Create options?
         return $this->collection->count(
-            $this->query,
+            array_merge($this->query, $query),
             ['skip' => $this->offset, 'limit' => $this->limit]
         );
     }

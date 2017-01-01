@@ -14,13 +14,13 @@ use Psr\Log\NullLogger;
 use Spiral\Core\Component;
 use Spiral\Debug\LogsInterface;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Tests\Core\Fixtures\SampleComponent;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 
 class LoggerTraitTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {
-        SampleComponent::shareContainer(null);
+        SharedComponent::shareContainer(null);
         LoggedClass::shareLogger(null);
     }
 
@@ -64,7 +64,7 @@ class LoggerTraitTest extends \PHPUnit_Framework_TestCase
 
         $logs->shouldReceive('getLogger')->with(LoggedClass::class)->andReturn($logger);
 
-        SampleComponent::shareContainer($container);
+        SharedComponent::shareContainer($container);
 
         $class = new LoggedClass();
 

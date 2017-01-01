@@ -13,14 +13,14 @@ use Mockery as m;
 use Spiral\Core\Container;
 use Spiral\Core\Exceptions\Container\AutowireException;
 use Spiral\Tests\Core\Fixtures\SampleClass;
-use Spiral\Tests\Core\Fixtures\SampleComponent;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\Core\Fixtures\SaturableComponent;
 
 class SaturateTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {
-        SampleComponent::shareContainer(null);
+        SharedComponent::shareContainer(null);
     }
 
     public function testManualClass()
@@ -45,7 +45,7 @@ class SaturateTest extends \PHPUnit_Framework_TestCase
     {
         $container = m::mock(ContainerInterface::class);
 
-        SampleComponent::shareContainer($container);
+        SharedComponent::shareContainer($container);
 
         $container->shouldReceive('get')->with(SampleClass::class)->andReturn(
             $sample = new SampleClass()
@@ -64,7 +64,7 @@ class SaturateTest extends \PHPUnit_Framework_TestCase
     {
         $container = m::mock(ContainerInterface::class);
 
-        SampleComponent::shareContainer($container);
+        SharedComponent::shareContainer($container);
 
         $container->shouldReceive('get')->with(SampleClass::class)->andThrow(
             AutowireException::class,

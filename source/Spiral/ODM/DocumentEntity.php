@@ -145,11 +145,12 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      *
-     * @param ODMInterface $odm To lazy create nested document ang aggregations.
+     * @param ODMInterface $odm   To lazy create nested document ang aggregations.
+     * @param array        $model Model schema if none will be fetched from ODM.
      *
      * @throws ScopeException When no ODM instance can be resolved.
      */
-    public function __construct($fields = [], array $schema = null, ODMInterface $odm = null)
+    public function __construct($fields = [], ODMInterface $odm = null, array $schema = null)
     {
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODMInterface::class);
@@ -171,6 +172,22 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
     /**
      * {@inheritdoc}
+     */
+    public function getField(string $name, $default = null, bool $filter = true)
+    {
+        if (!$this->hasField($name) && !isset($this->documentSchema[self::SH_COMPOSITIONS][$name])) {
+            throw new FieldException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
+        }
+
+        return parent::getField($name, $default, $filter);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * Tracks field changes.
      */
@@ -178,7 +195,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         if (!$this->hasField($name)) {
             //We are only allowing to modify existed fields, this is strict schema
-            throw new FieldException("Undefined field '{$name}' in '" . static::class . "'");
+            throw new FieldException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
         }
 
         //Original field value
@@ -323,7 +344,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         $this->changes = [];
 
-        foreach ($this->getFields(false) as $value) {
+        foreach ($this->getFields(false) as $field => $value) {
             if ($value instanceof CompositableInterface) {
                 $value->flushUpdates();
             }
@@ -385,7 +406,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         return [
             'fields'  => $this->getFields(),
-            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : []
+            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
         ];
     }
 

@@ -30,7 +30,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         ], $user->getCompositions($builder));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class);
 
@@ -45,7 +45,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, ['piece' => ['value' => 'abc']]);
 
@@ -59,7 +59,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, ['piece' => ['value' => 'abc']]);
 
@@ -73,7 +73,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, ['piece' => ['value' => 'abc']]);
 
@@ -93,7 +93,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, ['piece' => ['value' => 'abc']]);
         $this->assertSame('abc', $user->piece->value);
@@ -112,7 +112,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, ['piece' => ['value' => 'abc']]);
         $this->assertSame('abc', $user->piece->value);
@@ -131,7 +131,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $model = $odm->instantiate(NullableComposition::class, ['piece' => ['value' => 'abc']]);
         $this->assertSame('abc', $model->piece->value);
@@ -150,7 +150,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $model = $odm->instantiate(NullableComposition::class);
         $this->assertNull($model->piece);
@@ -163,7 +163,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $model = $odm->instantiate(NullableComposition::class);
         $this->assertNull($model->piece);
@@ -180,7 +180,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $model = $odm->instantiate(NullableComposition::class, ['piece' => ['value' => 'abc']]);
 
@@ -198,7 +198,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $model = $odm->instantiate(NullableComposition::class, ['piece' => ['value' => 'abc']]);
 

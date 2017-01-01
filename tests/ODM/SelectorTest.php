@@ -254,7 +254,7 @@ class SelectorTest extends \PHPUnit_Framework_TestCase
 
         $builder->addSchema(new DS(new RE(ExternalDB::class), $mutators));
 
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         return $odm;
     }

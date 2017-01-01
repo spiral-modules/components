@@ -26,7 +26,7 @@ class SourcesTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $source = $odm->source(User::class);
         $this->assertInstanceOf(DocumentSource::class, $source);
@@ -40,7 +40,7 @@ class SourcesTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(Moderator::class));
 
         $builder->addSource(Moderator::class, ModeratorSource::class);
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $source = $odm->source(User::class);
         $this->assertInstanceOf(DocumentSource::class, $source);

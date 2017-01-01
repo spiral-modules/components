@@ -10,13 +10,13 @@ namespace Spiral\Tests\Core;
 
 use Spiral\Core\Container;
 use Spiral\Tests\Core\Fixtures\OtherComponent;
-use Spiral\Tests\Core\Fixtures\SampleComponent;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 
 class ComponentTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {
-        SampleComponent::shareContainer(null);
+        SharedComponent::shareContainer(null);
     }
 
     public function testShareContainer()
@@ -24,37 +24,37 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
         $containerA = new Container();
         $containerB = new Container();
 
-        $this->assertNull(SampleComponent::shareContainer($containerA));
-        $this->assertSame($containerA, SampleComponent::shareContainer($containerB));
-        $this->assertSame($containerB, SampleComponent::shareContainer(null));
+        $this->assertNull(SharedComponent::shareContainer($containerA));
+        $this->assertSame($containerA, SharedComponent::shareContainer($containerB));
+        $this->assertSame($containerB, SharedComponent::shareContainer(null));
     }
 
     public function testMissingContainer()
     {
-        $component = new SampleComponent();
+        $component = new SharedComponent();
         $this->assertNull($component->getContainer());
     }
 
     public function testFallbackContainer()
     {
         $sharedContainer = new Container();
-        $this->assertNull(SampleComponent::shareContainer($sharedContainer));
+        $this->assertNull(SharedComponent::shareContainer($sharedContainer));
 
-        $component = new SampleComponent();
+        $component = new SharedComponent();
         $this->assertSame($sharedContainer, $component->getContainer());
     }
 
     public function testLocalContainer()
     {
         $sharedContainer = new Container();
-        $this->assertNull(SampleComponent::shareContainer($sharedContainer));
+        $this->assertNull(SharedComponent::shareContainer($sharedContainer));
 
         $localContainer = new Container();
 
         $component = new OtherComponent($localContainer);
         $this->assertSame($localContainer, $component->getContainer());
 
-        $component = new SampleComponent();
+        $component = new SharedComponent();
         $this->assertSame($sharedContainer, $component->getContainer());
     }
 
@@ -62,15 +62,15 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
     {
         $containerA = new Container();
         $containerB = new Container();
-        $component = new SampleComponent();
+        $component = new SharedComponent();
 
-        $this->assertNull(SampleComponent::shareContainer($containerA));
+        $this->assertNull(SharedComponent::shareContainer($containerA));
         $this->assertSame($containerA, $component->getContainer());
 
-        $this->assertSame($containerA, SampleComponent::shareContainer($containerB));
+        $this->assertSame($containerA, SharedComponent::shareContainer($containerB));
         $this->assertSame($containerB, $component->getContainer());
 
-        $this->assertSame($containerB, SampleComponent::shareContainer($containerA));
+        $this->assertSame($containerB, SharedComponent::shareContainer($containerA));
         $this->assertSame($containerA, $component->getContainer());
     }
 }

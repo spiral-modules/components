@@ -21,7 +21,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
 
         $builder->addSchema($this->makeSchema(Accessed::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $entity = $odm->instantiate(Accessed::class, []);
         $this->assertInstanceOf(Accessed::class, $entity);
@@ -36,7 +36,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
 
         $builder->addSchema($this->makeSchema(Accessed::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $entity = $odm->instantiate(Accessed::class, [
             'tags' => ['a', 'b', 'c']
@@ -58,7 +58,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
 
         $builder->addSchema($this->makeSchema(Accessed::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $entity = $odm->instantiate(Accessed::class, [
             'tags' => ['a', 'b', 'c']
@@ -82,7 +82,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
 
         $builder->addSchema($this->makeSchema(Accessed::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $entity = $odm->instantiate(Accessed::class, [
             'tags' => ['a', 'b', 'c']
@@ -98,5 +98,25 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
 
         $entity->tags->pull('c');
         $this->assertFalse($entity->tags->has('c'));
+    }
+
+    /**
+     * @expectedException \Spiral\ODM\Exceptions\FieldException
+     * @expectedExceptionMessage No such property 'test' in 'Spiral\Tests\ODM\Fixtures\Accessed',
+     *                           check schema being relevant
+     */
+    public function testException()
+    {
+        $builder = $this->makeBuilder();
+        $odm = $this->makeODM();
+
+        $builder->addSchema($this->makeSchema(Accessed::class));
+        $odm->buildSchema($builder);
+
+        $entity = $odm->instantiate(Accessed::class, [
+            'tags' => ['a', 'b', 'c']
+        ]);
+
+        $entity->test->pull('c');
     }
 }

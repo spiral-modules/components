@@ -13,13 +13,13 @@ use Mockery as m;
 use Spiral\Core\Component;
 use Spiral\Debug\BenchmarkerInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Tests\Core\Fixtures\SampleComponent;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 
 class BenchmarkTraitTest extends \PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {
-        SampleComponent::shareContainer(null);
+        SharedComponent::shareContainer(null);
     }
 
     public function testNoBenchmarker()
@@ -54,7 +54,7 @@ class BenchmarkTraitTest extends \PHPUnit_Framework_TestCase
             $benchmarker = m::mock(BenchmarkerInterface::class)
         );
 
-        SampleComponent::shareContainer($container);
+        SharedComponent::shareContainer($container);
 
         $class = new BenchmarkedClass();
 

@@ -8,7 +8,7 @@ namespace Spiral\Tests\ODM;
 
 use Spiral\Core\Container;
 use Spiral\ODM\ODMInterface;
-use Spiral\Tests\Core\Fixtures\SampleComponent;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ODM\Fixtures\User;
 use Spiral\Tests\ODM\Traits\ODMTrait;
 
@@ -26,7 +26,7 @@ class ScopesTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         //Restoring global scope
-        SampleComponent::shareContainer(null);
+        SharedComponent::shareContainer(null);
     }
 
     public function setUp()
@@ -36,7 +36,7 @@ class ScopesTest extends \PHPUnit_Framework_TestCase
         $builder = $this->makeBuilder();
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $this->container->bind(ODMInterface::class, $odm);
     }
@@ -53,7 +53,7 @@ class ScopesTest extends \PHPUnit_Framework_TestCase
 
     public function testWithScope()
     {
-        SampleComponent::shareContainer($this->container);
+        SharedComponent::shareContainer($this->container);
         $user = new User();
         $this->assertInstanceOf(User::class, $user);
     }

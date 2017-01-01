@@ -318,15 +318,15 @@ class DocumentCompositor implements
 
         //Document specific atomic operations (excluding document which are colliding with composition
         //specific operations)
-        foreach ($this->entities as $offset => $document) {
-            if (in_array($document, $excluded)) {
+        foreach ($this->entities as $offset => $entity) {
+            if (!$entity->hasUpdates() || in_array($entity, $excluded)) {
                 //Handler on higher level
                 continue;
             }
 
             $atomics = array_merge(
                 $atomics,
-                $document->buildAtomics((!empty($container) ? $container . '.' : '') . $offset)
+                $entity->buildAtomics((!empty($container) ? $container . '.' : '') . $offset)
             );
         }
 

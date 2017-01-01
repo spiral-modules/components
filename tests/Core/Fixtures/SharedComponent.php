@@ -11,7 +11,7 @@ namespace Spiral\Tests\Core\Fixtures;
 use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
 
-class SampleComponent extends Component
+class SharedComponent extends Component
 {
     public function getContainer()
     {

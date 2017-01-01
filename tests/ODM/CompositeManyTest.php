@@ -33,7 +33,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         ], $admin->getCompositions($builder));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class);
 
@@ -49,7 +49,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -64,7 +64,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -81,7 +81,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -99,7 +99,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -119,7 +119,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -141,7 +141,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -167,7 +167,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -210,7 +210,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -239,7 +239,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -257,7 +257,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -273,7 +273,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -303,7 +303,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
@@ -338,7 +338,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
@@ -357,7 +357,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
@@ -382,7 +382,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
@@ -401,7 +401,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(DataPiece::class));
 
         $odm = $this->makeODM();
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $admin = $odm->instantiate(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);

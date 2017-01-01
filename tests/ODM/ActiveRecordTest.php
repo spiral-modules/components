@@ -27,7 +27,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, []);
         $this->assertInstanceOf(User::class, $user);
@@ -65,7 +65,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, [
             '_id'  => new ObjectID('507f191e810c19729de860ea'),
@@ -85,7 +85,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, [
             '_id'  => $_id = new ObjectID('507f191e810c19729de860ea'),
@@ -120,7 +120,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, [
             '_id'  => $_id = new ObjectID('507f191e810c19729de860ea'),
@@ -152,7 +152,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $user = $odm->instantiate(User::class, [
             //'_id'  => $_id = new ObjectID('507f191e810c19729de860ea'),

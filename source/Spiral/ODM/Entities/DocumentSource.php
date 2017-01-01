@@ -127,11 +127,13 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     }
 
     /**
+     * @param array $query
+     *
      * @return int
      */
-    public function count(): int
+    public function count(array $query = []): int
     {
-        return $this->getSelector()->count();
+        return $this->getSelector()->count($query);
     }
 
     /**

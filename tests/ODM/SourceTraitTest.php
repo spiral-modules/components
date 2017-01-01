@@ -15,7 +15,7 @@ use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\MongoManager;
 use Spiral\ODM\ODM;
 use Spiral\ODM\ODMInterface;
-use Spiral\Tests\Core\Fixtures\SampleComponent;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ODM\Fixtures\User;
 use Spiral\Tests\ODM\Traits\ODMTrait;
 
@@ -36,7 +36,7 @@ class SourceTraitTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         //Restoring global scope
-        SampleComponent::shareContainer(null);
+        SharedComponent::shareContainer(null);
     }
 
     public function setUp()
@@ -46,7 +46,7 @@ class SourceTraitTest extends \PHPUnit_Framework_TestCase
         $builder = $this->makeBuilder();
 
         $builder->addSchema($this->makeSchema(User::class));
-        $odm->setSchema($builder);
+        $odm->buildSchema($builder);
 
         $this->container->bind(ODMInterface::class, ODM::class);
         $this->container->bind(ODM::class, $odm);
@@ -64,7 +64,7 @@ class SourceTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testSourceMethod()
     {
-        SampleComponent::shareContainer($this->container);
+        SharedComponent::shareContainer($this->container);
 
         $source = User::source();
         $this->assertInstanceOf(DocumentSource::class, $source);
@@ -72,7 +72,7 @@ class SourceTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testSelector()
     {
-        SampleComponent::shareContainer($this->container);
+        SharedComponent::shareContainer($this->container);
 
         $database = m::mock(MongoDatabase::class);
         $this->manager->shouldReceive('database')->with(null)->andReturn($database);

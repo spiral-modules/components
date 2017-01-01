@@ -46,7 +46,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     abstract protected function driverID(): string;
 
     /**
-     * Drop all tables in db.
+     * ATTENTION, DATABASE WILL BE CLEAN AFTER TESTS!
      */
     protected function dropAll(Database $database)
     {

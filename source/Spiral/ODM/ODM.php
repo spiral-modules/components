@@ -9,14 +9,17 @@ namespace Spiral\ODM;
 use MongoDB\BSON\ObjectID;
 use MongoDB\Collection;
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
+use Spiral\Core\NullMemory;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\Schemas\LocatorInterface;
+use Spiral\ODM\Schemas\NullLocator;
 use Spiral\ODM\Schemas\SchemaBuilder;
 
 /**
@@ -78,15 +81,15 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      */
     public function __construct(
         MongoManager $manager,
-        LocatorInterface $locator,
-        MemoryInterface $memory,
-        FactoryInterface $factory
+        LocatorInterface $locator = null,
+        MemoryInterface $memory = null,
+        FactoryInterface $factory = null
     ) {
         $this->manager = $manager;
-        $this->locator = $locator;
 
-        $this->memory = $memory;
-        $this->factory = $factory;
+        $this->locator = $locator ?? new NullLocator();
+        $this->memory = $memory ?? new NullMemory();
+        $this->factory = $factory ?? new Container();
 
         //Loading schema from memory (if any)
         $this->schema = $this->loadSchema();
@@ -128,7 +131,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
      * @param SchemaBuilder $builder
      * @param bool          $remember Set to true to remember packed schema in memory.
      */
-    public function setSchema(SchemaBuilder $builder, bool $remember = false)
+    public function buildSchema(SchemaBuilder $builder, bool $remember = false)
     {
         $this->schema = $builder->packSchema();
 
@@ -144,7 +147,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     {
         if (empty($this->schema)) {
             //Update and remember
-            $this->setSchema($this->schemaBuilder(), true);
+            $this->buildSchema($this->schemaBuilder(), true);
         }
 
         //Check value
@@ -179,7 +182,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         if (empty($handles)) {
             //All sources are linked to primary class (i.e. Admin source => User class), unless specified
             //in source directly
-            $handles = $this->define($class, self::D_PRIMARY_CLASS);
+            $handles = $class;
         }
 
         return $this->factory->make($source, [

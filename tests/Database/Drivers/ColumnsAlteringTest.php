@@ -206,6 +206,22 @@ abstract class ColumnsAlteringTest extends BaseTest
         $this->assertSameAsInDB($schema);
     }
 
+    public function testChangeColumnFromEnumToString()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->enum('new_column', ['a', 'b', 'c'])->defaultValue(null);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+
+        $schema->column('new_column')->string();
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
     public function testAddMultipleColumns()
     {
         $schema = $this->sampleSchema('table');

@@ -215,7 +215,7 @@ class Container extends Component implements
                 $arguments[] = $this->get($class->getName(), $parameter->getName());
 
                 continue;
-            } catch (ArgumentException $e) {
+            } catch (AutowireException $e) {
                 if ($parameter->isDefaultValueAvailable()) {
                     //Let's try to use default value instead
                     $arguments[] = $parameter->getDefaultValue();

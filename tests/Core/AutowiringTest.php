@@ -105,8 +105,8 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\NotFoundException
-     * @expectedExceptionMessage Undefined class or binding 'WrongClass'
+     * See line 218 in Container, this behaviour allows system to pass on classes which can not be
+     * automatically constructured or missing but ONLY when default value is set to NULL.
      */
     public function testAutowireWithDefaultOnWrongClass()
     {

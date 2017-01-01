@@ -11,6 +11,7 @@ use MongoDB\Database;
 use MongoDB\GridFS\Bucket;
 use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
+use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
 
@@ -66,11 +67,11 @@ class GridFSServer extends AbstractServer
 
         $result = $this->gridFS($bucket)->uploadFromStream(
             $name,
-            fopen($this->castFilename($source), 'rb')
+            StreamWrapper::getResource($this->castStream($source))
         );
 
         if (empty($result)) {
-            throw new ServerException("Unable to store {$name} in GridFS server");
+            throw new ServerException("Unable to store {$name} at GridFS server");
         }
 
         return true;
@@ -113,6 +114,7 @@ class GridFSServer extends AbstractServer
     public function delete(BucketInterface $bucket, string $name)
     {
         $file = $this->gridFS($bucket)->findOne(['filename' => $name]);
+
         if (!empty($file)) {
             $this->gridFS($bucket)->delete($file->_id);
         }
@@ -135,7 +137,7 @@ class GridFSServer extends AbstractServer
     }
 
     /**
-     * Get valid gridfs collection associated with container.
+     * Get valid GridFS collection associated with bucket.
      *
      * @param BucketInterface $bucket Bucket instance.
      *

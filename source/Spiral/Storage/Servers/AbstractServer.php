@@ -138,6 +138,9 @@ abstract class AbstractServer extends Component implements ServerInterface
         }
 
         if ($source instanceof StreamInterface) {
+            //This step is important to prevent user errors
+            $source->rewind();
+
             return $source;
         }
 

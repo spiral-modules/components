@@ -36,7 +36,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
      *
      * @param array $config
      */
-    final public function __construct(array $config = [])
+    public function __construct(array $config = [])
     {
         $this->config = $config;
     }

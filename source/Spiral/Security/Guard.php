@@ -13,7 +13,7 @@ use Spiral\Security\Exceptions\GuardException;
 /**
  * Checks permissions using given actor.
  */
-class Guard extends Component implements GuardInterface
+final class Guard extends Component implements GuardInterface
 {
     /**
      * @var PermissionsInterface

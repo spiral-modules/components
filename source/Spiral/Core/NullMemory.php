@@ -6,7 +6,7 @@
  */
 namespace Spiral\Core;
 
-class NullMemory implements MemoryInterface
+final class NullMemory implements MemoryInterface
 {
     /**
      * {@inheritdoc}

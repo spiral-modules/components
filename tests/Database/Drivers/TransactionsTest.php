@@ -49,6 +49,18 @@ abstract class TransactionsTest extends BaseTest
         $this->assertSame(1, $this->database->table->count());
     }
 
+    public function testCommitTransactionInsertClosure()
+    {
+        $db = $this->database;
+
+        $this->database->transaction(function () use ($db) {
+            $db->table->insertOne(['name' => 'Anton', 'value' => 123]);
+            $this->assertSame(1, $this->database->table->count());
+        });
+
+        $this->assertSame(1, $this->database->table->count());
+    }
+
     public function testRollbackTransactionInsert()
     {
         $this->database->begin();
@@ -57,6 +69,24 @@ abstract class TransactionsTest extends BaseTest
         $this->assertSame(1, $this->database->table->count());
 
         $this->database->rollback();
+
+        $this->assertSame(0, $this->database->table->count());
+    }
+
+    public function testRollbackTransactionInsertClosure()
+    {
+        $db = $this->database;
+
+        try {
+            $this->database->transaction(function () use ($db) {
+                $db->table->insertOne(['name' => 'Anton', 'value' => 123]);
+                $this->assertSame(1, $this->database->table->count());
+
+                throw new \Error('Something happen');
+            });
+        } catch (\Error $e) {
+            $this->assertSame('Something happen', $e->getMessage());
+        }
 
         $this->assertSame(0, $this->database->table->count());
     }
@@ -100,4 +130,6 @@ abstract class TransactionsTest extends BaseTest
         $this->database->commit();
         $this->assertSame(1, $this->database->table->count());
     }
+
+
 }

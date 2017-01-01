@@ -194,6 +194,17 @@ abstract class ColumnsAlteringTest extends BaseTest
         $this->assertSameAsInDB($schema);
     }
 
+    public function testRenameThoughtTest()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->column('first_name')->setName('another_name');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
     public function testRenameMultipleColumns()
     {
         $schema = $this->sampleSchema('table');

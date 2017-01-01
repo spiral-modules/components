@@ -24,7 +24,7 @@ class SoftDependedClass
      * @param string      $name
      * @param SampleClass $sample
      */
-    public function __construct($name, SampleClass $sample = null)
+    public function __construct(string $name, SampleClass $sample = null)
     {
         $this->name = $name;
         $this->sample = $sample;

@@ -26,7 +26,7 @@ class Bucket
      * @param string $name
      * @param mixed  $data
      */
-    public function __construct($name, $data = 'default-data')
+    public function __construct(string $name, $data = 'default-data')
     {
         $this->name = $name;
         $this->data = $data;

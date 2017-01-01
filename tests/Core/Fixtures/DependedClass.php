@@ -24,7 +24,7 @@ class DependedClass
      * @param string      $name
      * @param SampleClass $sample
      */
-    public function __construct($name, SampleClass $sample)
+    public function __construct(string $name, SampleClass $sample)
     {
         $this->name = $name;
         $this->sample = $sample;

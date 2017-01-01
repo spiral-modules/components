@@ -14,6 +14,7 @@ use Spiral\Tests\Core\Fixtures\DependedClass;
 use Spiral\Tests\Core\Fixtures\ExtendedSample;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 use Spiral\Tests\Core\Fixtures\SoftDependedClass;
+use Spiral\Tests\Core\Fixtures\TypedClass;
 
 /**
  * The most fun test.
@@ -116,5 +117,117 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(SoftDependedClass::class, $object);
         $this->assertSame('some-name', $object->getName());
         $this->assertNull($object->getSample());
+    }
+
+    public function testAutowireTypecastingAndValidating()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => 'string',
+            'int'    => 123,
+            'float'  => 123.00,
+            'bool'   => true
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => 'string',
+            'int'    => '123',
+            'float'  => '123.00',
+            'bool'   => 1
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => 'string',
+            'int'    => 123,
+            'float'  => 123.00,
+            'bool'   => 0
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedExceptionMessage  Unable to resolve 'string' argument in
+     *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
+     */
+    public function testAutowireTypecastingAndValidatingWrongString()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => null,
+            'int'    => 123,
+            'float'  => 123.00,
+            'bool'   => true
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedExceptionMessage  Unable to resolve 'int' argument in
+     *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
+     */
+    public function testAutowireTypecastingAndValidatingWrongInt()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => '',
+            'int'    => 'yo!',
+            'float'  => 123.00,
+            'bool'   => true
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedExceptionMessage  Unable to resolve 'float' argument in
+     *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
+     */
+    public function testAutowireTypecastingAndValidatingWrongFloat()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => '',
+            'int'    => 123,
+            'float'  => '~',
+            'bool'   => true
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedExceptionMessage  Unable to resolve 'bool' argument in
+     *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
+     */
+    public function testAutowireTypecastingAndValidatingWrongBool()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => '',
+            'int'    => 123,
+            'float'  => 1.00,
+            'bool'   => 'true'
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
     }
 }

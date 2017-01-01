@@ -18,6 +18,57 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DatabaseException;
 use Spiral\Database\Exceptions\DBALException;
 
+/**
+ * Automatic factory and configurator for Drivers and Databases.
+ *
+ * Example:
+ * $config = [
+ *  'default'     => 'default',
+ *  'aliases'     => [
+ *      'default'  => 'primary',
+ *      'database' => 'primary',
+ *      'db'       => 'primary',
+ *  ],
+ *  'databases'   => [
+ *      'primary'   => [
+ *          'connection'  => 'mysql',
+ *          'tablePrefix' => 'db_'
+ *      ],
+ *      'secondary' => [
+ *          'connection'  => 'postgres',
+ *          'tablePrefix' => '',
+ *      ],
+ *  ],
+ *  'connections' => [
+ *      'mysql'     => [
+ *          'driver'     => Drivers\MySQL\MySQLDriver::class,
+ *          'connection' => 'mysql:host=127.0.0.1;dbname=database',
+ *          'username'   => 'mysql',
+ *          'password'   => 'mysql',
+ *      ],
+ *      'postgres'  => [
+ *          'driver'     => Drivers\Postgres\PostgresDriver::class,
+ *          'connection' => 'pgsql:host=127.0.0.1;dbname=database',
+ *          'username'   => 'postgres',
+ *          'password'   => 'postgres',
+ *      ],
+ *      'runtime'   => [
+ *          'driver'     => Drivers\SQLite\SQLiteDriver::class,
+ *          'connection' => 'sqlite:' . directory('runtime') . 'runtime.db',
+ *          'options'    => []
+ *      ],
+ *      'sqlServer' => [
+ *          'driver'     => Drivers\SQLServer\SQLServerDriver::class,
+ *          'connection' => 'sqlsrv:Server=OWNER;Database=DATABASE',
+ *          'username'   => 'sqlServer',
+ *          'password'   => 'sqlServer',
+ *      ],
+ *  ]
+ * ];
+ *
+ * $manager = new DatabaseManager(new DatabaseConfig($config));
+ * echo $manager->database('runtime')->select()->from('users')->count();
+ */
 class DatabaseManager extends Component implements SingletonInterface, InjectorInterface
 {
     /**

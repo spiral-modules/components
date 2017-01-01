@@ -46,6 +46,8 @@ use Spiral\Database\Schemas\TableState;
  * @method AbstractColumn binary($column)
  * @method AbstractColumn tinyBinary($column)
  * @method AbstractColumn longBinary($column)
+ *
+ * @todo add AbstractView?
  */
 abstract class AbstractTable implements TableInterface
 {

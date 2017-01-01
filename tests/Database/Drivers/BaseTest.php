@@ -14,7 +14,7 @@ use Spiral\Database\Schemas\StateComparator;
 
 abstract class BaseTest extends \PHPUnit_Framework_TestCase
 {
-    static $driversCache = [];
+    static private $driversCache = [];
 
     const PROFILING = ENABLE_PROFILING;
 
@@ -30,16 +30,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $driver = self::$driversCache[$this->driverID()];
         } else {
             self::$driversCache[$this->driverID()] = $driver = $this->getDriver();
-        }
-
-        if (!empty($driver->tableNames())) {
-            $this->markTestSkipped(
-                "Database '{$driver->getSource()}' not empty ("
-                . join(', ', $driver->tableNames())
-                . ")!"
-            );
-
-            return null;
         }
 
         return new Database($driver, $name, $prefix);

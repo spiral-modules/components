@@ -325,7 +325,7 @@ abstract class Driver extends PDODriver
     protected function savepointCreate(string $name)
     {
         if ($this->isProfiling()) {
-            $this->logger()->info("Creating savepoint '{$name}'");
+            $this->logger()->info("Transaction: new savepoint 'SVP{$name}'");
         }
 
         $this->statement('SAVEPOINT ' . $this->identifier("SVP{$name}"));
@@ -342,7 +342,7 @@ abstract class Driver extends PDODriver
     protected function savepointRelease(string $name)
     {
         if ($this->isProfiling()) {
-            $this->logger()->info("Releasing savepoint '{$name}'");
+            $this->logger()->info("Transaction: release savepoint 'SVP{$name}'");
         }
 
         $this->statement('RELEASE SAVEPOINT ' . $this->identifier("SVP{$name}"));
@@ -359,8 +359,9 @@ abstract class Driver extends PDODriver
     protected function savepointRollback(string $name)
     {
         if ($this->isProfiling()) {
-            $this->logger()->info("Rolling back savepoint '{$name}'");
+            $this->logger()->info("Transaction: rollback savepoint 'SVP{$name}'");
         }
+
         $this->statement('ROLLBACK TO SAVEPOINT ' . $this->identifier("SVP{$name}"));
     }
 }

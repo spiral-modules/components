@@ -110,4 +110,54 @@ class SQLServerDriver extends Driver
     {
         return new SQLServerHandler($this, $logger);
     }
+
+    /**
+     * Create nested transaction save point.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     *
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
+     */
+    protected function savepointCreate(string $name)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Transaction: new savepoint 'SVP{$name}'");
+        }
+
+        $this->statement('SAVE TRANSACTION ' . $this->identifier("SVP{$name}"));
+    }
+
+    /**
+     * Commit/release savepoint.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     *
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
+     */
+    protected function savepointRelease(string $name)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Transaction: release savepoint 'SVP{$name}'");
+        }
+
+        //SQLServer automatically commits nested transactions with parent transaction
+    }
+
+    /**
+     * Rollback savepoint.
+     *
+     * @link http://en.wikipedia.org/wiki/Savepoint
+     *
+     * @param string $name Savepoint name/id, must not contain spaces and be valid database
+     *                     identifier.
+     */
+    protected function savepointRollback(string $name)
+    {
+        if ($this->isProfiling()) {
+            $this->logger()->info("Transaction: rollback savepoint 'SVP{$name}'");
+        }
+        $this->statement('ROLLBACK TRANSACTION ' . $this->identifier("SVP{$name}"));
+    }
 }

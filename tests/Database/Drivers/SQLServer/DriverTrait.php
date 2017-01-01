@@ -34,6 +34,7 @@ trait DriverTrait
             $this->driver = new SQLServerDriver(
                 'mysql',
                 [
+                    //todo move to env
                     'connection' => 'sqlsrv:Server=WOLFY-PC;Database=spiral',
                     'username'   => '',
                     'password'   => '',

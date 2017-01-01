@@ -103,12 +103,12 @@ class Highlighter
     /**
      * Get only part of php file around specified line.
      *
-     * @param int|null $line   Set as null to avoid line highlighting.
+     * @param int      $line   Set as null to avoid line highlighting.
      * @param int|null $around Set as null to return every line.
      *
      * @return string
      */
-    public function lines(int $line = null, int $around = null): string
+    public function lines(int $line, int $around = null): string
     {
         //Chinking by lines
         $lines = explode("\n", str_replace("\r\n", "\n", $this->highlight()));
@@ -118,7 +118,7 @@ class Highlighter
             $human = $number + 1;
             if (
                 !empty($around)
-                && ($human <= $line - $around || $human >= $line + $around)
+                && ($human < $line - $around || $human >= $line + $around)
             ) {
                 //Not included in a range
                 continue;

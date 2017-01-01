@@ -91,7 +91,7 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\AutowireException
+     * @expectedException \Spiral\Core\Exceptions\Container\NotFoundException
      * @expectedExceptionMessage Undefined class or binding 'WrongClass'
      */
     public function testAutowireException()
@@ -104,6 +104,10 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
         ]);
     }
 
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\NotFoundException
+     * @expectedExceptionMessage Undefined class or binding 'WrongClass'
+     */
     public function testAutowireWithDefaultOnWrongClass()
     {
         $container = new Container();

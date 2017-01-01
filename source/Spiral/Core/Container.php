@@ -17,6 +17,7 @@ use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\AutowireException;
 use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InjectionException;
+use Spiral\Core\Exceptions\Container\NotFoundException;
 
 /**
  * Super simple auto-wiring container with declarative singletons and injectors integration.
@@ -177,7 +178,8 @@ class Container extends Component implements
 
             try {
                 $class = $parameter->getClass();
-            } catch (\ReflectionException $e) {
+            } catch (\Throwable $e) {
+                //Possibly invalid class definition or syntax error
                 throw new ContainerException($e->getMessage(), $e->getCode(), $e);
             }
 
@@ -198,7 +200,7 @@ class Container extends Component implements
                     continue;
                 }
 
-                //Unable to resolve scalar argument value
+                //Unable to resolve scalar argument value (soft exception)
                 throw new ArgumentException($parameter, $reflection);
             }
 
@@ -213,7 +215,7 @@ class Container extends Component implements
                 $arguments[] = $this->get($class->getName(), $parameter->getName());
 
                 continue;
-            } catch (AutowireException $e) {
+            } catch (ArgumentException $e) {
                 if ($parameter->isDefaultValueAvailable()) {
                     //Let's try to use default value instead
                     $arguments[] = $parameter->getDefaultValue();
@@ -385,7 +387,7 @@ class Container extends Component implements
     protected function autowire(string $class, array $parameters, string $context = null)
     {
         if (!class_exists($class)) {
-            throw new AutowireException("Undefined class or binding '{$class}'");
+            throw new NotFoundException("Undefined class or binding '{$class}'");
         }
 
         //OK, we can create class by ourselves
@@ -459,7 +461,8 @@ class Container extends Component implements
     ) {
         try {
             $reflection = new \ReflectionClass($class);
-        } catch (\ReflectionException $e) {
+        } catch (\Throwable $e) {
+            //Issues with syntax or class definition
             throw new ContainerException($e->getMessage(), $e->getCode(), $e);
         }
 

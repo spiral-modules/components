@@ -28,7 +28,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     /**
      * @var Driver[]
      */
-    private $connections = [];
+    private $drivers = [];
 
     /**
      * @var DatabasesConfig
@@ -149,11 +149,11 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      */
     public function addDriver(Driver $driver): DatabaseManager
     {
-        if (isset($this->connections[$driver->getName()])) {
+        if (isset($this->drivers[$driver->getName()])) {
             throw new DBALException("Connection '{$driver->getName()}' already exists");
         }
 
-        $this->connections[$driver->getName()] = $driver;
+        $this->drivers[$driver->getName()] = $driver;
 
         return $this;
     }
@@ -202,8 +202,8 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      */
     public function driver(string $connection): Driver
     {
-        if (isset($this->connections[$connection])) {
-            return $this->connections[$connection];
+        if (isset($this->drivers[$connection])) {
+            return $this->drivers[$connection];
         }
 
         if (!$this->config->hasDriver($connection)) {
@@ -217,7 +217,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             'options' => $this->config->driverOptions($connection),
         ]);
 
-        return $this->connections[$connection] = $instance;
+        return $this->drivers[$connection] = $instance;
     }
 
     /**
@@ -255,9 +255,14 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     {
         $result = [];
 
-        //todo: include manually added drivers
         foreach ($this->config->driverNames() as $name) {
             $result[] = $this->driver($name);
+        }
+
+        foreach ($this->drivers as $driver) {
+            if (!in_array($driver->getName(), $result)) {
+                $result[] = $driver->getName();
+            }
         }
 
         return $result;

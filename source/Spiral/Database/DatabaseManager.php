@@ -55,6 +55,7 @@ use Spiral\Database\Exceptions\DBALException;
  *      'runtime'   => [
  *          'driver'     => Drivers\SQLite\SQLiteDriver::class,
  *          'connection' => 'sqlite:' . directory('runtime') . 'runtime.db',
+ *          'username'   => 'sqlite',
  *          'options'    => []
  *      ],
  *      'sqlServer' => [
@@ -143,7 +144,11 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
 
         $instance = $this->factory->make(
             Database::class,
-            ['name' => $name, 'prefix' => $prefix, 'driver' => $connection]
+            [
+                'name'   => $name,
+                'prefix' => $prefix,
+                'driver' => $connection
+            ]
         );
 
         $this->addDatabase($instance);
@@ -180,11 +185,16 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         }
 
         //No need to benchmark here, due connection will happen later
-        $instance = $this->factory->make(Database::class, [
-            'name'   => $database,
-            'prefix' => $this->config->databasePrefix($database),
-            'driver' => $this->driver($this->config->databaseDriver($database)),
-        ]);
+        $instance = $this->factory->make(
+            Database::class,
+            [
+                'name'   => $database,
+                'prefix' => $this->config->databasePrefix($database),
+                'driver' => $this->driver(
+                    $this->config->databaseDriver($database)
+                ),
+            ]
+        );
 
         return $this->databases[$database] = $instance;
     }
@@ -227,14 +237,17 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         string $username,
         string $password = ''
     ): Driver {
-        $instance = $this->factory->make($driver, [
-            'name'    => $name,
-            'options' => [
-                'connection' => $dns,
-                'username'   => $username,
-                'password'   => $password
+        $instance = $this->factory->make(
+            $driver,
+            [
+                'name'    => $name,
+                'options' => [
+                    'connection' => $dns,
+                    'username'   => $username,
+                    'password'   => $password
+                ]
             ]
-        ]);
+        );
 
         $this->addDriver($instance);
 
@@ -263,10 +276,13 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             );
         }
 
-        $instance = $this->factory->make($this->config->driverClass($connection), [
-            'name'    => $connection,
-            'options' => $this->config->driverOptions($connection),
-        ]);
+        $instance = $this->factory->make(
+            $this->config->driverClass($connection),
+            [
+                'name'    => $connection,
+                'options' => $this->config->driverOptions($connection),
+            ]
+        );
 
         return $this->drivers[$connection] = $instance;
     }

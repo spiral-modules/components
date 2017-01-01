@@ -44,8 +44,8 @@ class SQLiteDriver extends Driver
      */
     public function getSource(): string
     {
-        //Remove "sqlite:"
-        return substr($this->options['connection'], 7);
+        //Remove "sqlite:" and trailing ":"
+        return rtrim(substr($this->options['connection'], 7), ':');
     }
 
     /**

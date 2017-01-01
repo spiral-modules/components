@@ -21,6 +21,6 @@ class NullMemory implements MemoryInterface
      */
     public function saveData(string $section, $data, string $location = null)
     {
-        //Nothing
+        //Nothing to do
     }
 }

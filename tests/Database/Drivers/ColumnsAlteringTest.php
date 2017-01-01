@@ -136,6 +136,65 @@ abstract class ColumnsAlteringTest extends BaseTest
         $this->assertSameAsInDB($schema);
     }
 
+    public function testChangeEnumValues()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->enum('new_column', ['a', 'b', 'c'])->nullable('a');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+
+        $schema->enum('new_column', ['a', 'b', 'c', 'd'])->nullable('a');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeStringToText()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->column('email')->setType('text');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeColumnFromIntToFloatWithDefaultValue()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->integer('balance')->defaultValue(0);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+
+        $schema->column('balance')->float();
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeColumnFromIntToStringWithDefaultValue()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->integer('balance')->defaultValue(0);
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+
+        $schema->column('balance')->string();
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
     public function testAddColumnEnumNullDefault()
     {
         $schema = $this->sampleSchema('table');

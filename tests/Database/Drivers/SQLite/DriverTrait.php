@@ -34,7 +34,7 @@ trait DriverTrait
             $this->driver = new SQLiteDriver(
                 'sqlite',
                 [
-                    'connection' => 'sqlite:' . __DIR__ . '/fixture/runtime.db',
+                    'connection' => 'sqlite::memory:',
                     'username'   => 'sqlite',
                     'password'   => '',
                     'options'    => []

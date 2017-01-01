@@ -54,7 +54,7 @@ class MySQLColumn extends AbstractColumn
         'bigInteger'  => ['type' => 'bigint', 'size' => 20],
 
         //String with specified length (mapped via method)
-        'string'      => 'varchar',
+        'string'      => ['type' => 'varchar', 'size' => 255],
 
         //Generic types
         'text'        => 'text',

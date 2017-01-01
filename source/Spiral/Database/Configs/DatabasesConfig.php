@@ -119,6 +119,9 @@ class DatabasesConfig extends InjectableConfig
      */
     public function driverOptions(string $driver): array
     {
-        return $this->config['connections'][$driver];
+        $options = $this->config['connections'][$driver];
+        unset($options['driver']);
+
+        return $options;
     }
 }

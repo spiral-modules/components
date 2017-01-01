@@ -414,13 +414,13 @@ class AtomicsTest extends \PHPUnit_Framework_TestCase
 
     private function makeLoaded(string $class, $fields = []): DocumentEntity
     {
-        return $this->odm->instantiate($class, [
+        return $this->odm->make($class, [
                 '_id' => new ObjectID('507f1f77bcf86cd799439011')
             ] + $fields, false);
     }
 
     private function makeNew(string $class, $fields = []): DocumentEntity
     {
-        return $this->odm->instantiate($class, $fields);
+        return $this->odm->make($class, $fields);
     }
 }

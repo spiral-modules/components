@@ -56,7 +56,7 @@ class SourcesTest extends \PHPUnit_Framework_TestCase
 
         $source = new DocumentSource('sample-class', $odm);
 
-        $odm->shouldReceive('instantiate')
+        $odm->shouldReceive('make')
             ->with('sample-class', ['fields'], true)
             ->andReturn($entity);
 

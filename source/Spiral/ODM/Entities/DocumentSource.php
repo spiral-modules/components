@@ -84,7 +84,7 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     public function create($fields = [], string $class = null)
     {
         //Create model with filtered set of fields
-        return $this->odm->instantiate($class ?? $this->class, $fields, true);
+        return $this->odm->make($class ?? $this->class, $fields, true);
     }
 
     /**

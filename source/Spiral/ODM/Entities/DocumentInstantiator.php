@@ -58,13 +58,13 @@ class DocumentInstantiator implements InstantiatorInterface
      *
      * @throws InstantionException
      */
-    public function instantiate($fields, bool $filter = true): CompositableInterface
+    public function make($fields, bool $filter = true): CompositableInterface
     {
         $class = $this->defineClass($fields);
 
         if ($class !== $this->class) {
             //We have to dedicate class creation to external instantiator (possibly children class)
-            return $this->odm->instantiate($class, $fields, $filter);
+            return $this->odm->make($class, $fields, $filter);
         }
 
         if (!is_array($fields)) {

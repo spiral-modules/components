@@ -25,5 +25,5 @@ interface InstantiatorInterface
      *
      * @throws InstantionException
      */
-    public function instantiate($fields, bool $filter = true): CompositableInterface;
+    public function make($fields, bool $filter = true): CompositableInterface;
 }

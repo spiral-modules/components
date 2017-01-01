@@ -52,6 +52,9 @@ class LocalServer extends AbstractServer
 
     /**
      * {@inheritdoc}
+     *
+     * Note, this method will return real filename, DO NOT remove or write into it! User streams
+     * instead as more safer method.
      */
     public function allocateFilename(BucketInterface $bucket, string $name): string
     {

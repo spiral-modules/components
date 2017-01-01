@@ -8,6 +8,7 @@
 namespace Spiral\Database;
 
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
@@ -45,10 +46,10 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
      * @param DatabasesConfig  $config
      * @param FactoryInterface $factory
      */
-    public function __construct(DatabasesConfig $config, FactoryInterface $factory)
+    public function __construct(DatabasesConfig $config, FactoryInterface $factory = null)
     {
         $this->config = $config;
-        $this->factory = $factory;
+        $this->factory = $factory ?? new Container();
     }
 
     /**
@@ -230,9 +231,14 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     {
         $result = [];
 
-        //todo: include manually added databases
         foreach ($this->config->databaseNames() as $name) {
             $result[] = $this->database($name);
+        }
+
+        foreach ($this->databases as $database) {
+            if (!in_array($database->getName(), $result)) {
+                $result[] = $database->getName();
+            }
         }
 
         return $result;

@@ -88,7 +88,7 @@ abstract class SelectQueryTest extends BaseQueryTest
         $select = $this->database->select()->distinct()->from(['users'])->where('name', '!=', null);
 
         $this->assertSameQuery(
-            "SELECT DISTINCT * FROM {users} WHERE {name} = ?",
+            "SELECT DISTINCT * FROM {users} WHERE {name} != ?",
             $select
         );
     }

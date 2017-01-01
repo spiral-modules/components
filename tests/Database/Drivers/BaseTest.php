@@ -12,6 +12,9 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Database\Schemas\StateComparator;
 
+/**
+ * ATTENTION, DO NOT CONNECT TO PRODUCTION DATABASE AT ANY COST.
+ */
 abstract class BaseTest extends \PHPUnit_Framework_TestCase
 {
     static private $driversCache = [];

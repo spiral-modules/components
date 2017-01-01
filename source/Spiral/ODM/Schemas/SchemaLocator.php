@@ -17,7 +17,7 @@ use Spiral\Tokenizer\ClassesInterface;
  * Provides ability to automatically locate schemas in a project. Can be user redefined in order to
  * automatically include custom classes.
  */
-class SchemaLocator
+class SchemaLocator implements LocatorInterface
 {
     /**
      * Container is used for lazy resolution for ClassesInterface.
@@ -35,9 +35,7 @@ class SchemaLocator
     }
 
     /**
-     * Locate all available document schemas in a project.
-     *
-     * @return SchemaInterface[]
+     * {@inheritdoc}
      */
     public function locateSchemas(): array
     {
@@ -65,11 +63,9 @@ class SchemaLocator
         return $schemas;
     }
 
+
     /**
-     * Locate all DocumentSources defined by user. Must return values in a form of
-     * Document::class => Source::class.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function locateSources(): array
     {

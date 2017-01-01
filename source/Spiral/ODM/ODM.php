@@ -16,8 +16,8 @@ use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\ODM\Exceptions\ODMException;
 use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\Schemas\LocatorInterface;
 use Spiral\ODM\Schemas\SchemaBuilder;
-use Spiral\ODM\Schemas\SchemaLocator;
 
 /**
  * Provides supporting functionality for ODM classes such as selectors, instantiators and schema
@@ -55,7 +55,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     protected $manager;
 
     /**
-     * @var SchemaLocator
+     * @var LocatorInterface
      */
     protected $locator;
 
@@ -72,13 +72,13 @@ class ODM extends Component implements ODMInterface, SingletonInterface
 
     /**
      * @param MongoManager     $manager
-     * @param SchemaLocator    $locator
+     * @param LocatorInterface $locator
      * @param MemoryInterface  $memory
      * @param FactoryInterface $factory
      */
     public function __construct(
         MongoManager $manager,
-        SchemaLocator $locator,
+        LocatorInterface $locator,
         MemoryInterface $memory,
         FactoryInterface $factory
     ) {

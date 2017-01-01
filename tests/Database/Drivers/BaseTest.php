@@ -32,7 +32,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $driver = $this->getDriver();
 
             if (!empty($driver->tableNames())) {
-                $this->markTestSkipped("Database {$driver->getSource()} not empty!");
+                $this->markTestSkipped("Database '{$driver->getSource()}' not empty!");
             }
 
             self::$driversCache[$this->driverID()] = $driver;

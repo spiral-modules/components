@@ -80,7 +80,10 @@ class MySQLHandler extends AbstractHandler
     protected function assertValid(AbstractColumn $column)
     {
         if (
-            in_array($column->abstractType(), ['text', 'tinyText', 'longText'])
+            in_array(
+                $column->abstractType(),
+                ['text', 'tinyText', 'longText', 'blob', 'tinyBlob', 'longBlob']
+            )
             && is_string($column->getDefaultValue()) && $column->getDefaultValue() !== ''
         ) {
             throw new MySQLDriverException(

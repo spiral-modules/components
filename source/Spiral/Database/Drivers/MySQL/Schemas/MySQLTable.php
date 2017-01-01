@@ -56,6 +56,7 @@ class MySQLTable extends AbstractTable
     public function setEngine($engine)
     {
         if ($this->exists()) {
+            //todo: support engine change for already exists tables
             throw new SchemaException('Table engine can be set only at moment of creation');
         }
 

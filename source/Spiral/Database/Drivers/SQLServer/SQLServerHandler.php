@@ -46,7 +46,7 @@ class SQLServerHandler extends AbstractHandler
         AbstractColumn $column
     ) {
         if (!$initial instanceof SQLServerColumn || !$column instanceof SQLServerColumn) {
-            throw new SchemaException('SQlServer handler can work only with SQLServer columns.');
+            throw new SchemaException('SQlServer handler can work only with SQLServer columns');
         }
 
         //In SQLServer we have to drop ALL related indexes and foreign keys while

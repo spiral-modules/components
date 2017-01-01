@@ -60,5 +60,11 @@ class AggregateSchemaTest extends \PHPUnit_Framework_TestCase
                 ['_id' => 'self::userId']),
             'users' => new AggregationDefinition(Document::MANY, User::class, []),
         ], $aggregates->getAggregations());
+
+        $aggregation = $aggregates->getAggregations()['user'];
+
+        $this->assertSame(Document::ONE, $aggregation->getType());
+        $this->assertSame(User::class, $aggregation->getClass());
+        $this->assertSame(['_id' => 'self::userId'], $aggregation->getQuery());
     }
 }

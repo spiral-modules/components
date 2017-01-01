@@ -116,10 +116,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function localFilename(): string
     {
-        if (empty($this->name)) {
-            throw new ObjectException("Unable to allocate filename for unassigned storage object");
-        }
-
         return $this->bucket->allocateFilename($this->name);
     }
 
@@ -128,10 +124,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function getStream(): StreamInterface
     {
-        if (empty($this->name)) {
-            throw new ObjectException("Unable to get stream for unassigned storage object");
-        }
-
         return $this->bucket->allocateStream($this->name);
     }
 
@@ -155,10 +147,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function rename(string $newName): ObjectInterface
     {
-        if (empty($this->name)) {
-            throw new ObjectException("Unable to rename unassigned storage object");
-        }
-
         $this->address = $this->bucket->rename($this->name, $newName);
         $this->name = $newName;
 
@@ -170,10 +158,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function copy(string $destination): ObjectInterface
     {
-        if (empty($this->name)) {
-            throw new ObjectException("Unable to copy unassigned storage object");
-        }
-
         if (is_string($destination)) {
             $destination = $this->storage->getBucket($destination);
         }
@@ -186,10 +170,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function replace(string $destination): ObjectInterface
     {
-        if (empty($this->name)) {
-            throw new ObjectException("Unable to replace unassigned storage object");
-        }
-
         if (is_string($destination)) {
             $destination = $this->storage->getBucket($destination);
         }

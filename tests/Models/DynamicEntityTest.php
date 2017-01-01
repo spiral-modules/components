@@ -8,15 +8,14 @@
 
 namespace Spiral\tests\Cases\Models;
 
-use Spiral\Models\DataEntity;
 use Spiral\Models\DynamicEntity;
 
 //todo: improve test coverage
-class DataEntityTest extends \PHPUnit_Framework_TestCase
+class DynamicEntityTest extends \PHPUnit_Framework_TestCase
 {
     public function testSetter()
     {
-        $entity = new DataEntity();
+        $entity = new DynamicEntity();
         $entity->setField('abc', 123);
         $this->assertEquals(123, $entity->getField('abc'));
 
@@ -26,7 +25,7 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testMagicProperties()
     {
-        $entity = new DataEntity();
+        $entity = new DynamicEntity();
         $entity->abc = 123;
         $this->assertEquals(123, $entity->abc);
 
@@ -35,7 +34,7 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testMagicMethods()
     {
-        $entity = new DataEntity();
+        $entity = new DynamicEntity();
         $entity->setAbc('123');
         $this->assertEquals(123, $entity->getAbc());
         $this->assertEquals($entity->getField('abc'), $entity->getAbc());
@@ -45,7 +44,7 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
 
     public function testPackingSimple()
     {
-        $entity = new DataEntity(['a' => 'b']);
+        $entity = new DynamicEntity(['a' => 'b']);
         $this->assertSame(['a' => 'b'], $entity->packFields());
     }
 
@@ -53,7 +52,7 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
     {
         $data = ['a' => 123, 'b' => null, 'c' => 'test'];
 
-        $entity = new DataEntity($data);
+        $entity = new DynamicEntity($data);
         $this->assertEquals($data, $entity->packValue());
     }
 }

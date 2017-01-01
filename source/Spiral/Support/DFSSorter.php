@@ -67,7 +67,7 @@ class DFSSorter
     {
         $items = array_values($this->keys);
 
-        $this->stack = [];
+        $this->states = $this->stack = [];
         foreach ($items as $item) {
             $this->dfs($item, $this->dependencies[$item]);
         }

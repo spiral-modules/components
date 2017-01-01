@@ -234,4 +234,24 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedExceptionMessage  Unable to resolve 'array' argument in
+     *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
+     */
+    public function testAutowireTypecastingAndValidatingWrongArray()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => '',
+            'int'    => 123,
+            'float'  => 1.00,
+            'bool'   => true,
+            'array'  => 'not array'
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
 }

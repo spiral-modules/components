@@ -8,7 +8,12 @@ namespace Spiral\Tests\Core\Fixtures;
 
 class TypedClass
 {
-    public function __construct(string $string, int $int, float $float, bool $bool)
-    {
+    public function __construct(
+        string $string,
+        int $int,
+        float $float,
+        bool $bool,
+        array $array = []
+    ) {
     }
 }

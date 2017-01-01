@@ -112,6 +112,8 @@ class StreamWrapper
      */
     public function stream_seek($offset, $whence = SEEK_SET)
     {
+        //Note, MongoDB native streams DO NOT support seeking at the moment
+        //@see https://jira.mongodb.org/browse/PHPLIB-213
         $this->stream->seek($offset, $whence);
 
         return true;
@@ -135,6 +137,8 @@ class StreamWrapper
      */
     public function stream_tell()
     {
+        //Note, MongoDB native streams DO NOT support seeking at the moment
+        //@see https://jira.mongodb.org/browse/PHPLIB-213
         return $this->stream->tell();
     }
 

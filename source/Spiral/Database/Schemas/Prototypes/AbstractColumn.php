@@ -410,6 +410,8 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
      * Attention, changing type of existed columns in some databases has a lot of restrictions like
      * cross type conversions and etc. Try do not change column type without a reason.
      *
+     * @todo Support native database types (simply bypass abstractType)!
+     *
      * @param string $abstract Abstract or virtual type declared in mapping.
      *
      * @return self|$this
@@ -419,6 +421,7 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
     public function setType(string $abstract): AbstractColumn
     {
         if (isset($this->aliases[$abstract])) {
+            //Make recursive
             $abstract = $this->aliases[$abstract];
         }
 
@@ -430,13 +433,14 @@ abstract class AbstractColumn extends AbstractElement implements ColumnInterface
         $this->size = $this->precision = $this->scale = 0;
         $this->enumValues = [];
 
+        //Abstract type points to DBMS specific type
         if (is_string($this->mapping[$abstract])) {
             $this->type = $this->mapping[$abstract];
 
             return $this;
         }
 
-        //Additional type options
+        //Configuring column properties based on abstractType preferences
         foreach ($this->mapping[$abstract] as $property => $value) {
             $this->{$property} = $value;
         }

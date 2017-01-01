@@ -17,10 +17,12 @@ use Spiral\Storage\Entities\StorageObject;
 use Spiral\Storage\Exceptions\StorageException;
 
 /**
- * Default implementation of StorageInterface.
+ * Default implementation of StorageInterface. Please note that StorageManager component provides
+ * general purpose abstraction for file storage, it does not and will not support directory
+ * listings and features specific to storage adapter (however such functionality can be added at
+ * server level).
  *
- * @todo check if i still need Guzzle dependency or there is something lighter for PSR7 curl
- * @todo wrappers
+ * @todo check Guzzle dependency and if there is something lighter for PSR7 curl wrappers
  */
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {

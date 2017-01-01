@@ -22,20 +22,24 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      * @param string $name
      * @param string $prefix
      *
-     * @return Database
+     * @return Database|null When non empty null will be given, for safety, for science.
      */
-    protected function database(string $name = 'default', string $prefix = ''): Database
+    protected function database(string $name = 'default', string $prefix = '')
     {
         if (isset(self::$driversCache[$this->driverID()])) {
             $driver = self::$driversCache[$this->driverID()];
         } else {
-            $driver = $this->getDriver();
+            self::$driversCache[$this->driverID()] = $driver = $this->getDriver();
+        }
 
-            if (!empty($driver->tableNames())) {
-                $this->markTestSkipped("Database '{$driver->getSource()}' not empty!");
-            }
+        if (!empty($driver->tableNames())) {
+            $this->markTestSkipped(
+                "Database '{$driver->getSource()}' not empty ("
+                . join(', ', $driver->tableNames())
+                . ")!"
+            );
 
-            self::$driversCache[$this->driverID()] = $driver;
+            return null;
         }
 
         return new Database($driver, $name, $prefix);
@@ -51,11 +55,12 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      */
     abstract protected function driverID(): string;
 
-    /**
-     * ATTENTION, DATABASE WILL BE CLEAN AFTER TESTS!
-     */
-    protected function dropAll(Database $database)
+    protected function dropAll(Database $database = null)
     {
+        if (empty($database)) {
+            return;
+        }
+
         foreach ($database->getTables() as $table) {
             $schema = $table->getSchema();
 

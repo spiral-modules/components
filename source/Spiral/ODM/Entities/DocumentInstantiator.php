@@ -80,7 +80,6 @@ class DocumentInstantiator implements InstantiatorInterface
         /*
          * Filtering entity
          */
-
         $entity = new $class([], $this->odm, $this->schema);
         if (!$entity instanceof CompositableInterface) {
             throw new InstantionException(

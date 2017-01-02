@@ -176,10 +176,6 @@ class StemplerLoader implements LoaderInterface
      */
     protected function fetchName(string $filename): string
     {
-        if (empty($this->extension)) {
-            return $filename;
-        }
-
-        return substr($filename, 0, -1 * (1 + strlen($this->extension)));
+        return substr($filename, 0, -1 * (1 + strlen(static::FILE_EXTENSION)));
     }
 }

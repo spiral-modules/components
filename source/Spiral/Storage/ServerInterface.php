@@ -44,9 +44,9 @@ interface ServerInterface
     /**
      * Put object data into specified bucket under given name, must replace existed data.
      *
-     * @param BucketInterface        $bucket
-     * @param string                 $name
-     * @param string|StreamInterface $source
+     * @param BucketInterface                 $bucket
+     * @param string                          $name
+     * @param string|StreamInterface|resource $source
      *
      * @return bool
      * @throws ServerException

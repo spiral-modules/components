@@ -221,7 +221,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     public function make(
         string $class,
         $fields = [],
-        bool $filter = true
+        bool $filter = false
     ): CompositableInterface {
         return $this->instantiator($class)->make($fields, $filter);
     }

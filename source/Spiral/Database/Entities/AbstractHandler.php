@@ -142,7 +142,7 @@ abstract class AbstractHandler
          * This is schema synchronization code, if you are reading it you are either experiencing
          * VERY weird bug, or you are very curious. Please contact me in a any scenario :)
          */
-        $this->runChanges($table, $behaviour, $comparator);
+        $this->executeChanges($table, $behaviour, $comparator);
     }
 
     /**
@@ -343,8 +343,11 @@ abstract class AbstractHandler
      * @param int             $behaviour
      * @param StateComparator $comparator
      */
-    protected function runChanges(AbstractTable $table, int $behaviour, StateComparator $comparator)
-    {
+    protected function executeChanges(
+        AbstractTable $table,
+        int $behaviour,
+        StateComparator $comparator
+    ) {
         //Remove all non needed table constraints
         $this->dropConstrains($table, $behaviour, $comparator);
 

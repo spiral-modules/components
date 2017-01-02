@@ -7,6 +7,7 @@
 namespace Spiral\ODM;
 
 use MongoDB\Driver\Manager;
+use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
@@ -35,10 +36,10 @@ class MongoManager implements InjectorInterface, SingletonInterface
      * @param MongoConfig      $config
      * @param FactoryInterface $factory
      */
-    public function __construct(MongoConfig $config, FactoryInterface $factory)
+    public function __construct(MongoConfig $config, FactoryInterface $factory = null)
     {
         $this->config = $config;
-        $this->factory = $factory;
+        $this->factory = $factory ?? new Container();
     }
 
     /**

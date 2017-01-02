@@ -9,11 +9,12 @@ namespace Spiral\Reactor\ClassDeclaration\Aggregators;
 
 use Spiral\Reactor\ClassDeclaration\MethodDeclaration;
 use Spiral\Reactor\DeclarationAggregator;
+use Spiral\Reactor\DeclarationInterface;
 
 /**
  * Method aggregation. Can automatically create constant on demand.
  *
- * @method $this add(MethodDeclaration $element)
+ * @method MethodDeclaration add(MethodDeclaration $element)
  */
 class MethodAggregator extends DeclarationAggregator
 {
@@ -30,7 +31,7 @@ class MethodAggregator extends DeclarationAggregator
      *
      * @param string $name
      *
-     * @return MethodDeclaration
+     * @return MethodDeclaration|DeclarationInterface
      */
     public function get(string $name): MethodDeclaration
     {

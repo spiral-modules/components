@@ -87,7 +87,7 @@ class AtomicsTest extends BaseTest
         $this->assertTrue($user->isLoaded());
         $this->assertTrue($user->isSolid());
 
-        $user->pieces->add($this->odm->create(DataPiece::class, ['value' => 1]));
+        $user->pieces->add($this->odm->make(DataPiece::class, ['value' => 1]));
 
         $this->assertSame([
             '$set' => [
@@ -108,7 +108,7 @@ class AtomicsTest extends BaseTest
         $user->save();
 
         $user->solidState(false);
-        $user->pieces->add($this->odm->create(DataPiece::class, ['value' => 2]));
+        $user->pieces->add($this->odm->make(DataPiece::class, ['value' => 2]));
 
         $this->assertSame([
             '$addToSet' => [
@@ -127,7 +127,7 @@ class AtomicsTest extends BaseTest
         $this->assertCount(2, $user->pieces);
         $this->assertCount(2, $this->fromDB($user)->pieces);
 
-        $user->pieces->add($this->odm->create(DataPiece::class, ['value' => 2]));
+        $user->pieces->add($this->odm->make(DataPiece::class, ['value' => 2]));
 
         $this->assertSame([
             '$addToSet' => [
@@ -146,7 +146,7 @@ class AtomicsTest extends BaseTest
         $this->assertCount(2, $user->pieces);
         $this->assertCount(2, $this->fromDB($user)->pieces);
 
-        $user->pieces->push($this->odm->create(DataPiece::class, ['value' => 2]));
+        $user->pieces->push($this->odm->make(DataPiece::class, ['value' => 2]));
 
         $this->assertSame([
             '$push' => [
@@ -166,7 +166,7 @@ class AtomicsTest extends BaseTest
         $this->assertCount(3, $this->fromDB($user)->pieces);
 
         $user->solidState(false);
-        $user->pieces->pull($this->odm->create(DataPiece::class, ['value' => 2]));
+        $user->pieces->pull($this->odm->make(DataPiece::class, ['value' => 2]));
 
         $this->assertSame([
             '$pull' => [
@@ -206,21 +206,21 @@ class AtomicsTest extends BaseTest
         $user2 = clone $user;
 
         $user->solidState(false);
-        $user->pieces->add($this->odm->create(DataPiece::class, ['value' => 1]));
+        $user->pieces->add($this->odm->make(DataPiece::class, ['value' => 1]));
         $user->save();
 
         $this->assertTrue($this->fromDB($user)->pieces->has(['value' => 1]));
 
         //This check
         $user1->solidState(false);
-        $user1->pieces->push($this->odm->create(DataPiece::class, ['value' => 2]));
+        $user1->pieces->push($this->odm->make(DataPiece::class, ['value' => 2]));
         $user1->save();
 
         $this->assertTrue($this->fromDB($user)->pieces->has(['value' => 1]));
         $this->assertTrue($this->fromDB($user)->pieces->has(['value' => 2]));
 
         $user2->solidState(false);
-        $user1->pieces->pull($this->odm->create(DataPiece::class, ['value' => 1]));
+        $user1->pieces->pull($this->odm->make(DataPiece::class, ['value' => 1]));
         $user2->save();
 
         $this->assertFalse($this->fromDB($user)->pieces->has(['value' => 1]));

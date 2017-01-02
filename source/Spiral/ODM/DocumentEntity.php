@@ -458,7 +458,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             switch ($accessor[0]) {
                 case self::ONE:
                     //Singular embedded document
-                    return $this->odm->create($accessor[1], $value, false);
+                    return $this->odm->make($accessor[1], $value, false);
                 case self::MANY:
                     return new DocumentCompositor($accessor[1], $value, $this->odm);
             }

@@ -200,7 +200,7 @@ class DocumentSelector extends Component implements
         );
 
         if (!is_null($result)) {
-            $result = $this->odm->create($this->class, $result, false);
+            $result = $this->odm->make($this->class, $result, false);
         }
 
         return $result;

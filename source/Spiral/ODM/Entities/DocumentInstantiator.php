@@ -64,7 +64,7 @@ class DocumentInstantiator implements InstantiatorInterface
 
         if ($class !== $this->class) {
             //We have to dedicate class creation to external instantiator (possibly children class)
-            return $this->odm->create($class, $fields, $filter);
+            return $this->odm->make($class, $fields, $filter);
         }
 
         if (!is_array($fields)) {

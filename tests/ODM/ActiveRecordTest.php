@@ -29,7 +29,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(User::class));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, []);
+        $user = $odm->make(User::class, []);
         $this->assertInstanceOf(User::class, $user);
 
         $db = m::mock(MongoDatabase::class);
@@ -67,7 +67,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(User::class));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, [
+        $user = $odm->make(User::class, [
             '_id'  => new ObjectID('507f191e810c19729de860ea'),
             'name' => 'test name'
         ], false);
@@ -87,7 +87,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(User::class));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, [
+        $user = $odm->make(User::class, [
             '_id'  => $_id = new ObjectID('507f191e810c19729de860ea'),
             'name' => 'test name'
         ], false);
@@ -122,7 +122,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(User::class));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, [
+        $user = $odm->make(User::class, [
             '_id'  => $_id = new ObjectID('507f191e810c19729de860ea'),
             'name' => 'test name'
         ], false);
@@ -154,7 +154,7 @@ class ActiveRecordTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(User::class));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, [
+        $user = $odm->make(User::class, [
             //'_id'  => $_id = new ObjectID('507f191e810c19729de860ea'),
             'name' => 'test name'
         ], false);

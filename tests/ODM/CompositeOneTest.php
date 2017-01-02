@@ -32,7 +32,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class);
+        $user = $odm->make(User::class);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertInstanceOf(DataPiece::class, $user->piece);
@@ -47,7 +47,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, ['piece' => ['value' => 'abc']]);
+        $user = $odm->make(User::class, ['piece' => ['value' => 'abc']]);
 
         $this->assertSame('abc', $user->piece->value);
     }
@@ -61,7 +61,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, ['piece' => ['value' => 'abc']]);
+        $user = $odm->make(User::class, ['piece' => ['value' => 'abc']]);
 
         $this->assertSame('abc', $user->piece->value);
     }
@@ -75,7 +75,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, ['piece' => ['value' => 'abc']]);
+        $user = $odm->make(User::class, ['piece' => ['value' => 'abc']]);
 
         $this->assertSame('abc', $user->piece->value);
 
@@ -95,7 +95,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, ['piece' => ['value' => 'abc']]);
+        $user = $odm->make(User::class, ['piece' => ['value' => 'abc']]);
         $this->assertSame('abc', $user->piece->value);
 
         //Must pass value to piece
@@ -114,7 +114,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, ['piece' => ['value' => 'abc']]);
+        $user = $odm->make(User::class, ['piece' => ['value' => 'abc']]);
         $this->assertSame('abc', $user->piece->value);
 
         //Must pass value to piece
@@ -133,7 +133,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $model = $odm->create(NullableComposition::class, ['piece' => ['value' => 'abc']]);
+        $model = $odm->make(NullableComposition::class, ['piece' => ['value' => 'abc']]);
         $this->assertSame('abc', $model->piece->value);
 
         //Must pass value to piece
@@ -152,7 +152,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $model = $odm->create(NullableComposition::class);
+        $model = $odm->make(NullableComposition::class);
         $this->assertNull($model->piece);
     }
 
@@ -165,7 +165,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $model = $odm->create(NullableComposition::class);
+        $model = $odm->make(NullableComposition::class);
         $this->assertNull($model->piece);
 
         $model->piece = ['value' => 'abc'];
@@ -182,7 +182,7 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $model = $odm->create(NullableComposition::class, ['piece' => ['value' => 'abc']]);
+        $model = $odm->make(NullableComposition::class, ['piece' => ['value' => 'abc']]);
 
         $this->assertInstanceOf(DataPiece::class, $model->piece);
         $this->assertSame('abc', $model->piece->value);
@@ -200,12 +200,12 @@ class CompositeOneTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $model = $odm->create(NullableComposition::class, ['piece' => ['value' => 'abc']]);
+        $model = $odm->make(NullableComposition::class, ['piece' => ['value' => 'abc']]);
 
         $this->assertInstanceOf(DataPiece::class, $model->piece);
         $this->assertSame('abc', $model->piece->value);
 
-        $model->piece = $odm->create(DataPiece::class, ['value' => 'another-value']);
+        $model->piece = $odm->make(DataPiece::class, ['value' => 'another-value']);
 
         $this->assertInstanceOf(DataPiece::class, $model->piece);
         $this->assertSame('another-value', $model->piece->value);

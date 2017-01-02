@@ -26,10 +26,10 @@ class InstancesTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema(new DS(new RE(User::class), $mutators));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, []);
+        $user = $odm->make(User::class, []);
         $this->assertInstanceOf(User::class, $user);
 
-        $user = $odm->create(User::class, ['name' => 'test']);
+        $user = $odm->make(User::class, ['name' => 'test']);
         $this->assertInstanceOf(User::class, $user);
     }
 
@@ -42,10 +42,10 @@ class InstancesTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema(new DS(new RE(User::class), $mutators));
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, []);
+        $user = $odm->make(User::class, []);
         $this->assertInstanceOf(User::class, $user);
 
-        $user = $odm->create(User::class, ['name' => 'test']);
+        $user = $odm->make(User::class, ['name' => 'test']);
         $this->assertInstanceOf(User::class, $user);
         $this->assertSame('test', $user->name);
     }
@@ -61,14 +61,14 @@ class InstancesTest extends \PHPUnit_Framework_TestCase
 
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, []);
+        $user = $odm->make(User::class, []);
         $this->assertInstanceOf(User::class, $user);
 
-        $admin = $odm->create(Admin::class, []);
+        $admin = $odm->make(Admin::class, []);
         $this->assertInstanceOf(Admin::class, $admin);
 
         //Auto-inheritance
-        $admin = $odm->create(User::class, ['admins' => 'everything']);
+        $admin = $odm->make(User::class, ['admins' => 'everything']);
         $this->assertInstanceOf(Admin::class, $admin);
     }
 
@@ -84,17 +84,17 @@ class InstancesTest extends \PHPUnit_Framework_TestCase
 
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, []);
+        $user = $odm->make(User::class, []);
         $this->assertInstanceOf(User::class, $user);
 
-        $admin = $odm->create(Admin::class, []);
+        $admin = $odm->make(Admin::class, []);
         $this->assertInstanceOf(Admin::class, $admin);
 
 
-        $admin = $odm->create(User::class, ['admins' => 'everything']);
+        $admin = $odm->make(User::class, ['admins' => 'everything']);
         $this->assertInstanceOf(Admin::class, $admin);
 
-        $admin = $odm->create(User::class, ['admins' => 'everything', 'super' => 'yes']);
+        $admin = $odm->make(User::class, ['admins' => 'everything', 'super' => 'yes']);
         $this->assertInstanceOf(SuperAdministrator::class, $admin);
     }
 
@@ -110,17 +110,17 @@ class InstancesTest extends \PHPUnit_Framework_TestCase
 
         $odm->buildSchema($builder);
 
-        $user = $odm->create(User::class, []);
+        $user = $odm->make(User::class, []);
         $this->assertInstanceOf(User::class, $user);
 
-        $admin = $odm->create(Admin::class, []);
+        $admin = $odm->make(Admin::class, []);
         $this->assertInstanceOf(Admin::class, $admin);
 
 
-        $admin = $odm->create(User::class, ['admins' => 'everything']);
+        $admin = $odm->make(User::class, ['admins' => 'everything']);
         $this->assertInstanceOf(Admin::class, $admin);
 
-        $admin = $odm->create(User::class, ['admins' => 'everything', 'super' => 'yes']);
+        $admin = $odm->make(User::class, ['admins' => 'everything', 'super' => 'yes']);
         $this->assertInstanceOf(SuperAdministrator::class, $admin);
     }
 }

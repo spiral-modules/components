@@ -164,13 +164,10 @@ class ColumnRenderer
         switch ($column->phpType()) {
             case 'int':
                 return 0;
-                break;
             case 'float':
                 return 0.0;
-                break;
             case 'bool':
                 return false;
-                break;
         }
 
         return '';

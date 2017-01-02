@@ -353,6 +353,11 @@ abstract class AbstractHandler
             $this->createColumns($table, $comparator);
         }
 
+        if ($behaviour & self::ALTER_COLUMNS) {
+            //We can alter columns now
+            $this->alterColumns($table, $comparator);
+        }
+
         //Add new constrains and modify existed one
         $this->setConstrains($table, $behaviour, $comparator);
     }
@@ -620,10 +625,6 @@ abstract class AbstractHandler
         int $behaviour,
         StateComparator $comparator
     ) {
-        if ($behaviour & self::ALTER_COLUMNS) {
-            $this->alterColumns($table, $comparator);
-        }
-
         if ($behaviour & self::CREATE_INDEXES) {
             $this->createIndexes($table, $comparator);
         }

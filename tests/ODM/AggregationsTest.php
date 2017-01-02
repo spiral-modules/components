@@ -33,7 +33,7 @@ class AggregationsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
         $odm->buildSchema($builder);
 
-        $aggr = $odm->make(GoodAggregates::class, [
+        $aggr = $odm->create(GoodAggregates::class, [
             'userId' => new ObjectID('507f1f77bcf86cd799439011')
         ]);
 
@@ -54,7 +54,7 @@ class AggregationsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
         $odm->buildSchema($builder);
 
-        $aggr = $odm->make(GoodAggregates::class, [
+        $aggr = $odm->create(GoodAggregates::class, [
             'userId' => new ObjectID('507f1f77bcf86cd799439011')
         ]);
 
@@ -71,7 +71,7 @@ class AggregationsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
         $odm->buildSchema($builder);
 
-        $aggr = $odm->make(GoodAggregates::class, [
+        $aggr = $odm->create(GoodAggregates::class, [
             'userId' => new ObjectID('507f1f77bcf86cd799439011')
         ]);
 
@@ -96,7 +96,7 @@ class AggregationsTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM($manager);
         $odm->buildSchema($builder);
 
-        $aggr = $odm->make(GoodAggregates::class, [
+        $aggr = $odm->create(GoodAggregates::class, [
             'userId' => new ObjectID('507f1f77bcf86cd799439011')
         ]);
 

@@ -35,7 +35,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class);
+        $admin = $odm->create(Admin::class);
 
         $this->assertInstanceOf(User::class, $admin);
         $this->assertInstanceOf(DocumentCompositor::class, $admin->pieces);
@@ -51,7 +51,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
     }
@@ -66,7 +66,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
         $this->assertTrue($admin->pieces->has(['value' => 'abc']));
@@ -83,11 +83,11 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
         $this->assertTrue($admin->pieces->has(
-            $odm->make(DataPiece::class, ['value' => 'abc'])
+            $odm->create(DataPiece::class, ['value' => 'abc'])
         ));
     }
 
@@ -101,12 +101,12 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
         $this->assertInstanceOf(DataPiece::class, $admin->pieces->findOne(['value' => 'abc']));
         $this->assertEquals(
-            $odm->make(DataPiece::class, ['value' => 'abc'])->packValue(),
+            $odm->create(DataPiece::class, ['value' => 'abc'])->packValue(),
             $admin->pieces->findOne(['value' => 'abc'])->packValue()
         );
     }
@@ -121,10 +121,10 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
-        $entity = $odm->make(DataPiece::class, ['value' => 'abc']);
+        $entity = $odm->create(DataPiece::class, ['value' => 'abc']);
 
         $this->assertInstanceOf(DataPiece::class, $admin->pieces->findOne($entity));
         $this->assertEquals(
@@ -143,12 +143,12 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
 
-        $entity1 = $odm->make(DataPiece::class, ['value' => 'abc1']);
-        $entity2 = $odm->make(DataPiece::class, ['value' => 'abc2']);
+        $entity1 = $odm->create(DataPiece::class, ['value' => 'abc1']);
+        $entity2 = $odm->create(DataPiece::class, ['value' => 'abc2']);
 
         $admin->pieces = [$entity1, $entity2];
 
@@ -169,12 +169,12 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
 
-        $entity1 = $odm->make(DataPiece::class, ['value' => 'abc1']);
-        $entity2 = $odm->make(DataPiece::class, ['value' => 'abc2']);
+        $entity1 = $odm->create(DataPiece::class, ['value' => 'abc1']);
+        $entity2 = $odm->create(DataPiece::class, ['value' => 'abc2']);
 
         $admin->pieces = [$entity1, $entity2];
 
@@ -212,7 +212,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
 
@@ -241,7 +241,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
         $this->assertCount(1, $admin->pieces->find([]));
@@ -259,7 +259,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
         $this->assertInstanceOf(DataPiece::class, $admin->pieces->findOne(['value' => 'abc']));
@@ -275,7 +275,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
 
@@ -289,7 +289,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($admin->pieces->has(['value' => 888]));
 
         $this->assertCount(4, $admin->pieces);
-        $admin->pieces->pull($odm->make(DataPiece::class, ['value' => 888]));
+        $admin->pieces->pull($odm->create(DataPiece::class, ['value' => 888]));
         $this->assertCount(3, $admin->pieces);
 
         $this->assertFalse($admin->pieces->has(['value' => 888]));
@@ -305,7 +305,7 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
 
         $this->assertCount(1, $admin->pieces);
 
@@ -320,10 +320,10 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($admin->pieces->has(['value' => 123]));
 
         $this->assertCount(4, $admin->pieces);
-        $admin->pieces->pull($odm->make(DataPiece::class, ['value' => 888]));
+        $admin->pieces->pull($odm->create(DataPiece::class, ['value' => 888]));
 
         //Must pull 2 entities
-        $admin->pieces->pull($odm->make(DataPiece::class, ['value' => 123]));
+        $admin->pieces->pull($odm->create(DataPiece::class, ['value' => 123]));
         $this->assertCount(1, $admin->pieces);
 
         $this->assertFalse($admin->pieces->has(['value' => 123]));
@@ -340,10 +340,10 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
 
-        $admin->pieces->push($odm->make(DataPiece::class, ['value' => 888]));
+        $admin->pieces->push($odm->create(DataPiece::class, ['value' => 888]));
         $this->assertCount(2, $admin->pieces);
 
         $this->assertTrue($admin->pieces->has(['value' => 888]));
@@ -359,13 +359,13 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
 
         //Dupes are allowed by push
-        $admin->pieces->push($odm->make(DataPiece::class, ['value' => 888]));
-        $admin->pieces->push($odm->make(DataPiece::class, ['value' => 888]));
-        $admin->pieces->push($odm->make(DataPiece::class, ['value' => 333]));
+        $admin->pieces->push($odm->create(DataPiece::class, ['value' => 888]));
+        $admin->pieces->push($odm->create(DataPiece::class, ['value' => 888]));
+        $admin->pieces->push($odm->create(DataPiece::class, ['value' => 333]));
 
         $this->assertCount(4, $admin->pieces);
 
@@ -384,10 +384,10 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
 
-        $admin->pieces->add($odm->make(DataPiece::class, ['value' => 888]));
+        $admin->pieces->add($odm->create(DataPiece::class, ['value' => 888]));
         $this->assertCount(2, $admin->pieces);
 
         $this->assertTrue($admin->pieces->has(['value' => 888]));
@@ -403,13 +403,13 @@ class CompositeManyTest extends \PHPUnit_Framework_TestCase
         $odm = $this->makeODM();
         $odm->buildSchema($builder);
 
-        $admin = $odm->make(Admin::class, ['pieces' => [['value' => 'abc']]]);
+        $admin = $odm->create(Admin::class, ['pieces' => [['value' => 'abc']]]);
         $this->assertCount(1, $admin->pieces);
 
         //Dupes are allowed by push
-        $admin->pieces->add($odm->make(DataPiece::class, ['value' => 888]));
-        $admin->pieces->add($odm->make(DataPiece::class, ['value' => 888]));
-        $admin->pieces->add($odm->make(DataPiece::class, ['value' => 333]));
+        $admin->pieces->add($odm->create(DataPiece::class, ['value' => 888]));
+        $admin->pieces->add($odm->create(DataPiece::class, ['value' => 888]));
+        $admin->pieces->add($odm->create(DataPiece::class, ['value' => 333]));
 
         $this->assertCount(3, $admin->pieces);
 

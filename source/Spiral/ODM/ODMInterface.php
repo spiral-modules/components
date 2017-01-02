@@ -75,7 +75,7 @@ interface ODMInterface
      *
      * @return CompositableInterface
      */
-    public function make(
+    public function create(
         string $class,
         $fields = [],
         bool $filter = true

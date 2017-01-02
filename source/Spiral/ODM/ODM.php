@@ -218,7 +218,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     /**
      * {@inheritdoc}
      */
-    public function make(
+    public function create(
         string $class,
         $fields = [],
         bool $filter = true

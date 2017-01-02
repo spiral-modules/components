@@ -435,7 +435,7 @@ class DocumentCompositor implements
                 //Always clone to detach from original value
                 $result[] = clone $item;
             } else {
-                $result[] = $this->odm->make($this->class, $item, $filter);
+                $result[] = $this->odm->create($this->class, $item, $filter);
             }
         }
 

@@ -23,7 +23,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(Accessed::class));
         $odm->buildSchema($builder);
 
-        $entity = $odm->make(Accessed::class, []);
+        $entity = $odm->create(Accessed::class, []);
         $this->assertInstanceOf(Accessed::class, $entity);
 
         $this->assertInstanceOf(StringArray::class, $entity->tags);
@@ -38,7 +38,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(Accessed::class));
         $odm->buildSchema($builder);
 
-        $entity = $odm->make(Accessed::class, [
+        $entity = $odm->create(Accessed::class, [
             'tags' => ['a', 'b', 'c']
         ]);
         $this->assertInstanceOf(Accessed::class, $entity);
@@ -60,7 +60,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(Accessed::class));
         $odm->buildSchema($builder);
 
-        $entity = $odm->make(Accessed::class, [
+        $entity = $odm->create(Accessed::class, [
             'tags' => ['a', 'b', 'c']
         ]);
         $this->assertInstanceOf(Accessed::class, $entity);
@@ -84,7 +84,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(Accessed::class));
         $odm->buildSchema($builder);
 
-        $entity = $odm->make(Accessed::class, [
+        $entity = $odm->create(Accessed::class, [
             'tags' => ['a', 'b', 'c']
         ]);
         $this->assertInstanceOf(Accessed::class, $entity);
@@ -113,7 +113,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
         $builder->addSchema($this->makeSchema(Accessed::class));
         $odm->buildSchema($builder);
 
-        $entity = $odm->make(Accessed::class, [
+        $entity = $odm->create(Accessed::class, [
             'tags' => ['a', 'b', 'c']
         ]);
 

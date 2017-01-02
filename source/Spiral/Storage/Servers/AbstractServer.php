@@ -91,7 +91,7 @@ abstract class AbstractServer extends Component implements ServerInterface
     /**
      * Cast local filename to be used in file based methods and etc.
      *
-     * @param string|StreamInterface $source
+     * @param string|StreamInterface|resource $source
      *
      * @return string
      *
@@ -127,7 +127,7 @@ abstract class AbstractServer extends Component implements ServerInterface
     /**
      * Cast stream associated with origin data.
      *
-     * @param string|StreamInterface $source
+     * @param string|StreamInterface|resource $source
      *
      * @return StreamInterface
      */

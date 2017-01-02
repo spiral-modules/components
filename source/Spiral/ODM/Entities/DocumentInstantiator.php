@@ -81,7 +81,7 @@ class DocumentInstantiator implements InstantiatorInterface
          * Filtering entity
          */
 
-        $entity = new $class($fields, $this->odm, $this->schema);
+        $entity = new $class([], $this->odm, $this->schema);
         if (!$entity instanceof CompositableInterface) {
             throw new InstantionException(
                 "Unable to set filtered values for '{$class}', must be instance of CompositableInterface"

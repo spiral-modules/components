@@ -345,41 +345,16 @@ abstract class AbstractHandler
      */
     protected function runChanges(AbstractTable $table, int $behaviour, StateComparator $comparator)
     {
-        if ($behaviour & self::DROP_FOREIGNS) {
-            $this->dropForeigns($table, $comparator);
-        }
-
-        if ($behaviour & self::DROP_INDEXES) {
-            $this->dropIndexes($table, $comparator);
-        }
-
-        if ($behaviour & self::DROP_COLUMNS) {
-            $this->dropColumns($table, $comparator);
-        }
+        //Remove all non needed table constraints
+        $this->dropConstrains($table, $behaviour, $comparator);
 
         if ($behaviour & self::CREATE_COLUMNS) {
+            //After drops and before creations we can add new columns
             $this->createColumns($table, $comparator);
         }
 
-        if ($behaviour & self::ALTER_COLUMNS) {
-            $this->alterColumns($table, $comparator);
-        }
-
-        if ($behaviour & self::CREATE_INDEXES) {
-            $this->createIndexes($table, $comparator);
-        }
-
-        if ($behaviour & self::ALTER_INDEXES) {
-            $this->alterIndexes($table, $comparator);
-        }
-
-        if ($behaviour & self::CREATE_FOREIGNS) {
-            $this->createForeigns($table, $comparator);
-        }
-
-        if ($behaviour & self::ALTER_FOREIGNS) {
-            $this->alterForeigns($table, $comparator);
-        }
+        //Add new constrains and modify existed one
+        $this->setConstrains($table, $behaviour, $comparator);
     }
 
     /**
@@ -610,5 +585,59 @@ abstract class AbstractHandler
     protected function assertValid(AbstractColumn $column)
     {
         //All valid by default
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param int             $behaviour
+     * @param StateComparator $comparator
+     */
+    protected function dropConstrains(
+        AbstractTable $table,
+        int $behaviour,
+        StateComparator $comparator
+    ) {
+        if ($behaviour & self::DROP_FOREIGNS) {
+            $this->dropForeigns($table, $comparator);
+        }
+
+        if ($behaviour & self::DROP_INDEXES) {
+            $this->dropIndexes($table, $comparator);
+        }
+
+        if ($behaviour & self::DROP_COLUMNS) {
+            $this->dropColumns($table, $comparator);
+        }
+    }
+
+    /**
+     * @param AbstractTable   $table
+     * @param int             $behaviour
+     * @param StateComparator $comparator
+     */
+    protected function setConstrains(
+        AbstractTable $table,
+        int $behaviour,
+        StateComparator $comparator
+    ) {
+        if ($behaviour & self::ALTER_COLUMNS) {
+            $this->alterColumns($table, $comparator);
+        }
+
+        if ($behaviour & self::CREATE_INDEXES) {
+            $this->createIndexes($table, $comparator);
+        }
+
+        if ($behaviour & self::ALTER_INDEXES) {
+            $this->alterIndexes($table, $comparator);
+        }
+
+        if ($behaviour & self::CREATE_FOREIGNS) {
+            $this->createForeigns($table, $comparator);
+        }
+
+        if ($behaviour & self::ALTER_FOREIGNS) {
+            $this->alterForeigns($table, $comparator);
+        }
     }
 }

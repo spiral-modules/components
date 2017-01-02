@@ -14,7 +14,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
  * Attention! You can use only one timestamp or datetime with DATETIME_NOW setting! Thought, it will
  * work on multiple fields with MySQL 5.6.6+ version.
  *
- * @todo create ON_UPDATE_NOW and automatically create a trigger for a column
+ * @todo create ON_UPDATE_NOW and automatically create a trigger for a column, for all drivers
  */
 class MySQLColumn extends AbstractColumn
 {
@@ -173,7 +173,8 @@ class MySQLColumn extends AbstractColumn
         $column->defaultValue = $schema['Default'];
         $column->autoIncrement = stripos($schema['Extra'], 'auto_increment') !== false;
 
-        if (!preg_match(
+        if (
+        !preg_match(
             '/^(?P<type>[a-z]+)(?:\((?P<options>[^\)]+)\))?/',
             $column->type,
             $matches

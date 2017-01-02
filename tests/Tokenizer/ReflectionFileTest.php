@@ -22,7 +22,7 @@ class ReflectionFileTest extends \PHPUnit_Framework_TestCase
         $memory->shouldReceive('loadData')->andReturn([]);
         $memory->shouldReceive('saveData');
 
-        $tokenizer = new Tokenizer(new FileManager(), m::mock(TokenizerConfig::class), $memory);
+        $tokenizer = new Tokenizer(m::mock(TokenizerConfig::class), new FileManager(), $memory);
 
         $reflection = $tokenizer->fileReflection(__FILE__);
 

@@ -13,8 +13,10 @@ use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\MemoryInterface;
+use Spiral\Core\NullMemory;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Files\FileManager;
 use Spiral\Files\FilesInterface;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Reflections\ReflectionFile;
@@ -55,18 +57,18 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Tokenizer constructor.
      *
-     * @param FilesInterface  $files
      * @param TokenizerConfig $config
+     * @param FilesInterface  $files
      * @param MemoryInterface $memory
      */
     public function __construct(
-        FilesInterface $files,
         TokenizerConfig $config,
-        MemoryInterface $memory
+        FilesInterface $files = null,
+        MemoryInterface $memory = null
     ) {
-        $this->files = $files;
         $this->config = $config;
-        $this->memory = $memory;
+        $this->files = $files ?? new FileManager();
+        $this->memory = $memory ?? new NullMemory();
     }
 
     /**

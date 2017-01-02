@@ -146,7 +146,6 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      * {@inheritdoc}
      *
      * @param ODMInterface $odm   To lazy create nested document ang aggregations.
-     * @param array        $model Model schema if none will be fetched from ODM.
      *
      * @throws ScopeException When no ODM instance can be resolved.
      */

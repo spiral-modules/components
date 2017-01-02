@@ -123,7 +123,7 @@ class ClassLocatorTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('getDirectories')->andReturn([__DIR__]);
         $config->shouldReceive('getExcludes')->andReturn(['Excluded']);
 
-        $tokenizer = new Tokenizer(new FileManager(), $config, $memory);
+        $tokenizer = new Tokenizer($config, new FileManager(), $memory);
 
         return $tokenizer;
     }

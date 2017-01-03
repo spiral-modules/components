@@ -8,6 +8,7 @@
 namespace Spiral\Models\Reflections;
 
 use Spiral\Models\Prototypes\AbstractEntity;
+use Spiral\Models\SchematicEntity;
 
 /**
  * Provides ability to generate entity schema based on given entity class and default property
@@ -208,6 +209,10 @@ class ReflectionEntity
                 //Class values prior to parent values
                 $value = array_merge($parentValue, $value);
             }
+        }
+
+        if (!$this->reflection->isSubclassOf(SchematicEntity::class)) {
+            return $value;
         }
 
         //To let traits apply schema changes

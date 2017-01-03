@@ -221,6 +221,48 @@ class DocumentSchema implements SchemaInterface
     }
 
     /**
+     * Generate set of mutators associated with entity fields using user defined and automatic
+     * mutators.
+     *
+     * @see MutatorsConfig
+     * @return array
+     */
+    public function getMutators(): array
+    {
+        $mutators = $this->reflection->getMutators();
+
+        //Trying to resolve mutators based on field type
+        foreach ($this->getFields() as $field => $type) {
+            //Resolved mutators
+            $resolved = [];
+
+            if (
+                is_array($type)
+                && is_scalar($type[0])
+                && $filter = $this->mutatorsConfig->getMutators('array::' . $type[0])
+            ) {
+                //Mutator associated to array with specified type
+                $resolved += $filter;
+            } elseif (is_array($type) && $filter = $this->mutatorsConfig->getMutators('array')) {
+                //Default array mutator
+                $resolved += $filter;
+            } elseif (!is_array($type) && $filter = $this->mutatorsConfig->getMutators($type)) {
+                //Mutator associated with type directly
+                $resolved += $filter;
+            }
+
+            //Merging mutators and default mutators
+            foreach ($resolved as $mutator => $filter) {
+                if (!array_key_exists($field, $mutators[$mutator])) {
+                    $mutators[$mutator][$field] = $filter;
+                }
+            }
+        }
+
+        return $mutators;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function resolvePrimary(SchemaBuilder $builder): string
@@ -344,48 +386,6 @@ class DocumentSchema implements SchemaInterface
         }
 
         return $defaults;
-    }
-
-    /**
-     * Generate set of mutators associated with entity fields using user defined and automatic
-     * mutators.
-     *
-     * @see MutatorsConfig
-     * @return array
-     */
-    protected function resolveMutators(): array
-    {
-        $mutators = $this->reflection->getMutators();
-
-        //Trying to resolve mutators based on field type
-        foreach ($this->getFields() as $field => $type) {
-            //Resolved mutators
-            $resolved = [];
-
-            if (
-                is_array($type)
-                && is_scalar($type[0])
-                && $filter = $this->mutatorsConfig->getMutators('array::' . $type[0])
-            ) {
-                //Mutator associated to array with specified type
-                $resolved += $filter;
-            } elseif (is_array($type) && $filter = $this->mutatorsConfig->getMutators('array')) {
-                //Default array mutator
-                $resolved += $filter;
-            } elseif (!is_array($type) && $filter = $this->mutatorsConfig->getMutators($type)) {
-                //Mutator associated with type directly
-                $resolved += $filter;
-            }
-
-            //Merging mutators and default mutators
-            foreach ($resolved as $mutator => $filter) {
-                if (!array_key_exists($field, $mutators[$mutator])) {
-                    $mutators[$mutator][$field] = $filter;
-                }
-            }
-        }
-
-        return $mutators;
     }
 
     /**

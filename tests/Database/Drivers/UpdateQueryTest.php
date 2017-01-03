@@ -6,8 +6,11 @@
  */
 namespace Spiral\Tests\Database\Drivers;
 
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\UpdateQuery;
 use Spiral\Database\Entities\Database;
+use Spiral\Database\Helpers\QueryInterpolator;
+use Spiral\Database\Injections\ParameterInterface;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
 abstract class UpdateQueryTest extends BaseQueryTest
@@ -55,5 +58,23 @@ abstract class UpdateQueryTest extends BaseQueryTest
         $update = $this->database->update()->in('table')->set('name', 'Anton')->where('id', 1);
 
         $this->assertSameQuery("UPDATE {table} SET {name} = ? WHERE {id} = ?", $update);
+
+        $this->assertSameParameters([
+            'Anton',
+            1
+        ], $update);
+    }
+
+    protected function assertSameParameters(array $parameters, QueryBuilder $builder)
+    {
+        $builderParameters = [];
+        foreach (QueryInterpolator::flattenParameters($builder->getParameters()) as $value) {
+            $this->assertInstanceOf(ParameterInterface::class, $value);
+            $this->assertFalse($value->isArray());
+
+            $builderParameters[] = $value->getValue();
+        }
+
+        $this->assertEquals($parameters, $builderParameters);
     }
 }

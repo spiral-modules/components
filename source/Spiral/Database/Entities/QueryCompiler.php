@@ -90,29 +90,6 @@ class QueryCompiler
     }
 
     /**
-     * Sort list of parameters in dbms query specific order, query type must be provided. This
-     * method was used at times when delete and update queries supported joins, i might need to
-     * drop it now.
-     *
-     * @param string $queryType
-     * @param array  $whereParameters
-     * @param array  $onParameters
-     * @param array  $havingParameters
-     * @param array  $columnIdentifiers Column names (if any).
-     *
-     * @return array
-     */
-    public function orderParameters(
-        string $queryType,
-        array $whereParameters = [],
-        array $onParameters = [],
-        array $havingParameters = [],
-        array $columnIdentifiers = []
-    ): array {
-        return array_merge($columnIdentifiers, $onParameters, $whereParameters, $havingParameters);
-    }
-
-    /**
      * Create insert query using table names, columns and rowsets. Must support both - single and
      * batch inserts.
      *

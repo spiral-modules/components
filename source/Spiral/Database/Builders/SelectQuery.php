@@ -138,16 +138,14 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null): array
+    public function getParameters(): array
     {
-        $compiler = $compiler ?? $this->compiler;
-
-        $parameters = parent::getParameters($compiler);
+        $parameters = parent::getParameters();
 
         //Unions always located at the end of query.
         foreach ($this->unionTokens as $union) {
             if ($union[1] instanceof QueryBuilder) {
-                $parameters = array_merge($parameters, $union[1]->getParameters($compiler));
+                $parameters = array_merge($parameters, $union[1]->getParameters());
             }
         }
 

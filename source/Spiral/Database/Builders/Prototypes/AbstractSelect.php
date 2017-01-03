@@ -10,10 +10,8 @@ namespace Spiral\Database\Builders\Prototypes;
 
 use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\Traits\JoinsTrait;
-use Spiral\Database\Entities\QueryResult;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
@@ -101,18 +99,13 @@ abstract class AbstractSelect extends AbstractWhere implements
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null): array
+    public function getParameters(): array
     {
-        $compiler = $compiler ?? $this->compiler;
-
-        return $this->flattenParameters(
-            $compiler->orderParameters(
-                self::QUERY_TYPE,
-                $this->whereParameters,
-                $this->onParameters,
-                $this->havingParameters
-            )
-        );
+        return $this->flattenParameters(array_merge(
+            $this->whereParameters,
+            $this->onParameters,
+            $this->havingParameters
+        ));
     }
 
     /**

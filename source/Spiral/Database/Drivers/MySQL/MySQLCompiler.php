@@ -18,30 +18,6 @@ class MySQLCompiler extends AbstractCompiler
 {
     /**
      * {@inheritdoc}
-     */
-    public function orderParameters(
-        string $queryType,
-        array $whereParameters = [],
-        array $onParameters = [],
-        array $havingParameters = [],
-        array $columnIdentifiers = []
-    ): array {
-        if ($queryType == self::UPDATE_QUERY) {
-            //Where statement has pretty specific order
-            return array_merge($onParameters, $columnIdentifiers, $whereParameters);
-        }
-
-        return parent::orderParameters(
-            $queryType,
-            $whereParameters,
-            $onParameters,
-            $havingParameters,
-            $columnIdentifiers
-        );
-    }
-
-    /**
-     * {@inheritdoc}
      *
      * @link http://dev.mysql.com/doc/refman/5.0/en/select.html#id4651990
      */

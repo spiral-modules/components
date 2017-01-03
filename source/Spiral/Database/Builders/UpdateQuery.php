@@ -106,10 +106,8 @@ class UpdateQuery extends AbstractAffect
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null): array
+    public function getParameters(): array
     {
-        $compiler = $compiler ?? $this->compiler;
-
         $values = [];
         foreach ($this->values as $value) {
             if ($value instanceof QueryBuilder) {
@@ -129,9 +127,7 @@ class UpdateQuery extends AbstractAffect
         }
 
         //Join and where parameters are going after values
-        return $this->flattenParameters(
-            $compiler->orderParameters(self::QUERY_TYPE, $this->whereParameters, [], [], $values)
-        );
+        return $this->flattenParameters(array_merge($values, $this->whereParameters));
     }
 
     /**

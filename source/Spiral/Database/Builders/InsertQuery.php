@@ -144,13 +144,9 @@ class InsertQuery extends QueryBuilder
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null): array
+    public function getParameters(): array
     {
-        $compiler = $compiler ?? $this->compiler;
-
-        return $this->flattenParameters(
-            $compiler->orderParameters(self::QUERY_TYPE, [], [], [], $this->rowsets)
-        );
+        return $this->flattenParameters($this->rowsets);
     }
 
     /**

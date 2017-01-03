@@ -291,7 +291,7 @@ class DocumentSchema implements SchemaInterface
             DocumentEntity::SH_FILLABLE      => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ODM\SchemasConfig
-            DocumentEntity::SH_MUTATORS      => $this->resolveMutators(),
+            DocumentEntity::SH_MUTATORS      => $this->getMutators(),
 
             //Document behaviours (we can mix them with accessors due potential inheritance)
             DocumentEntity::SH_COMPOSITIONS  => $this->packCompositions($builder),
@@ -339,7 +339,7 @@ class DocumentSchema implements SchemaInterface
         $userDefined = $overwriteDefaults + $this->getDefaults();
 
         //We need mutators to normalize default values
-        $mutators = $this->resolveMutators();
+        $mutators = $this->getMutators();
 
         $defaults = [];
         foreach ($this->getFields() as $field => $type) {

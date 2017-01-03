@@ -58,7 +58,6 @@ class SQLServerCompiler extends QueryCompiler
             "ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS {$this->quote(self::ROW_NUMBER)}"
         );
 
-
         //Let's compile MOST of our query :)
         $selection = parent::compileSelect(
             $fromTables,

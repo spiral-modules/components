@@ -40,6 +40,8 @@ class SQLiteCompiler extends AbstractCompiler
 
                 $statement[] = 'SELECT ' . implode(', ', $selectColumns);
             } else {
+                //It is crityially important to use UNION ALL, UNION will try to merge values together
+                //which will cause non predictable insert order
                 $statement[] = 'UNION ALL SELECT ' . trim(str_repeat('?, ', count($columns)), ', ');
             }
         }

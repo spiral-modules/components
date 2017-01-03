@@ -133,11 +133,11 @@ class ReflectionEntity
     }
 
     /**
-     * Fields associated with their type.
+     * Entity schema.
      *
      * @return array
      */
-    public function getFields(): array
+    public function getSchema(): array
     {
         //Default property to store schema
         return (array)$this->getProperty('schema', true);

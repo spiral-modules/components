@@ -61,12 +61,12 @@ class InheritanceHelper
         uasort($children, [$this, 'sortChildren']);
 
         //Fields which are common for parent and child models
-        $commonFields = $this->schema->getReflection()->getFields();
+        $commonFields = $this->schema->getReflection()->getSchema();
 
         $definition = [];
         foreach ($children as $schema) {
             //Child document fields
-            $fields = $schema->getReflection()->getFields();
+            $fields = $schema->getReflection()->getSchema();
 
             if (empty($fields)) {
                 throw new DefinitionException(
@@ -220,6 +220,6 @@ class InheritanceHelper
      */
     private function sortChildren(DocumentSchema $childA, DocumentSchema $childB)
     {
-        return count($childA->getReflection()->getFields()) > count($childB->getReflection()->getFields());
+        return count($childA->getReflection()->getSchema()) > count($childB->getReflection()->getSchema());
     }
 }

@@ -124,7 +124,7 @@ class DocumentSchema implements SchemaInterface
      */
     public function getFields(): array
     {
-        $fields = $this->reflection->getFields();
+        $fields = $this->reflection->getSchema();
 
         foreach ($fields as $field => $type) {
             if ($this->isAggregation($type)) {
@@ -181,7 +181,7 @@ class DocumentSchema implements SchemaInterface
     public function getAggregations(): array
     {
         $result = [];
-        foreach ($this->reflection->getFields() as $field => $type) {
+        foreach ($this->reflection->getSchema() as $field => $type) {
             if ($this->isAggregation($type)) {
                 $aggregationType = isset($type[Document::ONE]) ? Document::ONE : Document::MANY;
 
@@ -207,7 +207,7 @@ class DocumentSchema implements SchemaInterface
     public function getCompositions(SchemaBuilder $builder): array
     {
         $result = [];
-        foreach ($this->reflection->getFields() as $field => $type) {
+        foreach ($this->reflection->getSchema() as $field => $type) {
             if (is_string($type) && $builder->hasSchema($type)) {
                 $result[$field] = new CompositionDefinition(DocumentEntity::ONE, $type);
             }

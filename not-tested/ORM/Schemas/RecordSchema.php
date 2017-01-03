@@ -160,7 +160,7 @@ class RecordSchema implements SchemaInterface
      */
     protected function getFields(): array
     {
-        $fields = $this->reflection->getFields();
+        $fields = $this->reflection->getSchema();
 
         foreach ($fields as $field => $type) {
             if ($this->isRelation($type)) {

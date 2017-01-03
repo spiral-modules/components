@@ -27,7 +27,7 @@ class MySQLCompiler extends AbstractCompiler
         array $columnIdentifiers = []
     ): array {
         if ($queryType == self::UPDATE_QUERY) {
-            //Where statement has pretty specific order
+            //Where statement has pretty specific order, still needed?
             return array_merge($onParameters, $columnIdentifiers, $whereParameters);
         }
 

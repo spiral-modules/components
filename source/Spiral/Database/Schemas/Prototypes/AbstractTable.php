@@ -164,6 +164,7 @@ abstract class AbstractTable implements TableInterface
      */
     public function exists(): bool
     {
+        //Derlared as dropped != actually dropped
         return $this->status == self::STATUS_EXISTS || $this->status == self::STATUS_DROPPED;
     }
 
@@ -219,8 +220,7 @@ abstract class AbstractTable implements TableInterface
             throw new SchemaException("Unable to drop non existed table");
         }
 
-        //Declaring as dropper
-        $this->status = self::STATUS_DROPPED;
+        //Declaring as dropped
         $this->status = self::STATUS_DROPPED;
     }
 

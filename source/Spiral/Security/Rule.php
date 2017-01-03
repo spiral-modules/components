@@ -11,14 +11,14 @@ use Spiral\Core\ResolverInterface;
 use Spiral\Security\Exceptions\RuleException;
 
 /**
- * Rule class provides ability to route check request to a specified method (by default "check")
+ * Rule class provides ability to verify permission request via specified method (by default "check")
  * using resolver interface. As side effect check method will support method injections.
  *
  * Example:
  *
  * class MyRule extends Rule
  * {
- *      public function allows($actor, $post)
+ *      public function check($actor, $post)
  *      {
  *          return $post->author_id == $actor->id;
  *      }

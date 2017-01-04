@@ -16,7 +16,7 @@ use Spiral\Tokenizer\TokenizerInterface;
  * in file. In addition file reflection provides ability to fetch and describe every method/function
  * call.
  *
- * @todo rewrite using AST
+ * @todo rewrite using AST, facelift
  */
 class ReflectionFile extends Component
 {

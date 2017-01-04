@@ -39,12 +39,10 @@ class InvocationsLocator extends AbstractLocator implements InvocationsInterface
      *
      * @param string $signature Method or function signature (name), for pre-filtering.
      *
-     * @return ReflectionInvocation[]
+     * @return ReflectionInvocation[]|\Generator
      */
-    protected function availableInvocations(string $signature = ''): array
+    protected function availableInvocations(string $signature = ''): \Generator
     {
-        $invocations = [];
-
         $signature = strtolower(trim($signature, '\\'));
         foreach ($this->availableReflections() as $reflection) {
             foreach ($reflection->getInvocations() as $invocation) {
@@ -55,11 +53,9 @@ class InvocationsLocator extends AbstractLocator implements InvocationsInterface
                     continue;
                 }
 
-                $invocations[] = $invocation;
+                yield $invocation;
             }
         }
-
-        return $invocations;
     }
 
     /**

@@ -80,6 +80,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         $fileMD5 = $this->files->md5($filename = $this->files->normalizePath($filename));
 
         $reflection = new ReflectionFile(
+            $filename,
             $this->normalizeTokens(token_get_all($this->files->read($filename))),
             (array)$this->memory->loadData($fileMD5, self::MEMORY)
         );

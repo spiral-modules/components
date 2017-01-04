@@ -136,13 +136,16 @@ class ReflectionFile extends Component
     private $invocations = [];
 
     /**
-     * @param array $tokens
-     * @param array $cache  Tokenizer can construct reflection with pre-created cache to speed up
+     * @param string $filename
+     * @param array  $tokens
+     * @param array  $cache Tokenizer can construct reflection with pre-created cache to speed up
      *                      indexation.
      */
-    public function __construct(array $tokens, array $cache = [])
+    public function __construct(string $filename, array $tokens, array $cache = [])
     {
+        $this->filename = $filename;
         $this->tokens = $tokens;
+        $this->countTokens = count($tokens);
 
         if (!empty($cache)) {
             //Locating file schema from file, can speed up class location a LOT
@@ -478,7 +481,9 @@ class ReflectionFile extends Component
             $tokenType = $token[self::TOKEN_TYPE];
 
             //We are not indexing function declarations or functions called from $objects.
-            if ($tokenType == T_FUNCTION || $tokenType == T_OBJECT_OPERATOR || $tokenType == T_NEW) {
+            if (in_array($tokenType, [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW])) {
+
+
                 if (
                     empty($argumentsTID)
                     && (
@@ -515,6 +520,7 @@ class ReflectionFile extends Component
 
             //We are inside function arguments and ")" met.
             if (!empty($invocationTID) && ($tokenType == ')' || $tokenType == ']')) {
+
                 --$level;
                 if ($level == -1) {
                     $invocationTID = false;
@@ -594,6 +600,7 @@ class ReflectionFile extends Component
         $this->locateInvocations($arguments, $invocationLevel + 1);
 
         list($class, $operator, $name) = $this->fetchContext($invocationID, $argumentsID);
+
         if (!empty($operator) && empty($class)) {
             //Non detectable
             return;

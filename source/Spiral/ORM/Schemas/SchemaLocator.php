@@ -17,7 +17,7 @@ use Spiral\Tokenizer\ClassesInterface;
  * Provides ability to automatically locate schemas in a project. Can be user redefined in order to
  * automatically include custom classes.
  */
-class SchemaLocator
+class SchemaLocator implements LocatorInterface
 {
     /**
      * Container is used for lazy resolution for ClassesInterface.

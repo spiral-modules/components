@@ -126,7 +126,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      * @param SchemaBuilder $builder
      * @param bool          $remember Set to true to remember packed schema in memory.
      */
-    public function setSchema(SchemaBuilder $builder, bool $remember = false)
+    public function buildSchema(SchemaBuilder $builder, bool $remember = false)
     {
         $this->schema = $builder->packSchema();
 
@@ -142,7 +142,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     {
         if (empty($this->schema)) {
             //Update and remember
-            $this->setSchema($this->schemaBuilder()->renderSchema(), true);
+            $this->buildSchema($this->schemaBuilder()->renderSchema(), true);
         }
 
         //Check value

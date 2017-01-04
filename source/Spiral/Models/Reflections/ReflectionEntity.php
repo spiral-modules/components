@@ -119,7 +119,7 @@ class ReflectionEntity
      *
      * @return \ReflectionMethod[]
      */
-    public function declareMethods(): array
+    public function declaredMethods(): array
     {
         $methods = [];
         foreach ($this->getMethods() as $method) {

@@ -63,7 +63,7 @@ class AggregationHelper
     {
         if (!isset($this->schema[DocumentEntity::SH_AGGREGATIONS][$aggregation])) {
             throw new AggregationException(sprintf(
-                "Undefined aggregation '%s' in '%s'",
+                "Undefined aggregation '%s' in '%s', make sure schema is updated",
                 $aggregation,
                 get_class($this->source)
             ));

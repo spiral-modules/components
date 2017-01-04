@@ -154,6 +154,7 @@ class Container extends Component implements
             return $instance;
         }
 
+        //Will this ever happen?
         return null;
     }
 
@@ -531,7 +532,7 @@ class Container extends Component implements
             if (!$parameter->isOptional()) {
                 throw new ArgumentException($parameter, $context);
             }
-
+            
             return;
         }
 

@@ -14,6 +14,7 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
+use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
@@ -24,6 +25,8 @@ use Spiral\ORM\Schemas\SchemaLocator;
 
 class ORM extends Component implements ORMInterface, SingletonInterface
 {
+    use LoggerTrait;
+
     /**
      * Memory section to store ORM schema.
      */
@@ -120,11 +123,6 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         return $builder;
     }
 
-    public function requireSync()
-    {
-
-    }
-
     /**
      * Specify behaviour schema for ORM to be used. Attention, you have to call renderSchema()
      * prior to passing builder into this method.
@@ -147,7 +145,6 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     public function define(string $class, int $property)
     {
         if (empty($this->schema)) {
-            //Update and remember
             $this->buildSchema($this->schemaBuilder()->renderSchema(), true);
         }
 

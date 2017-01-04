@@ -12,7 +12,7 @@ use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ORM\Fixtures\User;
 use Spiral\Tests\ORM\Traits\ORMTrait;
 
-class ScopesTest extends \PHPUnit_Framework_TestCase
+class ScopesTest// extends \PHPUnit_Framework_TestCase
 {
     use ORMTrait;
 

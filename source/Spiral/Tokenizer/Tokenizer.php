@@ -25,6 +25,8 @@ use Symfony\Component\Finder\Finder;
 
 /**
  * Default implementation of spiral tokenizer support while and blacklisted directories and etc.
+ *
+ * @todo this component have been written long time ago and require facelift
  */
 class Tokenizer extends Component implements SingletonInterface, TokenizerInterface, InjectorInterface
 {

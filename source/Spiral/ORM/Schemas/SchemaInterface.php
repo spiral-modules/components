@@ -78,11 +78,11 @@ interface SchemaInterface
      * Pack schema in a form compatible with entity class and selected mapper.
      *
      * @param SchemaBuilder $builder
-     * @param AbstractTable $table
+     * @param AbstractTable $table Associated table.
      *
      * @return array
      *
      * @throws SchemaException
      */
-    public function packSchema(SchemaBuilder $builder, AbstractTable $table = null): array;
+    public function packSchema(SchemaBuilder $builder, AbstractTable $table): array;
 }

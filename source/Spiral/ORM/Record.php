@@ -16,6 +16,12 @@ abstract class Record extends SchematicEntity implements ActiveEntityInterface
     use SaturateTrait, SolidableTrait;
 
     /**
+     * Set of schema sections needed to describe entity behaviour.
+     */
+    const SH_DEFAULTS    = 0;
+    const SH_RELATIONS   = 6;
+
+    /**
      * Constants used to declare indexes in record schema.
      *
      * @see Record::$indexes

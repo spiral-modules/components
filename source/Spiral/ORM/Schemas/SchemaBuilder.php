@@ -276,7 +276,10 @@ class SchemaBuilder
         foreach ($this->schemas as $class => $schema) {
             $result[$class][] = [
                 ORMInterface::R_INSTANTIATOR => $schema->getInstantiator(),
-                ORMInterface::R_SCHEMA       => $schema->packSchema($this, null),
+                ORMInterface::R_SCHEMA       => $schema->packSchema(
+                    $this,
+                    $this->requestTable($schema->getTable(), $schema->getDatabase(), false)
+                ),
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
                 ORMInterface::R_DATABASE     => $schema->getDatabase(),
                 ORMInterface::R_TABLE        => $schema->getTable(),

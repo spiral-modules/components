@@ -22,7 +22,6 @@ class MutatorsConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertSame([], $config->getMutators('int'));
     }
 
-
     public function testAliases()
     {
         $config = new MutatorsConfig([

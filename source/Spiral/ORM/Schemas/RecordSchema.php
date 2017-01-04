@@ -134,7 +134,7 @@ class RecordSchema implements SchemaInterface
     {
         return $this->renderer->renderColumns(
             $this->getFields(),
-            $this->createDefaults(),
+            $this->getDefaults(),
             $table
         );
     }
@@ -150,9 +150,23 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function packSchema(SchemaBuilder $builder, AbstractTable $table = null): array
+    public function packSchema(SchemaBuilder $builder, AbstractTable $table): array
     {
-        return [];
+        return [
+            //Default entity values
+            Record::SH_DEFAULTS  => [],
+
+            //Entity behaviour
+            Record::SH_HIDDEN    => $this->reflection->getHidden(),
+            Record::SH_SECURED   => $this->reflection->getSecured(),
+            Record::SH_FILLABLE  => $this->reflection->getFillable(),
+
+            //Mutators can be altered based on ORM\SchemasConfig
+            Record::SH_MUTATORS  => $this->buildMutators($table),
+
+            //Relations
+            Record::SH_RELATIONS => []
+        ];
     }
 
     /**
@@ -169,6 +183,44 @@ class RecordSchema implements SchemaInterface
         }
 
         return $fields;
+    }
+
+    /**
+     * Generate set of mutators associated with entity fields using user defined and automatic
+     * mutators.
+     *
+     * @see MutatorsConfig
+     *
+     * @param AbstractTable $table
+     *
+     * @return array
+     */
+    protected function buildMutators(AbstractTable $table): array
+    {
+        $mutators = $this->reflection->getMutators();
+
+        //Trying to resolve mutators based on field type
+        foreach ($table->getColumns() as $column) {
+            //Resolved mutators
+            $resolved = [];
+
+            if (!empty($filter = $this->mutatorsConfig->getMutators($column->abstractType()))) {
+                //Mutator associated with type directly
+                $resolved += $filter;
+            } elseif (!empty($filter = $this->mutatorsConfig->getMutators('php:' . $column->phpType()))) {
+                //Mutator associated with php type
+                $resolved += $filter;
+            }
+
+            //Merging mutators and default mutators
+            foreach ($resolved as $mutator => $filter) {
+                if (!array_key_exists($column->getName(), $mutators[$mutator])) {
+                    $mutators[$mutator][$column->getName()] = $filter;
+                }
+            }
+        }
+
+        return $mutators;
     }
 
     /**
@@ -228,7 +280,7 @@ class RecordSchema implements SchemaInterface
      *
      * @return array
      */
-    protected function createDefaults(): array
+    protected function getDefaults(): array
     {
         //Process defaults
         return $this->reflection->getProperty('defaults') ?? [];

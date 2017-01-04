@@ -6,6 +6,7 @@
  */
 namespace Spiral\ODM\Schemas;
 
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\Schemas\Definitions\IndexDefinition;
 

@@ -7,11 +7,7 @@
  */
 namespace Spiral\Tests\Stempler;
 
-use Spiral\Stempler\Stempler;
-use Spiral\Stempler\StemplerLoader;
-use Spiral\Stempler\Syntaxes\DarkSyntax;
-
-class StemplerTest extends \PHPUnit_Framework_TestCase
+class StemplerTest extends BaseTest
 {
     public function testBaseA()
     {
@@ -94,41 +90,11 @@ class StemplerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Render view and return it's blank lines.
-     *
-     * @param string $view
-     *
-     * @return array
+     * @expectedException \Spiral\Stempler\Exceptions\StemplerException
+     * @expectedExceptionMessage Unable to locate view 'includes-none.php' in namespace 'default'
      */
-    protected function render($view)
+    public function testInvalidParent()
     {
-        $stempler = new Stempler(
-            new StemplerLoader([
-                'default'   => [__DIR__ . '/fixtures/default/'],
-                'namespace' => [__DIR__ . '/fixtures/namespace/',]
-            ]),
-            new DarkSyntax()
-        );
-
-        $lines = explode("\n", self::normalizeEndings($stempler->compile($view)));
-        return array_values(array_map('trim', array_filter($lines, 'trim')));
-    }
-
-    /**
-     * Normalize string endings to avoid EOL problem. Replace \n\r and multiply new lines with
-     * single \n.
-     *
-     * @param string $string       String to be normalized.
-     * @param bool   $joinMultiple Join multiple new lines into one.
-     *
-     * @return string
-     */
-    public static function normalizeEndings(string $string, bool $joinMultiple = true): string
-    {
-        if (!$joinMultiple) {
-            return str_replace("\r\n", "\n", $string);
-        }
-
-        return preg_replace('/[\n\r]+/', "\n", $string);
+        $result = $this->render('includes-e');
     }
 }

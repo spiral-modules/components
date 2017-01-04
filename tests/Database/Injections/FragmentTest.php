@@ -20,4 +20,13 @@ class FragmentTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('some sql', $fragment->sqlStatement());
         $this->assertSame($fragment->sqlStatement(), (string)$fragment);
     }
+
+    public function testDebugInfo()
+    {
+        $fragment = new Fragment('some sql');
+
+        $this->assertSame([
+            'statement' => $fragment->sqlStatement()
+        ], $fragment->__debugInfo());
+    }
 }

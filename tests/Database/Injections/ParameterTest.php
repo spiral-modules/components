@@ -120,4 +120,15 @@ class ParameterTest extends \PHPUnit_Framework_TestCase
         $parameter = new Parameter(['1', '2', '3']);
         $this->assertSame(\PDO::PARAM_STMT, $parameter->getType());
     }
+
+    public function testDebugInfo()
+    {
+        $parameter = new Parameter([1, 2, 3]);
+
+        $this->assertSame([
+            'statement' => '(?, ?, ?)',
+            'value'     => [1, 2, 3],
+            'type'      => \PDO::PARAM_STMT
+        ], $parameter->__debugInfo());
+    }
 }

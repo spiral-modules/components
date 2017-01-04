@@ -104,7 +104,13 @@ class InjectableConfigTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $serialized = serialize($config);
-
         $this->assertEquals($config, unserialize($serialized));
+
+        $this->assertEquals($config, InjectableConfig::__set_state([
+            'config' => [
+                'keyA' => 'value',
+                'keyB' => 'valueB',
+            ]
+        ]));
     }
 }

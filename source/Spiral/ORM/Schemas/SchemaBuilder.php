@@ -318,9 +318,8 @@ class SchemaBuilder
      * @param AbstractTable $table
      * @param string|null   $database
      */
-    protected function pushTable(AbstractTable $table, string $database = null)
+    private function pushTable(AbstractTable $table, string $database = null)
     {
         $this->tables[$database . '.' . $table->getName()] = $table;
-
     }
 }

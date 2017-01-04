@@ -67,6 +67,7 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         MemoryInterface $memory = null
     ) {
         $this->config = $config;
+
         $this->files = $files ?? new FileManager();
         $this->memory = $memory ?? new NullMemory();
     }

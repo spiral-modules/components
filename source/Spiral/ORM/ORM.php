@@ -169,7 +169,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         bool $cache = false
     ): ActiveEntityInterface {
         //todo: cache
-        return $this->instantiator($class)->instantiate($fields, $filter);
+        return $this->instantiator($class)->make($fields, $filter);
     }
 
     //todo: __clone

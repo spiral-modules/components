@@ -1,6 +1,6 @@
 <?php
 /**
- * Spiral Framework, Core Components
+ * components
  *
  * @author    Wolfy-J
  */
@@ -17,7 +17,7 @@ use Spiral\Tokenizer\ClassesInterface;
  * Provides ability to automatically locate schemas in a project. Can be user redefined in order to
  * automatically include custom classes.
  */
-class SchemaLocator implements LocatorInterface
+class SchemaLocator
 {
     /**
      * Container is used for lazy resolution for ClassesInterface.
@@ -35,7 +35,9 @@ class SchemaLocator implements LocatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Locate all available document schemas in a project.
+     *
+     * @return SchemaInterface[]
      */
     public function locateSchemas(): array
     {
@@ -63,9 +65,11 @@ class SchemaLocator implements LocatorInterface
         return $schemas;
     }
 
-
     /**
-     * {@inheritdoc}
+     * Locate all DocumentSources defined by user. Must return values in a form of
+     * Document::class => Source::class.
+     *
+     * @return array
      */
     public function locateSources(): array
     {
@@ -81,11 +85,11 @@ class SchemaLocator implements LocatorInterface
         $result = [];
         foreach ($classes->getClasses(RecordSource::class) as $class) {
             $source = $class['name'];
-            if ($class['abstract'] || empty($source::DOCUMENT)) {
+            if ($class['abstract'] || empty($source::RECORD)) {
                 continue;
             }
 
-            $result[$source::DOCUMENT] = $source;
+            $result[$source::RECORD] = $source;
         }
 
         return $result;

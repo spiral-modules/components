@@ -27,5 +27,5 @@ interface InstantiatorInterface
      *
      * @throws InstantionException
      */
-    public function instantiate($fields, bool $filter = true): ActiveEntityInterface;
+    public function make($fields, bool $filter = true): ActiveEntityInterface;
 }

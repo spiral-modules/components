@@ -11,8 +11,8 @@ use Spiral\Core\Container;
 use Spiral\Core\MemoryInterface;
 use Spiral\ODM\MongoManager;
 use Spiral\ODM\ODM;
+use Spiral\ODM\Schemas\LocatorInterface;
 use Spiral\ODM\Schemas\SchemaBuilder;
-use Spiral\ODM\Schemas\SchemaLocator;
 use Spiral\Tests\ODM\Fixtures\Admin;
 use Spiral\Tests\ODM\Fixtures\Moderator;
 use Spiral\Tests\ODM\Fixtures\User;
@@ -31,11 +31,12 @@ class AutoloadingTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
 
-        $locator = m::mock(SchemaLocator::class);
+        $locator = m::mock(LocatorInterface::class);
 
         $odm = new ODM(
             m::mock(MongoManager::class),
-            $locator, $memory,
+            $locator,
+            $memory,
             $container = new Container()
         );
         $this->assertSame('user-database', $odm->define(User::class, ODM::D_DATABASE));

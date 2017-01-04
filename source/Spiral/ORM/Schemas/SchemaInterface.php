@@ -48,7 +48,7 @@ interface SchemaInterface
     /**
      * Get indexes declared by model.
      *
-     * @return IndexDefinition[]
+     * @return IndexDefinition[]|\Generator
      *
      * @throws SchemaException
      */

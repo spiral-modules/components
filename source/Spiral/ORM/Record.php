@@ -44,6 +44,4 @@ abstract class Record extends SchematicEntity implements ActiveEntityInterface
     {
         // TODO: Implement delete() method.
     }
-
-
 }

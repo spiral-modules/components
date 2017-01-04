@@ -5,20 +5,3 @@ Spiral Core Components
 [![Build Status](https://travis-ci.org/spiral/components.svg?branch=master)](https://travis-ci.org/spiral/components)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral/components/badges/quality-score.png)](https://scrutinizer-ci.com/g/spiral/components/?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/spiral/components/badge.svg?branch=master)](https://coveralls.io/github/spiral/components?branch=master)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/spiral/hotline)
-
-Components to be splitted
--------------------------
-Following component are currently looselly coupled to spiral infrastructure and planned to be splitted into separate projects:
-* Core interfaces and spiral DI container - **DONE**
-* Files Component (needed for Storages) - **DONE**
-* Translator Component
-* Validation Component
-* Models and Events
-* Encrypter - **DONE**
-* Stempler and Dark
-* Storage Manager
-* DBAL + Pagination
-* ORM
-* ODM
-* Cache (potentially replaced with community packages)

@@ -78,7 +78,7 @@ interface ORMInterface
      *
      * @return ActiveEntityInterface
      */
-    public function instantiate(
+    public function make(
         string $class,
         $fields = [],
         bool $filter = true,

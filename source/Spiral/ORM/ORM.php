@@ -6,14 +6,19 @@
  */
 namespace Spiral\ORM;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
+use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
 use Spiral\Models\ActiveEntityInterface;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
+use Spiral\ORM\Schemas\LocatorInterface;
+use Spiral\ORM\Schemas\NullLocator;
 use Spiral\ORM\Schemas\SchemaBuilder;
 use Spiral\ORM\Schemas\SchemaLocator;
 
@@ -57,27 +62,29 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     protected $memory;
 
     /**
-     * @var FactoryInterface
+     * Container defines working scope for all Documents and DocumentEntities.
+     *
+     * @var ContainerInterface
      */
-    protected $factory;
+    protected $container;
 
     /**
-     * @param DatabaseManager  $manager
-     * @param SchemaLocator    $locator
-     * @param MemoryInterface  $memory
-     * @param FactoryInterface $factory
+     * @param DatabaseManager    $manager
+     * @param LocatorInterface   $locator
+     * @param MemoryInterface    $memory
+     * @param ContainerInterface $container
      */
     public function __construct(
         DatabaseManager $manager,
-        SchemaLocator $locator,
-        MemoryInterface $memory,
-        FactoryInterface $factory
+        LocatorInterface $locator = null,
+        MemoryInterface $memory = null,
+        ContainerInterface $container = null
     ) {
         $this->manager = $manager;
-        $this->locator = $locator;
 
-        $this->memory = $memory;
-        $this->factory = $factory;
+        $this->locator = $locator ?? new NullLocator();
+        $this->memory = $memory ?? new NullMemory();
+        $this->container = $container ?? new Container();
 
         //Loading schema from memory (if any)
         $this->schema = $this->loadSchema();
@@ -98,7 +105,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         /**
          * @var SchemaBuilder $builder
          */
-        $builder = $this->factory->make(SchemaBuilder::class, ['manager' => $this->manager]);
+        $builder = $this->getFactory()->make(SchemaBuilder::class, ['manager' => $this->manager]);
 
         if ($locate) {
             foreach ($this->locator->locateSchemas() as $schema) {
@@ -155,7 +162,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     /**
      * {@inheritdoc}
      */
-    public function instantiate(
+    public function make(
         string $class,
         $fields = [],
         bool $filter = true,
@@ -181,7 +188,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         }
 
         //Potential optimization
-        $instantiator = $this->factory->make(
+        $instantiator = $this->getFactory()->make(
             $this->define($class, self::R_INSTANTIATOR),
             [
                 'class'  => $class,
@@ -204,4 +211,17 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         return (array)$this->memory->loadData(static::MEMORY);
     }
 
+    /**
+     * Get ODM specific factory.
+     *
+     * @return FactoryInterface
+     */
+    protected function getFactory(): FactoryInterface
+    {
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
+        }
+
+        return $this->container->get(FactoryInterface::class);
+    }
 }

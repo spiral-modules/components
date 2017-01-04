@@ -6,6 +6,7 @@
  */
 namespace Spiral\ODM;
 
+use Interop\Container\ContainerInterface;
 use MongoDB\BSON\ObjectID;
 use MongoDB\Collection;
 use Spiral\Core\Component;
@@ -69,27 +70,29 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     protected $memory;
 
     /**
-     * @var FactoryInterface
+     * Container defines working scope for all Documents and DocumentEntities.
+     *
+     * @var ContainerInterface
      */
-    protected $factory;
+    protected $container;
 
     /**
-     * @param MongoManager     $manager
-     * @param LocatorInterface $locator
-     * @param MemoryInterface  $memory
-     * @param FactoryInterface $factory
+     * @param MongoManager       $manager
+     * @param LocatorInterface   $locator
+     * @param MemoryInterface    $memory
+     * @param ContainerInterface $container
      */
     public function __construct(
         MongoManager $manager,
         LocatorInterface $locator = null,
         MemoryInterface $memory = null,
-        FactoryInterface $factory = null
+        ContainerInterface $container = null
     ) {
         $this->manager = $manager;
 
         $this->locator = $locator ?? new NullLocator();
         $this->memory = $memory ?? new NullMemory();
-        $this->factory = $factory ?? new Container();
+        $this->container = $container ?? new Container();
 
         //Loading schema from memory (if any)
         $this->schema = $this->loadSchema();
@@ -110,7 +113,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         /**
          * @var SchemaBuilder $builder
          */
-        $builder = $this->factory->make(SchemaBuilder::class, ['manager' => $this->manager]);
+        $builder = $this->getFactory()->make(SchemaBuilder::class, ['manager' => $this->manager]);
 
         if ($locate) {
             foreach ($this->locator->locateSchemas() as $schema) {
@@ -185,7 +188,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
             $handles = $class;
         }
 
-        return $this->factory->make($source, [
+        return $this->getFactory()->make($source, [
             'class' => $handles,
             'odm'   => $this
         ]);
@@ -240,7 +243,7 @@ class ODM extends Component implements ODMInterface, SingletonInterface
         }
 
         //Potential optimization
-        $instantiator = $this->factory->make(
+        $instantiator = $this->getFactory()->make(
             $this->define($class, self::D_INSTANTIATOR),
             [
                 'class'  => $class,
@@ -261,6 +264,20 @@ class ODM extends Component implements ODMInterface, SingletonInterface
     protected function loadSchema(): array
     {
         return (array)$this->memory->loadData(static::MEMORY);
+    }
+
+    /**
+     * Get ODM specific factory.
+     *
+     * @return FactoryInterface
+     */
+    protected function getFactory(): FactoryInterface
+    {
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
+        }
+
+        return $this->container->get(FactoryInterface::class);
     }
 
     /**

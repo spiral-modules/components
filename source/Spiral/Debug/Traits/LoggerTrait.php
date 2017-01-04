@@ -57,6 +57,16 @@ trait LoggerTrait
     }
 
     /**
+     * Alias for "logger" function.
+     *
+     * @return LoggerInterface
+     */
+    protected function getLogger(): LoggerInterface
+    {
+        return $this->logger();
+    }
+
+    /**
      * Get associated or create new instance of LoggerInterface.
      *
      * @return LoggerInterface
@@ -76,14 +86,9 @@ trait LoggerTrait
     }
 
     /**
-     * Alias for "logger" function.
-     *
-     * @return LoggerInterface
+     * @return ContainerInterface
      */
-    protected function getLogger(): LoggerInterface
-    {
-        return $this->logger();
-    }
+    abstract protected function iocContainer();
 
     /**
      * Create new instance of associated logger (on demand creation).
@@ -100,9 +105,4 @@ trait LoggerTrait
         //We are using class name as log channel (name) by default
         return $container->get(LogsInterface::class)->getLogger(static::class);
     }
-
-    /**
-     * @return ContainerInterface
-     */
-    abstract protected function iocContainer();
 }

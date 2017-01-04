@@ -86,7 +86,7 @@ class Node
     /**
      * @return SupervisorInterface
      */
-    public function supervisor()
+    public function getSupervisor()
     {
         return $this->supervisor;
     }

@@ -163,6 +163,7 @@ class Supervisor implements SupervisorInterface
         }
 
         try {
+            //In isolation
             return new Node(clone $this, $this->uniquePlaceholder(), $source);
         } catch (StemplerException $e) {
             //Wrapping to clarify location of error

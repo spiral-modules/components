@@ -12,6 +12,7 @@
          stopOnError="false"
          syntaxCheck="true"
         >
+
     <testsuites>
         <testsuite name="Spiral Framework Core Tests">
             <directory>./tests/</directory>

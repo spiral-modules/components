@@ -19,7 +19,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      *
      * @return array
      */
-    protected function render($view)
+    protected function compile($view)
     {
         $stempler = new Stempler(
             new StemplerLoader([

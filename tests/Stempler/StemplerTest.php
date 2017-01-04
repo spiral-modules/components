@@ -11,7 +11,7 @@ class StemplerTest extends BaseTest
 {
     public function testBaseA()
     {
-        $result = $this->render('base-a');
+        $result = $this->compile('base-a');
 
         $this->assertSame('Block A defined in file A(default).', $result[0]);
         $this->assertSame('Block B defined in file A(default).', $result[1]);
@@ -20,7 +20,7 @@ class StemplerTest extends BaseTest
 
     public function testBaseB()
     {
-        $result = $this->render('base-b');
+        $result = $this->compile('base-b');
 
         $this->assertSame('Block A defined in file B(default).', $result[0]);
         $this->assertSame('Block B defined in file A(default).', $result[1]);
@@ -29,7 +29,7 @@ class StemplerTest extends BaseTest
 
     public function testBaseC()
     {
-        $result = $this->render('namespace:base-e');
+        $result = $this->compile('namespace:base-e');
 
         $this->assertSame('Block A defined in file B(default).', $result[0]);
         $this->assertSame('Block B defined in file A(default).', $result[1]);
@@ -39,7 +39,7 @@ class StemplerTest extends BaseTest
 
     public function testIncludesA()
     {
-        $result = $this->render('includes-a');
+        $result = $this->compile('includes-a');
 
         $this->assertSame('Include A, block A.', $result[0]);
         $this->assertSame('<tag name="tag-a">', $result[1]);
@@ -50,7 +50,7 @@ class StemplerTest extends BaseTest
 
     public function testIncludesB()
     {
-        $result = $this->render('includes-b');
+        $result = $this->compile('includes-b');
 
         $this->assertSame('Include A, block A.', $result[0]);
         $this->assertSame('<tag name="tag-a">', $result[1]);
@@ -63,7 +63,7 @@ class StemplerTest extends BaseTest
 
     public function testIncludesC()
     {
-        $result = $this->render('includes-c');
+        $result = $this->compile('includes-c');
 
         $this->assertSame('Include A, block A.', $result[0]);
         $this->assertSame('<tag name="tag-a">', $result[1]);
@@ -78,7 +78,7 @@ class StemplerTest extends BaseTest
 
     public function testIncludesD()
     {
-        $result = $this->render('namespace:includes-d');
+        $result = $this->compile('namespace:includes-d');
 
         $this->assertSame('<tag class="class my-class" id="123">', $result[0]);
         $this->assertSame('<tag class="tag-b" name="tag-b">', $result[1]);
@@ -95,6 +95,6 @@ class StemplerTest extends BaseTest
      */
     public function testInvalidParent()
     {
-        $result = $this->render('includes-e');
+        $result = $this->compile('includes-e');
     }
 }

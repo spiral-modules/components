@@ -10,7 +10,7 @@ class ImportsTest extends BaseTest
 {
     public function testImportNone()
     {
-        $result = $this->render('import-a');
+        $result = $this->compile('import-a');
 
         $this->assertSame('Base file.', $result[0]);
         $this->assertSame('<tag name="test">value</tag>', $result[1]);
@@ -18,7 +18,7 @@ class ImportsTest extends BaseTest
 
     public function testImportAsAlias()
     {
-        $result = $this->render('import-b');
+        $result = $this->compile('import-b');
 
         $this->assertSame('Base file.', $result[0]);
         $this->assertSame('<tag class="tag-b" name="test">value</tag>', $result[1]);
@@ -26,7 +26,7 @@ class ImportsTest extends BaseTest
 
     public function testImportWithPrefix()
     {
-        $result = $this->render('import-c');
+        $result = $this->compile('import-c');
 
         $this->assertSame('Base file.', $result[0]);
         $this->assertSame('<tag name="test">value</tag>', $result[1]);
@@ -36,7 +36,7 @@ class ImportsTest extends BaseTest
 
     public function testImportBundle()
     {
-        $result = $this->render('import-bundle');
+        $result = $this->compile('import-bundle');
 
         $this->assertSame('<tag name="1" id="1">inner-1</tag>', $result[0]);
         $this->assertSame('<tag class="tag-b" name="2">inner-2</tag>', $result[1]);
@@ -48,7 +48,7 @@ class ImportsTest extends BaseTest
      */
     public function testImportWithPrefixErrorTag()
     {
-        $result = $this->render('import-d');
+        $result = $this->compile('import-d');
 
         $this->assertSame('Base file.', $result[0]);
         $this->assertSame('<tag class="tag-b" name="test">value</tag>', $result[1]);
@@ -60,7 +60,7 @@ class ImportsTest extends BaseTest
      */
     public function testInvalidUseElement()
     {
-        $result = $this->render('import-e');
+        $result = $this->compile('import-e');
 
         $this->assertSame('Base file.', $result[0]);
         $this->assertSame('<tag class="tag-b" name="test">value</tag>', $result[1]);

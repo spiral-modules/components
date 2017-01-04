@@ -8,6 +8,8 @@ namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\Models\AccessorInterface;
+use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
@@ -103,6 +105,24 @@ class RecordSchema implements SchemaInterface
     }
 
     /**
+     * Fields and their types declared in Record model.
+     *
+     * @return array
+     */
+    public function getFields(): array
+    {
+        $fields = $this->reflection->getSchema();
+
+        foreach ($fields as $field => $type) {
+            if ($this->isRelation($type)) {
+                unset($fields[$field]);
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
      * Returns set of declared indexes.
      *
      * Example:
@@ -154,7 +174,7 @@ class RecordSchema implements SchemaInterface
     {
         return [
             //Default entity values
-            Record::SH_DEFAULTS  => [],
+            Record::SH_DEFAULTS  => $this->packDefaults($table),
 
             //Entity behaviour
             Record::SH_HIDDEN    => $this->reflection->getHidden(),
@@ -170,19 +190,68 @@ class RecordSchema implements SchemaInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Generate set of default values to be used by record.
+     *
+     * @param AbstractTable $table
+     * @param array         $overwriteDefaults
+     *
+     * @return array
      */
-    protected function getFields(): array
+    protected function packDefaults(AbstractTable $table, array $overwriteDefaults = []): array
     {
-        $fields = $this->reflection->getSchema();
+        //User defined default values
+        $userDefined = $overwriteDefaults + $this->getDefaults();
 
-        foreach ($fields as $field => $type) {
-            if ($this->isRelation($type)) {
-                unset($fields[$field]);
+        //We need mutators to normalize default values
+        $mutators = $this->buildMutators($table);
+
+        $defaults = [];
+        foreach ($table->getColumns() as $column) {
+            $field = $column->getName();
+
+            if ($column->isNullable()) {
+                $defaults[$field] = null;
+                continue;
             }
+
+            /**
+             * working with default values!
+             */
+
+            $default = $column->getDefaultValue();
+
+            if (array_key_exists($field, $userDefined)) {
+                //No merge to keep fields order intact
+                $default = $userDefined[$field];
+            }
+
+            if (array_key_exists($field, $defaults)) {
+                //Default value declared in model schema
+                $default = $defaults[$field];
+            }
+
+            //Let's process default value using associated setter
+            if (isset($mutators[Record::MUTATOR_SETTER][$field])) {
+                try {
+                    $setter = $mutators[Record::MUTATOR_SETTER][$field];
+                    $default = call_user_func($setter, $default);
+                } catch (\Exception $exception) {
+                    //Unable to generate default value, use null or empty array as fallback
+                }
+            }
+
+            if (isset($mutators[Record::MUTATOR_ACCESSOR][$field])) {
+                $default = $this->accessorDefault(
+                    $default,
+                    $mutators[Record::MUTATOR_ACCESSOR][$field]
+                );
+            }
+
+            //Registering default values
+            $defaults[$field] = $default;
         }
 
-        return $fields;
+        return $defaults;
     }
 
     /**
@@ -284,5 +353,32 @@ class RecordSchema implements SchemaInterface
     {
         //Process defaults
         return $this->reflection->getProperty('defaults') ?? [];
+    }
+
+
+    /**
+     * Pass value thought accessor to ensure it's default.
+     *
+     * @param mixed  $default
+     * @param string $accessor
+     *
+     * @return mixed
+     *
+     * @throws AccessorExceptionInterface
+     */
+    protected function accessorDefault($default, string $accessor)
+    {
+        /**
+         * @var AccessorInterface $instance
+         */
+        $instance = new $accessor($default, [/*no context given*/]);
+        $default = $instance->packValue();
+
+        if (is_object($default)) {
+            //Some accessors might want to return objects (DateTime, StorageObject), default to null
+            $default = null;
+        }
+
+        return $default;
     }
 }

@@ -8,12 +8,12 @@ namespace Spiral\ODM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\AccessorInterface;
+use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\Document;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\DocumentInstantiator;
-use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\Exceptions\SchemaException;
 use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
 use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
@@ -464,7 +464,7 @@ class DocumentSchema implements SchemaInterface
      *
      * @return mixed
      *
-     * @throws AccessorException
+     * @throws AccessorExceptionInterface
      */
     protected function accessorDefault($default, string $accessor)
     {

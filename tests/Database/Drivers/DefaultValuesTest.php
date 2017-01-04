@@ -66,6 +66,7 @@ abstract class DefaultValuesTest extends BaseTest
         $this->assertTrue($schema->column('target')->compare($column));
     }
 
+    //Hahahaa, Postgres 9.4 and lower
     public function testDefaultNegativeValueForInteger()
     {
         $schema = $this->schema('table');

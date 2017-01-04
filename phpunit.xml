@@ -19,10 +19,6 @@
         </testsuite>
     </testsuites>
 
-    <logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
-    </logging>
-
     <filter>
         <whitelist>
             <directory>source/Spiral</directory>

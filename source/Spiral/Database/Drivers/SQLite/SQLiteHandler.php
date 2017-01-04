@@ -12,6 +12,10 @@ use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 
+/**
+ * Handler provides ability to exectute non supported changes using temporary
+ * tables and data mapping.
+ */
 class SQLiteHandler extends AbstractHandler
 {
     /**

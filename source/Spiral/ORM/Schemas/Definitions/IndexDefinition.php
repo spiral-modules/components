@@ -48,6 +48,18 @@ final class IndexDefinition
     }
 
     /**
+     * Generate unique index name.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        $name = ($this->isUnique() ? 'unique_' : 'index_') . join('_', $this->getColumns());
+
+        return strlen($name) > 64 ? md5($name) : $name;
+    }
+
+    /**
      * So we can compare indexes.
      *
      * @return string

@@ -23,7 +23,9 @@ abstract class Record extends SchematicEntity implements ActiveEntityInterface
     const INDEX  = 1000;            //Default index type
     const UNIQUE = 2000;            //Unique index definition
 
-    const SCHEMA = [];
+    const SCHEMA   = [];
+    const DEFAULTS = [];
+    const INDEXES  = [];
 
     public function isLoaded(): bool
     {

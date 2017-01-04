@@ -174,14 +174,20 @@ class SchemaBuilder
 
         foreach ($builder->schemas as $schema) {
             //Get table state (empty one)
-            $table = $this->requestTable($schema->getTable(), $schema->getDatabase(), true, true);
+            $table = $this->requestTable(
+                $schema->getTable(),
+                $schema->getDatabase(),
+                true,
+                true
+            );
 
             //Define it's schema
-            $table = $schema->defineTable($table);
+            $table = $schema->renderTable($table);
 
             //Working with indexes
             foreach ($schema->getIndexes() as $index) {
                 $table->index($index->getColumns())->unique($index->isUnique());
+                $table->index($index->getColumns())->setName($index->getName());
             }
 
             //And put it back :)
@@ -205,7 +211,7 @@ class SchemaBuilder
     {
         if (empty($this->tables) && !empty($this->schemas)) {
             throw new SchemaException(
-                "Unable to get tables, no defined tables were found, call defineTables() first"
+                "Unable to get tables, no tables are were found, call renderSchema() first"
             );
         }
 
@@ -216,6 +222,22 @@ class SchemaBuilder
         }
 
         return $result;
+    }
+
+    /**
+     * Indication that tables in database require syncing before being matched with ORM models.
+     *
+     * @return bool
+     */
+    public function hasChanges(): bool
+    {
+        foreach ($this->getTables() as $table) {
+            if ($table->getComparator()->hasChanges()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

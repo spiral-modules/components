@@ -72,7 +72,7 @@ interface SchemaInterface
      *
      * @throws SchemaException
      */
-    public function defineTable(AbstractTable $table): AbstractTable;
+    public function renderTable(AbstractTable $table): AbstractTable;
 
     /**
      * Pack schema in a form compatible with entity class and selected mapper.

@@ -130,7 +130,7 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function defineTable(AbstractTable $table): AbstractTable
+    public function renderTable(AbstractTable $table): AbstractTable
     {
         return $this->renderer->renderColumns(
             $this->getFields(),

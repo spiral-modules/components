@@ -103,11 +103,6 @@ class Container extends Component implements
             return $this->autowire($class, $parameters, $context);
         }
 
-        if ($class == ContainerInterface::class && empty($parameters)) {
-            //self wrapping
-            return $this;
-        }
-
         if (is_object($binding = $this->bindings[$class])) {
             //Singleton
             return $binding;
@@ -130,7 +125,7 @@ class Container extends Component implements
                 $instance = $reflection->invokeArgs(
                     $this->resolveArguments($reflection, $parameters, $context)
                 );
-            } elseif (is_array($binding[0])) {
+            } elseif (is_array($binding[0]) && isset($binding[0][1])) {
                 //In a form of resolver and method
                 list($resolver, $method) = $binding[0];
 
@@ -142,7 +137,7 @@ class Container extends Component implements
                     $resolver, $this->resolveArguments($method, $parameters, $context)
                 );
             } else {
-                throw new ContainerException("Invalid binding for {$class}");
+                throw new ContainerException("Invalid binding for '{$class}'");
             }
 
             if ($binding[1]) {
@@ -392,10 +387,6 @@ class Container extends Component implements
 
         //OK, we can create class by ourselves
         $instance = $this->createInstance($class, $parameters, $context, $reflector);
-
-        if (empty($reflector)) {
-            throw new ContainerException("Unable to receive ReflectionClass instance");
-        }
 
         return $this->registerInstance($instance, $reflector, $parameters);
     }

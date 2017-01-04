@@ -75,6 +75,21 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(SampleClass::class, $object->getSample());
     }
 
+    public function testRemoveBinding()
+    {
+        $container = new Container();
+
+        $container->bind('alias', $this);
+
+        $this->assertTrue($container->has('alias'));
+        $this->assertTrue($container->hasInstance('alias'));
+
+        $container->removeBinding('alias');
+
+        $this->assertFalse($container->has('alias'));
+        $this->assertFalse($container->hasInstance('alias'));
+    }
+
     public function testCascadeFollowBindings()
     {
         $container = new Container();

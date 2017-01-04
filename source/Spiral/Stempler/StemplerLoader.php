@@ -116,21 +116,6 @@ class StemplerLoader implements LoaderInterface
             return explode(':', $filename);
         }
 
-        //Twig like namespaces
-        if (isset($filename[0]) && $filename[0] == '@') {
-            if (($separator = strpos($filename, '/')) === false) {
-                throw new LoaderException(sprintf(
-                    'Malformed namespaced template name "%s" (expecting "@namespace/template_name")',
-                    $path
-                ));
-            }
-
-            $namespace = substr($filename, 1, $separator - 1);
-            $filename = substr($filename, $separator + 1);
-
-            return [$namespace, $filename];
-        }
-
         //Let's force default namespace
         return [static::DEFAULT_NAMESPACE, $filename];
     }

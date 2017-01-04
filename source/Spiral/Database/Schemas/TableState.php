@@ -145,36 +145,6 @@ class TableState
     }
 
     /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function knowsColumn(string $name): bool
-    {
-        return isset($this->columns[$name]);
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function knowsIndex(string $name): bool
-    {
-        return isset($this->indexes[$name]);
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function knowsForeign(string $name): bool
-    {
-        return isset($this->foreigns[$name]);
-    }
-
-    /**
      * {@inheritdoc}
      *
      * Lookup is performed based on initial column name.

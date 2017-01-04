@@ -146,7 +146,7 @@ class StateComparator
     {
         $difference = [];
         foreach ($this->current->getIndexes() as $name => $index) {
-            if (!$this->initial->knowsIndex($name)) {
+            if (!$this->initial->hasIndex($index->getColumns())) {
                 $difference[] = $index;
             }
         }
@@ -161,7 +161,7 @@ class StateComparator
     {
         $difference = [];
         foreach ($this->initial->getIndexes() as $name => $index) {
-            if (!$this->current->knowsIndex($name)) {
+            if (!$this->current->hasIndex($index->getColumns())) {
                 $difference[] = $index;
             }
         }
@@ -178,15 +178,15 @@ class StateComparator
     {
         $difference = [];
 
-        $initialIndexes = $this->initial->getIndexes();
         foreach ($this->current->getIndexes() as $name => $index) {
-            if (!$this->initial->knowsIndex($name)) {
+            if (!$this->initial->hasIndex($index->getColumns())) {
                 //Added into schema
                 continue;
             }
 
-            if (!$index->compare($initialIndexes[$name])) {
-                $difference[] = [$index, $initialIndexes[$name]];
+            $initial = $this->initial->findIndex($index->getColumns());
+            if (!$index->compare($initial)) {
+                $difference[] = [$index, $initial];
             }
         }
 
@@ -200,7 +200,7 @@ class StateComparator
     {
         $difference = [];
         foreach ($this->current->getForeigns() as $name => $foreign) {
-            if (!$this->initial->knowsForeign($name)) {
+            if (!$this->initial->hasForeign($foreign->getColumn())) {
                 $difference[] = $foreign;
             }
         }
@@ -215,7 +215,7 @@ class StateComparator
     {
         $difference = [];
         foreach ($this->initial->getForeigns() as $name => $foreign) {
-            if (!$this->current->knowsForeign($name)) {
+            if (!$this->current->hasForeign($foreign->getColumn())) {
                 $difference[] = $foreign;
             }
         }
@@ -232,15 +232,15 @@ class StateComparator
     {
         $difference = [];
 
-        $initialForeigns = $this->initial->getForeigns();
         foreach ($this->current->getForeigns() as $name => $foreign) {
-            if (!$this->initial->knowsForeign($name)) {
+            if (!$this->initial->hasForeign($foreign->getColumn())) {
                 //Added into schema
                 continue;
             }
 
-            if (!$foreign->compare($initialForeigns[$name])) {
-                $difference[] = [$foreign, $initialForeigns[$name]];
+            $initial = $this->initial->findForeign($foreign->getColumn());
+            if (!$foreign->compare($initial)) {
+                $difference[] = [$foreign, $initial];
             }
         }
 

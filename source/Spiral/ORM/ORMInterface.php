@@ -76,12 +76,12 @@ interface ORMInterface
      *                                         data. This will slow down model creation.
      * @param bool                     $cache  Add entity into EntityCache.
      *
-     * @return IdentifiedInterface
+     * @return RecordInterface
      */
     public function make(
         string $class,
         $fields = [],
         bool $filter = true,
         bool $cache = false
-    ): IdentifiedInterface;
+    ): RecordInterface;
 }

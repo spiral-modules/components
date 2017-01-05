@@ -11,6 +11,7 @@ use Spiral\ORM\Exceptions\InstantionException;
 use Spiral\ORM\InstantiatorInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
+use Spiral\ORM\RecordInterface;
 
 /**
  * Default instantiator for records.
@@ -73,7 +74,7 @@ class RecordInstantiator implements InstantiatorInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, bool $filter = true): IdentifiedInterface
+    public function make($fields, bool $filter = true): RecordInterface
     {
         if (!is_array($fields)) {
             $fields = iterator_to_array($fields);

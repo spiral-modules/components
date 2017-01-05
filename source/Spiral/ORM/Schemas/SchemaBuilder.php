@@ -303,8 +303,7 @@ class SchemaBuilder
      * @param string      $table
      * @param string|null $database
      * @param bool        $resetState When set to true current table state will be reset in order
-     *                                to
-     *                                allows model to redefine it's schema.
+     *                                to allow model to redefine it's schema.
      * @param bool        $unique     Set to true (default), to throw an exception when table
      *                                already referenced by another model.
      *

@@ -6,10 +6,9 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Models\IdentifiedInterface;
 use Spiral\Models\SchematicEntity;
 
-abstract class RecordEntity extends SchematicEntity implements IdentifiedInterface
+abstract class RecordEntity extends SchematicEntity implements RecordInterface
 {
     /**
      * Set of schema sections needed to describe entity behaviour.
@@ -42,7 +41,7 @@ abstract class RecordEntity extends SchematicEntity implements IdentifiedInterfa
 
     public function isLoaded(): bool
     {
-        return true;
+        return !empty($this->primaryKey());
     }
 
     public function primaryKey()

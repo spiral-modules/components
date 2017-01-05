@@ -223,7 +223,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $fields = [],
         bool $filter = true,
         bool $cache = false
-    ): IdentifiedInterface {
+    ): RecordInterface {
         $instantiator = $this->instantiator($class);
 
         if (!$cache || $filter || !$this->hasCache()) {

@@ -8,6 +8,7 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Exceptions\CacheException;
+use Spiral\ORM\RecordInterface;
 
 /**
  * Entity cache provides ability to access already retrieved entities from memory instead of
@@ -47,10 +48,10 @@ class EntityCache
      *
      * Attention, existed entity will be replaced!
      *
-     * @param string $class
-     * @param string $identity
-     * @param mixed  $entity
-     * @param bool   $ignoreLimit Cache overflow will be ignored.
+     * @param string          $class
+     * @param string          $identity
+     * @param RecordInterface $entity
+     * @param bool            $ignoreLimit Cache overflow will be ignored.
      *
      * @return IdentifiedInterface
      *
@@ -59,7 +60,7 @@ class EntityCache
     public function remember(
         string $class,
         string $identity,
-        $entity,
+        RecordInterface $entity,
         $ignoreLimit = true
     ): IdentifiedInterface {
         if (!$ignoreLimit && count($this->entities) > $this->maxSize) {
@@ -99,7 +100,7 @@ class EntityCache
      * @param string $class
      * @param string $identity
      *
-     * @return null|IdentifiedInterface
+     * @return null|RecordInterface
      */
     public function get(string $class, string $identity)
     {

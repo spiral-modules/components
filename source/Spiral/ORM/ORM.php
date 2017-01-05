@@ -272,6 +272,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      */
     public function __clone()
     {
+        //Each ORM clone must have isolated entity cache
         $this->cache = clone $this->cache;
     }
 

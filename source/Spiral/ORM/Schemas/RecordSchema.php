@@ -184,7 +184,11 @@ class RecordSchema implements SchemaInterface
             //Mutators can be altered based on ORM\SchemasConfig
             Record::SH_MUTATORS  => $this->buildMutators($table),
 
+            //Nullable fields
+            Record::SH_NULLABLE  => [],
+
             //Relations
+            //in here?
             Record::SH_RELATIONS => []
         ];
     }
@@ -214,10 +218,11 @@ class RecordSchema implements SchemaInterface
                 continue;
             }
 
+            //todo: this section has be very carefully debugged
+
             /**
              * working with default values!
              */
-
             $default = $column->getDefaultValue();
 
             if (array_key_exists($field, $userDefined)) {
@@ -230,25 +235,8 @@ class RecordSchema implements SchemaInterface
                 $default = $defaults[$field];
             }
 
-            //Let's process default value using associated setter
-            if (isset($mutators[Record::MUTATOR_SETTER][$field])) {
-                try {
-                    $setter = $mutators[Record::MUTATOR_SETTER][$field];
-                    $default = call_user_func($setter, $default);
-                } catch (\Exception $exception) {
-                    //Unable to generate default value, use null or empty array as fallback
-                }
-            }
-
-            if (isset($mutators[Record::MUTATOR_ACCESSOR][$field])) {
-                $default = $this->accessorDefault(
-                    $default,
-                    $mutators[Record::MUTATOR_ACCESSOR][$field]
-                );
-            }
-
-            //Registering default values
-            $defaults[$field] = $default;
+            //Registering default values (passing thought mutators)
+            $defaults[$field] = $this->mutateValue($mutators, $field, $default);
         }
 
         return $defaults;
@@ -355,7 +343,41 @@ class RecordSchema implements SchemaInterface
         return $this->reflection->getProperty('defaults') ?? [];
     }
 
+    /**
+     * Process value thought associated mutator if any.
+     *
+     * @param array  $mutators
+     * @param string $field
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    protected function mutateValue(array $mutators, string $field, $default)
+    {
+        //Let's process default value using associated setter
+        if (isset($mutators[Record::MUTATOR_SETTER][$field])) {
+            try {
+                $setter = $mutators[Record::MUTATOR_SETTER][$field];
+                $default = call_user_func($setter, $default);
 
+                return $default;
+            } catch (\Exception $exception) {
+                //Unable to generate default value, use null or empty array as fallback
+            }
+        }
+
+        if (isset($mutators[Record::MUTATOR_ACCESSOR][$field])) {
+            $default = $this->accessorDefault(
+                $default,
+                $mutators[Record::MUTATOR_ACCESSOR][$field]
+            );
+
+            return $default;
+        }
+
+        return $default;
+    }
+    
     /**
      * Pass value thought accessor to ensure it's default.
      *

@@ -355,34 +355,15 @@ class DocumentSchema implements SchemaInterface
                 $default = $defaults[$field];
             }
 
-            //Let's process default value using associated setter
-            if (isset($mutators[DocumentEntity::MUTATOR_SETTER][$field])) {
-                try {
-                    $setter = $mutators[DocumentEntity::MUTATOR_SETTER][$field];
-                    $default = call_user_func($setter, $default);
-                } catch (\Exception $exception) {
-                    //Unable to generate default value, use null or empty array as fallback
-                }
-            }
-
-            if (isset($mutators[DocumentEntity::MUTATOR_ACCESSOR][$field])) {
-                $default = $this->accessorDefault(
-                    $default,
-                    $mutators[DocumentEntity::MUTATOR_ACCESSOR][$field]
-                );
-            }
-
-            if (isset($compositions[$field])) {
-                if (is_null($default) && !array_key_exists($field, $userDefined)) {
-                    //Let's force default value for composite fields
-                    $default = [];
-                }
-
-                $default = $this->compositionDefault($default, $compositions[$field], $builder);
-            }
-
             //Registering default values
-            $defaults[$field] = $default;
+            $defaults[$field] = $this->mutateValue(
+                $builder,
+                $compositions,
+                $userDefined,
+                $mutators,
+                $field,
+                $default
+            );
         }
 
         return $defaults;
@@ -454,6 +435,59 @@ class DocumentSchema implements SchemaInterface
         }
 
         return false;
+    }
+
+    /**
+     * Ensure default value using associated mutators or pass thought composition.
+     *
+     * @param SchemaBuilder $builder
+     * @param array         $compositions
+     * @param array         $userDefined User defined set of default values.
+     * @param array         $mutators
+     * @param string        $field
+     * @param mixed         $default
+     *
+     * @return mixed
+     */
+    protected function mutateValue(
+        SchemaBuilder $builder,
+        array $compositions,
+        array $userDefined,
+        array $mutators,
+        string $field,
+        $default
+    ) {
+        //Let's process default value using associated setter
+        if (isset($mutators[DocumentEntity::MUTATOR_SETTER][$field])) {
+            try {
+                $setter = $mutators[DocumentEntity::MUTATOR_SETTER][$field];
+                $default = call_user_func($setter, $default);
+
+                return $default;
+            } catch (\Exception $exception) {
+                //Unable to generate default value, use null or empty array as fallback
+            }
+        }
+
+        if (isset($mutators[DocumentEntity::MUTATOR_ACCESSOR][$field])) {
+            $default = $this->accessorDefault(
+                $default,
+                $mutators[DocumentEntity::MUTATOR_ACCESSOR][$field]
+            );
+        }
+
+        if (isset($compositions[$field])) {
+            if (is_null($default) && !array_key_exists($field, $userDefined)) {
+                //Let's force default value for composite fields
+                $default = [];
+            }
+
+            $default = $this->compositionDefault($default, $compositions[$field], $builder);
+
+            return $default;
+        }
+
+        return $default;
     }
 
     /**

@@ -114,7 +114,7 @@ class ColumnRenderer
         //ORM force EVERY column to NOT NULL state unless different is said
         $column->nullable(false);
 
-        if (!empty($type['nullable'])) {
+        if (!empty($type['nullable']) || !$hasDefault) {
             //Indication that column is nullable
             $column->nullable(true);
         }
@@ -129,6 +129,7 @@ class ColumnRenderer
             //No default value can be set of primary keys
             return $column;
         }
+
         if (!$hasDefault && !$column->isNullable()) {
             //We have to come up with some default value
             return $column->defaultValue($this->castDefault($column));

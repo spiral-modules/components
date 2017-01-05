@@ -9,7 +9,7 @@ namespace Spiral\Models;
 /**
  * Provides ability to identify entity by it's primary key and state.
  */
-interface IdentityInterface
+interface IdentifiedInterface
 {
     /**
      * Indication that entity was fetched from it's primary source (database usually) and not just

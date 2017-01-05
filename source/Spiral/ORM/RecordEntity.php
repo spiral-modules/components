@@ -14,7 +14,7 @@ class RecordEntity extends SchematicEntity
      * Set of schema sections needed to describe entity behaviour.
      */
     const SH_DEFAULTS  = 0;
-    const SH_NULLABLE  = 6;
+    //const SH_NULLABLE  = 6;
     const SH_RELATIONS = 7;
 
     /**

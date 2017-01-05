@@ -7,7 +7,7 @@
 
 namespace Spiral\ORM;
 
-use Spiral\Models\ActiveEntityInterface;
+use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 
 /**
@@ -16,6 +16,16 @@ use Spiral\ORM\Exceptions\InstantionException;
 interface InstantiatorInterface
 {
     /**
+     * Identify set of fields with one unique value (usually primary key). Following identification
+     * key will be used to store record in ORM entity cache.
+     *
+     * @param array|\ArrayAccess|mixed $fields
+     *
+     * @return string|null
+     */
+    public function identify($fields);
+
+    /**
      * Method must detect and construct appropriate class instance based on a given fields.
      *
      * @param array|\ArrayAccess|mixed $fields
@@ -23,9 +33,9 @@ interface InstantiatorInterface
      *                                         filters to ensure their types and filter any user
      *                                         data. This will slow down model creation.
      *
-     * @return ActiveEntityInterface
+     * @return IdentifiedInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, bool $filter = true): ActiveEntityInterface;
+    public function make($fields, bool $filter = true): IdentifiedInterface;
 }

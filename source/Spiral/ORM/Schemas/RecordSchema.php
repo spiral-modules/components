@@ -184,11 +184,7 @@ class RecordSchema implements SchemaInterface
             //Mutators can be altered based on ORM\SchemasConfig
             Record::SH_MUTATORS  => $this->buildMutators($table),
 
-            //Nullable fields
-            Record::SH_NULLABLE  => $this->buildNullable($table),
-
-            //Relations
-            //in here?
+            //Relations in here?
             Record::SH_RELATIONS => []
         ];
     }
@@ -220,18 +216,6 @@ class RecordSchema implements SchemaInterface
         }
 
         return $defaults;
-    }
-
-    /**
-     * Find all nullable fields.
-     *
-     * @param AbstractTable $table
-     *
-     * @return array
-     */
-    protected function buildNullable(AbstractTable $table): array
-    {
-        return [];
     }
 
     /**

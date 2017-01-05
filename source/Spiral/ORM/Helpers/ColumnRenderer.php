@@ -14,6 +14,9 @@ use Spiral\ORM\Exceptions\DefinitionException;
 /**
  * Implements ability to define column in AbstractSchema based on string representation and default
  * value (if defined).
+ *
+ * Attention, this class will try to guess default value if column is NOT NULL and no default
+ * value provided by user.
  */
 class ColumnRenderer
 {
@@ -66,14 +69,14 @@ class ColumnRenderer
      *
      * Column definition are compatible with database Migrations and AbstractColumn types.
      *
-     * Column definition examples (by default all columns has flag NULL!):
+     * Column definition examples (by default all columns has flag NOT NULL):
      * protected $schema = [
      *      'id'           => 'primary',
      *      'name'         => 'string',                          //Default length is 255 characters.
-     *      'email'        => 'string(255), not null',           //Can be NULL
+     *      'email'        => 'string(255), nullable',           //Can be NULL
      *      'status'       => 'enum(active, pending, disabled)', //Enum values, trimmed
      *      'balance'      => 'decimal(10, 2)',
-     *      'message'      => 'text, notnull',                  //Alias for NOT NULL
+     *      'message'      => 'text, null',                      //Alias for nullable
      *      'time_expired' => 'timestamp'
      * ];
      *
@@ -98,7 +101,7 @@ class ColumnRenderer
         $default = null
     ) {
         //Expression used to declare column type, easy to read
-        $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<notnull>not ?null))?/i';
+        $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i';
 
         if (!preg_match($pattern, $definition, $type)) {
             throw new DefinitionException(
@@ -111,12 +114,12 @@ class ColumnRenderer
             $type['options'] = array_map('trim', explode(',', $type['options']));
         }
 
-        //ORM force EVERY column to NULL state unless different is said
-        $column->nullable(true);
+        //ORM force EVERY column to NOT NULL state unless different is said
+        $column->nullable(false);
 
-        if (!empty($type['notnull'])) {
+        if (!empty($type['nullable'])) {
             //Indication that column is nullable
-            $column->nullable(false);
+            $column->nullable(true);
         }
 
         //Bypassing call to AbstractColumn->__call method (or specialized column method)
@@ -135,7 +138,7 @@ class ColumnRenderer
             return $column->defaultValue($this->castDefault($column));
         }
 
-        if (is_null($default) && empty($type['notnull'])) {
+        if (is_null($default)) {
             //Default value is stated and NULL, clear what to do
             $column->nullable(true);
         }

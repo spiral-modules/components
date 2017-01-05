@@ -14,8 +14,8 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
-use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Models\ActiveEntityInterface;
+use Spiral\Models\IdentifiedInterface;
+use Spiral\ORM\Entities\EntityCache;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\LocatorInterface;
@@ -25,12 +25,16 @@ use Spiral\ORM\Schemas\SchemaLocator;
 
 class ORM extends Component implements ORMInterface, SingletonInterface
 {
-    use LoggerTrait;
-
     /**
      * Memory section to store ORM schema.
      */
     const MEMORY = 'orm.schema';
+
+    /**
+     * @invisible
+     * @var EntityCache|null
+     */
+    private $cache = null;
 
     /**
      * Already created instantiators.
@@ -72,18 +76,23 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     protected $container;
 
     /**
-     * @param DatabaseManager    $manager
-     * @param LocatorInterface   $locator
-     * @param MemoryInterface    $memory
-     * @param ContainerInterface $container
+     * ORM constructor.
+     *
+     * @param DatabaseManager         $manager
+     * @param EntityCache|null        $cache
+     * @param LocatorInterface|null   $locator
+     * @param MemoryInterface|null    $memory
+     * @param ContainerInterface|null $container
      */
     public function __construct(
         DatabaseManager $manager,
+        EntityCache $cache = null,
         LocatorInterface $locator = null,
         MemoryInterface $memory = null,
         ContainerInterface $container = null
     ) {
         $this->manager = $manager;
+        $this->cache = $cache;
 
         $this->locator = $locator ?? new NullLocator();
         $this->memory = $memory ?? new NullMemory();
@@ -91,6 +100,31 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
         //Loading schema from memory (if any)
         $this->schema = $this->loadSchema();
+    }
+
+    /**
+     * Create version of ORM with different initial cache or disabled cache.
+     *
+     * @param EntityCache|null $cache
+     *
+     * @return ORM
+     */
+    public function withCache(EntityCache $cache = null): ORM
+    {
+        $orm = clone $this;
+        $orm->cache = $cache;
+
+        return $orm;
+    }
+
+    /**
+     * Check if ORM has associated entity cache.
+     *
+     * @return bool
+     */
+    public function hasCache(): bool
+    {
+        return !empty($this->cache);
     }
 
     /**
@@ -170,12 +204,39 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $fields = [],
         bool $filter = true,
         bool $cache = false
-    ): ActiveEntityInterface {
-        //todo: cache
-        return $this->instantiator($class)->make($fields, $filter);
+    ): IdentifiedInterface {
+        $instantiator = $this->instantiator($class);
+
+        if (!$cache || $filter || !$this->hasCache()) {
+            return $instantiator->make($fields, $filter);
+        }
+
+        //Looking for an entity in a cache
+        $identity = $instantiator->identify($fields);
+
+        if (is_null($identity)) {
+            //Unable to cache non identified instance
+            return $instantiator->make($fields, $filter);
+        }
+
+        if ($this->cache->has($class, $identity)) {
+            return $this->cache->get($class, $identity);
+        }
+        
+        //Storing entity in a cache
+        return $this->cache->remember($class, $identity, $instantiator->make($fields, $filter));
     }
 
-    //todo: __clone
+    /**
+     * When ORM is cloned we are automatically cloning it's cache as well to create
+     * new isolated area. Basically we have cache enabled per selection.
+     *
+     * @see RecordSelector::getIterator()
+     */
+    public function __clone()
+    {
+        $this->cache = clone $this->cache;
+    }
 
     /**
      * Get object responsible for class instantiation.

@@ -16,6 +16,7 @@ use Spiral\ORM\Entities\RecordInstantiator;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Helpers\ColumnRenderer;
 use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\Definitions\IndexDefinition;
 
 class RecordSchema implements SchemaInterface
@@ -173,19 +174,21 @@ class RecordSchema implements SchemaInterface
     public function packSchema(SchemaBuilder $builder, AbstractTable $table): array
     {
         return [
+            RecordEntity::SH_PRIMARIES => $table->getPrimaryKeys(),
+
             //Default entity values
-            Record::SH_DEFAULTS  => $this->packDefaults($table),
+            RecordEntity::SH_DEFAULTS  => $this->packDefaults($table),
 
             //Entity behaviour
-            Record::SH_HIDDEN    => $this->reflection->getHidden(),
-            Record::SH_SECURED   => $this->reflection->getSecured(),
-            Record::SH_FILLABLE  => $this->reflection->getFillable(),
+            RecordEntity::SH_HIDDEN    => $this->reflection->getHidden(),
+            RecordEntity::SH_SECURED   => $this->reflection->getSecured(),
+            RecordEntity::SH_FILLABLE  => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ORM\SchemasConfig
-            Record::SH_MUTATORS  => $this->buildMutators($table),
+            RecordEntity::SH_MUTATORS  => $this->buildMutators($table),
 
             //Relations in here?
-            Record::SH_RELATIONS => []
+            RecordEntity::SH_RELATIONS => []
         ];
     }
 
@@ -285,8 +288,8 @@ class RecordSchema implements SchemaInterface
         $columns = [];
 
         foreach ($definition as $chunk) {
-            if ($chunk == Record::INDEX || $chunk == Record::UNIQUE) {
-                $unique = $chunk === Record::UNIQUE;
+            if ($chunk == RecordEntity::INDEX || $chunk == RecordEntity::UNIQUE) {
+                $unique = $chunk === RecordEntity::UNIQUE;
                 continue;
             }
 
@@ -331,9 +334,9 @@ class RecordSchema implements SchemaInterface
     protected function mutateValue(array $mutators, string $field, $default)
     {
         //Let's process default value using associated setter
-        if (isset($mutators[Record::MUTATOR_SETTER][$field])) {
+        if (isset($mutators[RecordEntity::MUTATOR_SETTER][$field])) {
             try {
-                $setter = $mutators[Record::MUTATOR_SETTER][$field];
+                $setter = $mutators[RecordEntity::MUTATOR_SETTER][$field];
                 $default = call_user_func($setter, $default);
 
                 return $default;
@@ -342,10 +345,10 @@ class RecordSchema implements SchemaInterface
             }
         }
 
-        if (isset($mutators[Record::MUTATOR_ACCESSOR][$field])) {
+        if (isset($mutators[RecordEntity::MUTATOR_ACCESSOR][$field])) {
             $default = $this->accessorDefault(
                 $default,
-                $mutators[Record::MUTATOR_ACCESSOR][$field]
+                $mutators[RecordEntity::MUTATOR_ACCESSOR][$field]
             );
 
             return $default;

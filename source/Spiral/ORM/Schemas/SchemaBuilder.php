@@ -268,25 +268,28 @@ class SchemaBuilder
     {
         if (empty($this->tables) && !empty($this->schemas)) {
             throw new SchemaException(
-                "Unable to pack schema, no defined tables were found, call defineTables() first"
+                "Unable to pack schema, no defined tables were found, call renderSchema() first"
             );
         }
 
         $result = [];
         foreach ($this->schemas as $class => $schema) {
-
             //Table which is being related to model schema
             $table = $this->requestTable($schema->getTable(), $schema->getDatabase(), false);
 
-            $result[$class][] = [
+            $result[$class] = [
                 ORMInterface::R_INSTANTIATOR => $schema->getInstantiator(),
 
                 //Schema includes list of fields, default values and nullable fields
                 ORMInterface::R_SCHEMA       => $schema->packSchema($this, clone $table),
 
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
+
+                //Data location
                 ORMInterface::R_DATABASE     => $schema->getDatabase(),
                 ORMInterface::R_TABLE        => $schema->getTable(),
+
+                //Defined relation (in here???)
                 ORMInterface::R_RELATIONS    => [/*external manager*/]
             ];
         }

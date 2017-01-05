@@ -14,6 +14,7 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Entities\Table;
 use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Entities\EntityCache;
 use Spiral\ORM\Exceptions\ORMException;
@@ -37,6 +38,11 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     private $cache = null;
 
     /**
+     * @var SchemaLocator
+     */
+    private $locator;
+
+    /**
      * Already created instantiators.
      *
      * @invisible
@@ -56,11 +62,6 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      * @var DatabaseManager
      */
     protected $manager;
-
-    /**
-     * @var SchemaLocator
-     */
-    protected $locator;
 
     /**
      * @invisible
@@ -92,6 +93,8 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         ContainerInterface $container = null
     ) {
         $this->manager = $manager;
+
+        //If null is passed = no caching is expected
         $this->cache = $cache;
 
         $this->locator = $locator ?? new NullLocator();
@@ -195,6 +198,22 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     }
 
     //other methods
+    //selector
+    //table
+
+    //source
+
+    /**
+     * {@inheritdoc}
+     */
+    public function table(string $class): Table
+    {
+        return $this->manager->database(
+            $this->define($class, self::R_DATABASE)
+        )->table(
+            $this->define($class, self::R_TABLE)
+        );
+    }
 
     /**
      * {@inheritdoc}
@@ -222,7 +241,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         if ($this->cache->has($class, $identity)) {
             return $this->cache->get($class, $identity);
         }
-        
+
         //Storing entity in a cache
         return $this->cache->remember($class, $identity, $instantiator->make($fields, $filter));
     }

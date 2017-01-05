@@ -10,7 +10,7 @@ use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 use Spiral\ORM\InstantiatorInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Default instantiator for records.
@@ -54,6 +54,15 @@ class RecordInstantiator implements InstantiatorInterface
      */
     public function identify($fields)
     {
+        if (!is_array($fields)) {
+            $fields = iterator_to_array($fields);
+        }
+
+        $primaryKeys = [];
+        foreach ($this->schema[RecordEntity::SH_PRIMARIES] as $primaryKey) {
+            //do some work here
+        }
+
         return null;
     }
 
@@ -83,9 +92,9 @@ class RecordInstantiator implements InstantiatorInterface
          */
 
         $entity = new $class($fields, $this->schema, $this->orm);
-        if (!$entity instanceof Record) {
+        if (!$entity instanceof RecordEntity) {
             throw new InstantionException(
-                "Unable to set filtered values for '{$class}', must be instance of Record"
+                "Unable to set filtered values for '{$class}', must be instance of RecordEntity"
             );
         }
 

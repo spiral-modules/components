@@ -56,7 +56,7 @@ interface ORMInterface
     //public function selector(string $class): RecordSelector;
 
     /**
-     * Get collection associated with given class.
+     * Get table associated with given class.
      *
      * @param string $class
      *
@@ -64,7 +64,7 @@ interface ORMInterface
      *
      * @throws ORMException
      */
-    //public function table(string $class): Table;
+    public function table(string $class): Table;
 
     /**
      * Instantiate record/model instance based on a given class name and fieldset.

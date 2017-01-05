@@ -10,7 +10,7 @@ use Interop\Container\ContainerInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordSource;
-use Spiral\ORM\Record;
+use Spiral\ORM\RecordEntity;
 use Spiral\Tokenizer\ClassesInterface;
 
 /**
@@ -51,7 +51,7 @@ class SchemaLocator implements LocatorInterface
         $classes = $this->container->get(ClassesInterface::class);
 
         $schemas = [];
-        foreach ($classes->getClasses(Record::class) as $class) {
+        foreach ($classes->getClasses(RecordEntity::class) as $class) {
             if ($class['abstract']) {
                 continue;
             }

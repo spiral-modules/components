@@ -6,14 +6,16 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Models\IdentifiedInterface;
 use Spiral\Models\SchematicEntity;
 
-class RecordEntity extends SchematicEntity
+abstract class RecordEntity extends SchematicEntity implements IdentifiedInterface
 {
     /**
      * Set of schema sections needed to describe entity behaviour.
      */
-    const SH_DEFAULTS  = 0;
+    const SH_PRIMARIES = 0;
+    const SH_DEFAULTS  = 1;
     //const SH_NULLABLE  = 6;
     const SH_RELATIONS = 7;
 
@@ -28,6 +30,15 @@ class RecordEntity extends SchematicEntity
     const SCHEMA   = [];
     const DEFAULTS = [];
     const INDEXES  = [];
+
+    //todo: state???????
+    public function __construct(
+        $fields = [],
+        ORMInterface $odm = null,
+        array $schema = null
+    ) {
+        parent::__construct($fields, $schema);
+    }
 
     public function isLoaded(): bool
     {

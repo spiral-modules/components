@@ -231,11 +231,16 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         string $class,
         $fields = [],
         bool $filter = true,
-        bool $cache = false
+        bool $cache = true
     ): RecordInterface {
         $instantiator = $this->instantiator($class);
 
-        if (!$cache || $filter || !$this->hasCache()) {
+        if ($filter) {
+            //No caching for entities created with user input
+            $cache = false;
+        }
+
+        if (!$cache || !$this->hasCache()) {
             return $instantiator->make($fields, $filter);
         }
 

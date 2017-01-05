@@ -6,7 +6,6 @@
  */
 namespace Spiral\ORM\Entities;
 
-use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Exceptions\CacheException;
 use Spiral\ORM\RecordInterface;
 
@@ -23,7 +22,7 @@ use Spiral\ORM\RecordInterface;
 class EntityCache
 {
     /**
-     * @var IdentifiedInterface[]
+     * @var RecordInterface[]
      */
     private $entities = [];
 
@@ -53,7 +52,7 @@ class EntityCache
      * @param RecordInterface $entity
      * @param bool            $ignoreLimit Cache overflow will be ignored.
      *
-     * @return IdentifiedInterface
+     * @return RecordInterface
      *
      * @throws CacheException When cache size exceeded.
      */
@@ -62,7 +61,7 @@ class EntityCache
         string $identity,
         RecordInterface $entity,
         $ignoreLimit = true
-    ): IdentifiedInterface {
+    ): RecordInterface {
         if (!$ignoreLimit && count($this->entities) > $this->maxSize) {
             throw new CacheException('Entity cache size exceeded');
         }

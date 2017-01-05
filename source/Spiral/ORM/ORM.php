@@ -256,8 +256,12 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             return $this->cache->get($class, $identity);
         }
 
-        //Storing entity in a cache
-        return $this->cache->remember($class, $identity, $instantiator->make($fields, $filter));
+        //Storing entity in a cache right after creating it
+        return $this->cache->remember(
+            $class,
+            $identity,
+            $instantiator->make($fields, $filter)
+        );
     }
 
     /**

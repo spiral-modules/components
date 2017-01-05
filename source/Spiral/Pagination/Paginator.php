@@ -10,7 +10,7 @@ namespace Spiral\Pagination;
 /**
  * Simple predictable paginator.
  */
-class Paginator implements PredictableInterface, \Countable
+class Paginator implements PagedInterface, \Countable
 {
     /**
      * @var int
@@ -49,7 +49,7 @@ class Paginator implements PredictableInterface, \Countable
      *
      * @return self
      */
-    public function withLimit(int $limit): PredictableInterface
+    public function withLimit(int $limit): PagedInterface
     {
         $paginator = clone $this;
         $paginator->limit = $limit;
@@ -68,7 +68,7 @@ class Paginator implements PredictableInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function withPage(int $number): PredictableInterface
+    public function withPage(int $number): PagedInterface
     {
         $paginator = clone $this;
         $paginator->pageNumber = max($number, 0);

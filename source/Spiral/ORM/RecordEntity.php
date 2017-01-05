@@ -6,14 +6,10 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Models\ActiveEntityInterface;
-use Spiral\Models\Traits\SolidableTrait;
+use Spiral\Models\SchematicEntity;
 
-abstract class Record extends RecordEntity implements ActiveEntityInterface
+class RecordEntity extends SchematicEntity
 {
-    use SaturateTrait, SolidableTrait;
-
     /**
      * Set of schema sections needed to describe entity behaviour.
      */
@@ -34,21 +30,11 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
 
     public function isLoaded(): bool
     {
-        // TODO: Implement isLoaded() method.
+        return true;
     }
 
     public function primaryKey()
     {
-        // TODO: Implement primaryKey() method.
-    }
 
-    public function save(): int
-    {
-        // TODO: Implement save() method.
-    }
-
-    public function delete()
-    {
-        // TODO: Implement delete() method.
     }
 }

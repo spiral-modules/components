@@ -313,8 +313,8 @@ class SchemaBuilder
         bool $unique = true,
         bool $resetState = false
     ): AbstractTable {
-        if (isset($this->tables[$database . '.table'])) {
-            $schema = $this->tables[$database . '.table'];
+        if (isset($this->tables[$database . '.' . $table])) {
+            $schema = $this->tables[$database . '.' . $table];
 
             if ($unique) {
                 throw new DoubleReferenceException(

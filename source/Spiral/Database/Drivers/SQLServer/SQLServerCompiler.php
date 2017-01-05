@@ -52,7 +52,7 @@ class SQLServerCompiler extends QueryCompiler
          * We are going to use fallback mechanism here in order to properly select limited data from
          * database. Avoid usage of LIMIT/OFFSET without proper ORDER BY statement.
          *
-         * Please not set of alerts raised in SelectQuery builder.
+         * Please see set of alerts raised in SelectQuery builder.
          */
         $columns[] = new Fragment(
             "ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS {$this->quote(self::ROW_NUMBER)}"

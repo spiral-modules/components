@@ -15,9 +15,9 @@ use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Helpers\ColumnRenderer;
-use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\Definitions\IndexDefinition;
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 
 class RecordSchema implements SchemaInterface
 {
@@ -165,7 +165,33 @@ class RecordSchema implements SchemaInterface
      */
     public function getRelations(): array
     {
-        return [];
+        $schema = $this->reflection->getSchema();
+
+        $relations = [];
+        foreach ($schema as $name => $definition) {
+            if (!$this->isRelation($definition)) {
+                continue;
+            }
+
+            /**
+             * We expect relations to be defined in a following form:
+             *
+             * [type => target, option => value, option => value]
+             */
+            $type = key($definition);
+            $target = $definition[$type];
+            unset($definition[$type]);
+
+            //Defining relation
+            $relations[$name] = new RelationDefinition(
+                $type,
+                $target,
+                $definition
+                //todo: inverse?
+            );
+        }
+
+        return $relations;
     }
 
     /**
@@ -185,10 +211,7 @@ class RecordSchema implements SchemaInterface
             RecordEntity::SH_FILLABLE  => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ORM\SchemasConfig
-            RecordEntity::SH_MUTATORS  => $this->buildMutators($table),
-
-            //Relations in here?
-            RecordEntity::SH_RELATIONS => []
+            RecordEntity::SH_MUTATORS  => $this->buildMutators($table)
         ];
     }
 

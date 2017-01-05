@@ -194,7 +194,10 @@ class SchemaBuilder
             $this->pushTable($table, $schema->getDatabase());
         }
 
-        //Working with defined relations
+        foreach ($builder->schemas as $schema) {
+            //Relations
+            dump($schema->getRelations());
+        }
 
         return $this;
     }
@@ -290,7 +293,7 @@ class SchemaBuilder
                 ORMInterface::R_TABLE        => $schema->getTable(),
 
                 //Defined relation (in here???)
-                ORMInterface::R_RELATIONS    => [/*external manager*/]
+                //ORMInterface::R_RELATIONS    => [/*external manager*/]
             ];
         }
 

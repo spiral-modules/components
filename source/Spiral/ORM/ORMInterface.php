@@ -7,7 +7,6 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Table;
-use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
 
@@ -45,15 +44,11 @@ interface ORMInterface
     /**
      * Get RecordSelector for a given class.
      *
-     * Example:
-     * Admin extends User
-     * $orm->selector(Admin::class)->getClass() == User::class
-     *
      * @param string $class
      *
      * @return RecordSelector
      */
-    //public function selector(string $class): RecordSelector;
+    public function selector(string $class): RecordSelector;
 
     /**
      * Get table associated with given class.

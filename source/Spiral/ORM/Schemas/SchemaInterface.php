@@ -55,7 +55,7 @@ interface SchemaInterface
     public function getIndexes();
 
     /**
-     * Get all defined record relations.
+     * Get all defined record relations. Attention, relation name excepted as resulted array key.
      *
      * @return RelationDefinition[]
      *

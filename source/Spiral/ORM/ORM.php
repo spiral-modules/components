@@ -15,8 +15,8 @@ use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
-use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Entities\EntityCache;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\LocatorInterface;
@@ -199,9 +199,18 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
     //other methods
     //selector
-    //table
 
     //source
+
+    public function selector(string $class): RecordSelector
+    {
+        //ORM is cloned in order to isolate cache scope.
+        return new RecordSelector(
+            $this->table($class),
+            $class,
+            clone $this
+        );
+    }
 
     /**
      * {@inheritdoc}

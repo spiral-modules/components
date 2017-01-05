@@ -350,11 +350,6 @@ class DocumentSchema implements SchemaInterface
                 $default = $userDefined[$field];
             }
 
-            if (array_key_exists($field, $defaults)) {
-                //Default value declared in model schema
-                $default = $defaults[$field];
-            }
-
             //Registering default values
             $defaults[$field] = $this->mutateValue(
                 $builder,

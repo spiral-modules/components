@@ -185,7 +185,7 @@ class RecordSchema implements SchemaInterface
             Record::SH_MUTATORS  => $this->buildMutators($table),
 
             //Nullable fields
-            Record::SH_NULLABLE  => [],
+            Record::SH_NULLABLE  => $this->buildNullable($table),
 
             //Relations
             //in here?
@@ -197,15 +197,11 @@ class RecordSchema implements SchemaInterface
      * Generate set of default values to be used by record.
      *
      * @param AbstractTable $table
-     * @param array         $overwriteDefaults
      *
      * @return array
      */
-    protected function packDefaults(AbstractTable $table, array $overwriteDefaults = []): array
+    protected function packDefaults(AbstractTable $table): array
     {
-        //User defined default values
-        $userDefined = $overwriteDefaults + $this->getDefaults();
-
         //We need mutators to normalize default values
         $mutators = $this->buildMutators($table);
 
@@ -213,33 +209,29 @@ class RecordSchema implements SchemaInterface
         foreach ($table->getColumns() as $column) {
             $field = $column->getName();
 
-            if ($column->isNullable()) {
-                $defaults[$field] = null;
-                continue;
-            }
-
-            //todo: this section has be very carefully debugged
-
-            /**
-             * working with default values!
-             */
             $default = $column->getDefaultValue();
 
-            if (array_key_exists($field, $userDefined)) {
-                //No merge to keep fields order intact
-                $default = $userDefined[$field];
+            //For non null values let's apply mutators to typecast it
+            if (!is_null($default) && !is_object($default) && !$column->isNullable()) {
+                $default = $this->mutateValue($mutators, $field, $default);
             }
 
-            if (array_key_exists($field, $defaults)) {
-                //Default value declared in model schema
-                $default = $defaults[$field];
-            }
-
-            //Registering default values (passing thought mutators)
-            $defaults[$field] = $this->mutateValue($mutators, $field, $default);
+            $defaults[$field] = $default;
         }
 
         return $defaults;
+    }
+
+    /**
+     * Find all nullable fields.
+     *
+     * @param AbstractTable $table
+     *
+     * @return array
+     */
+    protected function buildNullable(AbstractTable $table): array
+    {
+        return [];
     }
 
     /**
@@ -377,7 +369,7 @@ class RecordSchema implements SchemaInterface
 
         return $default;
     }
-    
+
     /**
      * Pass value thought accessor to ensure it's default.
      *

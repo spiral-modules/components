@@ -52,4 +52,14 @@ class Fragment implements FragmentInterface
     {
         return ['statement' => $this->sqlStatement()];
     }
+
+    /**
+     * @param array $an_array
+     *
+     * @return Fragment
+     */
+    static function __set_state(array $an_array): Fragment
+    {
+        return new static($an_array['statement']);
+    }
 }

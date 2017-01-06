@@ -88,7 +88,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
         $this->assertSameQuery(
             'SELECT * FROM {sample_table}',
-            $result->queryString()
+            $result->queryString
         );
 
         $this->assertSame(10, $i);
@@ -214,7 +214,7 @@ abstract class QueryResultTest extends BaseQueryTest
 
         $this->assertSameQuery(
             'SELECT * FROM {sample_table}',
-            $result->queryString()
+            $result->queryString
         );
     }
 

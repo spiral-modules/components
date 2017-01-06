@@ -6,7 +6,194 @@
  */
 namespace Spiral\ORM\Entities;
 
-class RecordSource
+use Spiral\Core\Component;
+use Spiral\Core\Traits\SaturateTrait;
+use Spiral\ORM\Exceptions\SourceException;
+use Spiral\ORM\ORM;
+use Spiral\ORM\Record;
+use Spiral\ORM\RecordInterface;
+
+/**
+ * Source class associated to one ORM model. Source can be used to write your own custom find
+ * method or change default selection.
+ */
+class RecordSource extends Component implements \Countable, \IteratorAggregate
 {
+    use SaturateTrait;
+
+    /**
+     * Linked record model. ORM can automatically index and link user sources to models based on
+     * value of this constant.
+     *
+     * Use this constant in custom source implementation in order to automatically link it to
+     * appropriate model AND be able to create source as constructor or method injection without
+     * ORM dependency.
+     */
     const RECORD = null;
+
+    /**
+     * @var RecordSelector
+     */
+    private $selector;
+
+    /**
+     * Associated document class.
+     *
+     * @var string
+     */
+    private $class = null;
+
+    /**
+     * @invisible
+     *
+     * @var ORM
+     */
+    protected $orm = null;
+
+    /**
+     * @param string $class
+     * @param ORM    $orm
+     *
+     * @throws SourceException
+     */
+    public function __construct(string $class = null, ORM $orm = null)
+    {
+        if (empty($class)) {
+            if (empty(static::RECORD)) {
+                throw new SourceException('Unable to create source without associated class');
+            }
+
+            $class = static::RECORD;
+        }
+
+        $this->class = $class;
+        $this->orm = $this->saturate($orm, ORM::class);
+    }
+
+    /**
+     * Create new DocumentEntity based on set of provided fields.
+     *
+     * @final Change static method of entity, not this one.
+     *
+     * @param array  $fields
+     * @param string $class  Due ODM models can be inherited you can use this argument to specify
+     *                       custom model class.
+     *
+     * @return RecordInterface|Record
+     */
+    public function create($fields = [], string $class = null)
+    {
+        //Create model with filtered set of fields
+        return $this->orm->make($class ?? $this->class, $fields, true);
+    }
+
+    /**
+     * Find document by it's primary key.
+     *
+     * @see findOne()
+     *
+     * @param string|\MongoId $id Primary key value.
+     *
+     * @return RecordInterface|Record|null
+     */
+    public function findByPK($id)
+    {
+        //todo: implement
+    }
+
+    /**
+     * Select one document from mongo collection.
+     *
+     * @param array $query  Fields and conditions to query by.
+     * @param array $sortBy Always specify sort by to ensure that results are stable.
+     *
+     * @return RecordInterface|Record|null
+     */
+    public function findOne(array $query = [], array $sortBy = [])
+    {
+        return $this->getSelector()->sortBy($sortBy)->findOne($query);
+    }
+
+    /**
+     * Get associated document selection with pre-configured query (if any).
+     *
+     * @param array $query
+     *
+     * @return RecordSelector
+     */
+    public function find(array $query = []): RecordSelector
+    {
+        return $this->getSelector()->where($query);
+    }
+
+    /**
+     * @param array $query
+     *
+     * @return int
+     */
+    public function count(array $query = []): int
+    {
+        return $this->getSelector()->count($query);
+    }
+
+    /**
+     * @return RecordSelector
+     */
+    public function getIterator(): RecordSelector
+    {
+        return $this->getSelector();
+    }
+
+    /**
+     * Create source with new associated selector.
+     *
+     * @param RecordSelector $selector
+     *
+     * @return RecordSource
+     */
+    public function withSelector(RecordSelector $selector): RecordSource
+    {
+        $source = clone $this;
+        $source->setSelector($selector);
+
+        return $source;
+    }
+
+    /**
+     * Set initial selector.
+     *
+     * @param RecordSelector $selector
+     */
+    protected function setSelector(RecordSelector $selector)
+    {
+        $this->selector = clone $selector;
+    }
+
+    /**
+     * Get associated selector.
+     *
+     * @return RecordSelector
+     */
+    protected function getSelector(): RecordSelector
+    {
+        if (empty($this->selector)) {
+            //Requesting selector on demand
+            $this->selector = $this->orm->selector($this->class);
+        }
+
+        return clone $this->selector;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function iocContainer()
+    {
+        if ($this->orm instanceof Component) {
+            //Always work in ODM scope
+            return $this->orm->iocContainer();
+        }
+
+        return parent::iocContainer();
+    }
 }

@@ -176,62 +176,18 @@ class SchemaBuilder
      */
     public function renderSchema(): SchemaBuilder
     {
-        $builder = clone $this;
+        //Declaring tables associated with records
+        $this->declareTables();
 
-        //Relation manager?
-        foreach ($builder->schemas as $schema) {
-            //Get table state (empty one)
-            $table = $this->requestTable(
-                $schema->getTable(),
-                $schema->getDatabase(),
-                true,
-                true
-            );
+        //Defining all relations declared by our schemas
+        $this->declareRelations();
 
-            //Define it's schema
-            $table = $schema->renderTable($table);
-
-            //Working with indexes
-            foreach ($schema->getIndexes() as $index) {
-                $table->index($index->getColumns())->unique($index->isUnique());
-                $table->index($index->getColumns())->setName($index->getName());
-            }
-
-            //And put it back :)
-            $this->pushTable($table, $schema->getDatabase());
-        }
-
-        foreach ($builder->schemas as $schema) {
-            foreach ($schema->getRelations() as $name => $relation) {
-
-                //Source context defines where relation comes from
-                $sourceContext = RelationContext::createContent(
-                    $schema,
-                    $this->requestTable($schema->getTable(), $schema->getDatabase())
-                );
-
-                //Target context might only exist if relation points to another record in ORM,
-                //in some cases it might point outside of ORM scope
-                $targetContext = null;
-
-                if ($this->hasSchema($relation->getTarget())) {
-                    $target = $this->getSchema($relation->getTarget());
-
-                    $targetContext = RelationContext::createContent(
-                        $target,
-                        $this->requestTable($target->getTable(), $target->getDatabase())
-                    );
-                }
-
-                $this->relations->registerRelation($relation->withContext(
-                    $sourceContext,
-                    $targetContext
-                ));
-            }
-        }
-
-        //Creating inverse relations
+        //Inverse relations (if requested)
         $this->relations->inverseRelations();
+
+        //Rendering needed columns, FKs and indexes needed for our relations (if relation is ORM specific)
+        //hello world
+
 
         dump($this->relations);
 
@@ -336,6 +292,77 @@ class SchemaBuilder
         }
 
         return $result;
+    }
+
+    /**
+     * Walk thought schemas and define structure of associated tables.
+     *
+     * @throws SchemaException
+     * @throws DBALException
+     */
+    protected function declareTables()
+    {
+        foreach ($this->schemas as $schema) {
+            /**
+             * Attention, this method will request table schema from DBAL and will empty it's state
+             * so schema can define it from ground zero!
+             */
+            $table = $this->requestTable(
+                $schema->getTable(),
+                $schema->getDatabase(),
+                true,
+                true
+            );
+
+            //Render table schema
+            $table = $schema->renderTable($table);
+
+            //Working with indexes
+            foreach ($schema->getIndexes() as $index) {
+                $table->index($index->getColumns())->unique($index->isUnique());
+                $table->index($index->getColumns())->setName($index->getName());
+            }
+
+            //And put it back :)
+            $this->pushTable($table, $schema->getDatabase());
+        }
+    }
+
+    /**
+     * Walk thought all record schemas, fetch and declare needed relations using relation manager.
+     *
+     * @throws SchemaException
+     */
+    protected function declareRelations()
+    {
+        foreach ($this->schemas as $schema) {
+            foreach ($schema->getRelations() as $name => $relation) {
+
+                //Source context defines where relation comes from
+                $sourceContext = RelationContext::createContent(
+                    $schema,
+                    $this->requestTable($schema->getTable(), $schema->getDatabase())
+                );
+
+                //Target context might only exist if relation points to another record in ORM,
+                //in some cases it might point outside of ORM scope
+                $targetContext = null;
+
+                if ($this->hasSchema($relation->getTarget())) {
+                    $target = $this->getSchema($relation->getTarget());
+
+                    $targetContext = RelationContext::createContent(
+                        $target,
+                        $this->requestTable($target->getTable(), $target->getDatabase())
+                    );
+                }
+
+                $this->relations->registerRelation($relation->withContext(
+                    $sourceContext,
+                    $targetContext
+                ));
+            }
+        }
     }
 
     /**

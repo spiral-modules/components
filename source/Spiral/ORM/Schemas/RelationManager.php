@@ -87,9 +87,16 @@ class RelationManager
             $definition = $relation->getDefinition();
 
             if ($definition->needInverse()) {
-                if (!$relation instanceof InversableInterface) {
-                    throw new DefinitionException();
+                if (!$relation instanceof InversableRelationInterface) {
+                    throw new DefinitionException(sprintf(
+                        "Unable to inverse relation '%s'.'%s', relation schema non inversable",
+                        $definition->sourceContext()->getClass(),
+                        $definition->getName()
+                    ));
                 }
+
+                //Let's perform inversion
+                $this->registerRelation($relation->inverseDefinition());
             }
         }
     }

@@ -188,7 +188,7 @@ class SchemaBuilder
 
         //Rendering needed columns, FKs and indexes needed for our relations (if relation is ORM specific)
 
-        //todo: implement this magic piece of code
+        //todo: implement this magic piece of code (do not forget to provide schema builder)
         dump($this->relations);
 
         return $this;

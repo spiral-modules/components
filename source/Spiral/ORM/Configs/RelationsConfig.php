@@ -19,6 +19,13 @@ class RelationsConfig extends InjectableConfig
     const CONFIG = 'schemas/relations';
 
     /**
+     * Relation sub classes.
+     */
+    const SCHEMA_CLASS = 'schema';
+    const LOADER_CLASS = 'loader';
+    const ACCESS_CLASS = 'schema';
+
+    /**
      * @var array
      */
     protected $config = [];
@@ -29,7 +36,7 @@ class RelationsConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasRelation(string $type, string $section = 'class'): bool
+    public function hasRelation(string $type, string $section = self::SCHEMA_CLASS): bool
     {
         return isset($this->config[$type][$section]);
     }

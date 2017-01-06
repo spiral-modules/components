@@ -109,14 +109,14 @@ final class RelationDefinition
     }
 
     /**
-     * Source context.
+     * Source context (where relation comes from).
      *
      * @return RelationContext
      */
     public function getSourceContext(): RelationContext
     {
-        if (empty($this->sourceContent)) {
-            throw new SchemaException("Source content not set");
+        if (empty($this->sourceContext)) {
+            throw new SchemaException("Source context not set");
         }
 
         return $this->sourceContext;

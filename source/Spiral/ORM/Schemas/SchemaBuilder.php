@@ -13,6 +13,7 @@ use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Helpers\SynchronizationPool;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\DoubleReferenceException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORMInterface;
@@ -186,9 +187,8 @@ class SchemaBuilder
         $this->relations->inverseRelations();
 
         //Rendering needed columns, FKs and indexes needed for our relations (if relation is ORM specific)
-        //hello world
 
-
+        //todo: implement this magic piece of code
         dump($this->relations);
 
         return $this;
@@ -286,8 +286,8 @@ class SchemaBuilder
                 ORMInterface::R_DATABASE     => $schema->getDatabase(),
                 ORMInterface::R_TABLE        => $schema->getTable(),
 
-                //Defined relation (in here???)
-                //ORMInterface::R_RELATIONS    => [/*external manager*/]
+                //Pack model specific relations
+                ORMInterface::R_RELATIONS    => $this->relations->packRelations($schema->getClass())
             ];
         }
 
@@ -332,6 +332,7 @@ class SchemaBuilder
      * Walk thought all record schemas, fetch and declare needed relations using relation manager.
      *
      * @throws SchemaException
+     * @throws DefinitionException
      */
     protected function declareRelations()
     {
@@ -357,10 +358,9 @@ class SchemaBuilder
                     );
                 }
 
-                $this->relations->registerRelation($relation->withContext(
-                    $sourceContext,
-                    $targetContext
-                ));
+                $this->relations->registerRelation(
+                    $relation->withContext($sourceContext, $targetContext)
+                );
             }
         }
     }

@@ -193,7 +193,7 @@ class RecordSchema implements SchemaInterface
             unset($definition[$type]);
 
             //Defining relation
-            yield $name => new RelationDefinition($type, $target, $definition);
+            yield new RelationDefinition($name, $type, $target, $definition);
         }
     }
 

@@ -21,9 +21,7 @@ class RelationsConfig extends InjectableConfig
     /**
      * @var array
      */
-    protected $config = [
-        'relations' => [],
-    ];
+    protected $config = [];
 
     /**
      * @param string $type
@@ -31,9 +29,9 @@ class RelationsConfig extends InjectableConfig
      *
      * @return bool
      */
-    public function hasRelation($type, string $section = 'class')
+    public function hasRelation(string $type, string $section = 'class'): bool
     {
-        return isset($this->config['relations'][$type][$section]);
+        return isset($this->config[$type][$section]);
     }
 
     /**
@@ -42,8 +40,8 @@ class RelationsConfig extends InjectableConfig
      *
      * @return string
      */
-    public function relationClass($type, string $section): string
+    public function relationClass(string $type, string $section): string
     {
-        return $this->config['relations'][$type][$section];
+        return $this->config[$type][$section];
     }
 }

@@ -16,6 +16,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\DoubleReferenceException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Schemas\Definitions\RelationContext;
 
 class SchemaBuilder
 {
@@ -23,6 +24,11 @@ class SchemaBuilder
      * @var DatabaseManager
      */
     private $manager;
+
+    /**
+     * @var RelationManager
+     */
+    private $relations;
 
     /**
      * @var AbstractTable[]
@@ -43,10 +49,12 @@ class SchemaBuilder
 
     /**
      * @param DatabaseManager $manager
+     * @param RelationManager $relations
      */
-    public function __construct(DatabaseManager $manager)
+    public function __construct(DatabaseManager $manager, RelationManager $relations)
     {
         $this->manager = $manager;
+        $this->relations = $relations;
     }
 
     /**
@@ -194,9 +202,38 @@ class SchemaBuilder
         }
 
         foreach ($builder->schemas as $schema) {
-            //Relations
-            dump(iterator_to_array($schema->getRelations()));
+            foreach ($schema->getRelations() as $name => $relation) {
+
+                //Source context defines where relation comes from
+                $sourceContext = RelationContext::createContent(
+                    $schema,
+                    $this->requestTable($schema->getTable(), $schema->getDatabase())
+                );
+
+                //Target context might only exist if relation points to another record in ORM,
+                //in some cases it might point outside of ORM scope
+                $targetContext = null;
+
+                if ($this->hasSchema($relation->getTarget())) {
+                    $target = $this->getSchema($relation->getTarget());
+
+                    $targetContext = RelationContext::createContent(
+                        $target,
+                        $this->requestTable($target->getTable(), $target->getDatabase())
+                    );
+                }
+
+                $this->relations->registerRelation($relation->withContext(
+                    $sourceContext,
+                    $targetContext
+                ));
+            }
         }
+
+        //Creating inverse relations
+        $this->relations->inverseRelations();
+
+        dump($this->relations);
 
         return $this;
     }
@@ -319,7 +356,7 @@ class SchemaBuilder
     protected function requestTable(
         string $table,
         string $database = null,
-        bool $unique = true,
+        bool $unique = false,
         bool $resetState = false
     ): AbstractTable {
         if (isset($this->tables[$database . '.' . $table])) {

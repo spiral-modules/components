@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Database\Drivers\MySQL;
 
-class DatetimeColumnsTest extends \Spiral\Tests\Database\Drivers\DatetimeColumnsTest
+class DatetimeColumns57Test extends \Spiral\Tests\Database\Drivers\DatetimeColumnsTest
 {
     use DriverTrait;
 
@@ -14,10 +14,11 @@ class DatetimeColumnsTest extends \Spiral\Tests\Database\Drivers\DatetimeColumns
     {
         parent::setUp();
         $pdo = $this->database->getDriver()->getPDO();
+
         $version = $pdo->getAttribute(\PDO::ATTR_SERVER_VERSION);
 
-        if (version_compare($version, '5.7', '<')) {
-            $this->markTestSkipped('TestCase is specific to < 5.7 driver only');
+        if (version_compare($version, '5.7', '>=')) {
+            $this->markTestSkipped('TestCase is specific to 5.7+ driver only');
         }
     }
 

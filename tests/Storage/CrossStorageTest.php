@@ -49,7 +49,7 @@ class CrossStorageTest extends \PHPUnit_Framework_TestCase
         }
 
         if ($this->skipped) {
-            $this->markTestIncomplete(
+            $this->markTestSkipped(
                 "CrossStorageTest is available only when all storages are properly configured"
             );
         }

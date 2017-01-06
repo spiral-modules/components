@@ -285,7 +285,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function query(string $statement, array $parameters = []): QueryStatement
     {
         //Forcing specific return class
-        $result = $this->statement($statement, $parameters, QueryStatement::class, [$parameters]);
+        $result = $this->statement($statement, $parameters, QueryStatement::class);
 
         /**
          * @var QueryStatement $result
@@ -300,7 +300,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
      * @param string $class      Class to be used to represent results.
-     * @param array  $args       Class construction arguments (by default filtered parameters)
      *
      * @return \PDOStatement
      *
@@ -309,8 +308,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function statement(
         string $query,
         array $parameters = [],
-        $class = QueryStatement::class,
-        array $args = []
+        $class = QueryStatement::class
     ): \PDOStatement {
 
         try {
@@ -323,7 +321,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
             }
 
             //PDOStatement instance (prepared)
-            $pdoStatement = $this->prepare($query, $class, $args);
+            $pdoStatement = $this->prepare($query, $class);
 
             //Mounting all input parameters
             $pdoStatement = $this->bindParameters($pdoStatement, $parameters);
@@ -364,18 +362,14 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string $statement Query statement.
      * @param string $class     Class to represent PDO statement.
-     * @param array  $args      Class construction arguments (by default paramaters)
      *
      * @return \PDOStatement
      */
-    public function prepare(
-        string $statement,
-        $class = QueryStatement::class,
-        array $args = []
-    ): \PDOStatement {
+    public function prepare(string $statement, $class = QueryStatement::class): \PDOStatement
+    {
         $pdo = $this->getPDO();
 
-        $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [$class, $args]);
+        $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [$class]);
 
         return $pdo->prepare($statement);
     }

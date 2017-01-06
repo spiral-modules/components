@@ -9,30 +9,16 @@
 namespace Spiral\Database\Entities;
 
 use PDOStatement;
-use Spiral\Database\Helpers\QueryInterpolator;
 
 /**
- * Works as prepared PDOStatement.
+ * Adds few quick methods to PDOStatement and fully compatible with it.
  */
-class QueryResult extends PDOStatement
+class QueryStatement extends PDOStatement
 {
     /**
      * Limits after which no records will be dumped in __debugInfo.
      */
     const DUMP_LIMIT = 500;
-
-    /**
-     * @var array
-     */
-    private $parameters = [];
-
-    /**
-     * @param array $parameters
-     */
-    protected function __construct(array $parameters)
-    {
-        $this->parameters = $parameters;
-    }
 
     /**
      * Bind a column value to a PHP variable. Aliased to bindParam.
@@ -42,7 +28,7 @@ class QueryResult extends PDOStatement
      *
      * @return self|$this
      */
-    public function bind($columnID, &$variable): QueryResult
+    public function bind($columnID, &$variable): QueryStatement
     {
         if (is_numeric($columnID)) {
             //PDO columns are 1-indexed
@@ -62,16 +48,6 @@ class QueryResult extends PDOStatement
     public function countColumns(): int
     {
         return $this->columnCount();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Attention: DO NOT USE THIS METHOD FOR ANYTHING DIFFERENT THAN DEBUGGING.
-     */
-    public function queryString(): string
-    {
-        return QueryInterpolator::interpolate($this->queryString, $this->parameters);
     }
 
     /**
@@ -96,7 +72,7 @@ class QueryResult extends PDOStatement
     public function __debugInfo()
     {
         return [
-            'query' => $this->queryString(),
+            'query' => $this->queryString,
             'count' => $this->rowCount(),
             'rows'  => $this->rowCount() > static::DUMP_LIMIT ? '[TOO MANY ROWS]' : $this->fetchAll(\PDO::FETCH_ASSOC)
         ];

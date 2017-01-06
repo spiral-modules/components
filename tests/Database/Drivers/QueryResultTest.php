@@ -7,7 +7,7 @@
 namespace Spiral\Tests\Database\Drivers;
 
 use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\QueryResult;
+use Spiral\Database\Entities\QueryStatement;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
@@ -57,7 +57,7 @@ abstract class QueryResultTest extends BaseQueryTest
     {
         $table = $this->database->table('sample_table');
 
-        $this->assertInstanceOf(QueryResult::class, $table->select()->getIterator());
+        $this->assertInstanceOf(QueryStatement::class, $table->select()->getIterator());
         $this->assertInstanceOf(\PDOStatement::class, $table->select()->getIterator());
     }
 

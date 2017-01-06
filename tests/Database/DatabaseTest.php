@@ -11,7 +11,7 @@ namespace Spiral\tests\Cases\Database;
 use Mockery as m;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Entities\QueryResult;
+use Spiral\Database\Entities\QueryStatement;
 use Spiral\Database\Entities\Table;
 
 class DatabaseTest extends \PHPUnit_Framework_TestCase
@@ -35,7 +35,7 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
         $driver = $this->makeDriver();
 
         $driver->expects($this->once())->method('query')->with('test query')
-            ->willReturn(m::mock(QueryResult::class));
+            ->willReturn(m::mock(QueryStatement::class));
 
         $database = new Database($driver, 'test', 'prefix_');
         $database->query('test query');

@@ -67,6 +67,8 @@ class QueryStatement extends PDOStatement
     }
 
     /**
+     * Attention, this method WILL NOT work correctly with SQLite driver.
+     *
      * @return array
      */
     public function __debugInfo()

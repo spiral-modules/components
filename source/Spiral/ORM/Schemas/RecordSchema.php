@@ -61,6 +61,17 @@ class RecordSchema implements SchemaInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getRole(): string
+    {
+        $role = $this->reflection->getProperty('model_role');
+
+        //When role not defined we are going to use short class name
+        return $role ?? lcfirst($this->reflection->getShortName());
+    }
+
+    /**
      * @return ReflectionEntity
      */
     public function getReflection(): ReflectionEntity
@@ -163,11 +174,10 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function getRelations(): array
+    public function getRelations(): \Generator
     {
         $schema = $this->reflection->getSchema();
 
-        $relations = [];
         foreach ($schema as $name => $definition) {
             if (!$this->isRelation($definition)) {
                 continue;
@@ -183,15 +193,8 @@ class RecordSchema implements SchemaInterface
             unset($definition[$type]);
 
             //Defining relation
-            $relations[$name] = new RelationDefinition(
-                $type,
-                $target,
-                $definition
-                //todo: inverse?
-            );
+            yield $name => new RelationDefinition($type, $target, $definition);
         }
-
-        return $relations;
     }
 
     /**

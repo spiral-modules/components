@@ -171,7 +171,6 @@ class SchemaBuilder
         $builder = clone $this;
 
         //Relation manager?
-
         foreach ($builder->schemas as $schema) {
             //Get table state (empty one)
             $table = $this->requestTable(
@@ -196,7 +195,7 @@ class SchemaBuilder
 
         foreach ($builder->schemas as $schema) {
             //Relations
-            dump($schema->getRelations());
+            dump(iterator_to_array($schema->getRelations()));
         }
 
         return $this;
@@ -283,8 +282,10 @@ class SchemaBuilder
             $result[$class] = [
                 ORMInterface::R_INSTANTIATOR => $schema->getInstantiator(),
 
+                ORMInterface::R_ROLE_NAME => $schema->getRole(),
+
                 //Schema includes list of fields, default values and nullable fields
-                ORMInterface::R_SCHEMA       => $schema->packSchema($this, clone $table),
+                ORMInterface::R_SCHEMA    => $schema->packSchema($this, clone $table),
 
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
 

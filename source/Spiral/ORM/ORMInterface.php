@@ -20,11 +20,12 @@ interface ORMInterface
      * Constants used in packed schema.
      */
     const R_INSTANTIATOR = 0;
-    const R_SCHEMA       = 1;
-    const R_SOURCE_CLASS = 2;
-    const R_DATABASE     = 3;
-    const R_TABLE        = 4;
-    const R_RELATIONS    = 5;
+    const R_ROLE_NAME    = 1;
+    const R_SCHEMA       = 2;
+    const R_SOURCE_CLASS = 3;
+    const R_DATABASE     = 4;
+    const R_TABLE        = 5;
+    const R_RELATIONS    = 6;
 
     /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.

@@ -21,6 +21,20 @@ interface SchemaInterface
     public function getClass(): string;
 
     /**
+     * Record role named used widely in relations to generate inner and outer keys, define related
+     * class and table in morphed relations and etc. You can define your own role name by using
+     * record constant MODEL_ROLE.
+     *
+     * Example:
+     * Record: Records\Post with primary key "id"
+     * Relation: HAS_ONE
+     * Outer key: post_id
+     *
+     * @return string
+     */
+    public function getRole(): string;
+
+    /**
      * Name of class responsible for model instantiation.
      *
      * @return string
@@ -57,7 +71,7 @@ interface SchemaInterface
     /**
      * Get all defined record relations. Attention, relation name excepted as resulted array key.
      *
-     * @return RelationDefinition[]
+     * @return RelationDefinition[]|\Generator
      *
      * @throws SchemaException
      */

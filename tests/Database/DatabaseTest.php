@@ -41,17 +41,6 @@ class DatabaseTest extends \PHPUnit_Framework_TestCase
         $database->query('test query');
     }
 
-    public function testStatement()
-    {
-        $driver = $this->makeDriver();
-
-        $driver->expects($this->once())->method('statement')->with('test statement',
-            [1, 2, 3])->willReturn(m::mock(QueryResult::class));
-
-        $database = new Database($driver, 'test', 'prefix_');
-        $database->statement('test statement', [1, 2, 3]);
-    }
-
     public function testHasTable()
     {
         $driver = $this->makeDriver();

@@ -370,7 +370,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function prepare(
         string $statement,
-        $class = \PDOStatement::class,
+        $class = QueryResult::class,
         array $args = []
     ): \PDOStatement {
         $pdo = $this->getPDO();

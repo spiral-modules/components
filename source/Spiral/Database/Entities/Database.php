@@ -173,7 +173,22 @@ class Database implements DatabaseInterface, InjectableInterface
      */
     public function execute(string $query, array $parameters = []): int
     {
-        return $this->statement($query, $parameters)->rowCount();
+        return $this->driver->statement($query, $parameters)->rowCount();
+    }
+
+    /**
+     * Prepare PDO statement.
+     *
+     * @param string $query
+     *
+     * @return \PDOStatement
+     *
+     * @throws DriverException
+     * @throws QueryException
+     */
+    public function prepare(string $query): \PDOStatement
+    {
+        return $this->driver->prepare($query);
     }
 
     /**
@@ -184,22 +199,6 @@ class Database implements DatabaseInterface, InjectableInterface
     public function query(string $query, array $parameters = []): QueryResult
     {
         return $this->driver->query($query, $parameters);
-    }
-
-    /**
-     * Get instance of PDOStatement from Driver.
-     *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     *
-     * @return \PDOStatement
-     *
-     * @throws DriverException
-     * @throws QueryException
-     */
-    public function statement(string $query, array $parameters = []): \PDOStatement
-    {
-        return $this->driver->statement($query, $parameters);
     }
 
     /**

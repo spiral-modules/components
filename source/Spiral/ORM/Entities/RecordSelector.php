@@ -6,13 +6,14 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Spiral\Core\Component;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\ORMInterface;
 
 /**
  * Attention, RecordSelector DOES NOT extends QueryBuilder but mocks it!
  */
-class RecordSelector
+class RecordSelector extends Component
 {
     /**
      * @var Table
@@ -52,5 +53,23 @@ class RecordSelector
         return $this->class;
     }
 
+    public function fetchData()
+    {
+        $selectQuery = $this->table->select();
 
+        dump($selectQuery);
+    }
+
+    /**
+     * @return \Interop\Container\ContainerInterface|null
+     */
+    protected function iocContainer()
+    {
+        if ($this->orm instanceof Component) {
+            //Working inside ORM container scope
+            return $this->orm->iocContainer();
+        }
+
+        return parent::iocContainer();
+    }
 }

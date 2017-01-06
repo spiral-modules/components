@@ -59,7 +59,7 @@ class RelationManager
             throw new DefinitionException(sprintf(
                 "Undefined relation type '%s' in '%s'.'%s'",
                 $definition->getType(),
-                $definition->getSourceContext()->getClass(),
+                $definition->sourceContext()->getClass(),
                 $definition->getName()
             ));
         }
@@ -75,14 +75,43 @@ class RelationManager
 
     /**
      * Create inverse relations where needed.
+     *
+     * @throws DefinitionException
      */
     public function inverseRelations()
     {
+        /**
+         * Inverse process is relation specific.
+         */
+        foreach ($this->relations as $relation) {
+            $definition = $relation->getDefinition();
 
+            if ($definition->needInverse()) {
+                if (!$relation instanceof InversableInterface) {
+                    throw new DefinitionException();
+                }
+            }
+        }
     }
 
+    /**
+     * Pack relation schemas for specific model class in order to be saved in memory.
+     *
+     * @param string $class
+     *
+     * @return array
+     */
     public function packRelations(string $class): array
     {
-        return [];
+        $result = [];
+        foreach ($this->relations as $relation) {
+            $definition = $relation->getDefinition();
+
+            if ($definition->sourceContext()->getClass() == $class) {
+                $result[$definition->getName()] = $relation->packRelation();
+            }
+        }
+
+        return $result;
     }
 }

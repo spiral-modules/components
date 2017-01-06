@@ -30,4 +30,6 @@ interface RelationInterface
 //    public function mapTables(): array;
 
     //????????
+
+    public function packRelation(): array;
 }

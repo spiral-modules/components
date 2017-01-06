@@ -113,7 +113,7 @@ final class RelationDefinition
      *
      * @return RelationContext
      */
-    public function getSourceContext(): RelationContext
+    public function sourceContext(): RelationContext
     {
         if (empty($this->sourceContext)) {
             throw new SchemaException("Source context not set");
@@ -127,7 +127,7 @@ final class RelationDefinition
      *
      * @return null|RelationContext
      */
-    public function getTargetContext()
+    public function targetContext()
     {
         return $this->targetContext;
     }
@@ -145,6 +145,21 @@ final class RelationDefinition
         $definition = clone $this;
         $definition->sourceContext = $source;
         $definition->targetContext = $target;
+
+        return $definition;
+    }
+
+    /**
+     * Create version of definition with different set of options.
+     *
+     * @param array $options
+     *
+     * @return RelationDefinition
+     */
+    public function withOptions(array $options): self
+    {
+        $definition = clone $this;
+        $definition->options = $options;
 
         return $definition;
     }

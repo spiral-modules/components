@@ -31,4 +31,10 @@ abstract class AbstractSchema implements RelationInterface
     {
         return $this->definition;
     }
+
+    public function packRelation(): array
+    {
+        //todo: replace
+        return [];
+    }
 }

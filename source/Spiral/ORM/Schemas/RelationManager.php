@@ -18,11 +18,13 @@ use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 class RelationManager
 {
     /**
+     * @invisible
      * @var RelationsConfig
      */
     protected $config;
 
     /**
+     * @invisible
      * @var FactoryInterface
      */
     protected $factory;
@@ -30,9 +32,9 @@ class RelationManager
     /**
      * Set of relation definitions.
      *
-     * @var RelationDefinition[]
+     * @var RelationInterface[]
      */
-    private $definitions = [];
+    private $relations = [];
 
     /**
      * @param RelationsConfig  $config
@@ -67,10 +69,8 @@ class RelationManager
             RelationsConfig::SCHEMA_CLASS
         );
 
-        //todo: create relation
-
-
-        $this->definitions[] = $definition;
+        //Creating relation schema
+        $this->relations[] = $this->factory->make($class, compact('definition'));
     }
 
     /**

@@ -6,27 +6,28 @@
  */
 namespace Spiral\ORM\Schemas;
 
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
+
 /**
- * Defines behaviour for a relation schemas.
+ * Defines behaviour for a relation schemas. Relation schema constructor must accept relation
+ * definition as input.
  */
 interface RelationInterface
 {
     /**
-     * Get relation name. Provided from outside?
+     * Get associated relation definition.
      *
-     * @return string
+     * @return RelationDefinition
      */
-    public function getName(): string;
+    public function getDefinition(): RelationDefinition;
 
-    public function defineRelation(SchemaInterface $source, SchemaInterface $target);
-
-    /**
-     * List of tables required for relation to be defined besides tables related to source and
-     * target record schemas. This method can be used to request map tables.
-     *
-     * @return array
-     */
-    public function mapTables(): array;
+//    /**
+//     * List of tables required for relation to be defined besides tables related to source and
+//     * target record schemas. This method can be used to request map tables.
+//     *
+//     * @return array
+//     */
+//    public function mapTables(): array;
 
     //????????
 }

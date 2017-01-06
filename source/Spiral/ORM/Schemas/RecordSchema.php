@@ -33,6 +33,7 @@ class RecordSchema implements SchemaInterface
     private $mutatorsConfig;
 
     /**
+     * @invisible
      * @var ColumnRenderer
      */
     private $renderer;

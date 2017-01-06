@@ -6,7 +6,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-class HasOneSchema
+class HasOneSchema extends AbstractSchema
 {
 
 }

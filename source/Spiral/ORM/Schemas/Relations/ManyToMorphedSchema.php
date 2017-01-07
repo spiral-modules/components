@@ -6,7 +6,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-class ManyToMorphedSchema extends AbstractSchema
+class ManyToMorphedSchema
 {
 
 }

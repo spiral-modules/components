@@ -6,7 +6,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
-class BelongsToMorphedSchema extends AbstractSchema
+class BelongsToMorphedSchema
 {
 
 }

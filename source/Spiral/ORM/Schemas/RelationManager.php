@@ -74,6 +74,7 @@ class RelationManager
 
         //Equavalent (low)?
 
+        //todo: morphed relations are a bit special
         //todo: make sure no dubs
 
         $this->relations[] = $relation;
@@ -95,7 +96,7 @@ class RelationManager
             if ($definition->needInversion()) {
                 if (!$relation instanceof InversableRelationInterface) {
                     throw new DefinitionException(sprintf(
-                        "Unable to inverse relation '%s'.'%s', relation schema '%s' non inversable",
+                        "Unable to inverse relation '%s'.'%s', relation schema '%s' is non inversable",
                         $definition->sourceContext()->getClass(),
                         $definition->getName(),
                         get_class($relation)

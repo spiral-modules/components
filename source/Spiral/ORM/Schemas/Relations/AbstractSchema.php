@@ -82,8 +82,9 @@ abstract class AbstractSchema implements RelationInterface
     public function packRelation(): array
     {
         return [
-            ORMInterface::R_TYPE    => static::RELATION_TYPE,
-            ORMInterface::R_OPTIONS => $this->options->defineMultiple(static::PACK_OPTIONS)
+            ORMInterface::R_TYPE   => static::RELATION_TYPE,
+            ORMInterface::R_CLASS  => $this->getDefinition()->getTarget(),
+            ORMInterface::R_SCHEMA => $this->options->defineMultiple(static::PACK_OPTIONS)
         ];
     }
 

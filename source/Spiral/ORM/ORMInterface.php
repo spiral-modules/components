@@ -30,8 +30,8 @@ interface ORMInterface
     /**
      * Constants used in packed relation schemas.
      */
-    const R_TYPE    = 0;
-    const R_OPTIONS = 1;
+    const R_TYPE  = 0;
+    const R_CLASS = 1;
 
     /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.
@@ -86,4 +86,17 @@ interface ORMInterface
         bool $filter = true,
         bool $cache = false
     ): RecordInterface;
+
+    /**
+     * Create instance of relation loader. Loader must receive target class name, relation schema
+     * (packed) and orm itself.
+     *
+     * @param string $class
+     * @param string $relation
+     *
+     * @return LoaderInterface
+     *
+     * @throws ORMException
+     */
+    public function makeLoader(string $class, string $relation): LoaderInterface;
 }

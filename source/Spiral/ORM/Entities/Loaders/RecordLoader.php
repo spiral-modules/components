@@ -13,20 +13,11 @@ use Spiral\ORM\ORMInterface;
  * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
  * and etc based on nested loaders.
  */
-class RootLoader
+class RecordLoader extends AbstractLoader
 {
     /**
-     * @var string
-     */
-    private $class;
-
-    /**
-     * @invisible
-     * @var ORMInterface
-     */
-    private $orm;
-
-    /**
+     * Root loader always define primary SelectQuery.
+     *
      * @var SelectQuery
      */
     private $select;
@@ -37,8 +28,7 @@ class RootLoader
      */
     public function __construct(string $class, ORMInterface $orm)
     {
-        $this->class = $class;
-        $this->orm = $orm;
+        parent::__construct($class, $orm);
 
         //Getting our initial select query
         $this->select = $orm->table($class)->select();
@@ -52,9 +42,13 @@ class RootLoader
         return $this->select;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function fetchData(): array
     {
+        dump($this->select);
+
         return $this->select->fetchAll();
-        return [];
     }
 }

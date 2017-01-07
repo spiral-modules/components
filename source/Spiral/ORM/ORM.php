@@ -15,6 +15,7 @@ use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
+use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\EntityCache;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
@@ -64,6 +65,11 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     protected $manager;
 
     /**
+     * @var RelationsConfig
+     */
+    protected $config;
+
+    /**
      * @invisible
      * @var MemoryInterface
      */
@@ -77,9 +83,8 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     protected $container;
 
     /**
-     * ORM constructor.
-     *
      * @param DatabaseManager         $manager
+     * @param RelationsConfig         $config
      * @param EntityCache|null        $cache
      * @param LocatorInterface|null   $locator
      * @param MemoryInterface|null    $memory
@@ -87,12 +92,14 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      */
     public function __construct(
         DatabaseManager $manager,
+        RelationsConfig $config,
         EntityCache $cache = null,
         LocatorInterface $locator = null,
         MemoryInterface $memory = null,
         ContainerInterface $container = null
     ) {
         $this->manager = $manager;
+        $this->config = $config;
 
         //If null is passed = no caching is expected
         $this->cache = $cache;
@@ -202,6 +209,9 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
     //source
 
+    /**
+     * {@inheritdoc}
+     */
     public function selector(string $class): RecordSelector
     {
         //ORM is cloned in order to isolate cache scope.
@@ -257,6 +267,34 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             $class,
             $identity,
             $instantiator->make($fields, $filter)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function makeLoader(string $class, string $relation): LoaderInterface
+    {
+        $schema = $this->define($class, self::R_RELATIONS);
+
+        if (!isset($schema[$relation])) {
+            throw new ORMException("Undefined relation '{$class}'.'{$relation}'");
+        }
+
+        $schema = $schema[$relation];
+
+        if (!$this->config->hasRelation($schema[self::R_TYPE])) {
+            throw new ORMException("Undefined relation type '{$schema[self::R_TYPE]}'");
+        }
+
+        //Generating relation
+        return $this->getFactory()->make(
+            $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::LOADER_CLASS),
+            [
+                'class'  => $schema[self::R_CLASS],
+                'schema' => $schema[self::R_SCHEMA],
+                'orm'    => $this
+            ]
         );
     }
 

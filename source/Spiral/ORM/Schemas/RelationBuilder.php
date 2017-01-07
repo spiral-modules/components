@@ -15,7 +15,7 @@ use Spiral\ORM\Schemas\Definitions\RelationDefinition;
  * Subsection of SchemaBuilder used to configure tables and columns defined by model to model
  * relations.
  */
-class RelationManager
+class RelationBuilder
 {
     /**
      * @invisible

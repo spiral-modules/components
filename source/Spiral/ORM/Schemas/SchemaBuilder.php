@@ -27,7 +27,7 @@ class SchemaBuilder
     private $manager;
 
     /**
-     * @var RelationManager
+     * @var RelationBuilder
      */
     private $relations;
 
@@ -50,9 +50,9 @@ class SchemaBuilder
 
     /**
      * @param DatabaseManager $manager
-     * @param RelationManager $relations
+     * @param RelationBuilder $relations
      */
-    public function __construct(DatabaseManager $manager, RelationManager $relations)
+    public function __construct(DatabaseManager $manager, RelationBuilder $relations)
     {
         $this->manager = $manager;
         $this->relations = $relations;

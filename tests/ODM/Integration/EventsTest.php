@@ -31,7 +31,6 @@ class EventsTest extends BaseTest
             $handled[] = 'create';
         });
 
-
         $user::events()->addListener('created', function ($e) use (&$handled) {
             $this->assertInstanceOf(DocumentEvent::class, $e);
             $this->assertInstanceOf(EntityEvent::class, $e);
@@ -39,7 +38,6 @@ class EventsTest extends BaseTest
 
             $handled[] = 'created';
         });
-
 
         $user->save();
         $this->assertSame(['create', 'created'], $handled);
@@ -67,7 +65,6 @@ class EventsTest extends BaseTest
 
             $handled[] = 'update';
         });
-
 
         $user::events()->addListener('updated', function ($e) use (&$handled) {
             $this->assertInstanceOf(DocumentEvent::class, $e);
@@ -103,7 +100,6 @@ class EventsTest extends BaseTest
 
             $handled[] = 'delete';
         });
-
 
         $user::events()->addListener('deleted', function ($e) use (&$handled) {
             $this->assertInstanceOf(DocumentEvent::class, $e);

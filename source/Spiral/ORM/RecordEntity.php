@@ -8,6 +8,7 @@ namespace Spiral\ORM;
 
 use Spiral\Models\SchematicEntity;
 
+//todo: do i need it?
 abstract class RecordEntity extends SchematicEntity implements RecordInterface
 {
     /**

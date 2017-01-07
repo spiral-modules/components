@@ -7,7 +7,7 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Database\Entities\AbstractHandler;
-use Spiral\Database\Exceptions\HandlerException;
+use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
@@ -23,7 +23,7 @@ class SQLiteHandler extends AbstractHandler
      *
      * @param AbstractTable $table
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function dropTable(AbstractTable $table)
     {
@@ -182,7 +182,7 @@ class SQLiteHandler extends AbstractHandler
      * @param string $to
      * @param array  $mapping (destination => source)
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     private function copyData(string $source, string $to, array $mapping)
     {

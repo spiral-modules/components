@@ -42,7 +42,12 @@ trait TablesTrait
     {
         $target = $this->getDefinition()->targetContext();
         if (empty($target)) {
-            throw new RelationSchemaException("Unable to get target context in " . get_class($this));
+            throw new RelationSchemaException(sprintf(
+                "Unable to get target context '%s' in '%s'.'%s'",
+                $this->getDefinition()->getTarget(),
+                $this->getDefinition()->sourceContext()->getClass(),
+                $this->getDefinition()->getName()
+            ));
         }
 
         return $builder->requestTable($target->getTable(), $target->getDatabase());

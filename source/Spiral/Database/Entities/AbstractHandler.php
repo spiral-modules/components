@@ -9,8 +9,8 @@ namespace Spiral\Database\Entities;
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Exceptions\InvalidArgumentException;
 use Spiral\Database\Exceptions\DriverException;
-use Spiral\Database\Exceptions\HandlerException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractElement;
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
@@ -24,9 +24,7 @@ use Spiral\Database\Schemas\StateComparator;
  */
 abstract class AbstractHandler
 {
-    /**
-     * Behaviours.
-     */
+    //Foreign key modification behaviours
     const DROP_FOREIGNS   = 0b000000001;
     const CREATE_FOREIGNS = 0b000000010;
     const ALTER_FOREIGNS  = 0b000000100;
@@ -34,6 +32,7 @@ abstract class AbstractHandler
     //All foreign keys related operations
     const DO_FOREIGNS = self::DROP_FOREIGNS | self::ALTER_FOREIGNS | self::CREATE_FOREIGNS;
 
+    //Column modification behaviours
     const DROP_COLUMNS   = 0b000001000;
     const CREATE_COLUMNS = 0b000010000;
     const ALTER_COLUMNS  = 0b000100000;
@@ -41,6 +40,7 @@ abstract class AbstractHandler
     //All columns related operations
     const DO_COLUMNS = self::DROP_COLUMNS | self::ALTER_COLUMNS | self::CREATE_COLUMNS;
 
+    //Index modification behaviours
     const DROP_INDEXES   = 0b001000000;
     const CREATE_INDEXES = 0b010000000;
     const ALTER_INDEXES  = 0b100000000;
@@ -48,7 +48,7 @@ abstract class AbstractHandler
     //All index related operations
     const DO_INDEXES = self::DROP_INDEXES | self::ALTER_INDEXES | self::CREATE_INDEXES;
 
-    //Schema operations
+    //General purpose schema operations
     const DO_RENAME = 0b10000000000;
     const DO_DROP   = 0b01000000000;
 
@@ -90,7 +90,7 @@ abstract class AbstractHandler
      *
      * @param AbstractTable $table
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function createTable(AbstractTable $table)
     {
@@ -110,7 +110,7 @@ abstract class AbstractHandler
      *
      * @param AbstractTable $table
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function dropTable(AbstractTable $table)
     {
@@ -151,7 +151,7 @@ abstract class AbstractHandler
      * @param string $table
      * @param string $name
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function renameTable(string $table, string $name)
     {
@@ -164,7 +164,7 @@ abstract class AbstractHandler
      * @param AbstractTable  $table
      * @param AbstractColumn $column
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function createColumn(AbstractTable $table, AbstractColumn $column)
     {
@@ -177,7 +177,7 @@ abstract class AbstractHandler
      * @param AbstractTable  $table
      * @param AbstractColumn $column
      *
-     * @return self
+     * @return AbstractHandler
      */
     public function dropColumn(AbstractTable $table, AbstractColumn $column)
     {
@@ -196,7 +196,7 @@ abstract class AbstractHandler
      * @param AbstractColumn $initial
      * @param AbstractColumn $column
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     abstract public function alterColumn(
         AbstractTable $table,
@@ -210,7 +210,7 @@ abstract class AbstractHandler
      * @param AbstractTable $table
      * @param AbstractIndex $index
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function createIndex(AbstractTable $table, AbstractIndex $index)
     {
@@ -223,7 +223,7 @@ abstract class AbstractHandler
      * @param AbstractTable $table
      * @param AbstractIndex $index
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function dropIndex(AbstractTable $table, AbstractIndex $index)
     {
@@ -237,7 +237,7 @@ abstract class AbstractHandler
      * @param AbstractIndex $initial
      * @param AbstractIndex $index
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function alterIndex(AbstractTable $table, AbstractIndex $initial, AbstractIndex $index)
     {
@@ -251,7 +251,7 @@ abstract class AbstractHandler
      * @param AbstractTable     $table
      * @param AbstractReference $foreign
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function createForeign(AbstractTable $table, AbstractReference $foreign)
     {
@@ -264,7 +264,7 @@ abstract class AbstractHandler
      * @param AbstractTable     $table
      * @param AbstractReference $foreign
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function dropForeign(AbstractTable $table, AbstractReference $foreign)
     {
@@ -278,7 +278,7 @@ abstract class AbstractHandler
      * @param AbstractReference $initial
      * @param AbstractReference $foreign
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function alterForeign(
         AbstractTable $table,
@@ -295,7 +295,7 @@ abstract class AbstractHandler
      * @param AbstractTable $table
      * @param string        $constraint
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     public function dropConstrain(AbstractTable $table, $constraint)
     {
@@ -373,14 +373,14 @@ abstract class AbstractHandler
      *
      * @return \PDOStatement
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      */
     protected function run(string $statement, array $parameters = []): \PDOStatement
     {
         try {
             return $this->driver->statement($statement, $parameters);
         } catch (QueryException $e) {
-            throw new HandlerException($e);
+            throw new SchemaHandlerException($e);
         }
     }
 

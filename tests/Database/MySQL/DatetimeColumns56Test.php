@@ -26,7 +26,7 @@ class DatetimeColumns57Test extends \Spiral\Tests\Database\DatetimeColumnsTest
     }
 
     /**
-     * @expectedException \Spiral\Database\Exceptions\HandlerException
+     * @expectedException \Spiral\Database\Exceptions\SchemaHandlerException
      * @expectedExceptionMessage SQLSTATE[42000]: Syntax error or access violation: 1067 Invalid
      *                           default value for 'target'
      */

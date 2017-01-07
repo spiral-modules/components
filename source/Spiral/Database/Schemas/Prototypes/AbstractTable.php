@@ -9,7 +9,7 @@ namespace Spiral\Database\Schemas\Prototypes;
 use Psr\Log\LoggerInterface;
 use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Exceptions\HandlerException;
+use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\StateComparator;
 use Spiral\Database\Schemas\TableInterface;
@@ -625,7 +625,7 @@ abstract class AbstractTable implements TableInterface
      * @param LoggerInterface $logger    Optional, aggregates messages for data syncing.
      * @param bool            $reset     When true schema will be marked as synced.
      *
-     * @throws HandlerException
+     * @throws SchemaHandlerException
      *
      * @throws SchemaException
      */

@@ -9,7 +9,7 @@ namespace Spiral\Database\Exceptions;
 /**
  * Schema sync related exception.
  */
-class HandlerException extends DriverException implements QueryExceptionInterface
+class SchemaHandlerException extends DriverException implements QueryExceptionInterface
 {
     /**
      * @param QueryException $e

@@ -19,7 +19,7 @@ use Spiral\Support\DFSSorter;
 /**
  * Saves multiple linked tables at once but treating their cross dependency.
  *
- * Attention, not every database support transactional schema manipulations!
+ * Attention, not every DBMS support transactional schema manipulations!
  */
 class SynchronizationPool extends Component
 {

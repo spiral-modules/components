@@ -10,7 +10,8 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\ORM\ORMInterface;
 
 /**
- * Primary ORM loader.
+ * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
+ * and etc based on nested loaders.
  */
 class RootLoader
 {
@@ -41,5 +42,19 @@ class RootLoader
 
         //Getting our initial select query
         $this->select = $orm->table($class)->select();
+    }
+
+    /**
+     * @return SelectQuery
+     */
+    public function selectQuery(): SelectQuery
+    {
+        return $this->select;
+    }
+
+    public function fetchData(): array
+    {
+        return $this->select->fetchAll();
+        return [];
     }
 }

@@ -53,8 +53,9 @@ class RecordSelector extends Component
         return $this->class;
     }
 
-    public function fetchData()
+    public function fetchData(): array
     {
+        return $this->loader->fetchData();
     }
 
     /**

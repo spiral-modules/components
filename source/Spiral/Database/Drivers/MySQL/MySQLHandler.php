@@ -25,7 +25,21 @@ class MySQLHandler extends AbstractHandler
         AbstractColumn $initial,
         AbstractColumn $column
     ) {
+
+        $foreignBackup = [];
+        foreach ($table->getForeigns() as $foreign) {
+            if ($column->getName() == $foreign->getColumn()) {
+                $foreignBackup[] = $foreign;
+                $this->dropForeign($table, $foreign);
+            }
+        }
+
         $this->run("ALTER TABLE {$this->identify($table)} CHANGE {$this->identify($initial)} {$column->sqlStatement($this->driver, true)}");
+
+        //Restoring FKs
+        foreach ($foreignBackup as $foreign) {
+            $this->createForeign($table, $foreign);
+        }
     }
 
     /**

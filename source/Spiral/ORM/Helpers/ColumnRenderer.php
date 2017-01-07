@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Helpers;
 
+use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\ColumnRenderException;
@@ -82,7 +83,9 @@ class ColumnRenderer
      *
      * Attention, column state will be affected!
      *
-     * @see AbstractColumn
+     * @see  AbstractColumn
+     *
+     * @todo convert column type exception into definition
      *
      * @param AbstractColumn $column
      * @param string         $definition
@@ -92,7 +95,6 @@ class ColumnRenderer
      * @return mixed
      *
      * @throws DefinitionException
-     * @throws \Spiral\Database\Exceptions\SchemaException
      */
     public function declareColumn(
         AbstractColumn $column,
@@ -105,7 +107,7 @@ class ColumnRenderer
 
         if (!preg_match($pattern, $definition, $type)) {
             throw new DefinitionException(
-                "Invalid column type definition in '{$this}'.'{$column->getName()}'"
+                "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'"
             );
         }
 
@@ -121,12 +123,19 @@ class ColumnRenderer
             //Indication that column is nullable
             $column->nullable(true);
         }
-
-        //Bypassing call to AbstractColumn->__call method (or specialized column method)
-        call_user_func_array(
-            [$column, $type['type']],
-            !empty($type['options']) ? $type['options'] : []
-        );
+        try {
+            //Bypassing call to AbstractColumn->__call method (or specialized column method)
+            call_user_func_array(
+                [$column, $type['type']],
+                !empty($type['options']) ? $type['options'] : []
+            );
+        } catch (SchemaException $e) {
+            throw new DefinitionException(
+                "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'",
+                $e->getCode(),
+                $e
+            );
+        }
 
         if (in_array($column->abstractType(), ['primary', 'bigPrimary'])) {
             //No default value can be set of primary keys

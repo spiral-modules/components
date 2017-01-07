@@ -80,6 +80,18 @@ class RelationOptions
     }
 
     /**
+     * All relation options.
+     *
+     * @param array $options Options to be defined.
+     *
+     * @return array
+     */
+    public function defineMultiple(array $options): array
+    {
+        return array_intersect_key($this->options, array_flip($options));
+    }
+
+    /**
      * Calculate options based on given template
      *
      * @param array $userOptions Options provided by user.
@@ -123,13 +135,13 @@ class RelationOptions
 
         $proposed = [
             //Relation name
-            'name'              => $this->definition->getName(),
+            'relation:name'     => $this->definition->getName(),
 
             //Relation name in plural form
-            'name:plural'       => Inflector::pluralize($this->definition->getName()),
+            'relation:plural'   => Inflector::pluralize($this->definition->getName()),
 
             //Relation name in singular form
-            'name:singular'     => Inflector::singularize($this->definition->getName()),
+            'relation:singular' => Inflector::singularize($this->definition->getName()),
 
             //Parent record role name
             'source:role'       => $source->getRole(),

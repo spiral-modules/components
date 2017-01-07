@@ -28,6 +28,12 @@ interface ORMInterface
     const R_RELATIONS    = 6;
 
     /**
+     * Constants used in packed relation schemas.
+     */
+    const R_TYPE    = 0;
+    const R_OPTIONS = 1;
+
+    /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.
      *
      * Example:

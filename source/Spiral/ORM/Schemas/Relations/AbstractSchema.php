@@ -8,6 +8,7 @@ namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\ORM\Exceptions\OptionsException;
 use Spiral\ORM\Helpers\RelationOptions;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 use Spiral\ORM\Schemas\RelationInterface;
 
@@ -16,6 +17,16 @@ use Spiral\ORM\Schemas\RelationInterface;
  */
 abstract class AbstractSchema implements RelationInterface
 {
+    /**
+     * Relation type to be stored in packed schema.
+     */
+    const RELATION_TYPE = null;
+
+    /**
+     * Options to be packed in schema (not all options are required in runtime).
+     */
+    const PACK_OPTIONS = [];
+
     /**
      * Most of relations provides ability to specify many different configuration options, such
      * as key names, pivot table schemas, foreign key request, ability to be nullabe and etc.
@@ -64,11 +75,15 @@ abstract class AbstractSchema implements RelationInterface
         return $this->definition;
     }
 
-
+    /**
+     * {@inheritdoc}
+     */
     public function packRelation(): array
     {
-        //todo: replace
-        return [];
+        return [
+            ORMInterface::R_TYPE    => static::RELATION_TYPE,
+            ORMInterface::R_OPTIONS => $this->options->defineMultiple(static::PACK_OPTIONS)
+        ];
     }
 
     /**

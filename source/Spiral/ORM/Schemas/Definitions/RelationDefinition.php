@@ -36,9 +36,11 @@ final class RelationDefinition
     private $options = [];
 
     /**
-     * @var bool
+     * Name of relation to be inversed to.
+     *
+     * @var string
      */
-    private $inverse = false;
+    private $inverse = null;
 
     /**
      * Defines where relation comes from.
@@ -48,7 +50,7 @@ final class RelationDefinition
     private $sourceContext;
 
     /**
-     * Defines where realation points to (if any).
+     * Defines where relation points to (if any).
      *
      * @var RelationContext|null
      */
@@ -59,19 +61,20 @@ final class RelationDefinition
      * @param string $type
      * @param string $target
      * @param array  $options
-     * @param bool   $inverse
+     * @param mixed  $inverse Name of relation to inversed to.
      */
     public function __construct(
         string $name,
         string $type,
         string $target,
         array $options,
-        bool $inverse = false
+        string $inverse = null
     ) {
         $this->name = $name;
         $this->type = $type;
         $this->target = $target;
         $this->options = $options;
+        $this->inverse = $inverse;
     }
 
     /**
@@ -165,109 +168,22 @@ final class RelationDefinition
     }
 
     /**
-     * @todo: add inversion options
+     * Checks if inversion if required.
+     *
      * @return bool
      */
-    public function needInverse(): bool
+    public function needInversion(): bool
+    {
+        return !empty($this->inverse);
+    }
+
+    /**
+     * Name of relation to be inversed to.
+     *
+     * @return string
+     */
+    public function getInverse(): string
     {
         return $this->inverse;
     }
-
-//    /**
-//     * Will specify missing fields in relation definition using default definition options. Such
-//     * options are dynamic and populated based on values fetched from related records.
-//     */
-//    protected function clarifyDefinition()
-//    {
-//        foreach ($this->defaultDefinition as $property => $pattern) {
-//            if (isset($this->definition[$property])) {
-//                //Specified by user
-//                continue;
-//            }
-//
-//            if (!is_string($pattern)) {
-//                //Some options are actually array of options
-//                $this->definition[$property] = $pattern;
-//                continue;
-//            }
-//
-//            //Let's create option value using default proposer values
-//            $this->definition[$property] = \Spiral\interpolate(
-//                $pattern,
-//                $this->proposedDefinitions()
-//            );
-//        }
-//    }
-
-//    /**
-//     * Create set of options to specify missing relation definition fields.
-//     *
-//     * @return array
-//     */
-//    protected function proposedDefinitions()
-//    {
-//        $options = [
-//            //Relation name
-//            'name'              => $this->name,
-//            //Relation name in plural form
-//            'name:plural'       => Inflector::pluralize($this->name),
-//            //Relation name in singular form
-//            'name:singular'     => Inflector::singularize($this->name),
-//            //Parent record role name
-//            'record:role'       => $this->record->getRole(),
-//            //Parent record table name
-//            'record:table'      => $this->record->getTable(),
-//            //Parent record primary key
-//            'record:primaryKey' => $this->record->getPrimaryKey(),
-//        ];
-//
-//        //Some options may use values declared in other definition fields
-//        $proposed = [
-//            RecordEntity::OUTER_KEY   => 'outerKey',
-//            RecordEntity::INNER_KEY   => 'innerKey',
-//            RecordEntity::PIVOT_TABLE => 'pivotTable',
-//        ];
-//
-//        foreach ($proposed as $property => $alias) {
-//            if (isset($this->definition[$property])) {
-//                //Let's create some default options based on user specified values
-//                $options['definition:' . $alias] = $this->definition[$property];
-//            }
-//        }
-//
-//        if ($this->builder->hasRecord($this->target)) {
-//            $options = $options + [
-//                    //Outer role name
-//                    'outer:role'       => $this->outerRecord()->getRole(),
-//                    //Outer record table
-//                    'outer:table'      => $this->outerRecord()->getTable(),
-//                    //Outer record primary key
-//                    'outer:primaryKey' => $this->outerRecord()->getPrimaryKey(),
-//                ];
-//        }
-//
-//        return $options;
-//    }
-
-//    /**
-//     * Resolve correct abstract type to represent inner or outer key. Primary types will be
-//     * converted to appropriate sized integers.
-//     *
-//     * @param AbstractColumn $column
-//     *
-//     * @return string
-//     */
-//    protected function resolveAbstract(AbstractColumn $column)
-//    {
-//        switch ($column->abstractType()) {
-//            case 'bigPrimary':
-//                return 'bigInteger';
-//            case 'primary':
-//                return 'integer';
-//            default:
-//                //Not primary key
-//                return $column->abstractType();
-//        }
-//    }
-
 }

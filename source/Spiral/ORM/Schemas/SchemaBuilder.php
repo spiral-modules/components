@@ -363,7 +363,7 @@ class SchemaBuilder
             );
 
             //Render table schema
-            $table = $schema->declateTable($table);
+            $table = $schema->declareTable($table);
 
             //Working with indexes
             foreach ($schema->getIndexes() as $index) {
@@ -416,17 +416,20 @@ class SchemaBuilder
     /**
      * Update table state.
      *
-     * @param AbstractTable $table
+     * @param AbstractTable $schema
      * @param string|null   $database
      *
      * @throws SchemaException
      */
-    protected function setTable(AbstractTable $table, string $database = null)
+    protected function setTable(AbstractTable $schema, string $database = null)
     {
-        if (empty($this->tables[$database . '.' . $table->getName()])) {
+        //We have to make sure that local table name is used
+        $table = substr($schema->getName(), strlen($schema->getPrefix()));
+
+        if (empty($this->tables[$database . '.' . $table])) {
             throw new SchemaException("AbstractTable must be requested before pushing back");
         }
 
-        $this->tables[$database . '.' . $table->getName()] = $table;
+        $this->tables[$database . '.' . $table] = $schema;
     }
 }

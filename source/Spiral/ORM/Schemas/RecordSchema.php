@@ -15,6 +15,7 @@ use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Helpers\ColumnRenderer;
+use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\Definitions\IndexDefinition;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
@@ -163,7 +164,7 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function declateTable(AbstractTable $table): AbstractTable
+    public function declareTable(AbstractTable $table): AbstractTable
     {
         return $this->renderer->renderColumns(
             $this->getFields(),
@@ -194,7 +195,13 @@ class RecordSchema implements SchemaInterface
             unset($definition[$type]);
 
             //Defining relation
-            yield new RelationDefinition($name, $type, $target, $definition);
+            yield new RelationDefinition(
+                $name,
+                $type,
+                $target,
+                $definition,
+                $definition[Record::INVERSE] ?? null
+            );
         }
     }
 

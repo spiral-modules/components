@@ -178,20 +178,68 @@ class SchemaBuilder
     public function renderSchema(): SchemaBuilder
     {
         //Declaring tables associated with records
-        $this->declareTables();
+        $this->renderModels();
 
         //Defining all relations declared by our schemas
-        $this->declareRelations();
+        $this->renderRelations();
 
         //Inverse relations (if requested)
         $this->relations->inverseRelations();
 
         //Rendering needed columns, FKs and indexes needed for our relations (if relation is ORM specific)
-
-        //todo: implement this magic piece of code (do not forget to provide schema builder)
-        dump($this->relations);
+        foreach ($this->relations->declareTables($this) as $table) {
+            $this->setTable($table);
+        }
 
         return $this;
+    }
+
+    /**
+     * Request table schema by name/database combination. Attention, you can only save table by
+     * pushing it back using pushTable() method.
+     *
+     * @see setTable()
+     *
+     * @param string      $table
+     * @param string|null $database
+     * @param bool        $resetState When set to true current table state will be reset in order
+     *                                to allow model to redefine it's schema.
+     * @param bool        $unique     Set to true (default), to throw an exception when table
+     *                                already referenced by another model.
+     *
+     * @return AbstractTable          Unlinked.
+     *
+     * @throws DoubleReferenceException When two records refers to same table and unique option
+     *                                  set.
+     */
+    public function requestTable(
+        string $table,
+        string $database = null,
+        bool $unique = false,
+        bool $resetState = false
+    ): AbstractTable {
+        if (isset($this->tables[$database . '.' . $table])) {
+            $schema = $this->tables[$database . '.' . $table];
+
+            if ($unique) {
+                throw new DoubleReferenceException(
+                    "Table '{$table}' of '{$database} 'been requested by multiple models"
+                );
+            }
+        } else {
+            //Requesting thought DatabaseManager
+            $schema = $this->manager->database($database)->table($table)->getSchema();
+            $this->tables[$database . '.' . $table] = $schema;
+        }
+
+        $schema = clone $schema;
+
+        if ($resetState) {
+            //Emptying our current state (initial not affected)
+            $schema->setState(null);
+        }
+
+        return $schema;
     }
 
     /**
@@ -300,7 +348,7 @@ class SchemaBuilder
      * @throws SchemaException
      * @throws DBALException
      */
-    protected function declareTables()
+    protected function renderModels()
     {
         foreach ($this->schemas as $schema) {
             /**
@@ -315,7 +363,7 @@ class SchemaBuilder
             );
 
             //Render table schema
-            $table = $schema->renderTable($table);
+            $table = $schema->declateTable($table);
 
             //Working with indexes
             foreach ($schema->getIndexes() as $index) {
@@ -324,7 +372,7 @@ class SchemaBuilder
             }
 
             //And put it back :)
-            $this->pushTable($table, $schema->getDatabase());
+            $this->setTable($table, $schema->getDatabase());
         }
     }
 
@@ -334,7 +382,7 @@ class SchemaBuilder
      * @throws SchemaException
      * @throws DefinitionException
      */
-    protected function declareRelations()
+    protected function renderRelations()
     {
         foreach ($this->schemas as $schema) {
             foreach ($schema->getRelations() as $name => $relation) {
@@ -366,58 +414,19 @@ class SchemaBuilder
     }
 
     /**
-     * Request table schema by name/database combination.
-     *
-     * @param string      $table
-     * @param string|null $database
-     * @param bool        $resetState When set to true current table state will be reset in order
-     *                                to allow model to redefine it's schema.
-     * @param bool        $unique     Set to true (default), to throw an exception when table
-     *                                already referenced by another model.
-     *
-     * @return AbstractTable          Unlinked.
-     *
-     * @throws DoubleReferenceException When two records refers to same table and unique option
-     *                                  set.
-     */
-    protected function requestTable(
-        string $table,
-        string $database = null,
-        bool $unique = false,
-        bool $resetState = false
-    ): AbstractTable {
-        if (isset($this->tables[$database . '.' . $table])) {
-            $schema = $this->tables[$database . '.' . $table];
-
-            if ($unique) {
-                throw new DoubleReferenceException(
-                    "Table '{$table}' of '{$database} 'been requested by multiple models"
-                );
-            }
-        } else {
-            //Requesting thought DatabaseManager
-            $schema = $this->manager->database($database)->table($table)->getSchema();
-            $this->tables[$database . '.' . $table] = $schema;
-        }
-
-        $schema = clone $schema;
-
-        if ($resetState) {
-            //Emptying our current state (initial not affected)
-            $schema->setState(null);
-        }
-
-        return $schema;
-    }
-
-    /**
      * Update table state.
      *
      * @param AbstractTable $table
      * @param string|null   $database
+     *
+     * @throws SchemaException
      */
-    private function pushTable(AbstractTable $table, string $database = null)
+    protected function setTable(AbstractTable $table, string $database = null)
     {
+        if (empty($this->tables[$database . '.' . $table->getName()])) {
+            throw new SchemaException("AbstractTable must be requested before pushing back");
+        }
+
         $this->tables[$database . '.' . $table->getName()] = $table;
     }
 }

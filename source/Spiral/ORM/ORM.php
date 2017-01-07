@@ -205,11 +205,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     public function selector(string $class): RecordSelector
     {
         //ORM is cloned in order to isolate cache scope.
-        return new RecordSelector(
-            $this->table($class),
-            $class,
-            clone $this
-        );
+        return new RecordSelector($class, clone $this);
     }
 
     /**

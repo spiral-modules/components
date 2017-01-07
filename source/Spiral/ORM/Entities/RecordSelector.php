@@ -7,7 +7,7 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
-use Spiral\Database\Entities\Table;
+use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\ORMInterface;
 
 /**
@@ -15,11 +15,6 @@ use Spiral\ORM\ORMInterface;
  */
 class RecordSelector extends Component
 {
-    /**
-     * @var Table
-     */
-    private $table;
-
     /**
      * @var string
      */
@@ -32,15 +27,20 @@ class RecordSelector extends Component
     private $orm;
 
     /**
-     * @param Table        $table
+     * @var RootLoader
+     */
+    private $loader;
+
+    /**
      * @param string       $class
      * @param ORMInterface $orm
      */
-    public function __construct(Table $table, string $class, ORMInterface $orm)
+    public function __construct(string $class, ORMInterface $orm)
     {
-        $this->table = $table;
         $this->class = $class;
         $this->orm = $orm;
+
+        $this->loader = new RootLoader($class, $orm);
     }
 
     /**
@@ -55,9 +55,6 @@ class RecordSelector extends Component
 
     public function fetchData()
     {
-        $selectQuery = $this->table->select();
-
-        dump($selectQuery);
     }
 
     /**

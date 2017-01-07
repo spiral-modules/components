@@ -6,6 +6,8 @@
  */
 namespace Spiral\ORM\Schemas;
 
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 
 /**
@@ -21,15 +23,23 @@ interface RelationInterface
      */
     public function getDefinition(): RelationDefinition;
 
-//    /**
-//     * List of tables required for relation to be defined besides tables related to source and
-//     * target record schemas. This method can be used to request map tables.
-//     *
-//     * @return array
-//     */
-//    public function mapTables(): array;
+    /**
+     * Method must return set of tables being altered by relation.
+     *
+     * @param SchemaBuilder $builder
+     *
+     * @return AbstractTable[]
+     *
+     * @throws RelationSchemaException
+     */
+    public function declareTables(SchemaBuilder $builder): array;
 
-    //????????
-
+    /**
+     * Pack relation information info form or immutable array to be used as schema in runtime.
+     *
+     * @return array
+     *
+     * @throws RelationSchemaException
+     */
     public function packRelation(): array;
 }

@@ -402,8 +402,16 @@ abstract class AbstractTable implements TableInterface
             return $this->current->findIndex($columns);
         }
 
-        $index = $this->createIndex($this->createIdentifier('index', $columns));
-        $index->columns($columns);
+        if ($this->initial->hasIndex($columns)) {
+            //Let's ensure that index name is always stays synced (not regenerated)
+            $name = $this->initial->findIndex($columns)->getName();
+        } else {
+            $name = $this->createIdentifier('index', $columns);
+        }
+
+        $index = $this->createIndex($name)->columns($columns);
+
+        //Adding to current schema
         $this->current->registerIndex($index);
 
         return $index;
@@ -429,9 +437,16 @@ abstract class AbstractTable implements TableInterface
             return $this->current->findForeign($column);
         }
 
-        $foreign = $this->createForeign($this->createIdentifier('foreign', [$column]));
-        $foreign->column($column);
+        if ($this->initial->hasForeign($column)) {
+            //Let's ensure that FK name is always stays synced (not regenerated)
+            $name = $this->initial->findForeign($column)->getName();
+        } else {
+            $name = $this->createIdentifier('foreign', [$column]);
+        }
 
+        $foreign = $this->createForeign($name)->column($column);
+
+        //Adding to current schema
         $this->current->registerForeign($foreign);
 
         //Let's ensure index existence to performance and compatibility reasons

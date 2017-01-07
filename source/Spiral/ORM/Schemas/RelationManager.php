@@ -70,7 +70,11 @@ class RelationManager
         );
 
         //Creating relation schema
-        $this->relations[] = $this->factory->make($class, compact('definition'));
+        $relation = $this->factory->make($class, compact('definition'));
+
+        //Equavalent (low)?
+
+        $this->relations[] = $relation;
     }
 
     /**
@@ -89,14 +93,35 @@ class RelationManager
             if ($definition->needInverse()) {
                 if (!$relation instanceof InversableRelationInterface) {
                     throw new DefinitionException(sprintf(
-                        "Unable to inverse relation '%s'.'%s', relation schema non inversable",
+                        "Unable to inverse relation '%s'.'%s', relation schema '%s' non inversable",
                         $definition->sourceContext()->getClass(),
-                        $definition->getName()
+                        $definition->getName(),
+                        get_class($relation)
                     ));
                 }
 
                 //Let's perform inversion
                 $this->registerRelation($relation->inverseDefinition());
+            }
+        }
+    }
+
+    //todo: normalize relations?
+
+    /**
+     * Declare set of tables for each relation. Method must return Generator of AbstractTable
+     * sequentially (attention, non sequential processing will cause collision issues between
+     * tables).
+     *
+     * @param SchemaBuilder $builder
+     *
+     * @return \Generator
+     */
+    public function declareTables(SchemaBuilder $builder): \Generator
+    {
+        foreach ($this->relations as $relation) {
+            foreach ($relation->declareTables($builder) as $table) {
+                yield $table;
             }
         }
     }

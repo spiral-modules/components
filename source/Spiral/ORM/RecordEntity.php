@@ -61,7 +61,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      * @see RelationSchemaInterface
      */
     const INVERSE           = 1001; //Relation should be inverted to parent record
-    const CONSTRAINT        = 1002; //Relation should create foreign keys (default)
+    const CREATE_CONSTRAINT = 1002; //Relation should create foreign keys (default)
     const CONSTRAINT_ACTION = 1003; //Default relation foreign key delete/update action (CASCADE)
     const CREATE_PIVOT      = 1004; //Many-to-Many should create pivot table automatically (default)
     const NULLABLE          = 1005; //Relation can be nullable (default)

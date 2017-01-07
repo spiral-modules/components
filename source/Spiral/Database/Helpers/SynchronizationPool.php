@@ -13,7 +13,6 @@ use Spiral\Core\Component;
 use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
-use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Support\DFSSorter;
 
 /**
@@ -23,8 +22,6 @@ use Spiral\Support\DFSSorter;
  */
 class SynchronizationPool extends Component
 {
-    use LoggerTrait;
-
     /**
      * @var AbstractTable[]
      */
@@ -91,8 +88,6 @@ class SynchronizationPool extends Component
 
         if (!$hasChanges) {
             //Nothing to do
-            $this->logger()->info('No changes detected');
-
             return;
         }
 
@@ -138,8 +133,6 @@ class SynchronizationPool extends Component
      */
     protected function beginTransaction()
     {
-        $this->logger()->debug('Begin transaction');
-
         foreach ($this->drivers as $driver) {
             $driver->beginTransaction();
         }
@@ -150,8 +143,6 @@ class SynchronizationPool extends Component
      */
     protected function commitTransaction()
     {
-        $this->logger()->debug('Commit transaction');
-
         foreach ($this->drivers as $driver) {
             $driver->commitTransaction();
         }
@@ -162,8 +153,6 @@ class SynchronizationPool extends Component
      */
     protected function rollbackTransaction()
     {
-        $this->logger()->warning('Roll back transaction');
-
         foreach ($this->drivers as $driver) {
             $driver->rollbackTransaction();
         }

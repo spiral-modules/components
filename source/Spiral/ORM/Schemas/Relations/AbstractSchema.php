@@ -9,6 +9,7 @@ namespace Spiral\ORM\Schemas\Relations;
 use Spiral\ORM\Exceptions\OptionsException;
 use Spiral\ORM\Helpers\RelationOptions;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Record;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 use Spiral\ORM\Schemas\RelationInterface;
 
@@ -87,6 +88,27 @@ abstract class AbstractSchema implements RelationInterface
     }
 
     /**
+     * Check if relation requests foreign key constraints to be created.
+     *
+     * @return bool
+     */
+    public function isConstrained()
+    {
+        $source = $this->definition->sourceContext();
+        $target = $this->definition->targetContext();
+        if (empty($target)) {
+            return false;
+        }
+
+        if ($source->getDatabase() != $target->getDatabase()) {
+            //Unable to create constrains for records in different databases
+            return false;
+        }
+
+        return $this->option(Record::CREATE_CONSTRAINT);
+    }
+
+    /**
      * Define relation configuration option.
      *
      * @param string $option
@@ -99,4 +121,5 @@ abstract class AbstractSchema implements RelationInterface
     {
         return $this->options->define($option);
     }
+
 }

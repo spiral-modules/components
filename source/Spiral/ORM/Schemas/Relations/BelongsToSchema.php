@@ -96,7 +96,7 @@ class BelongsToSchema extends AbstractSchema
             $sourceTable->index([$innerKey->getName()]);
         }
 
-        if ($this->option(Record::CREATE_CONSTRAINT)) {
+        if ($this->isConstrained()) {
             $this->createForeign(
                 $sourceTable,
                 $innerKey,

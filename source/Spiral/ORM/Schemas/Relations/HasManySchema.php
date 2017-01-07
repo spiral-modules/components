@@ -140,7 +140,7 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
             $targetTable->index([$outerKey->getName()]);
         }
 
-        if ($this->option(Record::CREATE_CONSTRAINT)) {
+        if ($this->isConstrained()) {
             $this->createForeign(
                 $targetTable,
                 $outerKey,

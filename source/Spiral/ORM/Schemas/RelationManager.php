@@ -74,6 +74,8 @@ class RelationManager
 
         //Equavalent (low)?
 
+        //todo: make sure no dubs
+
         $this->relations[] = $relation;
     }
 
@@ -99,6 +101,8 @@ class RelationManager
                         get_class($relation)
                     ));
                 }
+
+                //todo: make sure no dubs
 
                 //Let's perform inversion
                 $this->registerRelation($relation->inverseDefinition($definition->getInverse()));

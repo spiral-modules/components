@@ -70,6 +70,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     const MORPHED_ALIASES   = 1007; //Aliases for morphed sub-relations
 
     /**
+     * Set of columns to be used in relation (attention, make sure that loaded records are set as
+     * NON SOLID if you planning to modify their data).
+     */
+    const RELATION_COLUMNS = 1009;
+
+    /**
      * Constants used to declare indexes in record schema.
      *
      * @see Record::INDEXES

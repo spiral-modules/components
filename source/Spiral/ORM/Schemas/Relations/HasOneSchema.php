@@ -28,5 +28,10 @@ class HasOneSchema extends HasManySchema
     /**
      * Options needed in runtime (no need for where query).
      */
-    const PACK_OPTIONS = [Record::INNER_KEY, Record::OUTER_KEY, Record::NULLABLE];
+    const PACK_OPTIONS = [
+        Record::INNER_KEY,
+        Record::OUTER_KEY,
+        Record::NULLABLE,
+        Record::RELATION_COLUMNS
+    ];
 }

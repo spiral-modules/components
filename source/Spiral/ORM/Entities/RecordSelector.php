@@ -7,7 +7,7 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
-use Spiral\ORM\Entities\Loaders\RecordLoader;
+use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\ORMInterface;
 
 /**
@@ -27,9 +27,9 @@ class RecordSelector extends Component
     private $orm;
 
     /**
-     * @var RecordLoader
+     * @var RootLoader
      */
-    private $loader;
+    public $loader;
 
     /**
      * @param string       $class
@@ -40,7 +40,11 @@ class RecordSelector extends Component
         $this->class = $class;
         $this->orm = $orm;
 
-        $this->loader = new RecordLoader($class, $orm);
+        $this->loader = new RootLoader(
+            $class,
+            $orm->define($class, ORMInterface::R_SCHEMA),
+            $orm
+        );
     }
 
     /**
@@ -225,7 +229,7 @@ class RecordSelector extends Component
         }
 
         //Requesting primary loader to join nested relation, will only work for ORM loaders
-        $this->loader->joinRelation($relation, $options);
+        $this->loader->loadRelation($relation, $options, true);
 
         return $this;
     }

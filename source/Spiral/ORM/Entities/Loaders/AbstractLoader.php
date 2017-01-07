@@ -8,9 +8,9 @@ namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\LoaderException;
+use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\Record;
 
 /**
  * ORM Loaders used to load an compile data tree based on results fetched from SQL databases,
@@ -42,6 +42,20 @@ abstract class AbstractLoader implements LoaderInterface
     const LEFT_JOIN = 4;
 
     /**
+     * Nested loaders.
+     *
+     * @var LoaderInterface[]
+     */
+    protected $loaders = [];
+
+    /**
+     * Set of loaders with ability to JOIN it's data into parent SelectQuery.
+     *
+     * @var AbstractLoader[]
+     */
+    protected $joiners = [];
+
+    /**
      * @var string
      */
     protected $class;
@@ -55,6 +69,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Parent loader if any.
      *
+     * @invisible
      * @var AbstractLoader
      */
     protected $parent;
@@ -64,34 +79,31 @@ abstract class AbstractLoader implements LoaderInterface
      *
      * @var array
      */
-    protected $options = [
-        'method' => null,
-        'join'   => 'INNER',
-        'alias'  => null,
-        'using'  => null,
-        'where'  => null,
-    ];
+    protected $options = [];
 
     /**
-     * Associated record schema.
+     * Relation schema.
      *
      * @var array
      */
-    protected $record = [];
+    protected $schema = [];
 
     /**
      * @param string       $class
+     * @param array        $schema Relation schema.
      * @param ORMInterface $orm
      */
-    public function __construct(string $class, ORMInterface $orm)
+    public function __construct(string $class, array $schema, ORMInterface $orm)
     {
         $this->class = $class;
+        $this->schema = $schema;
         $this->orm = $orm;
-
-        $this->record = $orm->define($class, ORMInterface::R_SCHEMA);
     }
 
-    public function withParent(AbstractLoader $parent): self
+    /**
+     * {@inheritdoc}
+     */
+    public function withParent(LoaderInterface $parent): LoaderInterface
     {
         $loader = clone $this;
         $loader->parent = $parent;
@@ -99,10 +111,25 @@ abstract class AbstractLoader implements LoaderInterface
         return $loader;
     }
 
-    public function withOptions(array $options): self
+    /**
+     * {@inheritdoc}
+     */
+    public function withOptions(array $options): LoaderInterface
     {
+        /*
+         * This scary construction simply checks if input array has keys which do not present in a
+         * current set of options (i.e. default options, i.e. current options).
+         */
+        if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
+            throw new LoaderException(sprintf(
+                "Relation %s does not support options: %s",
+                get_class($this),
+                join(',', $wrong)
+            ));
+        }
+
         $loader = clone $this;
-        $loader->parent = $parent;
+        $loader->options = $options;
 
         return $loader;
     }
@@ -111,42 +138,108 @@ abstract class AbstractLoader implements LoaderInterface
      * Pre-load data on inner relation or relation chain. Method automatically called by Selector,
      * see load() method.
      *
+     * Method support chain initiation via dot notation. Method will return already exists loader if
+     * such presented.
+     *
      * @see RecordSelector::load()
      *
      * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options  Loader options (will be applied to last chain element only).
+     * @param array  $options  Loader options (to be applied to last chain element only).
+     * @param bool   $join     When set to true loaders will be forced into JOIN mode.
      *
-     * @return LoaderInterface
+     * @return LoaderInterface Must return loader for a requested relation.
      *
      * @throws LoaderException
      */
-    public function loadRelation(string $relation, array $options)
-    {
+    final public function loadRelation(
+        string $relation,
+        array $options,
+        bool $join = false
+    ): LoaderInterface {
+        //Check if relation contain dot, i.e. relation chain
+        if ($this->isChain($relation)) {
+            return $this->loadChain($relation, $options, $join);
+        }
 
+        /*
+         * Joined loaders must be isolated from normal loaders due they would not load any data
+         * and will only modify SelectQuery.
+         */
+        if (!$join) {
+            $loaders = &$this->loaders;
+        } else {
+            $loaders = &$this->joiners;
+        }
+
+        if ($join) {
+            //Let's tell our loaded that it's method is JOIN (forced)
+            $options['method'] = self::JOIN;
+        }
+
+        if (isset($loaders[$relation])) {
+            //Overwriting existed loader options
+            return $loaders[$relation] = $loaders[$relation]->withOptions($options);
+        }
+
+        try {
+            //Creating new loader.
+            $loader = $this->orm->makeLoader($this->class, $relation);
+        } catch (ORMException $e) {
+            throw new LoaderException("Unable to create loader", $e->getCode(), $e);
+        }
+
+        //Configuring loader scope
+        return $loaders[$relation] = $loader->withOptions($options)->withParent($this);
     }
 
     /**
-     * Filter data on inner relation or relation chain. Method automatically called by Selector,
-     * see with() method. Logic is identical to loader() method.
+     * Check if given relation is actually chain of relations.
      *
-     * Attention, you are only able to join ORM loaders!
+     * @param string $relation
      *
-     * @see RecordSelector::load()
-     *
-     * @param string $relation Relation name, or chain of relations separated by.
-     * @param array  $options  Loader options (will be applied to last chain element only).
-     *
-     * @return AbstractLoader
-     *
-     * @throws LoaderException
+     * @return bool
      */
-    public function joinRelation(string $relation, array $options)
+    private function isChain(string $relation): bool
     {
-
+        return strpos($relation, '.') !== false;
     }
 
-    protected function configureSelector()
+    /**
+     * @see loadRelation()
+     * @see joinRelation()
+     *
+     * @param string $chain
+     * @param array  $options Final loader options.
+     * @param bool   $join    See loadRelation().
+     *
+     * @return LoaderInterface
+     *
+     * @throws LoaderException When one of chain elements is not actually chainable (let's say ODM
+     *                         loader).
+     */
+    private function loadChain(string $chain, array $options, bool $join): LoaderInterface
     {
-        //todo: implement
+        $position = strpos($chain, '.');
+
+        //Chain of relations provided (relation.nestedRelation)
+        $child = $this->loadRelation(
+            substr($chain, 0, $position),
+            [],
+            $join
+        );
+
+        if (!$child instanceof self) {
+            throw new LoaderException(sprintf(
+                "Loader '%s' does not support chain relation loading",
+                get_class($child)
+            ));
+        }
+
+        //Loading nested relation thought chain (chainOptions prior to user options)
+        return $child->loadRelation(
+            substr($chain, $position + 1),
+            $options,
+            $join
+        );
     }
 }

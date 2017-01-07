@@ -41,7 +41,13 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
     /**
      * Options needed in runtime.
      */
-    const PACK_OPTIONS = [Record::INNER_KEY, Record::OUTER_KEY, Record::NULLABLE, Record::WHERE];
+    const PACK_OPTIONS = [
+        Record::INNER_KEY,
+        Record::OUTER_KEY,
+        Record::NULLABLE,
+        Record::WHERE,
+        Record::RELATION_COLUMNS
+    ];
 
     /**
      * {@inheritdoc}

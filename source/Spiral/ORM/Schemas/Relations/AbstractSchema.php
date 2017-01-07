@@ -52,7 +52,8 @@ abstract class AbstractSchema implements RelationInterface
     protected $definition;
 
     /**
-     * Provides ability to define missing relation options based on template.
+     * Provides ability to define missing relation options based on template. Column names will be
+     * added automatically if target presented.
      *
      * @see self::OPTIONS_TEMPLATE
      * @var RelationOptions

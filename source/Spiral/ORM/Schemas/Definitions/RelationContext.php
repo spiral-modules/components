@@ -27,6 +27,13 @@ final class RelationContext
     private $class;
 
     /**
+     * Role name.
+     *
+     * @var string
+     */
+    private $role;
+
+    /**
      * @var string|null
      */
     private $database;
@@ -37,18 +44,11 @@ final class RelationContext
     private $table;
 
     /**
-     * Role name.
+     * @invisible
      *
-     * @var string
+     * @var AbstractTable
      */
-    private $role;
-
-    /**
-     * Default column used to identify model.
-     *
-     * @var ColumnInterface|null
-     */
-    private $primary;
+    private $schema;
 
     /**
      * @param SchemaInterface $schema
@@ -66,10 +66,7 @@ final class RelationContext
         $context->table = $schema->getTable();
         $context->role = $schema->getRole();
 
-        $primaryKeys = $table->getPrimaryKeys();
-        if (count($primaryKeys) == 1) {
-            $context->primary = clone $table->column($primaryKeys[0]);
-        }
+        $context->schema = $table;
 
         return $context;
     }
@@ -80,6 +77,14 @@ final class RelationContext
     public function getClass(): string
     {
         return $this->class;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRole(): string
+    {
+        return $this->role;
     }
 
     /**
@@ -99,11 +104,24 @@ final class RelationContext
     }
 
     /**
-     * @return string
+     * @return AbstractTable
      */
-    public function getRole(): string
+    public function getSchema(): AbstractTable
     {
-        return $this->role;
+        return clone $this->schema;
+    }
+
+    /**
+     * @return array
+     */
+    public function columnNames(): array
+    {
+        $names = [];
+        foreach ($this->schema->getColumns() as $column) {
+            $names[] = $column->getName();
+        }
+
+        return $names;
     }
 
     /**
@@ -111,10 +129,15 @@ final class RelationContext
      */
     public function getPrimary()
     {
-        if (empty($this->primary)) {
-            return null;
+        $primaryKeys = $this->schema->getPrimaryKeys();
+        if (count($primaryKeys) == 1) {
+            return clone $this->schema->column($primaryKeys[0]);
         }
 
-        return $this->primary;
+        /*
+         * Table either have complex primary key or no primary keys.
+         */
+
+        return null;
     }
 }

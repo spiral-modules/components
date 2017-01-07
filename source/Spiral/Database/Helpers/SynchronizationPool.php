@@ -81,6 +81,21 @@ class SynchronizationPool extends Component
      */
     public function run(LoggerInterface $logger = null)
     {
+        $hasChanges = false;
+        foreach ($this->tables as $table) {
+            if ($table->getComparator()->hasChanges()) {
+                $hasChanges = true;
+                break;
+            }
+        }
+
+        if (!$hasChanges) {
+            //Nothing to do
+            $this->logger()->info('No changes detected');
+
+            return;
+        }
+
         $this->beginTransaction();
 
         try {

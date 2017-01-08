@@ -17,7 +17,7 @@ use Spiral\ORM\Record;
 /**
  * Provides ability to load relation data in a form of JOIN or external query.
  */
-abstract class RelationLoader extends QueryLoader
+abstract class RelationLoader extends AbstractLoader
 {
     use ColumnsTrait;
 
@@ -78,8 +78,8 @@ abstract class RelationLoader extends QueryLoader
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
         /**
-         * @var QueryLoader $parent
-         * @var self        $loader
+         * @var AbstractLoader $parent
+         * @var self           $loader
          */
         $loader = parent::withContext($parent, $options);
 
@@ -171,7 +171,7 @@ abstract class RelationLoader extends QueryLoader
             $this->mountColumns($query, true);
         } else {
             //This is initial set of columns (remove all existed)
-            $this->mountColumns($query, true, '', $this->options['minify']);
+            $this->mountColumns($query, $this->options['minify'], '');
         }
 
         return parent::configureQuery($query);
@@ -247,9 +247,9 @@ abstract class RelationLoader extends QueryLoader
     /**
      * Ensure table alias.
      *
-     * @param QueryLoader $parent
+     * @param AbstractLoader $parent
      */
-    protected function ensureAlias(QueryLoader $parent)
+    protected function ensureAlias(AbstractLoader $parent)
     {
         //Let's calculate loader alias
         if (empty($this->options['alias'])) {

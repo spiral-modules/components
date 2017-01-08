@@ -34,7 +34,7 @@ use Spiral\ORM\ORMInterface;
  * @see RecordSelector::load()
  * @see RecordSelector::with()
  */
-abstract class QueryLoader implements LoaderInterface
+abstract class AbstractLoader implements LoaderInterface
 {
     use ColumnsTrait;
 
@@ -56,7 +56,7 @@ abstract class QueryLoader implements LoaderInterface
     /**
      * Set of loaders with ability to JOIN it's data into parent SelectQuery.
      *
-     * @var QueryLoader[]
+     * @var AbstractLoader[]
      */
     protected $joiners = [];
 
@@ -75,7 +75,7 @@ abstract class QueryLoader implements LoaderInterface
      * Parent loader if any.
      *
      * @invisible
-     * @var QueryLoader
+     * @var AbstractLoader
      */
     protected $parent;
 
@@ -110,7 +110,7 @@ abstract class QueryLoader implements LoaderInterface
      */
     public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
-        if (!$parent instanceof QueryLoader) {
+        if (!$parent instanceof AbstractLoader) {
             throw new LoaderException(sprintf(
                 "Loader of type '%s' can not accept parent '%s'",
                 get_class($this),

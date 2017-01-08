@@ -20,7 +20,7 @@ use Spiral\ORM\Record;
  *
  * Note, in RootLoader schema represent record schema since there is no self to self relation.
  */
-class RootLoader extends QueryLoader
+class RootLoader extends AbstractLoader
 {
     use ColumnsTrait;
 

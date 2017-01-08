@@ -193,6 +193,18 @@ abstract class ColumnsAlteringTest extends BaseTest
         $this->assertSameAsInDB($schema);
     }
 
+    public function testChangeDoubleToFloatWithDefaultValue()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->column('balance')->defaultValue(1);
+        $schema->column('balance')->setType('float');
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
     public function testChangeColumnFromIntToStringWithDefaultValue()
     {
         $schema = $this->sampleSchema('table');

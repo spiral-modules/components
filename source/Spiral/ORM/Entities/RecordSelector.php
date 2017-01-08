@@ -8,6 +8,7 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\ORM\Entities\Loaders\RootLoader;
+use Spiral\ORM\Entities\Nodes\RootNode;
 use Spiral\ORM\ORMInterface;
 
 /**
@@ -236,6 +237,9 @@ class RecordSelector extends Component
 
     public function fetchData(): array
     {
+        /**
+         * @var RootNode $node
+         */
         $node = $this->loader->createNode();
 
         //Working with parser defined by loader itself

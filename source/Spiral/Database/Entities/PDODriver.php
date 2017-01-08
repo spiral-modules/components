@@ -77,9 +77,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * @var array
      */
     protected $pdoOptions = [
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_STRINGIFY_FETCHES => true,
+        PDO::ATTR_CASE             => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_EMULATE_PREPARES => false
     ];
 
     /**

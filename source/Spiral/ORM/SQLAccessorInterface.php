@@ -25,7 +25,7 @@ interface SQLAccessorInterface extends AccessorInterface
     /**
      * Mark object as successfully updated and flush all existed atomic operations and updates.
      */
-    public function flushUpdates();
+    public function commitUpdates();
 
     /**
      * Create update value or statement to be used in DBAL update builder. May return SQLFragments

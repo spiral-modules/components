@@ -339,13 +339,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      */
-    public function flushUpdates()
+    public function commitUpdates()
     {
         $this->changes = [];
 
         foreach ($this->getFields(false) as $field => $value) {
             if ($value instanceof CompositableInterface) {
-                $value->flushUpdates();
+                $value->commitUpdates();
             }
         }
     }

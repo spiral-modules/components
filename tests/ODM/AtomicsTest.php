@@ -240,7 +240,7 @@ class AtomicsTest extends \PHPUnit_Framework_TestCase
         $piece = $this->makeNew(DataPiece::class, ['value' => 'new-value']);
 
         //To make test harder
-        $piece->flushUpdates();
+        $piece->commitUpdates();
 
         $entity->piece = $piece;
 

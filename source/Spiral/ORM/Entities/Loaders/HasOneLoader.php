@@ -9,7 +9,7 @@ namespace Spiral\ORM\Entities\Loaders;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
-use Spiral\ORM\Entities\Nodes\SinguralNode;
+use Spiral\ORM\Entities\Nodes\SingularNode;
 use Spiral\ORM\Record;
 
 /**
@@ -62,7 +62,7 @@ class HasOneLoader extends RelationLoader
      */
     protected function initNode(): AbstractNode
     {
-        $node = new SinguralNode(
+        $node = new SingularNode(
             $this->schema[Record::RELATION_COLUMNS],
             $this->schema[Record::OUTER_KEY],
             $this->schema[Record::INNER_KEY],

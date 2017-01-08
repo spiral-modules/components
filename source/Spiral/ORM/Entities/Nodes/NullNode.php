@@ -14,7 +14,7 @@ class NullNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    public function parseRow(string $container, int $dataOffset, array $row)
+    public function parseRow(int $dataOffset, array $row)
     {
         //Doing nothing
     }
@@ -31,7 +31,7 @@ class NullNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    protected function registerData(string $container, array &$data)
+    protected function registerData(array &$data)
     {
         //Doing nothing
     }

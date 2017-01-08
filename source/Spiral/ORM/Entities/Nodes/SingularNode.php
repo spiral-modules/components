@@ -12,7 +12,7 @@ use Spiral\ORM\Exceptions\LoaderException;
 /**
  * Node with ability to push it's data into referenced tree location.
  */
-class SinguralNode extends AbstractNode
+class SingularNode extends AbstractNode
 {
     use DuplicateTrait;
 

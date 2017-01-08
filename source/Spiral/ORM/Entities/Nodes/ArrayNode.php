@@ -8,7 +8,7 @@ namespace Spiral\ORM\Entities\Nodes;
 
 use Spiral\ORM\Exceptions\LoaderException;
 
-class ArrayNode extends SinguralNode
+class ArrayNode extends SingularNode
 {
     /**
      * {@inheritdoc}

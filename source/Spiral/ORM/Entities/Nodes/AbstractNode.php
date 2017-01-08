@@ -170,7 +170,7 @@ abstract class AbstractNode
      * @param int   $dataOffset
      * @param array $row
      */
-    final public function parseRow(int $dataOffset, array $row)
+    public function parseRow(int $dataOffset, array $row)
     {
         //Fetching Node specific data from resulted row
         $data = $this->fetchData($dataOffset, $row);

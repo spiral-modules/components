@@ -43,6 +43,19 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
     const RELATION_TYPE = Record::MANY_TO_MANY;
 
     /**
+     * Options to be packed.
+     */
+    const PACK_OPTIONS = [
+        Record::PIVOT_TABLE,
+        Record::OUTER_KEY,
+        Record::INNER_KEY,
+        Record::THOUGHT_INNER_KEY,
+        Record::THOUGHT_OUTER_KEY,
+        Record::PIVOT_COLUMNS,  //todo: normalize
+        Record::WHERE_PIVOT,
+    ];
+
+    /**
      * Default postfix for pivot tables.
      */
     const PIVOT_POSTFIX = '_map';

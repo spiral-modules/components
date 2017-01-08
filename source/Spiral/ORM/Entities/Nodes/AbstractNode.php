@@ -189,6 +189,9 @@ abstract class AbstractNode
         foreach ($this->nodes as $container => $node) {
             if ($node->joined) {
                 $node->parseRow($this->countColumns + $dataOffset, $row);
+
+                //Shifting to next node location
+                $dataOffset += $node->countColumns;
             }
         }
     }

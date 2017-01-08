@@ -19,6 +19,11 @@ class ArrayNode extends SinguralNode
             throw new LoaderException("Unable to register data tree, parent is missing");
         }
 
+        if (is_null($data[$this->localKey])) {
+            //No data was loaded
+            return;
+        }
+
         //Mounting parsed data into parent under defined container
         $this->parent->mountArray(
             $this->container,

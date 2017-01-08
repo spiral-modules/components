@@ -134,18 +134,23 @@ class RelationBuilder
     /**
      * Pack relation schemas for specific model class in order to be saved in memory.
      *
-     * @param string $class
+     * @param string        $class
+     * @param SchemaBuilder $builder
      *
      * @return array
      */
-    public function packRelations(string $class): array
+    public function packRelations(string $class, SchemaBuilder $builder): array
     {
         $result = [];
         foreach ($this->relations as $relation) {
             $definition = $relation->getDefinition();
 
             if ($definition->sourceContext()->getClass() == $class) {
-                $result[$definition->getName()] = $relation->packRelation();
+                //Packing relation, relation schema are given with associated table
+                $result[$definition->getName()] = $relation->packRelation($builder->requestTable(
+                    $definition->targetContext()->getTable(),
+                    $definition->targetContext()->getDatabase()
+                ));
             }
         }
 

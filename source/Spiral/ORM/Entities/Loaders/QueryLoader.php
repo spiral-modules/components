@@ -6,6 +6,9 @@
  */
 namespace Spiral\ORM\Entities\Loaders;
 
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\ORM\Entities\Loaders\Traits\ColumnsTrait;
+use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\Exceptions\ORMException;
@@ -31,8 +34,10 @@ use Spiral\ORM\ORMInterface;
  * @see RecordSelector::load()
  * @see RecordSelector::with()
  */
-abstract class AbstractLoader implements LoaderInterface
+abstract class QueryLoader implements LoaderInterface
 {
+    use ColumnsTrait;
+
     /**
      * Loading methods for data loaders.
      */
@@ -51,7 +56,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Set of loaders with ability to JOIN it's data into parent SelectQuery.
      *
-     * @var AbstractLoader[]
+     * @var QueryLoader[]
      */
     protected $joiners = [];
 
@@ -70,7 +75,7 @@ abstract class AbstractLoader implements LoaderInterface
      * Parent loader if any.
      *
      * @invisible
-     * @var AbstractLoader
+     * @var QueryLoader
      */
     protected $parent;
 
@@ -103,19 +108,16 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function withParent(LoaderInterface $parent): LoaderInterface
+    public function withContext(LoaderInterface $parent, array $options = []): LoaderInterface
     {
-        $loader = clone $this;
-        $loader->parent = $parent;
+        if (!$parent instanceof QueryLoader) {
+            throw new LoaderException(sprintf(
+                "Loader of type '%s' can not accept parent '%s'",
+                get_class($this),
+                get_class($parent)
+            ));
+        }
 
-        return $loader;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function withOptions(array $options): LoaderInterface
-    {
         /*
          * This scary construction simply checks if input array has keys which do not present in a
          * current set of options (i.e. default options, i.e. current options).
@@ -129,7 +131,8 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         $loader = clone $this;
-        $loader->options = $options;
+        $loader->parent = $parent;
+        $loader->options = $options + $this->options;
 
         return $loader;
     }
@@ -178,7 +181,7 @@ abstract class AbstractLoader implements LoaderInterface
 
         if (isset($loaders[$relation])) {
             //Overwriting existed loader options
-            return $loaders[$relation] = $loaders[$relation]->withOptions($options);
+            return $loaders[$relation] = $loaders[$relation]->withContext($this, $options);
         }
 
         try {
@@ -189,8 +192,125 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         //Configuring loader scope
-        return $loaders[$relation] = $loader->withOptions($options)->withParent($this);
+        return $loaders[$relation] = $loader->withContext($this, $options);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function createNode(): AbstractNode
+    {
+        $node = $this->initNode();
+
+        //Working with nested relation loaders
+        foreach ($this->loaders as $relation => $loader) {
+            $node->registerNode($relation, $loader->createNode());
+        }
+
+        return $node;
+    }
+
+    public function loadData(AbstractNode $node)
+    {
+        if ($this->isJoined()) {
+            //We are expecting data to be already loaded via query itself
+            return;
+        }
+
+        //Query???
+
+
+        //Loading data
+
+        //Post-loading!!!!!!
+        foreach ($this->loaders as $relation => $loader) {
+            $loader->loadData($node->fetchNode($relation));
+        }
+    }
+
+    /**
+     * Ensure state of every nested loader.
+     */
+    final public function __clone()
+    {
+        foreach ($this->loaders as $name => $loader) {
+            //Will automatically ensure nested change parents
+            $this->loaders[$name] = $loader->withContext($this);
+        }
+
+        foreach ($this->joiners as $name => $loader) {
+            //Will automatically ensure nested change parents
+            $this->joiners[$name] = $loader->withContext($this);
+        }
+    }
+
+    /**
+     * Destruct loader.
+     */
+    final public function __destruct()
+    {
+        $this->loaders = [];
+        $this->joiners = [];
+    }
+
+    /**
+     * @param SelectQuery $query
+     *
+     * @return SelectQuery
+     */
+    protected function configureQuery(SelectQuery $query): SelectQuery
+    {
+        foreach ($this->loaders as $loader) {
+            if ($loader instanceof QueryLoader) {
+                $query = $loader->configureQuery(clone $query);
+            }
+        }
+
+        foreach ($this->joiners as $loader) {
+            $query = $loader->configureQuery(clone $query);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Get database name associated with relation
+     *
+     * @return string
+     */
+    protected function getDatabase(): string
+    {
+        return $this->orm->define($this->class, ORMInterface::R_DATABASE);
+    }
+
+    /**
+     * Get table name associated with relation
+     *
+     * @return string
+     */
+    protected function getTable(): string
+    {
+        return $this->orm->define($this->class, ORMInterface::R_TABLE);
+    }
+
+    /**
+     * @return AbstractNode
+     */
+    abstract protected function initNode(): AbstractNode;
+
+    /**
+     * Joined table alias.
+     *
+     * @return string
+     */
+    abstract protected function getAlias(): string;
+
+    /**
+     * list of columns to be loaded.
+     *
+     * @return array
+     */
+    abstract protected function getColumns(): array;
 
     /**
      * Check if given relation is actually chain of relations.

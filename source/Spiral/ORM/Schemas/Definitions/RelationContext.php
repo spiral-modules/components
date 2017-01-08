@@ -112,19 +112,6 @@ final class RelationContext
     }
 
     /**
-     * @return array
-     */
-    public function columnNames(): array
-    {
-        $names = [];
-        foreach ($this->schema->getColumns() as $column) {
-            $names[] = $column->getName();
-        }
-
-        return $names;
-    }
-
-    /**
      * @return null|ColumnInterface
      */
     public function getPrimary()

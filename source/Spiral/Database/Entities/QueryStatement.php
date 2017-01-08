@@ -11,7 +11,8 @@ namespace Spiral\Database\Entities;
 use PDOStatement;
 
 /**
- * Adds few quick methods to PDOStatement and fully compatible with it.
+ * Adds few quick methods to PDOStatement and fully compatible with it. By default uses
+ * PDO::FETCH_ASSOC mode.
  */
 class QueryStatement extends PDOStatement
 {
@@ -19,6 +20,14 @@ class QueryStatement extends PDOStatement
      * Limits after which no records will be dumped in __debugInfo.
      */
     const DUMP_LIMIT = 500;
+
+    /**
+     * You are seeing completely valid PDO specific protected constructor.
+     */
+    protected function __construct()
+    {
+        $this->setFetchMode(\PDO::FETCH_ASSOC);
+    }
 
     /**
      * Bind a column value to a PHP variable. Aliased to bindParam.

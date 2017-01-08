@@ -236,7 +236,15 @@ class RecordSelector extends Component
 
     public function fetchData(): array
     {
-        return $this->loader->fetchData();
+        $node = $this->loader->createNode();
+
+        //Working with parser defined by loader itself
+        $this->loader->loadData($node);
+
+        dumP($node);
+        dumP($node->getResult());
+
+        return $node->getResult();
     }
 
     /**

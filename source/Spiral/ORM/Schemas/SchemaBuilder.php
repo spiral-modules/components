@@ -325,17 +325,22 @@ class SchemaBuilder
 
                 ORMInterface::R_ROLE_NAME => $schema->getRole(),
 
+                ORMInterface::R_PRIMARIES => $table->getPrimaryKeys(),
+
                 //Schema includes list of fields, default values and nullable fields
                 ORMInterface::R_SCHEMA    => $schema->packSchema($this, clone $table),
 
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
 
-                //Data location
-                ORMInterface::R_DATABASE     => $schema->getDatabase(),
+                //Data location (database name either fetched from schema or default database name used)
+                ORMInterface::R_DATABASE     => $schema->getDatabase() ?? $this->manager->database()->getName(),
                 ORMInterface::R_TABLE        => $schema->getTable(),
 
                 //Pack model specific relations
-                ORMInterface::R_RELATIONS    => $this->relations->packRelations($schema->getClass())
+                ORMInterface::R_RELATIONS    => $this->relations->packRelations(
+                    $schema->getClass(),
+                    $this
+                )
             ];
         }
 

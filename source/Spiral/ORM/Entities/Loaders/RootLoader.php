@@ -7,6 +7,10 @@
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Builders\SelectQuery;
+use Spiral\ORM\Entities\Loaders\Traits\ColumnsTrait;
+use Spiral\ORM\Entities\Nodes\AbstractNode;
+use Spiral\ORM\Entities\Nodes\RootNode;
+use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
@@ -16,14 +20,16 @@ use Spiral\ORM\Record;
  *
  * Note, in RootLoader schema represent record schema since there is no self to self relation.
  */
-class RootLoader extends AbstractLoader
+class RootLoader extends QueryLoader
 {
+    use ColumnsTrait;
+
     /**
      * Root loader always define primary SelectQuery.
      *
      * @var SelectQuery
      */
-    private $select;
+    private $query;
 
     /**
      * @param string       $class
@@ -43,7 +49,7 @@ class RootLoader extends AbstractLoader
         );
 
         //Getting our initial select query
-        $this->select = $orm->table($class)->select();
+        $this->query = $orm->table($class)->select();
     }
 
     /**
@@ -51,16 +57,101 @@ class RootLoader extends AbstractLoader
      */
     public function selectQuery(): SelectQuery
     {
-        return $this->select;
+        return $this->query;
+    }
+
+    /**
+     * Get primary key column if possible.
+     *
+     * @return string
+     *
+     * @throws LoaderException
+     */
+    public function primaryKey(): string
+    {
+        $primaryKeys = $this->schema[Record::SH_PRIMARIES];
+        if (count($primaryKeys) != 1) {
+            throw new LoaderException(
+                "Unable to get primary key for '{$this->class}', make sure PK is singular and presented"
+            );
+        }
+
+        return $primaryKeys[0];
+    }
+
+    /**
+     * @param SelectQuery $query
+     *
+     * @return SelectQuery
+     */
+    protected function configureQuery(SelectQuery $query): SelectQuery
+    {
+        //Clarifying table name
+        $query->from("{$this->getTable()} AS {$this->getAlias()}");
+
+        //Columns to be loaded for primary model
+        $this->mountColumns($query, true, '', true);
+
+        return parent::configureQuery($query);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function fetchData(): array
+    public function loadData(AbstractNode $node)
     {
-        dump($this->select);
+        //Fetching results from database
+        $statement = $this->configureQuery(clone $this->query)->run();
 
-        return $this->select->fetchAll();
+        dumP($statement->queryString);
+
+        //Due specifics of queries
+        $statement->setFetchMode(\PDO::FETCH_NUM);
+
+        /*
+         * Parsing fetched rows using associated nodes.
+         */
+        foreach ($statement as $row) {
+            $node->parseRow('@root', 0, $row);
+        }
+
+        //Destroying statement
+        $statement->close();
+
+        //Executing child loaders
+        foreach ($this->loaders as $relation => $loader) {
+            $loader->loadData($node->fetchNode($relation));
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function initNode(): AbstractNode
+    {
+        return new RootNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::SH_PRIMARIES]
+        );
+    }
+
+    /**
+     * We are using model role as alias.
+     *
+     * @return string
+     */
+    protected function getAlias(): string
+    {
+        return $this->orm->define($this->class, ORMInterface::R_ROLE_NAME);
+    }
+
+    /**
+     * Relation columns.
+     *
+     * @return array
+     */
+    protected function getColumns(): array
+    {
+        return $this->schema[Record::RELATION_COLUMNS];
     }
 }

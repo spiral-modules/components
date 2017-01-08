@@ -21,11 +21,12 @@ interface ORMInterface
      */
     const R_INSTANTIATOR = 0;
     const R_ROLE_NAME    = 1;
-    const R_SCHEMA       = 2;
-    const R_SOURCE_CLASS = 3;
-    const R_DATABASE     = 4;
-    const R_TABLE        = 5;
-    const R_RELATIONS    = 6;
+    const R_PRIMARIES    = 2;
+    const R_SCHEMA       = 3;
+    const R_SOURCE_CLASS = 4;
+    const R_DATABASE     = 5;
+    const R_TABLE        = 6;
+    const R_RELATIONS    = 7;
 
     /**
      * Constants used in packed relation schemas.

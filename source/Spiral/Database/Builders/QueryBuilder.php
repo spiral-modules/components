@@ -24,15 +24,11 @@ use Spiral\Database\Injections\ParameterInterface;
 abstract class QueryBuilder extends Component implements ExpressionInterface
 {
     /**
-     * @invisible
-     *
      * @var Driver
      */
     protected $driver = null;
 
     /**
-     * @invisible
-     *
      * @var QueryCompiler
      */
     protected $compiler = null;
@@ -95,8 +91,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
 
         $debugInfo = [
             'statement' => $queryString,
-            'compiler'  => $this->compiler,
-            'driver'    => $this->driver,
+            'driver'    => $this->driver
         ];
 
         return $debugInfo;

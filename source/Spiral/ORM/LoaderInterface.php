@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Exceptions\LoaderException;
 
 /**
@@ -15,27 +16,35 @@ use Spiral\ORM\Exceptions\LoaderException;
 interface LoaderInterface
 {
     /**
-     * Mount parent for a given loader, parent will declare TreeParser where loader can mount his
-     * data, in addition each loader will declare set of fields to be aggregated in a parent and
-     * used to properly load connected data (AbstractLoaders can also be loaded directly thought
-     * joining into SQL query).
+     * Declare loader context, parent will declare TreeParser where loader can mount his data, in
+     * addition each loader will declare set of fields to be aggregated in a parent and used to
+     * properly load connected data (AbstractLoaders can also be loaded directly thought joining
+     * into SQL query).
+     *
+     * Attention, make sure that loader accepts given parent.
      *
      * @param LoaderInterface $parent
+     * @param array           $options
      *
      * @return LoaderInterface
-     *
      * @throws LoaderException
      */
-    public function withParent(LoaderInterface $parent): self;
+    public function withContext(LoaderInterface $parent, array $options = []): self;
 
     /**
-     * Create version of loader with new set of load options (relation specific).
+     * Create node used to represent collected data in a tree form. Nodes can declare dependencies
+     * to parent and automatically put collected data in a proper place.
      *
-     * @param array $options
+     * @return AbstractNode
+     */
+    public function createNode(): AbstractNode;
+
+    /**
+     * Load data into previously created node.
      *
-     * @return LoaderInterface
+     * @param AbstractNode $node
      *
      * @throws LoaderException
      */
-    public function withOptions(array $options): self;
+    public function loadData(AbstractNode $node);
 }

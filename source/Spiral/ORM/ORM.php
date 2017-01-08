@@ -204,11 +204,6 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         return $this->schema[$class][$property];
     }
 
-    //other methods
-    //selector
-
-    //source
-
     /**
      * {@inheritdoc}
      */
@@ -291,9 +286,10 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         return $this->getFactory()->make(
             $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::LOADER_CLASS),
             [
-                'class'  => $schema[self::R_CLASS],
-                'schema' => $schema[self::R_SCHEMA],
-                'orm'    => $this
+                'class'    => $schema[self::R_CLASS],
+                'relation' => $relation,
+                'schema'   => $schema[self::R_SCHEMA],
+                'orm'      => $this
             ]
         );
     }

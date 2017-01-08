@@ -37,9 +37,11 @@ interface RelationInterface
     /**
      * Pack relation information info form or immutable array to be used as schema in runtime.
      *
+     * @param AbstractTable $table Table associated with relation in it's final form.
+     *
      * @return array
      *
      * @throws RelationSchemaException
      */
-    public function packRelation(): array;
+    public function packRelation(AbstractTable $table): array;
 }

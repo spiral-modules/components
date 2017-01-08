@@ -77,6 +77,16 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
     }
 
     /**
+     * Tables to be loaded.
+     *
+     * @return array
+     */
+    public function getTables(): array
+    {
+        return $this->tables;
+    }
+
+    /**
      * Set columns should be fetched as result of SELECT query. Columns can be provided with
      * specified alias (AS construction).
      *
@@ -90,6 +100,16 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable
         $this->columns = $this->fetchIdentifiers(func_get_args());
 
         return $this;
+    }
+
+    /**
+     * Set of columns to be selected.
+     *
+     * @return array
+     */
+    public function getColumns(): array
+    {
+        return $this->columns;
     }
 
     /**

@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\OptionsException;
 use Spiral\ORM\Helpers\RelationOptions;
 use Spiral\ORM\ORMInterface;
@@ -80,12 +81,24 @@ abstract class AbstractSchema implements RelationInterface
     /**
      * {@inheritdoc}
      */
-    public function packRelation(): array
+    public function packRelation(AbstractTable $table): array
     {
+        $schema = $this->options->defineMultiple(static::PACK_OPTIONS);
+
+        if (
+            in_array(Record::RELATION_COLUMNS, static::PACK_OPTIONS)
+            && empty($schema[Record::RELATION_COLUMNS])
+        ) {
+            //Let's read list of columns
+            foreach ($table->getColumns() as $column) {
+                $schema[Record::RELATION_COLUMNS][] = $column->getName();
+            }
+        }
+
         return [
             ORMInterface::R_TYPE   => static::RELATION_TYPE,
             ORMInterface::R_CLASS  => $this->getDefinition()->getTarget(),
-            ORMInterface::R_SCHEMA => $this->options->defineMultiple(static::PACK_OPTIONS)
+            ORMInterface::R_SCHEMA => $schema
         ];
     }
 

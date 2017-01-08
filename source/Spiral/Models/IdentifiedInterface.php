@@ -23,6 +23,7 @@ interface IdentifiedInterface
      * Primary entity key if any. Can return as scalar values as objects or even arrays in case
      * of compound primary keys.
      *
+     * @todo: think about having this method
      * @return mixed|null
      */
     public function primaryKey();

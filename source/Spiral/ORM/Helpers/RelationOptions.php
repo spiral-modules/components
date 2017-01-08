@@ -56,14 +56,7 @@ class RelationOptions
     {
         $this->definition = $definition;
         $this->template = $template;
-
-        //Option to describe loaded columns
-        $columns = [];
-        if (!empty($definition->targetContext())) {
-            $columns[Record::RELATION_COLUMNS] = $definition->targetContext()->columnNames();
-        }
-
-        $this->options = $this->calculateOptions($definition->getOptions()) + $columns;
+        $this->options = $this->calculateOptions($definition->getOptions());
     }
 
     /**

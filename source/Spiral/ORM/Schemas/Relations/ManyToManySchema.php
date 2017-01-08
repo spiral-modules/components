@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Schemas\Relations;
 
+use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Helpers\ColumnRenderer;
 use Spiral\ORM\Record;
@@ -51,7 +52,7 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
         Record::INNER_KEY,
         Record::THOUGHT_INNER_KEY,
         Record::THOUGHT_OUTER_KEY,
-        Record::PIVOT_COLUMNS,  //todo: normalize
+        Record::PIVOT_COLUMNS,
         Record::WHERE_PIVOT,
     ];
 
@@ -116,6 +117,19 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
 
     /**
      * {@inheritdoc}
+     */
+    public function packRelation(AbstractTable $table): array
+    {
+        $packed = parent::packRelation($table);
+
+        //Normalization
+        $packed[Record::PIVOT_COLUMNS] = array_keys($packed[Record::PIVOT_COLUMNS]);
+
+        return $packed;
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * Note: pivot table will be build from direction of source, please do not attempt to create
      * many to many relations between databases without specifying proper database.
@@ -160,9 +174,8 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
         ));
 
         /*
-         * Declare user defined columns in pivot table.
+         * Declare user columns in pivot table.
          */
-
         $rendered = new ColumnRenderer();
         $rendered->renderColumns(
             $this->option(Record::PIVOT_COLUMNS),
@@ -172,10 +185,7 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
 
         //Map might only contain unique link between source and target
         if ($this->option(Record::CREATE_INDEXES)) {
-            $pivotTable->index([
-                $outerKey->getName(),
-                $innerKey->getName()
-            ])->unique();
+            $pivotTable->index([$innerKey->getName(), $outerKey->getName()])->unique();
         }
 
         //There is 2 constrains between map table and source and table

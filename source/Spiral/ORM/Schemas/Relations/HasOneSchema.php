@@ -12,6 +12,8 @@ use Spiral\ORM\Record;
  * Has one is just one of the cases of HasMany. Relations like that used when parent record has one
  * child with [outer] key linked to value of [inner] key of parent mode.
  *
+ * HasOne is identical to HasMany but uses different loader.
+ *
  * Example, [User has one Profile], user primary key is "id":
  * - relation will create outer key "user_id" in "profiles" table (or other table name), nullable
  *   by default

@@ -46,6 +46,8 @@ abstract class ColumnsAlteringTest extends BaseTest
             $schema->double('balance')->defaultValue(0);
             $schema->boolean('flagged')->defaultValue(true);
 
+            $schema->float('floated')->defaultValue(0);
+
             $schema->text('bio');
 
             //Some dates
@@ -53,6 +55,7 @@ abstract class ColumnsAlteringTest extends BaseTest
             $schema->datetime('datetime')->defaultValue('2017-01-01 00:00:00');
             $schema->date('datetime')->nullable(true);
             $schema->time('datetime')->defaultValue('00:00');
+
 
             $schema->save(AbstractHandler::DO_ALL);
         }
@@ -174,6 +177,17 @@ abstract class ColumnsAlteringTest extends BaseTest
         $this->assertSameAsInDB($schema);
 
         $schema->column('balance')->float();
+        $schema->save();
+
+        $this->assertSameAsInDB($schema);
+    }
+
+    public function testChangeFloatToDoubleWithDefaultValue()
+    {
+        $schema = $this->sampleSchema('table');
+        $this->assertTrue($schema->exists());
+
+        $schema->column('floated')->setType('double');
         $schema->save();
 
         $this->assertSameAsInDB($schema);

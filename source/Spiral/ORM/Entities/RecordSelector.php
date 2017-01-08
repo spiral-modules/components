@@ -241,9 +241,6 @@ class RecordSelector extends Component
         //Working with parser defined by loader itself
         $this->loader->loadData($node);
 
-        dumP($node);
-        dumP($node->getResult());
-
         return $node->getResult();
     }
 

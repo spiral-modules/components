@@ -42,7 +42,7 @@ class RootNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    protected function registerData(string $container, array &$data)
+    protected function registerData(array &$data)
     {
         $this->result[] = &$data;
     }

@@ -102,17 +102,10 @@ class RootLoader extends QueryLoader
     {
         //Fetching results from database
         $statement = $this->configureQuery(clone $this->query)->run();
-
-        dumP($statement->queryString);
-
-        //Due specifics of queries
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
-        /*
-         * Parsing fetched rows using associated nodes.
-         */
         foreach ($statement as $row) {
-            $node->parseRow('@root', 0, $row);
+            $node->parseRow(0, $row);
         }
 
         //Destroying statement

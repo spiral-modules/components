@@ -16,6 +16,13 @@ use Spiral\ORM\Exceptions\NodeException;
 abstract class AbstractNode
 {
     /**
+     * Indicates that node data is joined to parent row.
+     *
+     * @var bool
+     */
+    private $joined = false;
+
+    /**
      * Column names to be used to hydrate based on given query rows.
      *
      * @var array
@@ -44,6 +51,13 @@ abstract class AbstractNode
     private $references = [];
 
     /**
+     * Node location in a tree. Set when node is registered.
+     *
+     * @var string
+     */
+    protected $container;
+
+    /**
      * Declared column which must be aggregated in a parent node. i.e. Parent Key
      *
      * @var null|string
@@ -64,13 +78,51 @@ abstract class AbstractNode
     /**
      * @param array       $columns
      * @param string|null $referenceKey Defines column name in parent Node to be aggregated.
+     * @param array       $columns
+     * @param string|null $referenceKey
      */
-    public function __construct(array $columns = [], string $referenceKey = null)
-    {
+    public function __construct(
+        array $columns = [],
+        string $referenceKey = null
+    ) {
         $this->columns = $columns;
         $this->countColumns = count($columns);
-
         $this->referenceKey = $referenceKey;
+    }
+
+    /**
+     * Convert node into joined form (node will automatically parse parent row).
+     *
+     * @param bool $joined
+     *
+     * @return AbstractNode
+     */
+    public function asJoined(bool $joined = true)
+    {
+        $node = clone $this;
+        $node->joined = $joined;
+
+        return $node;
+    }
+
+    /**
+     * Get list of reference key values aggregated by parent.
+     *
+     * @return array
+     *
+     * @throws LoaderException
+     */
+    public function getReferences(): array
+    {
+        if (empty($this->parent)) {
+            throw new LoaderException("Unable to aggregate reference values, parent is missing");
+        }
+
+        if (empty($this->parent->references[$this->referenceKey])) {
+            return [];
+        }
+
+        return array_keys($this->parent->references[$this->referenceKey]);
     }
 
     /**
@@ -84,6 +136,7 @@ abstract class AbstractNode
      */
     final public function registerNode(string $container, AbstractNode $node)
     {
+        $node->container = $container;
         $node->parent = $this;
         $this->nodes[$container] = $node;
 
@@ -114,11 +167,10 @@ abstract class AbstractNode
     /**
      * Parser result work, fetch data and mount it into parent tree.
      *
-     * @param string $container Container name (which Node belongs to)
-     * @param int    $dataOffset
-     * @param array  $row
+     * @param int   $dataOffset
+     * @param array $row
      */
-    public function parseRow(string $container, int $dataOffset, array $row)
+    final public function parseRow(int $dataOffset, array $row)
     {
         //Fetching Node specific data from resulted row
         $data = $this->fetchData($dataOffset, $row);
@@ -131,11 +183,13 @@ abstract class AbstractNode
             $this->ensurePlaceholders($data);
 
             //Add data into result set
-            $this->registerData($container, $data);
+            $this->registerData($data);
         }
 
         foreach ($this->nodes as $container => $node) {
-            $node->parseRow($container, $this->countColumns + $dataOffset, $row);
+            if ($node->joined) {
+                $node->parseRow($this->countColumns + $dataOffset, $row);
+            }
         }
     }
 
@@ -158,10 +212,9 @@ abstract class AbstractNode
     /**
      * Register data result.
      *
-     * @param string $container
-     * @param array  $data
+     * @param array $data
      */
-    abstract protected function registerData(string $container, array &$data);
+    abstract protected function registerData(array &$data);
 
     /**
      * Mount record data into internal data storage under specified container using reference key
@@ -255,11 +308,15 @@ abstract class AbstractNode
      */
     protected function fetchData(int $dataOffset, array $line): array
     {
-        //Combine column names with sliced piece of row
-        return array_combine(
-            $this->columns,
-            array_slice($line, $dataOffset, $this->countColumns)
-        );
+        try {
+            //Combine column names with sliced piece of row
+            return array_combine(
+                $this->columns,
+                array_slice($line, $dataOffset, $this->countColumns)
+            );
+        } catch (\Exception $e) {
+            throw new LoaderException("Unable to parse incoming row", $e->getCode(), $e);
+        }
     }
 
     /**

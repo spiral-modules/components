@@ -41,10 +41,19 @@ abstract class RelationLoader extends QueryLoader
      * @var array
      */
     protected $options = [
+        //Load method, see QueryLoader constants
         'method' => null,
-        'join'   => 'INNER',
+
+        //When true all loader columns will be minified (only for loading)
+        'minify' => true,
+
+        //Table alias
         'alias'  => null,
+
+        //Alias used by another relation
         'using'  => null,
+
+        //Where conditions (if any)
         'where'  => null,
     ];
 
@@ -92,41 +101,77 @@ abstract class RelationLoader extends QueryLoader
     }
 
     /**
+     * Indicated that loaded must generate JOIN statement.
+     *
+     * @return bool
+     */
+    public function isJoined(): bool
+    {
+        if (!empty($this->options['using'])) {
+            return true;
+        }
+
+        return in_array($this->getMethod(), [self::INLOAD, self::JOIN, self::LEFT_JOIN]);
+    }
+
+    /**
+     * Indication that loader want to load data.
+     *
+     * @return bool
+     */
+    public function isLoaded(): bool
+    {
+        return $this->getMethod() !== self::JOIN && $this->getMethod() !== self::LEFT_JOIN;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function loadData(AbstractNode $node)
     {
-        if ($this->isJoined()) {
+        if ($this->isJoined() || !$this->isLoaded()) {
             //We are expecting data to be already loaded via query itself
             return;
         }
 
-        //Query???
+        $references = $node->getReferences();
+        if (empty($references)) {
+            //Nothing found at parent level, unable to create sub query
+            return;
+        }
 
+        //Ensure all nested relations
+        $statement = $this->configureQuery($this->createQuery(), $references)->run();
+        $statement->setFetchMode(\PDO::FETCH_NUM);
 
-        //Loading data
+        foreach ($statement as $row) {
+            $node->parseRow(0, $row);
+        }
 
-        //Post-loading!!!!!!
+        $statement->close();
+
+        //Loading data for all nested relations
         foreach ($this->loaders as $relation => $loader) {
             $loader->loadData($node->fetchNode($relation));
         }
     }
 
     /**
+     * Configure query with conditions, joins and columns.
+     *
      * @param SelectQuery $query
+     * @param array       $references Set of OUTER_KEY values collected by parent loader.
      *
      * @return SelectQuery
      */
-    protected function configureQuery(SelectQuery $query): SelectQuery
+    protected function configureQuery(SelectQuery $query, array $references = []): SelectQuery
     {
         if ($this->isJoined()) {
-            if ($this->isLoaded()) {
-                //Mounting columns
-                $this->mountColumns($query, true);
-            }
-
-            //Mounting joins
-            $this->mountJoins($query);
+            //Mounting columns
+            $this->mountColumns($query, true);
+        } else {
+            //This is initial set of columns (remove all existed)
+            $this->mountColumns($query, true, '', $this->options['minify']);
         }
 
         return parent::configureQuery($query);
@@ -162,30 +207,6 @@ abstract class RelationLoader extends QueryLoader
     }
 
     /**
-     * Indicated that loaded must generate JOIN statement.
-     *
-     * @return bool
-     */
-    protected function isJoined(): bool
-    {
-        if (!empty($this->options['using'])) {
-            return true;
-        }
-
-        return in_array($this->getMethod(), [self::INLOAD, self::JOIN, self::LEFT_JOIN]);
-    }
-
-    /**
-     * Indication that loader want to load data.
-     *
-     * @return bool
-     */
-    protected function isLoaded(): bool
-    {
-        return $this->getMethod() !== self::JOIN && $this->getMethod() !== self::LEFT_JOIN;
-    }
-
-    /**
      * Get load method.
      *
      * @return int
@@ -193,6 +214,34 @@ abstract class RelationLoader extends QueryLoader
     protected function getMethod(): int
     {
         return $this->options['method'];
+    }
+
+    /**
+     * Generate sql identifier using loader alias and value from relation definition. Key name to be
+     * fetched from schema.
+     *
+     * Example:
+     * $this->getKey(Record::OUTER_KEY);
+     *
+     * @param string $key
+     *
+     * @return string|null
+     */
+    protected function localKey($key): string
+    {
+        return $this->getAlias() . '.' . $this->schema[$key];
+    }
+
+    /**
+     * Get parent identifier based on relation configuration key.
+     *
+     * @param $key
+     *
+     * @return string
+     */
+    protected function parentKey($key): string
+    {
+        return $this->parent->getAlias() . '.' . $this->schema[$key];
     }
 
     /**
@@ -216,11 +265,16 @@ abstract class RelationLoader extends QueryLoader
     }
 
     /**
-     * Set required set of join for a given query.
+     * Create relation specific select query.
      *
-     * @param SelectQuery $query
+     * @param array $references List of parent key values aggregates while parsing.
      *
      * @return SelectQuery
      */
-    abstract protected function mountJoins(SelectQuery $query);
+    protected function createQuery(): SelectQuery
+    {
+        return $this->orm->table($this->class)->select()->from(
+            "{$this->getTable()} AS {$this->getAlias()}"
+        );
+    }
 }

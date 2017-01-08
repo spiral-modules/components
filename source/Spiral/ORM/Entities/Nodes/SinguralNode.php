@@ -9,7 +9,10 @@ namespace Spiral\ORM\Entities\Nodes;
 use Spiral\ORM\Entities\Nodes\Traits\DuplicateTrait;
 use Spiral\ORM\Exceptions\LoaderException;
 
-class RelationNode extends AbstractNode
+/**
+ * Node with ability to push it's data into referenced tree location.
+ */
+class SinguralNode extends AbstractNode
 {
     use DuplicateTrait;
 
@@ -40,7 +43,7 @@ class RelationNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    protected function registerData(string $container, array &$data)
+    protected function registerData(array &$data)
     {
         if (empty($this->parent)) {
             throw new LoaderException("Unable to register data tree, parent is missing");
@@ -48,7 +51,7 @@ class RelationNode extends AbstractNode
 
         //Mounting parsed data into parent under defined container
         $this->parent->mount(
-            $container,
+            $this->container,
             $this->referenceKey,
             $data[$this->localKey],
             $data

@@ -261,7 +261,7 @@ abstract class QueryLoader implements LoaderInterface
     protected function configureQuery(SelectQuery $query): SelectQuery
     {
         foreach ($this->loaders as $loader) {
-            if ($loader instanceof QueryLoader) {
+            if ($loader instanceof RelationLoader && $loader->isJoined()) {
                 $query = $loader->configureQuery(clone $query);
             }
         }

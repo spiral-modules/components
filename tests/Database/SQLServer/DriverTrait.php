@@ -32,7 +32,7 @@ trait DriverTrait
     {
         if (!isset($this->driver)) {
             $this->driver = new SQLServerDriver(
-                'mysql',
+                'sqlserver',
                 [
                     //todo move to env
                     'connection' => 'sqlsrv:Server=WOLFY-PC;Database=spiral',
@@ -45,6 +45,7 @@ trait DriverTrait
         }
 
         $driver = $this->driver;
+        $this->assertSame('sqlserver', $driver->getName());
 
         if (static::PROFILING) {
             $driver->setProfiling(static::PROFILING)->setLogger(new class implements LoggerInterface

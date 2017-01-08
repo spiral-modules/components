@@ -44,6 +44,7 @@ trait DriverTrait
         }
 
         $driver = $this->driver;
+        $this->assertSame('mysql', $driver->getName());
 
         if (static::PROFILING) {
             $driver->setProfiling(static::PROFILING)->setLogger(new class implements LoggerInterface

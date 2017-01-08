@@ -42,7 +42,7 @@ class MySQLDriver extends Driver
         PDO::ATTR_CASE               => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "UTF8"',
-        PDO::ATTR_EMULATE_PREPARES   => false
+        PDO::ATTR_STRINGIFY_FETCHES  => false,
     ];
 
     /**

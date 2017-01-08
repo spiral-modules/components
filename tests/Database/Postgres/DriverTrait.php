@@ -44,6 +44,7 @@ trait DriverTrait
         }
 
         $driver = $this->driver;
+        $this->assertSame('postgres', $driver->getName());
 
         if (static::PROFILING) {
             $driver->setProfiling(static::PROFILING)->setLogger(new class implements LoggerInterface

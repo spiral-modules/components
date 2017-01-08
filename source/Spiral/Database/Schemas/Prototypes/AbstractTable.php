@@ -9,8 +9,8 @@ namespace Spiral\Database\Schemas\Prototypes;
 use Psr\Log\LoggerInterface;
 use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Entities\Driver;
-use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Exceptions\SchemaException;
+use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Schemas\StateComparator;
 use Spiral\Database\Schemas\TableInterface;
 use Spiral\Database\Schemas\TableState;
@@ -337,7 +337,14 @@ abstract class AbstractTable implements TableInterface
             return $this->current->findColumn($name);
         }
 
-        $column = $this->createColumn($name);
+        if ($this->initial->hasColumn($name)) {
+            //Fetch from initial state (this code is required to ensure column states after schema
+            //flushing)
+            $column = clone $this->initial->findColumn($name);
+        } else {
+            $column = $this->createColumn($name);
+        }
+
         $this->current->registerColumn($column);
 
         return $column;

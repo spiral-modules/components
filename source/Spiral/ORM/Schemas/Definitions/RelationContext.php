@@ -7,7 +7,9 @@
 namespace Spiral\ORM\Schemas\Definitions;
 
 use Spiral\Database\Schemas\ColumnInterface;
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\SchemaInterface;
 
@@ -118,7 +120,7 @@ final class RelationContext
     {
         $primaryKeys = $this->schema->getPrimaryKeys();
         if (count($primaryKeys) == 1) {
-            return clone $this->schema->column($primaryKeys[0]);
+            return $this->getColumn($primaryKeys[0]);
         }
 
         /*
@@ -126,5 +128,19 @@ final class RelationContext
          */
 
         return null;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return AbstractColumn
+     */
+    public function getColumn($name): AbstractColumn
+    {
+        if (!$this->schema->hasColumn($name)) {
+            throw new DefinitionException("Undefined column {$name} in {$this->schema->getName()}");
+        }
+
+        return clone $this->schema->column($name);
     }
 }

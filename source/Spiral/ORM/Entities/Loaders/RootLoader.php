@@ -53,6 +53,8 @@ class RootLoader extends AbstractLoader
     }
 
     /**
+     * Attention, this is modifiable instance of query!
+     *
      * @return SelectQuery
      */
     public function selectQuery(): SelectQuery
@@ -80,19 +82,31 @@ class RootLoader extends AbstractLoader
     }
 
     /**
-     * @param SelectQuery $query
+     * {@inheritdoc}
      *
-     * @return SelectQuery
+     * Parent is not required for RootLoader.
      */
-    protected function configureQuery(SelectQuery $query): SelectQuery
-    {
+    protected function configureQuery(
+        SelectQuery $query,
+        AbstractLoader $parent = null
+    ): SelectQuery {
         //Clarifying table name
         $query->from("{$this->getTable()} AS {$this->getAlias()}");
 
         //Columns to be loaded for primary model
         $this->mountColumns($query, true, '', true);
 
-        return parent::configureQuery($query);
+        foreach ($this->loaders as $loader) {
+            if ($loader instanceof RelationLoader && $loader->isJoined()) {
+                $query = $loader->configureQuery(clone $query, $this);
+            }
+        }
+
+        foreach ($this->joiners as $loader) {
+            $query = $loader->configureQuery(clone $query, $this);
+        }
+
+        return $query;
     }
 
     /**

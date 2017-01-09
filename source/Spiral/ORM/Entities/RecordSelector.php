@@ -30,7 +30,7 @@ class RecordSelector extends Component
     /**
      * @var RootLoader
      */
-    public $loader;
+    private $loader;
 
     /**
      * @param string       $class
@@ -235,6 +235,7 @@ class RecordSelector extends Component
         return $this;
     }
 
+
     public function fetchData(): array
     {
         /**
@@ -246,6 +247,30 @@ class RecordSelector extends Component
         $this->loader->loadData($node);
 
         return $node->getResult();
+    }
+
+    /**
+     * Bypassing call to primary select query.
+     *
+     * @param string $name
+     * @param        $arguments
+     *
+     * @return $this|mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        $result = call_user_func_array([$this->loader->selectQuery(), $name], $arguments);
+        if ($result === $this->loader->selectQuery()) {
+            return $this;
+        }
+
+        return $result;
+    }
+
+    public function __destruct()
+    {
+        $this->orm = null;
+        $this->loader = null;
     }
 
     /**

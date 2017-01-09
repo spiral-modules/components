@@ -36,22 +36,29 @@ class HasManyLoader extends RelationLoader
     ];
 
     /**
-     * {@inheritdoc}
+     * @param SelectQuery         $query
+     * @param AbstractLoader|null $parent
+     * @param array               $outerKeys
+     *
+     * @return SelectQuery
      */
-    protected function configureQuery(SelectQuery $query, array $references = []): SelectQuery
-    {
+    protected function configureQuery(
+        SelectQuery $query,
+        AbstractLoader $parent,
+        array $outerKeys = []
+    ): SelectQuery {
         if ($this->isJoined()) {
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
                 "{$this->getTable()} AS {$this->getAlias()}",
-                [$this->localKey(Record::OUTER_KEY) => $this->parentKey(Record::INNER_KEY)]
+                [$this->localKey(Record::OUTER_KEY) => $this->parentKey($parent, Record::INNER_KEY)]
             );
         } else {
             //This relation is loaded using external query
             $query->where(
                 $this->localKey(Record::OUTER_KEY),
                 'IN',
-                new Parameter($references)
+                new Parameter($outerKeys)
             );
         }
 
@@ -73,7 +80,7 @@ class HasManyLoader extends RelationLoader
             $decorator->where($this->options['where']);
         }
 
-        return parent::configureQuery($query);
+        return parent::configureQuery($query, $parent, $outerKeys);
     }
 
     /**

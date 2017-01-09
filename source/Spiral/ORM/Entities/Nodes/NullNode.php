@@ -31,8 +31,8 @@ class NullNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    protected function registerData(array &$data)
+    protected function pushData(array &$data)
     {
-        //Doing nothing
+        //Nothing to do
     }
 }

@@ -50,19 +50,19 @@ abstract class AbstractNode
      */
     private $references = [];
 
+     /**
+     * Declared column which must be aggregated in a parent node. i.e. Parent Key
+     *
+     * @var null|string
+     */
+    protected $outerKey = null;
+
     /**
      * Node location in a tree. Set when node is registered.
      *
      * @var string
      */
     protected $container;
-
-    /**
-     * Declared column which must be aggregated in a parent node. i.e. Parent Key
-     *
-     * @var null|string
-     */
-    protected $referenceKey = null;
 
     /**
      * @invisible
@@ -77,17 +77,13 @@ abstract class AbstractNode
 
     /**
      * @param array       $columns
-     * @param string|null $referenceKey Defines column name in parent Node to be aggregated.
-     * @param array       $columns
-     * @param string|null $referenceKey
+     * @param string|null $outerKey Defines column name in parent Node to be aggregated.
      */
-    public function __construct(
-        array $columns = [],
-        string $referenceKey = null
-    ) {
+    public function __construct(array $columns = [], string $outerKey = null)
+    {
         $this->columns = $columns;
         $this->countColumns = count($columns);
-        $this->referenceKey = $referenceKey;
+        $this->outerKey = $outerKey;
     }
 
     /**
@@ -118,11 +114,11 @@ abstract class AbstractNode
             throw new LoaderException("Unable to aggregate reference values, parent is missing");
         }
 
-        if (empty($this->parent->references[$this->referenceKey])) {
+        if (empty($this->parent->references[$this->outerKey])) {
             return [];
         }
 
-        return array_keys($this->parent->references[$this->referenceKey]);
+        return array_keys($this->parent->references[$this->outerKey]);
     }
 
     /**
@@ -140,9 +136,9 @@ abstract class AbstractNode
         $node->parent = $this;
         $this->nodes[$container] = $node;
 
-        if (!empty($node->referenceKey)) {
+        if (!empty($node->outerKey)) {
             //This will make parser to aggregate such key in order to be used in later statement
-            $this->trackReference($node->referenceKey);
+            $this->trackReference($node->outerKey);
         }
     }
 
@@ -183,7 +179,7 @@ abstract class AbstractNode
             $this->ensurePlaceholders($data);
 
             //Add data into result set
-            $this->registerData($data);
+            $this->pushData($data);
         }
 
         foreach ($this->nodes as $container => $node) {
@@ -197,13 +193,14 @@ abstract class AbstractNode
     }
 
     /**
-     * In many cases (for example if you have inload of HAS_MANY relation) record data can be
-     * replicated by many result rows (duplicated). To prevent wrong data linking we have to
-     * deduplicate such records. This is only internal loader functionality and required due data
-     * tree are built using php references.
+     * In many cases (for example if you have INLOAD of HAS_MANY relation) record data can be
+     * replicated by many result rows (duplicated). To prevent incorrect data linking we have to
+     * deduplicate such records.
      *
-     * Method will return true if data is unique handled before and false in opposite case.
-     * Provided data array will be automatically linked with it's unique state using references.
+     * Method will return true if data is unique and handled previously or false in opposite case.
+     *
+     * Provided data array will be automatically linked with it's unique state using references
+     * (pointer will receive different address).
      *
      * @param array $data Reference to parsed record data, reference will be pointed to valid and
      *                    existed data segment if such data was already parsed.
@@ -217,7 +214,7 @@ abstract class AbstractNode
      *
      * @param array $data
      */
-    abstract protected function registerData(array &$data);
+    abstract protected function pushData(array &$data);
 
     /**
      * Mount record data into internal data storage under specified container using reference key

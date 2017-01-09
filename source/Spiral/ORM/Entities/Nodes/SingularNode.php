@@ -43,7 +43,7 @@ class SingularNode extends AbstractNode
     /**
      * {@inheritdoc}
      */
-    protected function registerData(array &$data)
+    protected function pushData(array &$data)
     {
         if (empty($this->parent)) {
             throw new LoaderException("Unable to register data tree, parent is missing");
@@ -57,7 +57,7 @@ class SingularNode extends AbstractNode
         //Mounting parsed data into parent under defined container
         $this->parent->mount(
             $this->container,
-            $this->referenceKey,
+            $this->outerKey,
             $data[$this->localKey],
             $data
         );

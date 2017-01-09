@@ -72,14 +72,6 @@ abstract class AbstractLoader implements LoaderInterface
     protected $orm;
 
     /**
-     * Parent loader if any.
-     *
-     * @invisible
-     * @var AbstractLoader
-     */
-    protected $parent;
-
-    /**
      * Loader options, can be altered on RecordSelector level.
      *
      * @var array
@@ -131,7 +123,6 @@ abstract class AbstractLoader implements LoaderInterface
         }
 
         $loader = clone $this;
-        $loader->parent = $parent;
         $loader->options = $options + $this->options;
 
         return $loader;
@@ -249,25 +240,29 @@ abstract class AbstractLoader implements LoaderInterface
      */
     final public function __destruct()
     {
+        $this->orm = null;
+
+        $this->schema = [];
         $this->loaders = [];
         $this->joiners = [];
     }
 
     /**
-     * @param SelectQuery $query
+     * @param SelectQuery    $query
+     * @param AbstractLoader $parent Parent loader if any.
      *
      * @return SelectQuery
      */
-    protected function configureQuery(SelectQuery $query): SelectQuery
+    protected function configureQuery(SelectQuery $query, AbstractLoader $parent): SelectQuery
     {
         foreach ($this->loaders as $loader) {
             if ($loader instanceof RelationLoader && $loader->isJoined()) {
-                $query = $loader->configureQuery(clone $query);
+                $query = $loader->configureQuery(clone $query, $this);
             }
         }
 
         foreach ($this->joiners as $loader) {
-            $query = $loader->configureQuery(clone $query);
+            $query = $loader->configureQuery(clone $query, $this);
         }
 
         return $query;

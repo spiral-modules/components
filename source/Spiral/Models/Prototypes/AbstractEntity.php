@@ -7,7 +7,6 @@
  */
 namespace Spiral\Models\Prototypes;
 
-use Doctrine\Common\Inflector\Inflector;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
 use Spiral\Models\Exceptions\AccessorExceptionInterface;
@@ -28,14 +27,6 @@ abstract class AbstractEntity extends MutableObject implements
     PublishableInterface
 {
     use EventsTrait;
-
-    /**
-     * Field format declares how entity must process magic setters and getters. Available values:
-     * camelCase, tableize.
-     *
-     * @protected
-     */
-    const FIELD_FORMAT = 'camelCase';
 
     /**
      * Field mutators.
@@ -60,62 +51,6 @@ abstract class AbstractEntity extends MutableObject implements
 
         //Initiating mutable object
         static::initialize(false);
-    }
-
-    /**
-     * Routes user function in format of (get|set)FieldName into (get|set)Field(fieldName, value).
-     *
-     * @see getFeld()
-     * @see setField()
-     *
-     * @param string $method
-     * @param array  $arguments
-     *
-     * @return $this|mixed|null|AccessorInterface
-     *
-     * @throws EntityException
-     */
-    public function __call($method, array $arguments)
-    {
-        if (method_exists($this, $method)) {
-            throw new EntityException(
-                "Method name '{$method}' is ambiguous and can not be used as magic setter"
-            );
-        }
-
-        if (strlen($method) <= 3) {
-            //Get/set needs exactly 0-1 argument
-            throw new EntityException("Undefined method '{$method}'");
-        }
-
-        $field = substr($method, 3);
-
-        switch (static::FIELD_FORMAT) {
-            case 'camelCase':
-                $field = Inflector::camelize($field);
-                break;
-            case 'tableize':
-                $field = Inflector::tableize($field);
-                break;
-            default:
-                throw new EntityException(
-                    "Undefined field format '" . static::FIELD_FORMAT . "'"
-                );
-        }
-
-        switch (substr($method, 0, 3)) {
-            case 'get':
-                return $this->getField($field);
-            case 'set':
-                if (count($arguments) === 1) {
-                    $this->setField($field, $arguments[0]);
-
-                    //setFieldA($a)->setFieldB($b)
-                    return $this;
-                }
-        }
-
-        throw new EntityException("Undefined method '{$method}'");
     }
 
     /**

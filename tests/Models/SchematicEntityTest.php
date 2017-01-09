@@ -66,10 +66,6 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
         $entity->a = '800';
         $this->assertInternalType('int', $entity->a);
         $this->assertSame(800, $entity->a);
-
-        $entity->setA('400');
-        $this->assertInternalType('int', $entity->getA());
-        $this->assertSame(400, $entity->getA());
     }
 
     public function testGetters()
@@ -89,9 +85,5 @@ class SchematicEntityTest extends \PHPUnit_Framework_TestCase
         $entity->a = 8000.1;
         $this->assertInternalType('int', $entity->a);
         $this->assertInternalType('float', $entity->packValue()['a']);
-
-        $entity->setA('400');
-        $this->assertInternalType('int', $entity->getA());
-        $this->assertInternalType('string', $entity->packValue()['a']);
     }
 }

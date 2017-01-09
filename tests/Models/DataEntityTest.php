@@ -33,16 +33,6 @@ class DataEntityTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($entity->abc));
     }
 
-    public function testMagicMethods()
-    {
-        $entity = new DataEntity();
-        $entity->setAbc('123');
-        $this->assertEquals(123, $entity->getAbc());
-        $this->assertEquals($entity->getField('abc'), $entity->getAbc());
-
-        $this->assertTrue($entity->hasField('abc'));
-    }
-
     public function testPackingSimple()
     {
         $entity = new DataEntity(['a' => 'b']);

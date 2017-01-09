@@ -17,6 +17,7 @@ use Spiral\ODM\Entities\DocumentCompositor;
 use Spiral\ODM\Entities\DocumentInstantiator;
 use Spiral\ODM\Exceptions\AccessorException;
 use Spiral\ODM\Exceptions\AggregationException;
+use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Exceptions\FieldException;
 use Spiral\ODM\Helpers\AggregationHelper;
 use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
@@ -248,7 +249,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             return $helper->createAggregation($method);
         }
 
-        return parent::__call($method, $arguments);
+        throw new DocumentException("Undefined method call '{$method}' in '" . get_called_class() . "'");
     }
 
     /**

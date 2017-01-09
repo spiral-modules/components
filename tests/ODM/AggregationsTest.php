@@ -20,8 +20,8 @@ class AggregationsTest extends \PHPUnit_Framework_TestCase
     use ODMTrait;
 
     /**
-     * @expectedException \Spiral\Models\Exceptions\EntityException
-     * @expectedExceptionMessage Undefined method 'badAggregation'
+     * @expectedException \Spiral\ODM\Exceptions\DocumentException
+     * @expectedExceptionMessage Undefined method call 'badAggregation' in 'Spiral\Tests\ODM\Fixtures\GoodAggregates'
      */
     public function testUndefinedAggregationOrMethod()
     {

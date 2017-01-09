@@ -127,8 +127,12 @@ abstract class RelationLoader extends AbstractLoader
     /**
      * {@inheritdoc}
      */
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node, LoaderInterface $parent)
     {
+        if (!$parent instanceof AbstractLoader) {
+            throw new LoaderException("RelationLoaders can only work inside AbstractLoader scope");
+        }
+
         if ($this->isJoined() || !$this->isLoaded()) {
             //We are expecting data to be already loaded via query itself
             return;
@@ -141,7 +145,7 @@ abstract class RelationLoader extends AbstractLoader
         }
 
         //Ensure all nested relations
-        $statement = $this->configureQuery($this->createQuery(), $references)->run();
+        $statement = $this->configureQuery($this->createQuery(), $parent, $references)->run();
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
         foreach ($statement as $row) {
@@ -152,7 +156,7 @@ abstract class RelationLoader extends AbstractLoader
 
         //Loading data for all nested relations
         foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation));
+            $loader->loadData($node->fetchNode($relation), $this);
         }
     }
 

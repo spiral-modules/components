@@ -11,6 +11,7 @@ use Spiral\ORM\Entities\Loaders\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\RootNode;
 use Spiral\ORM\Exceptions\LoaderException;
+use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
@@ -111,11 +112,14 @@ class RootLoader extends AbstractLoader
 
     /**
      * {@inheritdoc}
+     *
+     * No parent loader is expected.
      */
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node, LoaderInterface $parent = null)
     {
         //Fetching results from database
-        $statement = $this->configureQuery(clone $this->query)->run();
+        $statement = $this->configureQuery(clone $this->query, $parent)->run();
+
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
         foreach ($statement as $row) {
@@ -127,7 +131,7 @@ class RootLoader extends AbstractLoader
 
         //Executing child loaders
         foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation));
+            $loader->loadData($node->fetchNode($relation), $this);
         }
     }
 

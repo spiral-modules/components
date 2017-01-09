@@ -42,9 +42,10 @@ interface LoaderInterface
     /**
      * Load data into previously created node.
      *
-     * @param AbstractNode $node
+     * @param AbstractNode    $node
+     * @param LoaderInterface $parent Parent loader
      *
      * @throws LoaderException
      */
-    public function loadData(AbstractNode $node);
+    public function loadData(AbstractNode $node, LoaderInterface $parent);
 }

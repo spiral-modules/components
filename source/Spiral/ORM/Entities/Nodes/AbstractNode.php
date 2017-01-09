@@ -50,7 +50,7 @@ abstract class AbstractNode
      */
     private $references = [];
 
-     /**
+    /**
      * Declared column which must be aggregated in a parent node. i.e. Parent Key
      *
      * @var null|string

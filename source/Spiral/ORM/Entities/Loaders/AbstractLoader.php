@@ -201,7 +201,7 @@ abstract class AbstractLoader implements LoaderInterface
         return $node;
     }
 
-    public function loadData(AbstractNode $node)
+    public function loadData(AbstractNode $node, LoaderInterface $parent)
     {
         if ($this->isJoined()) {
             //We are expecting data to be already loaded via query itself
@@ -215,7 +215,7 @@ abstract class AbstractLoader implements LoaderInterface
 
         //Post-loading!!!!!!
         foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation));
+            $loader->loadData($node->fetchNode($relation), $this);
         }
     }
 

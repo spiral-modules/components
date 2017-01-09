@@ -189,10 +189,10 @@ abstract class AbstractNode
 
             //Make sure that all nested relations are registered
             $this->ensurePlaceholders($data);
-
-            //Add data into result set
-            $this->pushData($data);
         }
+
+        //Add data into result set
+        $this->pushData($data);
 
         foreach ($this->nodes as $container => $node) {
             if ($node->joined) {

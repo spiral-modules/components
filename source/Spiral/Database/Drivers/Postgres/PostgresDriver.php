@@ -62,7 +62,7 @@ class PostgresDriver extends Driver
     public function __construct(
         $name,
         array $options,
-        ContainerInterface $container,
+        ContainerInterface $container = null,
         MemoryInterface $memory = null
     ) {
         parent::__construct($name, $options, $container);

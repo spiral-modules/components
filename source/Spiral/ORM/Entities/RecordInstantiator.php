@@ -92,7 +92,7 @@ class RecordInstantiator implements InstantiatorInterface
          * Filtering entity
          */
 
-        $entity = new $class($fields, $this->schema, $this->orm);
+        $entity = new $class([], $this->schema, $this->orm);
         if (!$entity instanceof RecordEntity) {
             throw new InstantionException(
                 "Unable to set filtered values for '{$class}', must be instance of RecordEntity"

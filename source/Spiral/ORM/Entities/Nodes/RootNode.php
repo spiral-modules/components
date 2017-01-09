@@ -40,6 +40,15 @@ class RootNode extends AbstractNode
     }
 
     /**
+     * Destructing.
+     */
+    public function __destruct()
+    {
+        $this->result = [];
+        parent::__destruct();
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function pushData(array &$data)

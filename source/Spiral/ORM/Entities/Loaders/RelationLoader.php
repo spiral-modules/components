@@ -127,12 +127,8 @@ abstract class RelationLoader extends AbstractLoader
     /**
      * {@inheritdoc}
      */
-    public function loadData(AbstractNode $node, LoaderInterface $parent)
+    public function loadData(AbstractNode $node)
     {
-        if (!$parent instanceof AbstractLoader) {
-            throw new LoaderException("RelationLoaders can only work inside AbstractLoader scope");
-        }
-
         if ($this->isJoined() || !$this->isLoaded()) {
             //We are expecting data to be already loaded via query itself
             return;
@@ -145,7 +141,7 @@ abstract class RelationLoader extends AbstractLoader
         }
 
         //Ensure all nested relations
-        $statement = $this->configureQuery($this->createQuery(), $parent, $references)->run();
+        $statement = $this->configureQuery($this->createQuery(), $references)->run();
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
         foreach ($statement as $row) {
@@ -156,24 +152,20 @@ abstract class RelationLoader extends AbstractLoader
 
         //Loading data for all nested relations
         foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation), $this);
+            $loader->loadData($node->fetchNode($relation));
         }
     }
 
     /**
      * Configure query with conditions, joins and columns.
      *
-     * @param SelectQuery    $query
-     * @param AbstractLoader $parent
-     * @param array          $outerKeys Set of OUTER_KEY values collected by parent loader.
+     * @param SelectQuery $query
+     * @param array       $outerKeys Set of OUTER_KEY values collected by parent loader.
      *
      * @return SelectQuery
      */
-    protected function configureQuery(
-        SelectQuery $query,
-        AbstractLoader $parent,
-        array $outerKeys = []
-    ): SelectQuery {
+    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    {
         if ($this->isJoined()) {
             //Mounting columns
             $this->mountColumns($query, true);
@@ -182,7 +174,7 @@ abstract class RelationLoader extends AbstractLoader
             $this->mountColumns($query, $this->options['minify'], '');
         }
 
-        return parent::configureQuery($query, $parent);
+        return parent::configureQuery($query);
     }
 
     /**
@@ -243,14 +235,13 @@ abstract class RelationLoader extends AbstractLoader
     /**
      * Get parent identifier based on relation configuration key.
      *
-     * @param AbstractLoader $parent
-     * @param string         $key
+     * @param $key
      *
      * @return string
      */
-    protected function parentKey(AbstractLoader $parent, $key): string
+    protected function parentKey($key): string
     {
-        return $parent->getAlias() . '.' . $this->schema[$key];
+        return $this->parent->getAlias() . '.' . $this->schema[$key];
     }
 
     /**
@@ -275,6 +266,8 @@ abstract class RelationLoader extends AbstractLoader
 
     /**
      * Create relation specific select query.
+     *
+     * @param array $references List of parent key values aggregates while parsing.
      *
      * @return SelectQuery
      */

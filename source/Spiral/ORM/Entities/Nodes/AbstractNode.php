@@ -134,12 +134,24 @@ abstract class AbstractNode
     {
         $node->container = $container;
         $node->parent = $this;
+
         $this->nodes[$container] = $node;
 
         if (!empty($node->outerKey)) {
             //This will make parser to aggregate such key in order to be used in later statement
             $this->trackReference($node->outerKey);
         }
+    }
+
+    /**
+     * Destructing.
+     */
+    public function __destruct()
+    {
+        $this->parent = null;
+        $this->nodes = [];
+        $this->references = [];
+        $this->trackReferences = [];
     }
 
     /**

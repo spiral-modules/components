@@ -11,7 +11,6 @@ use Spiral\ORM\Entities\Loaders\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\RootNode;
 use Spiral\ORM\Exceptions\LoaderException;
-use Spiral\ORM\LoaderInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
@@ -83,43 +82,28 @@ class RootLoader extends AbstractLoader
     }
 
     /**
-     * {@inheritdoc}
+     * @param SelectQuery $query
      *
-     * Parent is not required for RootLoader.
+     * @return SelectQuery
      */
-    protected function configureQuery(
-        SelectQuery $query,
-        AbstractLoader $parent = null
-    ): SelectQuery {
+    protected function configureQuery(SelectQuery $query): SelectQuery
+    {
         //Clarifying table name
         $query->from("{$this->getTable()} AS {$this->getAlias()}");
 
         //Columns to be loaded for primary model
         $this->mountColumns($query, true, '', true);
 
-        foreach ($this->loaders as $loader) {
-            if ($loader instanceof RelationLoader && $loader->isJoined()) {
-                $query = $loader->configureQuery(clone $query, $this);
-            }
-        }
-
-        foreach ($this->joiners as $loader) {
-            $query = $loader->configureQuery(clone $query, $this);
-        }
-
-        return $query;
+        return parent::configureQuery($query);
     }
 
     /**
      * {@inheritdoc}
-     *
-     * No parent loader is expected.
      */
-    public function loadData(AbstractNode $node, LoaderInterface $parent = null)
+    public function loadData(AbstractNode $node)
     {
         //Fetching results from database
-        $statement = $this->configureQuery(clone $this->query, $parent)->run();
-
+        $statement = $this->configureQuery(clone $this->query)->run();
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
         foreach ($statement as $row) {
@@ -131,7 +115,7 @@ class RootLoader extends AbstractLoader
 
         //Executing child loaders
         foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation), $this);
+            $loader->loadData($node->fetchNode($relation));
         }
     }
 

@@ -210,19 +210,12 @@ abstract class AbstractLoader implements LoaderInterface
         return $node;
     }
 
+    /**
+     * @param AbstractNode $node
+     */
     public function loadData(AbstractNode $node)
     {
-        if ($this->isJoined()) {
-            //We are expecting data to be already loaded via query itself
-            return;
-        }
-
-        //Query???
-
-
-        //Loading data
-
-        //Post-loading!!!!!!
+        //Loading data thought child loaders
         foreach ($this->loaders as $relation => $loader) {
             $loader->loadData($node->fetchNode($relation));
         }

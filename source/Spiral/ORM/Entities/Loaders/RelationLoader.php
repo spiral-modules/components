@@ -130,7 +130,9 @@ abstract class RelationLoader extends AbstractLoader
     public function loadData(AbstractNode $node)
     {
         if ($this->isJoined() || !$this->isLoaded()) {
-            //We are expecting data to be already loaded via query itself
+            //Loading data for all nested relations
+            parent::loadData($node);
+
             return;
         }
 
@@ -151,9 +153,7 @@ abstract class RelationLoader extends AbstractLoader
         $statement->close();
 
         //Loading data for all nested relations
-        foreach ($this->loaders as $relation => $loader) {
-            $loader->loadData($node->fetchNode($relation));
-        }
+        parent::loadData($node);
     }
 
     /**

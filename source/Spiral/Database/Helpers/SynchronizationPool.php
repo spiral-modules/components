@@ -104,7 +104,7 @@ class SynchronizationPool extends Component
             $this->runChanges($logger);
 
             //Finishing with new foreign keys
-            $this->resetSchemas($logger);
+            $this->createForeigns($logger);
         } catch (\Throwable $e) {
             $this->rollbackTransaction();
             throw $e;
@@ -144,21 +144,9 @@ class SynchronizationPool extends Component
     }
 
     /**
-     * Collecting all involved drivers.
-     */
-    private function collectDrivers()
-    {
-        foreach ($this->tables as $table) {
-            if (!in_array($table->getDriver(), $this->drivers, true)) {
-                $this->drivers[] = $table->getDriver();
-            }
-        }
-    }
-
-    /**
      * @param LoggerInterface $logger
      */
-    private function dropForeigns(LoggerInterface $logger)
+    protected function dropForeigns(LoggerInterface $logger)
     {
         foreach ($this->sortedTables() as $table) {
             if ($table->exists()) {
@@ -170,20 +158,19 @@ class SynchronizationPool extends Component
     /**
      * @param LoggerInterface $logger
      */
-    private function dropIndexes(LoggerInterface $logger)
+    protected function dropIndexes(LoggerInterface $logger)
     {
         foreach ($this->sortedTables() as $table) {
             if ($table->exists()) {
                 $table->save(Behaviour::DROP_INDEXES, $logger, false);
             }
         }
-
     }
 
     /**
      * @param LoggerInterface $logger
      */
-    private function runChanges(LoggerInterface $logger)
+    protected function runChanges(LoggerInterface $logger)
     {
         foreach ($this->sortedTables() as $table) {
             $table->save(
@@ -196,10 +183,22 @@ class SynchronizationPool extends Component
     /**
      * @param LoggerInterface $logger
      */
-    private function resetSchemas(LoggerInterface $logger)
+    protected function createForeigns(LoggerInterface $logger)
     {
         foreach ($this->sortedTables() as $table) {
             $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);
+        }
+    }
+
+    /**
+     * Collecting all involved drivers.
+     */
+    private function collectDrivers()
+    {
+        foreach ($this->tables as $table) {
+            if (!in_array($table->getDriver(), $this->drivers, true)) {
+                $this->drivers[] = $table->getDriver();
+            }
         }
     }
 }

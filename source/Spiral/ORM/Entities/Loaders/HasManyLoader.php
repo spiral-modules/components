@@ -63,8 +63,8 @@ class HasManyLoader extends RelationLoader
             $this->getAlias()
         );
 
+        //Relation WHERE conditions
         if (!empty($this->schema[Record::WHERE])) {
-            //Relation WHERE conditions
             $decorator->where($this->schema[Record::WHERE]);
         }
 

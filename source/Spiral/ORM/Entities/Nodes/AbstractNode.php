@@ -11,6 +11,10 @@ use Spiral\ORM\Exceptions\NodeException;
 /**
  * Represents data node in a tree with ability to parse line of results, split it into sub
  * relations, aggregate reference keys and etc.
+ *
+ * Nodes can be used as to parse one big and flat query, or when multiple queries provide their
+ * data into one dataset, in both cases flow is identical from standpoint of Nodes (but offsets are
+ * different).
  */
 abstract class AbstractNode
 {

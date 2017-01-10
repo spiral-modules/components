@@ -60,7 +60,11 @@ class ManyToManyLoader extends RelationLoader
             );
         }
 
-        //pivot where
+        //Pivot conditions specified in relation schema
+        $this->setWhere($query, $this->pivotAlias(), 'onWhere', $this->schema[Record::WHERE_PIVOT]);
+
+        //Pivot conditions specified by user
+        $this->setWhere($query, $this->pivotAlias(), 'onWhere', $this->options['wherePivot']);
 
         if ($this->isJoined()) {
             $query->join(
@@ -70,8 +74,15 @@ class ManyToManyLoader extends RelationLoader
             );
         }
 
-        //normal where
+        //When relation is joined we will use ON statements, when not - normal WHERE
+        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
+        //Where conditions specified in relation definition
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
+
+        //User specified WHERE conditions
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+dump($query);
         return parent::configureQuery($query);
     }
 

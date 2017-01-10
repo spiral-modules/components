@@ -90,8 +90,9 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
         }
 
         $debugInfo = [
-            'statement' => $queryString,
-            'driver'    => $this->driver
+            'statement'  => $queryString,
+            'parameters' => $this->getParameters(),
+            'driver'     => $this->driver
         ];
 
         return $debugInfo;

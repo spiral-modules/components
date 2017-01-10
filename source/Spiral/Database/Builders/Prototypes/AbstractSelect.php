@@ -102,8 +102,8 @@ abstract class AbstractSelect extends AbstractWhere implements
     public function getParameters(): array
     {
         return $this->flattenParameters(array_merge(
-            $this->whereParameters,
             $this->onParameters,
+            $this->whereParameters,
             $this->havingParameters
         ));
     }

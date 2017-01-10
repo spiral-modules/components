@@ -17,6 +17,8 @@ use Spiral\Database\Exceptions\BuilderException;
  *
  * Decorator can additionally decorate target table name, using magic expression "{@}". Table name
  * decoration is required as Loader target table can be unknown for user.
+ *
+ * @todo support @ alias?
  */
 class WhereDecorator
 {

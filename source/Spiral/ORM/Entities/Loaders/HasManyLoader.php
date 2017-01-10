@@ -61,14 +61,10 @@ class HasManyLoader extends RelationLoader
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
         //Where conditions specified in relation definition
-        if (!empty($this->schema[Record::WHERE])) {
-            $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
-        }
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
 
         //User specified WHERE conditions
-        if (!empty($this->options['where'])) {
-            $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
-        }
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
 
         return parent::configureQuery($query);
     }

@@ -144,9 +144,9 @@ class SynchronizationPool extends Component
     }
 
     /**
-     * @param LoggerInterface $logger
+     * @param LoggerInterface|null $logger
      */
-    protected function dropForeigns(LoggerInterface $logger)
+    protected function dropForeigns(LoggerInterface $logger = null)
     {
         foreach ($this->sortedTables() as $table) {
             if ($table->exists()) {
@@ -156,9 +156,9 @@ class SynchronizationPool extends Component
     }
 
     /**
-     * @param LoggerInterface $logger
+     * @param LoggerInterface|null $logger
      */
-    protected function dropIndexes(LoggerInterface $logger)
+    protected function dropIndexes(LoggerInterface $logger = null)
     {
         foreach ($this->sortedTables() as $table) {
             if ($table->exists()) {
@@ -168,9 +168,9 @@ class SynchronizationPool extends Component
     }
 
     /**
-     * @param LoggerInterface $logger
+     * @param LoggerInterface|null $logger
      */
-    protected function runChanges(LoggerInterface $logger)
+    protected function runChanges(LoggerInterface $logger = null)
     {
         foreach ($this->sortedTables() as $table) {
             $table->save(
@@ -181,9 +181,9 @@ class SynchronizationPool extends Component
     }
 
     /**
-     * @param LoggerInterface $logger
+     * @param LoggerInterface|null $logger
      */
-    protected function createForeigns(LoggerInterface $logger)
+    protected function createForeigns(LoggerInterface $logger = null)
     {
         foreach ($this->sortedTables() as $table) {
             $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);

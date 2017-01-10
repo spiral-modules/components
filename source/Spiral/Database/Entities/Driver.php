@@ -22,9 +22,6 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
  * Driver abstraction is responsible for DBMS specific set of functions and used by Databases to
  * hide implementation specific functionality. Extends PDODriver and adds ability to create driver
  * specific query builders and schemas (basically operates like a factory).
- *
- * @todo (big todo) set db timezones at moment of connection initialization to same timezone
- *                  define in a options
  */
 abstract class Driver extends PDODriver
 {

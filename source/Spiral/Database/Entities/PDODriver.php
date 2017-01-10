@@ -61,7 +61,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     protected $options = [
         'profiling'  => false,
 
-        //All datetime objects will be converted relative to this timezone
+        //All datetime objects will be converted relative to this timezone (must match with DB timezone!)
         'timezone'   => 'UTC',
 
         //DSN

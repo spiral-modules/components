@@ -95,31 +95,16 @@ class SynchronizationPool extends Component
 
         try {
             //Drop not-needed foreign keys and alter everything else
-            foreach ($this->sortedTables() as $table) {
-                if ($table->exists()) {
-                    $table->save(Behaviour::DROP_FOREIGNS, $logger, false);
-                }
-            }
+            $this->dropForeigns($logger);
 
             //Drop not-needed indexes
-            foreach ($this->sortedTables() as $table) {
-                if ($table->exists()) {
-                    $table->save(Behaviour::DROP_INDEXES, $logger, false);
-                }
-            }
+            $this->dropIndexes($logger);
 
             //Other changes [NEW TABLES WILL BE CREATED HERE!]
-            foreach ($this->sortedTables() as $table) {
-                $table->save(
-                    Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES ^ Behaviour::CREATE_FOREIGNS,
-                    $logger
-                );
-            }
+            $this->runChanges($logger);
 
             //Finishing with new foreign keys
-            foreach ($this->sortedTables() as $table) {
-                $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);
-            }
+            $this->resetSchemas($logger);
         } catch (\Throwable $e) {
             $this->rollbackTransaction();
             throw $e;
@@ -167,6 +152,54 @@ class SynchronizationPool extends Component
             if (!in_array($table->getDriver(), $this->drivers, true)) {
                 $this->drivers[] = $table->getDriver();
             }
+        }
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    private function dropForeigns(LoggerInterface $logger)
+    {
+        foreach ($this->sortedTables() as $table) {
+            if ($table->exists()) {
+                $table->save(Behaviour::DROP_FOREIGNS, $logger, false);
+            }
+        }
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    private function dropIndexes(LoggerInterface $logger)
+    {
+        foreach ($this->sortedTables() as $table) {
+            if ($table->exists()) {
+                $table->save(Behaviour::DROP_INDEXES, $logger, false);
+            }
+        }
+
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    private function runChanges(LoggerInterface $logger)
+    {
+        foreach ($this->sortedTables() as $table) {
+            $table->save(
+                Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES ^ Behaviour::CREATE_FOREIGNS,
+                $logger
+            );
+        }
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    private function resetSchemas(LoggerInterface $logger)
+    {
+        foreach ($this->sortedTables() as $table) {
+            $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);
         }
     }
 }

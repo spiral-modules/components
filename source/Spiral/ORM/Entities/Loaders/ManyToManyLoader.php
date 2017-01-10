@@ -6,8 +6,10 @@
  */
 namespace Spiral\ORM\Entities\Loaders;
 
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Injections\Parameter;
+use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
-use Spiral\ORM\Entities\Nodes\NullNode;
 use Spiral\ORM\Entities\Nodes\PivotedNode;
 use Spiral\ORM\Record;
 
@@ -20,6 +22,8 @@ use Spiral\ORM\Record;
  */
 class ManyToManyLoader extends RelationLoader
 {
+    use WhereTrait;
+
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
@@ -34,9 +38,97 @@ class ManyToManyLoader extends RelationLoader
         'where'      => null,
     ];
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    {
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->pivotTable() . ' AS ' . $this->pivotAlias(),
+                [$this->pivotKey(Record::THOUGHT_INNER_KEY) => $this->parentKey(Record::INNER_KEY)]
+            );
+        } else {
+            //TODO: outer keys
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->pivotTable() . ' AS ' . $this->pivotAlias()
+            )->onWhere(
+                $this->pivotKey(Record::THOUGHT_INNER_KEY),
+                new Parameter($outerKeys)
+            );
+        }
+
+        //pivot where
+
+//        $pivotOuterKey = $this->getPivotKey(RecordEntity::THOUGHT_OUTER_KEY);
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->getTable() . ' AS ' . $this->getAlias(),
+                [$this->pivotKey(Record::THOUGHT_OUTER_KEY) => $this->localKey(Record::OUTER_KEY)]
+            );
+        }
+
+        //normal where
+
+        return parent::configureQuery($query);
+    }
+
+    /**
+     * Set columns into SelectQuery.
+     *
+     * @param SelectQuery $query
+     * @param bool        $minify    Minify column names (will work in case when query parsed in
+     *                               FETCH_NUM mode).
+     * @param string      $prefix    Prefix to be added for each column name.
+     * @param bool        $overwrite When set to true existed columns will be removed.
+     */
+    protected function mountColumns(
+        SelectQuery $query,
+        bool $minify = false,
+        string $prefix = '',
+        bool $overwrite = false
+    ) {
+        /*
+         * Configuring pivot columns.
+         */
+        //Column source alias
+        $alias = $this->pivotAlias();
+
+        $columns = $overwrite ? [] : $query->getColumns();
+        foreach ($this->pivotColumns() as $name) {
+            $column = $name;
+
+            if ($minify) {
+                //Let's use column number instead of full name
+                $column = 'p_c' . count($columns);
+            }
+
+            $columns[] = "{$alias}.{$name} AS {$prefix}{$column}";
+        }
+
+        //Updating column set
+        $query->columns($columns);
+
+        parent::mountColumns($query, $minify, $prefix, $overwrite);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function initNode(): AbstractNode
     {
-        return new NullNode();
+        $node = new PivotedNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::PIVOT_COLUMNS],
+            $this->schema[Record::OUTER_KEY],
+            $this->schema[Record::THOUGHT_INNER_KEY],
+            $this->schema[Record::THOUGHT_OUTER_KEY]
+        );
+
+        return $node->asJoined($this->isJoined());
     }
 
     /**
@@ -44,7 +136,7 @@ class ManyToManyLoader extends RelationLoader
      *
      * @return string
      */
-    public function pivotTable(): string
+    protected function pivotTable(): string
     {
         return $this->schema[Record::PIVOT_TABLE];
     }
@@ -61,5 +153,31 @@ class ManyToManyLoader extends RelationLoader
         }
 
         return $this->getAlias() . '_pivot';
+    }
+
+    /**
+     * @return array
+     */
+    protected function pivotColumns(): array
+    {
+        return $this->schema[Record::PIVOT_COLUMNS];
+    }
+
+    /**
+     * Key related to pivot table. Must include pivot table alias.
+     *
+     * @see pivotKey()
+     *
+     * @param string $key
+     *
+     * @return null|string
+     */
+    protected function pivotKey(string $key)
+    {
+        if (!isset($this->schema[$key])) {
+            return null;
+        }
+
+        return $this->pivotAlias() . '.' . $this->schema[$key];
     }
 }

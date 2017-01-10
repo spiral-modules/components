@@ -7,7 +7,7 @@
 namespace Spiral\ORM\Entities\Nodes;
 
 use Spiral\ORM\Entities\Nodes\Traits\DuplicateTrait;
-use Spiral\ORM\Exceptions\LoaderException;
+use Spiral\ORM\Exceptions\NodeException;
 
 /**
  * Node with ability to push it's data into referenced tree location.
@@ -19,22 +19,22 @@ class SingularNode extends AbstractNode
     /**
      * @var string
      */
-    protected $localKey;
+    protected $innerKey;
 
     /**
      * @param array       $columns
-     * @param string      $localKey  Inner relation key (for example user_id)
-     * @param string|null $parentKey Outer (parent) relation key (for example id = parent.id)
+     * @param string      $innerKey Inner relation key (for example user_id)
+     * @param string|null $outerKey Outer (parent) relation key (for example id = parent.id)
      * @param array       $primaryKeys
      */
     public function __construct(
         array $columns = [],
-        string $localKey,
-        string $parentKey,
+        string $innerKey,
+        string $outerKey,
         array $primaryKeys = []
     ) {
-        parent::__construct($columns, $parentKey);
-        $this->localKey = $localKey;
+        parent::__construct($columns, $outerKey);
+        $this->innerKey = $innerKey;
 
         //Using primary keys (if any) to de-duplicate results
         $this->duplicateCriteria = $primaryKeys;
@@ -46,10 +46,10 @@ class SingularNode extends AbstractNode
     protected function pushData(array &$data)
     {
         if (empty($this->parent)) {
-            throw new LoaderException("Unable to register data tree, parent is missing");
+            throw new NodeException("Unable to register data tree, parent is missing");
         }
 
-        if (is_null($data[$this->localKey])) {
+        if (is_null($data[$this->innerKey])) {
             //No data was loaded
             return;
         }
@@ -58,7 +58,7 @@ class SingularNode extends AbstractNode
         $this->parent->mount(
             $this->container,
             $this->outerKey,
-            $data[$this->localKey],
+            $data[$this->innerKey],
             $data
         );
     }

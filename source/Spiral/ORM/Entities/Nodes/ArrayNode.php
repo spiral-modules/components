@@ -6,20 +6,47 @@
  */
 namespace Spiral\ORM\Entities\Nodes;
 
-use Spiral\ORM\Exceptions\LoaderException;
+use Spiral\ORM\Entities\Nodes\Traits\DuplicateTrait;
+use Spiral\ORM\Exceptions\NodeException;
 
-class ArrayNode extends SingularNode
+class ArrayNode extends AbstractNode implements ArrayInterface
 {
+    use DuplicateTrait;
+
+    /**
+     * @var string
+     */
+    protected $innerKey;
+
+    /**
+     * @param array       $columns
+     * @param string      $innerKey Inner relation key (for example user_id)
+     * @param string|null $outerKey Outer (parent) relation key (for example id = parent.id)
+     * @param array       $primaryKeys
+     */
+    public function __construct(
+        array $columns = [],
+        string $innerKey,
+        string $outerKey,
+        array $primaryKeys = []
+    ) {
+        parent::__construct($columns, $outerKey);
+        $this->innerKey = $innerKey;
+
+        //Using primary keys (if any) to de-duplicate results
+        $this->duplicateCriteria = $primaryKeys;
+    }
+
     /**
      * {@inheritdoc}
      */
     protected function pushData(array &$data)
     {
         if (empty($this->parent)) {
-            throw new LoaderException("Unable to register data tree, parent is missing");
+            throw new NodeException("Unable to register data tree, parent is missing");
         }
 
-        if (is_null($data[$this->localKey])) {
+        if (is_null($data[$this->innerKey])) {
             //No data was loaded
             return;
         }
@@ -28,7 +55,7 @@ class ArrayNode extends SingularNode
         $this->parent->mountArray(
             $this->container,
             $this->outerKey,
-            $data[$this->localKey],
+            $data[$this->innerKey],
             $data
         );
     }

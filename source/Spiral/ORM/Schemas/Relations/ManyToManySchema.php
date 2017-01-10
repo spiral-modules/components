@@ -53,8 +53,10 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
         Record::INNER_KEY,
         Record::THOUGHT_INNER_KEY,
         Record::THOUGHT_OUTER_KEY,
+        Record::RELATION_COLUMNS,
         Record::PIVOT_COLUMNS,
         Record::WHERE_PIVOT,
+        Record::WHERE
     ];
 
     /**
@@ -125,6 +127,7 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
 
         //Let's clarify pivot columns
         $schema = $packed[ORMInterface::R_SCHEMA];
+        $schema[Record::PIVOT_TABLE] = $this->pivotTable();
         $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
 
         //Ensure that inner keys are always presented

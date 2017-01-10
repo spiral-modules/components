@@ -6,7 +6,6 @@
  */
 namespace Spiral\ORM\Entities\Nodes;
 
-use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\Exceptions\NodeException;
 
 /**
@@ -15,25 +14,6 @@ use Spiral\ORM\Exceptions\NodeException;
  */
 abstract class AbstractNode
 {
-    /**
-     * Indicates that node data is joined to parent row.
-     *
-     * @var bool
-     */
-    private $joined = false;
-
-    /**
-     * Column names to be used to hydrate based on given query rows.
-     *
-     * @var array
-     */
-    private $columns = [];
-
-    /**
-     * @var int
-     */
-    private $countColumns = 0;
-
     /**
      * Set of keys to be aggregated by Parser while parsing results.
      *
@@ -51,6 +31,25 @@ abstract class AbstractNode
     private $references = [];
 
     /**
+     * Indicates that node data is joined to parent row.
+     *
+     * @var bool
+     */
+    private $joined = false;
+
+    /**
+     * Column names to be used to hydrate based on given query rows.
+     *
+     * @var array
+     */
+    protected $columns = [];
+
+    /**
+     * @var int
+     */
+    private $countColumns = 0;
+
+    /**
      * Declared column which must be aggregated in a parent node. i.e. Parent Key
      *
      * @var null|string
@@ -60,6 +59,7 @@ abstract class AbstractNode
     /**
      * Node location in a tree. Set when node is registered.
      *
+     * @invisible
      * @var string
      */
     protected $container;
@@ -106,12 +106,12 @@ abstract class AbstractNode
      *
      * @return array
      *
-     * @throws LoaderException
+     * @throws NodeException
      */
     public function getReferences(): array
     {
         if (empty($this->parent)) {
-            throw new LoaderException("Unable to aggregate reference values, parent is missing");
+            throw new NodeException("Unable to aggregate reference values, parent is missing");
         }
 
         if (empty($this->parent->references[$this->outerKey])) {
@@ -177,8 +177,10 @@ abstract class AbstractNode
      *
      * @param int   $dataOffset
      * @param array $row
+     *
+     * @return int Must return number of handled columns.
      */
-    public function parseRow(int $dataOffset, array $row)
+    public function parseRow(int $dataOffset, array $row): int
     {
         //Fetching Node specific data from resulted row
         $data = $this->fetchData($dataOffset, $row);
@@ -197,14 +199,30 @@ abstract class AbstractNode
             $this->pushData($data);
         }
 
+        $innerOffset = 0;
         foreach ($this->nodes as $container => $node) {
             if ($node->joined) {
-                $node->parseRow($this->countColumns + $dataOffset, $row);
+                /**
+                 * We are looking into branch like structure:
+                 * node
+                 *  - node
+                 *      - node
+                 *      - node
+                 * node
+                 *
+                 * This means offset has to be calculated using all nested nodes
+                 */
+                $innerColumns = $node->parseRow($this->countColumns + $dataOffset, $row);
 
-                //Shifting to next node location
-                $dataOffset += $node->countColumns;
+                //Counting next selection offset
+                $dataOffset += $innerColumns;
+
+                //Counting nested tree offset
+                $innerOffset += $innerColumns;
             }
         }
+
+        return $this->countColumns + $innerOffset;
     }
 
     /**
@@ -253,7 +271,7 @@ abstract class AbstractNode
      * @param array  $data      Data must be referenced to existed set if it was registered
      *                          previously.
      *
-     * @throws LoaderException
+     * @throws NodeException
      */
     final protected function mount(
         string $container,
@@ -261,6 +279,10 @@ abstract class AbstractNode
         $criteria,
         array &$data
     ) {
+        if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new NodeException("Undefined reference {$key}.{$criteria}");
+        }
+
         foreach ($this->references[$key][$criteria] as &$subset) {
             if (isset($subset[$container])) {
                 //Back reference!
@@ -295,7 +317,7 @@ abstract class AbstractNode
      * @param array  $data      Data must be referenced to existed set if it was registered
      *                          previously.
      *
-     * @throws LoaderException
+     * @throws NodeException
      */
     final protected function mountArray(
         string $container,
@@ -303,6 +325,10 @@ abstract class AbstractNode
         $criteria,
         array &$data
     ) {
+        if (!array_key_exists($criteria, $this->references[$key])) {
+            throw new NodeException("Undefined reference {$key}.{$criteria}");
+        }
+
         foreach ($this->references[$key][$criteria] as &$subset) {
             if (!in_array($data, $subset[$container])) {
                 $subset[$container][] = &$data;
@@ -330,7 +356,7 @@ abstract class AbstractNode
                 array_slice($line, $dataOffset, $this->countColumns)
             );
         } catch (\Exception $e) {
-            throw new LoaderException("Unable to parse incoming row", $e->getCode(), $e);
+            throw new NodeException("Unable to parse incoming row", $e->getCode(), $e);
         }
     }
 
@@ -362,7 +388,7 @@ abstract class AbstractNode
     {
         //Let's force placeholders for every sub loaded
         foreach ($this->nodes as $name => $node) {
-            $data[$name] = $node instanceof ArrayNode ? [] : null;
+            $data[$name] = $node instanceof ArrayInterface ? [] : null;
         }
     }
 

@@ -35,6 +35,12 @@ interface ORMInterface
     const R_CLASS = 1;
 
     /**
+     * Pivot table data location in Record fields. Pivot data only provided when record is loaded
+     * using many-to-many relation.
+     */
+    const PIVOT_DATA = '@pivot';
+
+    /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.
      *
      * Example:

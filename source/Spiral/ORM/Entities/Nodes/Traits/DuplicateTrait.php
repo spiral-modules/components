@@ -64,7 +64,7 @@ trait DuplicateTrait
      *
      * @return mixed
      */
-    private function duplicateCriteria(array &$data)
+    protected function duplicateCriteria(array &$data)
     {
         if (empty($this->duplicateCriteria)) {
             //It is recommended to use primary keys in every record as it will speed up de-duplication.

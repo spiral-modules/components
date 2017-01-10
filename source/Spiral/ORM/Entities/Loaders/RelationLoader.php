@@ -168,10 +168,10 @@ abstract class RelationLoader extends AbstractLoader
     {
         if ($this->isJoined()) {
             //Mounting columns
-            $this->mountColumns($query, true);
+            $this->mountColumns($query, $this->options['minify']);
         } else {
             //This is initial set of columns (remove all existed)
-            $this->mountColumns($query, $this->options['minify'], '');
+            $this->mountColumns($query, $this->options['minify'], '', true);
         }
 
         return parent::configureQuery($query);

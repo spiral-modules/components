@@ -50,7 +50,6 @@ class ManyToManyLoader extends RelationLoader
                 [$this->pivotKey(Record::THOUGHT_INNER_KEY) => $this->parentKey(Record::INNER_KEY)]
             );
         } else {
-            //TODO: outer keys
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
                 $this->pivotTable() . ' AS ' . $this->pivotAlias()
@@ -62,7 +61,6 @@ class ManyToManyLoader extends RelationLoader
 
         //pivot where
 
-//        $pivotOuterKey = $this->getPivotKey(RecordEntity::THOUGHT_OUTER_KEY);
         if ($this->isJoined()) {
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
@@ -91,10 +89,7 @@ class ManyToManyLoader extends RelationLoader
         string $prefix = '',
         bool $overwrite = false
     ) {
-        /*
-         * Configuring pivot columns.
-         */
-        //Column source alias
+        //Pivot table source alias
         $alias = $this->pivotAlias();
 
         $columns = $overwrite ? [] : $query->getColumns();
@@ -112,7 +107,7 @@ class ManyToManyLoader extends RelationLoader
         //Updating column set
         $query->columns($columns);
 
-        parent::mountColumns($query, $minify, $prefix, $overwrite);
+        parent::mountColumns($query, $minify, $prefix, false);
     }
 
     /**

@@ -675,7 +675,8 @@ abstract class AbstractTable implements TableInterface
     }
 
     /**
-     * Ensure that no wrong indexes left in table.
+     * Ensure that no wrong indexes left in table. This method will create AbstracTable
+     * copy in order to prevent cross modifications.
      *
      * @param bool $withForeigns
      *

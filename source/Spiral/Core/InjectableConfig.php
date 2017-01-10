@@ -15,7 +15,7 @@ use Spiral\Core\Exceptions\ConfigException;
  *
  * Attention! Config has to be serialiable and be depended ONLY on environment or runtime
  * modifications/requests. No custom logic is allowed to initiate config, in other case config cache
- * will be invalid.
+ * will be invalid (pss... there is no config cache anymore).
  */
 class InjectableConfig extends Component implements ConfigInterface, \IteratorAggregate
 {

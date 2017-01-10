@@ -44,7 +44,7 @@ class HasManyLoader extends RelationLoader
     {
         if ($this->isJoined()) {
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->getMethod() == self::LEFT_JOIN ? 'LEFT' : 'INNER',
                 "{$this->getTable()} AS {$this->getAlias()}",
                 [$this->localKey(Record::OUTER_KEY) => $this->parentKey(Record::INNER_KEY)]
             );

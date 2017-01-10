@@ -46,43 +46,43 @@ class ManyToManyLoader extends RelationLoader
     {
         if ($this->isJoined()) {
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->getMethod() == self::LEFT_JOIN ? 'LEFT' : 'INNER',
                 $this->pivotTable() . ' AS ' . $this->pivotAlias(),
                 [$this->pivotKey(Record::THOUGHT_INNER_KEY) => $this->parentKey(Record::INNER_KEY)]
             );
         } else {
-            $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->pivotTable() . ' AS ' . $this->pivotAlias()
-            )->onWhere(
+            $query->innerJoin(
+                $this->pivotTable() . ' AS ' . $this->pivotAlias(),
+                [$this->pivotKey(Record::THOUGHT_OUTER_KEY) => $this->localKey(Record::OUTER_KEY)]
+            )->where(
                 $this->pivotKey(Record::THOUGHT_INNER_KEY),
                 new Parameter($outerKeys)
-            );
-        }
-
-        //Pivot conditions specified in relation schema
-        $this->setWhere($query, $this->pivotAlias(), 'onWhere', $this->schema[Record::WHERE_PIVOT]);
-
-        //Pivot conditions specified by user
-        $this->setWhere($query, $this->pivotAlias(), 'onWhere', $this->options['wherePivot']);
-
-        if ($this->isJoined()) {
-            $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->getTable() . ' AS ' . $this->getAlias(),
-                [$this->pivotKey(Record::THOUGHT_OUTER_KEY) => $this->localKey(Record::OUTER_KEY)]
             );
         }
 
         //When relation is joined we will use ON statements, when not - normal WHERE
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
+        //Pivot conditions specified in relation schema
+        $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->schema[Record::WHERE_PIVOT]);
+
+        //Pivot conditions specified by user
+        $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
+
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getMethod() == self::LEFT_JOIN ? 'LEFT' : 'INNER',
+                $this->getTable() . ' AS ' . $this->getAlias(),
+                [$this->localKey(Record::OUTER_KEY) => $this->pivotKey(Record::THOUGHT_OUTER_KEY)]
+            );
+        }
+
         //Where conditions specified in relation definition
         $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
 
         //User specified WHERE conditions
         $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
-dump($query);
+
         return parent::configureQuery($query);
     }
 

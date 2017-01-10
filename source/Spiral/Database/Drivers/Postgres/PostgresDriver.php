@@ -138,7 +138,7 @@ class PostgresDriver extends Driver
 
         //Caching
         if (!empty($this->memory)) {
-            $this->memory->saveData($this->getSource() . ',keys', $this->primaryKeys);
+            $this->memory->saveData($this->getSource() . '.keys', $this->primaryKeys);
         }
 
         return $this->primaryKeys[$table];

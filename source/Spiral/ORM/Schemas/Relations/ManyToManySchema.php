@@ -9,6 +9,7 @@ namespace Spiral\ORM\Schemas\Relations;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Helpers\ColumnRenderer;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\Schemas\Relations\Traits\ForeignsTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TablesTrait;
@@ -122,8 +123,20 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
     {
         $packed = parent::packRelation($table);
 
-        //Normalization
-        $packed[Record::PIVOT_COLUMNS] = array_keys($packed[Record::PIVOT_COLUMNS]);
+        //Let's clarify pivot columns
+        $schema = $packed[ORMInterface::R_SCHEMA];
+        $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
+
+        //Ensure that inner keys are always presented
+        $schema[Record::PIVOT_COLUMNS] = array_merge(
+            [
+                $this->option(Record::THOUGHT_INNER_KEY),
+                $this->option(Record::THOUGHT_OUTER_KEY)
+            ],
+            $schema[Record::PIVOT_COLUMNS]
+        );
+
+        $packed[ORMInterface::R_SCHEMA] = $schema;
 
         return $packed;
     }

@@ -227,8 +227,12 @@ abstract class RelationLoader extends AbstractLoader
      *
      * @return string|null
      */
-    protected function localKey($key): string
+    protected function localKey($key)
     {
+        if (empty($this->schema[$key])) {
+            return null;
+        }
+
         return $this->getAlias() . '.' . $this->schema[$key];
     }
 
@@ -266,8 +270,6 @@ abstract class RelationLoader extends AbstractLoader
 
     /**
      * Create relation specific select query.
-     *
-     * @param array $references List of parent key values aggregates while parsing.
      *
      * @return SelectQuery
      */

@@ -9,6 +9,9 @@ namespace Spiral\ORM\Entities\Nodes;
 use Spiral\ORM\Entities\Nodes\Traits\DuplicateTrait;
 use Spiral\ORM\Exceptions\NodeException;
 
+/**
+ * Parses multiple sub children and mount them under parent node.
+ */
 class ArrayNode extends AbstractNode implements ArrayInterface
 {
     use DuplicateTrait;

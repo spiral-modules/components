@@ -6,7 +6,25 @@
  */
 namespace Spiral\ORM\Entities\Loaders\Traits;
 
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\ORM\Helpers\WhereDecorator;
+
+/**
+ * Provides ability to clarify Query where conditions in JOIN or WHERE statement, based on provided
+ * values.
+ */
 trait WhereTrait
 {
-
+    /**
+     * @param SelectQuery $query
+     * @param string      $table  Table name to be automatically inserted into where conditions at
+     *                            place of {@}.
+     * @param string      $target Query target section (accepts: where, having, onWhere, on)
+     * @param array       $where  Where conditions in a form or short array form.
+     */
+    public function setWhere(SelectQuery $query, string $table, string $target, array $where)
+    {
+        $decorator = new WhereDecorator($query, $target, $table);
+        $decorator->where($where);
+    }
 }

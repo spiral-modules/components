@@ -36,6 +36,7 @@ class ManyToManyLoader extends RelationLoader
         'pivotAlias' => null,
         'using'      => null,
         'where'      => null,
+        'wherePivot' => null
     ];
 
     /**

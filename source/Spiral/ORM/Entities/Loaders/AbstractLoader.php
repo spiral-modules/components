@@ -124,7 +124,7 @@ abstract class AbstractLoader implements LoaderInterface
          */
         if (!empty($wrong = array_diff(array_keys($options), array_keys($this->options)))) {
             throw new LoaderException(sprintf(
-                "Relation %s does not support options: %s",
+                "Relation %s does not support option: %s",
                 get_class($this),
                 join(',', $wrong)
             ));

@@ -8,9 +8,9 @@ namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;
+use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\ArrayNode;
-use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\Record;
 
 /**
@@ -22,6 +22,8 @@ use Spiral\ORM\Record;
  */
 class HasManyLoader extends RelationLoader
 {
+    use WhereTrait;
+
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
@@ -55,22 +57,17 @@ class HasManyLoader extends RelationLoader
             );
         }
 
-        //Let's use where decorator to set conditions, it will automatically route tokens to valid
-        //destination (JOIN or WHERE)
-        $decorator = new WhereDecorator(
-            $query,
-            $this->isJoined() ? 'onWhere' : 'where',
-            $this->getAlias()
-        );
+        //When relation is joined we will use ON statements, when not - normal WHERE
+        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
-        //Relation WHERE conditions
+        //Where conditions specified in relation definition
         if (!empty($this->schema[Record::WHERE])) {
-            $decorator->where($this->schema[Record::WHERE]);
+            $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
         }
 
         //User specified WHERE conditions
         if (!empty($this->options['where'])) {
-            $decorator->where($this->options['where']);
+            $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
         }
 
         return parent::configureQuery($query);

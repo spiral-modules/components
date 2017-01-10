@@ -61,6 +61,36 @@ abstract class NestedQueriesTest extends BaseQueryTest
         ], $select);
     }
 
+    public function testWhereAndJoin()
+    {
+        $select = $this->database->select()
+            ->from('table')
+            ->leftJoin('external')->onWhere(['name' => 'test'])
+            ->where('id', 1);
+
+        $this->assertSameQuery("SELECT * FROM {table} LEFT JOIN {external} ON {name} = ? WHERE {id} = ?",
+            $select);
+        $this->assertSameParameters([
+            'test',
+            1
+        ], $select);
+    }
+
+    public function testWhereAndJoinReverted()
+    {
+        $select = $this->database->select()
+            ->from('table')
+            ->where('id', 1)
+            ->leftJoin('external')->onWhere(['name' => 'test']);
+
+        $this->assertSameQuery("SELECT * FROM {table} LEFT JOIN {external} ON {name} = ? WHERE {id} = ?",
+            $select);
+        $this->assertSameParameters([
+            'test',
+            1
+        ], $select);
+    }
+
     public function testArrayWhere()
     {
         $select = $this->database->select()->from('table')

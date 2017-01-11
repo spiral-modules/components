@@ -20,6 +20,7 @@ use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
  * model.
  *
  * @todo add sorts and limits
+ * @todo implement on query level?
  * @see  AggregationDefinition
  */
 class AggregationHelper

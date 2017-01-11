@@ -6,7 +6,9 @@
  */
 namespace Spiral\ORM\Entities;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Spiral\Core\Component;
+use Spiral\Database\Builders\SelectQuery;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Entities\Nodes\RootNode;
 use Spiral\ORM\ORMInterface;
@@ -14,7 +16,7 @@ use Spiral\ORM\ORMInterface;
 /**
  * Attention, RecordSelector DOES NOT extends QueryBuilder but mocks it!
  */
-class RecordSelector extends Component
+class RecordSelector extends Component implements \IteratorAggregate, \Countable
 {
     /**
      * @var string
@@ -112,7 +114,7 @@ class RecordSelector extends Component
      * @param string|array $relation
      * @param array        $options
      *
-     * @return $this|self
+     * @return $this|RecordSelector
      */
     public function load($relation, array $options = []): self
     {
@@ -211,7 +213,7 @@ class RecordSelector extends Component
      * @param string|array $relation
      * @param array        $options
      *
-     * @return $this|self
+     * @return $this|RecordSelector
      */
     public function with($relation, array $options = []): self
     {
@@ -235,7 +237,45 @@ class RecordSelector extends Component
         return $this;
     }
 
+    public function getIterator(CacheItemPoolInterface $pool = null, $lifetime = 0): \Traversable
+    {
 
+    }
+
+    /**
+     * @param string|null $column When column is null DISTINCT(PK) will be generated.
+     *
+     * @return int
+     */
+    public function count(string $column = null): int
+    {
+        if (is_null($column)) {
+            if (!empty($this->loader->primaryKey())) {
+                //@tuneyourserver solves the issue with counting on queries with joins.
+                $column = "DISTINCT({$this->loader->primaryKey()})";
+            } else {
+                $column = '*';
+            }
+        }
+
+        return $this->compileQuery()->count($column);
+    }
+
+    /**
+     * Get compiled version of SelectQuery, attentionly only first level query access is allowed.
+     *
+     * @return SelectQuery
+     */
+    public function compileQuery(): SelectQuery
+    {
+        return $this->loader->compileQuery();
+    }
+
+    /**
+     * Load data tree from databases and linked loaders in a form of array.
+     *
+     * @return array
+     */
     public function fetchData(): array
     {
         /**
@@ -259,14 +299,24 @@ class RecordSelector extends Component
      */
     public function __call(string $name, array $arguments)
     {
-        $result = call_user_func_array([$this->loader->selectQuery(), $name], $arguments);
-        if ($result === $this->loader->selectQuery()) {
+        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM'])) {
+            //One of aggregation requests
+            $result = call_user_func_array([$this->compileQuery(), $name], $arguments);
+        } else {
+            //Where condition or statement
+            $result = call_user_func_array([$this->loader->initialQuery(), $name], $arguments);
+        }
+
+        if ($result === $this->loader->initialQuery()) {
             return $this;
         }
 
         return $result;
     }
 
+    /**
+     * Remove nested loaders and clean ORM link.
+     */
     public function __destruct()
     {
         $this->orm = null;

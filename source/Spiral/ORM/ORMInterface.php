@@ -7,6 +7,7 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Table;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
 
@@ -85,14 +86,14 @@ interface ORMInterface
      *                                         data. This will slow down model creation.
      * @param bool                     $cache  Add entity into EntityCache.
      *
-     * @return RecordInterface
+     * @return EntityInterface
      */
     public function make(
         string $class,
         $fields = [],
         bool $filter = true,
         bool $cache = false
-    ): RecordInterface;
+    ): EntityInterface;
 
     /**
      * Create instance of relation loader. Loader must receive target class name, relation schema
@@ -106,4 +107,16 @@ interface ORMInterface
      * @throws ORMException
      */
     public function makeLoader(string $class, string $relation): LoaderInterface;
+
+    /**
+     * Get instance of relation object used to represent related data.
+     *
+     * @param string $class
+     * @param string $relation
+     *
+     * @return RelationInterface
+     *
+     * @throws ORMException
+     */
+    public function makeRelation(string $class, string $relation): RelationInterface;
 }

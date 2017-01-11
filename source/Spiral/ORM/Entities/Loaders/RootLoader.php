@@ -10,7 +10,6 @@ use Spiral\Database\Builders\SelectQuery;
 use Spiral\ORM\Entities\Loaders\Traits\ColumnsTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\RootNode;
-use Spiral\ORM\Exceptions\LoaderException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
@@ -53,32 +52,38 @@ class RootLoader extends AbstractLoader
     }
 
     /**
-     * Attention, this is modifiable instance of query!
+     * Return initial loader query (attention, mutable instance).
      *
      * @return SelectQuery
      */
-    public function selectQuery(): SelectQuery
+    public function initialQuery(): SelectQuery
     {
         return $this->query;
     }
 
     /**
-     * Get primary key column if possible.
+     * Return build version of query.
      *
-     * @return string
-     *
-     * @throws LoaderException
+     * @return SelectQuery
      */
-    public function primaryKey(): string
+    public function compileQuery(): SelectQuery
+    {
+        return $this->query;
+    }
+
+    /**
+     * Get primary key column if possible (aliased). Null when key is missing or non singular.
+     *
+     * @return string|null
+     */
+    public function primaryKey()
     {
         $primaryKeys = $this->schema[Record::SH_PRIMARIES];
         if (count($primaryKeys) != 1) {
-            throw new LoaderException(
-                "Unable to get primary key for '{$this->class}', make sure PK is singular and presented"
-            );
+            return null;
         }
 
-        return $primaryKeys[0];
+        return $this->getAlias() . '.' . $primaryKeys[0];
     }
 
     /**

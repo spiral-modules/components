@@ -7,6 +7,7 @@
 
 namespace Spiral\ORM;
 
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 
 /**
@@ -32,9 +33,9 @@ interface InstantiatorInterface
      *                                         filters to ensure their types and filter any user
      *                                         data. This will slow down model creation.
      *
-     * @return RecordInterface
+     * @return EntityInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, bool $filter = true): RecordInterface;
+    public function make($fields, bool $filter = true): EntityInterface;
 }

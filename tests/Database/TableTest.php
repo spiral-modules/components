@@ -356,4 +356,40 @@ abstract class TableTest extends BaseTest
             $table->jsonSerialize()
         );
     }
+
+    public function testCountID()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 15],
+                ['Charlie', 10]
+            ]
+        );
+
+        $this->assertSame(4, $table->select()->count('id'));
+    }
+
+    public function testCountDistinct()
+    {
+        $table = $this->database->table('table');
+        $this->assertSame(0, $table->count());
+
+        $table->insertMultiple(
+            ['name', 'value'],
+            [
+                ['Anton', 10],
+                ['John', 20],
+                ['Bob', 15],
+                ['Charlie', 10]
+            ]
+        );
+
+        $this->assertSame(4, $table->select()->count('DISTINCT(id)'));
+    }
 }

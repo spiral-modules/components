@@ -21,7 +21,8 @@
     "doctrine/inflector": "*",
     "symfony/finder": "^3.0",
     "symfony/event-dispatcher": "^3.0",
-    "guzzlehttp/guzzle": "~6.0"
+    "guzzlehttp/guzzle": "~6.0",
+    "psr/cache": "^1.0"
   },
   "require-dev": {
     "phpunit/phpunit": "~5.0",

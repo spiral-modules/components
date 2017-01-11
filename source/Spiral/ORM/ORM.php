@@ -15,6 +15,7 @@ use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\EntityCache;
 use Spiral\ORM\Entities\RecordSelector;
@@ -23,7 +24,6 @@ use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\LocatorInterface;
 use Spiral\ORM\Schemas\NullLocator;
 use Spiral\ORM\Schemas\SchemaBuilder;
-use Spiral\ORM\Schemas\SchemaLocator;
 
 class ORM extends Component implements ORMInterface, SingletonInterface
 {
@@ -85,16 +85,17 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     /**
      * @param DatabaseManager         $manager
      * @param RelationsConfig         $config
-     * @param EntityCache|null        $cache
      * @param LocatorInterface|null   $locator
+     * @param EntityCache|null        $cache
      * @param MemoryInterface|null    $memory
      * @param ContainerInterface|null $container
      */
     public function __construct(
         DatabaseManager $manager,
         RelationsConfig $config,
-        EntityCache $cache = null,
+
         LocatorInterface $locator = null,
+        EntityCache $cache = null,
         MemoryInterface $memory = null,
         ContainerInterface $container = null
     ) {
@@ -233,7 +234,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $fields = [],
         bool $filter = true,
         bool $cache = true
-    ): RecordInterface {
+    ): EntityInterface {
         $instantiator = $this->instantiator($class);
 
         if ($filter) {
@@ -292,6 +293,11 @@ class ORM extends Component implements ORMInterface, SingletonInterface
                 'orm'      => $this
             ]
         );
+    }
+
+    public function makeRelation(string $class, string $relation): RelationInterface
+    {
+
     }
 
     /**

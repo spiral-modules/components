@@ -8,10 +8,10 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\SourceException;
 use Spiral\ORM\ORM;
 use Spiral\ORM\Record;
-use Spiral\ORM\RecordInterface;
 
 /**
  * Source class associated to one ORM model. Source can be used to write your own custom find
@@ -79,9 +79,9 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      * @param string $class  Due ODM models can be inherited you can use this argument to specify
      *                       custom model class.
      *
-     * @return RecordInterface|Record
+     * @return EntityInterface|Record
      */
-    public function create($fields = [], string $class = null)
+    public function create($fields = [], string $class = null): EntityInterface
     {
         //Create model with filtered set of fields
         return $this->orm->make($class ?? $this->class, $fields, true);
@@ -94,11 +94,11 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      *
      * @param string|\MongoId $id Primary key value.
      *
-     * @return RecordInterface|Record|null
+     * @return EntityInterface|Record|null
      */
     public function findByPK($id)
     {
-        //todo: implement
+        return $this->getSelector()->wherePK($id)->findOne();
     }
 
     /**
@@ -107,7 +107,7 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      * @param array $query  Fields and conditions to query by.
      * @param array $sortBy Always specify sort by to ensure that results are stable.
      *
-     * @return RecordInterface|Record|null
+     * @return EntityInterface|Record|null
      */
     public function findOne(array $query = [], array $sortBy = [])
     {

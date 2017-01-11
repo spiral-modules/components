@@ -7,12 +7,10 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\Models\EntityInterface;
-use Spiral\Models\IdentifiedInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 use Spiral\ORM\InstantiatorInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
-use Spiral\ORM\RecordInterface;
 
 /**
  * Default instantiator for records.
@@ -75,7 +73,7 @@ class RecordInstantiator implements InstantiatorInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, bool $filter = true): EntityInterface
+    public function make($fields, int $state): EntityInterface
     {
         if (!is_array($fields)) {
             $fields = iterator_to_array($fields);
@@ -84,9 +82,15 @@ class RecordInstantiator implements InstantiatorInterface
         $class = $this->class;
 
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
-        if (!$filter) {
+        if ($state == ORMInterface::STATE_LOADED) {
             //No need to filter values, passing directly in constructor
             return new $class($fields, $this->schema, $this->orm);
+        }
+
+        if ($state != ORMInterface::STATE_NEW) {
+            throw new InstantionException(
+                "Undefined state {$state}, only NEW and LOADED are supported"
+            );
         }
 
         /*

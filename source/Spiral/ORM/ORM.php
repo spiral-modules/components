@@ -232,18 +232,18 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     public function make(
         string $class,
         $fields = [],
-        bool $filter = true,
+        int $state = self::STATE_NEW,
         bool $cache = true
     ): EntityInterface {
         $instantiator = $this->instantiator($class);
 
-        if ($filter) {
+        if ($state == self::STATE_NEW) {
             //No caching for entities created with user input
             $cache = false;
         }
 
         if (!$cache || !$this->hasCache()) {
-            return $instantiator->make($fields, $filter);
+            return $instantiator->make($fields, $state);
         }
 
         //Looking for an entity in a cache
@@ -251,7 +251,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
         if (is_null($identity)) {
             //Unable to cache non identified instance
-            return $instantiator->make($fields, $filter);
+            return $instantiator->make($fields, $state);
         }
 
         if ($this->cache->has($class, $identity)) {
@@ -262,7 +262,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         return $this->cache->remember(
             $class,
             $identity,
-            $instantiator->make($fields, $filter)
+            $instantiator->make($fields, $state)
         );
     }
 

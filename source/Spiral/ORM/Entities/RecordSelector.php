@@ -8,16 +8,25 @@ namespace Spiral\ORM\Entities;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Spiral\Core\Component;
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\SelectQuery;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Entities\Nodes\RootNode;
+use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORMInterface;
+use Spiral\Pagination\PaginatorAwareInterface;
+use Spiral\Pagination\PaginatorInterface;
 
 /**
  * Attention, RecordSelector DOES NOT extends QueryBuilder but mocks it!
+ *
+ * @todo mocked methods
  */
-class RecordSelector extends Component implements \IteratorAggregate, \Countable
+class RecordSelector extends Component implements \IteratorAggregate, \Countable, PaginatorAwareInterface
 {
+    use SaturateTrait;
+
     /**
      * @var string
      */
@@ -237,9 +246,80 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
         return $this;
     }
 
-    public function getIterator(CacheItemPoolInterface $pool = null, $lifetime = 0): \Traversable
+    /**
+     * Shortcut to where method to set AND condition for parent record primary key.
+     *
+     * @param string|int $id
+     *
+     * @return RecordSelector
+     *
+     * @throws SelectorException
+     */
+    public function wherePK($id): self
     {
+        if (empty($this->loader->primaryKey())) {
+            throw new SelectorException("Unable to set wherePK condition, no proper PK were defined");
+        }
 
+        $this->loader->initialQuery()->where([$this->loader->primaryKey() => $id]);
+
+        return $this;
+    }
+
+    /**
+     * Find one entity or return null.
+     *
+     * @param array|null $query
+     *
+     * @return EntityInterface|null
+     */
+    public function findOne(array $query = null)
+    {
+        $data = (clone $this)->where($query)->fetchData();
+
+        if (empty($data[0])) {
+            return null;
+        }
+
+        return $this->orm->make($this->class, $data[0], ORMInterface::STATE_LOADED, true);
+    }
+
+    /**
+     * Get RecordIterator (entity iterator) for a requested data. Provide cache key and lifetime in
+     * order to cache request data.
+     *
+     * @param string                      $cacheKey
+     * @param int|\DateInterval           $ttl
+     * @param CacheItemPoolInterface|null $pool
+     *
+     * @return RecordIterator
+     */
+    public function getIterator(
+        string $cacheKey = '',
+        $ttl = 0,
+        CacheItemPoolInterface $pool = null
+    ): RecordIterator {
+        if (!empty($cacheKey)) {
+            /**
+             * When no pool is provided saturate it using container scope
+             *
+             * @var CacheItemPoolInterface $pool
+             */
+            $pool = $this->saturate($pool, CacheItemPoolInterface::class);
+            $item = $pool->getItem($cacheKey);
+
+            if ($item->isHit()) {
+                $data = $item->get();
+            } else {
+                $data = $this->fetchData();
+
+                $pool->save($item->set($data)->expiresAfter($ttl));
+            }
+        } else {
+            $data = $this->fetchData();
+        }
+
+        return new RecordIterator($data, $this->class, $this->orm);
     }
 
     /**
@@ -290,6 +370,30 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function hasPaginator(): bool
+    {
+        return $this->loader->initialQuery()->hasPaginator();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPaginator(PaginatorInterface $paginator)
+    {
+        $this->loader->initialQuery()->setPaginator($paginator);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPaginator(): PaginatorInterface
+    {
+        return $this->loader->initialQuery()->getPaginator();
+    }
+
+    /**
      * Bypassing call to primary select query.
      *
      * @param string $name
@@ -312,6 +416,16 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
         }
 
         return $result;
+    }
+
+    /**
+     * Cloning with loader tree cloning.
+     *
+     * @attention at this moment binded query parameters would't be cloned!
+     */
+    public function __clone()
+    {
+        $this->loader = clone $this->loader;
     }
 
     /**

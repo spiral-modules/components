@@ -26,16 +26,15 @@ interface InstantiatorInterface
     public function identify($fields);
 
     /**
-     * Method must detect and construct appropriate class instance based on a given fields.
+     * Method must detect and construct appropriate class instance based on a given fields. When
+     * state set to NEW values MUST be filtered/typecasted before appearing in entity!
      *
      * @param array|\ArrayAccess|mixed $fields
-     * @param bool                     $filter When set to true values MUST be passed thought model
-     *                                         filters to ensure their types and filter any user
-     *                                         data. This will slow down model creation.
+     * @param int                      $state
      *
      * @return EntityInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, bool $filter = true): EntityInterface;
+    public function make($fields, int $state): EntityInterface;
 }

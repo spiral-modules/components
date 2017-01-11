@@ -18,6 +18,12 @@ use Spiral\ORM\Exceptions\ORMException;
 interface ORMInterface
 {
     /**
+     * Entity states.
+     */
+    const STATE_NEW    = 0;
+    const STATE_LOADED = 1;
+
+    /**
      * Constants used in packed schema.
      */
     const R_INSTANTIATOR = 0;
@@ -77,21 +83,20 @@ interface ORMInterface
     public function table(string $class): Table;
 
     /**
-     * Instantiate record/model instance based on a given class name and fieldset.
+     * Instantiate record/model instance based on a given class name and fieldset. When state set
+     * to NEW values MUST be filtered/typecasted before appearing in entity!
      *
      * @param string                   $class
      * @param array|\ArrayAccess|mixed $fields
-     * @param bool                     $filter When set to true values MUST be passed thought model
-     *                                         filters to ensure their types and filter any user
-     *                                         data. This will slow down model creation.
-     * @param bool                     $cache  Add entity into EntityCache.
+     * @param int                      $state
+     * @param bool                     $cache Add entity into EntityCache.
      *
      * @return EntityInterface
      */
     public function make(
         string $class,
         $fields = [],
-        bool $filter = true,
+        int $state = self::STATE_NEW,
         bool $cache = false
     ): EntityInterface;
 

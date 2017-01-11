@@ -136,6 +136,15 @@ class RootLoader extends AbstractLoader
     }
 
     /**
+     * Clone with initial query.
+     */
+    public function __clone()
+    {
+        $this->query = clone $this->query;
+        parent::__clone();
+    }
+
+    /**
      * We are using model role as alias.
      *
      * @return string

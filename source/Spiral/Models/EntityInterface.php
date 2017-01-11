@@ -12,6 +12,8 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 
 /**
  * Generic data entity instance.
+ *
+ * @todo Entity trait
  */
 interface EntityInterface extends \ArrayAccess
 {

@@ -224,7 +224,7 @@ abstract class AbstractLoader implements LoaderInterface
     /**
      * Ensure state of every nested loader.
      */
-    final public function __clone()
+    public function __clone()
     {
         foreach ($this->loaders as $name => $loader) {
             //Will automatically ensure nested change parents

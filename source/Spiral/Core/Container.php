@@ -170,9 +170,8 @@ class Container extends Component implements
     ): array {
         $arguments = [];
         foreach ($reflection->getParameters() as $parameter) {
-            $name = $parameter->getName();
-
             try {
+                $name = $parameter->getName();
                 $class = $parameter->getClass();
             } catch (\Throwable $e) {
                 //Possibly invalid class definition or syntax error

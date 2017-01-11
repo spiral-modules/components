@@ -150,7 +150,7 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
                 Record::CREATE_CONSTRAINT => $this->option(Record::CREATE_CONSTRAINT),
                 Record::CONSTRAINT_ACTION => $this->option(Record::CONSTRAINT_ACTION),
                 Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
-                Record::CREATE_PIVOT      => false, //Table creation already handled
+                Record::CREATE_PIVOT      => false, //Table creation hes been already handled
                 Record::PIVOT_COLUMNS     => $this->option(Record::PIVOT_COLUMNS),
                 Record::WHERE_PIVOT       => $this->option(Record::WHERE_PIVOT),
             ]

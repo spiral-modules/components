@@ -136,15 +136,14 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      */
     public function publicFields(): array
     {
+        $public = parent::publicFields();
         if (static::HIDE_UNDERSCORE_ID) {
-            $public = parent::publicFields();
+            //Replace '_id' property with 'id'
             unset($public['_id']);
-
-            //Replacing '_id' property with 'id'
-            return ['id' => (string)$this->primaryKey()] + $public;
+            $public = ['id' => (string)$this->primaryKey()] + $public;
         }
 
-        return parent::publicFields();
+        return $public;
     }
 
     /**

@@ -16,8 +16,8 @@ use Spiral\ORM\Exceptions\InstantionException;
 interface InstantiatorInterface
 {
     /**
-     * Identify set of fields with one unique value (usually primary key). Following identification
-     * key will be used to store record in ORM entity cache.
+     * Identify set of fields with resulted unique value (usually primary key). Following
+     * identification key will be used to store record in ORM entity cache.
      *
      * @param array|\ArrayAccess|mixed $fields
      *

@@ -39,7 +39,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     private $cache = null;
 
     /**
-     * @var SchemaLocator
+     * @var LocatorInterface
      */
     private $locator;
 

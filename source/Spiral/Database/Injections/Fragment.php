@@ -58,7 +58,7 @@ class Fragment implements FragmentInterface
      *
      * @return Fragment
      */
-    static function __set_state(array $an_array): Fragment
+    public static function __set_state(array $an_array): Fragment
     {
         return new static($an_array['statement']);
     }

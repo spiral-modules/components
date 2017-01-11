@@ -92,7 +92,7 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      *
      * @see findOne()
      *
-     * @param string|\MongoId $id Primary key value.
+     * @param string|int $id Primary key value.
      *
      * @return EntityInterface|Record|null
      */

@@ -6,11 +6,21 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
 
-//todo: do i need it?
-abstract class RecordEntity extends SchematicEntity implements RecordInterface
+/**
+ * Provides ActiveRecord-less abstraction for carried data with ability to automatically apply
+ * setters, getters, generate update, insert and delete sequences and access nested relations.
+ *
+ * Class implementations statically analyzed to define DB schema.
+ *
+ * @see RecordEntity::SCHEMA
+ */
+abstract class RecordEntity extends SchematicEntity
 {
+    use SaturateTrait;
+
     /**
      * Set of schema sections needed to describe entity behaviour.
      */

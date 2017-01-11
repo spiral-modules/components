@@ -15,6 +15,8 @@ use Spiral\ORM\Exceptions\NodeException;
  * Nodes can be used as to parse one big and flat query, or when multiple queries provide their
  * data into one dataset, in both cases flow is identical from standpoint of Nodes (but offsets are
  * different).
+ *
+ * @todo NodeInterface, extension
  */
 abstract class AbstractNode
 {

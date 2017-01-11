@@ -7,10 +7,13 @@
 namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Helpers\ColumnRenderer;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
+use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\ForeignsTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TablesTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
@@ -35,7 +38,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  * - relation will create foreign key "tag_user_map"."tag_id" => "tags"."id" if allowed
  * - relation will create additional columns in pivot table if any requested
  */
-class ManyToManySchema extends AbstractSchema //implements InversableRelationInterface
+class ManyToManySchema extends AbstractSchema implements InversableRelationInterface
 {
     use TablesTrait, TypecastTrait, ForeignsTrait;
 
@@ -119,29 +122,45 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
     ];
 
     /**
-     * {@inheritdoc}
+     *{@inheritdoc}
      */
-    public function packRelation(AbstractTable $table): array
+    public function inverseDefinition(string $inverseTo): RelationDefinition
     {
-        $packed = parent::packRelation($table);
+        if (empty($this->definition->targetContext())) {
+            throw new DefinitionException(sprintf(
+                "Unable to inverse relation '%s.''%s', unspecified relation target",
+                $this->definition->sourceContext()->getClass(),
+                $this->definition->getName()
+            ));
+        }
 
-        //Let's clarify pivot columns
-        $schema = $packed[ORMInterface::R_SCHEMA];
-        $schema[Record::PIVOT_TABLE] = $this->pivotTable();
-        $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
-
-        //Ensure that inner keys are always presented
-        $schema[Record::PIVOT_COLUMNS] = array_merge(
+        /**
+         * We are going to simply replace outer key with inner key and keep the rest of options intact.
+         */
+        $inversed = new RelationDefinition(
+            $inverseTo,
+            Record::MANY_TO_MANY,
+            $this->definition->sourceContext()->getClass(),
             [
-                $this->option(Record::THOUGHT_INNER_KEY),
-                $this->option(Record::THOUGHT_OUTER_KEY)
-            ],
-            $schema[Record::PIVOT_COLUMNS]
+                Record::PIVOT_TABLE       => $this->option(Record::PIVOT_TABLE),
+                Record::OUTER_KEY         => $this->option(Record::INNER_KEY),
+                Record::INNER_KEY         => $this->option(Record::OUTER_KEY),
+                Record::THOUGHT_INNER_KEY => $this->option(Record::THOUGHT_OUTER_KEY),
+                Record::THOUGHT_OUTER_KEY => $this->option(Record::THOUGHT_INNER_KEY),
+                Record::CREATE_CONSTRAINT => $this->option(Record::CREATE_CONSTRAINT),
+                Record::CONSTRAINT_ACTION => $this->option(Record::CONSTRAINT_ACTION),
+                Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
+                Record::CREATE_PIVOT      => false, //Table creation already handled
+                Record::PIVOT_COLUMNS     => $this->option(Record::PIVOT_COLUMNS),
+                Record::WHERE_PIVOT       => $this->option(Record::WHERE_PIVOT),
+            ]
         );
 
-        $packed[ORMInterface::R_SCHEMA] = $schema;
-
-        return $packed;
+        //In back order :)
+        return $inversed->withContext(
+            $this->definition->targetContext(),
+            $this->definition->sourceContext()
+        );
     }
 
     /**
@@ -172,7 +191,7 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
         $pivotTable = $builder->requestTable(
             $this->pivotTable(),
             $sourceContext->getDatabase(),
-            true,
+            false,
             true
         );
 
@@ -227,11 +246,37 @@ class ManyToManySchema extends AbstractSchema //implements InversableRelationInt
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function packRelation(AbstractTable $table): array
+    {
+        $packed = parent::packRelation($table);
+
+        //Let's clarify pivot columns
+        $schema = $packed[ORMInterface::R_SCHEMA];
+        $schema[Record::PIVOT_TABLE] = $this->pivotTable();
+        $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
+
+        //Ensure that inner keys are always presented
+        $schema[Record::PIVOT_COLUMNS] = array_merge(
+            [
+                $this->option(Record::THOUGHT_INNER_KEY),
+                $this->option(Record::THOUGHT_OUTER_KEY)
+            ],
+            $schema[Record::PIVOT_COLUMNS]
+        );
+
+        $packed[ORMInterface::R_SCHEMA] = $schema;
+
+        return $packed;
+    }
+
+    /**
      * Generate name of pivot table or fetch if from schema.
      *
      * @return string
      */
-    public function pivotTable(): string
+    protected function pivotTable(): string
     {
         if (!empty($this->option(Record::PIVOT_TABLE))) {
             return $this->option(Record::PIVOT_TABLE);

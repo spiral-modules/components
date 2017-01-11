@@ -202,17 +202,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             ));
         }
 
-        //Original field value
-        $original = $this->getField($name, null, false);
+        $this->registerChange($name);
 
         parent::setField($name, $value, $filter);
-
-        if (!array_key_exists($name, $this->changes)) {
-            //Let's keep track of how field looked before first change
-            $this->changes[$name] = $original instanceof AccessorInterface
-                ? $original->packValue()
-                : $original;
-        }
     }
 
     /**
@@ -482,5 +474,20 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         }
 
         return parent::iocContainer();
+    }
+
+    /**
+     * @param string $name
+     */
+    private function registerChange(string $name)
+    {
+        $original = $this->getField($name, null, false);
+
+        if (!array_key_exists($name, $this->changes)) {
+            //Let's keep track of how field looked before first change
+            $this->changes[$name] = $original instanceof AccessorInterface
+                ? $original->packValue()
+                : $original;
+        }
     }
 }

@@ -17,7 +17,6 @@ use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Configs\RelationsConfig;
-use Spiral\ORM\Entities\EntityCache;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;

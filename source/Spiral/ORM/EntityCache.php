@@ -4,11 +4,10 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\ORM\Entities;
+namespace Spiral\ORM;
 
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\CacheException;
-use Spiral\ORM\RecordInterface;
 
 /**
  * Entity cache provides ability to access already retrieved entities from memory instead of
@@ -23,7 +22,7 @@ use Spiral\ORM\RecordInterface;
 class EntityCache
 {
     /**
-     * @var RecordInterface[]
+     * @var EntityInterface[]
      */
     private $entities = [];
 

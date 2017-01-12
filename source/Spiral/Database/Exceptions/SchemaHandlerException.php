@@ -12,11 +12,17 @@ namespace Spiral\Database\Exceptions;
 class SchemaHandlerException extends DriverException implements QueryExceptionInterface
 {
     /**
+     * @var string
+     */
+    private $query;
+
+    /**
      * @param QueryException $e
      */
     public function __construct(QueryException $e)
     {
         parent::__construct($e->getMessage(), $e->getCode(), $e);
+        $this->query = $e->getQuery();
     }
 
     /**
@@ -24,6 +30,6 @@ class SchemaHandlerException extends DriverException implements QueryExceptionIn
      */
     public function getQuery(): string
     {
-        return $this->getPrevious()->getQuery();
+        return $this->query;
     }
 }

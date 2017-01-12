@@ -29,7 +29,8 @@ class SQLServerTable extends AbstractTable
 
         if ($reset) {
             foreach ($this->fetchColumns() as $column) {
-                if ($column->compare($this->current->findColumn($column->getName()))) {
+                $currentColumn = $this->current->findColumn($column->getName());
+                if (!empty($currentColumn) && $column->compare($currentColumn)) {
                     //SQLServer is going to add some automatic constrains, let's handle them
                     $this->current->registerColumn($column);
                 }

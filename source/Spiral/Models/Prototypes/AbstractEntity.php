@@ -92,7 +92,7 @@ abstract class AbstractEntity extends MutableObject implements
     public function setField(string $name, $value, bool $filter = true)
     {
         if ($value instanceof AccessorInterface) {
-            //In case of non scalar values filters must be bypassed
+            //In case of non scalar values filters must be bypassed (check accessor compatibility?)
             $this->fields[$name] = clone $value;
 
             return;
@@ -109,19 +109,12 @@ abstract class AbstractEntity extends MutableObject implements
         $accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR);
 
         if (!empty($accessor)) {
-            $field = $this->fields[$name];
-            if (empty($field) || !($field instanceof AccessorInterface)) {
-                $this->fields[$name] = $field = $this->createAccessor($accessor, $name, $value);
-            }
-
-            //Letting accessor to set value
-            $field->stateValue($value);
-
-            return;
+            //Setting value thought associated accessor
+            $this->setAccessed($accessor, $name, $value);
+        } else {
+            //Setting value thought setter filter (if any)
+            $this->setMutated($name, $value);
         }
-
-        //Setting value thought setter filter
-        $this->setMutated($name, $value);
     }
 
     /**
@@ -136,6 +129,7 @@ abstract class AbstractEntity extends MutableObject implements
         $value = $this->hasField($name) ? $this->fields[$name] : $default;
 
         if ($value instanceof AccessorInterface || (is_null($value) && $this->isNullable($name))) {
+            //Direct access to value when value is accessor or null and declared as nullable
             return $value;
         }
 
@@ -484,5 +478,32 @@ abstract class AbstractEntity extends MutableObject implements
         } else {
             $this->fields[$name] = $value;
         }
+    }
+
+    /**
+     * Set value in/thought associated accessor.
+     *
+     * @param string $accessor Accessor class name.
+     * @param string $name
+     * @param mixed  $value
+     */
+    private function setAccessed(string $accessor, string $name, $value)
+    {
+        if (array_key_exists($name, $this->fields)) {
+            $field = $this->fields[$name];
+        } else {
+            $field = null;
+        }
+
+        if (empty($field) || !($field instanceof AccessorInterface)) {
+            //New field representation
+            $field = $this->createAccessor($accessor, $name, $value);
+
+            //Save accessor with other fields
+            $this->fields[$name] = $accessor;
+        }
+
+        //Letting accessor to set value
+        $field->stateValue($value);
     }
 }

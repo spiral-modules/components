@@ -11,7 +11,15 @@ use Spiral\ORM\Record;
 class User extends Record
 {
     const SCHEMA = [
-        'primary' => 'id',
-        'name'    => 'string'
+        'id'    => 'primary',
+        'name'  => 'string',
+        'email' => 'string',
+
+        //Related posts
+        'posts' => [self::HAS_MANY => Post::class]
+    ];
+
+    const INDEXES = [
+        [self::UNIQUE, 'email']
     ];
 }

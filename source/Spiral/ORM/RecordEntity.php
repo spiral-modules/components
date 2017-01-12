@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
@@ -207,7 +208,7 @@ abstract class RecordEntity extends SchematicEntity
      * @param array|null        $schema
      */
     public function __construct(
-        $fields = [],
+        array $fields = [],
         int $state = ORMInterface::STATE_NEW,
         ORMInterface $orm = null,
         array $schema = null
@@ -226,8 +227,7 @@ abstract class RecordEntity extends SchematicEntity
             $this->solidState(true);
         }
 
-        //todo: fetch relations
-
+        $this->extractRelations($fields);
         parent::__construct($fields + $this->recordSchema[self::SH_DEFAULTS], $schema);
     }
 
@@ -237,7 +237,39 @@ abstract class RecordEntity extends SchematicEntity
     public function __debugInfo()
     {
         return [
-            'fields' => $this->getFields()
+            'fields'    => $this->getFields(),
+            'relations' => $this->relations
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function iocContainer()
+    {
+        if ($this->orm instanceof Component) {
+            //Forwarding IoC scope to parent ORM instance
+            return $this->orm->iocContainer();
+        }
+
+        return parent::iocContainer();
+    }
+
+    /**
+     * Extract relations data from given entity fields.
+     *
+     * @param array $data
+     */
+    private function extractRelations(array &$data)
+    {
+        $relations = array_intersect_key(
+            $data,
+            $this->orm->define(static::class, ORMInterface::R_RELATIONS)
+        );
+
+        foreach ($relations as $name => $relation) {
+            $this->relations[$name] = $relation;
+            unset($data[$name]);
+        }
     }
 }

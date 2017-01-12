@@ -102,7 +102,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct($fields = [], ODMInterface $odm = null, array $schema = null)
+    public function __construct(array $fields = [], ODMInterface $odm = null, array $schema = null)
     {
         parent::__construct($fields, $odm, $schema);
 

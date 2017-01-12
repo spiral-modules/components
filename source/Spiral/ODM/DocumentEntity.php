@@ -150,7 +150,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @throws ScopeException When no ODM instance can be resolved.
      */
-    public function __construct($fields = [], ODMInterface $odm = null, array $schema = null)
+    public function __construct(array $fields = [], ODMInterface $odm = null, array $schema = null)
     {
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODMInterface::class);

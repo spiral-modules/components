@@ -13,6 +13,7 @@ use Spiral\ORM\ORMInterface;
  * Instantiates array of entities. At this moment implementation is rather simple.
  *
  * @todo upgrade to \IteratorIterator?
+ * @todo pivot data
  */
 class RecordIterator implements \IteratorAggregate
 {

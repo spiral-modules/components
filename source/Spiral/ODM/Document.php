@@ -134,9 +134,9 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
      * Check model setting HIDE_UNDERSCORE_ID in order to enable/disable automatic conversion of
      * '_id' to 'id'.
      */
-    public function publicFields(): array
+    public function publicValue(): array
     {
-        $public = parent::publicFields();
+        $public = parent::publicValue();
         if (static::HIDE_UNDERSCORE_ID) {
             //Replace '_id' property with 'id'
             unset($public['_id']);

@@ -375,9 +375,9 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @return array
      */
-    public function publicFields(): array
+    public function publicValue(): array
     {
-        $public = parent::publicFields();
+        $public = parent::publicValue();
 
         array_walk_recursive($public, function (&$value) {
             if ($value instanceof ObjectID) {

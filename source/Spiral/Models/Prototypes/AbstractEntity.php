@@ -307,7 +307,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * Include every composition public data into result.
      */
-    public function publicFields(): array
+    public function publicValue(): array
     {
         $result = [];
 
@@ -320,7 +320,7 @@ abstract class AbstractEntity extends MutableObject implements
             $value = $this->getField($field);
 
             if ($value instanceof PublishableInterface) {
-                $result[$field] = $value->publicFields();
+                $result[$field] = $value->publicValue();
             } else {
                 $result[$field] = $value;
             }
@@ -346,7 +346,7 @@ abstract class AbstractEntity extends MutableObject implements
      */
     public function jsonSerialize()
     {
-        return $this->publicFields();
+        return $this->publicValue();
     }
 
     /**

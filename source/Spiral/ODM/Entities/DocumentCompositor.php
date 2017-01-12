@@ -338,12 +338,12 @@ class DocumentCompositor implements
      *
      * @return array
      */
-    public function publicFields(): array
+    public function publicValue(): array
     {
         $result = [];
         foreach ($this->entities as $entity) {
             if ($entity instanceof PublishableInterface) {
-                $result[] = $entity->publicFields();
+                $result[] = $entity->publicValue();
             }
         }
 
@@ -355,7 +355,7 @@ class DocumentCompositor implements
      */
     public function jsonSerialize()
     {
-        return $this->publicFields();
+        return $this->publicValue();
     }
 
     /**

@@ -13,7 +13,7 @@ use Spiral\Models\AccessorInterface;
 /**
  * Declares requirement for every ORM field accessor to control it's updates and state.
  */
-interface SQLAccessorInterface extends AccessorInterface
+interface RecordAccessorInterface extends AccessorInterface
 {
     /**
      * Check if object has any update.

@@ -19,7 +19,7 @@ class DataEntity extends AbstractEntity
     /**
      * List of fields must be hidden from publicFields() method.
      *
-     * @see publicFields()
+     * @see publicValue()
      *
      * @var array
      */

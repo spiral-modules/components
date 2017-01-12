@@ -21,9 +21,11 @@ interface ORMInterface
      */
     const STATE_NEW              = 0;
     const STATE_LOADED           = 1;
-    const STATE_SCHEDULED_INSERT = 2;
-    const STATE_SCHEDULED_UPDATE = 3;
-    const STATE_SCHEDULED_DELETE = 4;
+    const STATE_DELETED          = 2;
+    const STATE_SCHEDULED_INSERT = 3;
+    const STATE_SCHEDULED_UPDATE = 4;
+    const STATE_SCHEDULED_DELETE = 5;
+    const STATE_READONLY         = 6;
 
     /**
      * Constants used in packed schema.

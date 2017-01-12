@@ -8,7 +8,7 @@ namespace Spiral\ORM\Commands;
 
 use Spiral\ORM\CommandInterface;
 
-class TreeCommand implements CommandInterface
+abstract class CommandTree implements CommandInterface
 {
 
 }

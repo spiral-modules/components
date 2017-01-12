@@ -99,7 +99,7 @@ class SaveTest extends BaseTest
             $this->assertInstanceOf(ObjectID::class, $user->primaryKey());
             $this->assertInstanceOf(ObjectID::class, $user->_id);
 
-            $this->assertSame((string)$user->primaryKey(), $user->publicFields()['id']);
+            $this->assertSame((string)$user->primaryKey(), $user->publicValue()['id']);
 
             $user->delete();
         }

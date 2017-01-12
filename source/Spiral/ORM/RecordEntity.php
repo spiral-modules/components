@@ -15,6 +15,7 @@ use Spiral\ORM\Commands\DeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\UpdateCommand;
+use Spiral\ORM\Events\RecordEvent;
 use Spiral\ORM\Exceptions\FieldException;
 
 /**
@@ -205,7 +206,8 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     private $state;
 
     /**
-     * Record field updates (changed values).
+     * Record field updates (changed values). This array contain set of initial property values if
+     * any of them changed.
      *
      * @var array
      */
@@ -360,7 +362,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
 
             //Do not force accessor creation
             $value = $this->getField($field, null, false);
-            if ($value instanceof SQLAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                 return true;
             }
 
@@ -374,7 +376,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         //Do not force accessor creation
         foreach ($this->getFields(false) as $value) {
             //Checking all fields for changes (handled internally)
-            if ($value instanceof SQLAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
                 return true;
             }
         }
@@ -389,22 +391,21 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function queueSave(bool $queueRelations = true): CommandInterface
     {
+        if ($this->state == ORMInterface::STATE_READONLY) {
+            //Nothing to do on readonly entities
+            return new NullCommand();
+        }
+
         if (!$this->isLoaded()) {
-            $this->state = ORMInterface::STATE_SCHEDULED_INSERT;
-
-            $command = new InsertCommand();
+            $command = $this->prepareInsert();
         } else {
-            $this->state = ORMInterface::STATE_SCHEDULED_UPDATE;
-
-            $command = new UpdateCommand();
+            $command = $this->prepareUpdate();
         }
 
         //Relation commands
         if ($queueRelations) {
-
+            //This is magical part
         }
-
-        $this->flushUpdates();
 
         return $command;
     }
@@ -414,13 +415,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function queueDelete(): CommandInterface
     {
-        if (!$this->isLoaded()) {
+        if ($this->state == ORMInterface::STATE_READONLY || !$this->isLoaded()) {
+            //Nothing to do
             return new NullCommand();
         }
 
-        $this->state = ORMInterface::STATE_SCHEDULED_DELETE;
-
-        return new DeleteCommand();
+        return $this->prepareDelete();
     }
 
     /**
@@ -466,6 +466,166 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         return parent::iocContainer();
     }
 
+    /*
+     * Code below used to generate transaction commands.
+     */
+
+    /**
+     * Change object state.
+     *
+     * @param int $state
+     */
+    private function setState(int $state)
+    {
+        $this->state = $state;
+    }
+
+    /**
+     * @return InsertCommand
+     */
+    private function prepareInsert(): InsertCommand
+    {
+        //Entity indicates it's own status
+        $this->setState(ORMInterface::STATE_SCHEDULED_INSERT);
+        $this->dispatch('insert', new RecordEvent($this));
+
+        $command = new InsertCommand(
+            $this->packValue(),
+            $this->orm->define(static::class, ORMInterface::R_DATABASE),
+            $this->orm->define(static::class, ORMInterface::R_TABLE)
+        );
+
+        //Executed when transaction successfully completed
+        $command->onComplete(function () {
+            $this->setState(ORMInterface::STATE_LOADED);
+            $this->flushUpdates();
+            $this->dispatch('created', new RecordEvent($this));
+        });
+
+        return $command;
+    }
+
+    /**
+     * @return UpdateCommand
+     */
+    private function prepareUpdate(): UpdateCommand
+    {
+        //Entity indicates it's own status
+        $this->setState(ORMInterface::STATE_SCHEDULED_UPDATE);
+        $this->dispatch('update', new RecordEvent($this));
+
+        $command = new UpdateCommand(
+            $this->stateCriteria(),
+            $this->compileUpdates(true),
+            $this->orm->define(static::class, ORMInterface::R_DATABASE),
+            $this->orm->define(static::class, ORMInterface::R_TABLE)
+        );
+
+        //Executed when transaction successfully completed
+        $command->onComplete(function () {
+            $this->setState(ORMInterface::STATE_LOADED);
+            $this->flushUpdates();
+            $this->dispatch('updated', new RecordEvent($this));
+        });
+
+        return $command;
+    }
+
+    /**
+     * @return DeleteCommand
+     */
+    private function prepareDelete(): DeleteCommand
+    {
+        //Entity indicates it's own status
+        $this->setState(ORMInterface::STATE_SCHEDULED_DELETE);
+        $this->dispatch('delete', new RecordEvent($this));
+
+        $command = new DeleteCommand(
+            $this->stateCriteria(),
+            $this->orm->define(static::class, ORMInterface::R_DATABASE),
+            $this->orm->define(static::class, ORMInterface::R_TABLE)
+        );
+
+        //Executed when transaction successfully completed
+        $command->onComplete(function () {
+            $this->setState(ORMInterface::STATE_DELETED);
+            $this->dispatch('deleted', new RecordEvent($this));
+        });
+
+        return $command;
+    }
+
+    /**
+     * Get WHERE array to be used to perform record data update or deletion. Usually will include
+     * record primary key.
+     *
+     * Usually just [ID => value] array.
+     *
+     * @return array
+     */
+    private function stateCriteria()
+    {
+        if (!empty($primaryKey = $this->recordSchema[self::SH_PRIMARIES])) {
+
+            //Set of primary keys
+            $state = [];
+            foreach ($primaryKey as $key) {
+                $state[$key] = $this->getField($key);
+            }
+
+            return $state;
+        }
+
+        //Use entity data as where definition
+        return $this->changes + $this->packValue();
+    }
+
+    /**
+     * Create set of fields to be sent to UPDATE statement.
+     *
+     * @param bool $skipPrimaries Remove primary keys from update statement.
+     *
+     * @return array
+     */
+    private function compileUpdates(bool $skipPrimaries = false): array
+    {
+        if (!$this->hasUpdates() && !$this->isSolid()) {
+            return [];
+        }
+
+        if ($this->isSolid()) {
+            //Solid records always saved as one chunk of data
+            return $this->packValue();
+        }
+
+        $updates = [];
+        foreach ($this->getFields(false) as $field => $value) {
+            if (
+                $skipPrimaries
+                && in_array($field, $this->recordSchema[self::SH_PRIMARIES])
+            ) {
+                continue;
+            }
+
+            //Handled by sub-accessor
+            if ($value instanceof RecordAccessorInterface) {
+                if ($value->hasUpdates()) {
+                    $updates[$field] = $value->compileUpdates($field);
+                    continue;
+                }
+
+                $value = $value->packValue();
+            }
+
+            //Field change registered
+            if (array_key_exists($field, $this->changes)) {
+                $updates[$field] = $value;
+            }
+        }
+
+        return $updates;
+    }
+
     /**
      * Indicate that all updates done, reset dirty state.
      */
@@ -474,7 +634,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         $this->changes = [];
 
         foreach ($this->getFields(false) as $field => $value) {
-            if ($value instanceof SQLAccessorInterface) {
+            if ($value instanceof RecordAccessorInterface) {
                 $value->flushUpdates();
             }
         }

@@ -137,7 +137,7 @@ abstract class AbstractEntity extends MutableObject implements
         $accessor = $this->getMutator($name, self::MUTATOR_ACCESSOR);
 
         if (!empty($accessor)) {
-            return $this->fields[$name] = $this->createAccessor($accessor, $name, $value);
+            return $this->fields[$name] = $this->createAccessor($name, $accessor, $value);
         }
 
         //Getting value though getter
@@ -483,11 +483,11 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * Set value in/thought associated accessor.
      *
-     * @param string $accessor Accessor class name.
-     * @param string $name
-     * @param mixed  $value
+     * @param string       $name
+     * @param string|array $accessor Accessor definition (implementation specific).
+     * @param mixed        $value
      */
-    private function setAccessed(string $accessor, string $name, $value)
+    private function setAccessed(string $name, $accessor, $value)
     {
         if (array_key_exists($name, $this->fields)) {
             $field = $this->fields[$name];

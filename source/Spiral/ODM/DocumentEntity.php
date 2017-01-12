@@ -47,6 +47,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 {
     use SaturateTrait, SolidableTrait;
 
+    /*
+     * Begin set of behaviour and description constants.
+     * ================================================
+     */
+
     /**
      * Set of schema sections needed to describe entity behaviour.
      */
@@ -66,6 +71,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     const MANY = 778;
     const ONE  = 899;
+
+    /*
+     * ================================================
+     * End set of behaviour and description constants.
+     */
 
     /**
      * Class responsible for instance construction.

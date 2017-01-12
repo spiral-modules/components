@@ -25,6 +25,11 @@ abstract class RecordEntity extends SchematicEntity
 {
     use SaturateTrait, SolidableTrait;
 
+    /*
+     * Begin set of behaviour and description constants.
+     * ================================================
+     */
+
     /**
      * Set of schema sections needed to describe entity behaviour.
      */
@@ -97,6 +102,11 @@ abstract class RecordEntity extends SchematicEntity
      */
     const INDEX  = 1000;            //Default index type
     const UNIQUE = 2000;            //Unique index definition
+
+    /*
+     * ================================================
+     * End set of behaviour and description constants.
+     */
 
     /**
      * Model behaviour configurations.
@@ -322,7 +332,6 @@ abstract class RecordEntity extends SchematicEntity
 
         $this->setField($offset, null, false);
     }
-
 
     /**
      * {@inheritdoc}

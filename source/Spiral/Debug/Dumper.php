@@ -90,15 +90,14 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
                 echo $this->style->wrapContainer($this->dumpValue($value, '', 0));
                 break;
 
-            case self::OUTPUT_RETURN:
-                return $this->style->wrapContainer($this->dumpValue($value, '', 0));
-                break;
-
             case self::OUTPUT_LOG:
                 if (!empty($this->logger)) {
                     $this->logger->debug($this->dump($value, self::OUTPUT_RETURN));
                 }
                 break;
+
+            case self::OUTPUT_RETURN:
+                return $this->style->wrapContainer($this->dumpValue($value, '', 0));
         }
 
         //Nothing to return

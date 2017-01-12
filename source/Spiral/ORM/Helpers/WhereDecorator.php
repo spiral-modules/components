@@ -82,29 +82,25 @@ class WhereDecorator
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
-     * @return $this
+     * @return $this|self
      *
      * @throws BuilderException
      */
-    public function where($identifier, $variousA = null, $variousB = null, $variousC = null)
+    public function where(...$args): WhereDecorator
     {
-        if ($identifier instanceof \Closure) {
-            call_user_func($identifier, $this);
+        if ($args[0] instanceof \Closure) {
+            call_user_func($args[0], $this);
 
             return $this;
         }
 
         //We have to prepare only first argument
-        $arguments = func_get_args();
-        $arguments[0] = $this->prepare($arguments[0]);
+        $args[0] = $this->prepare($args[0]);
 
         //Routing where
-        call_user_func_array([$this->query, $this->target], $arguments);
+        call_user_func_array([$this->query, $this->target], $args);
 
         return $this;
     }
@@ -115,29 +111,25 @@ class WhereDecorator
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
-     * @return $this
+     * @return $this|self
      *
      * @throws BuilderException
      */
-    public function andWhere($identifier, $variousA = null, $variousB = null, $variousC = null)
+    public function andWhere(...$args): WhereDecorator
     {
-        if ($identifier instanceof \Closure) {
-            call_user_func($identifier, $this);
+        if ($args[0] instanceof \Closure) {
+            call_user_func($args[0], $this);
 
             return $this;
         }
 
         //We have to prepare only first argument
-        $arguments = func_get_args();
-        $arguments[0] = $this->prepare($arguments[0]);
+        $args[0] = $this->prepare($args[0]);
 
         //Routing where
-        call_user_func_array([$this->query, 'and' . ucfirst($this->target)], $arguments);
+        call_user_func_array([$this->query, 'and' . ucfirst($this->target)], $args);
 
         return $this;
     }
@@ -148,29 +140,25 @@ class WhereDecorator
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
-     * @return $this
+     * @return $this|self
      *
      * @throws BuilderException
      */
-    public function orWhere($identifier, $variousA = [], $variousB = null, $variousC = null)
+    public function orWhere(...$args): WhereDecorator
     {
-        if ($identifier instanceof \Closure) {
-            call_user_func($identifier, $this);
+        if ($args[0] instanceof \Closure) {
+            call_user_func($args[0], $this);
 
             return $this;
         }
 
         //We have to prepare only first argument
-        $arguments = func_get_args();
-        $arguments[0] = $this->prepare($arguments[0]);
+        $args[0] = $this->prepare($args[0]);
 
         //Routing where
-        call_user_func_array([$this->query, 'or' . ucfirst($this->target)], $arguments);
+        call_user_func_array([$this->query, 'or' . ucfirst($this->target)], $args);
 
         return $this;
     }

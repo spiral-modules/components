@@ -106,14 +106,6 @@ final class RelationContext
     }
 
     /**
-     * @return AbstractTable
-     */
-    public function getSchema(): AbstractTable
-    {
-        return clone $this->schema;
-    }
-
-    /**
      * @return null|ColumnInterface
      */
     public function getPrimary()

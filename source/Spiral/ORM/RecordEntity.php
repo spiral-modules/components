@@ -8,6 +8,7 @@ namespace Spiral\ORM;
 
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\SchematicEntity;
+use Spiral\Models\Traits\SolidableTrait;
 
 /**
  * Provides ActiveRecord-less abstraction for carried data with ability to automatically apply
@@ -19,7 +20,7 @@ use Spiral\Models\SchematicEntity;
  */
 abstract class RecordEntity extends SchematicEntity
 {
-    use SaturateTrait;
+    use SaturateTrait, SolidableTrait;
 
     /**
      * Set of schema sections needed to describe entity behaviour.
@@ -161,22 +162,70 @@ abstract class RecordEntity extends SchematicEntity
      */
     const INDEXES = [];
 
-    //todo: state???????
+    /**
+     * Record behaviour definition.
+     *
+     * @var array
+     */
+    private $recordSchema = [];
+
+    /**
+     * Record state.
+     *
+     * @var int
+     */
+    private $state;
+
+    private $changes = [];
+
+    /**
+     * Parent ORM instance, responsible for relation initialization and lazy loading operations.
+     *
+     * @invisible
+     * @var ORMInterface
+     */
+    protected $orm;
+
+    /**
+     * Initiate entity inside or outside of ORM scope using given fields and state.
+     *
+     * @param array             $fields
+     * @param int               $state
+     * @param ORMInterface|null $orm
+     * @param array|null        $schema
+     */
     public function __construct(
         $fields = [],
-        ORMInterface $odm = null,
+        int $state = ORMInterface::STATE_NEW,
+        ORMInterface $orm = null,
         array $schema = null
-    ) {
-        parent::__construct($fields, $schema);
+    ) {//We can use global container as fallback if no default values were provided
+        $this->orm = $this->saturate($orm, ORMInterface::class);
+
+        //Use supplied schema or fetch one from ORM
+        $this->recordSchema = !empty($schema) ? $schema : $this->orm->define(
+            static::class,
+            ORMInterface::R_SCHEMA
+        );
+
+        $this->state = $state;
+        if ($this->state == ORMInterface::STATE_NEW) {
+            //Non loaded records should be in solid state by default
+            $this->solidState(true);
+        }
+
+        //todo: fetch relations
+
+        parent::__construct($fields + $this->recordSchema[self::SH_DEFAULTS], $schema);
     }
 
-    public function isLoaded(): bool
+    /**
+     * @return array
+     */
+    public function __debugInfo()
     {
-        return !empty($this->primaryKey());
-    }
-
-    public function primaryKey()
-    {
-
+        return [
+            'fields' => $this->getFields()
+        ];
     }
 }

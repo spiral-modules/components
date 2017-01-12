@@ -91,7 +91,7 @@ class RecordInstantiator implements InstantiatorInterface
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
         if ($state == ORMInterface::STATE_LOADED) {
             //No need to filter values, passing directly in constructor
-            return new $class($fields, $this->schema, $this->orm);
+            return new $class($fields, $state, $this->orm, $this->schema);
         }
 
         if ($state != ORMInterface::STATE_NEW) {
@@ -104,7 +104,7 @@ class RecordInstantiator implements InstantiatorInterface
          * Filtering entity
          */
 
-        $entity = new $class([], $this->schema, $this->orm);
+        $entity = new $class([], $state, $this->orm, $this->schema);
         if (!$entity instanceof RecordEntity) {
             throw new InstantionException(
                 "Unable to set filtered values for '{$class}', must be instance of RecordEntity"

@@ -61,17 +61,20 @@ class RecordIterator implements \IteratorAggregate
      */
     public function getIterator()
     {
+        //todo: think about it
         if (empty($this->entities)) {
             foreach ($this->data as $data) {
                 /*
                  * Mass entity initialization.
                  */
-                $this->entities[] = $this->orm->make(
+                $this->entities[] = $entity = $this->orm->make(
                     $this->class,
                     $data,
                     ORMInterface::STATE_LOADED,
                     true
                 );
+
+                yield ['xxx'] => $entity;
             }
         }
 

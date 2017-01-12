@@ -96,6 +96,16 @@ abstract class RecordEntity extends SchematicEntity
     const UNIQUE = 2000;            //Unique index definition
 
     /**
+     * Model behaviour configurations.
+     */
+    const SECURED   = '*';
+    const HIDDEN    = [];
+    const FILLABLE  = [];
+    const SETTERS   = [];
+    const GETTERS   = [];
+    const ACCESSORS = [];
+
+    /**
      * Record relations and columns can be described in one place - record schema.
      * Attention: while defining table structure make sure that ACTIVE_SCHEMA constant is set to t
      * rue.
@@ -237,6 +247,8 @@ abstract class RecordEntity extends SchematicEntity
     public function __debugInfo()
     {
         return [
+            'database' => $this->orm->define(static::class, ORMInterface::R_DATABASE),
+            'table'     => $this->orm->define(static::class, ORMInterface::R_TABLE),
             'fields'    => $this->getFields(),
             'relations' => $this->relations
         ];

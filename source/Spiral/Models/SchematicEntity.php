@@ -32,13 +32,13 @@ class SchematicEntity extends AbstractEntity
     private $schema = [];
 
     /**
-     * @param array $fields
+     * @param array $data
      * @param array $schema
      */
-    public function __construct(array $fields, array $schema)
+    public function __construct(array $data, array $schema)
     {
         $this->schema = $schema;
-        parent::__construct($fields);
+        parent::__construct($data);
     }
 
     /**

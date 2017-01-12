@@ -102,9 +102,9 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(array $fields = [], ODMInterface $odm = null, array $schema = null)
+    public function __construct(array $data = [], ODMInterface $odm = null, array $schema = null)
     {
-        parent::__construct($fields, $odm, $schema);
+        parent::__construct($data, $odm, $schema);
 
         if (!$this->isLoaded()) {
             //Automatically force solidState for newly created documents

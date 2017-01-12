@@ -160,7 +160,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @throws ScopeException When no ODM instance can be resolved.
      */
-    public function __construct(array $fields = [], ODMInterface $odm = null, array $schema = null)
+    public function __construct(array $data = [], ODMInterface $odm = null, array $schema = null)
     {
         //We can use global container as fallback if no default values were provided
         $this->odm = $this->saturate($odm, ODMInterface::class);
@@ -171,13 +171,13 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             ODMInterface::D_SCHEMA
         );
 
-        $fields = is_array($fields) ? $fields : [];
+        $data = is_array($data) ? $data : [];
         if (!empty($this->documentSchema[self::SH_DEFAULTS])) {
             //Merging with default values
-            $fields = array_replace_recursive($this->documentSchema[self::SH_DEFAULTS], $fields);
+            $data = array_replace_recursive($this->documentSchema[self::SH_DEFAULTS], $data);
         }
 
-        parent::__construct($fields, $this->documentSchema);
+        parent::__construct($data, $this->documentSchema);
     }
 
     /**
@@ -185,13 +185,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function getField(string $name, $default = null, bool $filter = true)
     {
-        if (!$this->hasField($name) && !isset($this->documentSchema[self::SH_COMPOSITIONS][$name])) {
-            throw new FieldException(sprintf(
-                "No such property '%s' in '%s', check schema being relevant",
-                $name,
-                get_called_class()
-            ));
-        }
+        $this->assertField($name);
 
         return parent::getField($name, $default, $filter);
     }
@@ -203,15 +197,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function setField(string $name, $value, bool $filter = true)
     {
-        if (!$this->hasField($name)) {
-            //We are only allowing to modify existed fields, this is strict schema
-            throw new FieldException(sprintf(
-                "No such property '%s' in '%s', check schema being relevant",
-                $name,
-                get_called_class()
-            ));
-        }
-
+        $this->assertField($name);
         $this->registerChange($name);
 
         parent::setField($name, $value, $filter);
@@ -498,6 +484,22 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
             $this->changes[$name] = $original instanceof AccessorInterface
                 ? $original->packValue()
                 : $original;
+        }
+    }
+
+    /**
+     * @param string $name
+     *
+     * @throws FieldException
+     */
+    private function assertField(string $name)
+    {
+        if (!$this->hasField($name)) {
+            throw new FieldException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
         }
     }
 }

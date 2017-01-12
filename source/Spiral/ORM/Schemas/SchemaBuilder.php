@@ -332,11 +332,7 @@ class SchemaBuilder
                 ORMInterface::R_PRIMARIES    => $table->getPrimaryKeys(),
 
                 //Schema includes list of fields, default values and nullable fields
-                ORMInterface::R_SCHEMA       => $schema->packSchema(
-                    $this,
-                    clone $table,
-                    $relations
-                ),
+                ORMInterface::R_SCHEMA       => $schema->packSchema($this, clone $table),
 
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
 

@@ -15,6 +15,7 @@ use Spiral\ORM\Commands\DeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\UpdateCommand;
+use Spiral\ORM\Entities\RelationBucket;
 use Spiral\ORM\Events\RecordEvent;
 use Spiral\ORM\Exceptions\FieldException;
 
@@ -25,6 +26,8 @@ use Spiral\ORM\Exceptions\FieldException;
  * Class implementations statically analyzed to define DB schema.
  *
  * @see RecordEntity::SCHEMA
+ *
+ * Potentially requires split for StateWatcher.
  */
 abstract class RecordEntity extends SchematicEntity implements RecordInterface
 {
@@ -214,11 +217,11 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     private $changes = [];
 
     /**
-     * Associated relation instances and/or initial loaded data.
+     * AssociatedRelation bucket. Manages declared record relations.
      *
-     * @var array
+     * @var RelationBucket
      */
-    private $relations = [];
+    private $relations;
 
     /**
      * Parent ORM instance, responsible for relation initialization and lazy loading operations.
@@ -231,13 +234,13 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Initiate entity inside or outside of ORM scope using given fields and state.
      *
-     * @param array             $fields
+     * @param array             $data
      * @param int               $state
      * @param ORMInterface|null $orm
      * @param array|null        $schema
      */
     public function __construct(
-        array $fields = [],
+        array $data = [],
         int $state = ORMInterface::STATE_NEW,
         ORMInterface $orm = null,
         array $schema = null
@@ -256,8 +259,10 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
             $this->solidState(true);
         }
 
-        $this->extractRelations($fields);
-        parent::__construct($fields + $this->recordSchema[self::SH_DEFAULTS], $this->recordSchema);
+        $this->relations = new RelationBucket($this, $this->orm);
+        $this->relations->extractRelations($data);
+
+        parent::__construct($data + $this->recordSchema[self::SH_DEFAULTS], $this->recordSchema);
     }
 
     /**
@@ -285,15 +290,11 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function getField(string $name, $default = null, bool $filter = true)
     {
-        if (!$this->hasField($name) && !isset($this->recordSchema[self::SH_RELATIONS][$name])) {
-            throw new FieldException(sprintf(
-                "No such property '%s' in '%s', check schema being relevant",
-                $name,
-                get_called_class()
-            ));
+        if ($this->relations->exists($name)) {
+            return $this->relations->get($name);
         }
 
-        //todo: get relation
+        $this->assertField($name);
 
         return parent::getField($name, $default, $filter);
     }
@@ -305,17 +306,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function setField(string $name, $value, bool $filter = true)
     {
-        //todo: check if relation
-
-        if (!$this->hasField($name)) {
-            //We are only allowing to modify existed fields, this is strict schema
-            throw new FieldException(sprintf(
-                "No such property '%s' in '%s', check schema being relevant",
-                $name,
-                get_called_class()
-            ));
+        if ($this->relations->exists($name)) {
+            //Would not work with relations which do not represent singular entities
+            return $this->relations->set($name, $value);
         }
 
+        $this->assertField($name);
         $this->registerChange($name);
 
         parent::setField($name, $value, $filter);
@@ -324,9 +320,11 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * {@inheritdoc}
      */
-    public function __isset($name)
+    public function hasField(string $name): bool
     {
-        //todo: if relation
+        if ($this->relations->exists($name)) {
+            return true;
+        }
 
         return parent::__isset($name);
     }
@@ -338,6 +336,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function __unset($offset)
     {
+        if ($this->relations->exists($offset)) {
+            $this->relations->delete($offset);
+
+            return;
+        }
+
         if (!$this->isNullable($offset)) {
             throw new FieldException("Unable to unset not nullable field '{$offset}'");
         }
@@ -399,7 +403,11 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
         } else {
-            $command = $this->prepareUpdate();
+            if ($this->hasUpdates() || $this->solidState) {
+                $command = $this->prepareUpdate();
+            } else {
+                $command = new NullCommand();
+            }
         }
 
         //Relation commands
@@ -656,18 +664,18 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
-     * Extract relations data from given entity fields.
+     * @param string $name
      *
-     * @param array $data
+     * @throws FieldException
      */
-    private function extractRelations(array &$data)
+    private function assertField(string $name)
     {
-        //Fetch all relations
-        $relations = array_intersect_key($data, $this->recordSchema[self::SH_RELATIONS]);
-
-        foreach ($relations as $name => $relation) {
-            $this->relations[$name] = $relation;
-            unset($data[$name]);
+        if (!$this->hasField($name)) {
+            throw new FieldException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
         }
     }
 }

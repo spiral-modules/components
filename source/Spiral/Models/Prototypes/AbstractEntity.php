@@ -43,11 +43,11 @@ abstract class AbstractEntity extends MutableObject implements
     private $fields = [];
 
     /**
-     * @param array $fields
+     * @param array $data
      */
-    public function __construct(array $fields = [])
+    public function __construct(array $data = [])
     {
-        $this->fields = $fields;
+        $this->fields = $data;
 
         //Initiating mutable object
         static::initialize(false);

@@ -7,26 +7,32 @@
 namespace Spiral\ORM;
 
 use Spiral\Models\ActiveEntityInterface;
+use Spiral\ORM\Commands\InsertCommand;
+use Spiral\ORM\Commands\UpdateCommand;
 
+/**
+ * Adds ActiveRecord abilities to RecordEntity.
+ */
 abstract class Record extends RecordEntity implements ActiveEntityInterface
 {
-    public function isLoaded(): bool
+   public function save(TransactionInterface $transaction = null, bool $queueRelations = true): int
     {
-        // TODO: Implement isLoaded() method.
-    }
+        //saturate transaction
+        $transaction->addCommand($command = $this->queueSave($queueRelations));
 
-    public function primaryKey()
-    {
-        // TODO: Implement primaryKey() method.
-    }
+        if ($command instanceof InsertCommand) {
+            return self::CREATED;
+        } elseif ($command instanceof UpdateCommand) {
+            return self::UPDATED;
+        }
 
-    public function save(TransactionInterface $transaction = null): int
-    {
-        // TODO: Implement save() method.
+        return self::UNCHANGED;
     }
 
     public function delete(TransactionInterface $transaction = null)
     {
-        // TODO: Implement delete() method.
+        //saturate transaction
+
+        $transaction->addCommand($this->queueDelete());
     }
 }

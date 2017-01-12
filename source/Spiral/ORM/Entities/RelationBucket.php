@@ -63,7 +63,6 @@ class RelationBucket
 
     public function queueRelations(CommandInterface $parent): CommandInterface
     {
-
         return $parent;
     }
 

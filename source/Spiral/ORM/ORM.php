@@ -15,7 +15,6 @@ use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
-use Spiral\Models\EntityInterface;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
@@ -223,6 +222,21 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         )->table(
             $this->define($class, self::R_TABLE)
         );
+    }
+
+    public function hasTransaction(): bool
+    {
+
+    }
+
+    public function getTransaction(): TransactionInterface
+    {
+
+    }
+
+    public function beginTransaction(): TransactionInterface
+    {
+
     }
 
     /**

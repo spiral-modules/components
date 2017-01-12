@@ -170,7 +170,7 @@ abstract class Document extends DocumentEntity implements ActiveEntityInterface
             return self::CREATED;
         }
 
-        if ($this->isSolid() || $this->hasUpdates()) {
+        if ($this->isSolid() || $this->hasChanges()) {
             $this->dispatch('update', new DocumentEvent($this));
 
             //Performing an update

@@ -18,7 +18,7 @@ interface CompositableInterface extends AccessorInterface
      *
      * @return bool
      */
-    public function hasUpdates(): bool;
+    public function hasChanges(): bool;
 
     /**
      * Indicate that composition been properly saved.

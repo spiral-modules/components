@@ -367,7 +367,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * @param string $field Check once specific field changes.
      */
-    public function hasUpdates(string $field = null): bool
+    public function hasChanges(string $field = null): bool
     {
         //Check updates for specific field
         if (!empty($field)) {
@@ -417,7 +417,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
         } else {
-            if ($this->hasUpdates() || $this->solidState) {
+            if ($this->hasChanges() || $this->solidState) {
                 $command = $this->prepareUpdate();
             } else {
                 $command = new NullCommand();
@@ -513,7 +513,6 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     {
         //Entity indicates it's own status
         $this->setState(ORMInterface::STATE_SCHEDULED_INSERT);
-        $this->dispatch('insert', new RecordEvent($this));
 
         $command = new InsertCommand(
             $this->packValue(),
@@ -521,10 +520,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
             $this->orm->define(static::class, ORMInterface::R_TABLE)
         );
 
+        $this->dispatch('insert', new RecordEvent($this, $command));
+
         //Executed when transaction successfully completed
-        $command->onComplete(function () {
+        $command->onComplete(function ($command) {
             $this->setState(ORMInterface::STATE_LOADED);
-            $this->flushUpdates();
+            $this->flushChanges();
             $this->dispatch('created', new RecordEvent($this));
         });
 
@@ -538,20 +539,21 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     {
         //Entity indicates it's own status
         $this->setState(ORMInterface::STATE_SCHEDULED_UPDATE);
-        $this->dispatch('update', new RecordEvent($this));
 
         $command = new UpdateCommand(
             $this->stateCriteria(),
-            $this->compileUpdates(true),
+            $this->packChanges(true),
             $this->orm->define(static::class, ORMInterface::R_DATABASE),
             $this->orm->define(static::class, ORMInterface::R_TABLE)
         );
 
+        $this->dispatch('update', new RecordEvent($this, $command));
+
         //Executed when transaction successfully completed
-        $command->onComplete(function () {
+        $command->onComplete(function ($command) {
             $this->setState(ORMInterface::STATE_LOADED);
-            $this->flushUpdates();
-            $this->dispatch('updated', new RecordEvent($this));
+            $this->flushChanges();
+            $this->dispatch('updated', new RecordEvent($this, $command));
         });
 
         return $command;
@@ -613,9 +615,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * @return array
      */
-    private function compileUpdates(bool $skipPrimaries = false): array
+    private function packChanges(bool $skipPrimaries = false): array
     {
-        if (!$this->hasUpdates() && !$this->isSolid()) {
+        if (!$this->hasChanges() && !$this->isSolid()) {
             return [];
         }
 
@@ -655,7 +657,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Indicate that all updates done, reset dirty state.
      */
-    private function flushUpdates()
+    private function flushChanges()
     {
         $this->changes = [];
 

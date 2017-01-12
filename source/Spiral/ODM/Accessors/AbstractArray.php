@@ -152,7 +152,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * {@inheritdoc}
      */
-    public function hasUpdates(): bool
+    public function hasChanges(): bool
     {
         return !empty($this->atomics);
     }
@@ -170,7 +170,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
      */
     public function buildAtomics(string $container = ''): array
     {
-        if (!$this->hasUpdates()) {
+        if (!$this->hasChanges()) {
             return [];
         }
 

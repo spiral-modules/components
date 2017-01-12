@@ -259,10 +259,10 @@ class DocumentCompositor implements
      * @param bool $changedEntities Reference, will be set to true if any of entities changed
      *                              internally.
      */
-    public function hasUpdates(bool &$changedEntities = null): bool
+    public function hasChanges(bool &$changedEntities = null): bool
     {
         foreach ($this->entities as $entity) {
-            if ($entity->hasUpdates()) {
+            if ($entity->hasChanges()) {
                 $changedEntities = true;
 
                 return true;
@@ -290,7 +290,7 @@ class DocumentCompositor implements
     public function buildAtomics(string $container = ''): array
     {
         //$changedEntities will be set to true if any of internal entities were changed directly
-        if (!$this->hasUpdates($changedEntities)) {
+        if (!$this->hasChanges($changedEntities)) {
             return [];
         }
 
@@ -319,7 +319,7 @@ class DocumentCompositor implements
         //Document specific atomic operations (excluding document which are colliding with composition
         //specific operations)
         foreach ($this->entities as $offset => $entity) {
-            if (!$entity->hasUpdates() || in_array($entity, $excluded)) {
+            if (!$entity->hasChanges() || in_array($entity, $excluded)) {
                 //Handler on higher level
                 continue;
             }

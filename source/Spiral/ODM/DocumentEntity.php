@@ -245,7 +245,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      *
      * @param string $field Check once specific field changes.
      */
-    public function hasUpdates(string $field = null): bool
+    public function hasChanges(string $field = null): bool
     {
         //Check updates for specific field
         if (!empty($field)) {
@@ -255,7 +255,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
 
             //Do not force accessor creation
             $value = $this->getField($field, null, false);
-            if ($value instanceof CompositableInterface && $value->hasUpdates()) {
+            if ($value instanceof CompositableInterface && $value->hasChanges()) {
                 return true;
             }
 
@@ -269,7 +269,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
         //Do not force accessor creation
         foreach ($this->getFields(false) as $value) {
             //Checking all fields for changes (handled internally)
-            if ($value instanceof CompositableInterface && $value->hasUpdates()) {
+            if ($value instanceof CompositableInterface && $value->hasChanges()) {
                 return true;
             }
         }
@@ -282,7 +282,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function buildAtomics(string $container = null): array
     {
-        if (!$this->hasUpdates() && !$this->isSolid()) {
+        if (!$this->hasChanges() && !$this->isSolid()) {
             return [];
         }
 
@@ -394,7 +394,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         return [
             'fields'  => $this->getFields(),
-            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
+            'atomics' => $this->hasChanges() ? $this->buildAtomics() : [],
         ];
     }
 

@@ -117,7 +117,6 @@ class Serializer
         }
         if (is_bool($value)) {
             return ($value ? "true" : "false");
-
         }
 
         if (!is_string($value) && !is_numeric($value)) {

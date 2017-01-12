@@ -12,6 +12,8 @@ class Post extends Record
 {
     const SCHEMA = [
         'id'    => 'primary',
-        'title' => 'string'
+        'title' => 'string',
+
+        'tags' => [self::MANY_TO_MANY => Tag::class, Tag::INVERSE => 'posts']
     ];
 }

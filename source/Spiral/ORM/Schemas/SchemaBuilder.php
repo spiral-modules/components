@@ -320,15 +320,23 @@ class SchemaBuilder
             //Table which is being related to model schema
             $table = $this->requestTable($schema->getTable(), $schema->getDatabase(), false);
 
+            $relations = $this->relations->packRelations($schema->getClass(), $this);
+
             $result[$class] = [
                 ORMInterface::R_INSTANTIATOR => $schema->getInstantiator(),
 
-                ORMInterface::R_ROLE_NAME => $schema->getRole(),
+                //Model role name
+                ORMInterface::R_ROLE_NAME    => $schema->getRole(),
 
-                ORMInterface::R_PRIMARIES => $table->getPrimaryKeys(),
+                //Primary keys
+                ORMInterface::R_PRIMARIES    => $table->getPrimaryKeys(),
 
                 //Schema includes list of fields, default values and nullable fields
-                ORMInterface::R_SCHEMA    => $schema->packSchema($this, clone $table),
+                ORMInterface::R_SCHEMA       => $schema->packSchema(
+                    $this,
+                    clone $table,
+                    $relations
+                ),
 
                 ORMInterface::R_SOURCE_CLASS => $this->getSource($class),
 
@@ -337,10 +345,7 @@ class SchemaBuilder
                 ORMInterface::R_TABLE        => $schema->getTable(),
 
                 //Pack model specific relations
-                ORMInterface::R_RELATIONS    => $this->relations->packRelations(
-                    $schema->getClass(),
-                    $this
-                )
+                ORMInterface::R_RELATIONS    => $relations
             ];
         }
 

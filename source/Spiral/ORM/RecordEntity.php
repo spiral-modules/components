@@ -8,8 +8,10 @@ namespace Spiral\ORM;
 
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
+use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
+use Spiral\ORM\Exceptions\FieldException;
 
 /**
  * Provides ActiveRecord-less abstraction for carried data with ability to automatically apply
@@ -28,6 +30,7 @@ abstract class RecordEntity extends SchematicEntity
      */
     const SH_PRIMARIES = 0;
     const SH_DEFAULTS  = 1;
+    const SH_RELATIONS = 6;
 
     /**
      * Default ORM relation types, see ORM configuration and documentation for more information.
@@ -241,17 +244,153 @@ abstract class RecordEntity extends SchematicEntity
         parent::__construct($fields + $this->recordSchema[self::SH_DEFAULTS], $schema);
     }
 
+    //todo: think about it
+    public function getState(): int
+    {
+        return $this->state;
+    }
+
+    //todo: think about it
+    public function setState(int $state): self
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getField(string $name, $default = null, bool $filter = true)
+    {
+        if (!$this->hasField($name) && !isset($this->recordSchema[self::SH_RELATIONS][$name])) {
+            throw new FieldException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
+        }
+
+        //todo: get relation
+
+        return parent::getField($name, $default, $filter);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Tracks field changes.
+     */
+    public function setField(string $name, $value, bool $filter = true)
+    {
+        //todo: check if relation
+
+        if (!$this->hasField($name)) {
+            //We are only allowing to modify existed fields, this is strict schema
+            throw new FieldException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
+        }
+
+        $this->registerChange($name);
+
+        parent::setField($name, $value, $filter);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __isset($name)
+    {
+        //todo: if relation
+
+        return parent::__isset($name);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws FieldException
+     */
+    public function __unset($offset)
+    {
+        if (!$this->isNullable($offset)) {
+            throw new FieldException("Unable to unset not nullable field '{$offset}'");
+        }
+
+        $this->setField($offset, null, false);
+    }
+
+
+    /**
+     * {@inheritdoc}
+     *
+     * Method does not check updates in nested relation, but only in primary record.
+     *
+     * @param string $field Check once specific field changes.
+     */
+    public function hasUpdates(string $field = null): bool
+    {
+        //Check updates for specific field
+        if (!empty($field)) {
+            if (array_key_exists($field, $this->changes)) {
+                return true;
+            }
+
+            //Do not force accessor creation
+            $value = $this->getField($field, null, false);
+            if ($value instanceof SQLAccessorInterface && $value->hasUpdates()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        if (!empty($this->changes)) {
+            return true;
+        }
+
+        //Do not force accessor creation
+        foreach ($this->getFields(false) as $value) {
+            //Checking all fields for changes (handled internally)
+            if ($value instanceof SQLAccessorInterface && $value->hasUpdates()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @return array
      */
     public function __debugInfo()
     {
         return [
-            'database' => $this->orm->define(static::class, ORMInterface::R_DATABASE),
+            'database'  => $this->orm->define(static::class, ORMInterface::R_DATABASE),
             'table'     => $this->orm->define(static::class, ORMInterface::R_TABLE),
             'fields'    => $this->getFields(),
             'relations' => $this->relations
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * DocumentEntity will pass ODM instance as part of accessor context.
+     *
+     * @see CompositionDefinition
+     */
+    protected function createAccessor(
+        $accessor,
+        string $name,
+        $value,
+        array $context = []
+    ): AccessorInterface {
+        //Giving ORM as context
+        return parent::createAccessor($accessor, $name, $value, $context + ['orm' => $this->orm]);
     }
 
     /**
@@ -268,16 +407,29 @@ abstract class RecordEntity extends SchematicEntity
     }
 
     /**
+     * @param string $name
+     */
+    private function registerChange(string $name)
+    {
+        $original = $this->getField($name, null, false);
+
+        if (!array_key_exists($name, $this->changes)) {
+            //Let's keep track of how field looked before first change
+            $this->changes[$name] = $original instanceof AccessorInterface
+                ? $original->packValue()
+                : $original;
+        }
+    }
+
+    /**
      * Extract relations data from given entity fields.
      *
      * @param array $data
      */
     private function extractRelations(array &$data)
     {
-        $relations = array_intersect_key(
-            $data,
-            $this->orm->define(static::class, ORMInterface::R_RELATIONS)
-        );
+        //Fetch all relations
+        $relations = array_intersect_key($data, $this->recordSchema[self::SH_RELATIONS]);
 
         foreach ($relations as $name => $relation) {
             $this->relations[$name] = $relation;

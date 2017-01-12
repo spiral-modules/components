@@ -92,11 +92,16 @@ interface SchemaInterface
      * Pack schema in a form compatible with entity class and selected mapper.
      *
      * @param SchemaBuilder $builder
-     * @param AbstractTable $table Associated table.
+     * @param AbstractTable $table           Associated table.
+     * @param array         $packedRelations Schemas of associated relations.
      *
      * @return array
      *
      * @throws SchemaException
      */
-    public function packSchema(SchemaBuilder $builder, AbstractTable $table): array;
+    public function packSchema(
+        SchemaBuilder $builder,
+        AbstractTable $table,
+        array $packedRelations = []
+    ): array;
 }

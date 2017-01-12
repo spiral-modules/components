@@ -15,6 +15,7 @@ use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Helpers\ColumnRenderer;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\Definitions\IndexDefinition;
@@ -208,8 +209,17 @@ class RecordSchema implements SchemaInterface
     /**
      * {@inheritdoc}
      */
-    public function packSchema(SchemaBuilder $builder, AbstractTable $table): array
-    {
+    public function packSchema(
+        SchemaBuilder $builder,
+        AbstractTable $table,
+        array $packedRelations = []
+    ): array {
+
+        $relations = [];
+        foreach ($packedRelations as $relation => $schema) {
+            $relations[$relation] = $schema[ORMInterface::R_TYPE];
+        }
+
         return [
             RecordEntity::SH_PRIMARIES => $table->getPrimaryKeys(),
 
@@ -222,7 +232,9 @@ class RecordSchema implements SchemaInterface
             RecordEntity::SH_FILLABLE  => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ORM\SchemasConfig
-            RecordEntity::SH_MUTATORS  => $this->buildMutators($table)
+            RecordEntity::SH_MUTATORS  => $this->buildMutators($table),
+
+            RecordEntity::SH_RELATIONS => $relations
         ];
     }
 

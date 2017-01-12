@@ -484,8 +484,6 @@ class ReflectionFile extends Component
 
             //We are not indexing function declarations or functions called from $objects.
             if (in_array($tokenType, [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW])) {
-
-
                 if (
                     empty($argumentsTID)
                     && (

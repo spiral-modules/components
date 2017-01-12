@@ -385,10 +385,10 @@ class Container extends Component implements
             throw new NotFoundException("Undefined class or binding '{$class}'");
         }
 
-        //OK, we can create class by ourselves
-        $instance = $this->createInstance($class, $parameters, $context, $reflector);
-
-        return $this->registerInstance($instance, $reflector, $parameters);
+        //Create and register in container if needed
+        return $this->registerInstance(
+            $this->createInstance($class, $parameters, $context),
+            $parameters);
     }
 
     /**
@@ -434,22 +434,16 @@ class Container extends Component implements
     /**
      * Create instance of desired class.
      *
-     * @param string           $class
-     * @param array            $parameters Constructor parameters.
-     * @param string|null      $context
-     * @param \ReflectionClass $reflection Instance of reflection associated with class,
-     *                                     reference.
+     * @param string      $class
+     * @param array       $parameters Constructor parameters.
+     * @param string|null $context
      *
      * @return object
      *
      * @throws ContainerException
      */
-    private function createInstance(
-        string $class,
-        array $parameters,
-        string $context = null,
-        \ReflectionClass &$reflection = null
-    ) {
+    private function createInstance(string $class, array $parameters, string $context = null)
+    {
         try {
             $reflection = new \ReflectionClass($class);
         } catch (\Throwable $e) {
@@ -492,13 +486,12 @@ class Container extends Component implements
     /**
      * Make sure instance conditions are met.
      *
-     * @param object           $instance
-     * @param \ReflectionClass $reflector
-     * @param array            $parameters
+     * @param object $instance
+     * @param array  $parameters
      *
      * @return object
      */
-    private function registerInstance($instance, \ReflectionClass $reflector, array $parameters)
+    private function registerInstance($instance, array $parameters)
     {
         if (empty($parameters) && $instance instanceof SingletonInterface) {
             $singleton = get_class($instance);
@@ -531,7 +524,7 @@ class Container extends Component implements
             if (!$parameter->isOptional()) {
                 throw new ArgumentException($parameter, $context);
             }
-            
+
             return;
         }
 

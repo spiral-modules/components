@@ -6,16 +6,12 @@
  */
 namespace Spiral\ORM\Entities;
 
-use Spiral\Models\EntityInterface;
 use Spiral\ORM\ORMInterface;
 
 /**
  * Instantiates array of entities. At this moment implementation is rather simple.
- *
- * @todo upgrade to \IteratorIterator?
- * @todo pivot data
  */
-class RecordIterator implements \IteratorAggregate
+class RecordGenerator implements \IteratorAggregate
 {
     /**
      * Array of entity data to be fed into instantiators.
@@ -23,11 +19,6 @@ class RecordIterator implements \IteratorAggregate
      * @var array
      */
     private $data = [];
-
-    /**
-     * @var EntityInterface[]
-     */
-    private $entities = [];
 
     /**
      * Class to be instantiated.
@@ -57,27 +48,28 @@ class RecordIterator implements \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator
+     * Generate over data.
+     * Method will use pibot
+     *
+     * @return \Generator
      */
-    public function getIterator()
+    public function getIterator(): \Generator
     {
-        //todo: think about it
-        if (empty($this->entities)) {
-            foreach ($this->data as $data) {
+        foreach ($this->data as $index => $data) {
+            if (isset($data[ORMInterface::PIVOT_DATA])) {
                 /*
-                 * Mass entity initialization.
+                 * When pivot data is provided we are able to use it as array key.
                  */
-                $this->entities[] = $entity = $this->orm->make(
-                    $this->class,
-                    $data,
-                    ORMInterface::STATE_LOADED,
-                    true
-                );
-
-                yield ['xxx'] => $entity;
+                $index = $data[ORMInterface::PIVOT_DATA];
+                unset($data[ORMInterface::PIVOT_DATA]);
             }
-        }
 
-        return new \ArrayIterator($this->entities);
+            yield $index => $this->orm->make(
+                $this->class,
+                $data,
+                ORMInterface::STATE_LOADED,
+                true
+            );
+        }
     }
 }

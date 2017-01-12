@@ -300,13 +300,13 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
      * @param int|\DateInterval           $ttl
      * @param CacheItemPoolInterface|null $pool
      *
-     * @return RecordIterator
+     * @return RecordGenerator
      */
     public function getIterator(
         string $cacheKey = '',
         $ttl = 0,
         CacheItemPoolInterface $pool = null
-    ): RecordIterator {
+    ): RecordGenerator {
         if (!empty($cacheKey)) {
             /**
              * When no pool is provided saturate it using container scope
@@ -327,7 +327,7 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
             $data = $this->fetchData();
         }
 
-        return new RecordIterator($data, $this->class, $this->orm);
+        return new RecordGenerator($data, $this->class, $this->orm);
     }
 
     /**

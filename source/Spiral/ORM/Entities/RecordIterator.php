@@ -11,7 +11,7 @@ use Spiral\ORM\ORMInterface;
 /**
  * Instantiates array of entities. At this moment implementation is rather simple.
  */
-class RecordGenerator implements \IteratorAggregate
+class RecordIterator implements \IteratorAggregate
 {
     /**
      * Array of entity data to be fed into instantiators.

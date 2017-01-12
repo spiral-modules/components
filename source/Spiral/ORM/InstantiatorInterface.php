@@ -7,7 +7,6 @@
 
 namespace Spiral\ORM;
 
-use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 
 /**
@@ -32,9 +31,9 @@ interface InstantiatorInterface
      * @param array|\ArrayAccess|mixed $fields
      * @param int                      $state
      *
-     * @return EntityInterface
+     * @return RecordInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, int $state): EntityInterface;
+    public function make($fields, int $state): RecordInterface;
 }

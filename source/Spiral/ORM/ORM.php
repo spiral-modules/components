@@ -233,7 +233,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $fields = [],
         int $state = self::STATE_NEW,
         bool $cache = true
-    ): EntityInterface {
+    ): RecordInterface {
         $instantiator = $this->instantiator($class);
 
         if ($state == self::STATE_NEW) {

@@ -21,7 +21,7 @@ use Spiral\ORM\Exceptions\FieldException;
  *
  * @see RecordEntity::SCHEMA
  */
-abstract class RecordEntity extends SchematicEntity
+abstract class RecordEntity extends SchematicEntity implements RecordInterface
 {
     use SaturateTrait, SolidableTrait;
 

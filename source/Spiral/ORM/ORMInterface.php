@@ -7,7 +7,6 @@
 namespace Spiral\ORM;
 
 use Spiral\Database\Entities\Table;
-use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
 
@@ -94,14 +93,14 @@ interface ORMInterface
      * @param int                      $state
      * @param bool                     $cache Add entity into EntityCache.
      *
-     * @return EntityInterface
+     * @return RecordInterface
      */
     public function make(
         string $class,
         $fields = [],
         int $state = self::STATE_NEW,
         bool $cache = false
-    ): EntityInterface;
+    ): RecordInterface;
 
     /**
      * Create instance of relation loader. Loader must receive target class name, relation schema

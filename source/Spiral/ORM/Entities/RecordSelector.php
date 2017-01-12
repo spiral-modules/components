@@ -15,6 +15,7 @@ use Spiral\ORM\Entities\Loaders\RootLoader;
 use Spiral\ORM\Entities\Nodes\RootNode;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\RecordInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
 use Spiral\Pagination\PaginatorInterface;
 
@@ -300,7 +301,7 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
      * @param int|\DateInterval           $ttl
      * @param CacheItemPoolInterface|null $pool
      *
-     * @return RecordIterator
+     * @return RecordIterator|RecordInterface[]
      */
     public function getIterator(
         string $cacheKey = '',

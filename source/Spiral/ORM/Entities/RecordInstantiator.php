@@ -6,11 +6,11 @@
  */
 namespace Spiral\ORM\Entities;
 
-use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\InstantionException;
 use Spiral\ORM\InstantiatorInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordEntity;
+use Spiral\ORM\RecordInterface;
 
 /**
  * Default instantiator for records.
@@ -76,11 +76,11 @@ class RecordInstantiator implements InstantiatorInterface
     /**
      * {@inheritdoc}
      *
-     * @return EntityInterface
+     * @return RecordInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, int $state): EntityInterface
+    public function make($fields, int $state): RecordInterface
     {
         if (!is_array($fields)) {
             $fields = iterator_to_array($fields);
@@ -105,14 +105,14 @@ class RecordInstantiator implements InstantiatorInterface
          */
 
         $entity = new $class([], $state, $this->orm, $this->schema);
-        if (!$entity instanceof RecordEntity) {
+        if (!$entity instanceof RecordInterface) {
             throw new InstantionException(
-                "Unable to set filtered values for '{$class}', must be instance of RecordEntity"
+                "Unable to set filtered values for '{$class}', must be instance of RecordInterface"
             );
         }
 
         //Must pass value thought all needed filters
-        $entity->stateValue($fields);
+        $entity->setFields($fields);
 
         return $entity;
     }

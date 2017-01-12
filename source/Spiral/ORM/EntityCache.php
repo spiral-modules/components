@@ -49,19 +49,19 @@ class EntityCache
      *
      * @param string          $class
      * @param string          $identity
-     * @param EntityInterface $entity
+     * @param RecordInterface $entity
      * @param bool            $ignoreLimit Cache overflow will be ignored.
      *
-     * @return EntityInterface Returns given entity.
+     * @return RecordInterface Returns given entity.
      *
      * @throws CacheException When cache size exceeded.
      */
     public function remember(
         string $class,
         string $identity,
-        EntityInterface $entity,
+        RecordInterface $entity,
         $ignoreLimit = true
-    ): EntityInterface {
+    ): RecordInterface {
         if (!$ignoreLimit && count($this->entities) > $this->maxSize) {
             throw new CacheException('Entity cache size exceeded');
         }

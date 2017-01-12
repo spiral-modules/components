@@ -36,7 +36,7 @@ class ParameterAggregator extends DeclarationAggregator
     {
         if (!$this->has($name)) {
             //Automatically creating constant
-            $parameter = new ParameterDeclaration($name, null);
+            $parameter = new ParameterDeclaration($name);
             $this->add($parameter);
 
             return $parameter;

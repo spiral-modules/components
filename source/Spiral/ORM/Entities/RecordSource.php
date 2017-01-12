@@ -11,6 +11,7 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\SourceException;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
 /**
@@ -84,7 +85,7 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
     public function create($fields = [], string $class = null): EntityInterface
     {
         //Create model with filtered set of fields
-        return $this->orm->make($class ?? $this->class, $fields, true);
+        return $this->orm->make($class ?? $this->class, $fields, ORMInterface::STATE_NEW);
     }
 
     /**
@@ -127,13 +128,14 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
     }
 
     /**
-     * @param array $query
+     * @param array  $query
+     * @param string $column Column to count by, PK or * by default.
      *
      * @return int
      */
-    public function count(array $query = []): int
+    public function count(array $query = [], string $column = null): int
     {
-        return $this->getSelector()->count($query);
+        return $this->getSelector()->where($query)->count();
     }
 
     /**

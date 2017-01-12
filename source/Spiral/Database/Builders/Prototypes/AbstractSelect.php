@@ -127,22 +127,15 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return self|$this
      *
      * @throws BuilderException
      */
-    public function having(
-        $identifier,
-        $variousA = null,
-        $variousB = null,
-        $variousC = null
-    ): AbstractSelect {
-        $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
+    public function having(...$args): AbstractSelect
+    {
+        $this->whereToken('AND', $args, $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }
@@ -152,22 +145,15 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return self|$this
      *
      * @throws BuilderException
      */
-    public function andHaving(
-        $identifier,
-        $variousA = null,
-        $variousB = null,
-        $variousC = null
-    ): AbstractSelect {
-        $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
+    public function andHaving(...$args): AbstractSelect
+    {
+        $this->whereToken('AND', $args, $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }
@@ -177,22 +163,15 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return self|$this
      *
      * @throws BuilderException
      */
-    public function orHaving(
-        $identifier,
-        $variousA = [],
-        $variousB = null,
-        $variousC = null
-    ): AbstractSelect {
-        $this->whereToken('OR', func_get_args(), $this->havingTokens, $this->havingWrapper());
+    public function orHaving(...$args): AbstractSelect
+    {
+        $this->whereToken('OR', $args, $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }

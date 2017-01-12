@@ -442,7 +442,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     protected function createAccessor(
         $accessor,
-        string $field,
+        string $name,
         $value,
         array $context = []
     ): AccessorInterface {
@@ -456,11 +456,11 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
                     return new DocumentCompositor($accessor[1], $value, $this->odm);
             }
 
-            throw new AccessorException("Invalid accessor definition for field '{$field}'");
+            throw new AccessorException("Invalid accessor definition for field '{$name}'");
         }
 
         //Field as a context
-        return parent::createAccessor($accessor, $field, $value, $context + ['odm' => $this->odm]);
+        return parent::createAccessor($accessor, $name, $value, $context + ['odm' => $this->odm]);
     }
 
     /**

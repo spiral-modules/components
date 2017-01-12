@@ -189,19 +189,17 @@ trait JoinsTrait
      * Simple ON condition with various set of arguments. Can only be used to link column values
      * together, no parametric values allowed.
      *
-     * @param mixed $joined   Joined column name or expression.
-     * @param mixed $operator Foreign column name, if operator specified.
-     * @param mixed $outer    Foreign column name.
+     * @param mixed ...$args [(column, outer column), (column, operator, outer column)]
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function on($joined = null, $operator = null, $outer = null)
+    public function on(...$args)
     {
         $this->whereToken(
             'AND',
-            func_get_args(),
+            $args,
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
@@ -213,19 +211,17 @@ trait JoinsTrait
      * Simple AND ON condition with various set of arguments. Can only be used to link column values
      * together, no parametric values allowed.
      *
-     * @param mixed $joined   Joined column name or expression.
-     * @param mixed $operator Foreign column name, if operator specified.
-     * @param mixed $outer    Foreign column name.
+     * @param mixed ...$args [(column, outer column), (column, operator, outer column)]
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function andOn($joined = null, $operator = null, $outer = null)
+    public function andOn(...$args)
     {
         $this->whereToken(
             'AND',
-            func_get_args(),
+            $args,
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
@@ -237,19 +233,17 @@ trait JoinsTrait
      * Simple OR ON condition with various set of arguments. Can only be used to link column values
      * together, no parametric values allowed.
      *
-     * @param mixed $joined   Joined column name or expression.
-     * @param mixed $operator Foreign column name, if operator specified.
-     * @param mixed $outer    Foreign column name.
+     * @param mixed ...$args [(column, outer column), (column, operator, outer column)]
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function orOn($joined = null, $operator = null, $outer = null)
+    public function orOn(...$args)
     {
         $this->whereToken(
             'OR',
-            func_get_args(),
+            $args,
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
@@ -263,20 +257,17 @@ trait JoinsTrait
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $joined   Joined column or expression.
-     * @param mixed        $variousA Operator or value.
-     * @param mixed        $variousB Value, if operator specified.
-     * @param mixed        $variousC Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function onWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+    public function onWhere(...$args)
     {
         $this->whereToken(
             'AND',
-            func_get_args(),
+            $args,
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWhereWrapper()
         );
@@ -290,20 +281,17 @@ trait JoinsTrait
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $joined   Joined column or expression.
-     * @param mixed        $variousA Operator or value.
-     * @param mixed        $variousB Value, if operator specified.
-     * @param mixed        $variousC Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function andOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+    public function andOnWhere(...$args)
     {
         $this->whereToken(
             'AND',
-            func_get_args(),
+            $args,
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWhereWrapper()
         );
@@ -317,20 +305,17 @@ trait JoinsTrait
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $joined   Joined column or expression.
-     * @param mixed        $variousA Operator or value.
-     * @param mixed        $variousB Value, if operator specified.
-     * @param mixed        $variousC Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function orOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+    public function orOnWhere(...$args)
     {
         $this->whereToken(
             'OR',
-            func_get_args(),
+            $args,
             $this->joinTokens[$this->activeJoin]['on'],
             $this->onWhereWrapper()
         );

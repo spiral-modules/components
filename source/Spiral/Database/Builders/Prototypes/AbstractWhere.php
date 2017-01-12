@@ -107,22 +107,15 @@ abstract class AbstractWhere extends QueryBuilder
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return self|$this
      *
      * @throws BuilderException
      */
-    public function where(
-        $identifier,
-        $variousA = null,
-        $variousB = null,
-        $variousC = null
-    ): AbstractWhere {
-        $this->whereToken('AND', func_get_args(), $this->whereTokens, $this->whereWrapper());
+    public function where(...$args): AbstractWhere
+    {
+        $this->whereToken('AND', $args, $this->whereTokens, $this->whereWrapper());
 
         return $this;
     }
@@ -132,22 +125,15 @@ abstract class AbstractWhere extends QueryBuilder
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return self|$this
      *
      * @throws BuilderException
      */
-    public function andWhere(
-        $identifier,
-        $variousA = null,
-        $variousB = null,
-        $variousC = null
-    ): AbstractWhere {
-        $this->whereToken('AND', func_get_args(), $this->whereTokens, $this->whereWrapper());
+    public function andWhere(...$args): AbstractWhere
+    {
+        $this->whereToken('AND', $args, $this->whereTokens, $this->whereWrapper());
 
         return $this;
     }
@@ -157,22 +143,15 @@ abstract class AbstractWhere extends QueryBuilder
      *
      * @see AbstractWhere
      *
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
+     * @param mixed ...$args [(column, value), (column, operator, value)]
      *
      * @return self|$this
      *
      * @throws BuilderException
      */
-    public function orWhere(
-        $identifier,
-        $variousA = [],
-        $variousB = null,
-        $variousC = null
-    ): AbstractWhere {
-        $this->whereToken('OR', func_get_args(), $this->whereTokens, $this->whereWrapper());
+    public function orWhere(...$args): AbstractWhere
+    {
+        $this->whereToken('OR', $args, $this->whereTokens, $this->whereWrapper());
 
         return $this;
     }

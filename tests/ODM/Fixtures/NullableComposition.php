@@ -12,6 +12,10 @@ class NullableComposition extends Document
 {
     const COLLECTION = 'users';
 
+    const FILLABLE = [
+        'piece'
+    ];
+
     const SCHEMA = [
         '_id'   => 'MongoId',
         'name'  => 'string',

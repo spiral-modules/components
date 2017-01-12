@@ -176,7 +176,19 @@ abstract class RecordEntity extends SchematicEntity
      */
     private $state;
 
+    /**
+     * Record field updates (changed values).
+     *
+     * @var array
+     */
     private $changes = [];
+
+    /**
+     * Associated relation instances and/or initial loaded data.
+     *
+     * @var array
+     */
+    private $relations = [];
 
     /**
      * Parent ORM instance, responsible for relation initialization and lazy loading operations.

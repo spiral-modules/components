@@ -80,9 +80,9 @@ class InsertQuery extends QueryBuilder
      *
      * @return self
      */
-    public function columns($columns): InsertQuery
+    public function columns(...$columns): InsertQuery
     {
-        $this->columns = $this->fetchIdentifiers(func_get_args());
+        $this->columns = $this->fetchIdentifiers($columns);
 
         return $this;
     }

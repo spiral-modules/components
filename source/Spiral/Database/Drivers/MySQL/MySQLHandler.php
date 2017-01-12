@@ -34,7 +34,7 @@ class MySQLHandler extends AbstractHandler
             }
         }
 
-        $this->run("ALTER TABLE {$this->identify($table)} CHANGE {$this->identify($initial)} {$column->sqlStatement($this->driver, true)}");
+        $this->run("ALTER TABLE {$this->identify($table)} CHANGE {$this->identify($initial)} {$column->sqlStatement($this->driver)}");
 
         //Restoring FKs
         foreach ($foreignBackup as $foreign) {

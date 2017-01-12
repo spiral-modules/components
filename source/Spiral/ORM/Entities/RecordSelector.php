@@ -21,7 +21,15 @@ use Spiral\Pagination\PaginatorInterface;
 /**
  * Attention, RecordSelector DOES NOT extends QueryBuilder but mocks it!
  *
- * @todo mocked methods
+ * @method $this where(...$args);
+ * @method $this andWhere(...$args);
+ * @method $this orWhere(...$args);
+ *
+ * @method $this having(...$args);
+ * @method $this andHaving(...$args);
+ * @method $this orHaving(...$args);
+ *
+ * @method $this orderBy($expression, $direction = 'ASC');
  */
 class RecordSelector extends Component implements \IteratorAggregate, \Countable, PaginatorAwareInterface
 {

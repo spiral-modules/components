@@ -112,7 +112,7 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      */
     public function findOne(array $query = [], array $sortBy = [])
     {
-        return $this->getSelector()->sortBy($sortBy)->findOne($query);
+        return $this->getSelector()->orderBy($sortBy)->findOne($query);
     }
 
     /**

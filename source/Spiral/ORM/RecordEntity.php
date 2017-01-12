@@ -18,6 +18,8 @@ use Spiral\ORM\Commands\UpdateCommand;
 use Spiral\ORM\Entities\RelationBucket;
 use Spiral\ORM\Events\RecordEvent;
 use Spiral\ORM\Exceptions\FieldException;
+use Spiral\ORM\Exceptions\RecordException;
+use Spiral\ORM\Exceptions\RelationException;
 
 /**
  * Provides ActiveRecord-less abstraction for carried data with ability to automatically apply
@@ -287,10 +289,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws RelationException
      */
     public function getField(string $name, $default = null, bool $filter = true)
     {
-        if ($this->relations->exists($name)) {
+        if ($this->relations->has($name)) {
             return $this->relations->get($name);
         }
 
@@ -303,12 +307,17 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      * {@inheritdoc}
      *
      * Tracks field changes.
+     *
+     * @throws RelationException
      */
     public function setField(string $name, $value, bool $filter = true)
     {
-        if ($this->relations->exists($name)) {
+        if ($this->relations->has($name)) {
+
             //Would not work with relations which do not represent singular entities
-            return $this->relations->set($name, $value);
+            $this->relations->set($name, $value);
+
+            return;
         }
 
         $this->assertField($name);
@@ -322,22 +331,24 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function hasField(string $name): bool
     {
-        if ($this->relations->exists($name)) {
+        if ($this->relations->has($name)) {
             return true;
         }
 
-        return parent::__isset($name);
+        return parent::hasField($name);
     }
 
     /**
      * {@inheritdoc}
      *
      * @throws FieldException
+     * @throws RelationException
      */
     public function __unset($offset)
     {
-        if ($this->relations->exists($offset)) {
-            $this->relations->delete($offset);
+        if ($this->relations->has($offset)) {
+            //Flush associated relation value if possible
+            $this->relations->flush($offset);
 
             return;
         }
@@ -392,6 +403,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      * {@inheritdoc}
      *
      * @param bool $queueRelations
+     *
+     * @throws RecordException
+     * @throws RelationException
      */
     public function queueSave(bool $queueRelations = true): CommandInterface
     {
@@ -412,7 +426,8 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
 
         //Relation commands
         if ($queueRelations) {
-            //This is magical part
+            //Queue relations before and after parent command (if needed)
+            return $this->relations->queueRelations($command);
         }
 
         return $command;
@@ -420,6 +435,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @throws RecordException
+     * @throws RelationException
      */
     public function queueDelete(): CommandInterface
     {

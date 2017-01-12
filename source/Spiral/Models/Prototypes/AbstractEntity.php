@@ -120,18 +120,8 @@ abstract class AbstractEntity extends MutableObject implements
             return;
         }
 
-        //Checking field setter if any
-        $setter = $this->getMutator($name, self::MUTATOR_SETTER);
-
-        if (!empty($setter)) {
-            try {
-                $this->fields[$name] = call_user_func($setter, $value);
-            } catch (\Exception $e) {
-                //Exceptional situation, we are choosing to keep original field value
-            }
-        } else {
-            $this->fields[$name] = $value;
-        }
+        //Setting value thought setter filter
+        $this->setMutated($name, $value);
     }
 
     /**
@@ -156,19 +146,8 @@ abstract class AbstractEntity extends MutableObject implements
             return $this->fields[$name] = $this->createAccessor($accessor, $name, $value);
         }
 
-        //Checking for getter
-        $getter = $this->getMutator($name, self::MUTATOR_GETTER);
-
-        if ($filter && !empty($getter)) {
-            try {
-                return call_user_func($getter, $value);
-            } catch (\Exception $e) {
-                //Trying to filter null value, every filter must support it
-                return call_user_func($getter, null);
-            }
-        }
-
-        return $value;
+        //Getting value though getter
+        return $this->getMutated($name, $filter, $value);
     }
 
     /**
@@ -459,5 +438,51 @@ abstract class AbstractEntity extends MutableObject implements
 
         //Field as a context
         return new $accessor($value, $context + ['field' => $field, 'entity' => $this]);
+    }
+
+    /**
+     * Get value thought associated mutator.
+     *
+     * @param string $name
+     * @param bool   $filter
+     * @param mixed  $value
+     *
+     * @return mixed
+     */
+    private function getMutated(string $name, bool $filter, $value): mixed
+    {
+        $getter = $this->getMutator($name, self::MUTATOR_GETTER);
+
+        if ($filter && !empty($getter)) {
+            try {
+                return call_user_func($getter, $value);
+            } catch (\Exception $e) {
+                //Trying to filter null value, every filter must support it
+                return call_user_func($getter, null);
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Set value thought associated mutator.
+     *
+     * @param string $name
+     * @param mixed  $value
+     */
+    private function setMutated(string $name, $value)
+    {
+        $setter = $this->getMutator($name, self::MUTATOR_SETTER);
+
+        if (!empty($setter)) {
+            try {
+                $this->fields[$name] = call_user_func($setter, $value);
+            } catch (\Exception $e) {
+                //Exceptional situation, we are choosing to keep original field value
+            }
+        } else {
+            $this->fields[$name] = $value;
+        }
     }
 }

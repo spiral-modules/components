@@ -432,6 +432,30 @@ class Container extends Component implements
     }
 
     /**
+     * Register instance in container, might perform methods like auto-singletons, log populations
+     * and etc. Can be extended.
+     *
+     * @param object $instance
+     * @param array  $parameters
+     *
+     * @return object
+     */
+    protected function registerInstance($instance, array $parameters)
+    {
+        if (empty($parameters) && $instance instanceof SingletonInterface) {
+            $singleton = get_class($instance);
+
+            if (!isset($this->bindings[$singleton])) {
+                $this->bindings[$singleton] = $instance;
+            }
+        }
+
+        //Your code can go here
+
+        return $instance;
+    }
+
+    /**
      * Create instance of desired class.
      *
      * @param string      $class
@@ -479,29 +503,6 @@ class Container extends Component implements
             //No constructor specified
             $instance = $reflection->newInstance();
         }
-
-        return $instance;
-    }
-
-    /**
-     * Make sure instance conditions are met.
-     *
-     * @param object $instance
-     * @param array  $parameters
-     *
-     * @return object
-     */
-    private function registerInstance($instance, array $parameters)
-    {
-        if (empty($parameters) && $instance instanceof SingletonInterface) {
-            $singleton = get_class($instance);
-
-            if (!isset($this->bindings[$singleton])) {
-                $this->bindings[$singleton] = $instance;
-            }
-        }
-
-        //todo: additional registration operations?
 
         return $instance;
     }

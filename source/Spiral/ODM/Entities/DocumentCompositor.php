@@ -275,12 +275,12 @@ class DocumentCompositor implements
     /**
      * {@inheritdoc}
      */
-    public function commitUpdates()
+    public function flushUpdates()
     {
         $this->atomics = [];
 
         foreach ($this->entities as $entity) {
-            $entity->commitUpdates();
+            $entity->flushUpdates();
         }
     }
 

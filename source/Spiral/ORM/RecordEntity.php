@@ -11,6 +11,10 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
+use Spiral\ORM\Commands\DeleteCommand;
+use Spiral\ORM\Commands\InsertCommand;
+use Spiral\ORM\Commands\NullCommand;
+use Spiral\ORM\Commands\UpdateCommand;
 use Spiral\ORM\Exceptions\FieldException;
 
 /**
@@ -251,21 +255,27 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         $this->extractRelations($fields);
-        parent::__construct($fields + $this->recordSchema[self::SH_DEFAULTS], $schema);
+        parent::__construct($fields + $this->recordSchema[self::SH_DEFAULTS], $this->recordSchema);
     }
 
-    //todo: think about it
+    /**
+     * Check if entity been loaded (non new).
+     *
+     * @return bool
+     */
+    public function isLoaded(): bool
+    {
+        return $this->state != ORMInterface::STATE_NEW;
+    }
+
+    /**
+     * Current model state.
+     *
+     * @return int
+     */
     public function getState(): int
     {
         return $this->state;
-    }
-
-    //todo: think about it
-    public function setState(int $state): self
-    {
-        $this->state = $state;
-
-        return $this;
     }
 
     /**
@@ -373,6 +383,47 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @param bool $queueRelations
+     */
+    public function queueSave(bool $queueRelations = true): CommandInterface
+    {
+        if (!$this->isLoaded()) {
+            $this->state = ORMInterface::STATE_SCHEDULED_INSERT;
+
+            $command = new InsertCommand();
+        } else {
+            $this->state = ORMInterface::STATE_SCHEDULED_UPDATE;
+
+            $command = new UpdateCommand();
+        }
+
+        //Relation commands
+        if ($queueRelations) {
+
+        }
+
+        $this->flushUpdates();
+
+        return $command;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function queueDelete(): CommandInterface
+    {
+        if (!$this->isLoaded()) {
+            return new NullCommand();
+        }
+
+        $this->state = ORMInterface::STATE_SCHEDULED_DELETE;
+
+        return new DeleteCommand();
+    }
+
+    /**
      * @return array
      */
     public function __debugInfo()
@@ -413,6 +464,20 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         }
 
         return parent::iocContainer();
+    }
+
+    /**
+     * Indicate that all updates done, reset dirty state.
+     */
+    private function flushUpdates()
+    {
+        $this->changes = [];
+
+        foreach ($this->getFields(false) as $field => $value) {
+            if ($value instanceof SQLAccessorInterface) {
+                $value->flushUpdates();
+            }
+        }
     }
 
     /**

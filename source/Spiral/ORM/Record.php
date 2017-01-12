@@ -20,12 +20,12 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
         // TODO: Implement primaryKey() method.
     }
 
-    public function save(): int
+    public function save(TransactionInterface $transaction = null): int
     {
         // TODO: Implement save() method.
     }
 
-    public function delete()
+    public function delete(TransactionInterface $transaction = null)
     {
         // TODO: Implement delete() method.
     }

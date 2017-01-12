@@ -23,11 +23,6 @@ interface SQLAccessorInterface extends AccessorInterface
     public function hasUpdates();
 
     /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
-     */
-    public function commitUpdates();
-
-    /**
      * Create update value or statement to be used in DBAL update builder. May return SQLFragments
      * and expressions.
      *
@@ -36,4 +31,9 @@ interface SQLAccessorInterface extends AccessorInterface
      * @return mixed|FragmentInterface
      */
     public function compileUpdates(string $field = '');
+
+    /**
+     * Indicate that all updates done, reset dirty state.
+     */
+    public function flushUpdates();
 }

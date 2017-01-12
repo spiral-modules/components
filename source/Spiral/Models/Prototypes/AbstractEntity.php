@@ -443,7 +443,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return mixed
      */
-    private function getMutated(string $name, bool $filter, $value): mixed
+    private function getMutated(string $name, bool $filter, $value)
     {
         $getter = $this->getMutator($name, self::MUTATOR_GETTER);
 

@@ -25,4 +25,9 @@ interface TransactionInterface
      * @throws \Throwable
      */
     public function run();
+
+    /**
+     * Clear transaction and remove all associated objects.
+     */
+    public function clear();
 }

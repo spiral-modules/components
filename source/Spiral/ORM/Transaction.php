@@ -126,4 +126,12 @@ class Transaction implements TransactionInterface
             $command->complete();
         }
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function clear()
+    {
+        $this->commands = [];
+    }
 }

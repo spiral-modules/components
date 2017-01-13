@@ -10,7 +10,6 @@ use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ORM\Entities\RelationBucket;
-use Spiral\ORM\Exceptions\RecordException;
 
 /**
  * Provides data and relation access functionality.
@@ -270,30 +269,31 @@ abstract class AbstractRecord extends SchematicEntity
         }
 
         if ($this->isSolid()) {
-            //Solid records always saved as one chunk of data
-            return $this->packValue();
-        }
+            //Solid record always updated as one big solid
+            $updates = $this->packValue();
+        } else {
+            //Updating each field individually
+            $updates = [];
+            foreach ($this->getFields(false) as $field => $value) {
+                //Handled by sub-accessor
+                if ($value instanceof RecordAccessorInterface) {
+                    if ($value->hasUpdates()) {
+                        $updates[$field] = $value->compileUpdates($field);
+                        continue;
+                    }
 
-        $updates = [];
-        foreach ($this->getFields(false) as $field => $value) {
-            //Handled by sub-accessor
-            if ($value instanceof RecordAccessorInterface) {
-                if ($value->hasUpdates()) {
-                    $updates[$field] = $value->compileUpdates($field);
-                    continue;
+                    $value = $value->packValue();
                 }
 
-                $value = $value->packValue();
-            }
-
-            //Field change registered
-            if (array_key_exists($field, $this->changes)) {
-                $updates[$field] = $value;
+                //Field change registered
+                if (array_key_exists($field, $this->changes)) {
+                    $updates[$field] = $value;
+                }
             }
         }
 
         if ($skipPrimary) {
-            unset($updates[$this->recordSchema[self::SH_PRIMARY_KEY]]);
+            unset($updates[$this->primaryColumn()]);
         }
 
         return $updates;

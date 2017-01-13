@@ -13,7 +13,7 @@ class InsertCommand extends TableCommand
     /**
      * @var array
      */
-    private $context = [];
+    private $data = [];
 
     /**
      * Set when command is executed.
@@ -24,12 +24,12 @@ class InsertCommand extends TableCommand
 
     /**
      * @param Table $table
-     * @param array $context
+     * @param array $data
      */
-    public function __construct(Table $table, array $context)
+    public function __construct(Table $table, array $data)
     {
         parent::__construct($table);
-        $this->context = $context;
+        $this->data = $data;
     }
 
     /**
@@ -47,7 +47,7 @@ class InsertCommand extends TableCommand
      */
     public function execute()
     {
-        $this->insertID = $this->table->insertOne($this->context);
+        $this->insertID = $this->table->insertOne($this->data);
         parent::execute();
     }
 }

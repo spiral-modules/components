@@ -6,6 +6,8 @@
  */
 namespace Spiral\ORM\Commands;
 
+use Spiral\Database\Entities\Table;
+
 class UpdateCommand extends TableCommand
 {
     /**
@@ -15,7 +17,26 @@ class UpdateCommand extends TableCommand
      */
     private $where = [];
 
-    private $context = [];
+    /**
+     * Columns to be updated.
+     *
+     * @var array
+     */
+    private $values = [];
+
+    /**
+     * UpdateCommand constructor.
+     *
+     * @param Table $table
+     * @param array $where
+     * @param array $values
+     */
+    public function __construct(Table $table, array $where, array $values)
+    {
+        parent::__construct($table);
+        $this->where = $where;
+        $this->values = $values;
+    }
 
     /**
      * @param array $where
@@ -30,7 +51,7 @@ class UpdateCommand extends TableCommand
      */
     public function execute()
     {
-        $this->table->update($this->context, $this->where)->run();
+        $this->table->update($this->values, $this->where)->run();
         parent::execute();
     }
 }

@@ -261,12 +261,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             return new NullCommand();
         }
 
-        if ($this->state & ORMInterface::STATE_SCHEDULED) {
-            throw new RecordException(
-                "Unable to save already scheduled record, commit previous transaction first"
-            );
-        }
-
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
         } else {
@@ -332,6 +326,17 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     }
 
     /**
+     * Handle result of update command.
+     *
+     * @param UpdateCommand $command
+     */
+    protected function handleUpdate(UpdateCommand $command)
+    {
+        $this->state = ORMInterface::STATE_LOADED;
+        $this->dispatch('updated', new RecordEvent($this));
+    }
+
+    /**
      * Handle result of delete command.
      *
      * @param DeleteCommand $command
@@ -369,7 +374,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     {
         $command = new UpdateCommand(
             $this->orm->table(static::class),
-            $this->getField($this->primaryColumn(), null, false),
+            [$this->primaryColumn() => $this->primaryKey()],
             $this->packChanges(true)
         );
 

@@ -361,6 +361,11 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             $this->handleInsert($command);
         });
 
+        $command->onRollBack(function () {
+            //Flushing existed insert command to prevent collisions
+            $this->insertCommand = null;
+        });
+
         //Keep reference to the last insert command
         return $this->insertCommand = $command;
     }

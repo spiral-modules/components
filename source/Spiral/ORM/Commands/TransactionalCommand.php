@@ -14,16 +14,18 @@ use Spiral\ORM\Transaction;
  */
 class TransactionalCommand extends Transaction implements CommandInterface
 {
-    /**
-     * Execute command = push transaction.
-     */
     public function execute()
     {
-        $this->run();
+        //nothing to do (see getCommands())
     }
 
-    public function callEvent(int $event)
+    public function complete()
     {
-        // TODO: Implement setState() method.
+        //nothing to do (see getCommands())
+    }
+
+    public function rollBack()
+    {
+        //nothing to do (see getCommands())
     }
 }

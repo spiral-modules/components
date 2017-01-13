@@ -7,46 +7,60 @@
 namespace Spiral\ORM;
 
 use Spiral\Models\ActiveEntityInterface;
-use Spiral\ORM\Commands\InsertCommand;
-use Spiral\ORM\Commands\UpdateCommand;
 
 /**
  * Adds ActiveRecord abilities to RecordEntity.
  */
 abstract class Record extends RecordEntity implements ActiveEntityInterface
 {
+    /**
+     * Sync entity with database, when no transaction is given ActiveRecord will create and run it
+     * automatically.
+     *
+     * @param bool                      $queueRelations
+     * @param TransactionInterface|null $transaction
+     *
+     * @return int
+     */
     public function save(
-        TransactionInterface $transaction = null,
-        bool $queueRelations = true
+        bool $queueRelations = true,
+        TransactionInterface $transaction = null
     ): int {
-        //Initial record command
-        $command = $this->queueStore(false);
-
-        if ($command instanceof InsertCommand) {
+        if (!$this->isLoaded()) {
             $state = self::CREATED;
-        } elseif ($command instanceof UpdateCommand) {
+        } elseif (!$this->hasChanges()) {
             $state = self::UPDATED;
         } else {
             $state = self::UNCHANGED;
         }
 
-        if ($queueRelations) {
-            //Mounting relation related updates
-            $command = $this->relations->queueRelations($command);
+        if (empty($transaction)) {
+            /*
+             * When no transaction is given we will create our own and run it immediately.
+             */
+            $transaction = $transaction ?? new Transaction();
+            $transaction->addCommand($this->queueStore($queueRelations));
+            $transaction->run();
+        } else {
+            $transaction->addCommand($this->queueStore($queueRelations));
         }
-
-        //todo: saturate command
-
-        //Registering command
-        $transaction->addCommand($command);
 
         return $state;
     }
 
+    /**
+     * Delete entity in database, when no transaction is given ActiveRecord will create and run it
+     * automatically.
+     *
+     * @param TransactionInterface|null $transaction
+     */
     public function delete(TransactionInterface $transaction = null)
     {
         if (empty($transaction)) {
-            $transaction = $this->orm->createTransaction();
+            /*
+             * When no transaction is given we will create our own and run it immediately.
+             */
+            $transaction = $transaction ?? new Transaction();
             $transaction->addCommand($this->queueDelete());
             $transaction->run();
         } else {

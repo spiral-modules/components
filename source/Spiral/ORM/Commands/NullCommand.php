@@ -12,17 +12,16 @@ class NullCommand implements CommandInterface
 {
     public function execute()
     {
-        // TODO: Implement execute() method.
+        //nothing to do
     }
 
     public function complete()
     {
-        // TODO: Implement complete() method.
+        //nothing to do
     }
 
     public function rollBack()
     {
-        // TODO: Implement rollBack() method.
+        //nothing to do
     }
-
 }

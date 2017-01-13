@@ -332,7 +332,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     private function prepareInsert(): InsertCommand
     {
-        $command = new InsertCommand($this->packValue(), $this->orm->table(static::class));
+        $command = new InsertCommand($this->orm->table(static::class), $this->packValue());
 
         //Entity indicates it's own status
         $this->setState(ORMInterface::STATE_SCHEDULED_INSERT);
@@ -351,15 +351,15 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     private function prepareUpdate(): UpdateCommand
     {
         $command = new UpdateCommand(
-            $this->packChanges(true),
-            $this->isLoaded() ? $this->primaryKey() : null,
-            $this->orm->table(static::class)
+            $this->orm->table(static::class),
+            $this->getField($this->primaryColumn(), null, false),
+            $this->packChanges(true)
         );
 
         if (!empty($this->insertCommand)) {
             $this->insertCommand->onExecute(function (InsertCommand $insert) use ($command) {
                 //Sync primary key values
-                $command->setPrimary($insert->lastInsertID());
+                $command->setPrimary($insert->getInsertID());
             });
         }
 
@@ -382,11 +382,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         $this->setState(ORMInterface::STATE_SCHEDULED_DELETE);
         $this->dispatch('delete', new RecordEvent($this));
 
-        $command = new DeleteCommand(
-            $this->primaryKey(),
-            $this->orm->define(static::class, ORMInterface::R_DATABASE),
-            $this->orm->define(static::class, ORMInterface::R_TABLE)
-        );
+        $command = new DeleteCommand($this->orm->table(static::class), $this->primaryKey());
 
         //Executed when transaction successfully completed
         $command->onComplete($this->syncState());
@@ -394,25 +390,34 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         return $command;
     }
 
+    /**
+     * Declares closure used to handle command events.
+     *
+     * @return \Closure
+     */
     private function syncState(): \Closure
     {
         return function ($command) {
+            if ($command instanceof InsertCommand) {
+                //Flushing reference to last insert command
+                $this->insertCommand = null;
+
+                //We not how our primary value
+                //todo: support user supplied PK values (no autoincrement)
+                $this->setField(
+                    $this->primaryColumn(),
+                    $command->getInsertID(),
+                    true,
+                    false
+                );
+
+                $this->setState(ORMInterface::STATE_LOADED);
+                $this->dispatch('created', new RecordEvent($this));
+
+                return;
+            }
+
             dump($command);
         };
-
-        //got command!
-
-//        //Command context MIGHT include some fields set by parent commands (i.e. runtime values)
-//        foreach ($command->getContext() as $field => $value) {
-//            $this->setField($field, $value, true, false);
-//        }
-//
-//        $this->setField(
-//            $this->recordSchema[self::SH_PRIMARY_KEY],
-//            $command->primaryKey(),
-//            true,
-//            false
-//        );
-
     }
 }

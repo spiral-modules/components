@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Database\Entities\Driver;
 use Spiral\ORM\Exceptions\RecordException;
 
 /**
@@ -48,9 +49,23 @@ class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    public function addCommand(CommandInterface $command)
+    final public function addCommand(CommandInterface $command)
     {
         $this->commands[] = $command;
+    }
+
+    /**
+     * @return \Generator
+     */
+    final public function getCommands()
+    {
+        foreach ($this->commands as $command) {
+            if ($command instanceof TransactionInterface) {
+                yield from $command->getCommands();
+            }
+
+            yield $command;
+        }
     }
 
     /**
@@ -60,11 +75,20 @@ class Transaction implements TransactionInterface
      */
     public function run()
     {
-        //Related DBAL drivers
+        /**
+         * @var Driver[]           $drivers
+         * @var CommandInterface[] $executedCommands
+         */
         $drivers = [];
+        $executedCommands = [];
 
         try {
-            foreach ($this->commands as $command) {
+            foreach ($this->getCommands() as $command) {
+                if ($command instanceof TransactionInterface) {
+                    //All transaction commands are flatten (see getCommands() method)
+                    continue;
+                }
+
                 if ($command instanceof SQLCommandInterface) {
                     $driver = $command->getDriver();
 
@@ -77,13 +101,14 @@ class Transaction implements TransactionInterface
 
                 //Execute command
                 $command->execute();
+                $executedCommands[] = $command;
             }
         } catch (\Throwable $e) {
             foreach (array_reverse($drivers) as $driver) {
                 $driver->rollbackTransaction();
             }
 
-            foreach (array_reverse($this->commands) as $command) {
+            foreach (array_reverse($executedCommands) as $command) {
                 $command->rollBack();
             }
 
@@ -94,7 +119,7 @@ class Transaction implements TransactionInterface
             $driver->commitTransaction();
         }
 
-        foreach ($this->commands as $command) {
+        foreach ($executedCommands as $command) {
             $command->complete();
         }
     }

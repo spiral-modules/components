@@ -10,5 +10,7 @@ use Spiral\ORM\CommandInterface;
 
 class DeleteCommand implements CommandInterface
 {
-
+    public function onComplete()
+    {
+    }
 }

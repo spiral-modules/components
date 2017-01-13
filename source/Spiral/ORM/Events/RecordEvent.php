@@ -19,7 +19,7 @@ class RecordEvent extends EntityEvent
 
     /**
      * @param EntityInterface  $entity
-     * @param CommandInterface $command
+     * @param CommandInterface $command questionable
      */
     public function __construct(EntityInterface $entity, CommandInterface $command)
     {
@@ -28,7 +28,7 @@ class RecordEvent extends EntityEvent
     }
 
     /**
-     * Command associated with entity operation.
+     * Command associated with entity operation. [QUESTIONABLE]
      *
      * @return CommandInterface
      */

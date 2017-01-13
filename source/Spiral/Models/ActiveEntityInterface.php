@@ -11,7 +11,7 @@ use Spiral\Models\Exceptions\EntityExceptionInterface;
 /**
  * Common interface to indicate that entity implements ActiveRecord pattern.
  */
-interface ActiveEntityInterface extends IdentifiedInterface
+interface ActiveEntityInterface
 {
     const CREATED   = 1;
     const UPDATED   = 2;

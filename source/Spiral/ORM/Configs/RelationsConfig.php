@@ -23,7 +23,7 @@ class RelationsConfig extends InjectableConfig
      */
     const SCHEMA_CLASS = 'schema';
     const LOADER_CLASS = 'loader';
-    const ACCESS_CLASS = 'schema';
+    const ACCESS_CLASS = 'access';
 
     /**
      * @var array

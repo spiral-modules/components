@@ -223,7 +223,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      *
      * @var RelationBucket
      */
-    private $relations;
+    protected $relations;
 
     /**
      * Parent ORM instance, responsible for relation initialization and lazy loading operations.
@@ -295,7 +295,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     public function getField(string $name, $default = null, bool $filter = true)
     {
         if ($this->relations->has($name)) {
-            return $this->relations->get($name);
+            return $this->relations->getRelated($name);
         }
 
         $this->assertField($name);
@@ -306,22 +306,27 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * {@inheritdoc}
      *
-     * Tracks field changes.
+     * @param bool $registerChanges Track field changes.
      *
      * @throws RelationException
      */
-    public function setField(string $name, $value, bool $filter = true)
-    {
+    public function setField(
+        string $name,
+        $value,
+        bool $filter = true,
+        bool $registerChanges = true
+    ) {
         if ($this->relations->has($name)) {
-
             //Would not work with relations which do not represent singular entities
-            $this->relations->set($name, $value);
+            $this->relations->setRelated($name, $value);
 
             return;
         }
 
         $this->assertField($name);
-        $this->registerChange($name);
+        if ($registerChanges) {
+            $this->registerChange($name);
+        }
 
         parent::setField($name, $value, $filter);
     }
@@ -332,7 +337,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     public function hasField(string $name): bool
     {
         if ($this->relations->has($name)) {
-            return true;
+            return $this->relations->hasRelated($name);
         }
 
         return parent::hasField($name);
@@ -348,7 +353,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     {
         if ($this->relations->has($offset)) {
             //Flush associated relation value if possible
-            $this->relations->flush($offset);
+            $this->relations->flushRelated($offset);
 
             return;
         }
@@ -419,10 +424,15 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         } else {
             if ($this->hasChanges() || $this->solidState) {
                 $command = $this->prepareUpdate();
+
             } else {
                 $command = new NullCommand();
             }
         }
+
+        //Changes are flushed BEFORE entity is saved, this is required to present
+        //recursive update loops
+        $this->flushChanges();
 
         //Relation commands
         if ($queueRelations) {
@@ -525,8 +535,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         //Executed when transaction successfully completed
         $command->onComplete(function ($command) {
             $this->setState(ORMInterface::STATE_LOADED);
-            $this->flushChanges();
             $this->dispatch('created', new RecordEvent($this));
+
+            //Sync context?
         });
 
         return $command;
@@ -552,8 +563,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         //Executed when transaction successfully completed
         $command->onComplete(function ($command) {
             $this->setState(ORMInterface::STATE_LOADED);
-            $this->flushChanges();
             $this->dispatch('updated', new RecordEvent($this, $command));
+
+            //Sync context?
         });
 
         return $command;

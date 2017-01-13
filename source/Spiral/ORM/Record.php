@@ -15,24 +15,37 @@ use Spiral\ORM\Commands\UpdateCommand;
  */
 abstract class Record extends RecordEntity implements ActiveEntityInterface
 {
-   public function save(TransactionInterface $transaction = null, bool $queueRelations = true): int
+    public function save(TransactionInterface $transaction = null, bool $queueRelations = true): int
     {
-        //saturate transaction
-        $transaction->addCommand($command = $this->queueSave($queueRelations));
+        //Initial reacord command
+        $command = $this->queueSave(false);
 
         if ($command instanceof InsertCommand) {
-            return self::CREATED;
+            $state = self::CREATED;
         } elseif ($command instanceof UpdateCommand) {
-            return self::UPDATED;
+            $state = self::UPDATED;
+        } else {
+            $state = self::UNCHANGED;
         }
 
-        return self::UNCHANGED;
+        if ($queueRelations) {
+            //Mounting relation related updates
+            $command = $this->relations->queueRelations($command);
+        }
+
+        //todo: saturate command
+
+        //Registering command
+        $transaction->addCommand($command);
+
+        return $state;
     }
 
     public function delete(TransactionInterface $transaction = null)
     {
-        //saturate transaction
+        //todo: saturate command
 
+        //saturate transaction
         $transaction->addCommand($this->queueDelete());
     }
 }

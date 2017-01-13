@@ -308,9 +308,32 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function makeRelation(string $class, string $relation): RelationInterface
     {
+        $schema = $this->define($class, self::R_RELATIONS);
 
+        if (!isset($schema[$relation])) {
+            throw new ORMException("Undefined relation '{$class}'.'{$relation}'");
+        }
+
+        $schema = $schema[$relation];
+
+        if (!$this->config->hasRelation($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS)) {
+            throw new ORMException("Undefined relation type '{$schema[self::R_TYPE]}'");
+        }
+
+        //Generating relation
+        return $this->getFactory()->make(
+            $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS),
+            [
+                'class'  => $schema[self::R_CLASS],
+                'schema' => $schema[self::R_SCHEMA],
+                'orm'    => $this
+            ]
+        );
     }
 
     /**

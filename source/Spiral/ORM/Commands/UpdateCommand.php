@@ -10,5 +10,7 @@ use Spiral\ORM\CommandInterface;
 
 class UpdateCommand implements CommandInterface
 {
-
+    public function onComplete()
+    {
+    }
 }

@@ -8,6 +8,7 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\CommandQueue;
+use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
@@ -87,7 +88,8 @@ class RelationBucket
             return $parent;
         }
 
-        $queue = new CommandQueue();
+        //We have to execute multiple commands at once
+        $queue = new TransactionalCommand();
 
         //Leading relations
         foreach ($this->leadingRelations() as $relation) {
@@ -184,12 +186,7 @@ class RelationBucket
         $relations = [];
 
         foreach ($this->schema as $name => $content) {
-            if (!array_key_exists($name, $this->relations)) {
-                $relations[$name] = 'none';
-                continue;
-            }
-
-            $relations[$name] = empty($this->relations[$name]) ? 'empty' : 'loaded';
+            $relations[$name] = !array_key_exists($name, $this->relations) ? 'none' : 'loaded';
         }
 
         return $relations;
@@ -211,7 +208,7 @@ class RelationBucket
         $instance = $this->orm->makeRelation($this->class, $relation);
         if (array_key_exists($relation, $this->relations)) {
             //Relation have been pre-loaded (we have related data)
-            $instance->initData($this->relations[$relation]);
+            $instance = $instance->withData($this->relations[$relation]);
         }
 
         return $this->relations[$relation] = $instance;

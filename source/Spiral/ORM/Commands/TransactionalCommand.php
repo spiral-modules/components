@@ -7,13 +7,50 @@
 namespace Spiral\ORM\Commands;
 
 use Spiral\ORM\CommandInterface;
-use Spiral\ORM\Transaction;
+use Spiral\ORM\TransactionInterface;
 
 /**
  * Command to handle multiple inner commands.
  */
-class TransactionalCommand extends Transaction implements CommandInterface
+class TransactionalCommand extends AbstractCommand implements TransactionInterface
 {
+    /**
+     * Nested commands.
+     *
+     * @var CommandInterface[]
+     */
+    private $commands = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addCommand(CommandInterface $command)
+    {
+        $this->commands[] = $command;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCommands()
+    {
+        foreach ($this->commands as $command) {
+            if ($command instanceof TransactionInterface) {
+                yield from $command->getCommands();
+            }
+
+            yield $command;
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function run()
+    {
+        //nothing to do (see getCommands())
+    }
+
     public function execute()
     {
         //nothing to do (see getCommands())

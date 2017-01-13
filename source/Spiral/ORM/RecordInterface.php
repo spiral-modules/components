@@ -10,7 +10,6 @@ use Spiral\Models\EntityInterface;
 
 interface RecordInterface extends EntityInterface
 {
-
     /**
      * {@inheritdoc}
      *

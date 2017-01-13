@@ -65,6 +65,7 @@ class Transaction implements TransactionInterface
     {
         foreach ($this->commands as $command) {
             if ($command instanceof \Traversable) {
+                //Array of commands
                 yield from $command;
             }
 

@@ -94,7 +94,7 @@ class Transaction implements TransactionInterface
                 if ($command instanceof SQLCommandInterface) {
                     $driver = $command->getDriver();
 
-                    if (in_array($driver, $drivers)) {
+                    if (!in_array($driver, $drivers)) {
                         //Command requires DBAL driver to open transaction
                         $drivers[] = $driver;
                         $driver->beginTransaction();

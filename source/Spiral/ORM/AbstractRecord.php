@@ -217,6 +217,20 @@ abstract class AbstractRecord extends SchematicEntity
 
     /**
      * {@inheritdoc}
+     */
+    protected function isNullable(string $field): bool
+    {
+        if (array_key_exists($field, $this->recordSchema[self::SH_DEFAULTS])) {
+            //Only fields with default null value can be nullable
+            return is_null($this->recordSchema[self::SH_DEFAULTS][$field]);
+        }
+
+        //Values unknown to schema always nullable
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * DocumentEntity will pass ODM instance as part of accessor context.
      *

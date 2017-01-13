@@ -15,9 +15,11 @@ use Spiral\ORM\Commands\UpdateCommand;
  */
 abstract class Record extends RecordEntity implements ActiveEntityInterface
 {
-    public function save(TransactionInterface $transaction = null, bool $queueRelations = true): int
-    {
-        //Initial reacord command
+    public function save(
+        TransactionInterface $transaction = null,
+        bool $queueRelations = true
+    ): int {
+        //Initial record command
         $command = $this->queueSave(false);
 
         if ($command instanceof InsertCommand) {
@@ -43,9 +45,12 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
 
     public function delete(TransactionInterface $transaction = null)
     {
-        //todo: saturate command
-
-        //saturate transaction
-        $transaction->addCommand($this->queueDelete());
+        if (empty($transaction)) {
+            $transaction = $this->orm->createTransaction();
+            $transaction->addCommand($this->queueDelete());
+            $transaction->run();
+        } else {
+            $transaction->addCommand($this->queueDelete());
+        }
     }
 }

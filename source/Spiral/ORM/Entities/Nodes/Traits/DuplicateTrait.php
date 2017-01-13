@@ -12,10 +12,9 @@ namespace Spiral\ORM\Entities\Nodes\Traits;
 trait DuplicateTrait
 {
     /**
-     * @invisible
-     * @var array
+     * @var string
      */
-    private $duplicateCriteria = [];
+    private $primaryKey = '';
 
     /**
      * Aggregated duplicate data.
@@ -66,24 +65,6 @@ trait DuplicateTrait
      */
     protected function duplicateCriteria(array &$data)
     {
-        if (empty($this->duplicateCriteria)) {
-            //It is recommended to use primary keys in every record as it will speed up de-duplication.
-            $criteria = serialize($data);
-
-            return $criteria;
-        } elseif (count($this->duplicateCriteria) == 1) {
-            $criteria = $data[$this->duplicateCriteria[0]];
-
-            return $criteria;
-        } else {
-            $criteria = [];
-            foreach ($this->duplicateCriteria as $column) {
-                $criteria[] = $data[$column];
-            }
-
-            $criteria = join('.', $criteria);
-
-            return $criteria;
-        }
+        return $data[$this->primaryKey];
     }
 }

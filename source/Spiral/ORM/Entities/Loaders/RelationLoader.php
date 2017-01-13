@@ -68,7 +68,7 @@ abstract class RelationLoader extends AbstractLoader
         parent::__construct($class, $schema, $orm);
 
         //We need related model primary keys in order to ensure that
-        $this->schema[Record::SH_PRIMARIES] = $orm->define($class, ORMInterface::R_PRIMARIES);
+        $this->schema[Record::SH_PRIMARY_KEY] = $orm->define($class, ORMInterface::R_PRIMARY_KEY);
         $this->relation = $relation;
     }
 

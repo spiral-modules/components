@@ -59,7 +59,7 @@ class RecordInstantiator implements InstantiatorInterface
         }
 
         $primaryKeys = [];
-        foreach ($this->schema[RecordEntity::SH_PRIMARIES] as $primaryKey) {
+        foreach ($this->schema[RecordEntity::SH_PRIMARY_KEY] as $primaryKey) {
             if (array_key_exists($primaryKey, $fields)) {
                 $primaryKeys[] = $fields[$primaryKey];
             }

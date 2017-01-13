@@ -41,7 +41,7 @@ class RootLoader extends AbstractLoader
         parent::__construct(
             $class,
             [
-                Record::SH_PRIMARIES     => $schema[Record::SH_PRIMARIES],
+                Record::SH_PRIMARY_KEY   => $schema[Record::SH_PRIMARY_KEY],
                 Record::RELATION_COLUMNS => array_keys($schema[Record::SH_DEFAULTS])
             ],
             $orm
@@ -76,14 +76,9 @@ class RootLoader extends AbstractLoader
      *
      * @return string|null
      */
-    public function primaryKey()
+    public function primaryKey(): string
     {
-        $primaryKeys = $this->schema[Record::SH_PRIMARIES];
-        if (count($primaryKeys) != 1) {
-            return null;
-        }
-
-        return $this->getAlias() . '.' . $primaryKeys[0];
+        return $this->getAlias() . '.' . $this->schema[Record::SH_PRIMARY_KEY];
     }
 
     /**
@@ -131,7 +126,7 @@ class RootLoader extends AbstractLoader
     {
         return new RootNode(
             $this->schema[Record::RELATION_COLUMNS],
-            $this->schema[Record::SH_PRIMARIES]
+            $this->schema[Record::SH_PRIMARY_KEY]
         );
     }
 

@@ -37,7 +37,7 @@ class ArrayNode extends AbstractNode implements ArrayInterface
         $this->innerKey = $innerKey;
 
         //Using primary keys (if any) to de-duplicate results
-        $this->duplicateCriteria = $primaryKeys;
+        $this->primaryKey = $primaryKeys;
     }
 
     /**

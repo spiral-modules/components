@@ -66,7 +66,7 @@ class HasOneLoader extends RelationLoader
             $this->schema[Record::RELATION_COLUMNS],
             $this->schema[Record::OUTER_KEY],
             $this->schema[Record::INNER_KEY],
-            $this->schema[Record::SH_PRIMARIES]
+            $this->schema[Record::SH_PRIMARY_KEY]
         );
 
         return $node->asJoined($this->isJoined());

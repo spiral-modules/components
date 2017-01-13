@@ -22,17 +22,18 @@ interface ORMInterface
     const STATE_NEW              = 0;
     const STATE_LOADED           = 1;
     const STATE_DELETED          = 2;
-    const STATE_SCHEDULED_INSERT = 3;
-    const STATE_SCHEDULED_UPDATE = 4;
-    const STATE_SCHEDULED_DELETE = 5;
-    const STATE_READONLY         = 6;
+    const STATE_READONLY         = 3;
+    const STATE_SCHEDULED        = 100;
+    const STATE_SCHEDULED_INSERT = self::STATE_SCHEDULED | 4;
+    const STATE_SCHEDULED_UPDATE = self::STATE_SCHEDULED | 5;
+    const STATE_SCHEDULED_DELETE = self::STATE_SCHEDULED | 6;
 
     /**
      * Constants used in packed schema.
      */
     const R_INSTANTIATOR = 0;
     const R_ROLE_NAME    = 1;
-    const R_PRIMARIES    = 2;
+    const R_PRIMARY_KEY  = 2;
     const R_SCHEMA       = 3;
     const R_SOURCE_CLASS = 4;
     const R_DATABASE     = 5;

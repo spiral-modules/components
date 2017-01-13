@@ -20,13 +20,13 @@ class RootNode extends AbstractNode
     private $result = [];
 
     /**
-     * @param array $columns
-     * @param array $primaryKeys
+     * @param array  $columns
+     * @param string $primaryKey
      */
-    public function __construct(array $columns = [], array $primaryKeys = [])
+    public function __construct(array $columns = [], string $primaryKey)
     {
         parent::__construct($columns, null);
-        $this->duplicateCriteria = $primaryKeys;
+        $this->primaryKey = $primaryKey;
     }
 
     /**

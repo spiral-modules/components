@@ -211,18 +211,18 @@ class RecordSchema implements SchemaInterface
     public function packSchema(SchemaBuilder $builder, AbstractTable $table): array
     {
         return [
-            RecordEntity::SH_PRIMARIES => $table->getPrimaryKeys(),
+            RecordEntity::SH_PRIMARY_KEY => current($table->getPrimaryKeys()),
 
             //Default entity values
-            RecordEntity::SH_DEFAULTS  => $this->packDefaults($table),
+            RecordEntity::SH_DEFAULTS    => $this->packDefaults($table),
 
             //Entity behaviour
-            RecordEntity::SH_HIDDEN    => $this->reflection->getHidden(),
-            RecordEntity::SH_SECURED   => $this->reflection->getSecured(),
-            RecordEntity::SH_FILLABLE  => $this->reflection->getFillable(),
+            RecordEntity::SH_HIDDEN      => $this->reflection->getHidden(),
+            RecordEntity::SH_SECURED     => $this->reflection->getSecured(),
+            RecordEntity::SH_FILLABLE    => $this->reflection->getFillable(),
 
             //Mutators can be altered based on ORM\SchemasConfig
-            RecordEntity::SH_MUTATORS  => $this->buildMutators($table),
+            RecordEntity::SH_MUTATORS    => $this->buildMutators($table),
         ];
     }
 

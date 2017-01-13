@@ -43,9 +43,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * Set of schema sections needed to describe entity behaviour.
      */
-    const SH_PRIMARIES = 0;
-    const SH_DEFAULTS  = 1;
-    const SH_RELATIONS = 6;
+    const SH_PRIMARY_KEY = 0;
+    const SH_DEFAULTS    = 1;
+    const SH_RELATIONS   = 6;
 
     /**
      * Default ORM relation types, see ORM configuration and documentation for more information.
@@ -268,6 +268,16 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     }
 
     /**
+     * Get value of primary of model.
+     *
+     * @return int|string|null
+     */
+    public function primaryKey()
+    {
+        return $this->getField($this->recordSchema[self::SH_PRIMARY_KEY], null);
+    }
+
+    /**
      * Check if entity been loaded (non new).
      *
      * @return bool
@@ -419,12 +429,17 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
             return new NullCommand();
         }
 
+        if ($this->state & ORMInterface::STATE_SCHEDULED) {
+            throw new RecordException(
+                "Unable to save already scheduled record, commit previous transaction first"
+            );
+        }
+
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
         } else {
             if ($this->hasChanges() || $this->solidState) {
                 $command = $this->prepareUpdate();
-
             } else {
                 $command = new NullCommand();
             }
@@ -454,6 +469,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         if ($this->state == ORMInterface::STATE_READONLY || !$this->isLoaded()) {
             //Nothing to do
             return new NullCommand();
+        }
+
+        if ($this->state & ORMInterface::STATE_SCHEDULED) {
+            throw new RecordException(
+                "Unable to delete scheduled record, commit previous transaction first"
+            );
         }
 
         return $this->prepareDelete();
@@ -538,6 +559,15 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
             $this->dispatch('created', new RecordEvent($this));
 
             //Sync context?
+
+            //set PK?
+
+            if ($command->hasContext()) {
+
+            }
+
+            // push context to event?
+            $command->setContext('id', $command->lastIsertID());
         });
 
         return $command;
@@ -552,7 +582,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         $this->setState(ORMInterface::STATE_SCHEDULED_UPDATE);
 
         $command = new UpdateCommand(
-            $this->stateCriteria(),
+            $this->stateCriteria(), //THIS IS STATIC
             $this->packChanges(true),
             $this->orm->define(static::class, ORMInterface::R_DATABASE),
             $this->orm->define(static::class, ORMInterface::R_TABLE)
@@ -565,7 +595,9 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
             $this->setState(ORMInterface::STATE_LOADED);
             $this->dispatch('updated', new RecordEvent($this, $command));
 
-            //Sync context?
+            if ($command->hasContext()) {
+                //Sync context?
+            }
         });
 
         return $command;
@@ -605,7 +637,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     private function stateCriteria()
     {
-        if (!empty($primaryKey = $this->recordSchema[self::SH_PRIMARIES])) {
+        if (!empty($primaryKey = $this->recordSchema[self::SH_PRIMARY_KEY])) {
 
             //Set of primary keys
             $state = [];
@@ -642,7 +674,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         foreach ($this->getFields(false) as $field => $value) {
             if (
                 $skipPrimaries
-                && in_array($field, $this->recordSchema[self::SH_PRIMARIES])
+                && in_array($field, $this->recordSchema[self::SH_PRIMARY_KEY])
             ) {
                 continue;
             }

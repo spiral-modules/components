@@ -329,7 +329,7 @@ class SchemaBuilder
                 ORMInterface::R_ROLE_NAME    => $schema->getRole(),
 
                 //Primary keys
-                ORMInterface::R_PRIMARIES    => $table->getPrimaryKeys(),
+                ORMInterface::R_PRIMARY_KEY  => current($table->getPrimaryKeys()),
 
                 //Schema includes list of fields, default values and nullable fields
                 ORMInterface::R_SCHEMA       => $schema->packSchema($this, clone $table),
@@ -375,6 +375,25 @@ class SchemaBuilder
             foreach ($schema->getIndexes() as $index) {
                 $table->index($index->getColumns())->unique($index->isUnique());
                 $table->index($index->getColumns())->setName($index->getName());
+            }
+
+            /*
+             * Attention, this is critical section:
+             *
+             * In order to work efficiently (like for real), ORM does require every table
+             * to have 1 and only 1 primary key, this is crucial for things like in memory
+             * cache, transaction command priority pipeline, multiple queue commands for one entity
+             * and etc.
+             *
+             * It is planned to support user defined PKs in a future using unique indexes and record
+             * schema.
+             *
+             * You are free to select any name for PK field.
+             */
+            if (count($table->getPrimaryKeys()) !== 1) {
+                throw new SchemaException(
+                    "Every record must have singular primary key (primary, bigPrimary types)"
+                );
             }
 
             //And put it back :)

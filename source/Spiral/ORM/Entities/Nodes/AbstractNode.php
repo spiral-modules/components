@@ -85,7 +85,7 @@ abstract class AbstractNode
      * @param array       $columns
      * @param string|null $outerKey Defines column name in parent Node to be aggregated.
      */
-    public function __construct(array $columns = [], string $outerKey = null)
+    public function __construct(array $columns, string $outerKey = null)
     {
         $this->columns = $columns;
         $this->countColumns = count($columns);

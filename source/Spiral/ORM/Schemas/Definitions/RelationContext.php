@@ -110,16 +110,8 @@ final class RelationContext
      */
     public function getPrimary()
     {
-        $primaryKeys = $this->schema->getPrimaryKeys();
-        if (count($primaryKeys) == 1) {
-            return $this->getColumn($primaryKeys[0]);
-        }
-
-        /*
-         * Table either have complex primary key or no primary keys.
-         */
-
-        return null;
+        //We are always expecting to have primary key
+        return $this->getColumn($this->schema->getPrimaryKeys()[0]);
     }
 
     /**

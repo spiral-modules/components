@@ -15,16 +15,6 @@ use Spiral\ORM\Exceptions\InstantionException;
 interface InstantiatorInterface
 {
     /**
-     * Identify set of fields with resulted unique value (usually primary key). Following
-     * identification key will be used to store record in ORM entity cache.
-     *
-     * @param array|\ArrayAccess|mixed $fields
-     *
-     * @return string|null
-     */
-    public function identify($fields);
-
-    /**
      * Method must detect and construct appropriate class instance based on a given fields. When
      * state set to NEW values MUST be filtered/typecasted before appearing in entity!
      *

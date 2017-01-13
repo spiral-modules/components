@@ -255,14 +255,16 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             $cache = false;
         }
 
+        if (!is_array($fields)) {
+            $fields = iterator_to_array($fields);
+        }
+
         if (!$cache || !$this->hasCache()) {
             return $instantiator->make($fields, $state);
         }
 
-        //Looking for an entity in a cache
-        $identity = $instantiator->identify($fields);
-
-        if (is_null($identity)) {
+        //Always expect PK in our records
+        if (empty($identity = $fields[$this->define($class, self::R_PRIMARY_KEY)])) {
             //Unable to cache non identified instance
             return $instantiator->make($fields, $state);
         }

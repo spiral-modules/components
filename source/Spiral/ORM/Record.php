@@ -20,7 +20,7 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
         bool $queueRelations = true
     ): int {
         //Initial record command
-        $command = $this->queueSave(false);
+        $command = $this->queueStore(false);
 
         if ($command instanceof InsertCommand) {
             $state = self::CREATED;

@@ -6,9 +6,7 @@
  */
 namespace Spiral\ORM\Commands;
 
-use Spiral\ORM\CommandInterface;
-
-class DeleteCommand implements CommandInterface
+class DeleteCommand extends AbstractCommand
 {
     public function onComplete()
     {

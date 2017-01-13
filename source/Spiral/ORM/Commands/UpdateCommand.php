@@ -6,9 +6,7 @@
  */
 namespace Spiral\ORM\Commands;
 
-use Spiral\ORM\CommandInterface;
-
-class UpdateCommand implements CommandInterface
+class UpdateCommand extends AbstractCommand
 {
     public function onComplete()
     {

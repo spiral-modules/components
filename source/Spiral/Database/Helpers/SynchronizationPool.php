@@ -129,6 +129,9 @@ class SynchronizationPool extends Component
     protected function commitTransaction()
     {
         foreach ($this->drivers as $driver) {
+            /**
+             * @var Driver $driver
+             */
             $driver->commitTransaction();
         }
     }
@@ -138,7 +141,10 @@ class SynchronizationPool extends Component
      */
     protected function rollbackTransaction()
     {
-        foreach ($this->drivers as $driver) {
+        foreach (array_reverse($this->drivers) as $driver) {
+            /**
+             * @var Driver $driver
+             */
             $driver->rollbackTransaction();
         }
     }

@@ -44,6 +44,16 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     }
 
     /**
+     * Get associated driver instance.
+     *
+     * @return Driver
+     */
+    public function getDriver(): Driver
+    {
+        return $this->driver;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param QueryCompiler $compiler Associated compiled to be used by default.

@@ -106,9 +106,9 @@ final class RelationContext
     }
 
     /**
-     * @return null|ColumnInterface
+     * @return ColumnInterface
      */
-    public function getPrimary()
+    public function getPrimary(): ColumnInterface
     {
         //We are always expecting to have primary key
         return $this->getColumn($this->schema->getPrimaryKeys()[0]);

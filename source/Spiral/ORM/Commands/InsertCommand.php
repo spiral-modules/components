@@ -6,11 +6,6 @@
  */
 namespace Spiral\ORM\Commands;
 
-use Spiral\ORM\CommandInterface;
-
-class InsertCommand implements CommandInterface
+class InsertCommand extends AbstractCommand
 {
-    public function onComplete()
-    {
-    }
 }

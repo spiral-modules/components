@@ -6,10 +6,7 @@
  */
 namespace Spiral\ORM;
 
-use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Models\AccessorInterface;
-use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ORM\Commands\DeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
@@ -17,7 +14,6 @@ use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\UpdateCommand;
 use Spiral\ORM\Entities\RelationBucket;
 use Spiral\ORM\Events\RecordEvent;
-use Spiral\ORM\Exceptions\FieldException;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
 
@@ -31,7 +27,7 @@ use Spiral\ORM\Exceptions\RelationException;
  *
  * Potentially requires split for StateWatcher.
  */
-abstract class RecordEntity extends SchematicEntity implements RecordInterface
+abstract class RecordEntity extends AbstractRecord implements RecordInterface
 {
     use SaturateTrait, SolidableTrait;
 
@@ -39,13 +35,6 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      * Begin set of behaviour and description constants.
      * ================================================
      */
-
-    /**
-     * Set of schema sections needed to describe entity behaviour.
-     */
-    const SH_PRIMARY_KEY = 0;
-    const SH_DEFAULTS    = 1;
-    const SH_RELATIONS   = 6;
 
     /**
      * Default ORM relation types, see ORM configuration and documentation for more information.
@@ -197,13 +186,6 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     const INDEXES = [];
 
     /**
-     * Record behaviour definition.
-     *
-     * @var array
-     */
-    private $recordSchema = [];
-
-    /**
      * Record state.
      *
      * @var int
@@ -211,27 +193,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     private $state;
 
     /**
-     * Record field updates (changed values). This array contain set of initial property values if
-     * any of them changed.
+     * Points to last queued insert command for this entity, required to properly handle multiple
+     * entity updates inside one transaction.
      *
-     * @var array
+     * @var InsertCommand
      */
-    private $changes = [];
-
-    /**
-     * AssociatedRelation bucket. Manages declared record relations.
-     *
-     * @var RelationBucket
-     */
-    protected $relations;
-
-    /**
-     * Parent ORM instance, responsible for relation initialization and lazy loading operations.
-     *
-     * @invisible
-     * @var ORMInterface
-     */
-    protected $orm;
+    private $insertCommand = null;
 
     /**
      * Initiate entity inside or outside of ORM scope using given fields and state.
@@ -239,21 +206,16 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      * @param array             $data
      * @param int               $state
      * @param ORMInterface|null $orm
-     * @param array|null        $schema
+     * @param array|null        $recordSchema
      */
     public function __construct(
         array $data = [],
         int $state = ORMInterface::STATE_NEW,
         ORMInterface $orm = null,
-        array $schema = null
-    ) {//We can use global container as fallback if no default values were provided
-        $this->orm = $this->saturate($orm, ORMInterface::class);
-
-        //Use supplied schema or fetch one from ORM
-        $this->recordSchema = !empty($schema) ? $schema : $this->orm->define(
-            static::class,
-            ORMInterface::R_SCHEMA
-        );
+        array $recordSchema = null
+    ) {
+        //We can use global container as fallback if no default values were provided
+        $orm = $this->saturate($orm, ORMInterface::class);
 
         $this->state = $state;
         if ($this->state == ORMInterface::STATE_NEW) {
@@ -261,20 +223,7 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
             $this->solidState(true);
         }
 
-        $this->relations = new RelationBucket($this, $this->orm);
-        $this->relations->extractRelations($data);
-
-        parent::__construct($data + $this->recordSchema[self::SH_DEFAULTS], $this->recordSchema);
-    }
-
-    /**
-     * Get value of primary of model.
-     *
-     * @return int|string|null
-     */
-    public function primaryKey()
-    {
-        return $this->getField($this->recordSchema[self::SH_PRIMARY_KEY], null);
+        parent::__construct($orm, $data, new RelationBucket($this, $orm));
     }
 
     /**
@@ -284,7 +233,8 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     public function isLoaded(): bool
     {
-        return $this->state != ORMInterface::STATE_NEW;
+        return $this->state != ORMInterface::STATE_NEW
+            && !empty($this->getField($this->primaryColumn(), null, false));
     }
 
     /**
@@ -300,129 +250,12 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
     /**
      * {@inheritdoc}
      *
-     * @throws RelationException
-     */
-    public function getField(string $name, $default = null, bool $filter = true)
-    {
-        if ($this->relations->has($name)) {
-            return $this->relations->getRelated($name);
-        }
-
-        $this->assertField($name);
-
-        return parent::getField($name, $default, $filter);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param bool $registerChanges Track field changes.
-     *
-     * @throws RelationException
-     */
-    public function setField(
-        string $name,
-        $value,
-        bool $filter = true,
-        bool $registerChanges = true
-    ) {
-        if ($this->relations->has($name)) {
-            //Would not work with relations which do not represent singular entities
-            $this->relations->setRelated($name, $value);
-
-            return;
-        }
-
-        $this->assertField($name);
-        if ($registerChanges) {
-            $this->registerChange($name);
-        }
-
-        parent::setField($name, $value, $filter);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function hasField(string $name): bool
-    {
-        if ($this->relations->has($name)) {
-            return $this->relations->hasRelated($name);
-        }
-
-        return parent::hasField($name);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @throws FieldException
-     * @throws RelationException
-     */
-    public function __unset($offset)
-    {
-        if ($this->relations->has($offset)) {
-            //Flush associated relation value if possible
-            $this->relations->flushRelated($offset);
-
-            return;
-        }
-
-        if (!$this->isNullable($offset)) {
-            throw new FieldException("Unable to unset not nullable field '{$offset}'");
-        }
-
-        $this->setField($offset, null, false);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Method does not check updates in nested relation, but only in primary record.
-     *
-     * @param string $field Check once specific field changes.
-     */
-    public function hasChanges(string $field = null): bool
-    {
-        //Check updates for specific field
-        if (!empty($field)) {
-            if (array_key_exists($field, $this->changes)) {
-                return true;
-            }
-
-            //Do not force accessor creation
-            $value = $this->getField($field, null, false);
-            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
-                return true;
-            }
-
-            return false;
-        }
-
-        if (!empty($this->changes)) {
-            return true;
-        }
-
-        //Do not force accessor creation
-        foreach ($this->getFields(false) as $value) {
-            //Checking all fields for changes (handled internally)
-            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
      * @param bool $queueRelations
      *
      * @throws RecordException
      * @throws RelationException
      */
-    public function queueSave(bool $queueRelations = true): CommandInterface
+    public function queueStore(bool $queueRelations = true): CommandInterface
     {
         if ($this->state == ORMInterface::STATE_READONLY) {
             //Nothing to do on readonly entities
@@ -480,49 +313,6 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         return $this->prepareDelete();
     }
 
-    /**
-     * @return array
-     */
-    public function __debugInfo()
-    {
-        return [
-            'database'  => $this->orm->define(static::class, ORMInterface::R_DATABASE),
-            'table'     => $this->orm->define(static::class, ORMInterface::R_TABLE),
-            'fields'    => $this->getFields(),
-            'relations' => $this->relations
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * DocumentEntity will pass ODM instance as part of accessor context.
-     *
-     * @see CompositionDefinition
-     */
-    protected function createAccessor(
-        $accessor,
-        string $name,
-        $value,
-        array $context = []
-    ): AccessorInterface {
-        //Giving ORM as context
-        return parent::createAccessor($accessor, $name, $value, $context + ['orm' => $this->orm]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function iocContainer()
-    {
-        if ($this->orm instanceof Component) {
-            //Forwarding IoC scope to parent ORM instance
-            return $this->orm->iocContainer();
-        }
-
-        return parent::iocContainer();
-    }
-
     /*
      * Code below used to generate transaction commands.
      */
@@ -542,35 +332,17 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     private function prepareInsert(): InsertCommand
     {
+        $command = new InsertCommand($this->packValue(), $this->orm->table(static::class));
+
         //Entity indicates it's own status
         $this->setState(ORMInterface::STATE_SCHEDULED_INSERT);
-
-        $command = new InsertCommand(
-            $this->packValue(),
-            $this->orm->define(static::class, ORMInterface::R_DATABASE),
-            $this->orm->define(static::class, ORMInterface::R_TABLE)
-        );
-
         $this->dispatch('insert', new RecordEvent($this, $command));
 
         //Executed when transaction successfully completed
-        $command->onComplete(function ($command) {
-            $this->setState(ORMInterface::STATE_LOADED);
-            $this->dispatch('created', new RecordEvent($this));
+        $command->onComplete($this->syncState());
 
-            //Sync context?
-
-            //set PK?
-
-            if ($command->hasContext()) {
-
-            }
-
-            // push context to event?
-            $command->setContext('id', $command->lastIsertID());
-        });
-
-        return $command;
+        //Keep reference to the last insert command
+        return $this->insertCommand = $command;
     }
 
     /**
@@ -578,27 +350,25 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
      */
     private function prepareUpdate(): UpdateCommand
     {
-        //Entity indicates it's own status
-        $this->setState(ORMInterface::STATE_SCHEDULED_UPDATE);
-
         $command = new UpdateCommand(
-            $this->stateCriteria(), //THIS IS STATIC
             $this->packChanges(true),
-            $this->orm->define(static::class, ORMInterface::R_DATABASE),
-            $this->orm->define(static::class, ORMInterface::R_TABLE)
+            $this->isLoaded() ? $this->primaryKey() : null,
+            $this->orm->table(static::class)
         );
 
-        $this->dispatch('update', new RecordEvent($this, $command));
+        if (!empty($this->insertCommand)) {
+            $this->insertCommand->onExecute(function (InsertCommand $insert) use ($command) {
+                //Sync primary key values
+                $command->setPrimary($insert->lastInsertID());
+            });
+        }
+
+        //Entity indicates it's own status
+        $this->setState(ORMInterface::STATE_SCHEDULED_UPDATE);
+        $this->dispatch('update', new RecordEvent($this));
 
         //Executed when transaction successfully completed
-        $command->onComplete(function ($command) {
-            $this->setState(ORMInterface::STATE_LOADED);
-            $this->dispatch('updated', new RecordEvent($this, $command));
-
-            if ($command->hasContext()) {
-                //Sync context?
-            }
-        });
+        $command->onComplete($this->syncState());
 
         return $command;
     }
@@ -613,133 +383,36 @@ abstract class RecordEntity extends SchematicEntity implements RecordInterface
         $this->dispatch('delete', new RecordEvent($this));
 
         $command = new DeleteCommand(
-            $this->stateCriteria(),
+            $this->primaryKey(),
             $this->orm->define(static::class, ORMInterface::R_DATABASE),
             $this->orm->define(static::class, ORMInterface::R_TABLE)
         );
 
         //Executed when transaction successfully completed
-        $command->onComplete(function () {
-            $this->setState(ORMInterface::STATE_DELETED);
-            $this->dispatch('deleted', new RecordEvent($this));
-        });
+        $command->onComplete($this->syncState());
 
         return $command;
     }
 
-    /**
-     * Get WHERE array to be used to perform record data update or deletion. Usually will include
-     * record primary key.
-     *
-     * Usually just [ID => value] array.
-     *
-     * @return array
-     */
-    private function stateCriteria()
+    private function syncState(): \Closure
     {
-        if (!empty($primaryKey = $this->recordSchema[self::SH_PRIMARY_KEY])) {
+        return function ($command) {
+            dump($command);
+        };
 
-            //Set of primary keys
-            $state = [];
-            foreach ($primaryKey as $key) {
-                $state[$key] = $this->getField($key);
-            }
+        //got command!
 
-            return $state;
-        }
+//        //Command context MIGHT include some fields set by parent commands (i.e. runtime values)
+//        foreach ($command->getContext() as $field => $value) {
+//            $this->setField($field, $value, true, false);
+//        }
+//
+//        $this->setField(
+//            $this->recordSchema[self::SH_PRIMARY_KEY],
+//            $command->primaryKey(),
+//            true,
+//            false
+//        );
 
-        //Use entity data as where definition
-        return $this->changes + $this->packValue();
-    }
-
-    /**
-     * Create set of fields to be sent to UPDATE statement.
-     *
-     * @param bool $skipPrimaries Remove primary keys from update statement.
-     *
-     * @return array
-     */
-    private function packChanges(bool $skipPrimaries = false): array
-    {
-        if (!$this->hasChanges() && !$this->isSolid()) {
-            return [];
-        }
-
-        if ($this->isSolid()) {
-            //Solid records always saved as one chunk of data
-            return $this->packValue();
-        }
-
-        $updates = [];
-        foreach ($this->getFields(false) as $field => $value) {
-            if (
-                $skipPrimaries
-                && in_array($field, $this->recordSchema[self::SH_PRIMARY_KEY])
-            ) {
-                continue;
-            }
-
-            //Handled by sub-accessor
-            if ($value instanceof RecordAccessorInterface) {
-                if ($value->hasUpdates()) {
-                    $updates[$field] = $value->compileUpdates($field);
-                    continue;
-                }
-
-                $value = $value->packValue();
-            }
-
-            //Field change registered
-            if (array_key_exists($field, $this->changes)) {
-                $updates[$field] = $value;
-            }
-        }
-
-        return $updates;
-    }
-
-    /**
-     * Indicate that all updates done, reset dirty state.
-     */
-    private function flushChanges()
-    {
-        $this->changes = [];
-
-        foreach ($this->getFields(false) as $field => $value) {
-            if ($value instanceof RecordAccessorInterface) {
-                $value->flushUpdates();
-            }
-        }
-    }
-
-    /**
-     * @param string $name
-     */
-    private function registerChange(string $name)
-    {
-        $original = $this->getField($name, null, false);
-
-        if (!array_key_exists($name, $this->changes)) {
-            //Let's keep track of how field looked before first change
-            $this->changes[$name] = $original instanceof AccessorInterface
-                ? $original->packValue()
-                : $original;
-        }
-    }
-
-    /**
-     * @param string $name
-     *
-     * @throws FieldException
-     */
-    private function assertField(string $name)
-    {
-        if (!$this->hasField($name)) {
-            throw new FieldException(sprintf(
-                "No such property '%s' in '%s', check schema being relevant",
-                $name,
-                get_called_class()
-            ));
-        }
     }
 }

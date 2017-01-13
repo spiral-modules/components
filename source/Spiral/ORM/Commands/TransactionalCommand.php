@@ -7,12 +7,11 @@
 namespace Spiral\ORM\Commands;
 
 use Spiral\ORM\CommandInterface;
-use Spiral\ORM\TransactionInterface;
 
 /**
  * Command to handle multiple inner commands.
  */
-class TransactionalCommand extends AbstractCommand implements TransactionInterface
+class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
 {
     /**
      * Nested commands.
@@ -32,23 +31,15 @@ class TransactionalCommand extends AbstractCommand implements TransactionInterfa
     /**
      * {@inheritdoc}
      */
-    public function getCommands()
+    public function getIterator()
     {
         foreach ($this->commands as $command) {
-            if ($command instanceof TransactionInterface) {
-                yield from $command->getCommands();
+            if ($command instanceof \Traversable) {
+                yield from $command;
             }
 
             yield $command;
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function run()
-    {
-        //nothing to do (see getCommands())
     }
 
     public function execute()

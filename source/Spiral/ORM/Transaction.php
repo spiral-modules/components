@@ -62,8 +62,8 @@ class Transaction implements TransactionInterface
     final public function getCommands()
     {
         foreach ($this->commands as $command) {
-            if ($command instanceof TransactionInterface) {
-                yield from $command->getCommands();
+            if ($command instanceof \Traversable) {
+                yield from $command;
             }
 
             yield $command;

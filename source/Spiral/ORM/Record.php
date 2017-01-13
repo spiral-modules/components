@@ -26,6 +26,9 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
         bool $queueRelations = true,
         TransactionInterface $transaction = null
     ): int {
+        /*
+         * First, per interface agreement calculate entity state after save command being called.
+         */
         if (!$this->isLoaded()) {
             $state = self::CREATED;
         } elseif (!$this->hasChanges()) {
@@ -39,7 +42,7 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
              * When no transaction is given we will create our own and run it immediately.
              */
             $transaction = $transaction ?? new Transaction();
-            $transaction->addCommand($this->queueStore($queueRelations));
+            $transaction->store($this, $queueRelations);
             $transaction->run();
         } else {
             $transaction->addCommand($this->queueStore($queueRelations));
@@ -61,7 +64,7 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
              * When no transaction is given we will create our own and run it immediately.
              */
             $transaction = $transaction ?? new Transaction();
-            $transaction->addCommand($this->queueDelete());
+            $transaction->delete($this);
             $transaction->run();
         } else {
             $transaction->addCommand($this->queueDelete());

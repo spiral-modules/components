@@ -28,12 +28,13 @@ class Transaction implements TransactionInterface
      * Store entity information (update or insert).
      *
      * @param RecordInterface $record
+     * @param bool            $queueRelations
      *
      * @throws RecordException
      */
-    public function store(RecordInterface $record)
+    public function store(RecordInterface $record, bool $queueRelations = true)
     {
-        $this->addCommand($record->queueStore());
+        $this->addCommand($record->queueStore($queueRelations));
     }
 
     /**

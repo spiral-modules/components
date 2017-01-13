@@ -233,7 +233,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     public function isLoaded(): bool
     {
-        return $this->state != ORMInterface::STATE_NEW;
+        return !empty($this->primaryKey());
     }
 
     /**

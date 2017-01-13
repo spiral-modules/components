@@ -22,12 +22,9 @@ interface TransactionInterface
      * Execute all nested commands in transaction, if failed - transaction MUST automatically
      * rollback and exception instance MUST be throwed.
      *
+     * Transaction will be emptied after execution.
+     *
      * @throws \Throwable
      */
     public function run();
-
-    /**
-     * Clear transaction and remove all associated objects.
-     */
-    public function clear();
 }

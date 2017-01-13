@@ -24,8 +24,6 @@ use Spiral\ORM\Exceptions\RelationException;
  * Class implementations statically analyzed to define DB schema.
  *
  * @see RecordEntity::SCHEMA
- *
- * Potentially requires split for StateWatcher.
  */
 abstract class RecordEntity extends AbstractRecord implements RecordInterface
 {

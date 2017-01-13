@@ -218,6 +218,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         $orm = $this->saturate($orm, ORMInterface::class);
 
         $this->state = $state;
+
         //Non loaded records should be in solid state by default
         $this->solidState($this->state == ORMInterface::STATE_NEW);
 

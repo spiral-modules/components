@@ -13,12 +13,10 @@ use Spiral\ORM\Exceptions\RecordException;
  * Singular ORM transaction with ability to automatically open transaction for all involved
  * drivers.
  *
- * Drivers will be automatically fetched from commands. Potentially Transaction can be teached
+ * Drivers will be automatically fetched from commands. Potentially Transaction can be improved
  * to optimize commands inside it (batch insert, batch delete and etc).
- *
- * @todo add watch method
  */
-class Transaction implements TransactionInterface
+final class Transaction implements TransactionInterface
 {
     /**
      * @var CommandInterface[]
@@ -53,7 +51,7 @@ class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      */
-    final public function addCommand(CommandInterface $command)
+    public function addCommand(CommandInterface $command)
     {
         $this->commands[] = $command;
     }
@@ -61,7 +59,7 @@ class Transaction implements TransactionInterface
     /**
      * @return \Generator
      */
-    final public function getCommands()
+    public function getCommands()
     {
         foreach ($this->commands as $command) {
             if ($command instanceof \Traversable) {

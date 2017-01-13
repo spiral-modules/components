@@ -295,53 +295,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         return $this->prepareDelete();
     }
 
-    /*
-     * Code below used to generate transaction commands.
-     */
-    /**
-     * Handle result of insert command.
-     *
-     * @param InsertCommand $command
-     */
-    protected function handleInsert(InsertCommand $command)
-    {
-        //Flushing reference to last insert command
-        $this->insertCommand = null;
-
-        //We not how our primary value (add support of user supplied PK values (no autoincrement))
-        $this->setField(
-            $this->primaryColumn(),
-            $command->getInsertID(),
-            true,
-            false
-        );
-
-        $this->state = ORMInterface::STATE_LOADED;
-        $this->dispatch('created', new RecordEvent($this));
-    }
-
-    /**
-     * Handle result of update command.
-     *
-     * @param UpdateCommand $command
-     */
-    protected function handleUpdate(UpdateCommand $command)
-    {
-        $this->state = ORMInterface::STATE_LOADED;
-        $this->dispatch('updated', new RecordEvent($this));
-    }
-
-    /**
-     * Handle result of delete command.
-     *
-     * @param DeleteCommand $command
-     */
-    protected function handleDelete(DeleteCommand $command)
-    {
-        $this->state = ORMInterface::STATE_DELETED;
-        $this->dispatch('deleted', new RecordEvent($this));
-    }
-
     /**
      * @return InsertCommand
      */
@@ -427,5 +380,49 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         });
 
         return $command;
+    }
+
+    /**
+     * Handle result of insert command.
+     *
+     * @param InsertCommand $command
+     */
+    private function handleInsert(InsertCommand $command)
+    {
+        //Flushing reference to last insert command
+        $this->insertCommand = null;
+
+        //We not how our primary value (add support of user supplied PK values (no autoincrement))
+        $this->setField(
+            $this->primaryColumn(),
+            $command->getInsertID(),
+            true,
+            false
+        );
+
+        $this->state = ORMInterface::STATE_LOADED;
+        $this->dispatch('created', new RecordEvent($this));
+    }
+
+    /**
+     * Handle result of update command.
+     *
+     * @param UpdateCommand $command
+     */
+    private function handleUpdate(UpdateCommand $command)
+    {
+        $this->state = ORMInterface::STATE_LOADED;
+        $this->dispatch('updated', new RecordEvent($this));
+    }
+
+    /**
+     * Handle result of delete command.
+     *
+     * @param DeleteCommand $command
+     */
+    private function handleDelete(DeleteCommand $command)
+    {
+        $this->state = ORMInterface::STATE_DELETED;
+        $this->dispatch('deleted', new RecordEvent($this));
     }
 }

@@ -77,21 +77,13 @@ abstract class AbstractRecord extends SchematicEntity
     }
 
     /**
-     * Get value of primary of model. Make sure to call isLoaded first, getting PK before entity
-     * have been saved is not possible.
+     * Get value of primary of model. Make sure to call isLoaded first!
      *
      * @return int|string|null
-     *
-     * @throws RecordException When PK is empty.
      */
     public function primaryKey()
     {
-        $primaryKey = $this->getField($this->primaryColumn(), null, false);
-        if (empty($primaryKey)) {
-            throw new RecordException("Unable to get PK, value is empty (@see 'isLoaded')");
-        }
-
-        return $primaryKey;
+        return $this->getField($this->primaryColumn(), null, false);
     }
 
     /**

@@ -233,8 +233,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     public function isLoaded(): bool
     {
-        return $this->state != ORMInterface::STATE_NEW
-            && !empty($this->getField($this->primaryColumn(), null, false));
+        return $this->state != ORMInterface::STATE_NEW;
     }
 
     /**
@@ -304,27 +303,43 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             return new NullCommand();
         }
 
-        if ($this->state & ORMInterface::STATE_SCHEDULED) {
-            throw new RecordException(
-                "Unable to delete scheduled record, commit previous transaction first"
-            );
-        }
-
         return $this->prepareDelete();
     }
 
     /*
      * Code below used to generate transaction commands.
      */
+    /**
+     * Handle result of insert command.
+     *
+     * @param InsertCommand $command
+     */
+    protected function handleInsert(InsertCommand $command)
+    {
+        //Flushing reference to last insert command
+        $this->insertCommand = null;
+
+        //We not how our primary value (add support of user supplied PK values (no autoincrement))
+        $this->setField(
+            $this->primaryColumn(),
+            $command->getInsertID(),
+            true,
+            false
+        );
+
+        $this->state = ORMInterface::STATE_LOADED;
+        $this->dispatch('created', new RecordEvent($this));
+    }
 
     /**
-     * Change object state.
+     * Handle result of delete command.
      *
-     * @param int $state
+     * @param DeleteCommand $command
      */
-    private function setState(int $state)
+    protected function handleDelete(DeleteCommand $command)
     {
-        $this->state = $state;
+        $this->state = ORMInterface::STATE_DELETED;
+        $this->dispatch('deleted', new RecordEvent($this));
     }
 
     /**
@@ -335,11 +350,13 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         $command = new InsertCommand($this->orm->table(static::class), $this->packValue());
 
         //Entity indicates it's own status
-        $this->setState(ORMInterface::STATE_SCHEDULED_INSERT);
+        $this->state = ORMInterface::STATE_SCHEDULED_INSERT;
         $this->dispatch('insert', new RecordEvent($this, $command));
 
         //Executed when transaction successfully completed
-        $command->onComplete($this->syncState());
+        $command->onComplete(function (InsertCommand $command) {
+            $this->handleInsert($command);
+        });
 
         //Keep reference to the last insert command
         return $this->insertCommand = $command;
@@ -359,16 +376,18 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         if (!empty($this->insertCommand)) {
             $this->insertCommand->onExecute(function (InsertCommand $insert) use ($command) {
                 //Sync primary key values
-                $command->setPrimary($insert->getInsertID());
+                $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
             });
         }
 
         //Entity indicates it's own status
-        $this->setState(ORMInterface::STATE_SCHEDULED_UPDATE);
+        $this->state = ORMInterface::STATE_SCHEDULED_UPDATE;
         $this->dispatch('update', new RecordEvent($this));
 
         //Executed when transaction successfully completed
-        $command->onComplete($this->syncState());
+        $command->onComplete(function (UpdateCommand $command) {
+            $this->handleUpdate($command);
+        });
 
         return $command;
     }
@@ -378,46 +397,27 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     private function prepareDelete(): DeleteCommand
     {
+        $command = new DeleteCommand(
+            $this->orm->table(static::class),
+            [$this->primaryColumn() => $this->primaryKey()]
+        );
+
+        if (!empty($this->insertCommand)) {
+            $this->insertCommand->onExecute(function (InsertCommand $insert) use ($command) {
+                //Sync primary key values
+                $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
+            });
+        }
+
         //Entity indicates it's own status
-        $this->setState(ORMInterface::STATE_SCHEDULED_DELETE);
+        $this->state = ORMInterface::STATE_SCHEDULED_DELETE;
         $this->dispatch('delete', new RecordEvent($this));
 
-        $command = new DeleteCommand($this->orm->table(static::class), $this->primaryKey());
-
         //Executed when transaction successfully completed
-        $command->onComplete($this->syncState());
+        $command->onComplete(function (DeleteCommand $command) {
+            $this->handleDelete($command);
+        });
 
         return $command;
-    }
-
-    /**
-     * Declares closure used to handle command events.
-     *
-     * @return \Closure
-     */
-    private function syncState(): \Closure
-    {
-        return function ($command) {
-            if ($command instanceof InsertCommand) {
-                //Flushing reference to last insert command
-                $this->insertCommand = null;
-
-                //We not how our primary value
-                //todo: support user supplied PK values (no autoincrement)
-                $this->setField(
-                    $this->primaryColumn(),
-                    $command->getInsertID(),
-                    true,
-                    false
-                );
-
-                $this->setState(ORMInterface::STATE_LOADED);
-                $this->dispatch('created', new RecordEvent($this));
-
-                return;
-            }
-
-            dump($command);
-        };
     }
 }

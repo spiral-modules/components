@@ -20,7 +20,7 @@ class InsertCommand extends TableCommand
      *
      * @var null|mixed
      */
-    private $inserID = null;
+    private $insertID = null;
 
     /**
      * @param Table $table
@@ -39,7 +39,7 @@ class InsertCommand extends TableCommand
      */
     public function getInsertID()
     {
-        return $this->inserID;
+        return $this->insertID;
     }
 
     /**
@@ -47,8 +47,7 @@ class InsertCommand extends TableCommand
      */
     public function execute()
     {
-        $this->inserID = $this->table->insertOne($this->context);
-
+        $this->insertID = $this->table->insertOne($this->context);
         parent::execute();
     }
 }

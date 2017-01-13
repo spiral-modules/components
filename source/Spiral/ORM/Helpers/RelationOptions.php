@@ -149,7 +149,7 @@ class RelationOptions
             'source:table'      => $source->getTable(),
 
             //Parent record primary key
-            'source:primaryKey' => !empty($source->getPrimary()) ? $source->getPrimary()->getName() : '',
+            'source:primaryKey' => $source->getPrimary(),
         ];
 
         //Some options may use values declared in other definition fields

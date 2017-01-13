@@ -261,8 +261,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             }
         }
 
-        //Changes are flushed BEFORE entity is saved, this is required to present
-        //recursive update loops
+        //Reset all tracked entity changes
         $this->flushChanges();
 
         //Relation commands

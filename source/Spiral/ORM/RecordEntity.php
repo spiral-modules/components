@@ -198,7 +198,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      *
      * @var InsertCommand
      */
-    private $insertCommand = null;
+    private $lastInsert = null;
 
     /**
      * Initiate entity inside or outside of ORM scope using given fields and state.
@@ -316,11 +316,11 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
 
         $command->onRollBack(function () {
             //Flushing existed insert command to prevent collisions
-            $this->insertCommand = null;
+            $this->lastInsert = null;
         });
 
         //Keep reference to the last insert command
-        return $this->insertCommand = $command;
+        return $this->lastInsert = $command;
     }
 
     /**
@@ -334,8 +334,8 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             $this->packChanges(true)
         );
 
-        if (!empty($this->insertCommand)) {
-            $this->insertCommand->onExecute(function (InsertCommand $insert) use ($command) {
+        if (!empty($this->lastInsert)) {
+            $this->lastInsert->onExecute(function (InsertCommand $insert) use ($command) {
                 //Sync primary key values
                 $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
             });
@@ -363,8 +363,8 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             [$this->primaryColumn() => $this->primaryKey()]
         );
 
-        if (!empty($this->insertCommand)) {
-            $this->insertCommand->onExecute(function (InsertCommand $insert) use ($command) {
+        if (!empty($this->lastInsert)) {
+            $this->lastInsert->onExecute(function (InsertCommand $insert) use ($command) {
                 //Sync primary key values
                 $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
             });
@@ -390,7 +390,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     private function handleInsert(InsertCommand $command)
     {
         //Flushing reference to last insert command
-        $this->insertCommand = null;
+        $this->lastInsert = null;
 
         //We not how our primary value (add support of user supplied PK values (no autoincrement))
         $this->setField(

@@ -16,9 +16,9 @@ abstract class AbstractCommand implements CommandInterface
     /**
      * @var \Closure
      */
-    private $onExecute = null;
-    private $onComplete = null;
-    private $onRollback = null;
+    private $onExecute = [];
+    private $onComplete = [];
+    private $onRollBack = [];
 
     /**
      * Closure to be called after command executing.
@@ -27,7 +27,7 @@ abstract class AbstractCommand implements CommandInterface
      */
     final public function onExecute(\Closure $closure)
     {
-        $this->onExecute = $closure;
+        $this->onExecute[] = $closure;
     }
 
     /**
@@ -37,7 +37,7 @@ abstract class AbstractCommand implements CommandInterface
      */
     final public function onComplete(\Closure $closure)
     {
-        $this->onComplete = $closure;
+        $this->onComplete[] = $closure;
     }
 
     /**
@@ -45,9 +45,9 @@ abstract class AbstractCommand implements CommandInterface
      *
      * @param \Closure $closure
      */
-    final public function onRollback(\Closure $closure)
+    final public function onRollBack(\Closure $closure)
     {
-        $this->onRollback = $closure;
+        $this->onRollBack[] = $closure;
     }
 
     /**
@@ -55,8 +55,8 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function execute()
     {
-        if (!empty($this->onExecute)) {
-            call_user_func($this->onExecute, $this);
+        foreach ($this->onExecute as $closure) {
+            call_user_func($closure, $this);
         }
     }
 
@@ -65,8 +65,8 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function complete()
     {
-        if (!empty($this->onComplete)) {
-            call_user_func($this->onComplete, $this);
+        foreach ($this->onComplete as $closure) {
+            call_user_func($closure, $this);
         }
     }
 
@@ -75,8 +75,8 @@ abstract class AbstractCommand implements CommandInterface
      */
     public function rollBack()
     {
-        if (!empty($this->onRollback)) {
-            call_user_func($this->onRollback, $this);
+        foreach ($this->onRollBack as $closure) {
+            call_user_func($closure, $this);
         }
     }
 }

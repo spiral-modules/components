@@ -14,6 +14,8 @@ use Spiral\ORM\Exceptions\RecordException;
  * drivers.
  *
  * Drivers will be automatically fetched from commands.
+ *
+ * @todo add watch method
  */
 class Transaction implements TransactionInterface
 {

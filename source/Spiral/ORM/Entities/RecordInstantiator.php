@@ -9,7 +9,6 @@ namespace Spiral\ORM\Entities;
 use Spiral\ORM\Exceptions\InstantionException;
 use Spiral\ORM\InstantiatorInterface;
 use Spiral\ORM\ORMInterface;
-use Spiral\ORM\RecordEntity;
 use Spiral\ORM\RecordInterface;
 
 /**
@@ -31,46 +30,13 @@ class RecordInstantiator implements InstantiatorInterface
     private $class = '';
 
     /**
-     * Normalized schema delivered by RecordSchema.
-     *
-     * @var array
-     */
-    private $schema = [];
-
-    /**
      * @param ORMInterface $orm
      * @param string       $class
-     * @param array        $schema
      */
-    public function __construct(ORMInterface $orm, string $class, array $schema)
+    public function __construct(ORMInterface $orm, string $class)
     {
         $this->orm = $orm;
         $this->class = $class;
-        $this->schema = $schema;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function identify($fields)
-    {
-        if (!is_array($fields)) {
-            $fields = iterator_to_array($fields);
-        }
-
-        $primaryKeys = [];
-        foreach ($this->schema[RecordEntity::SH_PRIMARY_KEY] as $primaryKey) {
-            if (array_key_exists($primaryKey, $fields)) {
-                $primaryKeys[] = $fields[$primaryKey];
-            }
-        }
-
-        if (count($primaryKeys) === 0) {
-            //Unable to create reliable identity
-            return null;
-        }
-
-        return join('.', $primaryKeys);
     }
 
     /**
@@ -91,7 +57,7 @@ class RecordInstantiator implements InstantiatorInterface
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
         if ($state == ORMInterface::STATE_LOADED) {
             //No need to filter values, passing directly in constructor
-            return new $class($fields, $state, $this->orm, $this->schema);
+            return new $class($fields, $state, $this->orm);
         }
 
         if ($state != ORMInterface::STATE_NEW) {
@@ -104,7 +70,7 @@ class RecordInstantiator implements InstantiatorInterface
          * Filtering entity
          */
 
-        $entity = new $class([], $state, $this->orm, $this->schema);
+        $entity = new $class([], $state, $this->orm);
         if (!$entity instanceof RecordInterface) {
             throw new InstantionException(
                 "Unable to set filtered values for '{$class}', must be instance of RecordInterface"

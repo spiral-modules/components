@@ -206,13 +206,11 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      * @param array             $data
      * @param int               $state
      * @param ORMInterface|null $orm
-     * @param array|null        $recordSchema
      */
     public function __construct(
         array $data = [],
         int $state = ORMInterface::STATE_NEW,
-        ORMInterface $orm = null,
-        array $recordSchema = null
+        ORMInterface $orm = null
     ) {
         //We can use global container as fallback if no default values were provided
         $orm = $this->saturate($orm, ORMInterface::class);

@@ -22,7 +22,6 @@ interface ORMInterface
     const STATE_NEW              = 0;
     const STATE_LOADED           = 1;
     const STATE_DELETED          = 2;
-    const STATE_READONLY         = 3;
     const STATE_SCHEDULED        = 100;
     const STATE_SCHEDULED_INSERT = self::STATE_SCHEDULED | 4;
     const STATE_SCHEDULED_UPDATE = self::STATE_SCHEDULED | 5;

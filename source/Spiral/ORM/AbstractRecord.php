@@ -82,7 +82,7 @@ abstract class AbstractRecord extends SchematicEntity
      */
     public function primaryKey()
     {
-        return $this->getField($this->primaryColumn(), null, false);
+        return $this->getField($this->primaryColumn(), null);
     }
 
     /**

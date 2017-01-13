@@ -25,6 +25,10 @@ class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
      */
     public function addCommand(CommandInterface $command)
     {
+        if ($command instanceof NullCommand) {
+            return;
+        }
+
         $this->commands[] = $command;
     }
 

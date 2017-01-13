@@ -256,11 +256,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     public function queueStore(bool $queueRelations = true): CommandInterface
     {
-        if ($this->state == ORMInterface::STATE_READONLY) {
-            //Nothing to do on readonly entities
-            return new NullCommand();
-        }
-
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
         } else {
@@ -292,7 +287,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     public function queueDelete(): CommandInterface
     {
-        if ($this->state == ORMInterface::STATE_READONLY || !$this->isLoaded()) {
+        if (!$this->isLoaded()) {
             //Nothing to do
             return new NullCommand();
         }
@@ -352,7 +347,10 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     private function prepareInsert(): InsertCommand
     {
-        $command = new InsertCommand($this->orm->table(static::class), $this->packValue());
+        $data = $this->packValue();
+        unset($data[$this->primaryColumn()]);
+
+        $command = new InsertCommand($this->orm->table(static::class), $data);
 
         //Entity indicates it's own status
         $this->state = ORMInterface::STATE_SCHEDULED_INSERT;

@@ -45,19 +45,4 @@ class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
             yield $command;
         }
     }
-
-    public function execute()
-    {
-        //nothing to do (see getCommands())
-    }
-
-    public function complete()
-    {
-        //nothing to do (see getCommands())
-    }
-
-    public function rollBack()
-    {
-        //nothing to do (see getCommands())
-    }
 }

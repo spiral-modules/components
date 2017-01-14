@@ -11,12 +11,40 @@ use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
+use Spiral\ORM\RecordInterface;
 
 class HasOneRelation extends SingularRelation
 {
     const CREATE_PLACEHOLDER = true;
 
+    /**
+     * Previously binded instance, to be deleted.
+     *
+     * @var RecordInterface
+     */
+    private $previous = null;
+
+    /**
+     * Related object changed.
+     *
+     * @var bool
+     */
     private $changed = true;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setRelated($value)
+    {
+        //Make sure value is accepted
+        $this->assertValid($value);
+
+        $this->loaded = true;
+        $this->changed = true;
+
+        $this->previous = $this->instance;
+        $this->instance = $value;
+    }
 
     public function queueCommands(ContextualCommandInterface $command)
     {

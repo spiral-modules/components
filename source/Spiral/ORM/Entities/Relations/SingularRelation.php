@@ -7,6 +7,7 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
@@ -92,6 +93,20 @@ abstract class SingularRelation extends AbstractRelation
         if (!empty($this->data[0])) {
             //Use first result
             $this->data = $this->data[0];
+        }
+    }
+
+    /**
+     * @param $value
+     */
+    protected function assertValid($value)
+    {
+        if (is_null($value) && !$this->schema[Record::NULLABLE]) {
+            throw new RelationException("Relation is not nullable");
+        } elseif (!is_a($value, $this->class, false)) {
+            throw new RelationException(
+                "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"
+            );
         }
     }
 }

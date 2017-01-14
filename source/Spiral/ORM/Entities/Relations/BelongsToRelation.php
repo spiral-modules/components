@@ -14,7 +14,6 @@ use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
-use Spiral\Reactor\Exceptions\ReactorException;
 
 /**
  * Complex relation with ability to mount inner_key context into parent save command.
@@ -39,13 +38,7 @@ class BelongsToRelation extends SingularRelation
     public function setRelated($value)
     {
         //Make sure value is accepted
-        if (is_null($value) && !$this->schema[Record::NULLABLE]) {
-            throw new ReactorException("Relation is not nullable");
-        } elseif (!is_a($value, $this->class, false)) {
-            throw new ReactorException(
-                "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"
-            );
-        }
+        $this->assertValid($value);
 
         $this->loaded = true;
         $this->changed = true;

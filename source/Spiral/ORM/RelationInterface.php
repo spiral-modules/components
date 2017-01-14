@@ -7,6 +7,8 @@
 
 namespace Spiral\ORM;
 
+use Spiral\ORM\Exceptions\RelationException;
+
 /**
  * Base definition for cross RecordInterface relations.
  */
@@ -48,4 +50,32 @@ interface RelationInterface
      * @return bool
      */
     public function isLoaded(): bool;
+
+    /**
+     * Assign new value to relation. Make sure type is compatible.
+     *
+     * @param mixed $value
+     *
+     * @throws RelationException
+     */
+    public function setRelated($value);
+
+    /**
+     * Get related data representation.
+     *
+     * @return mixed|self
+     *
+     * @throws RelationException
+     */
+    public function getRelated();
+
+    /**
+     * Create relation specific command or multiple commands in relation to parent object command.
+     * Parent command must be contextual in order to provide ability to exchange FK keys.
+     *
+     * @param ContextualCommandInterface $command
+     *
+     * @return CommandInterface
+     */
+    public function queueCommands(ContextualCommandInterface $command): CommandInterface;
 }

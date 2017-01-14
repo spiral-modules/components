@@ -166,10 +166,6 @@ class RelationMap
      */
     public function setRelated(string $relation, $value)
     {
-        if (is_null($value)) {
-            $this->flushRelated($relation);
-        }
-
         $this->get($relation)->setRelated($value);
     }
 

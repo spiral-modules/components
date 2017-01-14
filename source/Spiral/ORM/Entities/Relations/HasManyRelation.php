@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
+use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
@@ -23,7 +24,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     }
 
 
-    public function queueCommands(ContextualCommandInterface $command)
+    public function queueCommands(ContextualCommandInterface $command): CommandInterface
     {
         return new NullCommand();
     }

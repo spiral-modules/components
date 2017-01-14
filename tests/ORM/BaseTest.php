@@ -47,6 +47,11 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      */
     protected $orm;
 
+    /**
+     * @var Database
+     */
+    protected $db;
+
     public function setUp()
     {
         $this->dbal = $this->databaseManager();
@@ -100,7 +105,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             'connections' => []
         ]));
 
-        $dbal->addDatabase(new Database($this->getDriver(), 'default', ''));
+        $dbal->addDatabase($this->db = new Database($this->getDriver(), 'default', ''));
         $dbal->addDatabase(new Database($this->getDriver(), 'slave', 'slave_'));
 
         return $dbal;

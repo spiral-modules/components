@@ -6,7 +6,7 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
-class ManyToManyRelation extends AbstractRelation
+abstract class ManyToManyRelation extends AbstractRelation
 {
 
 }

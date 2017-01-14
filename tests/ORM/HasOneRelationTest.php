@@ -7,6 +7,7 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Entities\Loaders\RelationLoader;
+use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\User;
 
 abstract class HasOneRelationTest extends BaseTest
@@ -17,6 +18,8 @@ abstract class HasOneRelationTest extends BaseTest
         $user->name = 'Some name';
         $user->profile->bio = 'Some bio';
         $user->save();
+
+        $this->assertInstanceOf(Profile::class, $user->profile);
 
         $this->assertTrue($user->getRelations()->get('profile')->isLoaded());
 
@@ -76,5 +79,44 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertEquals($user->getFields(), $dbUser->getFields());
         $this->assertEquals($user->profile->getFields(), $dbUser->profile->getFields());
+    }
+
+    public function testDeleteAssociated()
+    {
+        $user = new User();
+        $user->name = 'Some name';
+        $user->profile->bio = 'Some bio';
+        $user->save();
+        $this->assertSame(1, $this->db->profiles->count());
+
+        $user->profile->delete();
+        $this->assertSame(0, $this->db->profiles->count());
+        $this->assertFalse($user->profile->isLoaded());
+    }
+
+    public function testSetAssociatedNull()
+    {
+        $user = new User();
+        $user->name = 'Some name';
+        $user->profile->bio = 'Some bio';
+        $user->save();
+
+        $this->assertSame(1, $this->db->profiles->count());
+
+        //Back up
+        $profile = $user->profile;
+
+        $user->profile = null;
+
+        //Null command expected
+        $user->solidState(false);
+        $user->save();
+
+        //New instance
+        $this->assertInstanceOf(Profile::class, $user->profile);
+        $this->assertNotSame($profile, $user->profile);
+
+        $this->assertSame(0, $this->db->profiles->count());
+        $this->assertFalse($user->profile->isLoaded());
     }
 }

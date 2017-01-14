@@ -14,9 +14,9 @@ use Spiral\Database\Entities\Driver;
 interface SQLCommandInterface extends CommandInterface
 {
     /**
-     * Must return associated command driver.
+     * Must return associated command driver. If any.
      *
-     * @return Driver
+     * @return Driver|null
      */
-    public function getDriver(): Driver;
+    public function getDriver();
 }

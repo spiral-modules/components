@@ -101,8 +101,10 @@ abstract class SingularRelation extends AbstractRelation
      */
     protected function assertValid($value)
     {
-        if (is_null($value) && !$this->schema[Record::NULLABLE]) {
-            throw new RelationException("Relation is not nullable");
+        if (is_null($value)) {
+            if (!$this->schema[Record::NULLABLE]) {
+                throw new RelationException("Relation is not nullable");
+            }
         } elseif (!is_a($value, $this->class, false)) {
             throw new RelationException(
                 "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"

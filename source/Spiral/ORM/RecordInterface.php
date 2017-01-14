@@ -7,6 +7,8 @@
 namespace Spiral\ORM;
 
 use Spiral\Models\EntityInterface;
+use Spiral\ORM\Exceptions\RecordException;
+use Spiral\ORM\Exceptions\RelationException;
 
 interface RecordInterface extends EntityInterface
 {

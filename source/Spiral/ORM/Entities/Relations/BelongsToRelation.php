@@ -64,9 +64,18 @@ class BelongsToRelation extends SingularRelation
             return new NullCommand();
         }
 
-        /*
-         * Getting command needed to handle associated entity changes
-         */
+        return $this->queueRelated($command);
+    }
+
+    /**
+     * Store related instance
+     *
+     * @param ContextualCommandInterface $command
+     *
+     * @return ContextualCommandInterface
+     */
+    private function queueRelated(ContextualCommandInterface $command): ContextualCommandInterface
+    {
         $related = $this->instance->queueStore(true);
         $leadingCommand = $related instanceof TransactionalCommand ? $related->getLeading() : $related;
 

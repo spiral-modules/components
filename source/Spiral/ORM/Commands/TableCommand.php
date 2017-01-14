@@ -6,7 +6,6 @@
  */
 namespace Spiral\ORM\Commands;
 
-use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\SQLCommandInterface;
 
@@ -30,7 +29,7 @@ class TableCommand extends AbstractCommand implements SQLCommandInterface
     /**
      * {@inheritdoc}
      */
-    public function getDriver(): Driver
+    public function getDriver()
     {
         return $this->table->getDatabase()->getDriver();
     }

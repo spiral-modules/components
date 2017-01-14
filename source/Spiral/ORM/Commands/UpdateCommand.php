@@ -48,6 +48,19 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getDriver()
+    {
+        if (empty($this->context) && empty($this->values)) {
+            //Nothing to do
+            return null;
+        }
+
+        return $this->table->getDatabase()->getDriver();
+    }
+
+    /**
      * @param array $where
      */
     public function setWhere(array $where)

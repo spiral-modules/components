@@ -63,10 +63,23 @@ abstract class StoreWithRelationsTest extends BaseTest
     public function testSave3levelTreeDirectIni()
     {
         $post = new Post();
-
         $post->author = new User();
         $post->author->name = 'Some name';
         $post->author->profile->bio = 'Some bio';
+
+        $post->save();
+
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post->author);
+        $this->assertSameInDB($post->author->profile);
+    }
+
+    public function testSave3levelTreeDirectIniChild()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->author->name = 'Some name';
+        $post->author->profile = new Profile(['bio' => 'new bio']);
 
         $post->save();
 

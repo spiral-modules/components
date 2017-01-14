@@ -303,4 +303,82 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSameInDB($recursive2);
         $this->assertSameInDB($recursive3);
     }
+
+    public function testLoadOptionalFirstLevelOfParentsPostload()
+    {
+        $recursive = new Recursive();
+        $recursive->parent = $recursive1 = new Recursive();
+        $recursive1->parent = $recursive2 = new Recursive();
+        $recursive2->parent = $recursive3 = new Recursive();
+
+        $recursive->save();
+
+        $this->assertSameInDB($recursive);
+        $this->assertSameInDB($recursive1);
+        $this->assertSameInDB($recursive2);
+        $this->assertSameInDB($recursive3);
+
+        $recursive = $this->orm->selector(Recursive::class)
+            ->load('parent', ['method' => RelationLoader::POSTLOAD])
+            ->wherePK($recursive->primaryKey())
+            ->findOne();
+
+        $this->assertInstanceOf(Recursive::class, $recursive);
+
+        $this->assertTrue($recursive->getRelations()->get('parent')->isLoaded());
+        $this->assertFalse($recursive->parent->getRelations()->get('parent')->isLoaded());
+
+        $recursive = $this->orm->selector(Recursive::class)
+            ->load('parent.parent',
+                ['method' => RelationLoader::POSTLOAD])
+            ->wherePK($recursive->primaryKey())
+            ->findOne();
+
+        $this->assertInstanceOf(Recursive::class, $recursive);
+
+        $this->assertTrue($recursive->getRelations()->get('parent')->isLoaded());
+        $this->assertTrue($recursive->parent->getRelations()->get('parent')->isLoaded());
+        $this->assertFalse($recursive->parent->parent->getRelations()->get('parent')->isLoaded());
+    }
+
+    public function testLoadOptionalFirstLevelOfParentsInload()
+    {
+        $recursive = new Recursive();
+        $recursive->parent = $recursive1 = new Recursive();
+        $recursive1->parent = $recursive2 = new Recursive();
+        $recursive2->parent = $recursive3 = new Recursive();
+
+        $recursive->save();
+
+        $this->assertSameInDB($recursive);
+        $this->assertSameInDB($recursive1);
+        $this->assertSameInDB($recursive2);
+        $this->assertSameInDB($recursive3);
+
+        $recursive = $this->orm->selector(Recursive::class)
+            ->load('parent', ['method' => RelationLoader::INLOAD])
+            ->wherePK($recursive->primaryKey())
+            ->findOne();
+
+        $this->assertInstanceOf(Recursive::class, $recursive);
+
+        $this->assertTrue($recursive->getRelations()->get('parent')->isLoaded());
+        $this->assertFalse($recursive->parent->getRelations()->get('parent')->isLoaded());
+
+        $recursive = $this->orm->selector(Recursive::class)
+            ->load('parent', ['method' => RelationLoader::INLOAD])
+            ->load('parent.parent', ['method' => RelationLoader::INLOAD])
+            ->wherePK($recursive->primaryKey())
+            ->findOne();
+
+        $this->assertInstanceOf(Recursive::class, $recursive);
+
+        $this->assertTrue($recursive->getRelations()->get('parent')->isLoaded());
+        $this->assertTrue($recursive->parent->getRelations()->get('parent')->isLoaded());
+        $this->assertFalse($recursive->parent->parent->getRelations()->get('parent')->isLoaded());
+
+        $this->assertEquals($recursive1->getFields(), $recursive->parent->getFields());
+        $this->assertEquals($recursive2->getFields(), $recursive->parent->parent->getFields());
+        $this->assertEquals($recursive3->getFields(), $recursive->parent->parent->parent->getFields());
+    }
 }

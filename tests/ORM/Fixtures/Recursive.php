@@ -10,9 +10,11 @@ class Recursive extends AbstactRecord
 {
     const SCHEMA = [
         'id'     => 'bigPrimary',
+        'name'   => 'string',
         'parent' => [
-            self::BELONGS_TO => self::class,
-            self::NULLABLE   => true
+            self::BELONGS_TO        => self::class,
+            self::NULLABLE          => true,
+            self::CREATE_CONSTRAINT => false
         ],
     ];
 }

@@ -66,9 +66,9 @@ class RootLoader extends AbstractLoader
      *
      * @return SelectQuery
      */
-    public function compileQuery(): SelectQuery
+    public function compiledQuery(): SelectQuery
     {
-        return $this->query;
+        return $this->configureQuery(clone $this->query);
     }
 
     /**

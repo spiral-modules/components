@@ -112,6 +112,28 @@ abstract class StoreInScopeTest extends BaseTest
         $this->assertSame(0, $this->dbal->database()->users->count());
     }
 
+    public function testStoreWithoutError()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $this->assertFalse($user->isLoaded());
+
+        $transaction = new Transaction();
+        $transaction->store($user);
+        $transaction->addCommand(new CallbackCommand(function () {
+            //all good
+        }));
+
+        $transaction->run();
+
+        $this->assertSame(1, $this->dbal->database()->users->count());
+
+        $transaction->store($user);
+        $transaction->run();
+
+        $this->assertSame(1, $this->dbal->database()->users->count());
+    }
+
     public function testStoreWithError()
     {
         $user = new User();

@@ -367,9 +367,9 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
      *
      * @return SelectQuery
      */
-    public function compileQuery(): SelectQuery
+    public function compiledQuery(): SelectQuery
     {
-        return $this->loader->compileQuery();
+        return $this->loader->compiledQuery();
     }
 
     /**

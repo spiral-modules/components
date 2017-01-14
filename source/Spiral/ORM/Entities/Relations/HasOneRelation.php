@@ -105,7 +105,7 @@ class HasOneRelation extends SingularRelation
              * Basically inversed case of BELONGS_TO.
              */
             $command->onExecute(function (SyncCommandInterface $command) use ($related) {
-                $related->addContext($this->schema[Record::OUTER_KEY], $command->getInsertID());
+                $related->addContext($this->schema[Record::OUTER_KEY], $command->primaryKey());
             });
         } elseif ($this->changed) {
             //Delete old one!

@@ -177,6 +177,28 @@ class RelationBucket
     }
 
     /**
+     * Get associated relation instance.
+     *
+     * @param string $relation
+     *
+     * @return RelationInterface
+     */
+    public function get(string $relation): RelationInterface
+    {
+        if ($this->relations[$relation] instanceof RelationInterface) {
+            return $this->relations[$relation];
+        }
+
+        $instance = $this->orm->makeRelation($this->class, $relation);
+        if (array_key_exists($relation, $this->relations)) {
+            //Relation have been pre-loaded (we have related data)
+            $instance = $instance->withData($this->relations[$relation]);
+        }
+
+        return $this->relations[$relation] = $instance;
+    }
+
+    /**
      * Information about loaded relations.
      *
      * @return array
@@ -190,28 +212,6 @@ class RelationBucket
         }
 
         return $relations;
-    }
-
-    /**
-     * Get associated relation instance.
-     *
-     * @param string $relation
-     *
-     * @return RelationInterface
-     */
-    protected function get(string $relation): RelationInterface
-    {
-        if ($this->relations[$relation] instanceof RelationInterface) {
-            return $this->relations[$relation];
-        }
-
-        $instance = $this->orm->makeRelation($this->class, $relation);
-        if (array_key_exists($relation, $this->relations)) {
-            //Relation have been pre-loaded (we have related data)
-            $instance = $instance->withData($this->relations[$relation]);
-        }
-
-        return $this->relations[$relation] = $instance;
     }
 
     /**

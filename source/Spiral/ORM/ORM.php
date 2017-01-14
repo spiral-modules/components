@@ -17,6 +17,7 @@ use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSelector;
+use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\LocatorInterface;
@@ -32,9 +33,9 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
     /**
      * @invisible
-     * @var EntityCache|null
+     * @var EntityMap|null
      */
-    private $cache = null;
+    private $map = null;
 
     /**
      * @var LocatorInterface
@@ -84,16 +85,16 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      * @param DatabaseManager         $manager
      * @param RelationsConfig         $config
      * @param LocatorInterface|null   $locator
-     * @param EntityCache|null        $cache
+     * @param EntityMap|null          $map
      * @param MemoryInterface|null    $memory
      * @param ContainerInterface|null $container
      */
     public function __construct(
         DatabaseManager $manager,
         RelationsConfig $config,
-
+        //Following arguments can be resolved automatically
         LocatorInterface $locator = null,
-        EntityCache $cache = null,
+        EntityMap $map = null,
         MemoryInterface $memory = null,
         ContainerInterface $container = null
     ) {
@@ -101,7 +102,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $this->config = $config;
 
         //If null is passed = no caching is expected
-        $this->cache = $cache;
+        $this->map = $map;
 
         $this->locator = $locator ?? new NullLocator();
         $this->memory = $memory ?? new NullMemory();
@@ -112,16 +113,16 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     }
 
     /**
-     * Create version of ORM with different initial cache or disabled cache.
+     * Create version of ORM with different initial map or disable caching.
      *
-     * @param EntityCache|null $cache
+     * @param EntityMap|null $map
      *
      * @return ORM
      */
-    public function withCache(EntityCache $cache = null): ORM
+    public function withMap(EntityMap $map = null): ORM
     {
         $orm = clone $this;
-        $orm->cache = $cache;
+        $orm->map = $map;
 
         return $orm;
     }
@@ -131,9 +132,9 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      *
      * @return bool
      */
-    public function hasCache(): bool
+    public function hasMap(): bool
     {
-        return !empty($this->cache);
+        return !empty($this->map);
     }
 
     /**
@@ -204,6 +205,34 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     }
 
     /**
+     * Get source (selection repository) for specific entity class.
+     *
+     * @param string $class
+     *
+     * @return RecordSource
+     */
+    public function source(string $class): RecordSource
+    {
+        $source = $this->define($class, self::R_SOURCE_CLASS);
+
+        if (empty($source)) {
+            //Let's use default source
+            $source = RecordSource::class;
+        }
+
+        $handles = $source::RECORD;
+        if (empty($handles)) {
+            //Force class to be handled
+            $handles = $class;
+        }
+
+        return $this->getFactory()->make($source, [
+            'class' => $handles,
+            'odm'   => $this
+        ]);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function selector(string $class): RecordSelector
@@ -244,7 +273,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             $fields = iterator_to_array($fields);
         }
 
-        if (!$cache || !$this->hasCache()) {
+        if (!$cache || !$this->hasMap()) {
             return $instantiator->make($fields, $state);
         }
 
@@ -254,12 +283,12 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             return $instantiator->make($fields, $state);
         }
 
-        if ($this->cache->has($class, $identity)) {
-            return $this->cache->get($class, $identity);
+        if ($this->map->has($class, $identity)) {
+            return $this->map->get($class, $identity);
         }
 
         //Storing entity in a cache right after creating it
-        return $this->cache->remember(
+        return $this->map->remember(
             $class,
             $identity,
             $instantiator->make($fields, $state)
@@ -331,9 +360,9 @@ class ORM extends Component implements ORMInterface, SingletonInterface
      */
     public function __clone()
     {
-        //Each ORM clone must have isolated entity cache
-        if (!empty($this->cache)) {
-            $this->cache = clone $this->cache;
+        //Each ORM clone must have isolated entity cache/map
+        if (!empty($this->map)) {
+            $this->map = clone $this->map;
         }
     }
 

@@ -69,6 +69,18 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Get associated ORM instance, can be used to create separate query/selection using same
+     * (nested) memory scope for ORM cache.
+     *
+     * @see ORM::selector()
+     * @return ORMInterface
+     */
+    public function getORM(): ORMInterface
+    {
+        return $this->orm;
+    }
+
+    /**
      * Get associated class.
      *
      * @return string

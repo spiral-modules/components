@@ -209,7 +209,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return bool
      */
-    public function __isset($offset)
+    final public function __isset($offset)
     {
         return $this->hasField($offset);
     }
@@ -219,7 +219,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return mixed
      */
-    public function __get($offset)
+    final public function __get($offset)
     {
         return $this->getField($offset);
     }
@@ -228,7 +228,7 @@ abstract class AbstractEntity extends MutableObject implements
      * @param mixed $offset
      * @param mixed $value
      */
-    public function __set($offset, $value)
+    final public function __set($offset, $value)
     {
         $this->setField($offset, $value);
     }
@@ -244,7 +244,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function offsetExists($offset)
+    final public function offsetExists($offset)
     {
         return $this->__isset($offset);
     }
@@ -252,7 +252,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function offsetGet($offset)
+    final public function offsetGet($offset)
     {
         return $this->getField($offset);
     }
@@ -260,7 +260,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function offsetSet($offset, $value)
+    final public function offsetSet($offset, $value)
     {
         $this->setField($offset, $value);
     }
@@ -268,7 +268,7 @@ abstract class AbstractEntity extends MutableObject implements
     /**
      * {@inheritdoc}
      */
-    public function offsetUnset($offset)
+    final public function offsetUnset($offset)
     {
         $this->__unset($offset);
     }

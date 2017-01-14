@@ -19,7 +19,7 @@ use Spiral\ORM\Exceptions\CacheException;
  *
  * assert($user1 !== $user2);
  */
-final class EntityCache
+final class EntityMap
 {
     /**
      * @var EntityInterface[]

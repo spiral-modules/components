@@ -6,10 +6,13 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Core\Component;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ORM\Entities\RelationBucket;
+use Spiral\ORM\Exceptions\FieldException;
+use Spiral\ORM\Exceptions\RelationException;
 
 /**
  * Provides data and relation access functionality.

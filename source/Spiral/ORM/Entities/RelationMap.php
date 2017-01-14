@@ -174,16 +174,6 @@ class RelationMap
     }
 
     /**
-     * De-associated relation data (idential to assign to null).
-     *
-     * @param string $relation
-     */
-    public function flushRelated(string $relation)
-    {
-        $this->get($relation)->flushRelated();
-    }
-
-    /**
      * Get associated relation instance.
      *
      * @param string $relation

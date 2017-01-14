@@ -65,4 +65,48 @@ abstract class StoreInScopeTest extends BaseTest
 
         $this->assertSameInDB($user);
     }
+
+    public function testStoreAndUpdate()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $this->assertSameInDB($user);
+
+        $user->name = 'John';
+        $user->save();
+
+        $this->assertSameInDB($user);
+    }
+
+    public function testStoreAndUpdateDirty()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $this->assertSameInDB($user);
+
+        $user->solidState(false);
+        $user->name = 'John';
+        $user->save();
+
+        $this->assertSameInDB($user);
+    }
+
+    public function testStoreAndDelete()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $this->assertSameInDB($user);
+        $this->assertSame(1, $this->dbal->database()->users->count());
+
+        $user->delete();
+        $this->assertFalse($user->isLoaded());
+
+        $this->assertSame(0, $this->dbal->database()->users->count());
+    }
 }

@@ -8,7 +8,7 @@ namespace Spiral\Tests\ORM\MySQL;
 
 use Spiral\Tests\Database\MySQL\DriverTrait;
 
-class CreateTest extends \Spiral\Tests\ORM\CreateTest
+class StoreTest extends \Spiral\Tests\ORM\StoreTest
 {
     use DriverTrait;
 }

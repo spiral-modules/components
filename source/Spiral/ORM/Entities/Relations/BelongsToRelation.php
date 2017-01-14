@@ -11,6 +11,7 @@ use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\Reactor\Exceptions\ReactorException;
@@ -55,10 +56,16 @@ class BelongsToRelation extends SingularRelation
      * @param ContextualCommandInterface $command
      *
      * @return CommandInterface
+     *
+     * @throws RelationException
      */
     public function queueCommands(ContextualCommandInterface $command): CommandInterface
     {
         if (empty($this->instance)) {
+            if (!$this->schema[Record::NULLABLE]) {
+                throw new RelationException("No data presented in non nullable relation");
+            }
+
             $command->addContext($this->schema[Record::INNER_KEY], null);
 
             return new NullCommand();

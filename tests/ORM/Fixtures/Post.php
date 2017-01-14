@@ -7,9 +7,8 @@
 namespace Spiral\Tests\ORM\Fixtures;
 
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
-use Spiral\ORM\RecordEntity;
 
-class Post extends RecordEntity
+class Post extends AbstactRecord
 {
     const SCHEMA = [
         'id'      => 'bigPrimary',

@@ -9,12 +9,14 @@ namespace Spiral\Tests\ORM;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
 
-abstract class CreateTest extends BaseTest
+abstract class StoreTest extends BaseTest
 {
     public function testNotLoaded()
     {
         /** @var User $user */
         $user = $this->orm->make(User::class);
+        $this->assertInstanceOf(User::class, $user);
+
         $this->assertFalse($user->isLoaded());
     }
 
@@ -22,9 +24,31 @@ abstract class CreateTest extends BaseTest
     {
         /** @var User $user */
         $user = $this->orm->make(User::class);
+        $this->assertInstanceOf(User::class, $user);
+
         $this->assertFalse($user->isLoaded());
 
         $user->save();
+        $this->assertTrue($user->isLoaded());
+        $this->assertNotEmpty($user->primaryKey());
+    }
+
+    public function testSaveIntoTransaction()
+    {
+        /** @var User $user */
+        $user = $this->orm->make(User::class);
+        $this->assertInstanceOf(User::class, $user);
+
+        $this->assertFalse($user->isLoaded());
+
+        $transaction = new Transaction();
+        $user->save($transaction);
+
+        $this->assertTrue($user->isLoaded());
+        $this->assertEmpty($user->primaryKey());
+
+        $transaction->run();
+
         $this->assertTrue($user->isLoaded());
         $this->assertNotEmpty($user->primaryKey());
     }
@@ -33,6 +57,8 @@ abstract class CreateTest extends BaseTest
     {
         /** @var User $user */
         $user = $this->orm->make(User::class);
+        $this->assertInstanceOf(User::class, $user);
+
         $this->assertFalse($user->isLoaded());
 
         $transaction = new Transaction();
@@ -40,6 +66,7 @@ abstract class CreateTest extends BaseTest
 
         $this->assertTrue($user->isLoaded());
         $this->assertEmpty($user->primaryKey());
+
         $transaction->run();
 
         $this->assertTrue($user->isLoaded());

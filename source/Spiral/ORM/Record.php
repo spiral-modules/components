@@ -17,14 +17,14 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
      * Sync entity with database, when no transaction is given ActiveRecord will create and run it
      * automatically.
      *
-     * @param bool                      $queueRelations
      * @param TransactionInterface|null $transaction
+     * @param bool                      $queueRelations
      *
      * @return int
      */
     public function save(
-        bool $queueRelations = true,
-        TransactionInterface $transaction = null
+        TransactionInterface $transaction = null,
+        bool $queueRelations = true
     ): int {
         /*
          * First, per interface agreement calculate entity state after save command being called.

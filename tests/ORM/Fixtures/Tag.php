@@ -6,9 +6,7 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-use Spiral\ORM\Record;
-
-class Tag extends Record
+class Tag extends AbstactRecord
 {
     const SCHEMA = [
         'id'   => 'primary',

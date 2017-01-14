@@ -14,6 +14,8 @@ use Spiral\ORM\Record;
 
 class HasOneRelation extends SingularRelation
 {
+    const CREATE_PLACEHOLDER = true;
+
     private $changed = true;
 
     public function queueCommands(ContextualCommandInterface $command)

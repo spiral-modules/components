@@ -10,7 +10,6 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
-use Spiral\ORM\RecordEntity;
 use Spiral\ORM\RecordInterface;
 
 /**
@@ -18,6 +17,11 @@ use Spiral\ORM\RecordInterface;
  */
 abstract class SingularRelation extends AbstractRelation
 {
+    /**
+     * Create placeholder model when relation is empty.
+     */
+    const CREATE_PLACEHOLDER = false;
+
     /**
      * @var RecordInterface
      */
@@ -40,10 +44,7 @@ abstract class SingularRelation extends AbstractRelation
         }
 
         if (empty($this->data)) {
-            if ($this->schema[RecordEntity::NULLABLE]) {
-                //No parent were defined
-                return null;
-            } else {
+            if (static::CREATE_PLACEHOLDER) {
                 //Stub instance
                 return $this->instance = $this->orm->make(
                     $this->class,
@@ -51,6 +52,8 @@ abstract class SingularRelation extends AbstractRelation
                     ORMInterface::STATE_NEW
                 );
             }
+
+            return null;
         }
 
         //Create instance based on loaded data

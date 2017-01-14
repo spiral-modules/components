@@ -6,13 +6,16 @@
  */
 namespace Spiral\Tests\ORM;
 
+use Spiral\Core\Container;
 use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Helpers\SynchronizationPool;
 use Spiral\ORM\ORM;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schemas\SchemaBuilder;
+use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Tag;
@@ -57,10 +60,17 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $this->builder->pushSchema();
 
         $this->orm->buildSchema($this->builder);
+
+        $container = new Container();
+        $container->bind(ORMInterface::class, $this->orm);
+
+        SharedComponent::shareContainer($container);
     }
 
     public function tearDown()
     {
+        SharedComponent::shareContainer(null);
+
         $schemas = [];
         //Clean up
         foreach ($this->dbal->database()->getTables() as $table) {

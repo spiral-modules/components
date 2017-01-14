@@ -6,8 +6,6 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-use Spiral\Database\Schemas\Prototypes\AbstractColumn;
-
 class Post extends AbstactRecord
 {
     const SCHEMA = [
@@ -22,10 +20,9 @@ class Post extends AbstactRecord
         ],
 
         'tags' => [
-            self::MANY_TO_MANY   => Tag::class,
-            self::PIVOT_COLUMNS  => ['time_linked' => 'datetime'],
-            self::PIVOT_DEFAULTS => ['time_linked' => AbstractColumn::DATETIME_NOW],
-            Tag::INVERSE         => 'posts'
+            self::MANY_TO_MANY  => Tag::class,
+            self::PIVOT_COLUMNS => ['time_linked' => 'datetime'],
+            Tag::INVERSE        => 'posts'
         ]
     ];
 }

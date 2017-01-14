@@ -4,9 +4,9 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\ORM\SQLServer;
+namespace Spiral\Tests\ORM\Postgres;
 
-use Spiral\Tests\Database\SQLServer\DriverTrait;
+use Spiral\Tests\Database\Postgres\DriverTrait;
 
 class CreateTest extends \Spiral\Tests\ORM\CreateTest
 {

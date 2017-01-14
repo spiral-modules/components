@@ -6,6 +6,8 @@
  */
 namespace Spiral\Tests\ORM;
 
+use Spiral\ORM\Commands\CallbackCommand;
+use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
 
@@ -108,5 +110,31 @@ abstract class StoreInScopeTest extends BaseTest
         $this->assertFalse($user->isLoaded());
 
         $this->assertSame(0, $this->dbal->database()->users->count());
+    }
+
+    public function testStoreWithError()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $this->assertFalse($user->isLoaded());
+
+        $transaction = new Transaction();
+        $transaction->store($user);
+        $transaction->addCommand(new CallbackCommand(function () {
+            throw new ORMException("some error");
+        }));
+
+        try {
+            $transaction->run();
+        } catch (ORMException $e) {
+            $this->assertSame('some error', $e->getMessage());
+        }
+
+        $this->assertSame(0, $this->dbal->database()->users->count());
+
+        $transaction->store($user);
+        $transaction->run();
+
+        $this->assertSame(1, $this->dbal->database()->users->count());
     }
 }

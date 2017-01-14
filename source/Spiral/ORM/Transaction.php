@@ -117,6 +117,7 @@ final class Transaction implements TransactionInterface
                 $command->rollBack();
             }
 
+            $this->commands = [];
             throw $e;
         }
 

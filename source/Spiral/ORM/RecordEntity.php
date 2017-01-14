@@ -309,6 +309,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         $command->onRollBack(function () {
             //Flushing existed insert command to prevent collisions
             $this->firstInsert = null;
+            $this->state = ORMInterface::STATE_NEW;
         });
 
         //Keep reference to the last insert command
@@ -340,6 +341,11 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         //Executed when transaction successfully completed
         $command->onComplete(function (UpdateCommand $command) {
             $this->handleUpdate($command);
+        });
+
+        $command->onRollBack(function () {
+            //Flushing existed insert command to prevent collisions
+            $this->state = ORMInterface::STATE_LOADED;
         });
 
         return $command;

@@ -19,6 +19,7 @@ use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ORM\Fixtures\AbstactRecord;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Post;
+use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\Tag;
 use Spiral\Tests\ORM\Fixtures\User;
 use Spiral\Tests\ORM\Traits\ORMTrait;
@@ -29,7 +30,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     const PROFILING = ENABLE_PROFILING;
 
-    const MODELS = [User::class, Post::class, Comment::class, Tag::class];
+    const MODELS = [User::class, Post::class, Comment::class, Tag::class, Profile::class];
 
     /**
      * @var DatabaseManager

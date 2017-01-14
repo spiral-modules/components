@@ -7,7 +7,11 @@
 namespace Spiral\Tests\ORM\Fixtures;
 
 /**
- * @property string $name
+ * @property int     $id
+ * @property string  $name
+ * @property string  $status
+ * @property Post[]  $posts
+ * @property Profile $profile
  */
 class User extends AbstactRecord
 {
@@ -23,7 +27,9 @@ class User extends AbstactRecord
             self::NULLABLE          => false,
             Post::INVERSE           => 'author',
             self::CREATE_CONSTRAINT => false
-        ]
+        ],
+
+        'profile' => [self::HAS_ONE => Profile::class]
     ];
 
     const DEFAULTS = [

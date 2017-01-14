@@ -7,6 +7,7 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\Tests\ORM\Fixtures\Post;
+use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\User;
 
 abstract class StoreWithRelationsTest extends BaseTest
@@ -28,5 +29,35 @@ abstract class StoreWithRelationsTest extends BaseTest
 
         $this->assertSameInDB($post);
         $this->assertSameInDB($post->author);
+    }
+
+    public function testSaveWithChild()
+    {
+        $user = new User();
+        $user->name = 'Some name';
+        $this->assertInstanceOf(Profile::class, $user->profile);
+        $user->profile->bio = 'Some bio';
+
+        $user->save();
+
+        $this->assertSameInDB($user);
+        $this->assertSameInDB($user->profile);
+    }
+
+    public function testSave3levelTree()
+    {
+        $post = new Post();
+
+        $user = new User();
+        $user->name = 'Some name';
+        $this->assertInstanceOf(Profile::class, $user->profile);
+        $user->profile->bio = 'Some bio';
+
+        $post->author = $user;
+        $post->save();
+
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post->author);
+        $this->assertSameInDB($post->author->profile);
     }
 }

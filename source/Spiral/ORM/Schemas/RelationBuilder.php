@@ -111,7 +111,15 @@ class RelationBuilder
         }
     }
 
-    //todo: normalize relations?
+    /**
+     * All declared relations.
+     *
+     * @return RelationInterface[]
+     */
+    public function listRelations(): array
+    {
+        return $this->relations;
+    }
 
     /**
      * Declare set of tables for each relation. Method must return Generator of AbstractTable

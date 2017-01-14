@@ -159,6 +159,26 @@ class SchemaBuilder
     }
 
     /**
+     * Get all associated sources.
+     *
+     * @return array
+     */
+    public function getSources(): array
+    {
+        return $this->sources;
+    }
+
+    /**
+     * Get all created relations.
+     *
+     * @return RelationInterface[]
+     */
+    public function getRelations(): array
+    {
+        return $this->relations->listRelations();
+    }
+
+    /**
      * Process all added schemas and relations in order to created needed tables, indexes and etc.
      * Attention, this method will return new instance of SchemaBuilder without affecting original
      * object. You MUST call this method before calling packSchema() method.

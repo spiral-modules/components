@@ -10,7 +10,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Exceptions\SourceException;
-use Spiral\ORM\ORM;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
@@ -47,17 +46,17 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
     /**
      * @invisible
      *
-     * @var ORM
+     * @var ORMInterface
      */
     protected $orm = null;
 
     /**
-     * @param string $class
-     * @param ORM    $orm
+     * @param string       $class
+     * @param ORMInterface $orm
      *
      * @throws SourceException
      */
-    public function __construct(string $class = null, ORM $orm = null)
+    public function __construct(string $class = null, ORMInterface $orm = null)
     {
         if (empty($class)) {
             if (empty(static::RECORD)) {
@@ -68,7 +67,17 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
         }
 
         $this->class = $class;
-        $this->orm = $this->saturate($orm, ORM::class);
+        $this->orm = $this->saturate($orm, ORMInterface::class);
+    }
+
+    /**
+     * Associated ORM manager.
+     *
+     * @return ORMInterface
+     */
+    public function getORM(): ORMInterface
+    {
+        return $this->orm;
     }
 
     /**

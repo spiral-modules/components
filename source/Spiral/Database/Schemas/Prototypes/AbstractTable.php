@@ -54,9 +54,9 @@ abstract class AbstractTable implements TableInterface
     /**
      * Table states.
      */
-    const STATUS_NEW     = 0;
-    const STATUS_EXISTS  = 1;
-    const STATUS_DROPPED = 2;
+    const STATUS_NEW              = 0;
+    const STATUS_EXISTS           = 1;
+    const STATUS_DECLARED_DROPPED = 2;
 
     /**
      * Indication that table is exists and current schema is fetched from database.
@@ -165,7 +165,7 @@ abstract class AbstractTable implements TableInterface
     public function exists(): bool
     {
         //Derlared as dropped != actually dropped
-        return $this->status == self::STATUS_EXISTS || $this->status == self::STATUS_DROPPED;
+        return $this->status == self::STATUS_EXISTS || $this->status == self::STATUS_DECLARED_DROPPED;
     }
 
     /**
@@ -221,7 +221,12 @@ abstract class AbstractTable implements TableInterface
         }
 
         //Declaring as dropped
-        $this->status = self::STATUS_DROPPED;
+        $this->status = self::STATUS_DECLARED_DROPPED;
+
+        foreach ($this->current->getForeigns() as $foreign) {
+            //Remove all FK keys
+            $this->current->forgetForeign($foreign);
+        }
     }
 
     /**
@@ -644,7 +649,7 @@ abstract class AbstractTable implements TableInterface
         //We need an instance of Handler of dbal operations
         $handler = $this->driver->getHandler($logger);
 
-        if ($this->status == self::STATUS_DROPPED) {
+        if ($this->status == self::STATUS_DECLARED_DROPPED && $behaviour & Behaviour::DO_DROP) {
             //We don't need syncer for this operation
             $handler->dropTable($this);
 
@@ -770,6 +775,7 @@ abstract class AbstractTable implements TableInterface
     public function __debugInfo()
     {
         return [
+            'status'      => $this->status,
             'name'        => $this->getName(),
             'primaryKeys' => $this->getPrimaryKeys(),
             'columns'     => array_values($this->getColumns()),

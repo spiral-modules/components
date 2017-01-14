@@ -1,19 +1,32 @@
 <?php
 /**
- * components
+ * spiral-empty.dev
  *
  * @author    Wolfy-J
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-use Spiral\ORM\Record;
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
+use Spiral\ORM\RecordEntity;
 
-class Post extends Record
+class Post extends RecordEntity
 {
     const SCHEMA = [
-        'id'    => 'primary',
-        'title' => 'string',
+        'id'      => 'bigPrimary',
+        'title'   => 'string(64)',
+        'content' => 'text',
+        'public'  => 'bool',
 
-        'tags' => [self::MANY_TO_MANY => Tag::class, Tag::INVERSE => 'posts']
+        'comments' => [
+            self::HAS_MANY   => Comment::class,
+            Comment::INVERSE => 'post'
+        ],
+
+        'tags' => [
+            self::MANY_TO_MANY   => Tag::class,
+            self::PIVOT_COLUMNS  => ['time_linked' => 'datetime'],
+            self::PIVOT_DEFAULTS => ['time_linked' => AbstractColumn::DATETIME_NOW],
+            Tag::INVERSE         => 'posts'
+        ]
     ];
 }

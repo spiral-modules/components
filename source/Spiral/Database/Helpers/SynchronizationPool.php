@@ -80,7 +80,8 @@ class SynchronizationPool extends Component
     {
         $hasChanges = false;
         foreach ($this->tables as $table) {
-            if ($table->getComparator()->hasChanges()) {
+            //todo: test drop
+            if ($table->getComparator()->hasChanges() || $table->getStatus() == AbstractTable::STATUS_DECLARED_DROPPED) {
                 $hasChanges = true;
                 break;
             }
@@ -101,10 +102,10 @@ class SynchronizationPool extends Component
             $this->dropIndexes($logger);
 
             //Other changes [NEW TABLES WILL BE CREATED HERE!]
-            $this->runChanges($logger);
+            foreach ($this->runChanges($logger) as $table) {
+                $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);
+            }
 
-            //Finishing with new foreign keys
-            $this->createForeigns($logger);
         } catch (\Throwable $e) {
             $this->rollbackTransaction();
             throw $e;
@@ -175,25 +176,25 @@ class SynchronizationPool extends Component
 
     /**
      * @param LoggerInterface|null $logger
+     *
+     * @return AbstractTable[] Created or updated tables.
      */
-    protected function runChanges(LoggerInterface $logger = null)
+    protected function runChanges(LoggerInterface $logger = null): array
     {
+        $tables = [];
         foreach ($this->sortedTables() as $table) {
-            $table->save(
-                Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES ^ Behaviour::CREATE_FOREIGNS,
-                $logger
-            );
+            if ($table->getStatus() == AbstractTable::STATUS_DECLARED_DROPPED) {
+                $table->save(Behaviour::DO_DROP, $logger);
+            } else {
+                $tables[] = $table;
+                $table->save(
+                    Behaviour::DO_ALL ^ Behaviour::DROP_FOREIGNS ^ Behaviour::DROP_INDEXES ^ Behaviour::CREATE_FOREIGNS,
+                    $logger
+                );
+            }
         }
-    }
 
-    /**
-     * @param LoggerInterface|null $logger
-     */
-    protected function createForeigns(LoggerInterface $logger = null)
-    {
-        foreach ($this->sortedTables() as $table) {
-            $table->save(Behaviour::CREATE_FOREIGNS, $logger, true);
-        }
+        return $tables;
     }
 
     /**

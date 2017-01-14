@@ -8,10 +8,12 @@ namespace Spiral\Tests\ORM\Fixtures;
 
 use Spiral\ORM\Record;
 
-class Tag extends Record
+class Comment extends Record
 {
     const SCHEMA = [
-        'id'   => 'primary',
-        'name' => 'string(32)'
+        'id'      => 'primary',
+        'message' => 'string',
+
+        'author' => [self::BELONGS_TO => User::class]
     ];
 }

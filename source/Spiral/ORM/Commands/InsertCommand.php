@@ -9,11 +9,12 @@ namespace Spiral\ORM\Commands;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Commands\Traits\ContextTrait;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\SyncCommandInterface;
 
 /**
  * Inserted data CAN be modified by parent commands using context.
  */
-class InsertCommand extends TableCommand implements ContextualCommandInterface
+class InsertCommand extends TableCommand implements ContextualCommandInterface, SyncCommandInterface
 {
     use ContextTrait;
 
@@ -50,11 +51,19 @@ class InsertCommand extends TableCommand implements ContextualCommandInterface
     }
 
     /**
+     * @return mixed|null
+     */
+    public function primaryKey()
+    {
+        return $this->insertID;
+    }
+
+    /**
      * Inserting data into associated table.
      */
     public function execute()
     {
-        $this->insertID = $this->table->insertOne($this->context +  $this->data);
+        $this->insertID = $this->table->insertOne($this->context + $this->data);
         parent::execute();
     }
 }

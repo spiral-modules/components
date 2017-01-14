@@ -14,10 +14,21 @@ use Spiral\ORM\CommandInterface;
 abstract class AbstractCommand implements CommandInterface
 {
     /**
-     * @var \Closure
+     * @invisible
+     * @var \Closure[]
      */
     private $onExecute = [];
+
+    /**
+     * @invisible
+     * @var \Closure[]
+     */
     private $onComplete = [];
+
+    /**
+     * @invisible
+     * @var \Closure[]
+     */
     private $onRollBack = [];
 
     /**

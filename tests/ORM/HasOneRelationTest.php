@@ -7,6 +7,8 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Entities\Loaders\RelationLoader;
+use Spiral\ORM\Entities\Relations\HasOneRelation;
+use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\User;
 
@@ -15,8 +17,14 @@ abstract class HasOneRelationTest extends BaseTest
     public function testCreateWithNewRelation()
     {
         $user = new User();
+        $this->assertFalse($user->getRelations()->get('profile')->isLoaded());
+        $this->assertInstanceOf(HasOneRelation::class, $user->getRelations()->get('profile'));
+
         $user->name = 'Some name';
         $user->profile->bio = 'Some bio';
+
+        $this->assertTrue($user->getRelations()->get('profile')->isLoaded());
+
         $user->save();
 
         $this->assertInstanceOf(Profile::class, $user->profile);
@@ -25,6 +33,17 @@ abstract class HasOneRelationTest extends BaseTest
 
         $this->assertSameInDB($user);
         $this->assertSameInDB($user->profile);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\RelationException
+     * @expectedExceptionMessage Must be an instance of 'Spiral\Tests\ORM\Fixtures\Profile',
+     *                           'Spiral\Tests\ORM\Fixtures\Comment' given
+     */
+    public function testSetWrongInstance()
+    {
+        $user = new User();
+        $user->profile = new Comment();
     }
 
     public function testUpdateRelation()

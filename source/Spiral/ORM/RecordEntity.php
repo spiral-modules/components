@@ -11,7 +11,7 @@ use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ORM\Commands\DeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
-use Spiral\ORM\Commands\UpdateCommand;
+use Spiral\ORM\Commands\SyncCommand;
 use Spiral\ORM\Entities\RelationMap;
 use Spiral\ORM\Events\RecordEvent;
 use Spiral\ORM\Exceptions\RecordException;
@@ -280,7 +280,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     public function queueDelete(): CommandInterface
     {
         if (!$this->isLoaded()) {
-            //Nothing to do
+            //Nothing to do, do not delete twice?
             return new NullCommand();
         }
 
@@ -317,20 +317,22 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     }
 
     /**
-     * @return UpdateCommand
+     * @return SyncCommand
      */
-    private function prepareUpdate(): UpdateCommand
+    private function prepareUpdate(): SyncCommand
     {
-        $command = new UpdateCommand(
+        $command = new SyncCommand(
             $this->orm->table(static::class),
             [$this->primaryColumn() => $this->primaryKey()],
-            $this->packChanges(true)
+            $this->packChanges(true),
+            $this->primaryKey()
         );
 
         if (!empty($this->firstInsert)) {
             $this->firstInsert->onExecute(function (InsertCommand $insert) use ($command) {
                 //Sync primary key values
                 $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
+                $command->setPrimaryKey($insert->getInsertID());
             });
         }
 
@@ -339,7 +341,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         $this->dispatch('update', new RecordEvent($this));
 
         //Executed when transaction successfully completed
-        $command->onComplete(function (UpdateCommand $command) {
+        $command->onComplete(function (SyncCommand $command) {
             $this->handleUpdate($command);
         });
 
@@ -405,9 +407,9 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     /**
      * Handle result of update command.
      *
-     * @param UpdateCommand $command
+     * @param SyncCommand $command
      */
-    private function handleUpdate(UpdateCommand $command)
+    private function handleUpdate(SyncCommand $command)
     {
         //Once command executed we will know some information about it's context (for exampled added FKs)
         foreach ($command->getContext() as $name => $value) {
@@ -415,6 +417,8 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         }
 
         $this->state = ORMInterface::STATE_LOADED;
+        $this->solidState(false);
+
         $this->dispatch('updated', new RecordEvent($this));
     }
 

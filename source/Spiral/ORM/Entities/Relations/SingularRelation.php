@@ -79,14 +79,14 @@ abstract class SingularRelation extends AbstractRelation
     {
         $this->loaded = true;
 
-        $innerKey = $this->schema[Record::INNER_KEY];
+        $innerKey = $this->key(Record::INNER_KEY);
         if (empty($this->parent->getField($innerKey))) {
             //Unable to load
             return;
         }
 
         $this->data = $this->orm->selector($this->class)->where(
-            $this->schema[Record::OUTER_KEY],
+            $this->key(Record::OUTER_KEY),
             $this->parent->getField($innerKey)
         )->fetchData();
 

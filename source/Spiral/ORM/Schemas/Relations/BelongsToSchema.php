@@ -49,10 +49,10 @@ class BelongsToSchema extends AbstractSchema
      */
     const OPTIONS_TEMPLATE = [
         //Outer key is primary key of related record by default
-        Record::OUTER_KEY => '{target:primaryKey}',
+        Record::OUTER_KEY         => '{target:primaryKey}',
 
         //Inner key will be based on singular name of relation and outer key name
-        Record::INNER_KEY => '{relation:singular}_{option:outerKey}',
+        Record::INNER_KEY         => '{relation:singular}_{option:outerKey}',
 
         //Set constraints (foreign keys) by default
         Record::CREATE_CONSTRAINT => true,
@@ -61,11 +61,11 @@ class BelongsToSchema extends AbstractSchema
         Record::CONSTRAINT_ACTION => 'CASCADE',
 
         //Relation allowed to create indexes in inner table
-        Record::CREATE_INDEXES => true,
+        Record::CREATE_INDEXES    => true,
 
         //We are going to make all relations nullable by default, so we can add fields to existed
         //tables without raising an exceptions
-        Record::NULLABLE => true,
+        Record::NULLABLE          => true,
     ];
 
     /**

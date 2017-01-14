@@ -102,6 +102,8 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
                 Record::CREATE_CONSTRAINT => $this->option(Record::CREATE_CONSTRAINT),
                 Record::CONSTRAINT_ACTION => $this->option(Record::CONSTRAINT_ACTION),
                 Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
+
+                //Ohh, this is very very interesting behaviour there, when
                 Record::NULLABLE          => $this->option(Record::NULLABLE),
             ]
         );

@@ -7,13 +7,14 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\CommandInterface;
-use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
+use Spiral\ORM\Commands\SyncCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
+use Spiral\ORM\SyncCommandInterface;
 
 /**
  * Complex relation with ability to mount inner_key context into parent save command.
@@ -26,11 +27,9 @@ class BelongsToRelation extends SingularRelation
     const LEADING_RELATION = true;
 
     /**
-     * Related object changed.
-     *
-     * @var bool
+     * No placeholder for belongs to.
      */
-    private $changed = false;
+    const CREATE_PLACEHOLDER = false;
 
     /**
      * {@inheritdoc}
@@ -41,7 +40,6 @@ class BelongsToRelation extends SingularRelation
         $this->assertValid($value);
 
         $this->loaded = true;
-        $this->changed = true;
         $this->instance = $value;
     }
 
@@ -54,17 +52,17 @@ class BelongsToRelation extends SingularRelation
      */
     public function queueCommands(ContextualCommandInterface $command): CommandInterface
     {
-        if (empty($this->instance)) {
-            if (!$this->schema[Record::NULLABLE]) {
-                throw new RelationException("No data presented in non nullable relation");
-            }
-
-            $command->addContext($this->schema[Record::INNER_KEY], null);
-
-            return new NullCommand();
+        if (!empty($this->instance)) {
+            return $this->queueRelated($command);
         }
 
-        return $this->queueRelated($command);
+        if (!$this->schema[Record::NULLABLE]) {
+            throw new RelationException("No data presented in non nullable relation");
+        }
+
+        $command->addContext($this->schema[Record::INNER_KEY], null);
+
+        return new NullCommand();
     }
 
     /**
@@ -83,20 +81,17 @@ class BelongsToRelation extends SingularRelation
         $primaryKey = $this->orm->define(get_class($this->instance), ORMInterface::R_PRIMARY_KEY);
 
         if (
-            $leadingCommand instanceof InsertCommand
-            && $primaryKey == $this->schema[Record::OUTER_KEY]
+            $leadingCommand instanceof SyncCommandInterface
+            && $primaryKey == $this->key(Record::OUTER_KEY)
         ) {
             /**
              * Particular case when parent entity exists but now saved yet AND outer key is PK.
+             *
+             * Promised by previous command.
              */
-            $leadingCommand->onExecute(function (InsertCommand $related) use ($command) {
-                $command->addContext($this->schema[Record::INNER_KEY], $related->getInsertID());
+            $leadingCommand->onExecute(function (SyncCommandInterface $related) use ($command) {
+                $command->addContext($this->key(Record::INNER_KEY), $related->primaryKey());
             });
-        } elseif ($this->changed) {
-            $command->addContext(
-                $this->schema[Record::INNER_KEY],
-                $this->instance->getField($this->schema[Record::OUTER_KEY])
-            );
         }
 
         return $related;

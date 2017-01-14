@@ -24,8 +24,8 @@ class User extends AbstactRecord
         //Relations
         'posts'   => [
             self::HAS_MANY          => Post::class,
-            self::NULLABLE          => false,
             Post::INVERSE           => 'author',
+            Post::NULLABLE          => false,
             self::CREATE_CONSTRAINT => false
         ],
 

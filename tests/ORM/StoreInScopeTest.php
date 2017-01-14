@@ -137,4 +137,28 @@ abstract class StoreInScopeTest extends BaseTest
 
         $this->assertSame(1, $this->dbal->database()->users->count());
     }
+
+    public function testMultipleSyncCommands()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $this->assertFalse($user->isLoaded());
+
+        $transaction = new Transaction();
+        $transaction->store($user);
+
+        $user->name = 'John';
+
+        $transaction->store($user);
+
+        $user->name = 'Bobby';
+        $transaction->store($user);
+
+        //Nothing changed
+        $transaction->store($user);
+
+        $transaction->run();
+
+        $this->assertSame(1, $this->dbal->database()->users->count());
+    }
 }

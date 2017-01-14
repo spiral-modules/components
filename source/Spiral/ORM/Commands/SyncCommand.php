@@ -9,13 +9,14 @@ namespace Spiral\ORM\Commands;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Commands\Traits\ContextTrait;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\SyncCommandInterface;
 
 /**
  * Update data CAN be modified by parent commands using context.
  *
  * This is conditional command, it would not be executed when no fields are given!
  */
-class UpdateCommand extends TableCommand implements ContextualCommandInterface
+class SyncCommand extends TableCommand implements ContextualCommandInterface, SyncCommandInterface
 {
     use ContextTrait;
 
@@ -25,6 +26,13 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      * @var array
      */
     private $where = [];
+
+    /**
+     * Primary key value (from previous command), promised on execution!.
+     *
+     * @var mixed
+     */
+    private $primaryKey;
 
     /**
      * Columns to be updated.
@@ -39,12 +47,14 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      * @param Table $table
      * @param array $where
      * @param array $values
+     * @param mixed $primaryKey
      */
-    public function __construct(Table $table, array $where, array $values = [])
+    public function __construct(Table $table, array $where, array $values = [], $primaryKey = null)
     {
         parent::__construct($table);
         $this->where = $where;
         $this->values = $values;
+        $this->primaryKey = $primaryKey;
     }
 
     /**
@@ -74,6 +84,24 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
     public function getWhere(): array
     {
         return $this->where;
+    }
+
+    /**
+     * Promised on execute.
+     *
+     * @return mixed|null
+     */
+    public function primaryKey()
+    {
+        return $this->primaryKey;
+    }
+
+    /**
+     * @param mixed $primaryKey
+     */
+    public function setPrimaryKey($primaryKey)
+    {
+        $this->primaryKey = $primaryKey;
     }
 
     /**

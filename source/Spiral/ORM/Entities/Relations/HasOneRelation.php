@@ -9,11 +9,13 @@ namespace Spiral\ORM\Entities\Relations;
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
+use Spiral\ORM\Commands\SyncCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
+use Spiral\ORM\SyncCommandInterface;
 
 class HasOneRelation extends SingularRelation
 {
@@ -94,21 +96,21 @@ class HasOneRelation extends SingularRelation
         $primaryKey = $this->orm->define(get_class($this->parent), ORMInterface::R_PRIMARY_KEY);
 
         if (
-            $command instanceof InsertCommand
-            && $primaryKey == $this->schema[Record::INNER_KEY]
+            $command instanceof SyncCommandInterface
+            && $primaryKey == $this->key(Record::INNER_KEY)
         ) {
             /**
              * Particular case when parent entity exists but now saved yet AND outer key is PK.
              *
              * Basically inversed case of BELONGS_TO.
              */
-            $command->onExecute(function (InsertCommand $command) use ($related) {
+            $command->onExecute(function (SyncCommandInterface $command) use ($related) {
                 $related->addContext($this->schema[Record::OUTER_KEY], $command->getInsertID());
             });
         } elseif ($this->changed) {
             //Delete old one!
             $related->addContext(
-                $this->schema[Record::OUTER_KEY],
+                $this->key(Record::OUTER_KEY),
                 $this->parent->getField($this->schema[Record::INNER_KEY])
             );
         }

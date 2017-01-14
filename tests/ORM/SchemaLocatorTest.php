@@ -8,10 +8,9 @@ namespace Spiral\Tests\ORM;
 
 use Mockery as m;
 use Spiral\Core\Container;
-use Spiral\ODM\Configs\MutatorsConfig;
-use Spiral\ODM\DocumentEntity;
-use Spiral\ODM\Entities\DocumentSource;
-use Spiral\ODM\Schemas\SchemaLocator;
+use Spiral\ORM\Configs\MutatorsConfig;
+use Spiral\ORM\RecordEntity;
+use Spiral\ORM\Schemas\SchemaLocator;
 use Spiral\ORM\Schemas\RecordSchema;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\User;
@@ -34,7 +33,7 @@ class SchemaLocatorTest extends \PHPUnit_Framework_TestCase
 
         $locator = new SchemaLocator($container);
 
-        $classes->shouldReceive('getClasses', [DocumentEntity::class])->andReturn([
+        $classes->shouldReceive('getClasses', [RecordEntity::class])->andReturn([
             User::class => ['name' => User::class, 'filename' => '~', 'abstract' => false],
             Post::class => ['name' => Post::class, 'filename' => '~', 'abstract' => true]
         ]);
@@ -61,7 +60,7 @@ class SchemaLocatorTest extends \PHPUnit_Framework_TestCase
 
         $locator = new SchemaLocator($container);
 
-        $classes->shouldReceive('getClasses', [DocumentSource::class])->andReturn([
+        $classes->shouldReceive('getClasses', [RecordEntity::class])->andReturn([
             UserSource::class => [
                 'name'     => UserSource::class,
                 'filename' => '~',

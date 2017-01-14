@@ -6,10 +6,13 @@
  */
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
+use Psr\Log\LoggerInterface;
+use Spiral\Database\Entities\AbstractHandler as Behaviour;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+
 
 class PostgresTable extends AbstractTable
 {
@@ -38,6 +41,30 @@ class PostgresTable extends AbstractTable
     {
         return $this->primarySequence;
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * SQLServer will reload schemas after successful savw.
+     */
+    public function save(
+        int $behaviour = Behaviour::DO_ALL,
+        LoggerInterface $logger = null,
+        bool $reset = true
+    ) {
+        parent::save($behaviour, $logger, $reset);
+
+        if ($reset) {
+            foreach ($this->fetchColumns() as $column) {
+                $currentColumn = $this->current->findColumn($column->getName());
+                if (!empty($currentColumn) && $column->compare($currentColumn)) {
+                    //Ensure constrained columns
+                    $this->current->registerColumn($column);
+                }
+            }
+        }
+    }
+
 
     /**
      * {@inheritdoc}

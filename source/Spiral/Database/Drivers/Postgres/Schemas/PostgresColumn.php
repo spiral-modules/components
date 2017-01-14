@@ -421,8 +421,8 @@ class PostgresColumn extends AbstractColumn
             $tableOID,
             '(' . $column->name . '%',
             '("' . $column->name . '%',
-            $column->name . '::text%',
             //Postgres magic
+            $column->name . '::text%',
             '%(' . $column->name . ')::text%'
         ]);
 
@@ -430,7 +430,7 @@ class PostgresColumn extends AbstractColumn
             if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches)) {
                 $enumValues = explode(',', $matches[1]);
                 foreach ($enumValues as &$value) {
-                    if (preg_match("/^'?(.*?)'?::(.+)/", trim($value), $matches)) {
+                    if (preg_match("/^'?(.*?)'?::(.+)/", trim($value, ' ()'), $matches)) {
                         //In database: 'value'::TYPE
                         $value = $matches[1];
                     }

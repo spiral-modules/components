@@ -18,12 +18,12 @@ interface InstantiatorInterface
      * Method must detect and construct appropriate class instance based on a given fields. When
      * state set to NEW values MUST be filtered/typecasted before appearing in entity!
      *
-     * @param array|\ArrayAccess|mixed $fields
-     * @param int                      $state
+     * @param array $fields
+     * @param int   $state
      *
      * @return RecordInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, int $state): RecordInterface;
+    public function make(array $fields, int $state): RecordInterface;
 }

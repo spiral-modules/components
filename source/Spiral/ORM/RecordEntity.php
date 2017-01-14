@@ -12,7 +12,7 @@ use Spiral\ORM\Commands\DeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\UpdateCommand;
-use Spiral\ORM\Entities\RelationBucket;
+use Spiral\ORM\Entities\RelationMap;
 use Spiral\ORM\Events\RecordEvent;
 use Spiral\ORM\Exceptions\RecordException;
 use Spiral\ORM\Exceptions\RelationException;
@@ -218,7 +218,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         //Non loaded records should be in solid state by default
         $this->solidState($this->state == ORMInterface::STATE_NEW);
 
-        parent::__construct($orm, $data, new RelationBucket($this, $orm));
+        parent::__construct($orm, $data, new RelationMap($this, $orm));
     }
 
     /**

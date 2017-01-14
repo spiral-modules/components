@@ -7,7 +7,6 @@
 namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\CommandInterface;
-use Spiral\ORM\Commands\CommandQueue;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
@@ -17,7 +16,7 @@ use Spiral\ORM\RelationInterface;
 /**
  * Represent set of entity relations.
  */
-class RelationBucket
+class RelationMap
 {
     /**
      * @var array|RelationInterface[]
@@ -30,6 +29,13 @@ class RelationBucket
      * @var string
      */
     private $class;
+
+    /**
+     * Parent model.
+     *
+     * @var RecordInterface
+     */
+    private $parent;
 
     /**
      * Relations schema.
@@ -52,6 +58,7 @@ class RelationBucket
     public function __construct(RecordInterface $record, ORMInterface $orm)
     {
         $this->class = get_class($record);
+        $this->parent = $record;
         $this->schema = $orm->define($this->class, ORMInterface::R_RELATIONS);
         $this->orm = $orm;
     }
@@ -185,14 +192,17 @@ class RelationBucket
      */
     public function get(string $relation): RelationInterface
     {
-        if ($this->relations[$relation] instanceof RelationInterface) {
+        if (isset($this->relations[$relation]) && $this->relations[$relation] instanceof RelationInterface) {
             return $this->relations[$relation];
         }
 
         $instance = $this->orm->makeRelation($this->class, $relation);
         if (array_key_exists($relation, $this->relations)) {
-            //Relation have been pre-loaded (we have related data)
-            $instance = $instance->withData($this->relations[$relation]);
+            //Indicating that relation is loaded
+            $instance = $instance->withContext($this->parent, true, $this->relations[$relation]);
+        } else {
+            //Not loaded relation
+            $instance = $instance->withContext($this->parent, false);
         }
 
         return $this->relations[$relation] = $instance;
@@ -207,8 +217,16 @@ class RelationBucket
     {
         $relations = [];
 
-        foreach ($this->schema as $name => $content) {
-            $relations[$name] = !array_key_exists($name, $this->relations) ? 'none' : 'loaded';
+        foreach ($this->schema as $relation => $schema) {
+            $accessor = $this->get($relation);
+
+            //Only base class name
+            $type = (new \ReflectionClass($accessor))->getShortName();
+
+            $class = (new \ReflectionClass($accessor->getClass()))->getShortName();
+
+            //[+] for loaded, [~] for lazy loaded
+            $relations[$relation] = $type . '(' . $class . ') [' . ($accessor->isLoaded() ? '+]' : '~]');
         }
 
         return $relations;

@@ -269,7 +269,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             $cache = false;
         }
 
-        if (!is_array($fields)) {
+        if ($fields instanceof \Traversable) {
             $fields = iterator_to_array($fields);
         }
 

@@ -10,7 +10,7 @@ use Spiral\Core\Component;
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
-use Spiral\ORM\Entities\RelationBucket;
+use Spiral\ORM\Entities\RelationMap;
 use Spiral\ORM\Exceptions\FieldException;
 use Spiral\ORM\Exceptions\RelationException;
 
@@ -46,7 +46,7 @@ abstract class AbstractRecord extends SchematicEntity
     /**
      * AssociatedRelation bucket. Manages declared record relations.
      *
-     * @var RelationBucket
+     * @var RelationMap
      */
     protected $relations;
 
@@ -59,17 +59,17 @@ abstract class AbstractRecord extends SchematicEntity
     protected $orm;
 
     /**
-     * @param ORMInterface   $orm
-     * @param array          $data
-     * @param RelationBucket $relations
+     * @param ORMInterface $orm
+     * @param array        $data
+     * @param RelationMap  $relations
      */
     public function __construct(
         ORMInterface $orm,
         array $data = [],
-        RelationBucket $relations
+        RelationMap $relations
     ) {
         $this->orm = $orm;
-        $this->recordSchema = $this->orm->define(static::class, ORMInterface::R_SCHEMA);
+        $this->recordSchema = (array)$this->orm->define(static::class, ORMInterface::R_SCHEMA);
 
         $this->relations = $relations;
         $this->relations->extractRelations($data);
@@ -211,6 +211,7 @@ abstract class AbstractRecord extends SchematicEntity
     public function __debugInfo()
     {
         return [
+            'objectID'  => hash('crc32', spl_object_hash($this)),
             'database'  => $this->orm->define(static::class, ORMInterface::R_DATABASE),
             'table'     => $this->orm->define(static::class, ORMInterface::R_TABLE),
             'fields'    => $this->getFields(),

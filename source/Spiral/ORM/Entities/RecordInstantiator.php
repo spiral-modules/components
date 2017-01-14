@@ -46,12 +46,8 @@ class RecordInstantiator implements InstantiatorInterface
      *
      * @throws InstantionException
      */
-    public function make($fields, int $state): RecordInterface
+    public function make(array $fields, int $state): RecordInterface
     {
-        if (!is_array($fields)) {
-            $fields = iterator_to_array($fields);
-        }
-
         $class = $this->class;
 
         //Now we can construct needed class, in this case we are following DocumentEntity declaration
@@ -82,5 +78,4 @@ class RecordInstantiator implements InstantiatorInterface
 
         return $entity;
     }
-
 }

@@ -6,7 +6,7 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
-class HasManyRelation
+class HasManyRelation extends AbstractRelation
 {
 
     public function getRelated()

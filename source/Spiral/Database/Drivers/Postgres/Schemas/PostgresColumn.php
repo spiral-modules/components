@@ -423,6 +423,7 @@ class PostgresColumn extends AbstractColumn
         ]);
 
         foreach ($constraints as $constraint) {
+            print_r($constraint);
             if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches)) {
                 $enumValues = explode(',', $matches[1]);
                 foreach ($enumValues as &$value) {

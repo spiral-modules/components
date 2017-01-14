@@ -16,6 +16,7 @@ use Spiral\ORM\ORM;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schemas\SchemaBuilder;
 use Spiral\Tests\Core\Fixtures\SharedComponent;
+use Spiral\Tests\ORM\Fixtures\AbstactRecord;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Tag;
@@ -102,6 +103,20 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $dbal->addDatabase(new Database($this->getDriver(), 'slave', 'slave_'));
 
         return $dbal;
+    }
+
+    protected function assertSameInDB(AbstactRecord $record)
+    {
+        $this->assertTrue($record->isLoaded());
+        $this->assertNotEmpty($record->primaryKey());
+
+        $fromDB = $this->orm->source(get_class($record))->findByPK($record->primaryKey());
+        $this->assertInstanceOf(get_class($record), $fromDB);
+
+        $this->assertEquals(
+            $record->getFields(),
+            $fromDB->getFields()
+        );
     }
 
     /**

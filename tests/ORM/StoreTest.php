@@ -71,5 +71,7 @@ abstract class StoreTest extends BaseTest
 
         $this->assertTrue($user->isLoaded());
         $this->assertNotEmpty($user->primaryKey());
+
+        $this->assertSameInDB($user);
     }
 }

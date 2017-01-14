@@ -15,7 +15,6 @@ class User extends AbstactRecord
         'id'      => 'primary',
         'name'    => 'string',
         'status'  => 'enum(active, disabled)',
-        'date'    => 'datetime',
         'balance' => 'float',
 
         //Relations

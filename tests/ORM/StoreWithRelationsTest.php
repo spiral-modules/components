@@ -60,7 +60,7 @@ abstract class StoreWithRelationsTest extends BaseTest
         $this->assertSameInDB($post->author->profile);
     }
 
-    public function testSave3levelTreeDirectIni()
+    public function testSave3levelTreeDirectInit()
     {
         $post = new Post();
         $post->author = new User();
@@ -74,7 +74,7 @@ abstract class StoreWithRelationsTest extends BaseTest
         $this->assertSameInDB($post->author->profile);
     }
 
-    public function testSave3levelTreeDirectIniChild()
+    public function testSave3levelTreeDirectInitChild()
     {
         $post = new Post();
         $post->author = new User();

@@ -8,7 +8,6 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
-use Spiral\ORM\Commands\SyncCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Exceptions\RelationException;

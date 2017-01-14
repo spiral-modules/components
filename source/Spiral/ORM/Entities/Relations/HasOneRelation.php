@@ -7,9 +7,7 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\CommandInterface;
-use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
-use Spiral\ORM\Commands\SyncCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\ORMInterface;
@@ -96,8 +94,7 @@ class HasOneRelation extends SingularRelation
         $primaryKey = $this->orm->define(get_class($this->parent), ORMInterface::R_PRIMARY_KEY);
 
         if (
-            $command instanceof SyncCommandInterface
-            && $primaryKey == $this->key(Record::INNER_KEY)
+            $command instanceof SyncCommandInterface && $primaryKey == $this->key(Record::INNER_KEY)
         ) {
             /**
              * Particular case when parent entity exists but now saved yet AND outer key is PK.

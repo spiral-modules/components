@@ -11,6 +11,7 @@ use Spiral\ORM\Entities\Relations\BelongsToRelation;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Post;
+use Spiral\Tests\ORM\Fixtures\Recursive;
 use Spiral\Tests\ORM\Fixtures\User;
 
 abstract class BelongsToRelationTest extends BaseTest
@@ -286,5 +287,20 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->assertEquals($post->getFields(), $dbPost->getFields());
         $this->assertEquals($post->author->getFields(), $dbPost->author->getFields());
+    }
+
+    public function testRecursive()
+    {
+        $recursive = new Recursive();
+        $recursive->parent = $recursive1 = new Recursive();
+        $recursive1->parent = $recursive2 = new Recursive();
+        $recursive2->parent = $recursive3 = new Recursive();
+
+        $recursive->save();
+
+        $this->assertSameInDB($recursive);
+        $this->assertSameInDB($recursive1);
+        $this->assertSameInDB($recursive2);
+        $this->assertSameInDB($recursive3);
     }
 }

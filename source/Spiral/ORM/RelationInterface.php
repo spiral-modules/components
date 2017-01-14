@@ -12,6 +12,22 @@ namespace Spiral\ORM;
  */
 interface RelationInterface
 {
+    /**
+     * Indicates that relation commands must be executed prior to parent command.
+     *
+     * @return bool
+     */
+    public function isLeading(): bool;
+
+    /**
+     * Create version of relation with given parent and loaded data (if any).
+     *
+     * @param RecordInterface $parent
+     * @param bool            $loaded
+     * @param array|null      $data
+     *
+     * @return RelationInterface
+     */
     public function withContext(
         RecordInterface $parent,
         bool $loaded = false,

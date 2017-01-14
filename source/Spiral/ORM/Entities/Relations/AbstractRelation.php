@@ -13,6 +13,11 @@ use Spiral\ORM\RelationInterface;
 abstract class AbstractRelation implements RelationInterface
 {
     /**
+     * Indicates that relation commands must be executed prior to parent command.
+     */
+    const LEADING_RELATION = false;
+
+    /**
      * Indication that relation have been loaded.
      *
      * @var bool
@@ -22,6 +27,7 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * Parent record. Only read operations!
      *
+     * @invisible
      * @var RecordInterface
      */
     protected $parent;
@@ -44,6 +50,7 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * Related data.
      *
+     * @invisible
      * @var array
      */
     protected $data = null;
@@ -51,6 +58,7 @@ abstract class AbstractRelation implements RelationInterface
     /**
      * Provides ability for lazy-loading model initialization and inner selects.
      *
+     * @invisible
      * @var ORMInterface
      */
     protected $orm;
@@ -65,6 +73,14 @@ abstract class AbstractRelation implements RelationInterface
         $this->class = $class;
         $this->schema = $schema;
         $this->orm = $orm;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isLeading(): bool
+    {
+        return static::LEADING_RELATION;
     }
 
     /**

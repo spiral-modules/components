@@ -7,9 +7,18 @@
 namespace Spiral\ORM\Commands;
 
 use Spiral\Database\Entities\Table;
+use Spiral\ORM\Commands\Traits\ContextTrait;
+use Spiral\ORM\ContextualCommandInterface;
 
-class UpdateCommand extends TableCommand
+/**
+ * Update data CAN be modified by parent commands using context.
+ *
+ * This is conditional command, it would not be executed when no fields are given!
+ */
+class UpdateCommand extends TableCommand implements ContextualCommandInterface
 {
+    use ContextTrait;
+
     /**
      * Where conditions (short where format).
      *
@@ -31,7 +40,7 @@ class UpdateCommand extends TableCommand
      * @param array $where
      * @param array $values
      */
-    public function __construct(Table $table, array $where, array $values)
+    public function __construct(Table $table, array $where, array $values = [])
     {
         parent::__construct($table);
         $this->where = $where;
@@ -47,11 +56,23 @@ class UpdateCommand extends TableCommand
     }
 
     /**
+     * @return array
+     */
+    public function getWhere(): array
+    {
+        return $this->where;
+    }
+
+    /**
      * Inserting data into associated table.
      */
     public function execute()
     {
-        $this->table->update($this->values, $this->where)->run();
+        $values = $this->context + $this->values;
+        if (!empty($values)) {
+            $this->table->update($values, $this->where)->run();
+        }
+
         parent::execute();
     }
 }

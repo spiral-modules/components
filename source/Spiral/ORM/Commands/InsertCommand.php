@@ -7,9 +7,16 @@
 namespace Spiral\ORM\Commands;
 
 use Spiral\Database\Entities\Table;
+use Spiral\ORM\Commands\Traits\ContextTrait;
+use Spiral\ORM\ContextualCommandInterface;
 
-class InsertCommand extends TableCommand
+/**
+ * Inserted data CAN be modified by parent commands using context.
+ */
+class InsertCommand extends TableCommand implements ContextualCommandInterface
 {
+    use ContextTrait;
+
     /**
      * @var array
      */
@@ -47,7 +54,7 @@ class InsertCommand extends TableCommand
      */
     public function execute()
     {
-        $this->insertID = $this->table->insertOne($this->data);
+        $this->insertID = $this->table->insertOne($this->context +  $this->data);
         parent::execute();
     }
 }

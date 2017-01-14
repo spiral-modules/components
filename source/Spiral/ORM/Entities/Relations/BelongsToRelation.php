@@ -6,61 +6,92 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
-use Spiral\Database\Exceptions\QueryException;
-use Spiral\ORM\Exceptions\SelectorException;
+use Spiral\ORM\CommandInterface;
+use Spiral\ORM\Commands\InsertCommand;
+use Spiral\ORM\Commands\NullCommand;
+use Spiral\ORM\Commands\TransactionalCommand;
+use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
-use Spiral\ORM\RecordInterface;
+use Spiral\Reactor\Exceptions\ReactorException;
 
-class BelongsToRelation extends AbstractRelation
+/**
+ * Complex relation with ability to mount inner_key context into parent save command.
+ */
+class BelongsToRelation extends SingularRelation
 {
     /**
-     * @var RecordInterface
+     * Always saved before parent.
      */
-    private $instance;
+    const LEADING_RELATION = true;
+
+    /**
+     * Related object changed.
+     *
+     * @var bool
+     */
+    private $changed = false;
 
     /**
      * {@inheritdoc}
-     *
-     * Returns associated parent or NULL if none associated.
      */
-    public function getRelated()
+    public function setRelated($value)
     {
-        if ($this->instance instanceof RecordInterface) {
-            return $this->instance;
+        //Make sure value is accepted
+        if (is_null($value) && !$this->schema[Record::NULLABLE]) {
+            throw new ReactorException("Relation is not nullable");
+        } elseif (!is_a($value, $this->class, false)) {
+            throw new ReactorException(
+                "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"
+            );
         }
 
-        if (!$this->isLoaded()) {
-            //Lazy loading our relation data
-            $this->loadData();
-        }
-
-        if (empty($this->data)) {
-            //No parent were defined
-            return null;
-        }
-
-        //Create instance based on loaded data
-        return $this->instance = $this->orm->make(
-            $this->class,
-            $this->data,
-            ORMInterface::STATE_LOADED,
-            true
-        );
+        $this->loaded = true;
+        $this->changed = true;
+        $this->instance = $value;
     }
 
     /**
-     * Load related data thought ORM selectors.
+     * @param ContextualCommandInterface $command
      *
-     * @throws SelectorException
-     * @throws QueryException
+     * @return CommandInterface
      */
-    protected function loadData()
+    public function queueCommands(ContextualCommandInterface $command): CommandInterface
     {
-        $innerKey = $this->schema[Record::INNER_KEY];
-        if (empty($this->parent->getField($innerKey))) {
-            //Unable to load
-            $this->loaded = true;
+        if (empty($this->instance)) {
+            $command->addContext($this->schema[Record::INNER_KEY], null);
+
+            return new NullCommand();
         }
+
+        /*
+         * Getting command needed to handle associated entity changes
+         */
+        $related = $this->instance->queueStore(true);
+        if ($related instanceof TransactionalCommand) {
+            $related = $related->getLeadingCommand();
+        }
+
+        //Primary key of associated entity
+        $primaryKey = $this->orm->define(get_class($this->instance), ORMInterface::R_PRIMARY_KEY);
+
+        if (
+            $related instanceof InsertCommand
+            && $primaryKey == $this->schema[Record::OUTER_KEY]
+        ) {
+            /**
+             * Particular case when parent entity exists but now saved yet AND outer key is PK.
+             */
+            $related->onExecute(function (InsertCommand $related) use ($command) {
+                $command->addContext($this->schema[Record::INNER_KEY], $related->getInsertID());
+            });
+        } elseif ($this->changed) {
+            $command->addContext(
+                $this->schema[Record::INNER_KEY],
+                $this->instance->getField($this->schema[Record::OUTER_KEY])
+            );
+        }
+
+        return $related;
     }
 }

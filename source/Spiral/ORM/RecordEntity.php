@@ -254,11 +254,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
         } else {
-            if ($this->hasChanges() || $this->solidState) {
-                $command = $this->prepareUpdate();
-            } else {
-                $command = new NullCommand();
-            }
+            $command = $this->prepareUpdate();
         }
 
         //Reset all tracked entity changes
@@ -386,13 +382,13 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         //Flushing reference to last insert command
         $this->firstInsert = null;
 
-        //We not how our primary value (add support of user supplied PK values (no autoincrement))
-        $this->setField(
-            $this->primaryColumn(),
-            $command->getInsertID(),
-            true,
-            false
-        );
+        //Mounting PK
+        $this->setField($this->primaryColumn(), $command->getInsertID(), true, false);
+
+        //Once command executed we will know some information about it's context (for exampled added FKs)
+        foreach ($command->getContext() as $name => $value) {
+            $this->setField($name, $value, true, false);
+        }
 
         $this->state = ORMInterface::STATE_LOADED;
         $this->dispatch('created', new RecordEvent($this));
@@ -405,6 +401,11 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     private function handleUpdate(UpdateCommand $command)
     {
+        //Once command executed we will know some information about it's context (for exampled added FKs)
+        foreach ($command->getContext() as $name => $value) {
+            $this->setField($name, $value, true, false);
+        }
+
         $this->state = ORMInterface::STATE_LOADED;
         $this->dispatch('updated', new RecordEvent($this));
     }

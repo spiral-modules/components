@@ -7,6 +7,7 @@
 namespace Spiral\ORM\Commands;
 
 use Spiral\ORM\CommandInterface;
+use Spiral\ORM\ContextualCommandInterface;
 
 /**
  * Command to handle multiple inner commands.
@@ -20,16 +21,30 @@ class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
      */
     private $commands = [];
 
+    private $leadingCommand;
+
     /**
      * {@inheritdoc}
      */
-    public function addCommand(CommandInterface $command)
+    public function addCommand(CommandInterface $command, bool $leading = false)
     {
         if ($command instanceof NullCommand) {
             return;
         }
 
         $this->commands[] = $command;
+
+        if ($leading) {
+            $this->leadingCommand = $command;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLeadingCommand(): ContextualCommandInterface
+    {
+        return $this->leadingCommand;
     }
 
     /**

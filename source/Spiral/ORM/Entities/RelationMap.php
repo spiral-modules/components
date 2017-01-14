@@ -8,6 +8,7 @@ namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\TransactionalCommand;
+use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
@@ -84,11 +85,11 @@ class RelationMap
      * or insert sequence. Commands might define dependencies between each other in order to extend
      * FK values.
      *
-     * @param CommandInterface $parent
+     * @param ContextualCommandInterface $parent
      *
      * @return CommandInterface
      */
-    public function queueRelations(CommandInterface $parent): CommandInterface
+    public function queueRelations(ContextualCommandInterface $parent): CommandInterface
     {
         if (empty($this->relations)) {
             //No relations exists, nothing to do
@@ -96,24 +97,24 @@ class RelationMap
         }
 
         //We have to execute multiple commands at once
-        $queue = new TransactionalCommand();
+        $transaction = new TransactionalCommand();
 
         //Leading relations
         foreach ($this->leadingRelations() as $relation) {
             //Generating commands needed to save given relation prior to parent command
-            $queue->addCommand($relation->queueCommands($parent));
+            $transaction->addCommand($relation->queueCommands($parent));
         }
 
         //Parent model save operations
-        $queue->addCommand($parent);
+        $transaction->addCommand($parent, true);
 
         //Depended relations
         foreach ($this->dependedRelations() as $relation) {
             //Generating commands needed to save relations after parent command being executed
-            $queue->addCommand($relation->queueCommands($parent));
+            $transaction->addCommand($relation->queueCommands($parent));
         }
 
-        return $queue;
+        return $transaction;
     }
 
     /**
@@ -240,11 +241,15 @@ class RelationMap
      * $post = new Post();
      * $post->user = new User();
      *
-     * @return RelationInterface[]
+     * @return RelationInterface[]|\Generator
      */
     protected function leadingRelations()
     {
-        return [];
+        foreach ($this->relations as $relation) {
+            if ($relation instanceof RelationInterface && $relation->isLeading()) {
+                yield $relation;
+            }
+        }
     }
 
     /**
@@ -255,10 +260,14 @@ class RelationMap
      * $post = new Post();
      * $post->comments->add(new Comment());
      *
-     * @return RelationInterface[]
+     * @return RelationInterface[]|\Generator
      */
     protected function dependedRelations()
     {
-        return [];
+        foreach ($this->relations as $relation) {
+            if ($relation instanceof RelationInterface && !$relation->isLeading()) {
+                yield $relation;
+            }
+        }
     }
 }

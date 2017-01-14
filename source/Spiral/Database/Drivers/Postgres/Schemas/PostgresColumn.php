@@ -414,16 +414,19 @@ class PostgresColumn extends AbstractColumn
      */
     private static function resolveConstrains(Driver $driver, $tableOID, PostgresColumn $column)
     {
-        $query = "SELECT conname, consrc FROM pg_constraint WHERE conrelid = ? AND contype = 'c' AND (consrc LIKE ? OR consrc LIKE ?)";
+        $query = "SELECT conname, consrc FROM pg_constraint WHERE conrelid = ? AND contype = 'c' AND "
+            . "(consrc LIKE ? OR consrc LIKE ? OR consrc LIKE ? OR consrc LIKE ?)";
 
         $constraints = $driver->query($query, [
             $tableOID,
             '(' . $column->name . '%',
-            '("' . $column->name . '%'
+            '("' . $column->name . '%',
+            $column->name . '::text%',
+            //Postgres magic
+            '%(' . $column->name . ')::text%'
         ]);
 
         foreach ($constraints as $constraint) {
-            print_r($constraint);
             if (preg_match('/ARRAY\[([^\]]+)\]/', $constraint['consrc'], $matches)) {
                 $enumValues = explode(',', $matches[1]);
                 foreach ($enumValues as &$value) {

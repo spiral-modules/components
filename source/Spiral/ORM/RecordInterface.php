@@ -18,7 +18,7 @@ interface RecordInterface extends EntityInterface
      * @throws RecordException
      * @throws RelationException
      */
-    public function queueStore(bool $queueRelations = true): CommandInterface;
+    public function queueStore(bool $queueRelations = true): ContextualCommandInterface;
 
     /**
      * {@inheritdoc}

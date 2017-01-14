@@ -68,21 +68,19 @@ class BelongsToRelation extends SingularRelation
          * Getting command needed to handle associated entity changes
          */
         $related = $this->instance->queueStore(true);
-        if ($related instanceof TransactionalCommand) {
-            $related = $related->getLeadingCommand();
-        }
+        $leadingCommand = $related instanceof TransactionalCommand ? $related->getLeading() : $related;
 
         //Primary key of associated entity
         $primaryKey = $this->orm->define(get_class($this->instance), ORMInterface::R_PRIMARY_KEY);
 
         if (
-            $related instanceof InsertCommand
+            $leadingCommand instanceof InsertCommand
             && $primaryKey == $this->schema[Record::OUTER_KEY]
         ) {
             /**
              * Particular case when parent entity exists but now saved yet AND outer key is PK.
              */
-            $related->onExecute(function (InsertCommand $related) use ($command) {
+            $leadingCommand->onExecute(function (InsertCommand $related) use ($command) {
                 $command->addContext($this->schema[Record::INNER_KEY], $related->getInsertID());
             });
         } elseif ($this->changed) {

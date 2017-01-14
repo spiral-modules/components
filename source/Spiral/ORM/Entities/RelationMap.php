@@ -6,7 +6,6 @@
  */
 namespace Spiral\ORM\Entities;
 
-use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Exceptions\RelationException;
@@ -87,9 +86,9 @@ class RelationMap
      *
      * @param ContextualCommandInterface $parent
      *
-     * @return CommandInterface
+     * @return ContextualCommandInterface
      */
-    public function queueRelations(ContextualCommandInterface $parent): CommandInterface
+    public function queueRelations(ContextualCommandInterface $parent): ContextualCommandInterface
     {
         if (empty($this->relations)) {
             //No relations exists, nothing to do

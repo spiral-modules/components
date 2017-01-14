@@ -8,7 +8,6 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
-use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
@@ -25,14 +24,9 @@ class HasOneRelation extends SingularRelation
 
         $related = $this->instance->queueStore(true);
 
-        if ($related instanceof TransactionalCommand) {
-            $related = $related->getLeadingCommand();
-        }
-
         //Primary key of parent entity
         $primaryKey = $this->orm->define(get_class($this->parent), ORMInterface::R_PRIMARY_KEY);
 
-        //todo: careful there
         if (
             $command instanceof InsertCommand
             && $primaryKey == $this->schema[Record::INNER_KEY]
@@ -45,7 +39,7 @@ class HasOneRelation extends SingularRelation
             $command->onExecute(function (InsertCommand $command) use ($related) {
                 $related->addContext($this->schema[Record::OUTER_KEY], $command->getInsertID());
             });
-        } elseif ($this->changed && $related instanceof ContextualCommandInterface) {
+        } elseif ($this->changed) {
             //Delete old one!
             $related->addContext(
                 $this->schema[Record::OUTER_KEY],

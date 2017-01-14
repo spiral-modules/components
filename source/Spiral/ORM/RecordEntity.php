@@ -249,7 +249,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      * @throws RecordException
      * @throws RelationException
      */
-    public function queueStore(bool $queueRelations = true): CommandInterface
+    public function queueStore(bool $queueRelations = true): ContextualCommandInterface
     {
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();

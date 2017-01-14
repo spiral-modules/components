@@ -8,11 +8,14 @@ namespace Spiral\ORM\Commands;
 
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Exceptions\ORMException;
 
 /**
  * Command to handle multiple inner commands.
  */
-class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
+class TransactionalCommand extends AbstractCommand implements
+    \IteratorAggregate,
+    ContextualCommandInterface
 {
     /**
      * Nested commands.
@@ -21,6 +24,9 @@ class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
      */
     private $commands = [];
 
+    /**
+     * @var ContextualCommandInterface
+     */
     private $leadingCommand;
 
     /**
@@ -35,14 +41,25 @@ class TransactionalCommand extends AbstractCommand implements \IteratorAggregate
         $this->commands[] = $command;
 
         if ($leading) {
+            if (!$command instanceof ContextualCommandInterface) {
+                throw new ORMException("Only Insert and Update commands can be used as leading.");
+            }
+
             $this->leadingCommand = $command;
         }
     }
 
-    /**
-     * @return mixed
-     */
-    public function getLeadingCommand(): ContextualCommandInterface
+    public function getContext(): array
+    {
+        return $this->leadingCommand->getContext();
+    }
+
+    public function addContext(string $name, $value)
+    {
+        $this->leadingCommand->addContext($name, $value);
+    }
+
+    public function getLeading(): ContextualCommandInterface
     {
         return $this->leadingCommand;
     }

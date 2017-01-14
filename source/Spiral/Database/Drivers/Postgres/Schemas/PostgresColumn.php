@@ -188,7 +188,7 @@ class PostgresColumn extends AbstractColumn
     {
         $this->enumValues = array_map('strval', is_array($values) ? $values : func_get_args());
 
-        $this->type = 'character';
+        $this->type = 'character varying';
         foreach ($this->enumValues as $value) {
             $this->size = max((int)$this->size, strlen($value));
         }
@@ -250,7 +250,7 @@ class PostgresColumn extends AbstractColumn
                     $enumSize = max($enumSize, strlen($value));
                 }
 
-                $type = "ALTER COLUMN {$identifier} TYPE character($enumSize)";
+                $type = "ALTER COLUMN {$identifier} TYPE character varying($enumSize)";
                 $operations[] = $type;
             } else {
                 $type = "ALTER COLUMN {$identifier} TYPE {$this->type}";

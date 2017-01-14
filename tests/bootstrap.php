@@ -53,4 +53,4 @@ if (file_exists(dirname(__DIR__) . '/.env')) {
 }
 
 //Set to true to enter the Matrix
-define('ENABLE_PROFILING', true);
+define('ENABLE_PROFILING', env('PROFILING', false));

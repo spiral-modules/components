@@ -245,6 +245,35 @@ abstract class ObjectTest extends BaseTest
         $this->assertFalse($object->exists());
     }
 
+
+    public function testLocalFilename()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue(file_exists($object->localFilename()));
+        $object->delete();
+    }
+
+    public function testAddressToString()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+        $this->assertSame((string)$object, $object->getAddress());
+    }
+
     protected function makeAddress(string $name): string
     {
         return $this->getBucket()->getPrefix() . $name;

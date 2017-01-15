@@ -52,15 +52,14 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function __construct(string $address, StorageInterface $storage = null)
     {
-        //Trying to find bucket using address
-        if (empty($address)) {
-            throw new ObjectException("Unable to create StorageObject with empty address");
-        }
-
         $this->storage = $this->saturate($storage, StorageInterface::class);
 
         $this->address = $address;
         $this->bucket = $this->storage->locateBucket($address, $this->name);
+
+        if (empty($this->name)) {
+            throw new ObjectException("Unable to create StorageObject with empty name");
+        }
     }
 
     /**
@@ -132,10 +131,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function delete()
     {
-        if (empty($this->name)) {
-            return;
-        }
-
         $this->bucket->delete($this->name);
 
         $this->address = $this->name = '';

@@ -6,6 +6,16 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\ORM\Commands\TransactionalCommand;
+
+/**
+ * Represent one or multiple operations in transaction.
+ *
+ * Attention, ALL commands are flatten before execution to extract sub commands, implement
+ * Traversable interface to let transaction to flatten command.
+ *
+ * @see TransactionalCommand
+ */
 interface CommandInterface
 {
     /**
@@ -20,7 +30,7 @@ interface CommandInterface
     public function complete();
 
     /**
-     * Rollback command or declare that command been rolledback.
+     * Rollback command or declare that command been rolled back.
      */
     public function rollBack();
 
@@ -32,7 +42,7 @@ interface CommandInterface
     public function onExecute(\Closure $closure);
 
     /**
-     * To be called after parent transaction been commited.
+     * To be called after parent transaction been committed.
      *
      * @param \Closure $closure
      */

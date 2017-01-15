@@ -6,6 +6,9 @@
  */
 namespace Spiral\ORM;
 
+/**
+ * All sync commands must be aware of parent.
+ */
 interface SyncCommandInterface extends CommandInterface
 {
     /**

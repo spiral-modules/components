@@ -10,5 +10,4 @@ use Spiral\Models\Events\EntityEvent;
 
 class DocumentEvent extends EntityEvent
 {
-
 }

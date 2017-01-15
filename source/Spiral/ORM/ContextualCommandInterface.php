@@ -20,7 +20,8 @@ interface ContextualCommandInterface extends CommandInterface
     public function getContext(): array;
 
     /**
-     * Add context value, usually FK.
+     * Add context value, usually FK. Must be set before command being executed, usually in leading
+     * command "execute" event.
      *
      * @param string $name
      * @param mixed  $value

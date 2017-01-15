@@ -93,6 +93,14 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     }
 
     /**
+     * @return bool
+     */
+    public function isPartial(): bool
+    {
+        return !$this->autoload;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param bool $autoload When true all existed records will be loaded and removed.
@@ -127,7 +135,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
      */
     public function getRelated()
     {
-        return $this->loadData();
+        return $this->loadData(true);
     }
 
     /**
@@ -137,11 +145,11 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->loadData()->instances);
+        return new \ArrayIterator($this->loadData(true)->instances);
     }
 
     /**
-     * Iterate over deleted instanes.
+     * Iterate over deleted instances.
      *
      * @return \ArrayIterator
      */
@@ -378,10 +386,11 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     {
         $innerKey = $this->key(Record::INNER_KEY);
         if (!empty($this->parent->getField($innerKey))) {
-            return $this->orm->selector($this->class)->where(
-                $this->key(Record::OUTER_KEY),
-                $this->parent->getField($innerKey)
-            )->fetchData();
+
+            return $this->orm
+                ->selector($this->class)
+                ->where($this->key(Record::OUTER_KEY), $this->parent->getField($innerKey))
+                ->fetchData();
         }
 
         return [];

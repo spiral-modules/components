@@ -617,7 +617,7 @@ abstract class HasManyRelationTest extends BaseTest
         $post2->save();
 
         $this->assertCount(2, $this->db->posts);
-        $this->assertCount(3, $this->db->comments);
+        $this->assertCount(4, $this->db->comments);
 
         $this->assertSame(2, $this->orm->selector(Post::class)
             ->with('comments')

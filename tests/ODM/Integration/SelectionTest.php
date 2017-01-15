@@ -6,6 +6,8 @@
  */
 namespace Spiral\Tests\ODM\Integration;
 
+use MongoDB\Driver\Cursor;
+use Spiral\ODM\Entities\DocumentCursor;
 use Spiral\Tests\ODM\Fixtures\Admin;
 use Spiral\Tests\ODM\Fixtures\DataPiece;
 use Spiral\Tests\ODM\Fixtures\User;
@@ -108,6 +110,36 @@ class SelectionTest extends BaseTest
         );
         foreach ($this->odm->source(User::class)->find(['pieces.value' => ['$exists' => 1]]) as $user) {
             $this->assertInstanceOf(Admin::class, $user);
+        }
+    }
+
+    public function testCursor()
+    {
+        $this->assertSame(0, $this->odm->source(User::class)->count());
+
+        for ($i = 0; $i < 10; $i++) {
+            $user = $this->odm->source(User::class)->create();
+            $user->name = 'Anton';
+            $user->piece->value = 100;
+            $user->save();
+        }
+
+        $cursor = $this->odm->source(User::class)->find(['piece.value' => 100])->getIterator();
+        $this->assertInstanceOf(DocumentCursor::class, $cursor);
+        $this->assertInstanceOf(Cursor::class, $cursor->getCursor());
+
+        $cursor = $this->odm->source(User::class)->find(['piece.value' => 100])->getIterator();
+        $this->assertCount(10, $result = $cursor->toArray());
+
+        foreach ($result as $user) {
+            $this->assertInstanceOf(User::class, $user);
+        }
+
+        $cursor = $this->odm->source(User::class)->find(['piece.value' => 100])->getIterator();
+        $this->assertCount(10, $result = $cursor->fetchAll());
+
+        foreach ($result as $user) {
+            $this->assertInstanceOf(User::class, $user);
         }
     }
 }

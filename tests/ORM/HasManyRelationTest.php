@@ -547,4 +547,58 @@ abstract class HasManyRelationTest extends BaseTest
         $post->save();
         $this->assertCount(0, $this->db->comments);
     }
+
+    public function testLoadPartialPostload()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->load('comments', [
+                'method' => RelationLoader::POSTLOAD,
+                'where'  => [
+                    '{@}.message' => 'hi'
+                ]
+            ])
+            ->findOne();
+
+        $this->assertCount(2, $post->comments);
+
+        $this->assertTrue($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2));
+    }
+
+    public function testLoadPartialInload()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->load('comments', [
+                'method' => RelationLoader::INLOAD,
+                'where'  => [
+                    '{@}.message' => 'hi'
+                ]
+            ])
+            ->findOne();
+
+        $this->assertCount(2, $post->comments);
+
+        $this->assertTrue($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2));
+    }
 }

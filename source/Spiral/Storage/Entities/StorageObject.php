@@ -60,6 +60,10 @@ class StorageObject extends Component implements ObjectInterface
         if (empty($this->name)) {
             throw new ObjectException("Unable to create StorageObject with empty name");
         }
+
+        if (empty($this->bucket)) {
+            throw new ObjectException("Unable to resolve bucket for address '{$address}'");
+        }
     }
 
     /**
@@ -124,9 +128,6 @@ class StorageObject extends Component implements ObjectInterface
     public function delete()
     {
         $this->bucket->delete($this->name);
-
-        $this->address = $this->name = '';
-        $this->bucket = null;
     }
 
     /**

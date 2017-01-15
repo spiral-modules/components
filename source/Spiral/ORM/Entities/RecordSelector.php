@@ -359,7 +359,7 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
             }
         }
 
-        return $this->compileQuery()->count($column);
+        return $this->compiledQuery()->count($column);
     }
 
     /**

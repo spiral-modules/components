@@ -24,7 +24,7 @@ use Spiral\Database\Schemas\Prototypes\AbstractTable;
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
  * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class Table implements \JsonSerializable, \IteratorAggregate
+class Table implements \JsonSerializable, \IteratorAggregate, \Countable
 {
     /**
      * @var string

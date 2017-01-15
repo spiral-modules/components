@@ -386,8 +386,13 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function lastInsertID(string $sequence = null)
     {
         $pdo = $this->getPDO();
+        $result = $sequence ? (int)$pdo->lastInsertId($sequence) : (int)$pdo->lastInsertId();
 
-        return $sequence ? (int)$pdo->lastInsertId($sequence) : (int)$pdo->lastInsertId();
+        if ($this->isProfiling()) {
+            $this->logger()->debug("Given insert ID: {$result}");
+        }
+
+        return $result;
     }
 
     /**

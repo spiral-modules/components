@@ -21,7 +21,7 @@ use Spiral\Debug\Traits\LoggerTrait;
  * SelectQuery extends AbstractSelect with ability to specify selection tables and perform UNION
  * of multiple select queries.
  */
-class SelectQuery extends AbstractSelect implements \JsonSerializable
+class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countable
 {
     use LoggerTrait;
 

@@ -91,10 +91,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function exists(): bool
     {
-        if (empty($this->name)) {
-            return false;
-        }
-
         return $this->bucket->exists($this->name);
     }
 
@@ -103,10 +99,6 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function getSize()
     {
-        if (empty($this->name)) {
-            return false;
-        }
-
         return $this->bucket->size($this->name);
     }
 

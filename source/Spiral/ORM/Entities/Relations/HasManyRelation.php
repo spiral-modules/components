@@ -299,7 +299,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
      * @return self
      *
      * @throws SelectorException
-     * @throws QueryException
+     * @throws QueryException (needs wrapping)
      */
     protected function loadData(bool $autoload = true): self
     {

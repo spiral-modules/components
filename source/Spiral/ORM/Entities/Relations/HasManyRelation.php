@@ -95,12 +95,14 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     /**
      * {@inheritdoc}
      *
+     * @param bool $autoload When true all existed records will be loaded and removed.
+     *
      * @throws RelationException
      */
-    public function setRelated($value)
+    public function setRelated($value, bool $autoload = true)
     {
-        //Loading before flushing
-        $this->loadData(true);
+        $this->autoload = $autoload;
+        $this->loadData();
 
         if (!is_array($value)) {
             throw new RelationException("HasMany relation can only be set with array of entities");
@@ -301,6 +303,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
 
         if (empty($this->data) || !is_array($this->data)) {
             if ($this->autoload && $autoload) {
+                //Only for non partial selections
                 $this->data = $this->loadRelated();
             } else {
                 $this->data = [];

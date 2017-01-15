@@ -28,6 +28,16 @@ class HighlighterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(count(file(__FILE__)), count(explode("\n", $highlighter->highlight())));
     }
 
+    public function testHighlightWithDarkStyle()
+    {
+        $highlighter = new Highlighter();
+        $highlighter = $highlighter->withSource(file_get_contents(__FILE__));
+
+        $highlighter = $highlighter->withStyle(new Highlighter\InversedStyle());
+        $this->assertInternalType('string', $highlighter->highlight());
+        $this->assertSame(count(file(__FILE__)), count(explode("\n", $highlighter->highlight())));
+    }
+
     public function testHighlightLines()
     {
         $highlighter = new Highlighter();

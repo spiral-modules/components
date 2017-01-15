@@ -98,16 +98,14 @@ class RelationMap
         //We have to execute multiple commands at once
         $transaction = new TransactionalCommand();
 
-        //Leading relations
         foreach ($this->leadingRelations() as $relation) {
             //Generating commands needed to save given relation prior to parent command
             $transaction->addCommand($relation->queueCommands($parent));
         }
 
-        //Parent model save operations
+        //Parent model save operations (true state that this is leading/primary command)
         $transaction->addCommand($parent, true);
 
-        //Depended relations
         foreach ($this->dependedRelations() as $relation) {
             //Generating commands needed to save relations after parent command being executed
             $transaction->addCommand($relation->queueCommands($parent));
@@ -206,9 +204,7 @@ class RelationMap
         foreach ($this->schema as $relation => $schema) {
             $accessor = $this->get($relation);
 
-            //Only base class name
             $type = (new \ReflectionClass($accessor))->getShortName();
-
             $class = (new \ReflectionClass($accessor->getClass()))->getShortName();
 
             //[+] for loaded, [~] for lazy loaded

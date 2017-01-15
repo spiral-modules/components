@@ -196,7 +196,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      *
      * @var InsertCommand
      */
-    private $firstInsert = null;
+    private $lastInsert = null;
 
     /**
      * Initiate entity inside or outside of ORM scope using given fields and state.
@@ -308,12 +308,12 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
 
         $command->onRollBack(function () {
             //Flushing existed insert command to prevent collisions
-            $this->firstInsert = null;
+            $this->lastInsert = null;
             $this->state = ORMInterface::STATE_NEW;
         });
 
         //Keep reference to the last insert command
-        return $this->firstInsert = $command;
+        return $this->lastInsert = $command;
     }
 
     /**
@@ -328,8 +328,8 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             $this->primaryKey()
         );
 
-        if (!empty($this->firstInsert)) {
-            $this->firstInsert->onExecute(function (InsertCommand $insert) use ($command) {
+        if (!empty($this->lastInsert)) {
+            $this->lastInsert->onExecute(function (InsertCommand $insert) use ($command) {
                 //Sync primary key values
                 $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
                 $command->setPrimaryKey($insert->getInsertID());
@@ -363,10 +363,10 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             [$this->primaryColumn() => $this->primaryKey()]
         );
 
-        if (!empty($this->firstInsert)) {
-            $this->firstInsert->onExecute(function (InsertCommand $insert) use ($command) {
-                //Sync primary key values
-                $command->setWhere([$this->primaryColumn() => $insert->getInsertID()]);
+        if (!empty($this->lastInsert)) {
+            //Sync primary key values
+            $this->lastInsert->onExecute(function (InsertCommand $insert) use ($command) {
+                $command->setWhere([$this->primaryColumn() => $insert->primaryKey()]);
             });
         }
 
@@ -390,17 +390,23 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     private function handleInsert(InsertCommand $command)
     {
         //Flushing reference to last insert command
-        $this->firstInsert = null;
+        $this->lastInsert = null;
 
         //Mounting PK
         $this->setField($this->primaryColumn(), $command->getInsertID(), true, false);
 
-        //Once command executed we will know some information about it's context (for exampled added FKs)
+        //Once command executed we will know some information about it's context
+        //(for exampled added FKs), this information must already be in database (added to command),
+        //so no need to track changes
         foreach ($command->getContext() as $name => $value) {
             $this->setField($name, $value, true, false);
         }
 
         $this->state = ORMInterface::STATE_LOADED;
+
+        //Once loaded we can switch to non solid state (possibly define manually)
+        $this->solidState(false);
+
         $this->dispatch('created', new RecordEvent($this));
     }
 
@@ -417,8 +423,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         }
 
         $this->state = ORMInterface::STATE_LOADED;
-        $this->solidState(false);
-
         $this->dispatch('updated', new RecordEvent($this));
     }
 

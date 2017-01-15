@@ -601,4 +601,42 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertTrue($post->comments->has($comment));
         $this->assertTrue($post->comments->has($comment2));
     }
+
+    public function testWith()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->save();
+
+        $post2 = new Post();
+        $post2->author = new User();
+        $post2->comments->add($comment = new Comment(['message' => 'hi']));
+        $post2->comments->add($comment3 = new Comment(['message' => 'hi3']));
+        $post2->save();
+
+        $this->assertCount(2, $this->db->posts);
+        $this->assertCount(3, $this->db->comments);
+
+        $this->assertSame(2, $this->orm->selector(Post::class)
+            ->with('comments')
+            ->count());
+
+        $this->assertSame(2, $this->orm->selector(Post::class)
+            ->with('comments', ['where' => ['{@}.message' => 'hi']])
+            ->count());
+
+        $this->assertSame(1, $this->orm->selector(Post::class)
+            ->with('comments', ['where' => ['{@}.message' => 'hi3']])
+            ->count());
+
+        $this->assertSimilar($post, $this->orm->selector(Post::class)
+            ->with('comments', ['where' => ['{@}.message' => 'hi2']])
+            ->findOne());
+
+        $this->assertSimilar($post2, $this->orm->selector(Post::class)
+            ->with('comments', ['where' => ['{@}.message' => 'hi3']])
+            ->findOne());
+    }
 }

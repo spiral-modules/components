@@ -6,9 +6,9 @@
  */
 namespace Spiral\ODM\Exceptions;
 
-use Spiral\Models\Exceptions\AccessorExceptionInterface;
+use Spiral\ORM\Exceptions\ORMException;
 
-class AccessorException extends DocumentException implements AccessorExceptionInterface
+class AccessorException extends ORMException
 {
 
 }

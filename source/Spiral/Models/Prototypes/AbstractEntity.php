@@ -9,12 +9,11 @@ namespace Spiral\Models\Prototypes;
 
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
-use Spiral\Models\Exceptions\AccessorExceptionInterface;
 use Spiral\Models\Exceptions\EntityException;
-use Spiral\Models\Exceptions\FieldExceptionInterface;
+use Spiral\Models\Exceptions\AccessExceptionInterface;
 use Spiral\Models\PublishableInterface;
 use Spiral\Models\Traits\EventsTrait;
-use Spiral\ODM\Exceptions\FieldException;
+use Spiral\ODM\Exceptions\AccessException;
 
 /**
  * AbstractEntity with ability to define field mutators and access
@@ -86,8 +85,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param bool $filter If false, associated field setter or accessor will be ignored.
      *
-     * @throws AccessorExceptionInterface
-     * @throws FieldException
+     * @throws AccessException
      */
     public function setField(string $name, $value, bool $filter = true)
     {
@@ -122,7 +120,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param bool $filter If false, associated field getter will be ignored.
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     public function getField(string $name, $default = null, bool $filter = true)
     {
@@ -156,7 +154,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return $this
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     public function setFields($fields = [], bool $all = false)
     {
@@ -168,7 +166,7 @@ abstract class AbstractEntity extends MutableObject implements
             if ($all || $this->isFillable($name)) {
                 try {
                     $this->setField($name, $value, true);
-                } catch (FieldExceptionInterface $e) {
+                } catch (AccessExceptionInterface $e) {
                     //We are supressing field setting exceptions
                 }
             }
@@ -192,7 +190,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param bool $filter
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     public function getFields(bool $filter = true): array
     {
@@ -286,7 +284,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return array
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     public function packFields(): array
     {
@@ -415,7 +413,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return AccessorInterface|null
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      * @throws EntityException
      */
     protected function createAccessor(

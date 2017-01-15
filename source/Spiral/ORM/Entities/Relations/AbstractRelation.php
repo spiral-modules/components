@@ -6,7 +6,9 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
+use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
 
@@ -125,5 +127,33 @@ abstract class AbstractRelation implements RelationInterface
     protected function key(int $key)
     {
         return $this->schema[$key];
+    }
+
+    /**
+     * Get primary key column
+     *
+     * @param RecordInterface $record
+     *
+     * @return string
+     */
+    protected function primaryColumnOf(RecordInterface $record): string
+    {
+        return $this->orm->define(get_class($record), ORMInterface::R_PRIMARY_KEY);
+    }
+
+    /**
+     * @param $value
+     */
+    protected function assertValid($value)
+    {
+        if (is_null($value)) {
+            if (!$this->schema[Record::NULLABLE]) {
+                throw new RelationException("Relation is not nullable");
+            }
+        } elseif (!is_a($value, $this->class, false)) {
+            throw new RelationException(
+                "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"
+            );
+        }
     }
 }

@@ -11,7 +11,7 @@ use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ORM\Commands\DeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
-use Spiral\ORM\Commands\SyncCommand;
+use Spiral\ORM\Commands\UpdateCommand;
 use Spiral\ORM\Entities\RelationMap;
 use Spiral\ORM\Events\RecordEvent;
 use Spiral\ORM\Exceptions\RecordException;
@@ -317,11 +317,11 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     }
 
     /**
-     * @return SyncCommand
+     * @return UpdateCommand
      */
-    private function prepareUpdate(): SyncCommand
+    private function prepareUpdate(): UpdateCommand
     {
-        $command = new SyncCommand(
+        $command = new UpdateCommand(
             $this->orm->table(static::class),
             [$this->primaryColumn() => $this->primaryKey()],
             $this->packChanges(true),
@@ -341,7 +341,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         $this->dispatch('update', new RecordEvent($this));
 
         //Executed when transaction successfully completed
-        $command->onComplete(function (SyncCommand $command) {
+        $command->onComplete(function (UpdateCommand $command) {
             $this->handleUpdate($command);
         });
 
@@ -413,9 +413,9 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     /**
      * Handle result of update command.
      *
-     * @param SyncCommand $command
+     * @param UpdateCommand $command
      */
-    private function handleUpdate(SyncCommand $command)
+    private function handleUpdate(UpdateCommand $command)
     {
         //Once command executed we will know some information about it's context (for exampled added FKs)
         foreach ($command->getContext() as $name => $value) {

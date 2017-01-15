@@ -124,18 +124,18 @@ class SelectionTest extends BaseTest
             $user->save();
         }
 
-        $cursor = $this->odm->source(User::class)->find(['piece.value' => 100])->getIterator();
+        $cursor = $this->odm->source(User::class)->find(['piece.value' => '100'])->getIterator();
         $this->assertInstanceOf(DocumentCursor::class, $cursor);
         $this->assertInstanceOf(Cursor::class, $cursor->getCursor());
 
-        $cursor = $this->odm->source(User::class)->find(['piece.value' => 100])->getIterator();
+        $cursor = $this->odm->source(User::class)->find(['piece.value' => '100'])->getIterator();
         $this->assertCount(10, $result = $cursor->toArray());
 
         foreach ($result as $user) {
             $this->assertInstanceOf(User::class, $user);
         }
 
-        $cursor = $this->odm->source(User::class)->find(['piece.value' => 100])->getIterator();
+        $cursor = $this->odm->source(User::class)->find(['piece.value' => '100'])->getIterator();
         $this->assertCount(10, $result = $cursor->fetchAll());
 
         foreach ($result as $user) {

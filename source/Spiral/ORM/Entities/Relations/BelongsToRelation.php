@@ -8,12 +8,9 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
-use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
-use Spiral\ORM\SyncCommandInterface;
 
 /**
  * Complex relation with ability to mount inner_key context into parent save command.
@@ -73,23 +70,20 @@ class BelongsToRelation extends SingularRelation
      */
     private function queueRelated(ContextualCommandInterface $command): ContextualCommandInterface
     {
+        //Command or command set needed to store
         $related = $this->instance->queueStore(true);
-        $leadingCommand = $related instanceof TransactionalCommand ? $related->getLeading() : $related;
 
-        //Primary key of associated entity
-        $primaryKey = $this->orm->define(get_class($this->instance), ORMInterface::R_PRIMARY_KEY);
-
-        if (
-            $leadingCommand instanceof SyncCommandInterface
-            && $primaryKey == $this->key(Record::OUTER_KEY)
-        ) {
+        if ($this->primaryColumnOf($this->instance) == $this->key(Record::OUTER_KEY)) {
             /**
              * Particular case when parent entity exists but now saved yet AND outer key is PK.
-             *
              * Promised by previous command.
              */
-            $leadingCommand->onExecute(function (SyncCommandInterface $related) use ($command) {
-                $command->addContext($this->key(Record::INNER_KEY), $related->primaryKey());
+            $related->onExecute(function (ContextualCommandInterface $related) use ($command) {
+                //Giving our child our context in a form of FK value
+                $command->addContext(
+                    $this->key(Record::INNER_KEY),
+                    $related->primaryKey()
+                );
             });
         }
 

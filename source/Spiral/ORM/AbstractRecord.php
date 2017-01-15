@@ -8,10 +8,10 @@ namespace Spiral\ORM;
 
 use Spiral\Core\Component;
 use Spiral\Models\AccessorInterface;
+use Spiral\Models\Exceptions\AccessException;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ORM\Entities\RelationMap;
-use Spiral\ORM\Exceptions\FieldException;
 use Spiral\ORM\Exceptions\RelationException;
 
 /**
@@ -147,7 +147,7 @@ abstract class AbstractRecord extends SchematicEntity
     /**
      * {@inheritdoc}
      *
-     * @throws FieldException
+     * @throws AccessException
      * @throws RelationException
      */
     public function __unset($offset)
@@ -160,7 +160,7 @@ abstract class AbstractRecord extends SchematicEntity
         }
 
         if (!$this->isNullable($offset)) {
-            throw new FieldException("Unable to unset not nullable field '{$offset}'");
+            throw new AccessException("Unable to unset not nullable field '{$offset}'");
         }
 
         $this->setField($offset, null, false);
@@ -349,12 +349,12 @@ abstract class AbstractRecord extends SchematicEntity
     /**
      * @param string $name
      *
-     * @throws FieldException
+     * @throws AccessException
      */
     private function assertField(string $name)
     {
         if (!$this->hasField($name)) {
-            throw new FieldException(sprintf(
+            throw new AccessException(sprintf(
                 "No such property '%s' in '%s', check schema being relevant",
                 $name,
                 get_called_class()

@@ -9,12 +9,11 @@ namespace Spiral\ORM\Commands;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Commands\Traits\ContextTrait;
 use Spiral\ORM\ContextualCommandInterface;
-use Spiral\ORM\SyncCommandInterface;
 
 /**
  * Inserted data CAN be modified by parent commands using context.
  */
-class InsertCommand extends TableCommand implements ContextualCommandInterface, SyncCommandInterface
+class InsertCommand extends TableCommand implements ContextualCommandInterface
 {
     use ContextTrait;
 

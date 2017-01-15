@@ -8,7 +8,7 @@
 
 namespace Spiral\Models;
 
-use Spiral\Models\Exceptions\AccessorExceptionInterface;
+use Spiral\Models\Exceptions\AccessException;
 
 /**
  * Accessors used to mock access to model field, control value setting, serializing and etc.
@@ -27,7 +27,7 @@ interface AccessorInterface extends \JsonSerializable
      *
      * @param mixed $data
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     public function stateValue($data);
 
@@ -36,7 +36,7 @@ interface AccessorInterface extends \JsonSerializable
      *
      * @return mixed
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     public function packValue();
 }

@@ -10,10 +10,8 @@ use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
-use Spiral\ORM\SyncCommandInterface;
 
 class HasOneRelation extends SingularRelation
 {
@@ -63,8 +61,8 @@ class HasOneRelation extends SingularRelation
             //Delete old entity
             $transaction->addCommand($this->previous->queueDelete());
 
-            //Store new entity if any
-            $transaction->addCommand($this->queueRelated($command));
+            //Store new entity if any (leading)
+            $transaction->addCommand($this->queueRelated($command), true);
 
             //We don't need previous reference anymore
             $this->previous = null;
@@ -88,30 +86,28 @@ class HasOneRelation extends SingularRelation
             return new NullCommand();
         }
 
-        $related = $this->instance->queueStore(true);
+        //Related entity store command
+        $inner = $this->instance->queueStore(true);
 
-        //Primary key of parent entity
-        $primaryKey = $this->orm->define(get_class($this->parent), ORMInterface::R_PRIMARY_KEY);
-
-        if (
-            $command instanceof SyncCommandInterface && $primaryKey == $this->key(Record::INNER_KEY)
-        ) {
+        if ($this->primaryColumnOf($this->parent) == $this->key(Record::INNER_KEY)) {
             /**
              * Particular case when parent entity exists but now saved yet AND outer key is PK.
-             *
              * Basically inversed case of BELONGS_TO.
              */
-            $command->onExecute(function (SyncCommandInterface $command) use ($related) {
-                $related->addContext($this->schema[Record::OUTER_KEY], $command->primaryKey());
+            $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
+                $inner->addContext(
+                    $this->schema[Record::OUTER_KEY],
+                    $command->primaryKey()
+                );
             });
         } elseif ($this->changed) {
-            //Delete old one!
-            $related->addContext(
+            //We should have already non empty field (?)
+            $inner->addContext(
                 $this->key(Record::OUTER_KEY),
                 $this->parent->getField($this->schema[Record::INNER_KEY])
             );
         }
 
-        return $related;
+        return $inner;
     }
 }

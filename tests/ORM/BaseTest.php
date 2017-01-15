@@ -31,7 +31,14 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     const PROFILING = ENABLE_PROFILING;
 
-    const MODELS = [User::class, Post::class, Comment::class, Tag::class, Profile::class, Recursive::class];
+    const MODELS = [
+        User::class,
+        Post::class,
+        Comment::class,
+        Tag::class,
+        Profile::class,
+        Recursive::class
+    ];
 
     /**
      * @var DatabaseManager
@@ -64,8 +71,10 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $this->builder->addSchema($this->makeSchema($model));
         }
 
+        $this->db->getDriver()->setProfiling(false);
         $this->builder->renderSchema();
         $this->builder->pushSchema();
+        $this->db->getDriver()->setProfiling(true);
 
         $this->orm->buildSchema($this->builder);
 
@@ -81,6 +90,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
         $schemas = [];
         //Clean up
+        $this->db->getDriver()->setProfiling(false);
         foreach ($this->dbal->database()->getTables() as $table) {
             $schema = $table->getSchema();
             $schema->declareDropped();
@@ -90,6 +100,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         //Clear all tables
         $syncBus = new SynchronizationPool($schemas);
         $syncBus->run();
+
+        $this->db->getDriver()->setProfiling(true);
     }
 
     /**

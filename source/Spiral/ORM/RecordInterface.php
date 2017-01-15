@@ -13,6 +13,14 @@ use Spiral\ORM\Exceptions\RelationException;
 interface RecordInterface extends EntityInterface
 {
     /**
+     * Pack entity data into array form, no accessors is allowed. Not typed strictly to be
+     * compatible with AccessorInterface.
+     *
+     * @return array
+     */
+    public function packValue();
+
+    /**
      * {@inheritdoc}
      *
      * @param bool $queueRelations

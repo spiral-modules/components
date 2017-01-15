@@ -13,9 +13,7 @@ use Spiral\ORM\Exceptions\ORMException;
 /**
  * Command to handle multiple inner commands.
  */
-class TransactionalCommand extends AbstractCommand implements
-    \IteratorAggregate,
-    ContextualCommandInterface
+class TransactionalCommand implements \IteratorAggregate, ContextualCommandInterface
 {
     /**
      * Nested commands.
@@ -52,30 +50,6 @@ class TransactionalCommand extends AbstractCommand implements
     /**
      * {@inheritdoc}
      */
-    public function getContext(): array
-    {
-        if (empty($this->leadingCommand)) {
-            throw new ORMException("Leading command is not set");
-        }
-
-        return $this->leadingCommand->getContext();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function addContext(string $name, $value)
-    {
-        if (empty($this->leadingCommand)) {
-            throw new ORMException("Leading command is not set");
-        }
-
-        $this->leadingCommand->addContext($name, $value);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getLeading(): ContextualCommandInterface
     {
         if (empty($this->leadingCommand)) {
@@ -83,6 +57,30 @@ class TransactionalCommand extends AbstractCommand implements
         }
 
         return $this->leadingCommand;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getContext(): array
+    {
+        return $this->getLeading()->getContext();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addContext(string $name, $value)
+    {
+        $this->getLeading()->addContext($name, $value);
+    }
+
+    /**
+     * @return mixed|null
+     */
+    public function primaryKey()
+    {
+        return $this->getLeading()->primaryKey();
     }
 
     /**
@@ -97,5 +95,59 @@ class TransactionalCommand extends AbstractCommand implements
 
             yield $command;
         }
+    }
+
+    /**
+     * Closure to be called after command executing.
+     *
+     * @param \Closure $closure
+     */
+    final public function onExecute(\Closure $closure)
+    {
+        $this->getLeading()->onExecute($closure);
+    }
+
+    /**
+     * To be called after parent transaction been commited.
+     *
+     * @param \Closure $closure
+     */
+    final public function onComplete(\Closure $closure)
+    {
+        $this->getLeading()->onComplete($closure);
+    }
+
+    /**
+     * To be called after parent transaction been rolled back.
+     *
+     * @param \Closure $closure
+     */
+    final public function onRollBack(\Closure $closure)
+    {
+        $this->getLeading()->onRollBack($closure);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function execute()
+    {
+        //Nothing
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function complete()
+    {
+        //Nothing
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rollBack()
+    {
+        //Nothing
     }
 }

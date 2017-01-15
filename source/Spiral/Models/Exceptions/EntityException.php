@@ -11,6 +11,6 @@ namespace Spiral\Models\Exceptions;
 /**
  * Errors raised by Entity logic in runtime.
  */
-class EntityException extends \RuntimeException implements EntityExceptionInterface, AccessorExceptionInterface
+class EntityException extends \RuntimeException implements EntityExceptionInterface
 {
 }

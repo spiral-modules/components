@@ -27,4 +27,11 @@ interface ContextualCommandInterface extends CommandInterface
      * @param mixed  $value
      */
     public function addContext(string $name, $value);
+
+    /**
+     * Returns associated primary key, can be NULL. Promised on execution!
+     *
+     * @return mixed|null
+     */
+    public function primaryKey();
 }

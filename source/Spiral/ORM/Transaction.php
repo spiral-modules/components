@@ -87,8 +87,8 @@ final class Transaction implements TransactionInterface
 
         try {
             foreach ($this->getCommands() as $command) {
-                if ($command instanceof TransactionInterface) {
-                    //All transaction commands are flatten (see getCommands() method)
+                if ($command instanceof \Traversable) {
+                    //Skipping commands which intended to be command array
                     continue;
                 }
 

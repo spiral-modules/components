@@ -30,6 +30,8 @@ class ReflectionFileTest extends \PHPUnit_Framework_TestCase
         $this->assertContains(TestTrait::class, $reflection->getTraits());
         $this->assertContains(TestInterface::class, $reflection->getInterfaces());
 
+        $this->assertSame(['hello'], $reflection->getFunctions());
+
         $functionA = null;
         $functionB = null;
 
@@ -69,6 +71,11 @@ class ReflectionFileTest extends \PHPUnit_Framework_TestCase
         test_function_a($this, $a + $b);
         test_function_b("string", 123);
     }
+}
+
+function hello()
+{
+
 }
 
 trait TestTrait

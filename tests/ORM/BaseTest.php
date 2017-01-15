@@ -14,6 +14,7 @@ use Spiral\Database\Entities\Driver;
 use Spiral\Database\Helpers\SynchronizationPool;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\RecordInterface;
 use Spiral\ORM\Schemas\SchemaBuilder;
 use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ORM\Fixtures\AbstactRecord;
@@ -136,6 +137,11 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $record->getFields(),
             $fromDB->getFields()
         );
+    }
+
+    protected function assertSimilar(RecordInterface $entity, RecordInterface $entityB)
+    {
+        $this->assertTrue(empty(array_diff($entity->packValue(), $entityB->packValue())));
     }
 
     /**

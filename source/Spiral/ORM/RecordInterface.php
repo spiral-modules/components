@@ -13,6 +13,13 @@ use Spiral\ORM\Exceptions\RelationException;
 interface RecordInterface extends EntityInterface
 {
     /**
+     * Can be null.
+     *
+     * @return mixed
+     */
+    public function primaryKey();
+
+    /**
      * Pack entity data into array form, no accessors is allowed. Not typed strictly to be
      * compatible with AccessorInterface.
      *

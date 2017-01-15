@@ -163,6 +163,10 @@ abstract class AbstractRelation implements RelationInterface
             if (!$this->schema[Record::NULLABLE]) {
                 throw new RelationException("Relation is not nullable");
             }
+        } elseif (!is_object($value)) {
+            throw new RelationException(
+                "Must be an instance of '{$this->class}', '" . gettype($value) . "' given"
+            );
         } elseif (!is_a($value, $this->class, false)) {
             throw new RelationException(
                 "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"

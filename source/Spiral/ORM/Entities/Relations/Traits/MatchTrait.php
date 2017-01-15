@@ -28,11 +28,21 @@ trait MatchTrait
             return true;
         }
 
+        if (is_scalar($query) && $record->primaryKey() == $query) {
+            //Matched by PK
+            return true;
+        }
+
         $value = $record->packValue();
 
-        if ($query instanceof RecordInterface && $value == $query->packValue()) {
-            //Soft search
-            return true;
+        if ($query instanceof RecordInterface) {
+            if (!empty($query->primaryKey()) && $query->primaryKey() == $record->primaryKey()) {
+                return true;
+            }
+
+            if ($value == $query->packValue()) {
+                return true;
+            }
         }
 
         //Comparasion over intersection

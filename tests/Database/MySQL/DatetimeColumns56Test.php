@@ -7,9 +7,9 @@
 namespace Spiral\Tests\Database\MySQL;
 
 /**
- * MySQL 5.7 and higher
+ * MySQL 5.6 and higher
  */
-class DatetimeColumns57Test extends \Spiral\Tests\Database\DatetimeColumnsTest
+class DatetimeColumns56Test extends \Spiral\Tests\Database\DatetimeColumnsTest
 {
     use DriverTrait;
 

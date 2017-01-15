@@ -13,6 +13,13 @@ namespace Spiral\ORM;
 interface ContextualCommandInterface extends CommandInterface
 {
     /**
+     * Must be true when command does not carry any data.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool;
+
+    /**
      * Get current command context.
      *
      * @return array

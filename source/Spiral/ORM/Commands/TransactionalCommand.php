@@ -62,6 +62,14 @@ class TransactionalCommand implements \IteratorAggregate, ContextualCommandInter
     /**
      * {@inheritdoc}
      */
+    public function isEmpty(): bool
+    {
+        return $this->getLeading()->isEmpty();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getContext(): array
     {
         return $this->getLeading()->getContext();

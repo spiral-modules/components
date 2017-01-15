@@ -103,13 +103,13 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     /**
      * {@inheritdoc}
      *
-     * @param bool $autoload When true all existed records will be loaded and removed.
+     * @param bool $force When true all existed records will be loaded and removed.
      *
      * @throws RelationException
      */
-    public function setRelated($value, bool $autoload = true)
+    public function setRelated($value, bool $force = false)
     {
-        $this->autoload = $autoload;
+        $this->autoload = $force;
         $this->loadData();
 
         if (!is_array($value)) {
@@ -135,7 +135,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
      */
     public function getRelated()
     {
-        return $this->loadData(true);
+        return $this;
     }
 
     /**
@@ -201,9 +201,9 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
                 if ($instance === $record) {
                     //Remove from save
                     unset($this->instances[$index]);
+                    $this->deletedInstances[] = $instance;
+                    break;
                 }
-
-                $this->deletedInstances[] = $instance;
             }
         }
 
@@ -233,7 +233,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
      */
     public function matchOne($query)
     {
-        foreach ($this->loadData()->instances as $instance) {
+        foreach ($this->loadData(true)->instances as $instance) {
             if ($this->match($instance, $query)) {
                 return $instance;
             }
@@ -358,27 +358,36 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
         //Inner storing inner instance
         $inner = $instance->queueStore(true);
 
-        if ($this->primaryColumnOf($this->parent) == $this->key(Record::INNER_KEY)) {
-            /**
-             * Particular case when parent entity exists but now saved yet AND outer key is PK.
-             * Basically inversed case of BELONGS_TO.
-             */
-            $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
-                $inner->addContext($this->schema[Record::OUTER_KEY], $command->primaryKey());
-            });
-        } else {
-            //Must already be set
-            $inner->addContext(
-                $this->key(Record::OUTER_KEY),
-                $this->parent->getField($this->schema[Record::INNER_KEY])
-            );
+        /*
+         * Instance FK not synced.
+         */
+        if (
+            $this->value($instance, Record::OUTER_KEY)
+            != $this->value($this->parent, Record::INNER_KEY)
+            || empty($this->value($this->parent, Record::INNER_KEY))
+        ) {
+            if ($this->primaryColumnOf($this->parent) == $this->key(Record::INNER_KEY)) {
+                /**
+                 * Particular case when parent entity exists but now saved yet AND outer key is PK.
+                 * Basically inversed case of BELONGS_TO.
+                 */
+                $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
+                    $inner->addContext($this->schema[Record::OUTER_KEY], $command->primaryKey());
+                });
+            } else {
+                //Syncing FKs
+                $inner->addContext(
+                    $this->key(Record::OUTER_KEY),
+                    $this->parent->getField($this->schema[Record::INNER_KEY])
+                );
+            }
         }
 
         return $inner;
     }
 
     /**
-     * Fetch data from database.
+     * Fetch data from database. Lazy load.
      *
      * @return array
      */
@@ -386,7 +395,6 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     {
         $innerKey = $this->key(Record::INNER_KEY);
         if (!empty($this->parent->getField($innerKey))) {
-
             return $this->orm
                 ->selector($this->class)
                 ->where($this->key(Record::OUTER_KEY), $this->parent->getField($innerKey))

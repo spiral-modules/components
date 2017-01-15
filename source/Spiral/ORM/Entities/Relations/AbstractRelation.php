@@ -118,6 +118,19 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
+     * Get value from record based on schema key.
+     *
+     * @param RecordInterface $record
+     * @param string          $key
+     *
+     * @return mixed
+     */
+    protected function value(RecordInterface $record, string $key)
+    {
+        return $record->getField($this->key($key));
+    }
+
+    /**
      * Schema value.
      *
      * @param int $key

@@ -40,6 +40,15 @@ class InsertCommand extends TableCommand implements ContextualCommandInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function isEmpty(): bool
+    {
+        //never empty
+        return false;
+    }
+
+    /**
      * Get inserted row id.
      *
      * @return mixed|null

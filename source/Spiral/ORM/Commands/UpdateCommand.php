@@ -70,6 +70,15 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function isEmpty(): bool
+    {
+        //never empty
+        return empty($this->values);
+    }
+
+    /**
      * @param array $where
      */
     public function setWhere(array $where)

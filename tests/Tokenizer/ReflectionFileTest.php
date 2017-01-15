@@ -30,7 +30,7 @@ class ReflectionFileTest extends \PHPUnit_Framework_TestCase
         $this->assertContains(TestTrait::class, $reflection->getTraits());
         $this->assertContains(TestInterface::class, $reflection->getInterfaces());
 
-        $this->assertSame(['hello'], $reflection->getFunctions());
+        $this->assertSame([__NAMESPACE__ . '\hello'], $reflection->getFunctions());
 
         $functionA = null;
         $functionB = null;

@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers\LocalServer;
+namespace Spiral\Tests\Storage\LocalServer;
 
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Entities\StorageBucket;

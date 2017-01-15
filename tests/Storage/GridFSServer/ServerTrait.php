@@ -4,12 +4,14 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers\AmazonServer;
+namespace Spiral\Tests\Storage\GridFSServer;
 
+use MongoDB\Database;
+use MongoDB\Driver\Manager;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\ServerInterface;
-use Spiral\Storage\Servers\AmazonServer;
+use Spiral\Storage\Servers\GridFSServer;
 
 trait ServerTrait
 {
@@ -17,9 +19,9 @@ trait ServerTrait
 
     public function setUp()
     {
-        if (empty(env('STORAGE_AMAZON_KEY'))) {
+        if (empty(env('MONGO_DATABASE'))) {
             $this->skipped = true;
-            $this->markTestSkipped('Amazon credentials are not set');
+            $this->markTestSkipped('Mongo credentials are not set');
         }
     }
 
@@ -30,12 +32,9 @@ trait ServerTrait
         }
 
         $bucket = new StorageBucket(
-            'amazon',
-            env('STORAGE_AMAZON_PREFIX'),
-            [
-                'bucket' => env('STORAGE_AMAZON_BUCKET'),
-                'public' => false
-            ],
+            'mongo',
+            'mongo:',
+            ['bucket' => 'grid-fs'],
             $this->getServer()
         );
 
@@ -46,9 +45,8 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new AmazonServer([
-            'accessKey' => env('STORAGE_AMAZON_KEY'),
-            'secretKey' => env('STORAGE_AMAZON_SECRET')
-        ]);
+        return new GridFSServer(
+            new Database(new Manager(env('MONGO_CONNECTION')), env('MONGO_DATABASE'))
+        );
     }
 }

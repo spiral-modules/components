@@ -4,12 +4,12 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers\RackspaceServer;
+namespace Spiral\Tests\Storage\AmazonServer;
 
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\ServerInterface;
-use Spiral\Storage\Servers\RackspaceServer;
+use Spiral\Storage\Servers\AmazonServer;
 
 trait ServerTrait
 {
@@ -17,9 +17,9 @@ trait ServerTrait
 
     public function setUp()
     {
-        if (empty(env('STORAGE_RACKSPACE_USERNAME'))) {
+        if (empty(env('STORAGE_AMAZON_KEY'))) {
             $this->skipped = true;
-            $this->markTestSkipped('Rackspace credentials are not set');
+            $this->markTestSkipped('Amazon credentials are not set');
         }
     }
 
@@ -30,11 +30,11 @@ trait ServerTrait
         }
 
         $bucket = new StorageBucket(
-            'rackspace',
-            env('STORAGE_RACKSPACE_PREFIX'),
+            'amazon',
+            env('STORAGE_AMAZON_PREFIX'),
             [
-                'container' => env('STORAGE_RACKSPACE_CONTAINER'),
-                'region'    => env('STORAGE_RACKSPACE_REGION')
+                'bucket' => env('STORAGE_AMAZON_BUCKET'),
+                'public' => false
             ],
             $this->getServer()
         );
@@ -46,9 +46,9 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new RackspaceServer([
-            'username' => env('STORAGE_RACKSPACE_USERNAME'),
-            'apiKey'   => env('STORAGE_RACKSPACE_API_KEY')
+        return new AmazonServer([
+            'accessKey' => env('STORAGE_AMAZON_KEY'),
+            'secretKey' => env('STORAGE_AMAZON_SECRET')
         ]);
     }
 }

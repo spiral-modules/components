@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\Storage\Servers\LocalServer;
 
-class ObjectTest extends \Spiral\Tests\Storage\Servers\ObjectTest
+class ObjectTest extends \Spiral\Tests\Storage\ObjectTest
 {
     use ServerTrait;
 }

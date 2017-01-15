@@ -4,14 +4,12 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers\GridFSServer;
+namespace Spiral\Tests\Storage\RackspaceServer;
 
-use MongoDB\Database;
-use MongoDB\Driver\Manager;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Entities\StorageBucket;
 use Spiral\Storage\ServerInterface;
-use Spiral\Storage\Servers\GridFSServer;
+use Spiral\Storage\Servers\RackspaceServer;
 
 trait ServerTrait
 {
@@ -19,9 +17,9 @@ trait ServerTrait
 
     public function setUp()
     {
-        if (empty(env('MONGO_DATABASE'))) {
+        if (empty(env('STORAGE_RACKSPACE_USERNAME'))) {
             $this->skipped = true;
-            $this->markTestSkipped('Mongo credentials are not set');
+            $this->markTestSkipped('Rackspace credentials are not set');
         }
     }
 
@@ -32,9 +30,12 @@ trait ServerTrait
         }
 
         $bucket = new StorageBucket(
-            'mongo',
-            'mongo:',
-            ['bucket' => 'grid-fs'],
+            'rackspace',
+            env('STORAGE_RACKSPACE_PREFIX'),
+            [
+                'container' => env('STORAGE_RACKSPACE_CONTAINER'),
+                'region'    => env('STORAGE_RACKSPACE_REGION')
+            ],
             $this->getServer()
         );
 
@@ -45,8 +46,9 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new GridFSServer(
-            new Database(new Manager(env('MONGO_CONNECTION')), env('MONGO_DATABASE'))
-        );
+        return new RackspaceServer([
+            'username' => env('STORAGE_RACKSPACE_USERNAME'),
+            'apiKey'   => env('STORAGE_RACKSPACE_API_KEY')
+        ]);
     }
 }

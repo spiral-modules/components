@@ -4,12 +4,8 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers\SftpServer;
+namespace Spiral\Tests\Storage\SftpServer;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerTrait;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Entities\StorageBucket;

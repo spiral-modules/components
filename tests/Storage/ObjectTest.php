@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers;
+namespace Spiral\Tests\Storage;
 
 use Spiral\Storage\Configs\StorageConfig;
 use Spiral\Storage\ObjectInterface;

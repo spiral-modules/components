@@ -4,7 +4,7 @@
  *
  * @author    Wolfy-J
  */
-namespace Spiral\Tests\Storage\Servers\FtpServer;
+namespace Spiral\Tests\Storage\FtpServer;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;

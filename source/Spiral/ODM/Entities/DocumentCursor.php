@@ -52,7 +52,7 @@ class DocumentCursor extends \IteratorIterator
             'array'    => 'array'
         ]);
 
-        parent::__construct($cursor);
+        parent::__construct($this->cursor = $cursor);
 
         $this->class = $class;
         $this->odm = $odm;

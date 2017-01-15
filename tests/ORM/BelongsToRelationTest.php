@@ -382,6 +382,19 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $this->assertEquals($recursive1->getFields(), $recursive->parent->getFields());
         $this->assertEquals($recursive2->getFields(), $recursive->parent->parent->getFields());
-        $this->assertEquals($recursive3->getFields(), $recursive->parent->parent->parent->getFields());
+        $this->assertEquals($recursive3->getFields(),
+            $recursive->parent->parent->parent->getFields());
+    }
+
+    public function testSaveParentWithChild()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->author->profile->bio = 'new bio';
+        $post->save();
+
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post->author);
+        $this->assertSameInDB($post->author->profile);
     }
 }

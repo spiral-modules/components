@@ -15,6 +15,9 @@ namespace Spiral\Tests\ORM\Fixtures;
  */
 class User extends AbstactRecord
 {
+    //nothing is secured
+    const SECURED = [];
+
     const SCHEMA = [
         'id'      => 'primary',
         'name'    => 'string',

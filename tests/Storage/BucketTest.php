@@ -23,10 +23,10 @@ class BucketTest extends \PHPUnit_Framework_TestCase
             m::mock(ServerInterface::class)
         );
 
-        $this->assertSame('value', $bucket->getOption('value'));
+        $this->assertSame('value', $bucket->getOption('name'));
 
         $bucket1 = $bucket->withOption('name', 'value1');
-        $this->assertSame('value', $bucket->getOption('value'));
-        $this->assertSame('value1', $bucket1->getOption('value'));
+        $this->assertSame('value', $bucket->getOption('name'));
+        $this->assertSame('value1', $bucket1->getOption('name'));
     }
 }

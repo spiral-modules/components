@@ -6,8 +6,6 @@
  */
 namespace Spiral\Tests\ORM;
 
-use Spiral\ORM\Entities\Loaders\RelationLoader;
-use Spiral\ORM\Entities\Relations\HasManyRelation;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\User;
@@ -297,9 +295,9 @@ abstract class HasManyRelationTest extends BaseTest
 
         $post->save();
 
-        $this->assertSame(1,$comment->primaryKey());
-        $this->assertSame(2,$comment2->primaryKey());
-        $this->assertSame(3,$comment3->primaryKey());
+        $this->assertSame(1, $comment->primaryKey());
+        $this->assertSame(2, $comment2->primaryKey());
+        $this->assertSame(3, $comment3->primaryKey());
 
         $this->assertCount(3, $this->db->comments);
 
@@ -321,6 +319,124 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(2, $this->db->comments);
     }
 
-    //todo: find one
-    //todo: find multiple
+    public function testMatchOneSession()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $this->assertTrue($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2->getFields()));
+        $this->assertTrue($post->comments->has(['message' => 'hi3']));
+        $this->assertCount(3, $post->comments);
+
+        $post->save();
+
+        $this->assertSame($comment, $post->comments->matchOne($comment));
+        $this->assertSame($comment, $post->comments->matchOne($comment->primaryKey()));
+        $this->assertSame($comment, $post->comments->matchOne(['message' => 'hi']));
+    }
+
+    public function testReloadPreloaded()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $this->assertTrue($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2->getFields()));
+        $this->assertTrue($post->comments->has(['message' => 'hi3']));
+        $this->assertCount(3, $post->comments);
+
+        $post->save();
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->load('comments')
+            ->findOne();
+
+        $this->assertSame($comment, $post->comments->matchOne($comment));
+        $this->assertSame($comment, $post->comments->matchOne($comment->primaryKey()));
+        $this->assertSame($comment, $post->comments->matchOne(['message' => 'hi']));
+    }
+
+    public function testReloadButLazy()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $this->assertTrue($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2->getFields()));
+        $this->assertTrue($post->comments->has(['message' => 'hi3']));
+        $this->assertCount(3, $post->comments);
+
+        $post->save();
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertSame($comment, $post->comments->matchOne($comment));
+        $this->assertSame($comment, $post->comments->matchOne($comment->primaryKey()));
+        $this->assertSame($comment, $post->comments->matchOne(['message' => 'hi']));
+    }
+
+    public function testReloadButLazyButPartial()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $this->assertTrue($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2->getFields()));
+        $this->assertTrue($post->comments->has(['message' => 'hi3']));
+        $this->assertCount(3, $post->comments);
+
+        $post->save();
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $post->comments->partial(true);
+
+        $this->assertNull($post->comments->matchOne($comment));
+        $this->assertNull($post->comments->matchOne($comment->primaryKey()));
+        $this->assertNull($post->comments->matchOne(['message' => 'hi']));
+    }
+
+    public function testAddAsPartial()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $this->assertCount(3, $post->comments);
+
+        $post->save();
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $post->comments->partial(true);
+        $post->comments->add($comment4 = new Comment(['message' => 'hi4']));
+
+        $post->save();
+
+        $this->assertSameInDB($comment4);
+
+        $this->assertCount(4, $this->db->comments);
+    }
 }

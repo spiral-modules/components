@@ -234,11 +234,14 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @param bool $isolated Set to true (by default) to create new isolated entity map for
+     *                       selection.
      */
-    public function selector(string $class): RecordSelector
+    public function selector(string $class, bool $isolated = true): RecordSelector
     {
         //ORM is cloned in order to isolate cache scope.
-        return new RecordSelector($class, clone $this);
+        return new RecordSelector($class, $isolated ? clone $this : $this);
     }
 
     /**

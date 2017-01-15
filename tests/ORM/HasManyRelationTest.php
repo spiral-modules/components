@@ -639,4 +639,39 @@ abstract class HasManyRelationTest extends BaseTest
             ->with('comments', ['where' => ['{@}.message' => 'hi3']])
             ->findOne());
     }
+
+    public function testTransfer()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->save();
+
+        $post2 = new Post();
+        $post2->author = new User();
+        $post2->save();
+
+        $this->assertCount(2, $this->db->posts);
+        $this->assertCount(1, $this->db->comments);
+
+        $post2->comments->add($comment);
+        $post2->save();
+
+        $this->assertCount(2, $this->db->posts);
+        $this->assertCount(1, $this->db->comments);
+
+        $this->assertSameInDB($comment);
+
+        $post2 = $this->orm->selector(Post::class)
+            ->wherePK($post2->primaryKey())
+            ->findOne();
+
+        $this->assertTrue($post2->comments->has($comment));
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertFalse($post->comments->has($comment));
+    }
 }

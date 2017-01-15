@@ -341,9 +341,6 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertFalse($recursive->parent->parent->getRelations()->get('parent')->isLoaded());
     }
 
-    /**
-     * Fun.
-     */
     public function testLoadOptionalFirstLevelOfParentsInload()
     {
         $recursive = new Recursive();

@@ -77,7 +77,8 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
      *
      * $post = $this->findPost(); //no comments
      * $post->comments->partial(true);
-     * assert($post->comments->count() == 0); //never loaded
+     * $post->comments->add(new Comment());
+     * assert($post->comments->count() == 1); //no other comments to be loaded
      *
      * $post->comments->add($comment);
      *
@@ -166,7 +167,8 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     }
 
     /**
-     * Add new record into entity set. Attention, usage of this method WILL make relation partial.
+     * Add new record into entity set. Attention, usage of this method WILL load relation data
+     * unless partial.
      *
      * @param RecordInterface $record
      *
@@ -176,7 +178,8 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     {
         $this->assertValid($record);
 
-        $this->autoload = false;
+        //Pre-load existed records,
+        $this->loadData(true);
         $this->instances[] = $record;
     }
 
@@ -330,6 +333,24 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     }
 
     /**
+     * Fetch data from database. Lazy load.
+     *
+     * @return array
+     */
+    protected function loadRelated(): array
+    {
+        $innerKey = $this->key(Record::INNER_KEY);
+        if (!empty($this->parent->getField($innerKey))) {
+            return $this->orm
+                ->selector($this->class)
+                ->where($this->key(Record::OUTER_KEY), $this->parent->getField($innerKey))
+                ->fetchData();
+        }
+
+        return [];
+    }
+
+    /**
      * Init pre-loaded data.
      *
      * @return HasManyRelation
@@ -395,23 +416,5 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
         }
 
         return $inner;
-    }
-
-    /**
-     * Fetch data from database. Lazy load.
-     *
-     * @return array
-     */
-    protected function loadRelated(): array
-    {
-        $innerKey = $this->key(Record::INNER_KEY);
-        if (!empty($this->parent->getField($innerKey))) {
-            return $this->orm
-                ->selector($this->class)
-                ->where($this->key(Record::OUTER_KEY), $this->parent->getField($innerKey))
-                ->fetchData();
-        }
-
-        return [];
     }
 }

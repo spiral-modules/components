@@ -10,10 +10,12 @@ use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\RecordInterface;
+use Spiral\ORM\RelationInterface;
 
 class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
 {
@@ -38,6 +40,23 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
      * @var RecordInterface[]
      */
     private $unlinked = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withContext(
+        RecordInterface $parent,
+        bool $loaded = false,
+        array $data = null
+    ): RelationInterface {
+        /**
+         * @var self $relation
+         */
+        $relation = parent::withContext($parent, $loaded, $data);
+        $relation->pivotData = new \SplObjectStorage();
+
+        return $relation;
+    }
 
     /**
      * Partial selections will not be autoloaded.
@@ -114,6 +133,13 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
         return new \ArrayIterator($this->unlinked);
     }
 
+    /**
+     * todo: write docs
+     *
+     * @param array $records
+     * @param array $pivotData
+     * @param bool  $force
+     */
     public function sync(array $records, array $pivotData = [], bool $force = true)
     {
         if ($force) {
@@ -124,14 +150,20 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
 
     public function setPivot($record, array $pivotData)
     {
+        $this->pivotData->offsetSet($record, $pivotData);
     }
 
     public function getPivot($record)
     {
+        return $this->pivotData->offsetGet($record);
     }
 
     public function link($record, array $pivotData = [])
     {
+        //Linkage!
+        //$this->linked[] = $record;
+
+        $this->pivotData->offsetSet($record, $pivotData);
     }
 
     public function unlink($record)
@@ -184,6 +216,34 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
             }
         }
 
-        // return $this->initInstances();
+        return $this->initInstances();
+    }
+
+    /**
+     * Init relations and populate pivot map.
+     *
+     * @return ManyToManyRelation
+     */
+    private function initInstances(): self
+    {
+        if (is_array($this->data) && !empty($this->data)) {
+            //Iterates and instantiate records
+            $iterator = new RecordIterator($this->data, $this->class, $this->orm);
+
+            foreach ($iterator as $pivotData => $item) {
+                if ($this->has($item)) {
+                    //Skip duplicates
+                    continue;
+                }
+
+                $this->pivotData->attach($item, $pivotData);
+                $this->linked[] = $item;
+            }
+        }
+
+        //Memory free
+        $this->data = null;
+
+        return $this;
     }
 }

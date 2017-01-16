@@ -283,6 +283,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
 
         //Delete old instances first
         foreach ($this->deletedInstances as $deleted) {
+            //todo: add ability to work with nullable relations
             $transaction->addCommand($deleted->queueDelete());
         }
 

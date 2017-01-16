@@ -7,7 +7,7 @@
 namespace Spiral\ORM;
 
 use Spiral\Models\EntityInterface;
-use Spiral\ORM\Exceptions\CacheException;
+use Spiral\ORM\Exceptions\MapException;
 
 /**
  * Entity cache provides ability to access already retrieved entities from memory instead of
@@ -47,26 +47,28 @@ final class EntityMap
      *
      * Attention, existed entity will be replaced!
      *
-     * @param string          $class
-     * @param string          $identity
      * @param RecordInterface $entity
      * @param bool            $ignoreLimit Cache overflow will be ignored.
      *
      * @return RecordInterface Returns given entity.
      *
-     * @throws CacheException When cache size exceeded.
+     * @throws MapException When cache size exceeded.
      */
     public function remember(
-        string $class,
-        string $identity,
         RecordInterface $entity,
         $ignoreLimit = true
     ): RecordInterface {
         if (!$ignoreLimit && count($this->entities) > $this->maxSize) {
-            throw new CacheException('Entity cache size exceeded');
+            throw new MapException('Entity cache size exceeded');
         }
 
-        return $this->entities["{$class}.{$identity}"] = $entity;
+        if (empty($entity->primaryKey())) {
+            throw new MapException("Unable to store non identified entity " . get_class($entity));
+        }
+
+        $cacheID = get_class($entity) . ':' . $entity->primaryKey();
+
+        return $this->entities[$cacheID] = $entity;
     }
 
     /**

@@ -10,6 +10,6 @@ namespace Spiral\ORM\Exceptions;
 /**
  * Entity cache exception. Usually happens when cache size is exceeded.
  */
-class CacheException extends ORMException
+class MapException extends ORMException
 {
 }

@@ -7,6 +7,7 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Commands\CallbackCommand;
+use Spiral\ORM\Exceptions\MapException;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
@@ -196,5 +197,33 @@ abstract class StoreInScopeTest extends BaseTest
         }
 
         $this->assertSame(1, $count);
+    }
+
+    public function testMapIterate()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $this->orm->getMap()->remember($user);
+
+        $count = 0;
+        foreach ($this->orm->source(User::class) as $item) {
+            $count++;
+            $this->assertSame($user, $item);
+        }
+
+        $this->assertSame(1, $count);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\MapException
+     */
+    public function testStoreInMapNew()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+
+        $this->orm->getMap()->remember($user);
     }
 }

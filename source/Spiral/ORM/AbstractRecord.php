@@ -220,6 +220,14 @@ abstract class AbstractRecord extends SchematicEntity
     }
 
     /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return static::class . '#' . hash('crc32', spl_object_hash($this));
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function isNullable(string $field): bool

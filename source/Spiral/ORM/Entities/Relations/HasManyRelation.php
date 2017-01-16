@@ -120,17 +120,13 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
             throw new RelationException("HasMany relation can only be set with array of entities");
         }
 
-        //Delete old instances
-        foreach ($this->instances as $index => $instance) {
-            foreach ($value as $item) {
-                if ($this->match($instance, $item)) {
-                    $this->deletedInstances[] = $instance;
-                    unset($this->instances[$index]);
-                }
-            }
-        }
+        //Cleaning existed instances
+        $this->deletedInstances = array_unique(array_merge(
+            $this->deletedInstances,
+            $this->instances
+        ));
 
-        //Adding new instances
+        $this->instances = [];
         foreach ($value as $item) {
             if (!is_null($item)) {
                 $this->assertValid($item);

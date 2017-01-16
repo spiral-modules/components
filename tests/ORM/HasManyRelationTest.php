@@ -535,12 +535,25 @@ abstract class HasManyRelationTest extends BaseTest
         $post->comments->setRelated(null, true);
         $post->save();
 
-        $this->assertCount(2, $this->db->comments);
+        $this->assertCount(0, $this->db->comments);
+    }
 
-        $post->comments->deleteMultiple([$comment, $comment2]);
+    public function testClean3()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
         $post->save();
 
-        $this->assertCount(0, $this->db->comments);
+        $this->assertCount(3, $this->db->comments);
+
+        $post->comments->setRelated([$comment3], true);
+        $post->save();
+
+        $this->assertCount(1, $this->db->comments);
     }
 
     public function testCleanInSession()

@@ -736,6 +736,33 @@ abstract class HasManyRelationTest extends BaseTest
             ->findOne());
     }
 
+    public function testClearPartial()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->load('comments', [
+                'method' => RelationLoader::POSTLOAD,
+                'where'  => ['{@}.message' => 'hi']
+            ])
+            ->findOne();
+
+        $this->assertCount(2, $post->comments);
+        $post->comments = [];
+        $this->assertCount(0, $post->comments);
+        $post->save();
+
+        $this->assertCount(1, $this->db->comments);
+    }
+
     public function testTransfer()
     {
         $post = new Post();

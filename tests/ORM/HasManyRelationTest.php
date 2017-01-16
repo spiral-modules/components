@@ -80,6 +80,17 @@ abstract class HasManyRelationTest extends BaseTest
         $post->comments = [new User()];
     }
 
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\RelationException
+     * @expectedExceptionMessage HasMany relation can only be set with array of entities
+     */
+    public function testSetWrongInstance3()
+    {
+        $post = new Post();
+        $post->comments = new User();
+    }
+
+
     public function testSaveAndHasAndPostload()
     {
         $post = new Post();

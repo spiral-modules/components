@@ -89,6 +89,30 @@ class StemplerTest extends BaseTest
         $this->assertSame('</tag>', $result[6]);
     }
 
+    public function testCompileString()
+    {
+        $result = $this->compileString('
+<use path="namespace:includes/tag-c" as="tagA"/>
+<use path="default:includes/tag-b" as="tagB"/>
+
+<tagA class="my-class" id="123">
+    <tagB name="tag-b">
+        <tagA class="new-class" value="abc">
+            Some context.
+        </tagA>
+    </tagB>
+</tagA>
+');
+
+        $this->assertSame('<tag class="class my-class" id="123">', $result[0]);
+        $this->assertSame('<tag class="tag-b" name="tag-b">', $result[1]);
+        $this->assertSame('<tag class="class new-class" value="abc">', $result[2]);
+        $this->assertSame('Some context.', $result[3]);
+        $this->assertSame('</tag>', $result[4]);
+        $this->assertSame('</tag>', $result[5]);
+        $this->assertSame('</tag>', $result[6]);
+    }
+
     /**
      * @expectedException \Spiral\Stempler\Exceptions\StemplerException
      * @expectedExceptionMessage Unable to locate view 'includes-none.php' in namespace 'default'

@@ -170,7 +170,6 @@ abstract class StoreInScopeTest extends BaseTest
         $transaction->store($user);
 
         $user->name = 'John';
-
         $transaction->store($user);
 
         $user->name = 'Bobby';

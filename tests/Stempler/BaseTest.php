@@ -35,6 +35,29 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Render view and return it's blank lines.
+     *
+     * @param string $string
+     *
+     * @return array
+     */
+    protected function compileString($string)
+    {
+        $stempler = new Stempler(
+            new StemplerLoader([
+                'default'   => [__DIR__ . '/fixtures/default/'],
+                'namespace' => [__DIR__ . '/fixtures/namespace/',]
+            ]),
+            new DarkSyntax()
+        );
+
+        $lines = explode("\n", self::normalizeEndings($stempler->compileString($string)));
+
+        return array_values(array_map('trim', array_filter($lines, 'trim')));
+    }
+
+
+    /**
      * Normalize string endings to avoid EOL problem. Replace \n\r and multiply new lines with
      * single \n.
      *

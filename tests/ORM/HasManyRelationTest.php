@@ -641,9 +641,7 @@ abstract class HasManyRelationTest extends BaseTest
             ->wherePK($post->primaryKey())
             ->load('comments', [
                 'method' => RelationLoader::POSTLOAD,
-                'where'  => [
-                    '{@}.message' => 'hi'
-                ]
+                'where'  => ['{@}.message' => 'hi']
             ])
             ->findOne();
 

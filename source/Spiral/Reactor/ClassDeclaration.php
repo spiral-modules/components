@@ -169,6 +169,16 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
     }
 
     /**
+     * Declared interfaces.
+     *
+     * @return array
+     */
+    public function getInterfaces(): array
+    {
+        return array_keys($this->interfaces);
+    }
+
+    /**
      * @param string $class
      *
      * @return bool

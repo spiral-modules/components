@@ -17,6 +17,16 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
     public function testClassDeclaration()
     {
         $declaration = new ClassDeclaration('MyClass');
+        $declaration->setExtends('Record');
+        $this->assertSame('Record', $declaration->getExtends());
+
+        $declaration->addInterface('Traversable');
+        $this->assertSame(['Traversable'], $declaration->getInterfaces());
+
+        $this->assertTrue($declaration->hasInterface('Traversable'));
+        $declaration->removeInterface('Traversable');
+        $this->assertSame([], $declaration->getInterfaces());
+
         $declaration->constant('BOOT')
             ->setValue(true)
             ->setComment('Always boot');
@@ -30,7 +40,8 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
             ->setDefault(['Anton', 'John']);
 
         $this->assertTrue($declaration->getProperties()->has('names'));
-        $this->assertSame(['Anton', 'John'], $declaration->getProperties()->get('names')->getDefault());
+        $this->assertSame(['Anton', 'John'],
+            $declaration->getProperties()->get('names')->getDefault());
 
         $method = $declaration->method('sample');
         $method->parameter('input')->setType('int');
@@ -43,7 +54,7 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->assertSame(
-            preg_replace('/\s+/', '', 'class MyClass
+            preg_replace('/\s+/', '', 'class MyClass extends Record
             {
                 /**
                  * Always boot
@@ -77,6 +88,8 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
         $declaration = new FileDeclaration('Spiral\\Custom_Namespace', 'This is test file');
         $declaration->addUse(ContainerInterface::class, 'Container');
 
+        $this->assertSame('Spiral\\Custom_Namespace', $declaration->getNamespace());
+
         $declaration->addElement($this->testClassDeclaration());
 
         $this->assertSame(
@@ -89,7 +102,7 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
              
              use Interop\Container\ContainerInterface as Container;
              
-             class MyClass
+             class MyClass extends Record
              {
                  /**
                   * Always boot
@@ -128,7 +141,7 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
              namespace Spiral\\Custom_Namespace { 
                  use Interop\Container\ContainerInterface as Container;
                  
-                 class MyClass
+                 class MyClass extends Record
                  {
                      /**
                       * Always boot

@@ -181,6 +181,18 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     }
 
     /**
+     * Method will autoload data.
+     *
+     * @param array|RecordInterface|mixed $query Fields, entity or PK.
+     *
+     * @return bool
+     */
+    public function has($query): bool
+    {
+        return !empty($this->matchOne($query));
+    }
+
+    /**
      * Delete one record, strict compaction, make sure exactly same instance is given.
      *
      * @param RecordInterface $record
@@ -215,18 +227,6 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
         }
 
         $this->instances = array_values($this->instances);
-    }
-
-    /**
-     * Method will autoload data.
-     *
-     * @param array|RecordInterface|mixed $query Fields, entity or PK.
-     *
-     * @return bool
-     */
-    public function has($query): bool
-    {
-        return !empty($this->matchOne($query));
     }
 
     /**
@@ -338,6 +338,11 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     {
         if (is_array($this->data) && !empty($this->data)) {
             foreach ($this->data as $item) {
+                if ($this->has($item)) {
+                    //Skip duplicates
+                    continue;
+                }
+
                 $this->instances[] = $this->orm->make(
                     $this->class,
                     $item,

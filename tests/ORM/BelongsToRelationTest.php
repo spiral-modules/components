@@ -394,4 +394,19 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertSameInDB($post->author);
         $this->assertSameInDB($post->author->profile);
     }
+
+    public function testMultipleSave()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->author->profile->bio = 'new bio';
+        $post->save();
+
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post->author);
+        $this->assertSameInDB($post->author->profile);
+
+        //no commands
+        $post->save();
+    }
 }

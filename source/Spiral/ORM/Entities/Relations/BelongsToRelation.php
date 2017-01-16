@@ -73,18 +73,20 @@ class BelongsToRelation extends SingularRelation
         //Command or command set needed to store
         $related = $this->instance->queueStore(true);
 
-        if ($this->primaryColumnOf($this->instance) == $this->key(Record::OUTER_KEY)) {
-            /**
-             * Particular case when parent entity exists but now saved yet AND outer key is PK.
-             * Promised by previous command.
-             */
-            $related->onExecute(function (ContextualCommandInterface $related) use ($command) {
-                //Giving our child our context in a form of FK value
+        if (!$this->isSynced($this->parent, $this->instance)) {
+            //Syncing FKs
+            if ($this->key(Record::OUTER_KEY) != $this->primaryColumnOf($this->parent)) {
                 $command->addContext(
                     $this->key(Record::INNER_KEY),
-                    $related->primaryKey()
+                    $this->parent->getField($this->key(Record::OUTER_KEY))
                 );
-            });
+            } else {
+                //Syncing using promise
+                $related->onExecute(function (ContextualCommandInterface $related) use ($command) {
+                    //Giving our child our context in a form of FK value
+                    $command->addContext($this->key(Record::INNER_KEY), $related->primaryKey());
+                });
+            }
         }
 
         return $related;

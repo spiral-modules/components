@@ -380,31 +380,24 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
         ContextualCommandInterface $command,
         RecordInterface $instance
     ): CommandInterface {
-        //Inner storing inner instance
+        //Related entity store command
         $inner = $instance->queueStore(true);
 
-        /*
-         * Instance FK not synced.
-         */
-        if (
-            $this->value($instance, Record::OUTER_KEY)
-            != $this->value($this->parent, Record::INNER_KEY)
-            || empty($this->value($this->parent, Record::INNER_KEY))
-        ) {
-            if ($this->primaryColumnOf($this->parent) == $this->key(Record::INNER_KEY)) {
-                /**
-                 * Particular case when parent entity exists but now saved yet AND outer key is PK.
-                 * Basically inversed case of BELONGS_TO.
-                 */
-                $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
-                    $inner->addContext($this->schema[Record::OUTER_KEY], $command->primaryKey());
-                });
+        if (!$this->isSynced($this->parent, $instance)) {
+            //Syncing FKs
+            if ($this->key(Record::INNER_KEY) != $this->primaryColumnOf($this->parent)) {
+                $command->addContext(
+                    $this->key(Record::OUTER_KEY),
+                    $this->parent->getField($this->key(Record::INNER_KEY))
+                );
             } else {
                 //Syncing FKs
-                $inner->addContext(
-                    $this->key(Record::OUTER_KEY),
-                    $this->parent->getField($this->schema[Record::INNER_KEY])
-                );
+                $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
+                    $inner->addContext(
+                        $this->key(Record::OUTER_KEY),
+                        $command->primaryKey()
+                    );
+                });
             }
         }
 

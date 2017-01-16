@@ -25,13 +25,6 @@ class HasOneRelation extends SingularRelation
     private $previous = null;
 
     /**
-     * Related object changed.
-     *
-     * @var bool
-     */
-    private $changed = true;
-
-    /**
      * {@inheritdoc}
      */
     public function setRelated($value)
@@ -40,8 +33,6 @@ class HasOneRelation extends SingularRelation
         $this->assertValid($value);
 
         $this->loaded = true;
-        $this->changed = true;
-
         if (empty($this->previous)) {
             //We are only keeping reference to the oldest (ie loaded) instance
             $this->previous = $this->instance;
@@ -89,23 +80,22 @@ class HasOneRelation extends SingularRelation
         //Related entity store command
         $inner = $this->instance->queueStore(true);
 
-        if ($this->primaryColumnOf($this->parent) == $this->key(Record::INNER_KEY)) {
-            /**
-             * Particular case when parent entity exists but now saved yet AND outer key is PK.
-             * Basically inversed case of BELONGS_TO.
-             */
-            $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
-                $inner->addContext(
-                    $this->schema[Record::OUTER_KEY],
-                    $command->primaryKey()
+        if (!$this->isSynced($this->parent, $this->instance)) {
+            //Syncing FKs
+            if ($this->key(Record::INNER_KEY) != $this->primaryColumnOf($this->parent)) {
+                $command->addContext(
+                    $this->key(Record::OUTER_KEY),
+                    $this->parent->getField($this->key(Record::INNER_KEY))
                 );
-            });
-        } elseif ($this->changed) {
-            //We should have already non empty field (?)
-            $inner->addContext(
-                $this->key(Record::OUTER_KEY),
-                $this->parent->getField($this->schema[Record::INNER_KEY])
-            );
+            } else {
+                //Syncing FKs
+                $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
+                    $inner->addContext(
+                        $this->key(Record::OUTER_KEY),
+                        $command->primaryKey()
+                    );
+                });
+            }
         }
 
         return $inner;

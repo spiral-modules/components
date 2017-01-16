@@ -135,12 +135,14 @@ abstract class HasOneRelationTest extends BaseTest
         $user->name = 'Some name';
         $user->profile->bio = 'Some bio';
         $user->save();
+
         $this->assertSame(1, $this->db->profiles->count());
 
         $user->profile = $new = new Profile();
         $user->save();
 
-        $this->assertSame(0, $this->db->profiles->count());
+        //Old one must be deleted
+        $this->assertSame(1, $this->db->profiles->count());
         $this->assertSameInDB($new);
     }
 

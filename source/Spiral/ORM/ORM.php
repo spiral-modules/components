@@ -113,6 +113,26 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     }
 
     /**
+     * Check if ORM has associated entity cache.
+     *
+     * @return bool
+     */
+    public function hasMap(): bool
+    {
+        return !empty($this->map);
+    }
+
+    /**
+     * Get associated entity map.
+     *
+     * @return EntityMap
+     */
+    public function getMap(): EntityMap
+    {
+        return $this->map;
+    }
+
+    /**
      * Create version of ORM with different initial map or disable caching.
      *
      * @param EntityMap|null $map
@@ -125,16 +145,6 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $orm->map = $map;
 
         return $orm;
-    }
-
-    /**
-     * Check if ORM has associated entity cache.
-     *
-     * @return bool
-     */
-    public function hasMap(): bool
-    {
-        return !empty($this->map);
     }
 
     /**
@@ -281,7 +291,10 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         }
 
         //Always expect PK in our records
-        if (empty($identity = $fields[$this->define($class, self::R_PRIMARY_KEY)])) {
+        if (
+            !isset($fields[$this->define($class, self::R_PRIMARY_KEY)])
+            || empty($identity = $fields[$this->define($class, self::R_PRIMARY_KEY)])
+        ) {
             //Unable to cache non identified instance
             return $instantiator->make($fields, $state);
         }

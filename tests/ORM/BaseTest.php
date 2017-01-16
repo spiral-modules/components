@@ -12,6 +12,9 @@ use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Helpers\SynchronizationPool;
+use Spiral\ORM\Configs\MutatorsConfig;
+use Spiral\ORM\Configs\RelationsConfig;
+use Spiral\ORM\EntityMap;
 use Spiral\ORM\ORM;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
@@ -66,7 +69,21 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $this->dbal = $this->databaseManager();
         $this->builder = $this->makeBuilder($this->dbal);
 
-        $this->orm = new ORM($this->dbal, $this->relationsConfig());
+
+        $container = new Container();
+
+        $this->orm = new ORM(
+            $this->dbal,
+            $this->relationsConfig(),
+            null,
+            null,
+            null,
+            $container
+        );
+
+        //lazy loading
+        $container->bind(RelationsConfig::class, $this->relationsConfig());
+        $container->bind(MutatorsConfig::class, $this->mutatorsConfig());
 
         foreach (static::MODELS as $model) {
             $this->builder->addSchema($this->makeSchema($model));
@@ -79,14 +96,18 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
         $this->orm->buildSchema($this->builder);
 
-        $container = new Container();
         $container->bind(ORMInterface::class, $this->orm);
 
         SharedComponent::shareContainer($container);
+
+        //Make all tests with map
+        $this->orm = $this->orm->withMap(new EntityMap());
     }
 
     public function tearDown()
     {
+        $this->orm->getMap()->flush();
+
         SharedComponent::shareContainer(null);
 
         $schemas = [];

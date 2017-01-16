@@ -113,7 +113,7 @@ final class EntityMap
     /**
      * Flush content of entity cache.
      */
-    public function flushCache()
+    public function flush()
     {
         $this->entities = [];
     }
@@ -123,6 +123,6 @@ final class EntityMap
      */
     public function __destruct()
     {
-        $this->flushCache();
+        $this->flush();
     }
 }

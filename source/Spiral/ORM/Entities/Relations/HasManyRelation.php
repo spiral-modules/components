@@ -63,7 +63,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
          * @var self $hasMany
          */
         if ($hasMany->loaded) {
-            //Init all nested models immidiatelly
+            //Init all nested models immediately
             $hasMany->initInstances();
         }
 
@@ -104,13 +104,10 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     /**
      * {@inheritdoc}
      *
-     * @param bool $force When true all existed records will be loaded and removed.
-     *
      * @throws RelationException
      */
-    public function setRelated($value, bool $force = false)
+    public function setRelated($value)
     {
-        $this->autoload = $force;
         $this->loadData();
 
         if (is_null($value)) {
@@ -177,10 +174,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     public function add(RecordInterface $record)
     {
         $this->assertValid($record);
-
-        //Pre-load existed records,
-        $this->loadData(true);
-        $this->instances[] = $record;
+        $this->loadData(true)->instances[] = $record;
     }
 
     /**
@@ -207,14 +201,13 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
 
     /**
      * Delete multiple records, strict compaction, make sure exactly same instance is given. Method
-     * would not autoload instance and will mark it as partial.
+     * will autoload relation data unless partial.
      *
      * @param array|\Traversable $records
      */
     public function deleteMultiple($records)
     {
-        //Partial
-        $this->autoload = false;
+        $this->loadData(true);
 
         foreach ($records as $record) {
             $this->assertValid($record);
@@ -322,7 +315,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
 
         if (empty($this->data) || !is_array($this->data)) {
             if ($this->autoload && $autoload) {
-                //Only for non partial selections
+                //Only for non partial selections (excluded already selected)
                 $this->data = $this->loadRelated();
             } else {
                 $this->data = [];

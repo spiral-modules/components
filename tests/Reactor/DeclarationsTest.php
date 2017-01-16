@@ -21,10 +21,16 @@ class DeclarationsTest extends \PHPUnit_Framework_TestCase
             ->setValue(true)
             ->setComment('Always boot');
 
+        $this->assertTrue($declaration->getConstants()->has('BOOT'));
+        $this->assertSame(true, $declaration->getConstants()->get('BOOT')->getValue());
+
         $declaration->property('names')
             ->setAccess(ClassDeclaration\PropertyDeclaration::ACCESS_PRIVATE)
             ->setComment(['This is names', '', '@var array'])
             ->setDefault(['Anton', 'John']);
+
+        $this->assertTrue($declaration->getProperties()->has('names'));
+        $this->assertSame(['Anton', 'John'], $declaration->getProperties()->get('names')->getDefault());
 
         $method = $declaration->method('sample');
         $method->parameter('input')->setType('int');

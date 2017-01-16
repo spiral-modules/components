@@ -11,10 +11,10 @@ use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
-use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
@@ -337,18 +337,16 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     private function initInstances(): self
     {
         if (is_array($this->data) && !empty($this->data)) {
-            foreach ($this->data as $item) {
+            //Iterates and instantiate records
+            $iterator = new RecordIterator($this->data, $this->class, $this->orm);
+
+            foreach ($iterator as $item) {
                 if ($this->has($item)) {
                     //Skip duplicates
                     continue;
                 }
 
-                $this->instances[] = $this->orm->make(
-                    $this->class,
-                    $item,
-                    ORMInterface::STATE_LOADED,
-                    true
-                );
+                $this->instances[] = $item;
             }
         }
 

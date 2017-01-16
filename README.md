@@ -8,7 +8,21 @@ Spiral Core Components
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral/components/badges/quality-score.png)](https://scrutinizer-ci.com/g/spiral/components/?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/spiral/components/badge.svg?branch=feature/pre-split)](https://coveralls.io/github/spiral/components?branch=feature/pre-split)
 
-# Running Test
+# Components included
+  - Core interfaces and DI
+  - Stempler template processor
+  - Tokenizer, class locator, invocation locator
+  - Debug, profiling and dump components
+  - FileManager
+  - Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)
+  - Pagination
+  - DBAL, schema introspection, comparation, reflection
+  - Iehahrical ODM
+  - ORM, scaffolding, eager loading, transactional active record, memory mapping
+  - Security (NIST RBAC)
+  - Code scaffolding
+
+# Running Tests
 Install component dependencies first, make sure you have proper .env file with details about
 connected databases and storage component server configurations:
 

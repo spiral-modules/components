@@ -549,6 +549,46 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(0, $this->db->comments);
     }
 
+    public function testCleanX()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+        $post = $this->orm->source(Post::class)->findByPK($post->primaryKey());
+
+        $post->comments->setRelated(null);
+        $this->assertCount(3, $post->comments->getDeleted());
+        $post->save();
+
+        $this->assertCount(0, $this->db->comments);
+    }
+
+    public function testCleanY()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+        $post = $this->orm->source(Post::class)->findByPK($post->primaryKey());
+
+        $post->comments = [];
+        $this->assertCount(3, $post->comments->getDeleted());
+        $post->save();
+
+        $this->assertCount(0, $this->db->comments);
+    }
+
     public function testReassign()
     {
         $post = new Post();

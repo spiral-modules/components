@@ -36,7 +36,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     private $autoload = true;
 
     /**
-     * Loaded list of records.
+     * Loaded list of records. SplObjectStorage?
      *
      * @var RecordInterface[]
      */

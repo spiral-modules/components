@@ -69,6 +69,17 @@ abstract class HasManyRelationTest extends BaseTest
         $post->comments->add(new User());
     }
 
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\RelationException
+     * @expectedExceptionMessage Must be an instance of 'Spiral\Tests\ORM\Fixtures\Comment',
+     *                           'Spiral\Tests\ORM\Fixtures\User' given
+     */
+    public function testSetWrongInstance2()
+    {
+        $post = new Post();
+        $post->comments = [new User()];
+    }
+
     public function testSaveAndHasAndPostload()
     {
         $post = new Post();
@@ -499,6 +510,29 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(3, $this->db->comments);
 
         $post->comments->deleteMultiple([$comment3]);
+        $post->save();
+
+        $this->assertCount(2, $this->db->comments);
+
+        $post->comments->deleteMultiple([$comment, $comment2]);
+        $post->save();
+
+        $this->assertCount(0, $this->db->comments);
+    }
+
+    public function testClean2()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+
+        $post->comments->setRelated(null, true);
         $post->save();
 
         $this->assertCount(2, $this->db->comments);

@@ -154,7 +154,7 @@ abstract class AbstractRecord extends SchematicEntity
     {
         if ($this->relations->has($offset)) {
             //Flush associated relation value if possible
-            $this->relations->flushRelated($offset);
+            $this->relations->setRelated($offset, null);
 
             return;
         }

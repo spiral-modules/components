@@ -112,6 +112,10 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
         $this->autoload = $force;
         $this->loadData();
 
+        if (is_null($value)) {
+            $value = [];
+        }
+
         if (!is_array($value)) {
             throw new RelationException("HasMany relation can only be set with array of entities");
         }

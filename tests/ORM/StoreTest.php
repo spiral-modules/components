@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\ORM;
 
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
 
@@ -18,6 +19,15 @@ abstract class StoreTest extends BaseTest
         $this->assertInstanceOf(User::class, $user);
 
         $this->assertFalse($user->isLoaded());
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\InstantionException
+     */
+    public function testFiledMake()
+    {
+        /** @var User $user */
+        $user = $this->orm->make(User::class, [], ORMInterface::STATE_DELETED);
     }
 
     public function testSaveActiveRecordAndCheckLoaded()

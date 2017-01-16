@@ -183,4 +183,19 @@ abstract class StoreInScopeTest extends BaseTest
 
         $this->assertSame(1, $this->dbal->database()->users->count());
     }
+
+    public function testIterage()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $count = 0;
+        foreach ($this->orm->source(User::class) as $item) {
+            $count++;
+            $this->assertSimilar($user, $item);
+        }
+
+        $this->assertSame(1, $count);
+    }
 }

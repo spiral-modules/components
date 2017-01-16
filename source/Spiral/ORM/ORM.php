@@ -238,7 +238,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
 
         return $this->getFactory()->make($source, [
             'class' => $handles,
-            'odm'   => $this
+            'orm'   => $this
         ]);
     }
 

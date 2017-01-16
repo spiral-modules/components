@@ -79,7 +79,7 @@ final class EntityMap
      */
     public function forget(string $class, string $identity)
     {
-        unset($this->entities["{$class}.{$identity}"]);
+        unset($this->entities["{$class}:{$identity}"]);
     }
 
     /**
@@ -92,7 +92,7 @@ final class EntityMap
      */
     public function has(string $class, string $identity): bool
     {
-        return isset($this->entities["{$class}.{$identity}"]);
+        return isset($this->entities["{$class}:{$identity}"]);
     }
 
     /**
@@ -105,11 +105,11 @@ final class EntityMap
      */
     public function get(string $class, string $identity)
     {
-        if (empty($this->entities["{$class}.{$identity}"])) {
+        if (empty($this->entities["{$class}:{$identity}"])) {
             return null;
         }
 
-        return $this->entities[$class . '.' . $identity];
+        return $this->entities[$class . ':' . $identity];
     }
 
     /**

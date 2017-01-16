@@ -7,7 +7,6 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Commands\CallbackCommand;
-use Spiral\ORM\Exceptions\MapException;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
@@ -210,6 +209,7 @@ abstract class StoreInScopeTest extends BaseTest
         $count = 0;
         foreach ($this->orm->source(User::class) as $item) {
             $count++;
+            //Same instance
             $this->assertSame($user, $item);
         }
 

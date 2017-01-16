@@ -96,7 +96,7 @@ abstract class AbstractRelation implements RelationInterface
         $relation = clone $this;
         $relation->parent = $parent;
         $relation->loaded = $loaded;
-        $relation->data = $data;
+        $relation->data = is_null($data) ? [] : $data;
 
         return $relation;
     }

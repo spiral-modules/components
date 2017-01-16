@@ -533,6 +533,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(3, $this->db->comments);
 
         $post->comments->setRelated(null, true);
+        $this->assertCount(3, $post->comments->getDeleted());
         $post->save();
 
         $this->assertCount(0, $this->db->comments);
@@ -550,7 +551,6 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(3, $this->db->comments);
 
         $post->comments->setRelated([$comment3, null], true);
-        $this->assertCount(2, $post->comments->getDeleted());
         $post->save();
 
         $this->assertCount(0, $post->comments->getDeleted());

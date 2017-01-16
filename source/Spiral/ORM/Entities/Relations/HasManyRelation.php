@@ -126,7 +126,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
 
         foreach ($value as $item) {
             if (!is_null($item)) {
-                $this->assertValid($value);
+                $this->assertValid($item);
                 $this->instances[] = $item;
             }
         }

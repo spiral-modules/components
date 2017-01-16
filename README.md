@@ -62,3 +62,4 @@ PROFILING = true
 ```
 
 This is enable echoing of Storage, Database and ORM component log messages.
+![profiling][http://image.prntscr.com/image/96e68443490948e59badf8907f8ee0fd.png]

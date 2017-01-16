@@ -31,6 +31,11 @@ use Spiral\Pagination\PaginatorInterface;
  * @method $this orHaving(...$args);
  *
  * @method $this orderBy($expression, $direction = 'ASC');
+ *
+ * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
+ * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
+ * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
+ * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
 class RecordSelector extends Component implements \IteratorAggregate, \Countable, PaginatorAwareInterface
 {
@@ -426,7 +431,7 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     {
         if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM'])) {
             //One of aggregation requests
-            $result = call_user_func_array([$this->compileQuery(), $name], $arguments);
+            $result = call_user_func_array([$this->compiledQuery(), $name], $arguments);
         } else {
             //Where condition or statement
             $result = call_user_func_array([$this->loader->initialQuery(), $name], $arguments);

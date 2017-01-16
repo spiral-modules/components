@@ -216,6 +216,21 @@ abstract class StoreInScopeTest extends BaseTest
         $this->assertSame(1, $count);
     }
 
+    public function testSum()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save();
+
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 20;
+        $user->save();
+
+        $this->assertSame(30, $this->orm->selector(User::class)->sum('balance'));
+    }
+
     /**
      * @expectedException \Spiral\ORM\Exceptions\MapException
      */

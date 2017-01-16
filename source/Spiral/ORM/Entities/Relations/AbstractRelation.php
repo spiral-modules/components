@@ -53,7 +53,7 @@ abstract class AbstractRelation implements RelationInterface
      * Related data.
      *
      * @invisible
-     * @var array
+     * @var array|null
      */
     protected $data = null;
 

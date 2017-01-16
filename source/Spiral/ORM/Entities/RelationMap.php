@@ -59,7 +59,7 @@ class RelationMap
     {
         $this->class = get_class($record);
         $this->parent = $record;
-        $this->schema = $orm->define($this->class, ORMInterface::R_RELATIONS);
+        $this->schema = (array)$orm->define($this->class, ORMInterface::R_RELATIONS);
         $this->orm = $orm;
     }
 

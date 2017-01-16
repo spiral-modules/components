@@ -141,7 +141,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     protected function assertSimilar(RecordInterface $entity, RecordInterface $entityB)
     {
-        $this->assertTrue(empty(array_diff($entity->packValue(), $entityB->packValue())));
+        $this->assertTrue(empty(array_diff($entity->getFields(), $entityB->getFields())));
     }
 
     /**

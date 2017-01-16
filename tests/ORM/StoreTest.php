@@ -7,11 +7,17 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Schemas\SchemaBuilder;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
 
 abstract class StoreTest extends BaseTest
 {
+    public function testSchema()
+    {
+        $this->assertInstanceOf(SchemaBuilder::class, $this->orm->schemaBuilder(false));
+    }
+
     public function testNotLoaded()
     {
         /** @var User $user */

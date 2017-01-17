@@ -8,6 +8,7 @@ namespace Spiral\Tests\ORM;
 
 use Mockery as m;
 use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Injections\Fragment;
 use Spiral\ORM\Helpers\WhereDecorator;
 
 class WhereDecoratorTest extends \PHPUnit_Framework_TestCase
@@ -117,5 +118,17 @@ class WhereDecoratorTest extends \PHPUnit_Framework_TestCase
         $select->shouldReceive('orOnWhere')->with('alias.name', 'value');
 
         $decorator->orWhere('{@}.name', 'value');
+    }
+
+    public function testFragment()
+    {
+        $select = m::mock(SelectQuery::class);
+        $decorator = new WhereDecorator($select, 'onWhere', 'alias');
+
+        $f = new Fragment('hi');
+
+        $select->shouldReceive('orOnWhere')->with($f);
+
+        $decorator->orWhere($f);
     }
 }

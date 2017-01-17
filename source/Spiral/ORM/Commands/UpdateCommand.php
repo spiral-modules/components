@@ -74,8 +74,7 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      */
     public function isEmpty(): bool
     {
-        //never empty
-        return empty($this->values);
+        return empty($this->values) && empty($this->context);
     }
 
     /**
@@ -117,9 +116,8 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      */
     public function execute()
     {
-        $values = $this->context + $this->values;
-        if (!empty($values)) {
-            $this->table->update($values, $this->where)->run();
+        if (!$this->isEmpty()) {
+            $this->table->update($this->context + $this->values, $this->where)->run();
         }
 
         parent::execute();

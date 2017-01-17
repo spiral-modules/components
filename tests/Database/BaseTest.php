@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\Database;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
@@ -41,7 +42,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     /**
      * @return Driver
      */
-    abstract protected function getDriver(): Driver;
+    abstract protected function getDriver(ContainerInterface $container = null): Driver;
 
     /**
      * @return string

@@ -39,7 +39,7 @@ class Source extends Declaration
     /**
      * @param array $lines
      *
-     * @return self
+     * @return self|$this
      */
     public function setLines(array $lines): Source
     {

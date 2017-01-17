@@ -8,6 +8,7 @@
 namespace Spiral\Reactor\ClassDeclaration;
 
 use Spiral\Reactor\Prototypes\NamedDeclaration;
+use Spiral\Reactor\ReplaceableInterface;
 use Spiral\Reactor\Traits\AccessTrait;
 use Spiral\Reactor\Traits\CommentTrait;
 use Spiral\Reactor\Traits\SerializerTrait;
@@ -15,7 +16,7 @@ use Spiral\Reactor\Traits\SerializerTrait;
 /**
  * Declares property element.
  */
-class PropertyDeclaration extends NamedDeclaration
+class PropertyDeclaration extends NamedDeclaration implements ReplaceableInterface
 {
     use CommentTrait, SerializerTrait, AccessTrait;
 
@@ -85,6 +86,17 @@ class PropertyDeclaration extends NamedDeclaration
     public function getDefault()
     {
         return $this->defaultValue;
+    }
+
+    /**
+     * Replace comments.
+     *
+     * @param array|string $search
+     * @param array|string $replace
+     */
+    public function replace($search, $replace)
+    {
+        $this->docComment->replace($search, $replace);
     }
 
     /**

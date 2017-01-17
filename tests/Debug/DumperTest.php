@@ -61,7 +61,25 @@ class DumperTest extends \PHPUnit_Framework_TestCase
         $this->assertContains('N', $dump);
     }
 
+    public function testDumpAnonClass()
+    {
+        $dumper = new Dumper();
+        $dumper->setStyle(new Dumper\InversedStyle());
+
+        $dump = $dumper->dump(new class
+        {
+            private $name = 'Test';
+        }, Dumper::OUTPUT_RETURN);
+
+        $this->assertContains('object', $dump);
+        $this->assertContains('private', $dump);
+        $this->assertContains('name', $dump);
+        $this->assertContains('string(4)', $dump);
+        $this->assertContains('test', $dump);
+    }
+
     protected $_value_ = 'test value';
+
 
     /**
      * @invisible

@@ -20,7 +20,7 @@ class ReplaceTest extends \PHPUnit_Framework_TestCase
         $declaration->property('names')
             ->setAccess(ClassDeclaration\PropertyDeclaration::ACCESS_PRIVATE)
             ->setComment(['This is foxes', '', '@var array'])
-            ->setDefault(['name' => 11, 'value' => 0.1]);
+            ->setDefault(['name' => 11, 'value' => 0.1, 'test' => []]);
 
         $method = $declaration->method('sample');
         $method->parameter('input')->setType('int');
@@ -62,7 +62,8 @@ class ReplaceTest extends \PHPUnit_Framework_TestCase
                      */
                     private $names = [
                         \'name\'  => 11,
-                        \'value\' => 0.10000000000000001
+                        \'value\' => 0.10000000000000001,
+                        \'test\'  => []
                     ];
             
                     /**
@@ -97,7 +98,8 @@ class ReplaceTest extends \PHPUnit_Framework_TestCase
                          */
                         private $names = [
                             \'name\'  => 11,
-                            \'value\' => 0.10000000000000001
+                            \'value\' => 0.10000000000000001,
+                            \'test\'  => []
                         ];
                 
                         /**

@@ -75,10 +75,10 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->dbal = $this->databaseManager();
+        $this->container = $container = new Container();
+        $this->dbal = $this->databaseManager($this->container);
         $this->builder = $this->makeBuilder($this->dbal);
 
-        $this->container = $container = new Container();
 
         $this->orm = new ORM(
             $this->dbal,
@@ -140,19 +140,24 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     /**
      * Default SQLite database.
      *
+     * @param ContainerInterface $container
+     *
      * @return DatabaseManager
      */
-    protected function databaseManager(): DatabaseManager
+    protected function databaseManager(ContainerInterface $container): DatabaseManager
     {
-        $dbal = new DatabaseManager(new DatabasesConfig([
-            'default'     => 'default',
-            'aliases'     => [],
-            'databases'   => [],
-            'connections' => []
-        ]));
+        $dbal = new DatabaseManager(
+            new DatabasesConfig([
+                'default'     => 'default',
+                'aliases'     => [],
+                'databases'   => [],
+                'connections' => []
+            ]),
+            $container
+        );
 
-        $dbal->addDatabase($this->db = new Database($this->getDriver(), 'default', ''));
-        $dbal->addDatabase(new Database($this->getDriver(), 'slave', 'slave_'));
+        $dbal->addDatabase($this->db = new Database($this->getDriver($container), 'default', ''));
+        $dbal->addDatabase(new Database($this->getDriver($container), 'slave', 'slave_'));
 
         return $dbal;
     }
@@ -181,5 +186,5 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      *
      * @return Driver
      */
-    abstract function getDriver(): Driver;
+    abstract function getDriver(ContainerInterface $container = null): Driver;
 }

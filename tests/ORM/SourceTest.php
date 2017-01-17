@@ -7,6 +7,9 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Entities\RecordSelector;
+use Spiral\Pagination\Paginator;
+use Spiral\Pagination\PaginatorInterface;
+use Spiral\Pagination\PaginatorsInterface;
 use Spiral\Tests\ORM\Fixtures\User;
 use Spiral\Tests\ORM\Fixtures\UserSource;
 
@@ -22,6 +25,49 @@ abstract class SourceTest extends BaseTest
 
         $this->assertInstanceOf(RecordSelector::class, $source->getIterator());
         $this->assertInstanceOf(RecordSelector::class, $source->find());
+    }
+
+    public function testSelectorIsolated()
+    {
+        $selector = $this->orm->selector(User::class, true);
+        $this->assertNotSame($selector->getORM(), $this->orm);
+
+        $this->assertSame(User::class, $selector->getClass());
+    }
+
+    public function testSelectorNotIsolated()
+    {
+        $selector = $this->orm->selector(User::class, false);
+        $this->assertSame($selector->getORM(), $this->orm);
+
+        $this->assertSame(User::class, $selector->getClass());
+
+        $this->assertNull($selector->findOne());
+    }
+
+    public function testSelectorAndMap()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $selector = $this->orm->selector(User::class, true);
+
+        $this->assertSimilar($user, $selector->findOne());
+        $this->assertNotSame($user, $selector->findOne());
+    }
+
+    public function testSelectorAndMapButRemembered()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $this->orm->getMap()->remember($user);
+        $selector = $this->orm->selector(User::class, true);
+
+        $this->assertSimilar($user, $selector->findOne());
+        $this->assertSame($user, $selector->findOne());
     }
 
     public function testInstanceAutoInit()
@@ -144,6 +190,91 @@ abstract class SourceTest extends BaseTest
         $user->save();
 
         $this->assertSame(30, $this->orm->selector(User::class)->sum('balance'));
+    }
+
+    public function testPaginate()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save();
+
+        $user1 = new User();
+        $user1->name = 'John';
+        $user1->balance = 20;
+        $user1->save();
+
+
+        $selector = $this->orm->selector(User::class);
+        $this->assertFalse($selector->hasPaginator());
+        $selector->setPaginator((new Paginator(1))->withPage(1));
+
+        $this->assertTrue($selector->hasPaginator());
+        $this->assertSame(1, $selector->getPaginator()->getLimit());
+
+        foreach ($selector as $entity) {
+            $this->assertSimilar($user, $entity);
+        }
+
+        $selector->setPaginator($selector->getPaginator()->withPage(2));
+
+        $this->assertTrue($selector->hasPaginator());
+        $this->assertSame(1, $selector->getPaginator()->getLimit());
+
+        foreach ($selector as $entity) {
+            $this->assertSimilar($user1, $entity);
+        }
+    }
+
+    public function testPaginateInScope()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save();
+
+        $user1 = new User();
+        $user1->name = 'John';
+        $user1->balance = 20;
+        $user1->save();
+
+        $this->container->bind(PaginatorsInterface::class, new class implements PaginatorsInterface
+        {
+            public function createPaginator(string $parameter, int $limit = 25): PaginatorInterface
+            {
+                $paginator = new Paginator($limit);
+
+                return $paginator;
+            }
+        });
+
+        $selector = $this->orm->selector(User::class);
+        $this->assertFalse($selector->hasPaginator());
+        $selector->paginate(1);
+
+        $this->assertTrue($selector->hasPaginator());
+        $this->assertSame(1, $selector->getPaginator()->getLimit());
+
+        foreach ($selector as $entity) {
+            $this->assertSimilar($user, $entity);
+        }
+
+        $this->container->bind(PaginatorsInterface::class, new class implements PaginatorsInterface
+        {
+            public function createPaginator(string $parameter, int $limit = 25): PaginatorInterface
+            {
+                $paginator = new Paginator($limit);
+
+                return $paginator;
+            }
+        });
+
+        $selector->paginate(2);
+
+        $this->assertTrue($selector->hasPaginator());
+        $this->assertSame(2, $selector->getPaginator()->getLimit());
+
+        $this->container->removeBinding(PaginatorsInterface::class);
     }
 
     /**

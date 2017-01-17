@@ -7,6 +7,7 @@
  */
 namespace Spiral\Database;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
@@ -90,18 +91,19 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     /**
      * @invisible
      *
-     * @var FactoryInterface
+     * @var ContainerInterface
      */
-    protected $factory = null;
+    protected $container = null;
 
     /**
-     * @param DatabasesConfig  $config
-     * @param FactoryInterface $factory
+     * @param DatabasesConfig    $config
+     * @param ContainerInterface $container Factory provider. Also used to define driver and
+     *                                      builders scope.
      */
-    public function __construct(DatabasesConfig $config, FactoryInterface $factory = null)
+    public function __construct(DatabasesConfig $config, ContainerInterface $container = null)
     {
         $this->config = $config;
-        $this->factory = $factory ?? new Container();
+        $this->container = $container ?? new Container();
     }
 
     /**
@@ -142,7 +144,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             $connection = $this->driver($connection);
         }
 
-        $instance = $this->factory->make(
+        $instance = $this->getFactory()->make(
             Database::class,
             [
                 'name'   => $name,
@@ -185,7 +187,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         }
 
         //No need to benchmark here, due connection will happen later
-        $instance = $this->factory->make(
+        $instance = $this->getFactory()->make(
             Database::class,
             [
                 'name'   => $database,
@@ -237,7 +239,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
         string $username,
         string $password = ''
     ): Driver {
-        $instance = $this->factory->make(
+        $instance = $this->getFactory()->make(
             $driver,
             [
                 'name'    => $name,
@@ -276,7 +278,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
             );
         }
 
-        $instance = $this->factory->make(
+        $instance = $this->getFactory()->make(
             $this->config->driverClass($connection),
             [
                 'name'    => $connection,
@@ -342,5 +344,19 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
     {
         //If context is empty default database will be returned
         return $this->database($context);
+    }
+
+    /**
+     * Get ODM specific factory.
+     *
+     * @return FactoryInterface
+     */
+    protected function getFactory(): FactoryInterface
+    {
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
+        }
+
+        return $this->container->get(FactoryInterface::class);
     }
 }

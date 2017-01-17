@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\Database\MySQL;
 
+use Interop\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;
@@ -28,7 +29,7 @@ trait DriverTrait
         parent::setUp();
     }
 
-    public function getDriver(): Driver
+    public function getDriver(ContainerInterface $container = null): Driver
     {
         if (!isset($this->driver)) {
             $this->driver = new MySQLDriver(
@@ -39,7 +40,7 @@ trait DriverTrait
                     'password'   => '',
                     'options'    => []
                 ],
-                new Container()
+                $container ?? new Container()
             );
         }
 

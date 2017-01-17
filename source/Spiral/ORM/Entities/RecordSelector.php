@@ -30,6 +30,8 @@ use Spiral\Pagination\PaginatorInterface;
  * @method $this andHaving(...$args);
  * @method $this orHaving(...$args);
  *
+ * @method $this paginate($limit = 25, $page = 'page')
+ *
  * @method $this orderBy($expression, $direction = 'ASC');
  *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
@@ -469,6 +471,7 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     protected function iocContainer()
     {
         if ($this->orm instanceof Component) {
+
             //Working inside ORM container scope
             return $this->orm->iocContainer();
         }

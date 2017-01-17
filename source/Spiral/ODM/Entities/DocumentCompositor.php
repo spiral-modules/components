@@ -18,7 +18,7 @@ use Spiral\ODM\ODMInterface;
  * Attention, composition will be saved as one big $set operation in case when multiple atomic
  * operations applied to it (not supported by Mongo).
  *
- * @todo ArrayAcces?
+ * @todo ArrayAccess?
  */
 class DocumentCompositor implements
     CompositableInterface,

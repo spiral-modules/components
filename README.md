@@ -11,7 +11,7 @@ Spiral Core Components
 <b>[Documentation](http://spiral-framework.com/guide)</b> | [Framework Bundle](https://github.com/spiral/spiral) | [Skeleton Application](https://github.com/spiral/application)
 
 # Components included
-  - Core interfaces and DI
+  - Core interfaces and autowiring DI
   - Stempler template processor
   - Tokenizer, class locator, invocation locator
   - Debug, profiling and dump components

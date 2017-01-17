@@ -14,7 +14,7 @@ use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
-use Spiral\ORM\ORMInterface;
+use Spiral\ODM\ODMInterface;
 
 /**
  * Static record functionality including create and find methods.
@@ -101,7 +101,7 @@ trait SourceTrait
             ));
         }
 
-        return $container->get(ORMInterface::class)->source(static::class);
+        return $container->get(ODMInterface::class)->source(static::class);
     }
 
     /**

@@ -92,7 +92,7 @@ class WhereDecoratorTest extends \PHPUnit_Framework_TestCase
 
         $select->shouldReceive('orOnWhere')->with('alias.name', 'value');
 
-        $decorator->where(function (WhereDecorator $query) {
+        $decorator->orWhere(function (WhereDecorator $query) {
             $query->orWhere('{@}.name', 'value');
         });
     }
@@ -105,7 +105,7 @@ class WhereDecoratorTest extends \PHPUnit_Framework_TestCase
 
         $select->shouldReceive('andOnWhere')->with('alias.name', 'value');
 
-        $decorator->where(function (WhereDecorator $query) {
+        $decorator->andWhere(function (WhereDecorator $query) {
             $query->andWhere('{@}.name', 'value');
         });
     }

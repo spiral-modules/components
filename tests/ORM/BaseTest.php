@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\ORM;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\DatabaseManager;
@@ -27,6 +28,7 @@ use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\Recursive;
 use Spiral\Tests\ORM\Fixtures\Tag;
 use Spiral\Tests\ORM\Fixtures\User;
+use Spiral\Tests\ORM\Fixtures\UserSource;
 use Spiral\Tests\ORM\Traits\ORMTrait;
 
 abstract class BaseTest extends \PHPUnit_Framework_TestCase
@@ -43,6 +45,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         Profile::class,
         Recursive::class
     ];
+
+    const SOURCES = [User::class => UserSource::class];
 
     /**
      * @var DatabaseManager
@@ -64,13 +68,17 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
      */
     protected $db;
 
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
     public function setUp()
     {
         $this->dbal = $this->databaseManager();
         $this->builder = $this->makeBuilder($this->dbal);
 
-
-        $container = new Container();
+        $this->container = $container = new Container();
 
         $this->orm = new ORM(
             $this->dbal,
@@ -89,6 +97,10 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $this->builder->addSchema($this->makeSchema($model));
         }
 
+        foreach (static::SOURCES as $model => $source) {
+            $this->builder->addSource($model, $source);
+        }
+
         $this->db->getDriver()->setProfiling(false);
         $this->builder->renderSchema();
         $this->builder->pushSchema();
@@ -96,12 +108,11 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
         $this->orm->buildSchema($this->builder);
 
-        $container->bind(ORMInterface::class, $this->orm);
-
         SharedComponent::shareContainer($container);
 
         //Make all tests with map
         $this->orm = $this->orm->withMap(new EntityMap());
+        $container->bind(ORMInterface::class, $this->orm);
     }
 
     public function tearDown()

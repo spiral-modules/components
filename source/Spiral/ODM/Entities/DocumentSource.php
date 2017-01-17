@@ -71,6 +71,16 @@ class DocumentSource extends Component implements \Countable, \IteratorAggregate
     }
 
     /**
+     * Associated class.
+     *
+     * @return string
+     */
+    public function getClass(): string
+    {
+        return $this->class;
+    }
+
+    /**
      * Create new DocumentEntity based on set of provided fields.
      *
      * @final Change static method of entity, not this one.

@@ -71,6 +71,16 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
     }
 
     /**
+     * Associated class.
+     *
+     * @return string
+     */
+    public function getClass(): string
+    {
+        return $this->class;
+    }
+
+    /**
      * Associated ORM manager.
      *
      * @return ORMInterface

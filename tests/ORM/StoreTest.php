@@ -6,6 +6,7 @@
  */
 namespace Spiral\Tests\ORM;
 
+use Spiral\ORM\Entities\RecordInstantiator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Schemas\SchemaBuilder;
 use Spiral\ORM\Transaction;
@@ -16,6 +17,15 @@ abstract class StoreTest extends BaseTest
     public function testSchema()
     {
         $this->assertInstanceOf(SchemaBuilder::class, $this->orm->schemaBuilder(false));
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\InstantionException
+     */
+    public function testWrongInstance()
+    {
+        $instantiator = new RecordInstantiator($this->orm, Dummy::class);
+        $instantiator->make([], ORMInterface::STATE_NEW);
     }
 
     public function testNotLoaded()
@@ -90,4 +100,9 @@ abstract class StoreTest extends BaseTest
 
         $this->assertSameInDB($user);
     }
+}
+
+
+class Dummy
+{
 }

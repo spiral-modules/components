@@ -113,9 +113,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     }
 
     /**
-     * Check if ORM has associated entity cache.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasMap(): bool
     {
@@ -123,23 +121,21 @@ class ORM extends Component implements ORMInterface, SingletonInterface
     }
 
     /**
-     * Get associated entity map.
-     *
-     * @return EntityMap
+     * {@inheritdoc}
      */
     public function getMap(): EntityMap
     {
+        if (empty($this->map)) {
+            throw new ORMException("Attempts to access entity map in mapless mode");
+        }
+
         return $this->map;
     }
 
     /**
-     * Create version of ORM with different initial map or disable caching.
-     *
-     * @param EntityMap|null $map
-     *
-     * @return ORM
+     * {@inheritdoc}
      */
-    public function withMap(EntityMap $map = null): ORM
+    public function withMap(EntityMap $map = null): ORMInterface
     {
         $orm = clone $this;
         $orm->map = $map;

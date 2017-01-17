@@ -22,10 +22,8 @@ abstract class Record extends RecordEntity implements ActiveEntityInterface
      *
      * @return int
      */
-    public function save(
-        TransactionInterface $transaction = null,
-        bool $queueRelations = true
-    ): int {
+    public function save(TransactionInterface $transaction = null, bool $queueRelations = true): int
+    {
         /*
          * First, per interface agreement calculate entity state after save command being called.
          */

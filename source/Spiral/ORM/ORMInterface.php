@@ -52,6 +52,29 @@ interface ORMInterface
     const PIVOT_DATA = '@pivot';
 
     /**
+     * Check if ORM has associated entity cache.
+     *
+     * @return bool
+     */
+    public function hasMap(): bool;
+
+    /**
+     * Get associated entity map.
+     *
+     * @return EntityMap
+     */
+    public function getMap(): EntityMap;
+
+    /**
+     * Create version of ORM with different initial map or disable caching.
+     *
+     * @param EntityMap|null $map
+     *
+     * @return self
+     */
+    public function withMap(EntityMap $map = null): self;
+
+    /**
      * Define property from ORM schema. Attention, ORM will automatically load schema if it's empty.
      *
      * Example:

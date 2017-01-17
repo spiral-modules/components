@@ -25,6 +25,8 @@ use Spiral\Storage\Exceptions\ServerException;
 
 /**
  * Provides abstraction level to work with data located in Rackspace cloud.
+ *
+ * @todo change to different cache
  */
 class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 {
@@ -70,7 +72,7 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
     /**
      * @param array                $options
      * @param FilesInterface       $files
-     * @param CacheInterface|null  $cache
+     * @param CacheInterface|null  $cache todo REMOVE!
      * @param ClientInterface|null $client
      */
     public function __construct(
@@ -213,7 +215,7 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
      * {@inheritdoc}
      *
      * @todo debug to figure out why Rackspace is not reliable
-     * @see https://github.com/rackspace/php-opencloud/issues/477
+     * @see  https://github.com/rackspace/php-opencloud/issues/477
      */
     public function delete(BucketInterface $bucket, string $name, bool $retry = true)
     {
@@ -279,7 +281,7 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 
         try {
             $request = $this->buildRequest('PUT', $destination, $name, [
-                'X-Copy-From'    => '/' . $bucket->getOPtion('container') . '/' . rawurlencode($name),
+                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($name),
                 'Content-Length' => 0
             ]);
 
@@ -309,18 +311,16 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
             return;
         }
 
+        $username = $this->options['username'];
+        $apiKey = $this->options['apiKey'];
+
         //Credentials request
         $request = new Request(
             'POST',
             $this->options['authServer'],
             ['Content-Type' => 'application/json'],
             json_encode([
-                'auth' => [
-                    'RAX-KSKEY:apiKeyCredentials' => [
-                        'username' => $this->options['username'],
-                        'apiKey'   => $this->options['apiKey']
-                    ]
-                ]
+                'auth' => ['RAX-KSKEY:apiKeyCredentials' => compact('username', 'apiKey')]
             ])
         );
 
@@ -352,17 +352,18 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
             throw new ServerException("Unable to fetch rackspace auth token");
         }
 
+        //We got our authorization token (which will expire in some time)
         $this->authToken = $response['access']['token']['id'];
 
         if (!empty($this->cache) && $this->options['cache']) {
             $this->cache->set(
-                $this->options['username'] . '@rackspace-token',
+                $username . '@rackspace-token',
                 $this->authToken,
                 $this->options['lifetime']
             );
 
             $this->cache->set(
-                $this->options['username'] . '@rackspace-regions',
+                $username . '@rackspace-regions',
                 $this->regions,
                 $this->options['lifetime']
             );

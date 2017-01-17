@@ -54,10 +54,8 @@ final class EntityMap
      *
      * @throws MapException When cache size exceeded.
      */
-    public function remember(
-        RecordInterface $entity,
-        $ignoreLimit = true
-    ): RecordInterface {
+    public function remember(RecordInterface $entity, bool $ignoreLimit = false): RecordInterface
+    {
         if (!$ignoreLimit && count($this->entities) > $this->maxSize - 1) {
             throw new MapException('Entity cache size exceeded');
         }

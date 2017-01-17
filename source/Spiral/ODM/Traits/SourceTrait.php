@@ -93,8 +93,8 @@ trait SourceTrait
         //Via global scope
         $container = self::staticContainer();
 
-        if (empty($container)) //Via global scope
-        {
+        if (empty($container)) {
+            //Via global scope
             throw new ScopeException(sprintf(
                 "Unable to get '%s' source, no container scope is available",
                 static::class

@@ -27,9 +27,11 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertNull($post->author);
 
         $this->assertTrue($post->getRelations()->get('author')->isLoaded());
-        $this->assertFalse(empty($post->author));
+        $this->assertTrue(empty($post->author));
 
         $post->author = $user = new User();
+        $this->assertFalse(empty($post->author));
+
         $user->name = 'Bobby';
 
         $this->assertInstanceOf(User::class, $post->author);

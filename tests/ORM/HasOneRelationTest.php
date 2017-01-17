@@ -18,12 +18,15 @@ abstract class HasOneRelationTest extends BaseTest
     {
         $user = new User();
         $this->assertFalse($user->getRelations()->get('profile')->isLoaded());
+        $this->assertTrue(empty($user->profile));
+
         $this->assertInstanceOf(HasOneRelation::class, $user->getRelations()->get('profile'));
 
         $user->name = 'Some name';
         $user->profile->bio = 'Some bio';
 
         $this->assertTrue($user->getRelations()->get('profile')->isLoaded());
+        $this->assertFalse(empty($user->profile));
 
         $user->save();
 

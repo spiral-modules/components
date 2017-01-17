@@ -43,7 +43,7 @@ trait BenchmarkTrait
      *
      * @return bool|float|mixed
      */
-    protected function benchmark($record, string $context = '')
+    private function benchmark($record, string $context = '')
     {
         if (empty($this->benchmarker)) {
             $container = $this->iocContainer();

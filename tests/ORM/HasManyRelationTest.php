@@ -18,10 +18,14 @@ abstract class HasManyRelationTest extends BaseTest
     {
         $post = new Post();
         $this->assertFalse($post->getRelations()->get('comments')->isLoaded());
+        $this->assertTrue(empty($post->comments));
+
         $this->assertInstanceOf(HasManyRelation::class, $post->comments);
         $this->assertFalse($post->comments->isLeading());
         $this->assertCount(0, $post->comments);
         $this->assertTrue($post->comments->isLoaded());
+        $this->assertFalse(empty($post->comments));
+
     }
 
     public function testAddInstanceAndSave()

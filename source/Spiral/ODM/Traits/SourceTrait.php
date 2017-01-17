@@ -14,7 +14,7 @@ use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\Document;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
-use Spiral\ODM\ODM;
+use Spiral\ORM\ORMInterface;
 
 /**
  * Static record functionality including create and find methods.
@@ -22,10 +22,10 @@ use Spiral\ODM\ODM;
 trait SourceTrait
 {
     /**
-     * Find multiple records based on provided query.
+     * Find multiple documents based on provided query.
      *
      * Example:
-     * User::find(['status' => 'active'], ['profile']);
+     * User::find(['status' => 'active'];
      *
      * @param array $query Selection WHERE statement.
      *
@@ -39,11 +39,11 @@ trait SourceTrait
     }
 
     /**
-     * Fetch one record based on provided query or return null. Use second argument to specify
-     * relations to be loaded.
+     * Fetch one record based on provided query or return null. Make sure to specify sort by in
+     * order to stabilize selection
      *
      * Example:
-     * User::findOne(['name' => 'Wolfy-J'], ['profile'], ['id' => 'DESC']);
+     * User::findOne(['name' => 'Wolfy-J'], ['id' => -1]);
      *
      * @param array $where  Selection WHERE statement.
      * @param array $sortBy Sort by.
@@ -58,10 +58,10 @@ trait SourceTrait
     }
 
     /**
-     * Find record using it's primary key. Relation data can be preloaded with found record.
+     * Find record using it's primary key.
      *
      * Example:
-     * User::findByID(1, ['profile']);
+     * User::findByOK(1);
      *
      * @param mixed $primaryKey Primary key.
      *
@@ -75,7 +75,7 @@ trait SourceTrait
     }
 
     /**
-     * Instance of ORM Selector associated with specific document.
+     * Instance of ODM Selector associated with specific document.
      *
      * @see   Component::staticContainer()
      **
@@ -101,7 +101,7 @@ trait SourceTrait
             ));
         }
 
-        return $container->get(ODM::class)->source(static::class);
+        return $container->get(ORMInterface::class)->source(static::class);
     }
 
     /**

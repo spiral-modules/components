@@ -18,6 +18,8 @@ trait DriverTrait
 {
     private $driver;
 
+    private static $pdo;
+
     public function setUp()
     {
         if (!in_array('pgsql', \PDO::getAvailableDrivers())) {
@@ -44,7 +46,15 @@ trait DriverTrait
             );
         }
 
+        if (empty(self::$pdo)) {
+            self::$pdo = $this->driver->getPDO();
+        } else {
+            $this->driver = $this->driver->withPDO(self::$pdo);
+        }
+
         $driver = $this->driver;
+
+
         $this->assertSame('postgres', $driver->getName());
 
         if (static::PROFILING) {

@@ -18,6 +18,8 @@ trait DriverTrait
 {
     private $driver;
 
+    private static $pdo;
+
     public function setUp()
     {
         if (!in_array('mysql', \PDO::getAvailableDrivers())) {
@@ -42,6 +44,12 @@ trait DriverTrait
                 ],
                 $container ?? new Container()
             );
+        }
+
+        if (empty(self::$pdo)) {
+            self::$pdo = $this->driver->getPDO();
+        } else {
+            $this->driver = $this->driver->withPDO(self::$pdo);
         }
 
         $driver = $this->driver;

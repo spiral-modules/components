@@ -19,9 +19,8 @@ use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 
 /**
- * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
- * and use different by table prefix. Databases usually linked to real database or logical portion
- * of database (filtered by prefix).
+ * Database class is high level abstraction at top of Driver. Databases usually linked to real 
+ * database or logical portion of database (filtered by prefix).
  */
 class Database implements DatabaseInterface, InjectableInterface
 {

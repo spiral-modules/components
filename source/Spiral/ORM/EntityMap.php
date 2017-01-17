@@ -105,11 +105,11 @@ final class EntityMap
      */
     public function get(string $class, string $identity)
     {
-        if (empty($this->entities["{$class}:{$identity}"])) {
+        if (!$this->has($class, $identity)) {
             return null;
         }
 
-        return $this->entities[$class . ':' . $identity];
+        return $this->entities["{$class}:{$identity}"];
     }
 
     /**

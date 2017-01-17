@@ -62,34 +62,6 @@ class BelongsToRelation extends SingularRelation
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * Attempts to load parent from memory map!
-     */
-    protected function loadData()
-    {
-        $outerKey = $this->parent->getField($this->key(Record::OUTER_KEY));
-        /*
-         * Attempt to load entity from entity map, when entity map is set, parent is loaded and outer
-         * key is set. If failed - lazy load will happen. This code can help to drastically reduce
-         * amount of queries in cases where child call parent without inload or with inload).
-         *
-         * First child which will initiate specific parent WILL share same instance with other child,
-         * save collisions are resolved via SCHEDULE statuses.
-         */
-        if (!$this->isLoaded() && $this->orm->hasMap() && !empty($outerKey)) {
-            if ($this->orm->getMap()->has($this->class, $outerKey)) {
-                $this->instance = $this->orm->getMap()->get($this->class, $outerKey);
-                $this->loaded = true;
-
-                return;
-            }
-        }
-
-        parent::loadData();
-    }
-
-    /**
      * Store related instance
      *
      * @param ContextualCommandInterface $command

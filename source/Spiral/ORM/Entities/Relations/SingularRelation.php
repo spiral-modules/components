@@ -43,6 +43,10 @@ abstract class SingularRelation extends AbstractRelation
             $this->loadData();
         }
 
+        if (!empty($this->instance)) {
+            return $this->instance;
+        }
+
         if (empty($this->data)) {
             if (static::CREATE_PLACEHOLDER) {
                 //Stub instance

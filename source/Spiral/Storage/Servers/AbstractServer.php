@@ -145,14 +145,16 @@ abstract class AbstractServer extends Component implements ServerInterface
         }
 
         if (empty($source)) {
-            //This code is going to use additional abstraction layer to connect storage and guzzle
+            //Guzzle?
             return \GuzzleHttp\Psr7\stream_for('');
         }
 
         if ($this->isFilename($source)) {
+            //Must never pass user string in here, use Stream
             return \GuzzleHttp\Psr7\stream_for(fopen($source, 'rb'));
         }
 
+        //We do not allow source names in a string form
         throw new ServerException(
             "Source must be a valid resource, stream or filename, invalid value given"
         );

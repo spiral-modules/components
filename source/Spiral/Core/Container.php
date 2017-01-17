@@ -29,10 +29,7 @@ use Spiral\Core\Exceptions\Container\NotFoundException;
  * @see  InjectableInterface
  * @see  SingletonInterface
  */
-class Container extends Component implements
-    ContainerInterface,
-    FactoryInterface,
-    ResolverInterface
+class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {
     /**
      * IoC bindings.

@@ -40,7 +40,7 @@ class TransactionalCommand implements \IteratorAggregate, ContextualCommandInter
 
         if ($leading) {
             if (!$command instanceof ContextualCommandInterface) {
-                throw new ORMException("Only Insert and Update commands can be used as leading");
+                throw new ORMException("Only contextual commands can be used as leading");
             }
 
             $this->leadingCommand = $command;

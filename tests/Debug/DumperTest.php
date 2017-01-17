@@ -80,7 +80,6 @@ class DumperTest extends \PHPUnit_Framework_TestCase
 
     protected $_value_ = 'test value';
 
-
     /**
      * @invisible
      * @var string

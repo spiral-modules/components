@@ -32,8 +32,7 @@ use Spiral\Core\Exceptions\Container\NotFoundException;
 class Container extends Component implements
     ContainerInterface,
     FactoryInterface,
-    ResolverInterface,
-    ScoperInterface
+    ResolverInterface
 {
     /**
      * IoC bindings.
@@ -46,8 +45,7 @@ class Container extends Component implements
     protected $bindings = [
         ContainerInterface::class => self::class,
         FactoryInterface::class   => self::class,
-        ResolverInterface::class  => self::class,
-        ScoperInterface::class    => self::class
+        ResolverInterface::class  => self::class
     ];
 
     /**
@@ -113,7 +111,6 @@ class Container extends Component implements
             return $this->make($binding, $parameters, $context);
         }
 
-        //todo: unify using InvokerInterface
         if (is_array($binding)) {
             if (is_string($binding[0])) {
                 //Class name
@@ -150,7 +147,6 @@ class Container extends Component implements
                 return $instance;
             }
 
-            //todo: Do we want to register object here but skip auto singletons?
             return $instance;
         }
 
@@ -289,33 +285,19 @@ class Container extends Component implements
     }
 
     /**
-     * {@inheritdoc}
+     * Check if given class has associated injector.
+     *
+     * @param \ReflectionClass $reflection
+     *
+     * @return bool
      */
-    public function replace(string $alias, $resolver): array
+    public function hasInjector(\ReflectionClass $reflection): bool
     {
-        $payload = [$alias, null];
-        if (isset($this->bindings[$alias])) {
-            $payload[1] = $this->bindings[$alias];
+        if (isset($this->injectors[$reflection->getName()])) {
+            return true;
         }
 
-        $this->bind($alias, $resolver);
-
-        return $payload;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function restore(array $payload)
-    {
-        list($alias, $resolver) = $payload;
-
-        unset($this->bindings[$alias]);
-
-        if (!empty($resolver)) {
-            //Restoring original value
-            $this->bindings[$alias] = $resolver;
-        }
+        return $reflection->isSubclassOf(InjectableInterface::class);
     }
 
     /**
@@ -345,6 +327,14 @@ class Container extends Component implements
     public function removeBinding(string $alias)
     {
         unset($this->bindings[$alias]);
+    }
+
+    /**
+     * @param string $class
+     */
+    public function removeInjector(string $class)
+    {
+        unset($this->injectors[$class]);
     }
 
     /**
@@ -389,22 +379,6 @@ class Container extends Component implements
         return $this->registerInstance(
             $this->createInstance($class, $parameters, $context),
             $parameters);
-    }
-
-    /**
-     * Check if given class has associated injector.
-     *
-     * @param \ReflectionClass $reflection
-     *
-     * @return bool
-     */
-    protected function hasInjector(\ReflectionClass $reflection): bool
-    {
-        if (isset($this->injectors[$reflection->getName()])) {
-            return true;
-        }
-
-        return $reflection->isSubclassOf(InjectableInterface::class);
     }
 
     /**

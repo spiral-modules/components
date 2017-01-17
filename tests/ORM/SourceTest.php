@@ -82,8 +82,9 @@ abstract class SourceTest extends BaseTest
 
         $this->assertNotSame($source1, $source);
 
-        $this->assertSame(1, $source->count());
-        $this->assertSame(0, $source->count(['name' => 'Anton']));
+        $this->assertSame(2, $source->count());
+        $this->assertSame(1, $source1->count());
+        $this->assertSame(0, $source1->count(['name' => 'Anton']));
         $this->assertSame('John', $source1->findOne()->name);
     }
 

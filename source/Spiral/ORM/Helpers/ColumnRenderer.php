@@ -6,7 +6,6 @@
  */
 namespace Spiral\ORM\Helpers;
 
-use Spiral\Database\Exceptions\SchemaException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\ColumnRenderException;
@@ -129,7 +128,7 @@ class ColumnRenderer
                 [$column, $type['type']],
                 !empty($type['options']) ? $type['options'] : []
             );
-        } catch (SchemaException $e) {
+        } catch (\Throwable $e) {
             throw new DefinitionException(
                 "Invalid column type definition in '{$column->getTable()}'.'{$column->getName()}'",
                 $e->getCode(),

@@ -62,6 +62,18 @@ class WhereDecoratorTest extends \PHPUnit_Framework_TestCase
         $decorator->where('name', 'value');
     }
 
+    public function testWhereJoinClosure()
+    {
+        $select = m::mock(SelectQuery::class);
+        $decorator = new WhereDecorator($select, 'onWhere', 'alias');
+
+        $select->shouldReceive('onWhere')->with('alias.name', 'value');
+
+        $decorator->where(function (WhereDecorator $query) {
+            $query->where('{@}.name', 'value');
+        });
+    }
+
     public function testWhereOrJoin()
     {
         $select = m::mock(SelectQuery::class);
@@ -72,7 +84,33 @@ class WhereDecoratorTest extends \PHPUnit_Framework_TestCase
         $decorator->orWhere('name', 'value');
     }
 
-    public function testAlias(){
+    public function testWhereOrJoinClosure()
+    {
+        $select = m::mock(SelectQuery::class);
+        $decorator = new WhereDecorator($select, 'onWhere', 'alias');
+
+        $select->shouldReceive('orOnWhere')->with('alias.name', 'value');
+
+        $decorator->where(function (WhereDecorator $query) {
+            $query->orWhere('{@}.name', 'value');
+        });
+    }
+
+
+    public function testAndWhereOrJoinClosure()
+    {
+        $select = m::mock(SelectQuery::class);
+        $decorator = new WhereDecorator($select, 'onWhere', 'alias');
+
+        $select->shouldReceive('andOnWhere')->with('alias.name', 'value');
+
+        $decorator->where(function (WhereDecorator $query) {
+            $query->andWhere('{@}.name', 'value');
+        });
+    }
+
+    public function testAlias()
+    {
         $select = m::mock(SelectQuery::class);
         $decorator = new WhereDecorator($select, 'onWhere', 'alias');
 

@@ -12,7 +12,7 @@ namespace Spiral\Core\Container;
  * Must define constant INJECTOR pointing to associated injector class or binding.
  *
  * Attention, this abstraction is currently under re-thinking process in order to replace it with
- * binded context-specific factory (non breaking change).
+ * binded context-specific factory (non breaking change). Potentially deprecated.
  */
 interface InjectableInterface
 {

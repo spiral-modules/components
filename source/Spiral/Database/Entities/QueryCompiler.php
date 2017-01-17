@@ -366,7 +366,13 @@ class QueryCompiler
     {
         $result = [];
         foreach ($ordering as $order) {
-            $result[] = $this->quote($order[0]) . ' ' . strtoupper($order[1]);
+            $direction = strtoupper($order[1]);
+
+            if (!in_array($direction, ['ASC', 'DESC'])) {
+                throw new CompilerException("Invalid sorting direction, only ASC and DESC are allowed");
+            }
+
+            $result[] = $this->quote($order[0]) . ' ' . $direction;
         }
 
         return implode(', ', $result);

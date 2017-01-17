@@ -186,7 +186,7 @@ abstract class AbstractNode
      *
      * @return int Must return number of handled columns.
      */
-    public function parseRow(int $dataOffset, array $row): int
+    final public function parseRow(int $dataOffset, array $row): int
     {
         //Fetching Node specific data from resulted row
         $data = $this->fetchData($dataOffset, $row);

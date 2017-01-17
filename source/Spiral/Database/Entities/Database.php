@@ -148,6 +148,7 @@ class Database implements DatabaseInterface, InjectableInterface
     /**
      * Update database prefix.
      *
+     * @todo immutable?
      * @param string $prefix
      *
      * @return self

@@ -25,7 +25,7 @@ Spiral Core Components
 
 # Running Tests
 Install component dependencies first, make sure you have proper .env file with details about
-connected databases and storage component server configurations:
+connected databases and storage component server configurations (all optional):
 
 ```
 #Amazon storage

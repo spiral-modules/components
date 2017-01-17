@@ -25,7 +25,7 @@ Spiral Core Components
 
 # Running Tests
 Install component dependencies first, make sure you have proper .env file with details about
-connected databases and storage component server configurations:
+connected databases and storage component server configurations (all optional):
 
 ```
 #Amazon storage
@@ -35,14 +35,14 @@ STORAGE_AMAZON_BUCKET =
 STORAGE_AMAZON_PREFIX = amazon:
 
 #FTP Storage
-STORAGE_FTP_HOST = localhost
+STORAGE_FTP_HOST = 
 STORAGE_FTP_USERNAME = ftp
 STORAGE_FTP_PASSWORD =
 STORAGE_FTP_DIRECTORY = ftp-uploads/
 STORAGE_FTP_PREFIX = ftp:
 
 #SFTP storage
-STORAGE_SFTP_HOST = 192.168.0.102
+STORAGE_SFTP_HOST = 
 STORAGE_SFTP_USERNAME = sftp
 STORAGE_SFTP_PASSWORD =
 STORAGE_SFTP_HOME = /

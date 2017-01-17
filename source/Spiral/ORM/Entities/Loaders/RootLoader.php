@@ -140,7 +140,7 @@ class RootLoader extends AbstractLoader
     }
 
     /**
-     * We are using model role as alias.
+     * We are using model role as alias. Visibility up.
      *
      * @return string
      */

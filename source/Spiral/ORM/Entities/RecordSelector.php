@@ -286,10 +286,15 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     public function wherePK($id): self
     {
         if (empty($this->loader->primaryKey())) {
+            //This MUST never happen due ORM requires PK now for every entity
             throw new SelectorException("Unable to set wherePK condition, no proper PK were defined");
         }
 
-        $this->loader->initialQuery()->where([$this->loader->primaryKey() => $id]);
+        //Adding condition to initial query
+        $this->loader->initialQuery()->where([
+            //Must be already aliased
+            $this->loader->primaryKey() => $id
+        ]);
 
         return $this;
     }

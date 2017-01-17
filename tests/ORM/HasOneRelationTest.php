@@ -19,6 +19,7 @@ abstract class HasOneRelationTest extends BaseTest
         $user = new User();
         $this->assertFalse($user->getRelations()->get('profile')->isLoaded());
         $this->assertTrue(empty($user->profile));
+        $user->getRelations()->__debugInfo();
 
         $this->assertInstanceOf(HasOneRelation::class, $user->getRelations()->get('profile'));
 

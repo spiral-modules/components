@@ -74,12 +74,12 @@ final class EntityMap
     /**
      * Remove entity record from entity cache. Primary key value will be used as identifier.
      *
-     * @param string $class
-     * @param string $identity
+     * @param RecordInterface $entity
      */
-    public function forget(string $class, string $identity)
+    public function forget(RecordInterface $entity)
     {
-        unset($this->entities["{$class}:{$identity}"]);
+        $cacheID = get_class($entity) . ':' . $entity->primaryKey();
+        unset($this->entities[$cacheID]);
     }
 
     /**

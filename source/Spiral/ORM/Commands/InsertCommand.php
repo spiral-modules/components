@@ -33,7 +33,7 @@ class InsertCommand extends TableCommand implements ContextualCommandInterface
      * @param Table $table
      * @param array $data
      */
-    public function __construct(Table $table, array $data)
+    public function __construct(Table $table, array $data = [])
     {
         parent::__construct($table);
         $this->data = $data;
@@ -44,8 +44,7 @@ class InsertCommand extends TableCommand implements ContextualCommandInterface
      */
     public function isEmpty(): bool
     {
-        //never empty
-        return false;
+        return empty($this->data) && empty($this->context);
     }
 
     /**

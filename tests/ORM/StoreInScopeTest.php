@@ -216,6 +216,36 @@ abstract class StoreInScopeTest extends BaseTest
         $this->assertSame(1, $count);
     }
 
+    public function testMapIterateTwice()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->save();
+
+        $this->orm->getMap()->remember($user);
+
+        $count = 0;
+        foreach ($this->orm->source(User::class) as $item) {
+            $count++;
+            //Same instance
+            $this->assertSame($user, $item);
+        }
+
+        $this->assertSame(1, $count);
+
+        $this->orm->getMap()->forget($user);
+
+        $count = 0;
+        foreach ($this->orm->source(User::class) as $item) {
+            $count++;
+            $this->assertSimilar($user, $item);
+            $this->assertNotSame($user, $item);
+        }
+
+        $this->assertSame(1, $count);
+    }
+
+
     public function testSum()
     {
         $user = new User();

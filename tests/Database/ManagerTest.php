@@ -6,6 +6,7 @@
  */
 namespace Spiral\tests\Cases\Database;
 
+use Interop\Container\ContainerInterface;
 use Mockery as m;
 use Spiral\Core\FactoryInterface;
 use Spiral\Database\Configs\DatabasesConfig;
@@ -25,10 +26,12 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
     public function testDefaultDatabase()
     {
         $config = m::mock(DatabasesConfig::class);
+        $container = m::mock(ContainerInterface::class);
         $factory = m::mock(FactoryInterface::class);
+
         $db = m::mock(Database::class);
 
-        $manager = new DatabaseManager($config, $factory);
+        $manager = new DatabaseManager($config, $container);
 
         $config->shouldReceive('defaultDatabase')->andReturn('default');
         $config->shouldReceive('resolveAlias')->with('default')->andReturn('default');
@@ -42,12 +45,13 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
 
         $config->shouldReceive('driverOptions')->with('driverName')->andReturn(self::DEFAULT_OPTIONS);
 
-        $factory->shouldReceive('make')->with(SQLiteDriver::class, [
+        $container->shouldReceive('get', [FactoryInterface::class])->andReturn($factory);
+        $container->shouldReceive('make')->with(SQLiteDriver::class, [
             'name'    => 'driverName',
             'options' => self::DEFAULT_OPTIONS
         ])->andReturn($driver = new SQLiteDriver('driverName', self::DEFAULT_OPTIONS));
 
-        $factory->shouldReceive('make')->with(Database::class, [
+        $container->shouldReceive('make')->with(Database::class, [
             'name'   => 'default',
             'prefix' => 'prefix',
             'driver' => $driver
@@ -59,10 +63,12 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
     public function testNamedDatabase()
     {
         $config = m::mock(DatabasesConfig::class);
+        $container = m::mock(ContainerInterface::class);
         $factory = m::mock(FactoryInterface::class);
+
         $db = m::mock(Database::class);
 
-        $manager = new DatabaseManager($config, $factory);
+        $manager = new DatabaseManager($config, $container);
 
         $config->shouldReceive('resolveAlias')->with('test')->andReturn('default');
         $config->shouldReceive('hasDatabase')->with('default')->andReturn(true);
@@ -75,12 +81,13 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
 
         $config->shouldReceive('driverOptions')->with('driverName')->andReturn(self::DEFAULT_OPTIONS);
 
-        $factory->shouldReceive('make')->with(SQLiteDriver::class, [
+        $container->shouldReceive('get', [FactoryInterface::class])->andReturn($factory);
+        $container->shouldReceive('make')->with(SQLiteDriver::class, [
             'name'    => 'driverName',
             'options' => self::DEFAULT_OPTIONS
         ])->andReturn($driver = new SQLiteDriver('driverName', self::DEFAULT_OPTIONS));
 
-        $factory->shouldReceive('make')->with(Database::class, [
+        $container->shouldReceive('make')->with(Database::class, [
             'name'   => 'default',
             'prefix' => 'prefix',
             'driver' => $driver
@@ -96,16 +103,14 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
     public function testNoDatabase()
     {
         $config = m::mock(DatabasesConfig::class);
-        $factory = m::mock(FactoryInterface::class);
+        $container = m::mock(ContainerInterface::class);
         $db = m::mock(Database::class);
 
-        $manager = new DatabaseManager($config, $factory);
+        $manager = new DatabaseManager($config, $container);
 
         $config->shouldReceive('resolveAlias')->with('test')->andReturn('test');
         $config->shouldReceive('hasDatabase')->with('test')->andReturn(false);
 
         $this->assertSame($db, $manager->database('test'));
     }
-
-    //todo: possibly add few more tests
 }

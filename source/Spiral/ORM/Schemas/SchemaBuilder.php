@@ -175,7 +175,7 @@ class SchemaBuilder
      */
     public function getRelations(): array
     {
-        return $this->relations->listRelations();
+        return $this->relations->getRelations();
     }
 
     /**

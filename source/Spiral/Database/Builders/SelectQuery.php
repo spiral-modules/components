@@ -287,7 +287,7 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
      * @throws BuilderException
      * @throws QueryException
      */
-    public function __call(string $method, array $arguments)
+    public function __call($method, array $arguments)
     {
         if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
             throw new BuilderException("Unknown method '{$method}' in '" . get_class($this) . "'");

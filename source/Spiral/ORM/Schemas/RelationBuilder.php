@@ -116,7 +116,7 @@ class RelationBuilder
      *
      * @return RelationInterface[]
      */
-    public function listRelations(): array
+    public function getRelations(): array
     {
         return $this->relations;
     }

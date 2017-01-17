@@ -83,7 +83,7 @@ abstract class QueryBuilder extends Component implements ExpressionInterface
     /**
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         return $this->sqlStatement();
     }

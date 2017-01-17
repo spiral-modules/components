@@ -58,7 +58,7 @@ final class EntityMap
         RecordInterface $entity,
         $ignoreLimit = true
     ): RecordInterface {
-        if (!$ignoreLimit && count($this->entities) > $this->maxSize) {
+        if (!$ignoreLimit && count($this->entities) > $this->maxSize - 1) {
             throw new MapException('Entity cache size exceeded');
         }
 

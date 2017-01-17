@@ -395,7 +395,27 @@ abstract class BelongsToRelationTest extends BaseTest
         $this->assertEquals($recursive2->getFields(), $recursive->parent->parent->getFields());
 
         //This one is lazy
-        $this->assertEquals($recursive3->getFields(), $recursive->parent->parent->parent->getFields());
+        $this->assertEquals($recursive3->getFields(),
+            $recursive->parent->parent->parent->getFields());
+    }
+
+    public function testRemoveParent()
+    {
+        $recursive = new Recursive();
+        $recursive->parent = $recursive1 = new Recursive();
+
+        $recursive->save();
+
+        $this->assertSameInDB($recursive);
+        $this->assertSameInDB($recursive1);
+
+        $recursive->parent = null;
+        $recursive->save();
+
+        $this->assertSameInDB($recursive);
+        $this->assertSameInDB($recursive1);
+
+        $this->assertNull($recursive->parent);
     }
 
     public function testSaveParentWithChild()

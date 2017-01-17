@@ -6,6 +6,9 @@
  */
 namespace Spiral\Tests\ORM;
 
+use Mockery as m;
+use Psr\Cache\CacheItemInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
@@ -286,5 +289,103 @@ abstract class SourceTest extends BaseTest
         $user->name = 'Anton';
 
         $this->orm->getMap()->remember($user);
+    }
+
+    public function testCache()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save();
+
+        //With cache
+        $selector = $this->orm->selector(User::class);
+        $data = $selector->fetchData();
+        $this->assertCount(1, $data);
+
+        $pool = m::mock(CacheItemPoolInterface::class);
+        $item = m::mock(CacheItemInterface::class);
+        $pool->shouldReceive('getItem')->with('key')->andReturn($item);
+        $item->shouldReceive('isHit')->andReturn(true);
+
+        $item->shouldReceive('get')->andReturn($data);
+
+        $cached = $selector->getIterator(
+            'key',
+            10,
+            $pool
+        );
+
+
+        foreach ($cached as $item) {
+            $this->assertSimilar($user, $item);
+        }
+    }
+
+    public function testCacheInScope()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save();
+
+        //With cache
+        $selector = $this->orm->selector(User::class);
+        $data = $selector->fetchData();
+        $this->assertCount(1, $data);
+
+        $pool = m::mock(CacheItemPoolInterface::class);
+        $item = m::mock(CacheItemInterface::class);
+        $pool->shouldReceive('getItem')->with('key')->andReturn($item);
+        $item->shouldReceive('isHit')->andReturn(true);
+
+        $item->shouldReceive('get')->andReturn($data);
+
+        $this->container->bind(CacheItemPoolInterface::class, $pool);
+
+        $cached = $selector->getIterator(
+            'key',
+            10
+        );
+
+        foreach ($cached as $item) {
+            $this->assertSimilar($user, $item);
+        }
+
+
+        $this->container->removeBinding(CacheItemPoolInterface::class);
+    }
+
+    public function testCacheSet()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save();
+
+        //With cache
+        $selector = $this->orm->selector(User::class);
+        $data = $selector->fetchData();
+        $this->assertCount(1, $data);
+
+        $pool = m::mock(CacheItemPoolInterface::class);
+        $item = m::mock(CacheItemInterface::class);
+        $pool->shouldReceive('getItem')->with('key')->andReturn($item);
+        $item->shouldReceive('isHit')->andReturn(false);
+
+        $item->shouldReceive('set')->with($data)->andReturnSelf();
+        $item->shouldReceive('expiresAfter')->with(10)->andReturnSelf();
+
+        $pool->shouldReceive('save')->with($item);
+
+        $cached = $selector->getIterator(
+            'key',
+            10,
+            $pool
+        );
+
+        foreach ($cached as $item) {
+            $this->assertSimilar($user, $item);
+        }
     }
 }

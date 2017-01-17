@@ -260,6 +260,9 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
      */
     public function count(string $column = '*'): int
     {
+        //Quoting
+        $column = $this->driver->identifier($column);
+        
         /**
          * @var AbstractSelect $select
          */
@@ -298,11 +301,14 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
             throw new BuilderException('Aggregation methods can support exactly one column');
         }
 
+        //Quoting
+        $column = $this->driver->identifier($arguments[0]);
+        
         /**
          * @var AbstractSelect $select
          */
         $select = clone $this;
-        $select->columns = ["{$method}({$arguments[0]})"];
+        $select->columns = ["{$method}({$column})"];
 
         $result = $select->run(false)->fetchColumn();
 

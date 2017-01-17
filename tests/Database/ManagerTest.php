@@ -46,12 +46,12 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('driverOptions')->with('driverName')->andReturn(self::DEFAULT_OPTIONS);
 
         $container->shouldReceive('get', [FactoryInterface::class])->andReturn($factory);
-        $container->shouldReceive('make')->with(SQLiteDriver::class, [
+        $factory->shouldReceive('make')->with(SQLiteDriver::class, [
             'name'    => 'driverName',
             'options' => self::DEFAULT_OPTIONS
         ])->andReturn($driver = new SQLiteDriver('driverName', self::DEFAULT_OPTIONS));
 
-        $container->shouldReceive('make')->with(Database::class, [
+        $factory->shouldReceive('make')->with(Database::class, [
             'name'   => 'default',
             'prefix' => 'prefix',
             'driver' => $driver
@@ -82,12 +82,12 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         $config->shouldReceive('driverOptions')->with('driverName')->andReturn(self::DEFAULT_OPTIONS);
 
         $container->shouldReceive('get', [FactoryInterface::class])->andReturn($factory);
-        $container->shouldReceive('make')->with(SQLiteDriver::class, [
+        $factory->shouldReceive('make')->with(SQLiteDriver::class, [
             'name'    => 'driverName',
             'options' => self::DEFAULT_OPTIONS
         ])->andReturn($driver = new SQLiteDriver('driverName', self::DEFAULT_OPTIONS));
 
-        $container->shouldReceive('make')->with(Database::class, [
+        $factory->shouldReceive('make')->with(Database::class, [
             'name'   => 'default',
             'prefix' => 'prefix',
             'driver' => $driver

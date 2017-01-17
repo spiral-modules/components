@@ -356,6 +356,8 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Attention, column will be quoted by driver!
+     *
      * @param string|null $column When column is null DISTINCT(PK) will be generated.
      *
      * @return int

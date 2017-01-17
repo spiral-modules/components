@@ -23,6 +23,7 @@ use Spiral\Debug\Traits\LoggerTrait;
  */
 class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countable
 {
+    //See SQL generation below
     use LoggerTrait;
 
     /**

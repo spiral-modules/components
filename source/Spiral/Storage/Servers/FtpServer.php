@@ -165,7 +165,7 @@ class FtpServer extends AbstractServer
             throw new ServerException("Unable to replace '{$name}', object does not exists");
         }
 
-        $location = $this->ensureLocation($bucket, $name);
+        $location = $this->ensureLocation($destination, $name);
         if (!ftp_rename($this->connection, $this->getPath($bucket, $name), $location)) {
             throw new ServerException("Unable to replace '{$name}'.");
         }

@@ -9,7 +9,7 @@ namespace Spiral\ORM\Schemas;
 use Doctrine\Common\Inflector\Inflector;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\Exceptions\AccessorExceptionInterface;
+use Spiral\Models\Exceptions\AccessException;
 use Spiral\Models\Reflections\ReflectionEntity;
 use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordInstantiator;
@@ -399,7 +399,7 @@ class RecordSchema implements SchemaInterface
      *
      * @return mixed
      *
-     * @throws AccessorExceptionInterface
+     * @throws AccessException
      */
     protected function accessorDefault($default, string $accessor)
     {

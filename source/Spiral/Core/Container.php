@@ -20,11 +20,13 @@ use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\Exceptions\Container\NotFoundException;
 
 /**
- * Super simple auto-wiring container with declarative singletons and injectors integration.
- * Compatible with Container Interop.
+ * 480 lines of code size auto-wiring container with declarative singletons, contextual injections,
+ * bindings, lazy factories and Container Interop compatible. :)
  *
  * Container does not support setter injections, private properties and etc. Normally it will work
  * with classes only to be as much invisible as possible.
+ *
+ * @see \Spiral\Core\Container::registerInstance() to add your own behaviours.
  *
  * @see InjectableInterface
  * @see SingletonInterface
@@ -92,7 +94,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @param string|null $context Related to parameter caused injection if any.
      */
-    public function make(string $class, $parameters = [], string $context = null)
+    final public function make(string $class, $parameters = [], string $context = null)
     {
         if (!isset($this->bindings[$class])) {
             return $this->autowire($class, $parameters, $context);
@@ -151,7 +153,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @param string $context
      */
-    public function resolveArguments(
+    final public function resolveArguments(
         ContextFunction $reflection,
         array $parameters = [],
         string $context = null
@@ -222,7 +224,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @return self
      */
-    public function bind(string $alias, $resolver): Container
+    final public function bind(string $alias, $resolver): Container
     {
         if (is_array($resolver) || $resolver instanceof \Closure) {
             $this->bindings[$alias] = [$resolver, false];
@@ -244,7 +246,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @return self
      */
-    public function bindSingleton(string $alias, $resolver): Container
+    final public function bindSingleton(string $alias, $resolver): Container
     {
         if (is_object($resolver) && !$resolver instanceof \Closure) {
             $this->bindings[$alias] = $resolver;
@@ -299,7 +301,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @return bool
      */
-    public function hasInstance(string $alias): bool
+    final public function hasInstance(string $alias): bool
     {
         if (!$this->has($alias)) {
             return false;
@@ -316,7 +318,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     /**
      * @param string $alias
      */
-    public function removeBinding(string $alias)
+    final public function removeBinding(string $alias)
     {
         unset($this->bindings[$alias]);
     }
@@ -324,7 +326,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     /**
      * @param string $class
      */
-    public function removeInjector(string $class)
+    final public function removeInjector(string $class)
     {
         unset($this->injectors[$class]);
     }
@@ -335,7 +337,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @return array
      */
-    public function getBindings(): array
+    final public function getBindings(): array
     {
         return $this->bindings;
     }
@@ -345,7 +347,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @return array
      */
-    public function getInjectors(): array
+    final public function getInjectors(): array
     {
         return $this->injectors;
     }
@@ -361,7 +363,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      *
      * @throws AutowireException
      */
-    protected function autowire(string $class, array $parameters, string $context = null)
+    final protected function autowire(string $class, array $parameters, string $context = null)
     {
         try {
             if (!class_exists($class)) {

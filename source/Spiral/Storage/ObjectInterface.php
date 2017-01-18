@@ -103,7 +103,7 @@ interface ObjectInterface extends StreamableInterface
      * @throws BucketException
      * @throws ObjectException
      */
-    public function copy(string $destination): ObjectInterface;
+    public function copy($destination): ObjectInterface;
 
     /**
      * Move storage object data to another bucket.
@@ -115,7 +115,7 @@ interface ObjectInterface extends StreamableInterface
      * @throws BucketException
      * @throws ObjectException
      */
-    public function replace(string $destination): ObjectInterface;
+    public function replace($destination): ObjectInterface;
 
     /**
      * Must be serialized into object address.

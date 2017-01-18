@@ -16,6 +16,7 @@ trait ServerTrait
 {
     protected $bucket;
     protected $secondary;
+    protected $server;
 
     public function setUp()
     {
@@ -67,14 +68,13 @@ trait ServerTrait
         return $this->secondary = $bucket;
     }
 
-
     protected function getServer(): ServerInterface
     {
-        return new SftpServer([
-            'host'     => env('STORAGE_SFTP_HOST'),
-            'username' => env('STORAGE_SFTP_USERNAME'),
-            'password' => env('STORAGE_SFTP_PASSWORD'),
-            'home'     => env('STORAGE_SFTP_HOME'),
-        ]);
+        return $this->server ?? $this->server = new SftpServer([
+                'host'     => env('STORAGE_SFTP_HOST'),
+                'username' => env('STORAGE_SFTP_USERNAME'),
+                'password' => env('STORAGE_SFTP_PASSWORD'),
+                'home'     => env('STORAGE_SFTP_HOME'),
+            ]);
     }
 }

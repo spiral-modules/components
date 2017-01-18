@@ -6,10 +6,6 @@
  */
 namespace Spiral\Tests\Storage\FtpServer;
 
-use Psr\Log\LoggerInterface;
-use Psr\Log\LoggerTrait;
-use Psr\Log\LogLevel;
-use Psr\Log\NullLogger;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Entities\StorageBucket;
@@ -19,8 +15,8 @@ use Spiral\Storage\Servers\FtpServer;
 trait ServerTrait
 {
     protected $bucket;
-
     protected $secondary;
+    protected $server;
 
     public function setUp()
     {
@@ -74,10 +70,10 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new FtpServer([
-            'host'     => env('STORAGE_FTP_HOST'),
-            'login'    => env('STORAGE_FTP_USERNAME'),
-            'password' => env('STORAGE_FTP_PASSWORD')
-        ]);
+        return $this->server ?? $this->server = new FtpServer([
+                'host'     => env('STORAGE_FTP_HOST'),
+                'login'    => env('STORAGE_FTP_USERNAME'),
+                'password' => env('STORAGE_FTP_PASSWORD')
+            ]);
     }
 }

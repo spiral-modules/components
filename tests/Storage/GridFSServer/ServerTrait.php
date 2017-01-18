@@ -17,6 +17,7 @@ trait ServerTrait
 {
     protected $bucket;
     protected $secondary;
+    protected $server;
 
     public function setUp()
     {
@@ -64,8 +65,8 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new GridFSServer(
-            new Database(new Manager(env('MONGO_CONNECTION')), env('MONGO_DATABASE'))
-        );
+        return $this->server ?? $this->server = new GridFSServer(
+                new Database(new Manager(env('MONGO_CONNECTION')), env('MONGO_DATABASE'))
+            );
     }
 }

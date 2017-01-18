@@ -188,7 +188,7 @@ class LocalServer extends AbstractServer
         $this->files->ensureDirectory(dirname($destination), $mode);
 
         if (!$this->files->copy($filename, $destination)) {
-            throw new ServerException("Unable to copy '{$filename}' to '{$destination}'.");
+            throw new ServerException("Unable to copy '{$filename}' to '{$destination}'");
         }
 
         return $this->files->setPermissions($destination, $mode);

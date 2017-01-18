@@ -15,6 +15,7 @@ trait ServerTrait
 {
     protected $bucket;
     protected $secondary;
+    protected $server;
 
     public function setUp()
     {
@@ -68,9 +69,9 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new AmazonServer([
-            'accessKey' => env('STORAGE_AMAZON_KEY'),
-            'secretKey' => env('STORAGE_AMAZON_SECRET')
-        ]);
+        return $this->server ?? $this->server = new AmazonServer([
+                'accessKey' => env('STORAGE_AMAZON_KEY'),
+                'secretKey' => env('STORAGE_AMAZON_SECRET')
+            ]);
     }
 }

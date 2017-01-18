@@ -20,6 +20,7 @@ abstract class ObjectTest extends BaseTest
         }
 
         $this->getBucket()->exists('target') && $this->getBucket()->delete('target');
+        $this->secondaryBucket()->exists('target') && $this->secondaryBucket()->delete('target');
         $this->getBucket()->exists('targetB') && $this->getBucket()->delete('targetB');
         $this->getBucket()->exists('targetDir/targetName') && $this->getBucket()->delete('targetDir/targetName');
     }
@@ -227,46 +228,6 @@ abstract class ObjectTest extends BaseTest
         $this->assertSame($bucket->getPrefix() . 'targetB', $object->getAddress());
     }
 
-    public function testCopyInternal()
-    {
-        $bucket = $this->getBucket();
-        $this->assertFalse($bucket->exists('target'));
-
-        $object = $this->getStorage()->put(
-            $this->getBucket()->getName(),
-            'target',
-            __FILE__
-        );
-
-        $object2 = $object->copy($this->secondaryBucket());
-
-        $this->assertTrue($object2->exists());
-
-        $this->assertSame('target', $object2->getName());
-        $this->assertSame($this->secondaryBucket()->getPrefix() . 'target', $object2->getAddress());
-    }
-
-    public function testReplaceInternal()
-    {
-        $bucket = $this->getBucket();
-        $this->assertFalse($bucket->exists('target'));
-
-        $object = $this->getStorage()->put(
-            $this->getBucket()->getName(),
-            'target',
-            __FILE__
-        );
-
-        $oldObject = clone $object;
-        $object = $object->replace($this->secondaryBucket());
-
-        $this->assertTrue($object->exists());
-        $this->assertFalse($oldObject->exists());
-
-        $this->assertSame('target', $object->getName());
-        $this->assertSame($this->secondaryBucket()->getPrefix() . 'target', $object->getAddress());
-    }
-
     public function testDelete()
     {
         $bucket = $this->getBucket();
@@ -284,7 +245,6 @@ abstract class ObjectTest extends BaseTest
 
         $this->assertFalse($object->exists());
     }
-
 
     public function testLocalFilename()
     {
@@ -312,6 +272,48 @@ abstract class ObjectTest extends BaseTest
             __FILE__
         );
         $this->assertSame((string)$object, $object->getAddress());
+    }
+
+    public function testCopyInternal()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $this->assertTrue($object->exists());
+        $object2 = $object->copy($this->secondaryBucket());
+        $this->assertTrue($object2->exists());
+
+        $this->assertSame('target', $object2->getName());
+        $this->assertSame($this->secondaryBucket()->getPrefix() . 'target', $object2->getAddress());
+    }
+
+    public function testReplaceInternal()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $oldObject = clone $object;
+        $object = $object->replace($this->secondaryBucket());
+
+        $this->assertTrue($object->exists());
+        $this->assertFalse($oldObject->exists());
+
+        $this->assertSame('target', $object->getName());
+        $this->assertSame($this->secondaryBucket()->getPrefix() . 'target', $object->getAddress());
+
+        $object->delete();
     }
 
     protected function makeAddress(string $name): string

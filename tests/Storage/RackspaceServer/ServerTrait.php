@@ -15,6 +15,7 @@ trait ServerTrait
 {
     protected $bucket;
     protected $secondary;
+    protected $server;
 
     public function setUp()
     {
@@ -68,9 +69,9 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new RackspaceServer([
-            'username' => env('STORAGE_RACKSPACE_USERNAME'),
-            'apiKey'   => env('STORAGE_RACKSPACE_API_KEY')
-        ]);
+        return $this->server ?? $this->server = new RackspaceServer([
+                'username' => env('STORAGE_RACKSPACE_USERNAME'),
+                'apiKey'   => env('STORAGE_RACKSPACE_API_KEY')
+            ]);
     }
 }

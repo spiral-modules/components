@@ -144,19 +144,23 @@ class StorageObject extends Component implements ObjectInterface
     /**
      * {@inheritdoc}
      */
-    public function copy(string $destination): ObjectInterface
+    public function copy($destination): ObjectInterface
     {
         if (is_string($destination)) {
             $destination = $this->storage->getBucket($destination);
         }
 
-        return $this->storage->open($this->bucket->copy($destination, $this->name));
+        $object = clone $this;
+        $object->bucket = $destination;
+        $object->address = $this->bucket->copy($destination, $this->name);
+
+        return $object;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function replace(string $destination): ObjectInterface
+    public function replace($destination): ObjectInterface
     {
         if (is_string($destination)) {
             $destination = $this->storage->getBucket($destination);

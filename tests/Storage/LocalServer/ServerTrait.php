@@ -16,13 +16,21 @@ trait ServerTrait
     protected $bucket;
     protected $secondary;
 
+    protected $server;
+
     protected function getBucket(): BucketInterface
     {
         if (!empty($this->bucket)) {
             return $this->bucket;
         }
 
-        $bucket = new StorageBucket('files', 'file:', ['directory' => '/'], $this->getServer());
+        $bucket = new StorageBucket(
+            'files',
+            'file:',
+            ['directory' => '/'],
+            $this->getServer()
+        );
+
         $bucket->setLogger($this->makeLogger());
 
         return $this->bucket = $bucket;
@@ -34,7 +42,13 @@ trait ServerTrait
             return $this->secondary;
         }
 
-        $bucket = new StorageBucket('files-2', 'file-2:', ['directory' => '/secondary/'], $this->getServer());
+        $bucket = new StorageBucket(
+            'files-2',
+            'file-2:',
+            ['directory' => '/secondary/'],
+            $this->getServer()
+        );
+
         $bucket->setLogger($this->makeLogger());
 
         return $this->secondary = $bucket;
@@ -42,6 +56,6 @@ trait ServerTrait
 
     protected function getServer(): ServerInterface
     {
-        return new LocalServer(['home' => __DIR__ . '/fixtures/']);
+        return $this->server?? $this->server = new LocalServer(['home' => __DIR__ . '/fixtures/']);
     }
 }

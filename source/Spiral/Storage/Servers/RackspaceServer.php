@@ -131,7 +131,8 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
             if ($e->getCode() == 401) {
                 $this->reconnect();
 
-                return $this->exists($bucket, $name);
+                //Retry
+                return $this->exists($bucket, $name, $response);
             }
 
             //Some unexpected error

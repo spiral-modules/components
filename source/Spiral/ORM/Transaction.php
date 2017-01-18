@@ -74,17 +74,20 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      *
-     * Executing transaction.
+     * Executing transaction. Method require minor refactoring.
      */
     public function run()
     {
         /**
          * @var Driver[]           $drivers
+         * @var Driver[]           $wrappedDrivers
          * @var CommandInterface[] $executedCommands
          */
         $drivers = [];
+        $wrappedDrivers = [];
         $executedCommands = [];
 
+        //Flattening commands and preparing drivers
         try {
             foreach ($this->getCommands() as $command) {
                 if ($command instanceof \Traversable) {
@@ -95,10 +98,17 @@ final class Transaction implements TransactionInterface
                 if ($command instanceof SQLCommandInterface) {
                     $driver = $command->getDriver();
 
-                    if ($driver instanceof Driver && !in_array($driver, $drivers)) {
-                        //Command requires DBAL driver to open transaction
-                        $drivers[] = $driver;
-                        $driver->beginTransaction();
+                    if ($driver instanceof Driver) {
+                        if (!in_array($driver, $drivers)) {
+                            //This is first time we met this driver
+                            $drivers[] = $driver;
+                        } elseif (!in_array($driver, $wrappedDrivers)) {
+                            //And this is second
+                            $wrappedDrivers[] = $driver;
+
+                            //Not we know that transaction is required
+                            $driver->beginTransaction();
+                        }
                     }
                 }
 
@@ -107,7 +117,7 @@ final class Transaction implements TransactionInterface
                 $executedCommands[] = $command;
             }
         } catch (\Throwable $e) {
-            foreach (array_reverse($drivers) as $driver) {
+            foreach (array_reverse($wrappedDrivers) as $driver) {
                 /** @var Driver $driver */
                 $driver->rollbackTransaction();
             }
@@ -121,7 +131,7 @@ final class Transaction implements TransactionInterface
             throw $e;
         }
 
-        foreach ($drivers as $driver) {
+        foreach ($wrappedDrivers as $driver) {
             $driver->commitTransaction();
         }
 

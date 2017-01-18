@@ -341,7 +341,7 @@ abstract class AbstractLoader implements LoaderInterface
             $join
         );
 
-        if (!$child instanceof self) {
+        if (!$child instanceof AbstractLoader) {
             throw new LoaderException(sprintf(
                 "Loader '%s' does not support chain relation loading",
                 get_class($child)

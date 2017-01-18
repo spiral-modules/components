@@ -98,7 +98,7 @@ class RelationBuilder
                     ));
                 }
 
-                //todo: make sure no dubs
+                //Worry about duplicates?
 
                 //Let's perform inversion
                 $this->registerRelation($relation->inverseDefinition($definition->getInverse()));

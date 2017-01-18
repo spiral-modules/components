@@ -14,9 +14,8 @@ use Psr\Log\NullLogger;
 use Spiral\Debug\LogsInterface;
 
 /**
- * On demand logger creation. Allows class to share same logger between instances.
- *
- * @todo create logger using container instance registration (see Container::registerInstance)?
+ * On demand logger creation. Allows class to share same logger between instances. Logger trait work
+ * thought IoC scope!
  */
 trait LoggerTrait
 {

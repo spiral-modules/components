@@ -300,16 +300,13 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
             throw new BuilderException('Aggregation methods can support exactly one column');
         }
 
-        //Quoting
-        $column = $this->driver->identifier($arguments[0]);
-        
         /**
          * @var AbstractSelect $select
          */
         $select = clone $this;
 
         //To be escaped in compiler
-        $select->columns = ["{$method}({$column})"];
+        $select->columns = ["{$method}({$arguments[0]})"];
 
         $result = $select->run(false)->fetchColumn();
 

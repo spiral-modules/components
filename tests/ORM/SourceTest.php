@@ -7,8 +7,8 @@
 namespace Spiral\Tests\ORM;
 
 use Mockery as m;
-use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\SimpleCache\CacheInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
@@ -303,19 +303,15 @@ abstract class SourceTest extends BaseTest
         $data = $selector->fetchData();
         $this->assertCount(1, $data);
 
-        $pool = m::mock(CacheItemPoolInterface::class);
-        $item = m::mock(CacheItemInterface::class);
-        $pool->shouldReceive('getItem')->with('key')->andReturn($item);
-        $item->shouldReceive('isHit')->andReturn(true);
-
-        $item->shouldReceive('get')->andReturn($data);
+        $cache = m::mock(CacheInterface::class);
+        $cache->shouldReceive('has')->with('key')->andReturn(true);
+        $cache->shouldReceive('get')->with('key')->andReturn($data);
 
         $cached = $selector->getIterator(
             'key',
             10,
-            $pool
+            $cache
         );
-
 
         foreach ($cached as $item) {
             $this->assertSimilar($user, $item);
@@ -334,14 +330,11 @@ abstract class SourceTest extends BaseTest
         $data = $selector->fetchData();
         $this->assertCount(1, $data);
 
-        $pool = m::mock(CacheItemPoolInterface::class);
-        $item = m::mock(CacheItemInterface::class);
-        $pool->shouldReceive('getItem')->with('key')->andReturn($item);
-        $item->shouldReceive('isHit')->andReturn(true);
+        $cache = m::mock(CacheInterface::class);
+        $cache->shouldReceive('has')->with('key')->andReturn(true);
+        $cache->shouldReceive('get')->with('key')->andReturn($data);
 
-        $item->shouldReceive('get')->andReturn($data);
-
-        $this->container->bind(CacheItemPoolInterface::class, $pool);
+        $this->container->bind(CacheInterface::class, $cache);
 
         $cached = $selector->getIterator(
             'key',
@@ -368,20 +361,15 @@ abstract class SourceTest extends BaseTest
         $data = $selector->fetchData();
         $this->assertCount(1, $data);
 
-        $pool = m::mock(CacheItemPoolInterface::class);
-        $item = m::mock(CacheItemInterface::class);
-        $pool->shouldReceive('getItem')->with('key')->andReturn($item);
-        $item->shouldReceive('isHit')->andReturn(false);
 
-        $item->shouldReceive('set')->with($data)->andReturnSelf();
-        $item->shouldReceive('expiresAfter')->with(10)->andReturnSelf();
-
-        $pool->shouldReceive('save')->with($item);
+        $cache = m::mock(CacheInterface::class);
+        $cache->shouldReceive('has')->with('key')->andReturn(false);
+        $cache->shouldReceive('set')->with('key', $data, 10);
 
         $cached = $selector->getIterator(
             'key',
             10,
-            $pool
+            $cache
         );
 
         foreach ($cached as $item) {

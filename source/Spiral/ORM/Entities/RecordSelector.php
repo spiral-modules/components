@@ -323,7 +323,7 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
      *
      * @param string              $cacheKey
      * @param int|\DateInterval   $ttl
-     * @param CacheInterface|null $cache
+     * @param CacheInterface|null $cache Can be automatically resoled based on ORM scope.
      *
      * @return RecordIterator|RecordInterface[]
      */

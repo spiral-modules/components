@@ -178,7 +178,7 @@ abstract class AbstractSelect extends AbstractWhere implements
 
     /**
      * Sort result by column/expression. You can apply multiple sortings to query via calling method
-     * few times or by specifying values using array of sort parameters:.
+     * few times or by specifying values using array of sort parameters.
      *
      * $select->orderBy([
      *      'id'   => SelectQuery::SORT_DESC,

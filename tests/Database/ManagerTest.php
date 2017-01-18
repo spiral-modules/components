@@ -258,4 +258,20 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
             $manager->createInjection(new \ReflectionClass(Database::class), 'test')
         );
     }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\DBALException
+     */
+    public function testMissingDriver()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+        $driver = $manager->driver('invalid');
+    }
 }

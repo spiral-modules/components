@@ -15,8 +15,9 @@ class Post extends AbstactRecord
         'public'  => 'bool',
 
         'comments' => [
-            self::HAS_MANY   => Comment::class,
-            Comment::INVERSE => 'post'
+            self::HAS_MANY    => Comment::class,
+            Comment::INVERSE  => 'post',
+            Comment::NULLABLE => false
         ],
 
         'tags' => [

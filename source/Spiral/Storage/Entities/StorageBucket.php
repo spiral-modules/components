@@ -314,7 +314,8 @@ class StorageBucket extends Component implements
                 . "to '{$destination->getName()}'.'{$destination->buildAddress($name)}'."
             );
 
-            $destination->put($name, $this->allocateStream($name));
+            $destination->put($name, $stream = $this->allocateStream($name));
+            $stream->detach();
         }
 
         return $destination->buildAddress($name);

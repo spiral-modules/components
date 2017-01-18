@@ -20,6 +20,8 @@ trait ServerTrait
 {
     protected $bucket;
 
+    protected $secondary;
+
     public function setUp()
     {
         if (empty(env('STORAGE_FTP_USERNAME'))) {
@@ -47,6 +49,27 @@ trait ServerTrait
         $bucket->setLogger($this->makeLogger());
 
         return $this->bucket = $bucket;
+    }
+
+    protected function secondaryBucket(): BucketInterface
+    {
+        if (!empty($this->secondary)) {
+            return $this->secondary;
+        }
+
+        $bucket = new StorageBucket(
+            'ftp-2',
+            env('STORAGE_FTP_PREFIX_2'),
+            [
+                'directory' => env('STORAGE_FTP_DIRECTORY_2'),
+                'mode'      => FilesInterface::READONLY
+            ],
+            $this->getServer()
+        );
+
+        $bucket->setLogger($this->makeLogger());
+
+        return $this->secondary = $bucket;
     }
 
     protected function getServer(): ServerInterface

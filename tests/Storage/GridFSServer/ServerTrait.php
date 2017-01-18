@@ -16,6 +16,7 @@ use Spiral\Storage\Servers\GridFSServer;
 trait ServerTrait
 {
     protected $bucket;
+    protected $secondary;
 
     public function setUp()
     {
@@ -41,6 +42,24 @@ trait ServerTrait
         $bucket->setLogger($this->makeLogger());
 
         return $this->bucket = $bucket;
+    }
+
+    protected function secondaryBucket(): BucketInterface
+    {
+        if (!empty($this->secondary)) {
+            return $this->secondary;
+        }
+
+        $bucket = new StorageBucket(
+            'mongo-2',
+            'mongo-2:',
+            ['bucket' => 'grid-fs-2'],
+            $this->getServer()
+        );
+
+        $bucket->setLogger($this->makeLogger());
+
+        return $this->secondary = $bucket;
     }
 
     protected function getServer(): ServerInterface

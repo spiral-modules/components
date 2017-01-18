@@ -227,6 +227,46 @@ abstract class ObjectTest extends BaseTest
         $this->assertSame($bucket->getPrefix() . 'targetB', $object->getAddress());
     }
 
+    public function testCopyInternal()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $object2 = $object->copy($this->secondaryBucket());
+
+        $this->assertTrue($object2->exists());
+
+        $this->assertSame('target', $object2->getName());
+        $this->assertSame($this->secondaryBucket()->getPrefix() . 'target', $object2->getAddress());
+    }
+
+    public function testReplaceInternal()
+    {
+        $bucket = $this->getBucket();
+        $this->assertFalse($bucket->exists('target'));
+
+        $object = $this->getStorage()->put(
+            $this->getBucket()->getName(),
+            'target',
+            __FILE__
+        );
+
+        $oldObject = clone $object;
+        $object = $object->replace($this->secondaryBucket());
+
+        $this->assertTrue($object->exists());
+        $this->assertFalse($oldObject->exists());
+
+        $this->assertSame('target', $object->getName());
+        $this->assertSame($this->secondaryBucket()->getPrefix() . 'target', $object->getAddress());
+    }
+
     public function testDelete()
     {
         $bucket = $this->getBucket();

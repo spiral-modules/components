@@ -25,8 +25,6 @@ use Spiral\Storage\Exceptions\ServerException;
 
 /**
  * Provides abstraction level to work with data located in Rackspace cloud.
- *
- * @todo change to different cache
  */
 class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 {

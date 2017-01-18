@@ -14,6 +14,7 @@ use Spiral\Storage\Servers\LocalServer;
 trait ServerTrait
 {
     protected $bucket;
+    protected $secondary;
 
     protected function getBucket(): BucketInterface
     {
@@ -25,6 +26,18 @@ trait ServerTrait
         $bucket->setLogger($this->makeLogger());
 
         return $this->bucket = $bucket;
+    }
+
+    protected function secondaryBucket(): BucketInterface
+    {
+        if (!empty($this->secondary)) {
+            return $this->secondary;
+        }
+
+        $bucket = new StorageBucket('files-2', 'file-2:', ['directory' => '/secondary/'], $this->getServer());
+        $bucket->setLogger($this->makeLogger());
+
+        return $this->secondary = $bucket;
     }
 
     protected function getServer(): ServerInterface

@@ -29,6 +29,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
     abstract protected function getBucket(): BucketInterface;
 
+    abstract protected function secondaryBucket(): BucketInterface;
+
     abstract protected function getServer(): ServerInterface;
 
     protected function makeLogger()

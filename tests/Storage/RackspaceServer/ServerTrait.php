@@ -14,6 +14,7 @@ use Spiral\Storage\Servers\RackspaceServer;
 trait ServerTrait
 {
     protected $bucket;
+    protected $secondary;
 
     public function setUp()
     {
@@ -42,6 +43,27 @@ trait ServerTrait
         $bucket->setLogger($this->makeLogger());
 
         return $this->bucket = $bucket;
+    }
+
+    protected function secondaryBucket(): BucketInterface
+    {
+        if (!empty($this->secondary)) {
+            return $this->secondary;
+        }
+
+        $bucket = new StorageBucket(
+            'rackspace-2',
+            env('STORAGE_RACKSPACE_PREFIX_2'),
+            [
+                'container' => env('STORAGE_RACKSPACE_CONTAINER_2'),
+                'region'    => env('STORAGE_RACKSPACE_REGION_2')
+            ],
+            $this->getServer()
+        );
+
+        $bucket->setLogger($this->makeLogger());
+
+        return $this->secondary = $bucket;
     }
 
     protected function getServer(): ServerInterface

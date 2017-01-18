@@ -15,6 +15,7 @@ use Spiral\Storage\Servers\SftpServer;
 trait ServerTrait
 {
     protected $bucket;
+    protected $secondary;
 
     public function setUp()
     {
@@ -44,6 +45,28 @@ trait ServerTrait
 
         return $this->bucket = $bucket;
     }
+
+    protected function secondaryBucket(): BucketInterface
+    {
+        if (!empty($this->secondary)) {
+            return $this->secondary;
+        }
+
+        $bucket = new StorageBucket(
+            'sftp-2',
+            env('STORAGE_SFTP_PREFIX_2'),
+            [
+                'directory' => env('STORAGE_SFTP_DIRECTORY_2'),
+                'mode'      => FilesInterface::READONLY
+            ],
+            $this->getServer()
+        );
+
+        $bucket->setLogger($this->makeLogger());
+
+        return $this->secondary = $bucket;
+    }
+
 
     protected function getServer(): ServerInterface
     {

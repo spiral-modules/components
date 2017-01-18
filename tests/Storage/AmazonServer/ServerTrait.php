@@ -14,6 +14,7 @@ use Spiral\Storage\Servers\AmazonServer;
 trait ServerTrait
 {
     protected $bucket;
+    protected $secondary;
 
     public function setUp()
     {
@@ -42,6 +43,27 @@ trait ServerTrait
         $bucket->setLogger($this->makeLogger());
 
         return $this->bucket = $bucket;
+    }
+
+    protected function secondaryBucket(): BucketInterface
+    {
+        if (!empty($this->secondary)) {
+            return $this->secondary;
+        }
+
+        $bucket = new StorageBucket(
+            'amazon-2',
+            env('STORAGE_AMAZON_PREFIX_2'),
+            [
+                'bucket' => env('STORAGE_AMAZON_BUCKET_2'),
+                'public' => false
+            ],
+            $this->getServer()
+        );
+
+        $bucket->setLogger($this->makeLogger());
+
+        return $this->secondary = $bucket;
     }
 
     protected function getServer(): ServerInterface

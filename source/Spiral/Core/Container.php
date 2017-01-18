@@ -26,8 +26,8 @@ use Spiral\Core\Exceptions\Container\NotFoundException;
  * Container does not support setter injections, private properties and etc. Normally it will work
  * with classes only to be as much invisible as possible.
  *
- * @see  InjectableInterface
- * @see  SingletonInterface
+ * @see InjectableInterface
+ * @see SingletonInterface
  */
 class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {

@@ -61,6 +61,54 @@ abstract class TransactionsTest extends BaseTest
         $this->assertSame(1, $this->database->table->count());
     }
 
+    public function testCommitTransactionInsertClosureIsolationLevel()
+    {
+        $db = $this->database;
+
+        $this->database->transaction(function () use ($db) {
+            $db->table->insertOne(['name' => 'Anton', 'value' => 123]);
+            $this->assertSame(1, $this->database->table->count());
+        }, Database::ISOLATION_READ_COMMITTED);
+
+        $this->assertSame(1, $this->database->table->count());
+    }
+
+    public function testCommitTransactionInsertClosureIsolationLevel1()
+    {
+        $db = $this->database;
+
+        $this->database->transaction(function () use ($db) {
+            $db->table->insertOne(['name' => 'Anton', 'value' => 123]);
+            $this->assertSame(1, $this->database->table->count());
+        }, Database::ISOLATION_READ_UNCOMMITTED);
+
+        $this->assertSame(1, $this->database->table->count());
+    }
+
+    public function testCommitTransactionInsertClosureIsolationLevel2()
+    {
+        $db = $this->database;
+
+        $this->database->transaction(function () use ($db) {
+            $db->table->insertOne(['name' => 'Anton', 'value' => 123]);
+            $this->assertSame(1, $this->database->table->count());
+        }, Database::ISOLATION_REPEATABLE_READ);
+
+        $this->assertSame(1, $this->database->table->count());
+    }
+
+    public function testCommitTransactionInsertClosureIsolationLevel3()
+    {
+        $db = $this->database;
+
+        $this->database->transaction(function () use ($db) {
+            $db->table->insertOne(['name' => 'Anton', 'value' => 123]);
+            $this->assertSame(1, $this->database->table->count());
+        }, Database::ISOLATION_SERIALIZABLE);
+
+        $this->assertSame(1, $this->database->table->count());
+    }
+
     public function testRollbackTransactionInsert()
     {
         $this->database->begin();

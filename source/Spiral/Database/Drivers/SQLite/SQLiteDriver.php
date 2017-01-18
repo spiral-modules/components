@@ -88,8 +88,7 @@ class SQLiteDriver extends Driver
     {
         if ($this->isProfiling()) {
             $this->logger()->alert(
-                'Transaction isolation level is not fully supported by SQLite ({level}).',
-                compact('level')
+                "Transaction isolation level is not fully supported by SQLite ({$level})."
             );
         }
     }

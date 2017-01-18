@@ -331,7 +331,7 @@ class StorageBucket extends Component implements
         }
 
         //Internal copying
-        if ($this->getName() == $destination->getName()) {
+        if ($this->getServer() == $destination->getServer()) {
             $this->logger()->info(
                 "Internal move '{$this->buildAddress($name)}' "
                 . "to '{$destination->buildAddress($name)}' in '{$this->getName()}' bucket."

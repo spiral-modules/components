@@ -113,4 +113,124 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($db, $manager->database('test'));
     }
+
+    public function testCreateDriver()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+        $driver = $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+        $this->assertInstanceOf(SQLiteDriver::class, $driver);
+
+        $this->assertSame($driver, $manager->driver('sqlite'));
+        $this->assertSame([$driver], $manager->getDrivers());
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\DBALException
+     */
+    public function testCreateDriverTwice()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+
+        $driver = $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+
+        $driver = $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+    }
+
+    public function testCreateDatabase()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+        $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+
+
+        $db = $manager->createDatabase('test', '', 'sqlite');
+        $this->assertInstanceOf(Database::class, $db);
+
+        $this->assertSame([$db], $manager->getDatabases());
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\DBALException
+     */
+    public function testCreateDatabaseTwice()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+        $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+
+        $db = $manager->createDatabase('test', '', 'sqlite');
+        $db = $manager->createDatabase('test', '', 'sqlite');
+    }
+
+    public function testCreateDatabaseExplicit()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+        $driver = $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+
+        $db = $manager->createDatabase('test', '', $driver);
+        $this->assertInstanceOf(Database::class, $db);
+    }
 }

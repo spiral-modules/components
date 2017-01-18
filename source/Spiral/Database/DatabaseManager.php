@@ -306,7 +306,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
 
         foreach ($this->databases as $database) {
             if (!in_array($database, $result)) {
-                $result[] = $database->getName();
+                $result[] = $database;
             }
         }
 
@@ -330,7 +330,7 @@ class DatabaseManager extends Component implements SingletonInterface, InjectorI
 
         foreach ($this->drivers as $driver) {
             if (!in_array($driver, $result)) {
-                $result[] = $driver->getName();
+                $result[] = $driver;
             }
         }
 

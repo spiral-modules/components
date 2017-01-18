@@ -224,6 +224,7 @@ abstract class AbstractRecord extends SchematicEntity
      */
     public function __toString()
     {
+        //Do we need to worry about collision rate in this context?
         return static::class . '#' . hash('crc32', spl_object_hash($this));
     }
 

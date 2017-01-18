@@ -119,12 +119,14 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     public function getSource(): string
     {
-        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->options['connection'],
-            $matches)) {
+        if (preg_match(
+            '/(?:dbname|database)=([^;]+)/i', $this->options['connection'],
+            $matches
+        )) {
             return $matches[1];
         }
 
-        throw new DriverException('Unable to locate source name.');
+        throw new DriverException('Unable to locate source name');
     }
 
     /**
@@ -515,7 +517,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      */
     protected function normalizeTimestamp(\DateTimeInterface $value): string
     {
-        //Check DateTime creation thought DateTime
+        //Immutable and prepared??
         $datetime = new \DateTime('now', $this->getTimezone());
         $datetime->setTimestamp($value->getTimestamp());
 

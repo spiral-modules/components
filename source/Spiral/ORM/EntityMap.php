@@ -15,8 +15,9 @@ use Spiral\ORM\Exceptions\MapException;
  * data collision, ie:
  *
  * $user1 => $users->findOne();
- * $user2 => $user->findOne();
+ * $user2 => $users->findOne();
  *
+ * //Will work ONLY when both selections in a same scope, or it's same selector
  * assert($user1 !== $user2);
  */
 final class EntityMap

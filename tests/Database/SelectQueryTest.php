@@ -45,6 +45,12 @@ abstract class SelectQueryTest extends BaseQueryTest
     public function testSimpleSelection()
     {
         $select = $this->database->select()->from('table');
+        $this->assertSame($this->database->getDriver(), $select->getDriver());
+
+        $this->assertSame(['table'], $select->getTables());
+
+        //Test __debugInfo
+        $this->assertInternalType('array', $select->__debugInfo());
 
         $this->assertSameQuery("SELECT * FROM {table}", $select);
     }

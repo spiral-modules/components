@@ -114,21 +114,6 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
     }
 
     /**
-     * Alias for columns() method.
-     *
-     * @param array|string|mixed $columns Array of names, comma separated string or set of
-     *                                    parameters.
-     *
-     * @return self|$this
-     */
-    public function select($columns): SelectQuery
-    {
-        $this->columns = $this->fetchIdentifiers(func_get_args());
-
-        return $this;
-    }
-
-    /**
      * Add select query to be united with.
      *
      * @param FragmentInterface $query
@@ -229,7 +214,6 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
 
         //To keep original query untouched
         $select = clone $this;
-
         $select->limit($limit);
 
         $offset = 0;

@@ -230,6 +230,39 @@ abstract class QueryResultTest extends BaseQueryTest
         ], $result->toArray());
     }
 
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     */
+    public function testBadAggregation()
+    {
+        $table = $this->database->table('sample_table');
+        $this->fillData();
+
+        $table->select()->ha();
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     */
+    public function testBadAggregation2()
+    {
+        $table = $this->database->table('sample_table');
+        $this->fillData();
+
+        $table->select()->avg();
+    }
+
+    /**
+     * @expectedException \Spiral\Database\Exceptions\BuilderException
+     */
+    public function testBadAggregation3()
+    {
+        $table = $this->database->table('sample_table');
+        $this->fillData();
+
+        $table->select()->avg(1, 2);
+    }
+
     public function testClone()
     {
         $table = $this->database->table('sample_table');
@@ -237,6 +270,44 @@ abstract class QueryResultTest extends BaseQueryTest
         $result = $table->select()->getIterator();
 
         $result->close();
+    }
+
+    public function testChunks()
+    {
+        $table = $this->database->table('sample_table');
+        $this->fillData();
+
+        $select = $table->select();
+
+        $count = 0;
+        $select->runChunks(1, function ($result) use (&$count) {
+            $this->assertInstanceOf(QueryStatement::class, $result);
+            $this->assertEquals($count + 1, $result->fetchColumn());
+
+            $count++;
+        });
+
+        $this->assertSame(10, $count);
+    }
+
+    public function testChunksExif()
+    {
+        $table = $this->database->table('sample_table');
+        $this->fillData();
+
+        $select = $table->select();
+
+        $count = 0;
+        $select->runChunks(1, function ($result) use (&$count) {
+            $this->assertInstanceOf(QueryStatement::class, $result);
+
+            $count++;
+            if ($count == 5) {
+                return false;
+            }
+        });
+
+        $this->assertSame(5, $count);
     }
 
     public function testBindByName()

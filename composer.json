@@ -17,7 +17,7 @@
     "container-interop/container-interop": "^1.1",
     "psr/log": "*",
     "psr/http-message": "^1.0",
-    "psr/simple-cache": "^1.0"
+    "psr/simple-cache": "^1.0",
     "mongodb/mongodb": "^1.1",
     "doctrine/inflector": "*",
     "symfony/finder": "^3.0",

@@ -6,7 +6,7 @@
  */
 namespace Spiral\ORM\Entities;
 
-use Psr\Cache\CacheItemPoolInterface;
+use Psr\SimpleCache\CacheInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\SelectQuery;
@@ -321,32 +321,30 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
      * Get RecordIterator (entity iterator) for a requested data. Provide cache key and lifetime in
      * order to cache request data.
      *
-     * @param string                      $cacheKey
-     * @param int|\DateInterval           $ttl
-     * @param CacheItemPoolInterface|null $pool
+     * @param string              $cacheKey
+     * @param int|\DateInterval   $ttl
+     * @param CacheInterface|null $cache
      *
      * @return RecordIterator|RecordInterface[]
      */
     public function getIterator(
         string $cacheKey = '',
         $ttl = 0,
-        CacheItemPoolInterface $pool = null
+        CacheInterface $cache = null
     ): RecordIterator {
         if (!empty($cacheKey)) {
             /**
-             * When no pool is provided saturate it using container scope
+             * When no cache is provided saturate it using container scope
              *
-             * @var CacheItemPoolInterface $pool
+             * @var CacheInterface $cache
              */
-            $pool = $this->saturate($pool, CacheItemPoolInterface::class);
-            $item = $pool->getItem($cacheKey);
+            $cache = $this->saturate($cache, CacheInterface::class);
 
-            if ($item->isHit()) {
-                $data = $item->get();
+            if ($cache->has($cacheKey)) {
+                $data = $cache->get($cacheKey);
             } else {
                 $data = $this->fetchData();
-
-                $pool->save($item->set($data)->expiresAfter($ttl));
+                $cache->set($cacheKey, $data, $ttl);
             }
         } else {
             $data = $this->fetchData();

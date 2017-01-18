@@ -69,14 +69,15 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 
     /**
      * @param array                $options
-     * @param FilesInterface       $files
-     * @param CacheInterface|null  $cache todo REMOVE!
+     * @param CacheInterface|null  $cache
+     * @param FilesInterface|null  $files
      * @param ClientInterface|null $client
      */
     public function __construct(
         array $options,
-        FilesInterface $files = null,
         CacheInterface $cache = null,
+        FilesInterface $files = null,
+
         ClientInterface $client = null
     ) {
         parent::__construct($options, $files);

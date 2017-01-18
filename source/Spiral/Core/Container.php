@@ -20,7 +20,7 @@ use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\Exceptions\Container\NotFoundException;
 
 /**
- * 480 lines of code size auto-wiring container with declarative singletons, contextual injections,
+ * 500 lines of code size auto-wiring container with declarative singletons, contextual injections,
  * bindings, lazy factories and Container Interop compatible. :)
  *
  * Container does not support setter injections, private properties and etc. Normally it will work
@@ -97,11 +97,12 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     final public function make(string $class, $parameters = [], string $context = null)
     {
         if (!isset($this->bindings[$class])) {
+            //No direct instructions how to construct class, make is automatically
             return $this->autowire($class, $parameters, $context);
         }
 
         if (is_object($binding = $this->bindings[$class])) {
-            //Singleton
+            //When binding is instance, assuming singleton
             return $binding;
         }
 
@@ -116,7 +117,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
         } elseif ($binding[0] instanceof \Closure) {
             $reflection = new \ReflectionFunction($binding[0]);
 
-            //Invoking Closure
+            //Invoking Closure with resolved arguments
             $instance = $reflection->invokeArgs(
                 $this->resolveArguments($reflection, $parameters, $context)
             );
@@ -124,14 +125,18 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             //In a form of resolver and method
             list($resolver, $method) = $binding[0];
 
+            //Resolver instance (i.e. [ClassName::class, 'method'])
             $resolver = $this->get($resolver);
             $method = new \ReflectionMethod($resolver, $method);
             $method->setAccessible(true);
 
+            //Invoking factory method with resolved arguments
             $instance = $method->invokeArgs(
-                $resolver, $this->resolveArguments($method, $parameters, $context)
+                $resolver,
+                $this->resolveArguments($method, $parameters, $context)
             );
         } else {
+            //No idea what was this binding was
             throw new ContainerException("Invalid binding for '{$class}'");
         }
 
@@ -161,6 +166,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
         $arguments = [];
         foreach ($reflection->getParameters() as $parameter) {
             try {
+                //Information we need to know about argument in order to resolve it's value
                 $name = $parameter->getName();
                 $class = $parameter->getClass();
             } catch (\Throwable $e) {
@@ -168,42 +174,42 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                 throw new ContainerException($e->getMessage(), $e->getCode(), $e);
             }
 
+            //No declared type or scalar type or array
             if (empty($class)) {
+                //Provided from outside
                 if (array_key_exists($name, $parameters)) {
-                    //Let's validate value type
+                    //Make sure it's properly typed
                     $this->assertType($parameter, $reflection, $parameters[$name]);
-
-                    //Scalar value supplied by user
                     $arguments[] = $parameters[$name];
 
                     continue;
                 }
 
                 if ($parameter->isDefaultValueAvailable()) {
-                    //Default value on code level
+                    //Default value
                     $arguments[] = $parameter->getDefaultValue();
                     continue;
                 }
 
-                //Unable to resolve scalar argument value (soft exception)
+                //Unable to resolve scalar argument value
                 throw new ArgumentException($parameter, $reflection);
             }
 
             if (isset($parameters[$name]) && is_object($parameters[$name])) {
-                //Supplied by user
+                //Supplied by user but only as object!
                 $arguments[] = $parameters[$name];
                 continue;
             }
 
             try {
                 //Trying to resolve dependency (contextually)
-                $arguments[] = $this->get($class->getName(), $parameter->getName());
+                $arguments[] = $this->get($class->getName(), $name);
 
                 continue;
             } catch (AutowireException $e) {
-                if ($parameter->isDefaultValueAvailable()) {
-                    //Let's try to use default value instead
-                    $arguments[] = $parameter->getDefaultValue();
+                if ($parameter->isOptional()) {
+                    //This is optional dependency, skip
+                    $arguments[] = null;
                     continue;
                 }
 
@@ -227,6 +233,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     final public function bind(string $alias, $resolver): Container
     {
         if (is_array($resolver) || $resolver instanceof \Closure) {
+            //Array means = execute me, false = not singleton
             $this->bindings[$alias] = [$resolver, false];
 
             return $this;
@@ -249,6 +256,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     final public function bindSingleton(string $alias, $resolver): Container
     {
         if (is_object($resolver) && !$resolver instanceof \Closure) {
+            //Direct binding to an instance
             $this->bindings[$alias] = $resolver;
 
             return $this;
@@ -291,6 +299,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             return true;
         }
 
+        //Auto injection!
         return $reflection->isSubclassOf(InjectableInterface::class);
     }
 
@@ -307,8 +316,8 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             return false;
         }
 
-        //Cross bindings
         while (isset($this->bindings[$alias]) && is_string($this->bindings[$alias])) {
+            //Checking alias tree
             $alias = $this->bindings[$alias];
         }
 
@@ -374,10 +383,11 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             throw new ContainerException($e->getMessage(), $e->getCode(), $e);
         }
 
-        //Create and register in container if needed
-        return $this->registerInstance(
-            $this->createInstance($class, $parameters, $context),
-            $parameters);
+        //Automatically create instance
+        $instance = $this->createInstance($class, $parameters, $context);
+
+        //Apply registration functions to created instance
+        return $this->registerInstance($instance, $parameters);
     }
 
     /**
@@ -390,8 +400,10 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     protected function getInjector(\ReflectionClass $reflection): InjectorInterface
     {
         if (isset($this->injectors[$reflection->getName()])) {
+            //Stated directly
             $injector = $this->get($this->injectors[$reflection->getName()]);
         } else {
+            //Auto-injection!
             $injector = $this->get($reflection->getConstant('INJECTOR'));
         }
 
@@ -415,6 +427,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     protected function registerInstance($instance, array $parameters)
     {
+        //Declarative singletons
         if (empty($parameters) && $instance instanceof SingletonInterface) {
             $singleton = get_class($instance);
 

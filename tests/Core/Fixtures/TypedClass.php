@@ -13,7 +13,8 @@ class TypedClass
         int $int,
         float $float,
         bool $bool,
-        array $array = []
+        array $array = [],
+        string $pong = null
     ) {
     }
 }

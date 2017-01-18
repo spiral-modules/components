@@ -108,47 +108,42 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             return $this->make($binding, $parameters, $context);
         }
 
-        if (is_array($binding)) {
-            if (is_string($binding[0])) {
-                //Class name
-                $instance = $this->make($binding[0], $parameters, $context);
-            } elseif ($binding[0] instanceof \Closure) {
-                $reflection = new \ReflectionFunction($binding[0]);
+        if (is_string($binding[0])) {
+            //Class name
+            $instance = $this->make($binding[0], $parameters, $context);
+        } elseif ($binding[0] instanceof \Closure) {
+            $reflection = new \ReflectionFunction($binding[0]);
 
-                //Invoking Closure
-                $instance = $reflection->invokeArgs(
-                    $this->resolveArguments($reflection, $parameters, $context)
-                );
-            } elseif (is_array($binding[0]) && isset($binding[0][1])) {
-                //In a form of resolver and method
-                list($resolver, $method) = $binding[0];
+            //Invoking Closure
+            $instance = $reflection->invokeArgs(
+                $this->resolveArguments($reflection, $parameters, $context)
+            );
+        } elseif (is_array($binding[0]) && isset($binding[0][1])) {
+            //In a form of resolver and method
+            list($resolver, $method) = $binding[0];
 
-                $resolver = $this->get($resolver);
-                $method = new \ReflectionMethod($resolver, $method);
-                $method->setAccessible(true);
+            $resolver = $this->get($resolver);
+            $method = new \ReflectionMethod($resolver, $method);
+            $method->setAccessible(true);
 
-                $instance = $method->invokeArgs(
-                    $resolver, $this->resolveArguments($method, $parameters, $context)
-                );
-            } else {
-                throw new ContainerException("Invalid binding for '{$class}'");
-            }
+            $instance = $method->invokeArgs(
+                $resolver, $this->resolveArguments($method, $parameters, $context)
+            );
+        } else {
+            throw new ContainerException("Invalid binding for '{$class}'");
+        }
 
-            if ($binding[1]) {
-                //Declared singleton
-                $this->bindings[$class] = $instance;
-            }
+        if ($binding[1]) {
+            //Declared singleton
+            $this->bindings[$class] = $instance;
+        }
 
-            if (!is_object($instance)) {
-                //Non object bindings are allowed
-                return $instance;
-            }
-
+        if (!is_object($instance)) {
+            //Non object bindings are allowed
             return $instance;
         }
 
-        //Will this ever happen?
-        return null;
+        return $instance;
     }
 
     /**
@@ -368,8 +363,13 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     protected function autowire(string $class, array $parameters, string $context = null)
     {
-        if (!class_exists($class)) {
-            throw new NotFoundException("Undefined class or binding '{$class}'");
+        try {
+            if (!class_exists($class)) {
+                throw new NotFoundException("Undefined class or binding '{$class}'");
+            }
+        } catch (\Error $e) {
+            //Issues with syntax or class definition
+            throw new ContainerException($e->getMessage(), $e->getCode(), $e);
         }
 
         //Create and register in container if needed
@@ -439,12 +439,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     private function createInstance(string $class, array $parameters, string $context = null)
     {
-        try {
-            $reflection = new \ReflectionClass($class);
-        } catch (\Throwable $e) {
-            //Issues with syntax or class definition
-            throw new ContainerException($e->getMessage(), $e->getCode(), $e);
-        }
+        $reflection = new \ReflectionClass($class);
 
         //We have to construct class using external injector
         if (empty($parameters) && $this->hasInjector($reflection)) {

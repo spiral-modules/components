@@ -93,6 +93,11 @@ class InjectableTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($injectors);
         $this->assertArrayHasKey(TestConfig::class, $injectors);
         $this->assertSame('invalid-injector', $injectors[TestConfig::class]);
+
+        $container->removeInjector(TestConfig::class);
+        $injectors = $container->getInjectors();
+
+        $this->assertEmpty($injectors);
     }
 
     /**

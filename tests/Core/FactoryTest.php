@@ -10,7 +10,9 @@ namespace Spiral\Tests\Core;
 
 use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface;
+use Spiral\Tests\Core\Fixtures\BadClass;
 use Spiral\Tests\Core\Fixtures\Bucket;
+use Spiral\Tests\Core\Fixtures\CorruptedClass;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 
 class FactoryTest extends \PHPUnit_Framework_TestCase
@@ -81,6 +83,24 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(Bucket::class, $bucket);
         $this->assertSame('via-method-with-sample', $bucket->getName());
         $this->assertSame($sample, $bucket->getData());
+    }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ContainerException
+     */
+    public function testConstructAbstract()
+    {
+        $container = new Container();
+        $container->make(BadClass::class);
+    }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\Container\ContainerException
+     */
+    public function testConstructCorrupted()
+    {
+        $container = new Container();
+        $container->make(CorruptedClass::class);
     }
 
     /**

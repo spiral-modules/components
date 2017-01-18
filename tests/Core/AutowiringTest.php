@@ -84,10 +84,15 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($container->has('alias'));
         $this->assertTrue($container->hasInstance('alias'));
 
+        $this->assertNotEmpty($container->getBindings());
+
         $container->removeBinding('alias');
 
         $this->assertFalse($container->has('alias'));
         $this->assertFalse($container->hasInstance('alias'));
+
+        $container->bind('alias-b', 'alias');
+        $this->assertFalse($container->hasInstance('alias-b'));
     }
 
     public function testCascadeFollowBindings()
@@ -265,6 +270,35 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
             'float'  => 1.00,
             'bool'   => true,
             'array'  => 'not array'
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
+
+    public function testAutowireOptionalArray()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => '',
+            'int'    => 123,
+            'float'  => 1.00,
+            'bool'   => true
+        ]);
+
+        $this->assertInstanceOf(TypedClass::class, $object);
+    }
+
+    public function testAutowireOptionalString()
+    {
+        $container = new Container();
+
+        $object = $container->make(TypedClass::class, [
+            'string' => '',
+            'int'    => 123,
+            'float'  => 1.00,
+            'bool'   => true,
+            'pong'   => null
         ]);
 
         $this->assertInstanceOf(TypedClass::class, $object);

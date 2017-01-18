@@ -13,7 +13,6 @@ use Spiral\Core\Exceptions\DependencyException;
 /**
  * Something inside container.
  */
-class ContainerException extends DependencyException implements
-    \Interop\Container\Exception\ContainerException
+class ContainerException extends DependencyException implements \Interop\Container\Exception\ContainerException
 {
 }

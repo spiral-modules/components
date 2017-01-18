@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Schemas\Definitions;
 
+use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 
 /**
@@ -184,6 +185,10 @@ final class RelationDefinition
      */
     public function getInverse(): string
     {
+        if (!$this->needInversion()) {
+            throw new ORMException("Unable to get inversed name, not inversable");
+        }
+
         return $this->inverse;
     }
 }

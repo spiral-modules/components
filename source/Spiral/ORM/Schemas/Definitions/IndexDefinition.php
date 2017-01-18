@@ -66,9 +66,6 @@ final class IndexDefinition
      */
     public function __toString()
     {
-        return json_encode([
-            $this->index,
-            $this->unique
-        ]);
+        return json_encode([$this->index, $this->unique]);
     }
 }

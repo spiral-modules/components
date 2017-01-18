@@ -57,6 +57,8 @@ final class Transaction implements TransactionInterface
     }
 
     /**
+     * Will return flattened list of commands.
+     *
      * @return \Generator
      */
     public function getCommands()
@@ -80,39 +82,36 @@ final class Transaction implements TransactionInterface
     {
         /**
          * @var Driver[]           $drivers
-         * @var Driver[]           $wrappedDrivers
-         * @var CommandInterface[] $executedCommands
+         * @var CommandInterface[] $commands
          */
         $drivers = [];
-        $wrappedDrivers = [];
+        $commands = [];
+
+        foreach ($this->getCommands() as $command) {
+            if ($command instanceof SQLCommandInterface) {
+                $driver = $command->getDriver();
+                if (!empty($driver) && !in_array($driver, $drivers)) {
+                    $drivers[] = $driver;
+                }
+            }
+
+            $commands[] = $command;
+        }
+
         $executedCommands = [];
+        $wrappedDrivers = [];
 
-        //Flattening commands and preparing drivers
         try {
-            foreach ($this->getCommands() as $command) {
-                if ($command instanceof \Traversable) {
-                    //Skipping commands which intended to be command array
-                    continue;
+            if (count($commands) > 1) {
+                //Starting transactions
+                foreach ($drivers as $driver) {
+                    $driver->beginTransaction();
+                    $wrappedDrivers[] = $driver;
                 }
+            }
 
-                if ($command instanceof SQLCommandInterface) {
-                    $driver = $command->getDriver();
-
-                    if ($driver instanceof Driver) {
-                        if (!in_array($driver, $drivers)) {
-                            //This is first time we met this driver
-                            $drivers[] = $driver;
-                        } elseif (!in_array($driver, $wrappedDrivers)) {
-                            //And this is second
-                            $wrappedDrivers[] = $driver;
-
-                            //Not we know that transaction is required
-                            $driver->beginTransaction();
-                        }
-                    }
-                }
-
-                //Execute command
+            //Run commands
+            foreach ($commands as $command) {
                 $command->execute();
                 $executedCommands[] = $command;
             }

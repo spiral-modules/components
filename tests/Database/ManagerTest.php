@@ -233,4 +233,29 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         $db = $manager->createDatabase('test', '', $driver);
         $this->assertInstanceOf(Database::class, $db);
     }
+
+    public function testInjectionTest()
+    {
+        $config = new DatabasesConfig([
+            'default'     => 'default',
+            'aliases'     => [],
+            'databases'   => [],
+            'connections' => [],
+        ]);
+        $manager = new DatabaseManager($config);
+
+        $driver = $manager->createDriver(
+            'sqlite',
+            SQLiteDriver::class,
+            'sqlite:memory:',
+            'sqlite'
+        );
+
+        $db = $manager->createDatabase('test', '', $driver);
+
+        $this->assertSame(
+            $db,
+            $manager->createInjection(new \ReflectionClass(Database::class), 'test')
+        );
+    }
 }

@@ -69,6 +69,8 @@ abstract class QueryResultTest extends BaseQueryTest
         $result = $table->select()->getIterator();
 
         $this->assertSame(3, $result->countColumns());
+
+        $this->assertInternalType('array', $result->__debugInfo());
     }
 
     public function testIterateOver()
@@ -270,6 +272,17 @@ abstract class QueryResultTest extends BaseQueryTest
         $result = $table->select()->getIterator();
 
         $result->close();
+    }
+
+    public function testSpanishInquisition()
+    {
+        $driver = $this->database->getDriver();
+        $this->assertInstanceOf(\PDO::class, $driver->connect());
+        $this->assertInstanceOf(\PDO::class, $driver->getPDO());
+
+        //And now something different
+        $driver->disconnect();
+        $this->assertFalse($driver->isConnected());
     }
 
     public function testChunks()

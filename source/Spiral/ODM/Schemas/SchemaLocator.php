@@ -56,9 +56,10 @@ class SchemaLocator implements LocatorInterface
                 continue;
             }
 
-            $this->container->get(FactoryInterface::class)->make(DocumentSchema::class, [
-                'reflection' => new ReflectionEntity($class['name']),
-            ]);
+            $schemas[] = $this->container->get(FactoryInterface::class)->make(
+                DocumentSchema::class,
+                ['reflection' => new ReflectionEntity($class['name']),]
+            );
         }
 
         return $schemas;

@@ -181,4 +181,16 @@ class DirectoriesTest extends \PHPUnit_Framework_TestCase
             $this->assertFalse($files->exists($filename));
         }
     }
+
+    public function testGetFiles()
+    {
+        $files = new FileManager();
+        $this->assertNotEmpty($files->getFiles(__DIR__));
+    }
+
+    public function testGetFilesPattern()
+    {
+        $files = new FileManager();
+        $this->assertEmpty($files->getFiles(__DIR__, '*.jpg'));
+    }
 }

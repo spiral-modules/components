@@ -72,11 +72,6 @@ class RelationBuilder
         //Creating relation schema
         $relation = $this->factory->make($class, compact('definition'));
 
-        //Equavalent (low)?
-
-        //todo: morphed relations are a bit special
-        //todo: make sure no dubs
-
         $this->relations[] = $relation;
     }
 

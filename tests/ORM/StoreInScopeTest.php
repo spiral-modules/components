@@ -261,6 +261,26 @@ abstract class StoreInScopeTest extends BaseTest
         $this->assertSame(30, $this->orm->selector(User::class)->sum('balance'));
     }
 
+    public function testStoreAndDeleteOneInTransaction()
+    {
+        $transaction = new Transaction();
+
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 10;
+        $user->save($transaction);
+
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 20;
+        $user->save($transaction);
+
+        $user->delete($transaction);
+
+        $transaction->run();
+        $this->assertSame(1, $this->orm->selector(User::class)->count());
+    }
+
     /**
      * @expectedException \Spiral\ORM\Exceptions\MapException
      */

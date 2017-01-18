@@ -7,8 +7,8 @@
 namespace Spiral\ORM\Schemas;
 
 use Interop\Container\ContainerInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ORM\Configs\MutatorsConfig;
 use Spiral\ORM\Entities\RecordSource;
 use Spiral\ORM\RecordEntity;
 use Spiral\Tokenizer\ClassesInterface;
@@ -16,6 +16,8 @@ use Spiral\Tokenizer\ClassesInterface;
 /**
  * Provides ability to automatically locate schemas in a project. Can be user redefined in order to
  * automatically include custom classes.
+ *
+ * This is lazy implementation.
  */
 class SchemaLocator implements LocatorInterface
 {
@@ -56,10 +58,9 @@ class SchemaLocator implements LocatorInterface
                 continue;
             }
 
-            $schemas[] = new RecordSchema(
-                new ReflectionEntity($class['name']),
-                $this->container->get(MutatorsConfig::class)
-            );
+            $this->container->get(FactoryInterface::class)->make(RecordSchema::class, [
+                'reflection' => new ReflectionEntity($class['name']),
+            ]);
         }
 
         return $schemas;

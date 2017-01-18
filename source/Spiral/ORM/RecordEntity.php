@@ -23,6 +23,9 @@ use Spiral\ORM\Exceptions\RelationException;
  *
  * Class implementations statically analyzed to define DB schema.
  *
+ * You can define MODEL_ROLE, TABLE and DATABASE constants to pin model to specific table and name
+ * model whatever way you prefer.
+ *
  * @see RecordEntity::SCHEMA
  */
 abstract class RecordEntity extends AbstractRecord implements RecordInterface

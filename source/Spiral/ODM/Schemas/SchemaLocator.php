@@ -7,8 +7,8 @@
 namespace Spiral\ODM\Schemas;
 
 use Interop\Container\ContainerInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Models\Reflections\ReflectionEntity;
-use Spiral\ODM\Configs\MutatorsConfig;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\DocumentSource;
 use Spiral\Tokenizer\ClassesInterface;
@@ -16,6 +16,8 @@ use Spiral\Tokenizer\ClassesInterface;
 /**
  * Provides ability to automatically locate schemas in a project. Can be user redefined in order to
  * automatically include custom classes.
+ *
+ * This is lazy implementation.
  */
 class SchemaLocator implements LocatorInterface
 {
@@ -54,10 +56,9 @@ class SchemaLocator implements LocatorInterface
                 continue;
             }
 
-            $schemas[] = new DocumentSchema(
-                new ReflectionEntity($class['name']),
-                $this->container->get(MutatorsConfig::class)
-            );
+            $this->container->get(FactoryInterface::class)->make(DocumentSchema::class, [
+                'reflection' => new ReflectionEntity($class['name']),
+            ]);
         }
 
         return $schemas;

@@ -23,6 +23,7 @@ use Spiral\Storage\Exceptions\StorageException;
  * server level).
  *
  * @todo check Guzzle dependency and if there is something lighter for PSR7 curl wrappers
+ * @todo add async processing?
  */
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {

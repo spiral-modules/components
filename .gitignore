@@ -7,3 +7,5 @@ tests/runtime/*
 build/logs/*
 build/
 *.db
+clover.xml
+coveralls.json

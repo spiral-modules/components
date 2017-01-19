@@ -7,6 +7,7 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Entities\Relations\ManyToManyRelation;
+use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Tag;
 use Spiral\Tests\ORM\Fixtures\User;
@@ -130,4 +131,72 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->assertCount(2, $this->db->post_tag_map);
     }
+
+    public function testSaveTwice()
+    {
+        $tag2 = new Tag(['name' => 'tag b']);
+        $tag2->save();
+
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2);
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post->tags->link($tag3 = new Tag(['name' => 'tag c']));
+
+        $post->save();
+        $this->assertCount(3, $this->db->post_tag_map);
+    }
+
+//    public function testPivotValues()
+//    {
+//        $tag1 = new Tag(['name' => 'tag a']);
+//
+//        $post = new Post();
+//        $post->author = new User();
+//
+//        $post->tags->link($tag1);
+//        $this->assertNotEmpty($pivot = $post->tags->getPivot($tag1));
+//        $this->assertEquals(null, $pivot['post_id']);
+//        $this->assertEquals(null, $pivot['tag_id']);
+//        $post->save();
+//
+//        $this->assertNotEmpty($pivot = $post->tags->getPivot($tag1));
+//        $this->assertEquals($post->primaryKey(), $pivot['post_id']);
+//        $this->assertEquals($tag1->primaryKey(), $pivot['tag_id']);
+//    }
+
+
+//    public function testUnlinkInMemory()
+//    {
+//        //$tag2 = new Tag(['name' => 'tag b']);
+//        //$tag2->save();
+//
+//        $transaction = new Transaction();
+//
+//        $post = new Post();
+//        $post->author = new User();
+//        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+//        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+//
+//        $post->save($transaction);
+//
+//        $post->tags->unlink($tag2);
+//
+//        $post->save($transaction);
+//
+//        $transaction->run();
+//
+//        $this->assertSameInDB($post);
+//        $this->assertSameInDB($post->author);
+//        $this->assertSameInDB($tag1);
+//
+//        $this->assertTrue($tag2->isLoaded());
+//
+//        $this->assertCount(2, $this->db->tags);
+//        $this->assertCount(1, $this->db->post_tag_map);
+//    }
 }

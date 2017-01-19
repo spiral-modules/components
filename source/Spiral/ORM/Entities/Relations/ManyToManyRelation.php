@@ -9,10 +9,10 @@ namespace Spiral\ORM\Entities\Relations;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\CommandInterface;
-use Spiral\ORM\Commands\DeleteCommand;
+use Spiral\ORM\Commands\ContextualDeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
-use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
+use Spiral\ORM\Commands\UpdateCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
@@ -52,6 +52,13 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      * @var RecordInterface[]
      */
     private $linked = [];
+
+    /**
+     * Linked but not saved yet records.
+     *
+     * @var array
+     */
+    private $scheduled = [];
 
     /**
      * Record which pivot data was updated, record must still present in linked array.
@@ -176,6 +183,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      */
     public function link(RecordInterface $record, array $pivotData = []): self
     {
+        $this->loadData(true);
         $this->assertValid($record);
 
         if (in_array($record, $this->linked)) {
@@ -194,13 +202,15 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
 
         //New association
         $this->linked[] = $record;
+        $this->scheduled[] = $record;
         $this->pivotData->offsetSet($record, $pivotData);
 
         return $this;
     }
 
     /**
-     * Unlink specific entity from relation.
+     * Unlink specific entity from relation. Will load relation data! Set partial mode to remove
+     * without preloading (will also force removal)
      *
      * @param RecordInterface $record
      *
@@ -210,11 +220,16 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      */
     public function unlink(RecordInterface $record): self
     {
+        $this->loadData(true);
         foreach ($this->linked as $index => $linked) {
             if ($linked === $record) {
-                //Removing
+                //Removing locally
                 unset($this->linked[$index]);
-                $this->unlinked[] = $linked;
+
+                if (!in_array($linked, $this->scheduled)) {
+                    //Scheduling unlink in db when we know relation OR partial mode is on
+                    $this->unlinked[] = $linked;
+                }
                 break;
             }
         }
@@ -290,17 +305,66 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         $transaction = new TransactionalCommand();
 
         foreach ($this->unlinked as $record) {
-            if ($this->isLinked($this->parent, $record)) {
-                //Removing association between records
-                $transaction->addCommand($this->queueUnlink($parentCommand, $record));
-            }
+            //Leading command
+            $transaction->addCommand($recordCommand = $record->queueStore(), true);
+
+            //Delete link
+            $command = new ContextualDeleteCommand($this->pivotTable(), [
+                $this->key(Record::THOUGHT_INNER_KEY) => null,
+                $this->key(Record::THOUGHT_OUTER_KEY) => null,
+            ]);
+
+            //Make sure command is properly configured with conditions OR create promises
+            $command = $this->ensureContext(
+                $command,
+                $this->parent,
+                $parentCommand,
+                $record,
+                $recordCommand
+            );
+
+            $transaction->addCommand($command);
         }
 
         foreach ($this->linked as $record) {
-            //Storing related record changes
-            $transaction->addCommand($this->queueLink($parentCommand, $record));
+            //Leading command
+            $transaction->addCommand($recordCommand = $record->queueStore(), true);
+
+            //Create or refresh link between records
+            if (in_array($record, $this->scheduled)) {
+                //Create link
+                $command = new InsertCommand(
+                    $this->pivotTable(),
+                    $this->pivotData->offsetGet($record)
+                );
+            } elseif (in_array($record, $this->updated)) {
+                //Update link
+                $command = new UpdateCommand(
+                    $this->pivotTable(),
+                    [
+                        $this->key(Record::THOUGHT_INNER_KEY) => null,
+                        $this->key(Record::THOUGHT_OUTER_KEY) => null,
+                    ],
+                    $this->pivotData->offsetGet($record)
+                );
+            } else {
+                //Nothing to do
+                continue;
+            }
+
+            //Make sure command is properly configured with conditions OR create promises
+            $command = $this->ensureContext(
+                $command,
+                $this->parent,
+                $parentCommand,
+                $record,
+                $recordCommand
+            );
+
+            $transaction->addCommand($command);
         }
 
+        $this->scheduled = [];
         $this->unlinked = [];
         $this->updated = [];
 
@@ -352,6 +416,79 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
+     * Indicates that records are not linked yet.
+     *
+     * @param RecordInterface $outer
+     * @param bool            $strict When true will also check that keys are not empty.
+     *
+     * @return bool
+     */
+    protected function isLinked(RecordInterface $outer, bool $strict = false)
+    {
+        $pivotData = $this->pivotData->offsetGet($outer);
+        if (empty($pivotData)) {
+            //No pivot data at all
+            return false;
+        }
+
+        if (empty($pivotData[$this->key(Record::THOUGHT_OUTER_KEY)])) {
+            //No outer key value
+            return false;
+        }
+
+        if (empty($pivotData[$this->key(Record::THOUGHT_INNER_KEY)])) {
+            //No inner key value
+            return false;
+        }
+
+        //Both keys are set
+        return true;
+    }
+
+    /**
+     * Insane method used to properly set pivot command context (where or insert statement) based on
+     * parent and outer records AND/OR based on command promises.
+     *
+     * @param ContextualCommandInterface $pivotCommand
+     * @param RecordInterface            $parent
+     * @param ContextualCommandInterface $parentCommand
+     * @param RecordInterface            $outer
+     * @param ContextualCommandInterface $outerCommand
+     *
+     * @return ContextualCommandInterface
+     */
+    protected function ensureContext(
+        ContextualCommandInterface $pivotCommand,
+        RecordInterface $parent,
+        ContextualCommandInterface $parentCommand,
+        RecordInterface $outer,
+        ContextualCommandInterface $outerCommand
+    ) {
+        //Parent record dependency
+        $parentCommand->onExecute(function ($parentCommand) use ($pivotCommand, $parent) {
+            $pivotCommand->addContext(
+                $this->key(Record::THOUGHT_INNER_KEY),
+                $this->lookupKey(Record::INNER_KEY, $parent, $parentCommand)
+            );
+        });
+
+        //Outer record dependency
+        $outerCommand->onExecute(function ($outerCommand) use ($pivotCommand, $outer) {
+            $pivotCommand->addContext(
+                $this->key(Record::THOUGHT_OUTER_KEY),
+                $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
+            );
+        });
+
+        $pivotCommand->onComplete(function (ContextualCommandInterface $pivotCommand) use ($outer) {
+            //Now when we are done we can sync our values with current data
+            $this->pivotData->offsetSet($outer, $pivotCommand->getContext());
+        });
+
+        return $pivotCommand;
+    }
+
+    /**
      * @return Table
      */
     protected function pivotTable()
@@ -365,30 +502,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         }
 
         return $this->pivotTable;
-    }
-
-    /**
-     * Indicates that records are not linked yet.
-     *
-     * @param RecordInterface $parent
-     * @param RecordInterface $outer
-     *
-     * @return bool
-     */
-    protected function isLinked(RecordInterface $parent, RecordInterface $outer)
-    {
-        $pivotData = $this->pivotData->offsetGet($outer);
-        if (empty($pivotData)) {
-            //No pivot data at all
-            return false;
-        }
-
-        return false;
-    }
-
-    protected function isUpdated(RecordInterface $parent, RecordInterface $outer)
-    {
-        return in_array($outer, $this->updated);
     }
 
     /**
@@ -428,117 +541,10 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      */
     private function assertPivot(array $pivotData)
     {
-        //todo: write it
-    }
-
-    /**
-     * Drop relation between records.
-     *
-     * @param ContextualCommandInterface $parentCommand
-     * @param RecordInterface            $record
-     *
-     * @return CommandInterface
-     */
-    private function queueUnlink(
-        ContextualCommandInterface $parentCommand,
-        RecordInterface $record
-    ): CommandInterface {
-        //todo: make where
-        $delete = new DeleteCommand($this->pivotTable(), [
-
-        ]);
-
-        $parentCommand->onExecute(function ($parentCommand) {
-            //clarify where statement
-        });
-
-        return $delete;
-    }
-
-    /**
-     * Store related record and link it with parent.
-     *
-     * @param ContextualCommandInterface $parentCommand
-     * @param RecordInterface            $record
-     *
-     * @return CommandInterface
-     */
-    private function queueLink(
-        ContextualCommandInterface $parentCommand,
-        RecordInterface $record
-    ): CommandInterface {
-        $transaction = new TransactionalCommand();
-
-        //Leading command
-        $transaction->addCommand($recordCommand = $record->queueStore(), true);
-
-        //Make sure that link between records is set and updated to proper state
-        if (!$this->isLinked($this->parent, $record)) {
-            $transaction->addCommand(
-                $this->linkCommand($this->parent, $parentCommand, $record, $recordCommand)
-            );
-        } elseif ($this->isUpdated($this->parent, $record)) {
-            $transaction->addCommand(
-                $this->updateCommand($this->parent, $record)
+        if ($diff = array_diff(array_keys($pivotData), $this->schema[Record::PIVOT_COLUMNS])) {
+            throw new RelationException(
+                "Invalid pivot data, undefined columns found: " . join(', ', $diff)
             );
         }
-
-        return $transaction;
-    }
-
-    /**
-     * Creates new link command between records and lookup for outer and inner keys during
-     * execution.
-     *
-     * @param RecordInterface            $parent
-     * @param ContextualCommandInterface $parentCommand
-     * @param RecordInterface            $outer
-     * @param ContextualCommandInterface $outerCommand
-     *
-     * @return InsertCommand
-     */
-    private function linkCommand(
-        RecordInterface $parent,
-        ContextualCommandInterface $parentCommand,
-        RecordInterface $outer,
-        ContextualCommandInterface $outerCommand
-    ): InsertCommand {
-        $pivotCommand = new InsertCommand($this->pivotTable(), []);
-
-        //Parent record dependency
-        $parentCommand->onExecute(function ($parentCommand) use ($pivotCommand, $parent) {
-            $pivotCommand->addContext(
-                $this->key(Record::THOUGHT_INNER_KEY),
-                $this->lookupKey(Record::INNER_KEY, $parent, $parentCommand)
-            );
-        });
-
-        //Outer record dependency
-        $outerCommand->onExecute(function ($outerCommand) use ($pivotCommand, $outer) {
-            $pivotCommand->addContext(
-                $this->key(Record::THOUGHT_OUTER_KEY),
-                $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
-            );
-        });
-
-        $pivotCommand->onComplete(function (ContextualCommandInterface $pivotCommand) use ($outer) {
-            //Now when we are done we can sync our values with current data
-            $this->pivotData->offsetSet($outer, $pivotCommand->getContext());
-        });
-
-        return $pivotCommand;
-    }
-
-    /**
-     * Updates pivot map data between two records.
-     *
-     * @param RecordInterface $parent
-     * @param RecordInterface $outer
-     *
-     * @return CommandInterface
-     */
-    private function updateCommand(RecordInterface $parent, RecordInterface $outer)
-    {
-        return new NullCommand();
     }
 }

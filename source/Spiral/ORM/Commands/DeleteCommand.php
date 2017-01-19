@@ -7,15 +7,11 @@
 namespace Spiral\ORM\Commands;
 
 use Spiral\Database\Entities\Table;
+use Spiral\ORM\Commands\Traits\WhereTrait;
 
 class DeleteCommand extends TableCommand
 {
-    /**
-     * Where conditions (short where format).
-     *
-     * @var array
-     */
-    private $where = [];
+    use WhereTrait;
 
     /**
      * @param Table $table
@@ -25,22 +21,6 @@ class DeleteCommand extends TableCommand
     {
         parent::__construct($table);
         $this->where = $where;
-    }
-
-    /**
-     * @param array $where
-     */
-    public function setWhere(array $where)
-    {
-        $this->where = $where;
-    }
-
-    /**
-     * @return array
-     */
-    public function getWhere(): array
-    {
-        return $this->where;
     }
 
     /**

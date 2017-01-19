@@ -258,6 +258,9 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     {
         if (!$this->isLoaded()) {
             $command = $this->prepareInsert();
+
+            //Switch to atomic/dirty mode
+            $this->solidState(false);
         } else {
             $command = $this->prepareUpdate();
         }
@@ -406,10 +409,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         }
 
         $this->state = ORMInterface::STATE_LOADED;
-
-        //Once loaded we can switch to non solid state (possibly define manually)
-        $this->solidState(false);
-
         $this->dispatch('created', new RecordEvent($this));
     }
 

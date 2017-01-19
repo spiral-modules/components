@@ -13,20 +13,22 @@ use Spiral\ORM\Commands\Traits\WhereTrait;
 use Spiral\ORM\ContextualCommandInterface;
 
 /**
- * Update data CAN be modified by parent commands using context.
+ * Contextual delete is command which delete where statement directly linked to it's context
+ * (mutable delete).
  *
- * This is conditional command, it would not be executed when no fields are given!
+ * This creates ability to create postponed delete command which where statement will be resolved
+ * only later in transactions.
  */
-class UpdateCommand extends TableCommand implements ContextualCommandInterface
+class ContextualDeleteCommand extends TableCommand implements ContextualCommandInterface
 {
     use ContextTrait, PrimaryTrait, WhereTrait;
 
     /**
-     * Columns to be updated.
+     * Where conditions (short where format).
      *
      * @var array
      */
-    private $values = [];
+    private $where = [];
 
     /**
      * UpdateCommand constructor.
@@ -34,14 +36,11 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      * @param Table $table
      * @param array $where
      * @param array $values
-     * @param mixed $primaryKey
      */
-    public function __construct(Table $table, array $where, array $values = [], $primaryKey = null)
+    public function __construct(Table $table, array $where, array $values = [])
     {
         parent::__construct($table);
         $this->where = $where;
-        $this->values = $values;
-        $this->primaryKey = $primaryKey;
     }
 
     /**
@@ -49,7 +48,7 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      */
     public function getDriver()
     {
-        if (empty($this->context) && empty($this->values)) {
+        if (empty($this->context)) {
             //Nothing to do
             return null;
         }
@@ -62,7 +61,7 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
      */
     public function isEmpty(): bool
     {
-        return empty($this->values) && empty($this->context);
+        return empty($this->where) && empty($this->context);
     }
 
     /**
@@ -71,7 +70,7 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
     public function execute()
     {
         if (!$this->isEmpty()) {
-            $this->table->update($this->context + $this->values, $this->where)->run();
+            $this->table->delete($this->context + $this->where)->run();
         }
 
         parent::execute();

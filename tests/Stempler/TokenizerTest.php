@@ -229,4 +229,15 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
             HtmlTokenizer::TOKEN_CONTENT => '</html>',
         ], $tokens[53]);
     }
+
+    public function testParseAndCompile()
+    {
+        $tokenizer = new HtmlTokenizer(true, new Isolator());
+
+        $tokens = $tokenizer->parse($content = file_get_contents(__DIR__ . '/fixtures/htmlSample.php'));
+        $this->assertNotEmpty($tokens);
+
+        //Pack back!
+        $this->assertSame($content, $tokenizer->compile());
+    }
 }

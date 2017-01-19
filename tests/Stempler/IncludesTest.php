@@ -7,36 +7,8 @@
  */
 namespace Spiral\Tests\Stempler;
 
-class StemplerTest extends BaseTest
+class IncludesTest extends BaseTest
 {
-    public function testBaseA()
-    {
-        $result = $this->compile('base-a');
-
-        $this->assertSame('Block A defined in file A(default).', $result[0]);
-        $this->assertSame('Block B defined in file A(default).', $result[1]);
-        $this->assertSame('Block C defined in file A(default).', $result[2]);
-    }
-
-    public function testBaseB()
-    {
-        $result = $this->compile('base-b');
-
-        $this->assertSame('Block A defined in file B(default).', $result[0]);
-        $this->assertSame('Block B defined in file A(default).', $result[1]);
-        $this->assertSame('Block C defined in file A(default).', $result[2]);
-    }
-
-    public function testBaseC()
-    {
-        $result = $this->compile('namespace:base-e');
-
-        $this->assertSame('Block A defined in file B(default).', $result[0]);
-        $this->assertSame('Block B defined in file A(default).', $result[1]);
-        $this->assertSame('Block B defined in file D(namespace). Base E.', $result[2]);
-        $this->assertSame('Block C defined in file C(default).', $result[3]);
-    }
-
     public function testIncludesA()
     {
         $result = $this->compile('includes-a');
@@ -88,37 +60,31 @@ class StemplerTest extends BaseTest
         $this->assertSame('</tag>', $result[5]);
         $this->assertSame('</tag>', $result[6]);
     }
-
-    public function testCompileString()
+    public function testBaseA()
     {
-        $result = $this->compileString('
-<use path="namespace:includes/tag-c" as="tagA"/>
-<use path="default:includes/tag-b" as="tagB"/>
+        $result = $this->compile('base-a');
 
-<tagA class="my-class" id="123">
-    <tagB name="tag-b">
-        <tagA class="new-class" value="abc">
-            Some context.
-        </tagA>
-    </tagB>
-</tagA>
-');
-
-        $this->assertSame('<tag class="class my-class" id="123">', $result[0]);
-        $this->assertSame('<tag class="tag-b" name="tag-b">', $result[1]);
-        $this->assertSame('<tag class="class new-class" value="abc">', $result[2]);
-        $this->assertSame('Some context.', $result[3]);
-        $this->assertSame('</tag>', $result[4]);
-        $this->assertSame('</tag>', $result[5]);
-        $this->assertSame('</tag>', $result[6]);
+        $this->assertSame('Block A defined in file A(default).', $result[0]);
+        $this->assertSame('Block B defined in file A(default).', $result[1]);
+        $this->assertSame('Block C defined in file A(default).', $result[2]);
     }
 
-    /**
-     * @expectedException \Spiral\Stempler\Exceptions\StemplerException
-     * @expectedExceptionMessage Unable to locate view 'includes-none.php' in namespace 'default'
-     */
-    public function testInvalidParent()
+    public function testBaseB()
     {
-        $result = $this->compile('includes-e');
+        $result = $this->compile('base-b');
+
+        $this->assertSame('Block A defined in file B(default).', $result[0]);
+        $this->assertSame('Block B defined in file A(default).', $result[1]);
+        $this->assertSame('Block C defined in file A(default).', $result[2]);
+    }
+
+    public function testBaseC()
+    {
+        $result = $this->compile('namespace:base-e');
+
+        $this->assertSame('Block A defined in file B(default).', $result[0]);
+        $this->assertSame('Block B defined in file A(default).', $result[1]);
+        $this->assertSame('Block B defined in file D(namespace). Base E.', $result[2]);
+        $this->assertSame('Block C defined in file C(default).', $result[3]);
     }
 }

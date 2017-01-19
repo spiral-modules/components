@@ -183,13 +183,28 @@ class HtmlTokenizer
     }
 
     /**
-     * Compile token and all it's attributes into string.
+     * Compile all parsed tokens back into html form.
+     *
+     * @return string
+     */
+    public function compile(): string
+    {
+        $result = '';
+        foreach ($this->tokens as $token) {
+            $result .= $this->compileToken($token);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Compile parsed token.
      *
      * @param array $token
      *
      * @return string
      */
-    public function compile(array $token): string
+    public function compileToken(array $token): string
     {
         if (in_array($token[self::TOKEN_TYPE], [self::PLAIN_TEXT, self::TAG_CLOSE])) {
             //Nothing to compile
@@ -251,7 +266,6 @@ class HtmlTokenizer
         //Parsing arguments, due they already checked for open-close quotas we can use regular expression
         $attribute = '/(?P<name>[a-z0-9_\-\.\:]+)[ \n\t\r]*(?:(?P<equal>=)[ \n\t\r]*'
             . '(?P<value>[a-z0-9\-]+|\'[^\']+\'|\"[^\"]+\"|\"\"))?/si';
-        //todo: need better regexp for quotes
 
         preg_match_all($attribute, $content, $attributes);
 
@@ -260,11 +274,8 @@ class HtmlTokenizer
                 $value = trim($value, $value{0});
             }
 
-            //Restoring global php isolation
-            $name = $this->repairPHP(
-            //Restoring local php isolation
-                $isolator->repairPHP($attributes['name'][$index])
-            );
+            //Local and global php isolation restore
+            $name = $this->repairPHP($isolator->repairPHP($attributes['name'][$index]));
 
             $token[self::TOKEN_ATTRIBUTES][$name] = $this->repairPHP($isolator->repairPHP($value));
 

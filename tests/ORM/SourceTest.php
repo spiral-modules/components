@@ -18,6 +18,22 @@ use Spiral\Tests\ORM\Fixtures\UserSource;
 
 abstract class SourceTest extends BaseTest
 {
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\ORMException
+     */
+    public function testBadDefine()
+    {
+        $this->orm->define('abc', 123);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\ORMException
+     */
+    public function testBadDefineValidClass()
+    {
+        $this->orm->define(User::class, 123);
+    }
+
     public function testInstance()
     {
         $source = $this->orm->source(User::class);

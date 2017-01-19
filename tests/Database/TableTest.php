@@ -41,6 +41,7 @@ abstract class TableTest extends BaseTest
 
     public function testGetSchema()
     {
+        $this->assertInternalType('array', $this->database->getDriver()->__debugInfo());
         $this->assertInstanceOf(Table::class, $this->database->table('table'));
         $this->assertInstanceOf(AbstractTable::class, $this->database->table('table')->getSchema());
     }

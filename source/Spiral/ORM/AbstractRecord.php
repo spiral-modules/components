@@ -81,6 +81,10 @@ abstract class AbstractRecord extends SchematicEntity
     /**
      * Get value of primary of model. Make sure to call isLoaded first!
      *
+     * Attention, this method MIGHT return null even when isLoaded() returns true, this situation
+     * is possible when record is scheduled for save or update but transaction/unit-of-work not
+     * executed yet.
+     *
      * @return int|string|null
      */
     public function primaryKey()

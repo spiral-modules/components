@@ -30,6 +30,8 @@ class SourcesTest extends \PHPUnit_Framework_TestCase
 
         $source = $odm->source(User::class);
         $this->assertInstanceOf(DocumentSource::class, $source);
+
+        $this->assertSame(User::class, $source->getClass());
     }
 
     public function testGetCustomSource()

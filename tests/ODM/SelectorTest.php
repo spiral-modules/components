@@ -25,15 +25,20 @@ class SelectorTest extends \PHPUnit_Framework_TestCase
 {
     use ODMTrait;
 
-    public function testClass()
+    public function testInstance()
     {
         $selector = new DocumentSelector(
-            m::mock(Collection::class),
+            $c = m::mock(Collection::class),
             User::class,
-            $this->initODM()
+            $odm = $this->initODM()
         );
 
+        $c->shouldReceive('getDatabaseName')->andReturn('default');
+        $c->shouldReceive('getCollectionName')->andReturn('collection');
+
         $this->assertSame(User::class, $selector->getClass());
+        $this->assertSame($odm, $selector->getODM());
+        $this->assertInternalType('array', $selector->__debugInfo());
     }
 
     public function testPaginatorTrait()
@@ -80,6 +85,33 @@ class SelectorTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($result);
     }
 
+    public function testFindOneNullAlias()
+    {
+        $selector = new DocumentSelector(
+            $collection = m::mock(Collection::class),
+            User::class,
+            $this->initODM()
+        );
+
+        $collection->shouldReceive('findOne')->with([
+            'name'  => 'something',
+            'value' => 'x'
+        ], [
+            'skip'    => 0,
+            'limit'   => 0,
+            'sort'    => [
+                '_id' => -1
+            ],
+            'typeMap' => DocumentSelector::TYPE_MAP
+        ])->andReturn(null);
+
+        $result = $selector->find(['name' => 'something'])->sortBy(['_id' => -1])->findOne(
+            ['value' => 'x']
+        );
+
+        $this->assertNull($result);
+    }
+
     public function testFindOne()
     {
         $selector = new DocumentSelector(
@@ -105,6 +137,38 @@ class SelectorTest extends \PHPUnit_Framework_TestCase
         $result = $selector->where(['name' => 'something'])->sortBy(['_id' => -1])->findOne(
             ['value' => 'x']
         );
+
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertSame('selected', $result->name);
+    }
+
+    public function testOrderBy()
+    {
+        $selector = new DocumentSelector(
+            $collection = m::mock(Collection::class),
+            User::class,
+            $this->initODM()
+        );
+
+        $collection->shouldReceive('findOne')->with([
+            'name'  => 'something',
+            'value' => 'x'
+        ], [
+            'skip'    => 0,
+            'limit'   => 0,
+            'sort'    => [
+                '_id' => -1
+            ],
+            'typeMap' => DocumentSelector::TYPE_MAP
+        ])->andReturn([
+            'name' => 'selected'
+        ]);
+
+        $result = $selector->where(['name' => 'something'])
+            ->orderBy('_id', DocumentSelector::DESCENDING)
+            ->findOne(
+                ['value' => 'x']
+            );
 
         $this->assertInstanceOf(User::class, $result);
         $this->assertSame('selected', $result->name);

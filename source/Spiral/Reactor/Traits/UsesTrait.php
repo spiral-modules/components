@@ -100,7 +100,7 @@ trait UsesTrait
     private function renderUses(int $indentLevel = 0): string
     {
         $lines = [];
-        foreach ($this->uses as $class => $alias) {
+        foreach ($this->getUses() as $class => $alias) {
             $line = "use {$class}";
 
             if (!empty($alias)) {

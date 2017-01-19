@@ -88,6 +88,16 @@ class DocumentSelector extends Component implements
     }
 
     /**
+     * Associated ODM instance.
+     *
+     * @return ODMInterface
+     */
+    public function getODM(): ODMInterface
+    {
+        return $this->odm;
+    }
+
+    /**
      * Associated class name.
      *
      * @return string

@@ -11,7 +11,6 @@ use Spiral\Models\EntityInterface;
 use Spiral\ODM\CompositableInterface;
 use Spiral\ODM\DocumentEntity;
 use Spiral\ODM\Entities\DocumentSelector;
-use Spiral\ODM\Exceptions\AggregationException;
 use Spiral\ODM\ODMInterface;
 use Spiral\ODM\Schemas\Definitions\AggregationDefinition;
 
@@ -57,19 +56,9 @@ class AggregationHelper
      * @param string $aggregation
      *
      * @return DocumentSelector|CompositableInterface
-     *
-     * @throws AggregationException
      */
     public function createAggregation(string $aggregation)
     {
-        if (!isset($this->schema[DocumentEntity::SH_AGGREGATIONS][$aggregation])) {
-            throw new AggregationException(sprintf(
-                "Undefined aggregation '%s' in '%s', make sure schema is updated",
-                $aggregation,
-                get_class($this->source)
-            ));
-        }
-
         $schema = $this->schema[DocumentEntity::SH_AGGREGATIONS][$aggregation];
 
         //Let's create selector

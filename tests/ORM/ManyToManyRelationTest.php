@@ -104,9 +104,10 @@ abstract class ManyToManyRelationTest extends BaseTest
         $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
 
         $post->save();
-//        $this->assertSameInDB($post);
-//        $this->assertSameInDB($tag1);
-//        $this->assertSameInDB($tag2);
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post->author);
+        $this->assertSameInDB($tag1);
+        $this->assertSameInDB($tag2);
 
         $this->assertCount(2, $this->db->post_tag_map);
     }

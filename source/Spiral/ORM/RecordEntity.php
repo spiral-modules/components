@@ -302,7 +302,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
 
         //Entity indicates it's own status
         $this->state = ORMInterface::STATE_SCHEDULED_INSERT;
-        $this->dispatch('insert', new RecordEvent($this, $command));
+        $this->dispatch('insert', new RecordEvent($this));
 
         //Executed when transaction successfully completed
         $command->onComplete(function (InsertCommand $command) {

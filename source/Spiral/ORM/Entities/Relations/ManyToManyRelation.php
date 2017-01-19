@@ -9,6 +9,7 @@ namespace Spiral\ORM\Entities\Relations;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
+use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
@@ -19,6 +20,10 @@ use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
 
+/**
+ * Provides ability to create pivot map between parent record and multiple objects with ability to
+ * link them, link and create, update pivot, unlink or sync send. Relation support partial mode.
+ */
 class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate, \Countable
 {
     use MatchTrait, PartialTrait;
@@ -267,6 +272,16 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      */
     public function queueCommands(ContextualCommandInterface $command): CommandInterface
     {
+        $transaction = new TransactionalCommand();
+
+        //Deleting records which become unlinked
+
+        //Updating pivot data (only when both parent and linked record are loaded)
+
+        //Saving new linked records
+
+        //Linking records and parent
+
         return new NullCommand();
     }
 

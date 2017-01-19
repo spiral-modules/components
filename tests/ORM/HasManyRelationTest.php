@@ -24,8 +24,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertFalse($post->comments->isLeading());
         $this->assertCount(0, $post->comments);
         $this->assertTrue($post->comments->isLoaded());
-        $this->assertFalse(empty($post->comments));
-
+        $this->assertTrue(empty($post->comments));
     }
 
     public function testAddInstanceAndSave()

@@ -137,7 +137,7 @@ class RelationMap
     public function hasRelated(string $relation): bool
     {
         //Checking with only loaded records
-        return $this->get($relation)->isLoaded();
+        return $this->get($relation)->hasRelated() ;
     }
 
     /**

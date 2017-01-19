@@ -52,6 +52,13 @@ interface RelationInterface
     public function isLoaded(): bool;
 
     /**
+     * Indication that relation has any relation data, WILL force autoloading.
+     *
+     * @return bool
+     */
+    public function hasRelated(): bool;
+
+    /**
      * Assign new value to relation. Make sure type is compatible.
      *
      * @param mixed $value

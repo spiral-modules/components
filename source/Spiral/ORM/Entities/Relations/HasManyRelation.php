@@ -52,6 +52,19 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     /**
      * {@inheritdoc}
      */
+    public function hasRelated(): bool
+    {
+        if (!$this->isLoaded()) {
+            //Lazy loading our relation data
+            $this->loadData();
+        }
+
+        return !empty($this->instances);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function withContext(
         RecordInterface $parent,
         bool $loaded = false,

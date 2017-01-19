@@ -29,6 +29,19 @@ abstract class SingularRelation extends AbstractRelation
 
     /**
      * {@inheritdoc}
+     */
+    public function hasRelated(): bool
+    {
+        if (!$this->isLoaded()) {
+            //Lazy loading our relation data
+            $this->loadData();
+        }
+
+        return !empty($this->instance);
+    }
+
+    /**
+     * {@inheritdoc}
      *
      * Returns associated parent or NULL if none associated.
      */

@@ -136,9 +136,11 @@ final class Transaction implements TransactionInterface
         }
 
         foreach ($executedCommands as $command) {
+            //This is the point when record will get related PK and FKs filled
             $command->complete();
         }
 
+        //Clean transaction
         $this->commands = [];
     }
 }

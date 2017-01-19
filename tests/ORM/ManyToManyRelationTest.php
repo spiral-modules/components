@@ -8,6 +8,7 @@ namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Entities\Relations\ManyToManyRelation;
 use Spiral\Tests\ORM\Fixtures\Post;
+use Spiral\Tests\ORM\Fixtures\Tag;
 
 abstract class ManyToManyRelationTest extends BaseTest
 {
@@ -26,5 +27,46 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         //But still empty
         $this->assertTrue(empty($post->tags));
+    }
+
+    public function testAddLinkedNoSave()
+    {
+        $post = new Post();
+        $post->tags->link(new Tag(['name' => 'tag a']));
+        $post->tags->link(new Tag(['name' => 'tag b']));
+
+        $this->assertFalse(empty($post->tags));
+        $this->assertCount(2, $post->tags);
+    }
+
+    public function testMatchOneNull()
+    {
+        $post = new Post();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $this->assertSame(null, $post->tags->matchOne(null));
+        $this->assertFalse($post->tags->has(null));
+    }
+
+    public function testMatchOneEntity()
+    {
+        $post = new Post();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $this->assertSame($tag1, $post->tags->matchOne($tag1));
+        $this->assertTrue($post->tags->has($tag1));
+
+    }
+
+    public function testMatchOneQuery()
+    {
+        $post = new Post();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $this->assertSame($tag1, $post->tags->matchOne(['name' => 'tag a']));
+        $this->assertTrue($post->tags->has(['name' => 'tag a']));
     }
 }

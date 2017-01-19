@@ -27,7 +27,7 @@ use Spiral\ORM\RelationInterface;
  *
  * If you wish to load with relation WITHOUT loading previous records use [] initialization.
  */
-class HasManyRelation extends AbstractRelation implements \IteratorAggregate
+class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \Countable
 {
     use MatchTrait, PartialTrait;
 
@@ -129,6 +129,14 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->loadData(true)->instances);
+    }
+
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return count($this->loadData(true)->instances);
     }
 
     /**

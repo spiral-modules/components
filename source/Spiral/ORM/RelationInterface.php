@@ -80,9 +80,9 @@ interface RelationInterface
      * Create relation specific command or multiple commands in relation to parent object command.
      * Parent command must be contextual in order to provide ability to exchange FK keys.
      *
-     * @param ContextualCommandInterface $command
+     * @param ContextualCommandInterface $parentCommand
      *
      * @return CommandInterface
      */
-    public function queueCommands(ContextualCommandInterface $command): CommandInterface;
+    public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface;
 }

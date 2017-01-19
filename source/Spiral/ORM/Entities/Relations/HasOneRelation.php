@@ -10,11 +10,15 @@ use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 
 class HasOneRelation extends SingularRelation
 {
+    use LookupTrait;
+
+    /** Automatically create related model when empty. */
     const CREATE_PLACEHOLDER = true;
 
     /**
@@ -44,7 +48,7 @@ class HasOneRelation extends SingularRelation
     /**
      * {@inheritdoc}
      */
-    public function queueCommands(ContextualCommandInterface $command): CommandInterface
+    public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface
     {
         if (!empty($this->previous)) {
             $transaction = new TransactionalCommand();
@@ -53,7 +57,7 @@ class HasOneRelation extends SingularRelation
             $transaction->addCommand($this->previous->queueDelete());
 
             //Store new entity if any (leading)
-            $transaction->addCommand($this->queueRelated($command), true);
+            $transaction->addCommand($this->queueRelated($parentCommand), true);
 
             //We don't need previous reference anymore
             $this->previous = null;
@@ -61,43 +65,36 @@ class HasOneRelation extends SingularRelation
             return $transaction;
         }
 
-        return $this->queueRelated($command);
+        return $this->queueRelated($parentCommand);
     }
 
     /**
      * Store related instance.
      *
-     * @param ContextualCommandInterface $command
+     * @param ContextualCommandInterface $parentCommand
      *
      * @return CommandInterface
      */
-    private function queueRelated(ContextualCommandInterface $command): CommandInterface
+    private function queueRelated(ContextualCommandInterface $parentCommand): CommandInterface
     {
         if (empty($this->instance)) {
             return new NullCommand();
         }
 
         //Related entity store command
-        $inner = $this->instance->queueStore(true);
+        $innerCommand = $this->instance->queueStore(true);
 
+        //Inversed version of BelongsTo
         if (!$this->isSynced($this->parent, $this->instance)) {
-            //Syncing FKs
-            if ($this->key(Record::INNER_KEY) != $this->primaryColumnOf($this->parent)) {
-                $command->addContext(
+            //Syncing FKs after primary command been executed
+            $parentCommand->onExecute(function ($outerCommand) use ($innerCommand) {
+                $innerCommand->addContext(
                     $this->key(Record::OUTER_KEY),
-                    $this->parent->getField($this->key(Record::INNER_KEY))
+                    $this->lookupKey(Record::INNER_KEY, $this->parent, $outerCommand)
                 );
-            } else {
-                //Syncing FKs
-                $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
-                    $inner->addContext(
-                        $this->key(Record::OUTER_KEY),
-                        $command->primaryKey()
-                    );
-                });
-            }
+            });
         }
 
-        return $inner;
+        return $innerCommand;
     }
 }

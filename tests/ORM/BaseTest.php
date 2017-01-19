@@ -79,7 +79,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $this->dbal = $this->databaseManager($this->container);
         $this->builder = $this->makeBuilder($this->dbal);
 
-
         $this->orm = new ORM(
             $this->dbal,
             $this->relationsConfig(),
@@ -147,7 +146,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     protected function databaseManager(ContainerInterface $container): DatabaseManager
     {
         $dbal = new DatabaseManager(
-            new DatabasesConfig([
+            $this->dbConfig = new DatabasesConfig([
                 'default'     => 'default',
                 'aliases'     => [],
                 'databases'   => [],

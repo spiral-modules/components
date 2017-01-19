@@ -36,6 +36,14 @@ class DeleteCommand extends TableCommand
     }
 
     /**
+     * @return array
+     */
+    public function getWhere(): array
+    {
+        return $this->where;
+    }
+
+    /**
      * Inserting data into associated table.
      */
     public function execute()

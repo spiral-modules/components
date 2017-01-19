@@ -7,6 +7,7 @@
 namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\Entities\Relations\ManyToManyRelation;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Helpers\ColumnRenderer;
@@ -182,7 +183,11 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         $sourceContext = $this->definition->sourceContext();
         $targetContext = $this->definition->targetContext();
 
-        if ($sourceTable->getDriver() != $targetTable->getDriver()) {
+        //todo: support cross database and cross driver many to many
+        if (
+            $sourceTable->getDriver() != $targetTable->getDriver()
+            || $sourceContext->getDatabase() != $sourceContext->getDatabase()
+        ) {
             throw new RelationSchemaException(
                 "ManyToMany relations can only exists inside same database"
             );
@@ -199,11 +204,13 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
          * Declare columns in map/pivot table.
          */
         $innerKey = $pivotTable->column($this->option(Record::THOUGHT_INNER_KEY));
+        $innerKey->nullable(false);
         $innerKey->setType($this->resolveType(
             $sourceContext->getColumn($this->option(Record::INNER_KEY))
         ));
 
         $outerKey = $pivotTable->column($this->option(Record::THOUGHT_OUTER_KEY));
+        $outerKey->nullable(false);
         $outerKey->setType($this->resolveType(
             $targetContext->getColumn($this->option(Record::OUTER_KEY))
         ));
@@ -254,7 +261,11 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
 
         //Let's clarify pivot columns
         $schema = $packed[ORMInterface::R_SCHEMA];
+
+        //Pivot table location (for now always in context database)
         $schema[Record::PIVOT_TABLE] = $this->pivotTable();
+        $schema[ManyToManyRelation::PIVOT_DATABASE] = $this->definition->sourceContext()->getDatabase();
+
         $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
 
         //Ensure that inner keys are always presented

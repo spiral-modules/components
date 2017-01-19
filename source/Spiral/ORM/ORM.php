@@ -14,6 +14,7 @@ use Spiral\Core\FactoryInterface;
 use Spiral\Core\MemoryInterface;
 use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
+use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSelector;
@@ -260,6 +261,14 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         )->table(
             $this->define($class, self::R_TABLE)
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function database(string $alias = null): Database
+    {
+        return $this->manager->database($alias);
     }
 
     /**

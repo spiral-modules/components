@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM;
 
+use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Table;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Exceptions\ORMException;
@@ -108,6 +109,15 @@ interface ORMInterface
      * @throws ORMException
      */
     public function table(string $class): Table;
+
+    /**
+     * Get DBAL database under given name.
+     *
+     * @param string|null $alias
+     *
+     * @return Database
+     */
+    public function database(string $alias = null): Database;
 
     /**
      * Instantiate record/model instance based on a given class name and fieldset. When state set

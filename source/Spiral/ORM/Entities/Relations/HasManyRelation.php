@@ -12,6 +12,7 @@ use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
+use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
@@ -29,7 +30,7 @@ use Spiral\ORM\RelationInterface;
  */
 class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \Countable
 {
-    use MatchTrait, PartialTrait;
+    use MatchTrait, PartialTrait, LookupTrait;
 
     /**
      * Loaded list of records. SplObjectStorage?
@@ -254,7 +255,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
     /**
      * {@inheritdoc}
      */
-    public function queueCommands(ContextualCommandInterface $command): CommandInterface
+    public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface
     {
         //No autoloading here
 
@@ -272,7 +273,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
 
         //Store all instances
         foreach ($this->instances as $instance) {
-            $transaction->addCommand($this->queueRelated($command, $instance));
+            $transaction->addCommand($this->queueRelated($parentCommand, $instance));
         }
 
         //Flushing instances
@@ -321,6 +322,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
             return $this->orm
                 ->selector($this->class)
                 ->where($this->key(Record::OUTER_KEY), $this->parent->getField($innerKey))
+                ->where($this->schema[Record::WHERE])
                 ->fetchData();
         }
 
@@ -355,36 +357,28 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
     }
 
     /**
-     * @param ContextualCommandInterface $command
+     * @param ContextualCommandInterface $parentCommand
      * @param RecordInterface            $instance
      *
      * @return CommandInterface
      */
     private function queueRelated(
-        ContextualCommandInterface $command,
+        ContextualCommandInterface $parentCommand,
         RecordInterface $instance
     ): CommandInterface {
         //Related entity store command
-        $inner = $instance->queueStore(true);
+        $innerCommand = $instance->queueStore(true);
 
         if (!$this->isSynced($this->parent, $instance)) {
-            //Syncing FKs
-            if ($this->key(Record::INNER_KEY) != $this->primaryColumnOf($this->parent)) {
-                $command->addContext(
+            //Delayed linking
+            $parentCommand->onExecute(function ($outerCommand) use ($innerCommand) {
+                $innerCommand->addContext(
                     $this->key(Record::OUTER_KEY),
-                    $this->parent->getField($this->key(Record::INNER_KEY))
+                    $this->lookupKey(Record::INNER_KEY, $this->parent, $outerCommand)
                 );
-            } else {
-                //Syncing FKs
-                $command->onExecute(function (ContextualCommandInterface $command) use ($inner) {
-                    $inner->addContext(
-                        $this->key(Record::OUTER_KEY),
-                        $command->primaryKey()
-                    );
-                });
-            }
+            });
         }
 
-        return $inner;
+        return $innerCommand;
     }
 }

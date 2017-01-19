@@ -6,12 +6,16 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
+use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\CommandInterface;
+use Spiral\ORM\Commands\DeleteCommand;
+use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
+use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
@@ -26,7 +30,16 @@ use Spiral\ORM\RelationInterface;
  */
 class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate, \Countable
 {
-    use MatchTrait, PartialTrait;
+    use MatchTrait, PartialTrait, LookupTrait;
+
+    /** Schema shortcuts */
+    const PIVOT_TABLE    = Record::PIVOT_TABLE;
+    const PIVOT_DATABASE = 917;
+
+    /**
+     * @var Table|null
+     */
+    private $pivotTable = null;
 
     /**
      * @var \SplObjectStorage
@@ -166,6 +179,8 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         $this->assertValid($record);
 
         if (in_array($record, $this->linked)) {
+            $this->assertPivot($pivotData);
+
             //Merging pivot data
             $this->pivotData->offsetSet($record, $pivotData + $this->getPivot($record));
 
@@ -270,19 +285,26 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     /**
      * {@inheritdoc}
      */
-    public function queueCommands(ContextualCommandInterface $command): CommandInterface
+    public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface
     {
         $transaction = new TransactionalCommand();
 
-        //Deleting records which become unlinked
+        foreach ($this->unlinked as $record) {
+            if ($this->isLinked($this->parent, $record)) {
+                //Removing association between records
+                $transaction->addCommand($this->queueUnlink($parentCommand, $record));
+            }
+        }
 
-        //Updating pivot data (only when both parent and linked record are loaded)
+        foreach ($this->linked as $record) {
+            //Storing related record changes
+            $transaction->addCommand($this->queueLink($parentCommand, $record));
+        }
 
-        //Saving new linked records
+        $this->unlinked = [];
+        $this->updated = [];
 
-        //Linking records and parent
-
-        return new NullCommand();
+        return $transaction;
     }
 
     /**
@@ -330,6 +352,46 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
+     * @return Table
+     */
+    protected function pivotTable()
+    {
+        if (empty($this->pivotTable)) {
+            $this->pivotTable = $this->orm->database(
+                $this->schema[self::PIVOT_DATABASE]
+            )->table(
+                $this->schema[self::PIVOT_TABLE]
+            );
+        }
+
+        return $this->pivotTable;
+    }
+
+    /**
+     * Indicates that records are not linked yet.
+     *
+     * @param RecordInterface $parent
+     * @param RecordInterface $outer
+     *
+     * @return bool
+     */
+    protected function isLinked(RecordInterface $parent, RecordInterface $outer)
+    {
+        $pivotData = $this->pivotData->offsetGet($outer);
+        if (empty($pivotData)) {
+            //No pivot data at all
+            return false;
+        }
+
+        return false;
+    }
+
+    protected function isUpdated(RecordInterface $parent, RecordInterface $outer)
+    {
+        return in_array($outer, $this->updated);
+    }
+
+    /**
      * Init relations and populate pivot map.
      *
      * @return ManyToManyRelation
@@ -355,5 +417,128 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         $this->data = [];
 
         return $this;
+    }
+
+    /**
+     * Make sure that pivot data in a valid format.
+     *
+     * @param array $pivotData
+     *
+     * @throws RelationException
+     */
+    private function assertPivot(array $pivotData)
+    {
+        //todo: write it
+    }
+
+    /**
+     * Drop relation between records.
+     *
+     * @param ContextualCommandInterface $parentCommand
+     * @param RecordInterface            $record
+     *
+     * @return CommandInterface
+     */
+    private function queueUnlink(
+        ContextualCommandInterface $parentCommand,
+        RecordInterface $record
+    ): CommandInterface {
+        //todo: make where
+        $delete = new DeleteCommand($this->pivotTable(), [
+
+        ]);
+
+        $parentCommand->onExecute(function ($parentCommand) {
+            //clarify where statement
+        });
+
+        return $delete;
+    }
+
+    /**
+     * Store related record and link it with parent.
+     *
+     * @param ContextualCommandInterface $parentCommand
+     * @param RecordInterface            $record
+     *
+     * @return CommandInterface
+     */
+    private function queueLink(
+        ContextualCommandInterface $parentCommand,
+        RecordInterface $record
+    ): CommandInterface {
+        $transaction = new TransactionalCommand();
+
+        //Leading command
+        $transaction->addCommand($recordCommand = $record->queueStore(), true);
+
+        //Make sure that link between records is set and updated to proper state
+        if (!$this->isLinked($this->parent, $record)) {
+            $transaction->addCommand(
+                $this->linkCommand($this->parent, $parentCommand, $record, $recordCommand)
+            );
+        } elseif ($this->isUpdated($this->parent, $record)) {
+            $transaction->addCommand(
+                $this->updateCommand($this->parent, $record)
+            );
+        }
+
+        return $transaction;
+    }
+
+    /**
+     * Creates new link command between records and lookup for outer and inner keys during
+     * execution.
+     *
+     * @param RecordInterface            $parent
+     * @param ContextualCommandInterface $parentCommand
+     * @param RecordInterface            $outer
+     * @param ContextualCommandInterface $outerCommand
+     *
+     * @return InsertCommand
+     */
+    private function linkCommand(
+        RecordInterface $parent,
+        ContextualCommandInterface $parentCommand,
+        RecordInterface $outer,
+        ContextualCommandInterface $outerCommand
+    ): InsertCommand {
+        $pivotCommand = new InsertCommand($this->pivotTable(), []);
+
+        //Parent record dependency
+        $parentCommand->onExecute(function ($parentCommand) use ($pivotCommand, $parent) {
+            $pivotCommand->addContext(
+                $this->key(Record::THOUGHT_INNER_KEY),
+                $this->lookupKey(Record::INNER_KEY, $parent, $parentCommand)
+            );
+        });
+
+        //Outer record dependency
+        $outerCommand->onExecute(function ($outerCommand) use ($pivotCommand, $outer) {
+            $pivotCommand->addContext(
+                $this->key(Record::THOUGHT_OUTER_KEY),
+                $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
+            );
+        });
+
+        $pivotCommand->onComplete(function (ContextualCommandInterface $pivotCommand) use ($outer) {
+            //Now when we are done we can sync our values with current data
+            $this->pivotData->offsetSet($outer, $pivotCommand->getContext());
+        });
+
+        return $pivotCommand;
+    }
+
+    /**
+     * Updates pivot map data between two records.
+     *
+     * @param RecordInterface $parent
+     * @param RecordInterface $outer
+     *
+     * @return CommandInterface
+     */
+    private function updateCommand(RecordInterface $parent, RecordInterface $outer)
+    {
+        return new NullCommand();
     }
 }

@@ -18,6 +18,8 @@ use Spiral\ORM\Schemas;
 
 trait ORMTrait
 {
+    private $dbConfig;
+
     /**
      * @return Schemas\SchemaBuilder
      */

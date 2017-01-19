@@ -9,6 +9,7 @@ namespace Spiral\ORM\Entities\Relations;
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Record;
 
@@ -17,6 +18,8 @@ use Spiral\ORM\Record;
  */
 class BelongsToRelation extends SingularRelation
 {
+    use LookupTrait;
+
     /**
      * Always saved before parent.
      */
@@ -40,23 +43,23 @@ class BelongsToRelation extends SingularRelation
     }
 
     /**
-     * @param ContextualCommandInterface $command
+     * @param ContextualCommandInterface $parentCommand
      *
      * @return CommandInterface
      *
      * @throws RelationException
      */
-    public function queueCommands(ContextualCommandInterface $command): CommandInterface
+    public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface
     {
         if (!empty($this->instance)) {
-            return $this->queueRelated($command);
+            return $this->queueRelated($parentCommand);
         }
 
         if (!$this->schema[Record::NULLABLE]) {
             throw new RelationException("No data presented in non nullable relation");
         }
 
-        $command->addContext($this->schema[Record::INNER_KEY], null);
+        $parentCommand->addContext($this->schema[Record::INNER_KEY], null);
 
         return new NullCommand();
     }
@@ -64,31 +67,26 @@ class BelongsToRelation extends SingularRelation
     /**
      * Store related instance
      *
-     * @param ContextualCommandInterface $command
+     * @param ContextualCommandInterface $parentCommand
      *
      * @return ContextualCommandInterface
      */
-    private function queueRelated(ContextualCommandInterface $command): ContextualCommandInterface
-    {
+    private function queueRelated(
+        ContextualCommandInterface $parentCommand
+    ): ContextualCommandInterface {
         //Command or command set needed to store
-        $related = $this->instance->queueStore(true);
+        $innerCommand = $this->instance->queueStore(true);
 
         if (!$this->isSynced($this->parent, $this->instance)) {
-            //Syncing FKs
-            if ($this->key(Record::OUTER_KEY) != $this->primaryColumnOf($this->parent)) {
-                $command->addContext(
+            //Syncing FKs before primary command been executed
+            $innerCommand->onExecute(function ($innerCommand) use ($parentCommand) {
+                $parentCommand->addContext(
                     $this->key(Record::INNER_KEY),
-                    $this->parent->getField($this->key(Record::OUTER_KEY))
+                    $this->lookupKey(Record::OUTER_KEY, $this->parent, $innerCommand)
                 );
-            } else {
-                //Syncing using promise
-                $related->onExecute(function (ContextualCommandInterface $related) use ($command) {
-                    //Giving our child our context in a form of FK value
-                    $command->addContext($this->key(Record::INNER_KEY), $related->primaryKey());
-                });
-            }
+            });
         }
 
-        return $related;
+        return $innerCommand;
     }
 }

@@ -40,6 +40,14 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
      * @var RecordInterface[]
      */
     private $unlinked = [];
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function hasRelated(): bool
+    {
+        return false;
+    }
 
     /**
      * {@inheritdoc}

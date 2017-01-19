@@ -8,7 +8,7 @@ namespace Spiral\Tests\ORM\SQLServer;
 
 use Spiral\Tests\Database\SQLServer\DriverTrait;
 
-class ManyToManyTest extends \Spiral\Tests\ORM\ManyToManyTest
+class ManyToManyRelationTest extends \Spiral\Tests\ORM\ManyToManyRelationTest
 {
     use DriverTrait;
 }

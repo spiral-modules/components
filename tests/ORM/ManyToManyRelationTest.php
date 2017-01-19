@@ -9,7 +9,7 @@ namespace Spiral\Tests\ORM;
 use Spiral\ORM\Entities\Relations\ManyToManyRelation;
 use Spiral\Tests\ORM\Fixtures\Post;
 
-abstract class ManyToManyTest extends BaseTest
+abstract class ManyToManyRelationTest extends BaseTest
 {
     public function testInstance()
     {

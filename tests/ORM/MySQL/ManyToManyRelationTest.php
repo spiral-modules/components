@@ -8,7 +8,7 @@ namespace Spiral\Tests\ORM\MySQL;
 
 use Spiral\Tests\Database\MySQL\DriverTrait;
 
-class ManyToManyTest extends \Spiral\Tests\ORM\ManyToManyTest
+class ManyToManyRelationTest extends \Spiral\Tests\ORM\ManyToManyRelationTest
 {
     use DriverTrait;
 }

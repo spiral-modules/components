@@ -8,7 +8,7 @@ namespace Spiral\Tests\ORM\SQLite;
 
 use Spiral\Tests\Database\SQLite\DriverTrait;
 
-class ManyToManyTest extends \Spiral\Tests\ORM\ManyToManyTest
+class ManyToManyRelationTest extends \Spiral\Tests\ORM\ManyToManyRelationTest
 {
     use DriverTrait;
 }

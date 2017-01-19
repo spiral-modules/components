@@ -68,5 +68,27 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->assertSame($tag1, $post->tags->matchOne(['name' => 'tag a']));
         $this->assertTrue($post->tags->has(['name' => 'tag a']));
+
+        $this->assertSame([$tag1], $post->tags->matchMultiple(['name' => 'tag a']));
+    }
+
+    public function testDeleteInSession()
+    {
+        $post = new Post();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $this->assertFalse(empty($post->tags));
+        $this->assertCount(2, $post->tags);
+
+        $post->tags->unlink($tag1);
+
+        $this->assertFalse(empty($post->tags));
+        $this->assertCount(1, $post->tags);
+
+        $post->tags->unlink($tag2);
+
+        $this->assertTrue(empty($post->tags));
+        $this->assertCount(0, $post->tags);
     }
 }

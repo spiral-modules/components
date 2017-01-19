@@ -146,15 +146,19 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
-     * Link record with parent entity.
+     * Link record with parent entity. Only record instances is accepted.
      *
      * @param RecordInterface $record
      * @param array           $pivotData
      *
      * @return self
+     *
+     * @throws RelationException
      */
     public function link(RecordInterface $record, array $pivotData = []): self
     {
+        $this->assertValid($record);
+
         if (in_array($record, $this->linked)) {
             //Merging pivot data
             $this->pivotData->offsetSet($record, $pivotData + $this->getPivot($record));
@@ -174,10 +178,29 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         return $this;
     }
 
-    public function unlink($query)
+    /**
+     * Unlink specific entity from relation.
+     *
+     * @param RecordInterface $record
+     *
+     * @return self
+     *
+     * @throws RelationException When entity not linked.
+     */
+    public function unlink(RecordInterface $record): self
     {
-        $query = $this->matchOne($query);
+        foreach ($this->linked as $index => $linked) {
+            if ($linked === $record) {
+                //Removing
+                unset($this->linked[$index]);
+                $this->unlinked[] = $linked;
+                break;
+            }
+        }
 
+        $this->linked = array_values($this->linked);
+
+        return $this;
     }
 
     /**

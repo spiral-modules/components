@@ -150,20 +150,6 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
     }
 
     /**
-     * Add new record into entity set. Attention, usage of this method WILL load relation data
-     * unless partial.
-     *
-     * @param RecordInterface $record
-     *
-     * @throws RelationException
-     */
-    public function add(RecordInterface $record)
-    {
-        $this->assertValid($record);
-        $this->loadData(true)->instances[] = $record;
-    }
-
-    /**
      * Method will autoload data.
      *
      * @param array|RecordInterface|mixed $query Fields, entity or PK.
@@ -176,39 +162,49 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
     }
 
     /**
-     * Delete one record, strict compaction, make sure exactly same instance is given.
+     * Add new record into entity set. Attention, usage of this method WILL load relation data
+     * unless partial.
      *
      * @param RecordInterface $record
+     *
+     * @return self
+     *
+     * @throws RelationException
      */
-    public function delete(RecordInterface $record)
+    public function add(RecordInterface $record): self
     {
-        $this->deleteMultiple([$record]);
+        $this->assertValid($record);
+        $this->loadData(true)->instances[] = $record;
+
+        return $this;
     }
 
     /**
-     * Delete multiple records, strict compaction, make sure exactly same instance is given. Method
-     * will autoload relation data unless partial.
+     * Delete one record, strict compaction, make sure exactly same instance is given.
      *
-     * @param array|\Traversable $records
+     * @param RecordInterface $record
+     *
+     * @return self
+     *
+     * @throws RelationException
      */
-    public function deleteMultiple($records)
+    public function delete(RecordInterface $record): self
     {
         $this->loadData(true);
+        $this->assertValid($record);
 
-        foreach ($records as $record) {
-            $this->assertValid($record);
-
-            foreach ($this->instances as $index => $instance) {
-                if ($instance === $record) {
-                    //Remove from save
-                    unset($this->instances[$index]);
-                    $this->deletedInstances[] = $instance;
-                    break;
-                }
+        foreach ($this->instances as $index => $instance) {
+            if ($instance === $record) {
+                //Remove from save
+                unset($this->instances[$index]);
+                $this->deletedInstances[] = $instance;
+                break;
             }
         }
 
         $this->instances = array_values($this->instances);
+
+        return $this;
     }
 
     /**

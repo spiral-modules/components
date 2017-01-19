@@ -391,32 +391,6 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     }
 
     /**
-     * Get injector associated with given class.
-     *
-     * @param \ReflectionClass $reflection
-     *
-     * @return InjectorInterface
-     */
-    protected function getInjector(\ReflectionClass $reflection): InjectorInterface
-    {
-        if (isset($this->injectors[$reflection->getName()])) {
-            //Stated directly
-            $injector = $this->get($this->injectors[$reflection->getName()]);
-        } else {
-            //Auto-injection!
-            $injector = $this->get($reflection->getConstant('INJECTOR'));
-        }
-
-        if (!$injector instanceof InjectorInterface) {
-            throw new InjectionException(
-                "Class '" . get_class($injector) . "' must be an instance of InjectorInterface for '{$reflection->getName()}'"
-            );
-        }
-
-        return $injector;
-    }
-
-    /**
      * Register instance in container, might perform methods like auto-singletons, log populations
      * and etc. Can be extended.
      *
@@ -429,10 +403,10 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     {
         //Declarative singletons
         if (empty($parameters) && $instance instanceof SingletonInterface) {
-            $singleton = get_class($instance);
+            $alias = get_class($instance);
 
-            if (!isset($this->bindings[$singleton])) {
-                $this->bindings[$singleton] = $instance;
+            if (!isset($this->bindings[$alias])) {
+                $this->bindings[$alias] = $instance;
             }
         }
 
@@ -459,10 +433,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
         //We have to construct class using external injector
         if (empty($parameters) && $this->hasInjector($reflection)) {
             //Creating class using injector/factory
-            $instance = $this->getInjector($reflection)->createInjection(
-                $reflection,
-                $context
-            );
+            $instance = $this->getInjector($reflection)->createInjection($reflection, $context);
 
             if (!$reflection->isInstance($instance)) {
                 throw new InjectionException("Invalid injection response for '{$reflection->getName()}'");
@@ -486,6 +457,32 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
         }
 
         return $instance;
+    }
+
+    /**
+     * Get injector associated with given class.
+     *
+     * @param \ReflectionClass $reflection
+     *
+     * @return InjectorInterface
+     */
+    private function getInjector(\ReflectionClass $reflection): InjectorInterface
+    {
+        if (isset($this->injectors[$reflection->getName()])) {
+            //Stated directly
+            $injector = $this->get($this->injectors[$reflection->getName()]);
+        } else {
+            //Auto-injection!
+            $injector = $this->get($reflection->getConstant('INJECTOR'));
+        }
+
+        if (!$injector instanceof InjectorInterface) {
+            throw new InjectionException(
+                "Class '" . get_class($injector) . "' must be an instance of InjectorInterface for '{$reflection->getName()}'"
+            );
+        }
+
+        return $injector;
     }
 
     /**

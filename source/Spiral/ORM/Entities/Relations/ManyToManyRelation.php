@@ -12,6 +12,7 @@ use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
+use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\RecordInterface;
@@ -19,12 +20,7 @@ use Spiral\ORM\RelationInterface;
 
 class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
 {
-    use MatchTrait;
-
-    /**
-     * @var bool
-     */
-    private $autoload = true;
+    use MatchTrait, PartialTrait;
 
     /**
      * @var \SplObjectStorage
@@ -40,7 +36,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
      * @var RecordInterface[]
      */
     private $unlinked = [];
-    
+
     /**
      * {@inheritdoc}
      */
@@ -64,36 +60,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate
         $relation->pivotData = new \SplObjectStorage();
 
         return $relation;
-    }
-
-    /**
-     * Partial selections will not be autoloaded.
-     *
-     * Example:
-     *
-     * $post = $this->findPost(); //no comments
-     * $post->tags->partial(true);
-     * assert($post->tags->count() == 0); //never loaded
-     *
-     * $post->comments->add($comment);
-     *
-     * @param bool $partial
-     *
-     * @return ManyToManyRelation
-     */
-    public function partial(bool $partial = true): self
-    {
-        $this->autoload = !$partial;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPartial(): bool
-    {
-        return !$this->autoload;
     }
 
     /**

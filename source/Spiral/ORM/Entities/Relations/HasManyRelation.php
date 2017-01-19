@@ -13,6 +13,7 @@ use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
+use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\Record;
@@ -28,12 +29,7 @@ use Spiral\ORM\RelationInterface;
  */
 class HasManyRelation extends AbstractRelation implements \IteratorAggregate
 {
-    use MatchTrait;
-
-    /**
-     * @var bool
-     */
-    private $autoload = true;
+    use MatchTrait, PartialTrait;
 
     /**
      * Loaded list of records. SplObjectStorage?
@@ -81,37 +77,6 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate
         }
 
         return $hasMany->initInstances();
-    }
-
-    /**
-     * Partial selections will not be autoloaded.
-     *
-     * Example:
-     *
-     * $post = $this->findPost(); //no comments
-     * $post->comments->partial(true);
-     * $post->comments->add(new Comment());
-     * assert($post->comments->count() == 1); //no other comments to be loaded
-     *
-     * $post->comments->add($comment);
-     *
-     * @param bool $partial
-     *
-     * @return HasManyRelation
-     */
-    public function partial(bool $partial = true): self
-    {
-        $this->autoload = !$partial;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isPartial(): bool
-    {
-        return !$this->autoload;
     }
 
     /**

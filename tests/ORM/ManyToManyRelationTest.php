@@ -151,52 +151,45 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(3, $this->db->post_tag_map);
     }
 
-//    public function testPivotValues()
-//    {
-//        $tag1 = new Tag(['name' => 'tag a']);
-//
-//        $post = new Post();
-//        $post->author = new User();
-//
-//        $post->tags->link($tag1);
-//        $this->assertNotEmpty($pivot = $post->tags->getPivot($tag1));
-//        $this->assertEquals(null, $pivot['post_id']);
-//        $this->assertEquals(null, $pivot['tag_id']);
-//        $post->save();
-//
-//        $this->assertNotEmpty($pivot = $post->tags->getPivot($tag1));
-//        $this->assertEquals($post->primaryKey(), $pivot['post_id']);
-//        $this->assertEquals($tag1->primaryKey(), $pivot['tag_id']);
-//    }
+    public function testPivotValues()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
 
+        $post = new Post();
+        $post->author = new User();
 
-//    public function testUnlinkInMemory()
-//    {
-//        //$tag2 = new Tag(['name' => 'tag b']);
-//        //$tag2->save();
-//
-//        $transaction = new Transaction();
-//
-//        $post = new Post();
-//        $post->author = new User();
-//        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
-//        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
-//
-//        $post->save($transaction);
-//
-//        $post->tags->unlink($tag2);
-//
-//        $post->save($transaction);
-//
-//        $transaction->run();
-//
-//        $this->assertSameInDB($post);
-//        $this->assertSameInDB($post->author);
-//        $this->assertSameInDB($tag1);
-//
-//        $this->assertTrue($tag2->isLoaded());
-//
-//        $this->assertCount(2, $this->db->tags);
-//        $this->assertCount(1, $this->db->post_tag_map);
-//    }
+        $post->tags->link($tag1);
+        $this->assertEmpty($pivot = $post->tags->getPivot($tag1));
+        $post->save();
+
+        $this->assertNotEmpty($pivot = $post->tags->getPivot($tag1));
+        $this->assertEquals($post->primaryKey(), $pivot['post_id']);
+        $this->assertEquals($tag1->primaryKey(), $pivot['tag_id']);
+    }
+
+    public function testUnlinkInMemory()
+    {
+        $transaction = new Transaction();
+
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save($transaction);
+
+        $post->tags->unlink($tag2);
+
+        $post->save($transaction);
+
+        $transaction->run();
+
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post->author);
+        $this->assertSameInDB($tag1);
+        $this->assertSameInDB($tag2);
+
+        $this->assertCount(2, $this->db->tags);
+        $this->assertCount(1, $this->db->post_tag_map);
+    }
 }

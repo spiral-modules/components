@@ -352,6 +352,12 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
                 continue;
             }
 
+            //Syncing pivot data values
+            $command->onComplete(function (ContextualCommandInterface $command) use ($record) {
+                //Now when we are done we can sync our values with current data
+                $this->pivotData->offsetSet($record, $command->getContext());
+            });
+
             //Make sure command is properly configured with conditions OR create promises
             $command = $this->ensureContext(
                 $command,
@@ -478,11 +484,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
                 $this->key(Record::THOUGHT_OUTER_KEY),
                 $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
             );
-        });
-
-        $pivotCommand->onComplete(function (ContextualCommandInterface $pivotCommand) use ($outer) {
-            //Now when we are done we can sync our values with current data
-            $this->pivotData->offsetSet($outer, $pivotCommand->getContext());
         });
 
         return $pivotCommand;

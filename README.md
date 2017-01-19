@@ -40,5 +40,5 @@ env configuration:
 PROFILING = true
 ```
 
-This is enable echoing of Storage, Database and ORM component log messages.
+This option will enable echoing of Storage, Database and ORM component log messages.
 ![Profiling](http://image.prntscr.com/image/539b6b6ae59a4aceaf86bf1747c994fb.png)

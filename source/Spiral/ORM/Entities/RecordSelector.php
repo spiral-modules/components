@@ -343,8 +343,8 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
             if ($cache->has($cacheKey)) {
                 $data = $cache->get($cacheKey);
             } else {
-                $data = $this->fetchData();
-                $cache->set($cacheKey, $data, $ttl);
+                //Cache parsed tree with all sub queries executed!
+                $cache->set($cacheKey, $data = $this->fetchData(), $ttl);
             }
         } else {
             $data = $this->fetchData();
@@ -476,7 +476,6 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     protected function iocContainer()
     {
         if ($this->orm instanceof Component) {
-
             //Working inside ORM container scope
             return $this->orm->iocContainer();
         }

@@ -394,8 +394,8 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      * Register instance in container, might perform methods like auto-singletons, log populations
      * and etc. Can be extended.
      *
-     * @param object $instance
-     * @param array  $parameters
+     * @param object $instance   Created object.
+     * @param array  $parameters Parameters which been passed with created instance.
      *
      * @return object
      */

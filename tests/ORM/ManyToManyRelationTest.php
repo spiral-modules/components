@@ -9,6 +9,7 @@ namespace Spiral\Tests\ORM;
 use Spiral\ORM\Entities\Relations\ManyToManyRelation;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Tag;
+use Spiral\Tests\ORM\Fixtures\User;
 
 abstract class ManyToManyRelationTest extends BaseTest
 {
@@ -69,10 +70,13 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertSame($tag1, $post->tags->matchOne(['name' => 'tag a']));
         $this->assertTrue($post->tags->has(['name' => 'tag a']));
 
-        $this->assertSame([$tag1], $post->tags->matchMultiple(['name' => 'tag a']));
+        $this->assertSame(
+            [$tag1],
+            iterator_to_array($post->tags->matchMultiple(['name' => 'tag a']))
+        );
     }
 
-    public function testDeleteInSession()
+    public function testUnlinkInSession()
     {
         $post = new Post();
         $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
@@ -90,5 +94,20 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->assertTrue(empty($post->tags));
         $this->assertCount(0, $post->tags);
+    }
+
+    public function testCreateWithLinking()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+//        $this->assertSameInDB($post);
+//        $this->assertSameInDB($tag1);
+//        $this->assertSameInDB($tag2);
+
+        $this->assertCount(2, $this->db->post_tag_map);
     }
 }

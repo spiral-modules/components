@@ -89,8 +89,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
             throw new RelationException("HasMany relation can only be set with array of entities");
         }
 
-        //Sync values without forcing it (no autoloading), i.e. clear CURRENT associations
-        //  $this->sync($value, [], false);
+        //todo: write this section!!
     }
 
     /**
@@ -165,7 +164,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
             //Merging pivot data
             $this->pivotData->offsetSet($record, $pivotData + $this->getPivot($record));
 
-            if (in_array($record, $this->updated)) {
+            if (!in_array($record, $this->updated)) {
                 //Indicating that record pivot data has been changed
                 $this->updated[] = $record;
             }

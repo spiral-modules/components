@@ -52,7 +52,7 @@ class PostgresInsertQuery extends InsertQuery
     /**
      * {@inheritdoc}
      */
-    public function run(): int
+    public function run()
     {
         return (int)$this->driver->statement(
             $this->sqlStatement(),

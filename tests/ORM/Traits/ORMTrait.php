@@ -84,8 +84,7 @@ trait ORMTrait
             Record::MANY_TO_MANY => [
                 RelationsConfig::SCHEMA_CLASS => Schemas\Relations\ManyToManySchema::class,
                 RelationsConfig::LOADER_CLASS => Loaders\ManyToManyLoader::class,
-                RelationsConfig::ACCESS_CLASS => Relations\HasManyRelation::class
-
+                RelationsConfig::ACCESS_CLASS => Relations\ManyToManyRelation::class
             ],
         ]);
     }

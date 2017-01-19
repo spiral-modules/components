@@ -79,6 +79,8 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      */
     public function setRelated($value)
     {
+        $this->loadData(true);
+
         if (is_null($value)) {
             $value = [];
         }

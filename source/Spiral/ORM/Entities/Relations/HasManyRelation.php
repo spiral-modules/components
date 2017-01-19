@@ -86,7 +86,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
      */
     public function setRelated($value)
     {
-        $this->loadData();
+        $this->loadData(true);
 
         if (is_null($value)) {
             $value = [];

@@ -24,7 +24,8 @@ use Spiral\Core\Exceptions\Container\NotFoundException;
  * bindings, lazy factories and Container Interop compatible. :)
  *
  * Container does not support setter injections, private properties and etc. Normally it will work
- * with classes only to be as much invisible as possible.
+ * with classes only to be as much invisible as possible. Attention, this is hungry implementation
+ * of container, meaning it WILL try to resolve dependency unless you specified custom lazy factory.
  *
  * @see \Spiral\Core\Container::registerInstance() to add your own behaviours.
  *
@@ -82,6 +83,8 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      * $this->container->get(DatabaseInterface::class, 'default');
      *
      * @param string|null $context Call context.
+     *
+     * @throws ContainerException
      */
     public function get($alias, $context = null)
     {

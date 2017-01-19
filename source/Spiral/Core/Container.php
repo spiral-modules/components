@@ -410,7 +410,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             }
         }
 
-        //Your code can go here
+        //Your code can go here (for example LoggerAwareInterface, custom hydration and etc)
 
         return $instance;
     }

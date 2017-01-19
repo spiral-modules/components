@@ -76,16 +76,17 @@ final class Transaction implements TransactionInterface
     /**
      * {@inheritdoc}
      *
-     * Executing transaction. Method require minor refactoring.
+     * @param bool $forceTransaction When set to false transaction would not be started when only
+     *                               single command is presented inside (all commands are flatten
+     *                               before appearing inside this method).
      */
-    public function run()
+    public function run(bool $forceTransaction = false)
     {
         /**
          * @var Driver[]           $drivers
          * @var CommandInterface[] $commands
          */
-        $drivers = [];
-        $commands = [];
+        $drivers = $commands = [];
 
         foreach ($this->getCommands() as $command) {
             if ($command instanceof SQLCommandInterface) {
@@ -98,11 +99,11 @@ final class Transaction implements TransactionInterface
             $commands[] = $command;
         }
 
-        $executedCommands = [];
-        $wrappedDrivers = [];
+        //Commands we executed and drivers with started transactions
+        $executedCommands = $wrappedDrivers = [];
 
         try {
-            if (count($commands) > 1) {
+            if ($forceTransaction || count($commands) > 1) {
                 //Starting transactions
                 foreach ($drivers as $driver) {
                     $driver->beginTransaction();

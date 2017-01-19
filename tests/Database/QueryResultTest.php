@@ -10,6 +10,7 @@ use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\QueryStatement;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Injections\Parameter;
+use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Pagination\Paginator;
 
@@ -373,6 +374,15 @@ abstract class QueryResultTest extends BaseQueryTest
         $i = 4;
         $this->assertEquals(md5($i), $row['name']);
         $this->assertEquals($i * 10, $row['value']);
+    }
+
+    public function testDatetimeInQuery()
+    {
+        $this->fillData();
+
+        $this->assertSame(10, $this->database->sample_table->select()
+            ->where('name', '!=', new \DateTime('1990-01-01'))
+            ->count());
     }
 
     /**

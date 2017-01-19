@@ -79,8 +79,10 @@ final class Transaction implements TransactionInterface
      * @param bool $forceTransaction When set to false transaction would not be started when only
      *                               single command is presented inside (all commands are flatten
      *                               before appearing inside this method).
+     * @param bool $clean            When set to true - transaction will be cleaned after
+     *                               execution, default behaviour.
      */
-    public function run(bool $forceTransaction = false)
+    public function run(bool $forceTransaction = false, bool $clean = true)
     {
         /**
          * @var Driver[]           $drivers
@@ -141,6 +143,8 @@ final class Transaction implements TransactionInterface
         }
 
         //Clean transaction
-        $this->commands = [];
+        if ($clean) {
+            $this->commands = [];
+        }
     }
 }

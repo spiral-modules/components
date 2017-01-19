@@ -96,7 +96,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         $relation = parent::withContext($parent, $loaded, $data);
         $relation->pivotData = new \SplObjectStorage();
 
-        return $relation;
+        return $relation->initInstances();
     }
 
     /**
@@ -164,11 +164,13 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      */
     public function getPivot(RecordInterface $record): array
     {
-        if (!$this->pivotData->offsetExists($record)) {
-            throw new RelationException("Unable to get pivot data for non linked object");
+        if (empty($matched = $this->matchOne($record))) {
+            throw new RelationException(
+                "Unable to get pivotData for non linked record" . ($this->autoload ? '' : " (partial on)")
+            );
         }
 
-        return $this->pivotData->offsetGet($record);
+        return $this->pivotData->offsetGet($matched);
     }
 
     /**
@@ -209,8 +211,8 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
-     * Unlink specific entity from relation. Will load relation data! Set partial mode to remove
-     * without preloading (will also force removal)
+     * Unlink specific entity from relation. Will load relation data! Record to delete will be
+     * automatically matched to a give record.
      *
      * @param RecordInterface $record
      *
@@ -221,12 +223,13 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     public function unlink(RecordInterface $record): self
     {
         $this->loadData(true);
+
         foreach ($this->linked as $index => $linked) {
-            if ($linked === $record) {
+            if ($this->match($linked, $record)) {
                 //Removing locally
                 unset($this->linked[$index]);
 
-                if (!in_array($linked, $this->scheduled)) {
+                if (!in_array($linked, $this->scheduled) || !$this->autoload) {
                     //Scheduling unlink in db when we know relation OR partial mode is on
                     $this->unlinked[] = $linked;
                 }

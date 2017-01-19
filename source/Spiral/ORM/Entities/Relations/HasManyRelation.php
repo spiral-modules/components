@@ -68,15 +68,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
         array $data = null
     ): RelationInterface {
         $hasMany = parent::withContext($parent, $loaded, $data);
-
-        /**
-         * @var self $hasMany
-         */
-        if ($hasMany->loaded) {
-            //Init all nested models immediately
-            $hasMany->initInstances();
-        }
-
+        /** @var self $hasMany */
         return $hasMany->initInstances();
     }
 
@@ -97,7 +89,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
             throw new RelationException("HasMany relation can only be set with array of entities");
         }
 
-        //todo: optimize this section!!
+        //todo: optimize this section!?
 
         //Cleaning existed instances
         $this->deletedInstances = array_unique(array_merge(
@@ -197,7 +189,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
         $this->assertValid($record);
 
         foreach ($this->instances as $index => $instance) {
-            if ($instance === $record) {
+            if ($this->match($instance, $record)) {
                 //Remove from save
                 unset($this->instances[$index]);
                 $this->deletedInstances[] = $instance;

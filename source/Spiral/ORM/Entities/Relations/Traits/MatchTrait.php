@@ -28,25 +28,28 @@ trait MatchTrait
             return true;
         }
 
+        //Primary key comparision
         if (is_scalar($query) && $record->primaryKey() == $query) {
-            //Matched by PK
             return true;
         }
 
-        $value = $record->packValue();
-
+        //Record based comparision
         if ($query instanceof RecordInterface) {
+            //Matched by PK (assuming both same class)
             if (!empty($query->primaryKey()) && $query->primaryKey() == $record->primaryKey()) {
                 return true;
             }
 
-            if ($value == $query->packValue()) {
+            //Matched by content
+            if ($record->packValue() == $query->packValue()) {
                 return true;
             }
+
+            return false;
         }
 
-        //Comparasion over intersection
-        if (is_array($query) && array_intersect_assoc($value, $query) == $query) {
+        //Field intersection
+        if (is_array($query) && array_intersect_assoc($record->packValue(), $query) == $query) {
             return true;
         }
 

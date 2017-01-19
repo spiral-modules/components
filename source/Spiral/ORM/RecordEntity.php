@@ -309,6 +309,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
 
         //Executed when transaction successfully completed
         $command->onComplete(function (InsertCommand $command) {
+            $this->lastInsert = null;
             $this->handleInsert($command);
         });
 
@@ -395,9 +396,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     private function handleInsert(InsertCommand $command)
     {
-        //Flushing reference to last insert command
-        $this->lastInsert = null;
-
         //Mounting PK
         $this->setField($this->primaryColumn(), $command->getInsertID(), true, false);
 

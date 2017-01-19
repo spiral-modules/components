@@ -482,57 +482,6 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(1, $post->comments->matchMultiple(['message' => 'hi3']));
     }
 
-    /**
-     * @expectedException \Spiral\ORM\Exceptions\RelationException
-     * @expectedExceptionMessage Must be an instance of 'Spiral\Tests\ORM\Fixtures\Comment',
-     *                           'array' given
-     */
-    public function testCleanException()
-    {
-        $post = new Post();
-        $post->author = new User();
-        $post->comments->add($comment = new Comment(['message' => 'hi']));
-        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
-        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
-
-        $post->save();
-
-        $this->assertCount(3, $this->db->comments);
-
-        $post->comments->deleteMultiple([['message' => 'hi3']]);
-        $post->save();
-
-        $this->assertCount(2, $this->db->comments);
-
-        $post->comments->deleteMultiple([['message' => 'hi']]);
-        $post->save();
-
-        $this->assertCount(0, $this->db->comments);
-    }
-
-    public function testClean()
-    {
-        $post = new Post();
-        $post->author = new User();
-        $post->comments->add($comment = new Comment(['message' => 'hi']));
-        $post->comments->add($comment2 = new Comment(['message' => 'hi']));
-        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
-
-        $post->save();
-
-        $this->assertCount(3, $this->db->comments);
-
-        $post->comments->deleteMultiple([$comment3]);
-        $post->save();
-
-        $this->assertCount(2, $this->db->comments);
-
-        $post->comments->deleteMultiple([$comment, $comment2]);
-        $post->save();
-
-        $this->assertCount(0, $this->db->comments);
-    }
-
     public function testClean2()
     {
         $post = new Post();

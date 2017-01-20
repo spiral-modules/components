@@ -24,18 +24,20 @@ trait LookupTrait
     protected function lookupKey(
         int $key,
         RecordInterface $record,
-        ContextualCommandInterface $command
+        ContextualCommandInterface $command = null
     ) {
         $key = $this->key($key);
 
-        $context = $command->getContext();
-        if (!empty($context[$key])) {
-            //Key value found in a context
-            return $context[$key];
-        }
+        if (!empty($command)) {
+            $context = $command->getContext();
+            if (!empty($context[$key])) {
+                //Key value found in a context
+                return $context[$key];
+            }
 
-        if ($key == $this->primaryColumnOf($record)) {
-            return $command->primaryKey();
+            if ($key == $this->primaryColumnOf($record)) {
+                return $command->primaryKey();
+            }
         }
 
         //Fallback lookup in a record

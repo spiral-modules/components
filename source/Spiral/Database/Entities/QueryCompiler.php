@@ -273,7 +273,7 @@ class QueryCompiler
             unset($value);
         }
 
-        return trim(implode(',', $updates));
+        return trim(implode(', ', $updates));
     }
 
     /**

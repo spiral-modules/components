@@ -144,6 +144,8 @@ abstract class ManyToManyRelationTest extends BaseTest
         $post->tags->link($tag2);
 
         $post->save();
+        $post->save();
+
         $this->assertCount(2, $this->db->post_tag_map);
 
         $post->tags->link($tag3 = new Tag(['name' => 'tag c']));
@@ -512,11 +514,255 @@ abstract class ManyToManyRelationTest extends BaseTest
         $transaction->run();
 
         $this->assertCount(0, $this->db->post_tag_map);
+        $this->assertCount(0, $post->tags);
     }
 
-    //todo: custom pivot
-    //todo: update pivot
-    //todo: update pivot in a session
-    //todo: pivot error
-    //todo: custom where, using alias
+    public function testCustomPivot()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertFalse($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(2, $post->tags);
+        $this->assertCount(1, $post->magic_tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertTrue($post->tags->has($tag2));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
+
+        $this->assertEquals(false, (bool)$post->tags->getPivot($tag2)['magic']);
+        $this->assertEquals(true, (bool)$post->tags->getPivot($tag1)['magic']);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\RelationException
+     */
+    public function testBadPivot()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['bad' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+    }
+
+    public function testInloadWithWhere()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'where'  => ['{@}.name' => 'tag a'],
+                'method' => RelationLoader::INLOAD
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+    }
+
+    public function testInloadWithWherePivot()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'wherePivot' => ['{@}.magic' => true],
+                'method'     => RelationLoader::INLOAD
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+    }
+
+    public function testPostloadWithWhere()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'where'  => ['{@}.name' => 'tag a'],
+                'method' => RelationLoader::POSTLOAD
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+    }
+
+    public function testPostloadWithWherePivot()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'wherePivot' => ['{@}.magic' => true],
+                'method'     => RelationLoader::POSTLOAD
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+    }
+
+    public function testLoadUsingAnotherRelation()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->with('magic_tags', ['alias' => 'mt'])
+            ->load('tags', [
+                'using' => 'mt'
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+    }
+
+    public function testChangeInSession()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $transaction = new Transaction();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags->link($tag1, ['magic' => true]);
+
+        $this->assertCount(1, $post->tags);
+        $this->assertTrue((bool)$post->tags->getPivot($tag1)['magic']);
+
+        $post->tags->link($tag1, ['magic' => false]);
+        $post->save($transaction);
+
+        $transaction->run();
+
+        $this->assertCount(1, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+        $this->assertFalse((bool)$post->tags->getPivot($tag1)['magic']);
+    }
+
+    public function testChangePivot()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1, ['magic' => true]);
+        $post->save();
+
+        $this->assertCount(1, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+        $this->assertTrue((bool)$post->tags->getPivot($tag1)['magic']);
+
+        $post->tags->link($tag1, ['magic' => false]);
+        $post->save();
+
+        $this->assertFalse((bool)$post->tags->getPivot($tag1)['magic']);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertCount(1, $post->tags);
+        $this->assertFalse((bool)$post->tags->getPivot($tag1)['magic']);
+    }
 }

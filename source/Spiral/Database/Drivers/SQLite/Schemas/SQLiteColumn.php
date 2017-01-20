@@ -36,7 +36,7 @@ class SQLiteColumn extends AbstractColumn
         'enum'        => 'enum',
 
         //Logical types
-        'boolean'     => 'boolean',
+        'boolean'     => 'int',
 
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger

@@ -138,15 +138,11 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
      * @param RecordInterface $record
      *
      * @return array
-     *
-     * @throws RelationException
      */
     public function getPivot(RecordInterface $record): array
     {
         if (empty($matched = $this->matchOne($record))) {
-            throw new RelationException(
-                "Unable to get pivotData for non linked record" . ($this->autoload ? '' : " (partial on)")
-            );
+            return [];
         }
 
         return $this->pivotData->offsetGet($matched);
@@ -166,14 +162,16 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     {
         $this->loadData(true);
         $this->assertValid($record);
+        $this->assertPivot($pivotData);
+
+        //Ensure reference
+        $record = $this->matchOne($record) ?? $record;
 
         if (in_array($record, $this->instances)) {
-            $this->assertPivot($pivotData);
-
             //Merging pivot data
             $this->pivotData->offsetSet($record, $pivotData + $this->getPivot($record));
 
-            if (!in_array($record, $this->updated)) {
+            if (!in_array($record, $this->updated) && !in_array($record, $this->scheduled)) {
                 //Indicating that record pivot data has been changed
                 $this->updated[] = $record;
             }
@@ -202,6 +200,9 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     public function unlink(RecordInterface $record): self
     {
         $this->loadData(true);
+
+        //Ensure reference
+        $record = $this->matchOne($record) ?? $record;
 
         foreach ($this->instances as $index => $linked) {
             if ($this->match($linked, $record)) {
@@ -262,12 +263,14 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
                     $this->pivotData->offsetGet($record)
                 );
             } elseif (in_array($record, $this->updated)) {
-                //Update link
+                //Update link (expecting both records to be already loaded)
                 $command = new UpdateCommand(
                     $this->pivotTable(),
                     [
-                        $this->key(Record::THOUGHT_INNER_KEY) => null,
-                        $this->key(Record::THOUGHT_OUTER_KEY) => null,
+                        $this->key(Record::THOUGHT_INNER_KEY) => $this->lookupKey(Record::INNER_KEY,
+                            $this->parent),
+                        $this->key(Record::THOUGHT_OUTER_KEY) => $this->lookupKey(Record::OUTER_KEY,
+                            $record),
                     ],
                     $this->pivotData->offsetGet($record)
                 );
@@ -279,7 +282,10 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
             //Syncing pivot data values
             $command->onComplete(function (ContextualCommandInterface $command) use ($record) {
                 //Now when we are done we can sync our values with current data
-                $this->pivotData->offsetSet($record, $command->getContext());
+                $this->pivotData->offsetSet(
+                    $record,
+                    $command->getContext() + $this->getPivot($record)
+                );
             });
 
             //Make sure command is properly configured with conditions OR create promises

@@ -11,13 +11,13 @@ Spiral Core Components
 <b>[Documentation](http://spiral-framework.com/guide)</b> | [Framework Bundle](https://github.com/spiral/spiral) | [Skeleton Application](https://github.com/spiral/application)
 
 # Components included
-  - Core interfaces and autowiring DI
+  - Core interfaces, autowiring DI, lazy Singletons
   - Stempler template processor
   - Tokenizer, class locator, invocation locator
-  - Debug, profiling and dump components
+  - Debug, Profiling and Dump components
   - FileManager and Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)
   - Pagination
-  - DBAL, schema introspection, comparation, scaffolding
+  - DBAL, Schema Introspection, Comparation, Scaffolding, nested queries
   - Iehahrical ODM
   - ORM, schema scaffolding, eager loading, transactional active record, memory mapping
   - Security (NIST RBAC)

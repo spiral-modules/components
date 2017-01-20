@@ -357,14 +357,14 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
      *
      * @return ManyToManyRelation
      */
-    protected function initInstances(): self
+    protected function initInstances(): MultipleRelation
     {
         if (is_array($this->data) && !empty($this->data)) {
             //Iterates and instantiate records
             $iterator = new RecordIterator($this->data, $this->class, $this->orm);
 
             foreach ($iterator as $pivotData => $item) {
-                if (in_array($item, $this->linked)) {
+                if (in_array($item, $this->instances)) {
                     //Skip duplicates (if any?)
                     continue;
                 }

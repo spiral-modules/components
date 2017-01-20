@@ -177,7 +177,7 @@ abstract class MultipleRelation extends AbstractRelation
             $iterator = new RecordIterator($this->data, $this->class, $this->orm);
 
             foreach ($iterator as $item) {
-                if ($this->has($item)) {
+                if (in_array($item, $this->instances)) {
                     //Skip duplicates
                     continue;
                 }

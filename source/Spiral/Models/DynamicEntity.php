@@ -12,11 +12,9 @@ use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Prototypes\AbstractEntity;
 
 /**
- * DataEntity in spiral used to represent basic data set with validation rules, filters and
- * accessors. Most of spiral models (ORM and ODM, HttpFilters) will extend data entity. In addition
- * it creates magic set of getters and setters for every field name (see validator trait) in model.
+ * This is analog of DataEntity based on mutable arrays to define mutator and accessors.
  *
- * DataEntity provides ability to configure it's state using internal properties.
+ * @see DataEntity
  */
 class DynamicEntity extends AbstractEntity
 {

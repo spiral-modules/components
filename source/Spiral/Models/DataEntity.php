@@ -10,9 +10,8 @@ use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Prototypes\AbstractEntity;
 
 /**
- * This is analog of DataEntity based on constant arrays to define mutator and accessors.
- *
- * @see DynamicEntity
+ * DataEntity in spiral used to represent basic data set with filters and accessors. Most of spiral
+ * models (ORM and ODM, HttpFilters) will extend data entity.
  */
 class DataEntity extends AbstractEntity
 {

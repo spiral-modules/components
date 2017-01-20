@@ -94,7 +94,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
          * @var self $relation
          */
         $relation = parent::withContext($parent, $loaded, $data);
-        $relation->pivotData = new \SplObjectStorage();
+        $relation->pivotData = $this->pivotData ?? new \SplObjectStorage();
 
         return $relation->initInstances();
     }

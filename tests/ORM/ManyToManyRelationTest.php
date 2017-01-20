@@ -215,8 +215,65 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertTrue($post->tags->has($tag1));
         $this->assertTrue($post->tags->has($tag2));
 
-        $this->assertNotEmpty($post->tags->pivotData($tag1));
-        $this->assertNotEmpty($post->tags->pivotData($tag2));
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
+    }
+
+    public function testLoadInloadPartial()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'method' => RelationLoader::INLOAD,
+                'where'  => ['{@}.id' => $tag1->primaryKey()]
+            ])
+            ->load('author',[
+                'method' => RelationLoader::INLOAD,
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertTrue($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+    }
+
+    public function testLoadInloadPartialPivot()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'method' => RelationLoader::INLOAD,
+                'wherePivot'  => ['{@}.tag_id' => $tag2->primaryKey()]
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertTrue($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag2));
+        $this->assertFalse($post->tags->has($tag1));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
     }
 
     public function testLoadPostload()
@@ -240,7 +297,67 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertTrue($post->tags->has($tag1));
         $this->assertTrue($post->tags->has($tag2));
 
-        $this->assertNotEmpty($post->tags->pivotData($tag1));
-        $this->assertNotEmpty($post->tags->pivotData($tag2));
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
     }
+
+    public function testPostloadPartial()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'method' => RelationLoader::POSTLOAD,
+                'where'  => ['{@}.id' => $tag1->primaryKey()]
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertTrue($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+    }
+
+    public function testLoadPostloadPartialPivot()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->tags->link($tag1 = new Tag(['name' => 'tag a']));
+        $post->tags->link($tag2 = new Tag(['name' => 'tag b']));
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->load('tags', [
+                'method' => RelationLoader::POSTLOAD,
+                'wherePivot'  => ['{@}.tag_id' => $tag2->primaryKey()]
+            ])
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertTrue($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(1, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag2));
+        $this->assertFalse($post->tags->has($tag1));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
+    }
+
+    //todo: lazy load
+    //todo: custom pivot
+    //todo: update pivot
+    //todo: update pivot in a session
+    //todo: pivot error
 }

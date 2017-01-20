@@ -64,14 +64,16 @@ class ManyToManyLoader extends RelationLoader
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
         //Pivot conditions specified in relation schema
-        $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->schema[Record::WHERE_PIVOT]);
+        $this->setWhere($query, $this->pivotAlias(), $whereTarget,
+            $this->schema[Record::WHERE_PIVOT]);
 
         //Pivot conditions specified by user
         $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
 
         if ($this->isJoined()) {
+            //Actual data is always INNER join
             $query->join(
-                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                'INNER',
                 $this->getTable() . ' AS ' . $this->getAlias(),
                 [$this->localKey(Record::OUTER_KEY) => $this->pivotKey(Record::THOUGHT_OUTER_KEY)]
             );

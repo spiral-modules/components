@@ -48,7 +48,7 @@ class ContextualDeleteCommand extends TableCommand implements ContextualCommandI
      */
     public function getDriver()
     {
-        if (empty($this->context)) {
+        if ($this->isEmpty()) {
             //Nothing to do
             return null;
         }

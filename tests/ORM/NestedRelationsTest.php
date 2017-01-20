@@ -9,6 +9,7 @@ namespace Spiral\Tests\ORM;
 use Spiral\ORM\Entities\Loaders\RelationLoader;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Post;
+use Spiral\Tests\ORM\Fixtures\Tag;
 use Spiral\Tests\ORM\Fixtures\User;
 
 abstract class NestedRelationsTest extends BaseTest
@@ -208,5 +209,44 @@ abstract class NestedRelationsTest extends BaseTest
         $this->assertSimilar($post->author, $dbPost->author);
         $this->assertSimilar($post->author->profile, $dbPost->author->profile);
         $this->assertCount(0, $dbPost->comments);
+    }
+
+    public function testComplexInverse()
+    {
+        $post = new Post();
+        $post->title = 'title';
+        $post->author = new User();
+        $post->author->profile->bio = 'hello world';
+
+        $post->tags->link(new Tag(['name' => 'tag 1']));
+        $post->tags->link(new Tag(['name' => 'tag b']));
+
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+
+        $post->save();
+
+        /**
+         * @var Post $dbPost
+         */
+        $dbPost = $this->orm->withMap(null)->selector(Post::class)
+            ->load('tags', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts.author', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts.author.profile', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts.comments', ['method' => RelationLoader::INLOAD])
+            ->findOne();
+
+        foreach ($dbPost->tags as $tag) {
+            $this->assertTrue($tag->getRelations()->get('posts')->isLoaded());
+            $this->assertCount(1, $tag->posts);
+
+            foreach ($tag->posts as $tagPost) {
+                $this->assertSimilar($post, $tagPost);
+                $this->assertTrue($tagPost->getRelations()->get('comments')->isLoaded());
+                $this->assertTrue($tagPost->getRelations()->get('author')->isLoaded());
+                $this->assertTrue($tagPost->author->getRelations()->get('profile')->isLoaded());
+                $this->assertSimilar($post->author->profile, $tagPost->author->profile);
+            }
+        }
     }
 }

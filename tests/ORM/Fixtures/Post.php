@@ -43,8 +43,7 @@ class Post extends AbstactRecord
                 'time_linked' => 'datetime',
                 'magic'       => 'bool'
             ],
-            self::WHERE_PIVOT   => ['{@}.magic' => true],
-            Tag::INVERSE        => 'posts'
+            self::WHERE_PIVOT   => ['{@}.magic' => true]
         ]
     ];
 }

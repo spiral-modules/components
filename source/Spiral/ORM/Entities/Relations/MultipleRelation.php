@@ -170,7 +170,7 @@ abstract class MultipleRelation extends AbstractRelation
      *
      * @return HasManyRelation
      */
-    private function initInstances(): self
+    protected function initInstances(): self
     {
         if (is_array($this->data) && !empty($this->data)) {
             //Iterates and instantiate records

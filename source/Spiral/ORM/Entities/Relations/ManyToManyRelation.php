@@ -17,6 +17,7 @@ use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
 use Spiral\ORM\Entities\Loaders\RelationLoader;
 use Spiral\ORM\Entities\Nodes\PivotedRootNode;
+use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Helpers\WhereDecorator;
@@ -349,6 +350,34 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         $decorator->where($this->schema[Record::WHERE]);
 
         return $query;
+    }
+
+    /**
+     * Init relations and populate pivot map.
+     *
+     * @return ManyToManyRelation
+     */
+    protected function initInstances(): self
+    {
+        if (is_array($this->data) && !empty($this->data)) {
+            //Iterates and instantiate records
+            $iterator = new RecordIterator($this->data, $this->class, $this->orm);
+
+            foreach ($iterator as $pivotData => $item) {
+                if (in_array($item, $this->linked)) {
+                    //Skip duplicates (if any?)
+                    continue;
+                }
+
+                $this->pivotData->attach($item, $pivotData);
+                $this->instances[] = $item;
+            }
+        }
+
+        //Memory free
+        $this->data = [];
+
+        return $this;
     }
 
     /**

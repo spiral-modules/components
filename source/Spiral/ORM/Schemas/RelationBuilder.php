@@ -47,7 +47,8 @@ class RelationBuilder
     }
 
     /**
-     * Registering new relation definition.
+     * Registering new relation definition. At this moment function would not check if relation is
+     * unique and will redeclare it.
      *
      * @param RelationDefinition $definition Relation options (definition).
      *

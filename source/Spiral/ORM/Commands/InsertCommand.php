@@ -48,6 +48,16 @@ class InsertCommand extends TableCommand implements ContextualCommandInterface
     }
 
     /**
+     * Insert values, context not included.
+     *
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
      * Get inserted row id.
      *
      * @return mixed|null

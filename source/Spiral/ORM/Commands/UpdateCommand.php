@@ -66,6 +66,16 @@ class UpdateCommand extends TableCommand implements ContextualCommandInterface
     }
 
     /**
+     * Update values, context not included.
+     *
+     * @return array
+     */
+    public function getValues(): array
+    {
+        return $this->values;
+    }
+
+    /**
      * Inserting data into associated table.
      */
     public function execute()

@@ -218,14 +218,16 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
 
         $this->state = $state;
 
-        //Non loaded records should be in solid state by default
+        //Non loaded records should be in solid state by default (i.e. no dirty fields)
         $this->solidState($this->state == ORMInterface::STATE_NEW);
 
+        //Initiating data layer
         parent::__construct($orm, $data, new RelationMap($this, $orm));
     }
 
     /**
-     * Check if entity been loaded (non new).
+     * Check if entity been loaded (non new). Attention, this method will return true for entities
+     * which been queued to be stored in transaction even before transaction will be executed.
      *
      * @return bool
      */
@@ -303,10 +305,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
 
         $command = new InsertCommand($this->orm->table(static::class), $data);
 
-        //Entity indicates it's own status
-        $this->state = ORMInterface::STATE_SCHEDULED_INSERT;
-        $this->dispatch('insert', new RecordEvent($this));
-
         //Executed when transaction successfully completed
         $command->onComplete(function (InsertCommand $command) {
             $this->lastInsert = null;
@@ -318,6 +316,10 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             $this->lastInsert = null;
             $this->state = ORMInterface::STATE_NEW;
         });
+
+        //Entity indicates it's own status
+        $this->state = ORMInterface::STATE_SCHEDULED_INSERT;
+        $this->dispatch('create', new RecordEvent($this, $command));
 
         //Keep reference to the last insert command
         return $this->lastInsert = $command;
@@ -343,10 +345,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             });
         }
 
-        //Entity indicates it's own status
-        $this->state = ORMInterface::STATE_SCHEDULED_UPDATE;
-        $this->dispatch('update', new RecordEvent($this));
-
         //Executed when transaction successfully completed
         $command->onComplete(function (UpdateCommand $command) {
             $this->handleUpdate($command);
@@ -356,6 +354,10 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             //Flushing existed insert command to prevent collisions
             $this->state = ORMInterface::STATE_LOADED;
         });
+
+        //Entity indicates it's own status
+        $this->state = ORMInterface::STATE_SCHEDULED_UPDATE;
+        $this->dispatch('update', new RecordEvent($this, $command));
 
         return $command;
     }
@@ -377,14 +379,14 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
             });
         }
 
-        //Entity indicates it's own status
-        $this->state = ORMInterface::STATE_SCHEDULED_DELETE;
-        $this->dispatch('delete', new RecordEvent($this));
-
         //Executed when transaction successfully completed
         $command->onComplete(function (DeleteCommand $command) {
             $this->handleDelete($command);
         });
+
+        //Entity indicates it's own status
+        $this->state = ORMInterface::STATE_SCHEDULED_DELETE;
+        $this->dispatch('delete', new RecordEvent($this, $command));
 
         return $command;
     }
@@ -407,7 +409,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         }
 
         $this->state = ORMInterface::STATE_LOADED;
-        $this->dispatch('created', new RecordEvent($this));
+        $this->dispatch('created', new RecordEvent($this, $command));
     }
 
     /**
@@ -423,7 +425,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
         }
 
         $this->state = ORMInterface::STATE_LOADED;
-        $this->dispatch('updated', new RecordEvent($this));
+        $this->dispatch('updated', new RecordEvent($this, $command));
     }
 
     /**
@@ -434,6 +436,6 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     private function handleDelete(DeleteCommand $command)
     {
         $this->state = ORMInterface::STATE_DELETED;
-        $this->dispatch('deleted', new RecordEvent($this));
+        $this->dispatch('deleted', new RecordEvent($this, $command));
     }
 }

@@ -22,7 +22,7 @@ class PostgresCompiler extends AbstractCompiler
         string $table,
         array $columns,
         array $rowsets,
-        string $primaryKey = ''
+        string $primaryKey = null
     ): string {
         return parent::compileInsert(
                 $table,

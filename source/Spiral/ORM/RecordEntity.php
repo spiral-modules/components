@@ -49,8 +49,12 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     const MANY_TO_MANY = 104;
 
     /**
-     * Morphed relation types are usually created by inversion or equivalent of primary relation
-     * types.
+     * Relations with non fixed outer class.
+     * [Photo belongs to morphed parent (post, user, comment)],
+     * [many Tags to morphed records (post, user, ...)]
+     *
+     * Morphed relation targets must be defined using common interface, ORM will find matching
+     * classes automatically.
      *
      * @see RelationSchemaInterface
      * @see RelationSchema
@@ -109,7 +113,8 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
 
     /**
-     * Model behaviour configurations.
+     * Model behaviour configurations. Some of this options will be filled automatically based
+     * on MutatorsConfig and associated column types.
      */
     const SECURED   = '*';
     const HIDDEN    = [];

@@ -535,7 +535,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         return $this->pivotTable;
     }
 
-
     /**
      * Create query for lazy loading.
      *
@@ -546,7 +545,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     protected function createQuery($innerKey): SelectQuery
     {
         $table = $this->orm->table($this->class);
-        $query = $table->select();
+        $query = $this->orm->table($this->class)->select();
 
         //Loader will take care of query configuration
         $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
@@ -554,7 +553,11 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
         $loader = $loader->withContext(
             $loader,
-            ['alias' => $table->getName(), 'method' => RelationLoader::POSTLOAD]
+            [
+                'alias'      => $table->getName(),
+                'pivotAlias' => $table->getName() . '_pivot',
+                'method'     => RelationLoader::POSTLOAD
+            ]
         );
 
         //Configuring query using parent inner key value as reference
@@ -562,7 +565,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         $query = $loader->configureQuery($query, [$innerKey]);
 
         //Additional pivot conditions
-        $pivotDecorator = new WhereDecorator($query, 'onWhere', 'root_pivot');
+        $pivotDecorator = new WhereDecorator($query, 'onWhere', $table->getName() . '_pivot');
         $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
 
         //Additional where conditions!

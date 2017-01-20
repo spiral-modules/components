@@ -322,7 +322,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
             if (!empty($this->schema[Record::WHERE])) {
                 //Configuring where conditions with alias resolution
                 $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
-                $decorator->where($this->schema[Record::WHERE]);
+                //$decorator->where($this->schema[Record::WHERE]);
             }
 
             return $selector->fetchData();

@@ -156,6 +156,9 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
      * Example:
      * User::find()->load(['posts', 'comments', 'profile']);
      *
+     * Attention, consider disabling entity map if you want to use recursive loading (i.e.
+     * post.tags.posts), but first think why you even need recursive relation loading.
+     *
      * @see with()
      *
      * @param string|array $relation

@@ -9,6 +9,7 @@ namespace Spiral\Tests\ORM;
 use Spiral\ORM\Entities\Loaders\RelationLoader;
 use Spiral\ORM\Entities\Relations\ManyToManyRelation;
 use Spiral\ORM\Transaction;
+use Spiral\Tests\ORM\Fixtures\Node;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Tag;
 use Spiral\Tests\ORM\Fixtures\User;
@@ -772,5 +773,20 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $this->assertCount(1, $post->tags);
         $this->assertFalse((bool)$post->tags->getPivot($tag1)['magic']);
+    }
+
+    public function testRecursive()
+    {
+        $node1 = new Node(['name' => 'node 1']);
+        $node1->nodes->link($node2 = new Node(['name' => 'node 2']));
+        $node2->nodes->link($node3 = new Node(['name' => 'node 3']));
+        $node3->nodes->link($node4 = new Node(['name' => 'node 4']));
+
+        $node1->save();
+
+        $this->assertSameInDB($node1);
+        $this->assertSameInDB($node2);
+        $this->assertSameInDB($node3);
+        $this->assertSameInDB($node4);
     }
 }

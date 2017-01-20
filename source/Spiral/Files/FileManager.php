@@ -35,7 +35,6 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      */
     public function __construct()
     {
-        //Safety mechanism for temporary files, to be investigated if such approach already expired
         register_shutdown_function([$this, '__destruct']);
     }
 

@@ -12,7 +12,6 @@ use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
-use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\Record;
@@ -27,7 +26,7 @@ use Spiral\ORM\RecordInterface;
  */
 class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \Countable
 {
-    use LookupTrait, MatchTrait;
+    use LookupTrait;
 
     /**
      * Records deleted from list. Potentially pre-schedule command?

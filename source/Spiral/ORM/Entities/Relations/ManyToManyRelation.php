@@ -8,7 +8,6 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Entities\Table;
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\ContextualDeleteCommand;
 use Spiral\ORM\Commands\InsertCommand;
@@ -18,24 +17,20 @@ use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
 use Spiral\ORM\Entities\Loaders\RelationLoader;
 use Spiral\ORM\Entities\Nodes\PivotedRootNode;
-use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
-use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
-use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\Helpers\WhereDecorator;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
-use Spiral\ORM\RelationInterface;
 
 /**
  * Provides ability to create pivot map between parent record and multiple objects with ability to
  * link them, link and create, update pivot, unlink or sync send. Relation support partial mode.
  */
-class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate, \Countable
+class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate, \Countable
 {
-    use MatchTrait, PartialTrait, LookupTrait;
+    use LookupTrait;
 
     /** Schema shortcuts */
     const PIVOT_TABLE    = Record::PIVOT_TABLE;
@@ -50,13 +45,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
      * @var \SplObjectStorage
      */
     private $pivotData;
-
-    /**
-     * Linked records.
-     *
-     * @var RecordInterface[]
-     */
-    private $linked = [];
 
     /**
      * Linked but not saved yet records.
@@ -80,28 +68,14 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     private $unlinked = [];
 
     /**
-     * {@inheritdoc}
+     * @param string       $class
+     * @param array        $schema
+     * @param ORMInterface $orm
      */
-    public function hasRelated(): bool
+    public function __construct($class, array $schema, ORMInterface $orm)
     {
-        return !empty($this->linked);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function withContext(
-        RecordInterface $parent,
-        bool $loaded = false,
-        array $data = null
-    ): RelationInterface {
-        /**
-         * @var self $relation
-         */
-        $relation = parent::withContext($parent, $loaded, $data);
-        $relation->pivotData = $this->pivotData ?? new \SplObjectStorage();
-
-        return $relation->initInstances();
+        parent::__construct($class, $schema, $orm);
+        $this->pivotData = new \SplObjectStorage();
     }
 
     /**
@@ -120,32 +94,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         }
 
         //todo: write this section!!
-    }
-
-    /**
-     * @return $this
-     */
-    public function getRelated()
-    {
-        return $this;
-    }
-
-    /**
-     * Iterate over linked instances, will force pre-loading unless partial.
-     *
-     * @return \ArrayIterator
-     */
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->loadData(true)->linked);
-    }
-
-    /**
-     * @return int
-     */
-    public function count()
-    {
-        return count($this->loadData(true)->linked);
     }
 
     /**
@@ -193,7 +141,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         $this->loadData(true);
         $this->assertValid($record);
 
-        if (in_array($record, $this->linked)) {
+        if (in_array($record, $this->instances)) {
             $this->assertPivot($pivotData);
 
             //Merging pivot data
@@ -208,7 +156,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         }
 
         //New association
-        $this->linked[] = $record;
+        $this->instances[] = $record;
         $this->scheduled[] = $record;
         $this->pivotData->offsetSet($record, $pivotData);
 
@@ -229,10 +177,10 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     {
         $this->loadData(true);
 
-        foreach ($this->linked as $index => $linked) {
+        foreach ($this->instances as $index => $linked) {
             if ($this->match($linked, $record)) {
                 //Removing locally
-                unset($this->linked[$index]);
+                unset($this->instances[$index]);
 
                 if (!in_array($linked, $this->scheduled) || !$this->autoload) {
                     //Scheduling unlink in db when we know relation OR partial mode is on
@@ -242,67 +190,9 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
             }
         }
 
-        $this->linked = array_values($this->linked);
+        $this->instances = array_values($this->instances);
 
         return $this;
-    }
-
-    /**
-     * Check if given query points to linked entity.
-     *
-     * Example:
-     * echo $post->tags->has(1);
-     * echo $post->tags->has(['name'=>'tag a']);
-     *
-     * @param array|RecordInterface|mixed $query Fields, entity or PK.
-     *
-     * @return bool
-     */
-    public function has($query)
-    {
-        return !empty($this->matchOne($query));
-    }
-
-    /**
-     * Fine one entity for a given query or return null. Method will autoload data.
-     *
-     * Example: ->matchOne(['value' => 'something', ...]);
-     *
-     * @param array|RecordInterface|mixed $query Fields, entity or PK.
-     *
-     * @return RecordInterface|null
-     */
-    public function matchOne($query)
-    {
-        foreach ($this->loadData(true)->linked as $instance) {
-            if ($this->match($instance, $query)) {
-                return $instance;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Return only instances matched given query, performed in memory! Only simple conditions are
-     * allowed. Not "find" due trademark violation. Method will autoload data.
-     *
-     * Example: ->matchMultiple(['value' => 'something', ...]);
-     *
-     * @param array|RecordInterface|mixed $query Fields, entity or PK.
-     *
-     * @return \ArrayIterator
-     */
-    public function matchMultiple($query)
-    {
-        $result = [];
-        foreach ($this->loadData()->linked as $instance) {
-            if ($this->match($instance, $query)) {
-                $result[] = $instance;
-            }
-        }
-
-        return new \ArrayIterator($result);
     }
 
     /**
@@ -334,7 +224,7 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
             $transaction->addCommand($command);
         }
 
-        foreach ($this->linked as $record) {
+        foreach ($this->instances as $record) {
             //Leading command
             $transaction->addCommand($recordCommand = $record->queueStore(), true);
 
@@ -386,36 +276,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
-     * Load related records from database.
-     *
-     * @param bool $autoload
-     *
-     * @return self
-     *
-     * @throws SelectorException
-     * @throws QueryException (needs wrapping)
-     */
-    protected function loadData(bool $autoload = true): self
-    {
-        if ($this->loaded) {
-            return $this;
-        }
-
-        $this->loaded = true;
-
-        if (empty($this->data) || !is_array($this->data)) {
-            if ($this->autoload && $autoload) {
-                //Only for non partial selections
-                $this->data = $this->loadRelated();
-            } else {
-                $this->data = [];
-            }
-        }
-
-        return $this->initInstances();
-    }
-
-    /**
      * Fetch data from database. Lazy load. Method require a bit of love.
      *
      * @return array
@@ -452,14 +312,53 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
+     * Create query for lazy loading.
+     *
+     * @param mixed $innerKey
+     *
+     * @return SelectQuery
+     */
+    protected function createQuery($innerKey): SelectQuery
+    {
+        $table = $this->orm->table($this->class);
+        $query = $this->orm->table($this->class)->select();
+
+        //Loader will take care of query configuration
+        $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
+
+        //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
+        $loader = $loader->withContext(
+            $loader,
+            [
+                'alias'      => $table->getName(),
+                'pivotAlias' => $table->getName() . '_pivot',
+                'method'     => RelationLoader::POSTLOAD
+            ]
+        );
+
+        //Configuring query using parent inner key value as reference
+        /** @var ManyToManyLoader $loader */
+        $query = $loader->configureQuery($query, [$innerKey]);
+
+        //Additional pivot conditions
+        $pivotDecorator = new WhereDecorator($query, 'onWhere', $table->getName() . '_pivot');
+        $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
+
+        //Additional where conditions!
+        $decorator = new WhereDecorator($query, 'where', 'root');
+        $decorator->where($this->schema[Record::WHERE]);
+
+        return $query;
+    }
+
+    /**
      * Indicates that records are not linked yet.
      *
      * @param RecordInterface $outer
-     * @param bool            $strict When true will also check that keys are not empty.
      *
      * @return bool
      */
-    protected function isLinked(RecordInterface $outer, bool $strict = false)
+    protected function isLinked(RecordInterface $outer)
     {
         $pivotData = $this->pivotData->offsetGet($outer);
         if (empty($pivotData)) {
@@ -533,74 +432,6 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         }
 
         return $this->pivotTable;
-    }
-
-    /**
-     * Create query for lazy loading.
-     *
-     * @param mixed $innerKey
-     *
-     * @return SelectQuery
-     */
-    protected function createQuery($innerKey): SelectQuery
-    {
-        $table = $this->orm->table($this->class);
-        $query = $this->orm->table($this->class)->select();
-
-        //Loader will take care of query configuration
-        $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
-
-        //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
-        $loader = $loader->withContext(
-            $loader,
-            [
-                'alias'      => $table->getName(),
-                'pivotAlias' => $table->getName() . '_pivot',
-                'method'     => RelationLoader::POSTLOAD
-            ]
-        );
-
-        //Configuring query using parent inner key value as reference
-        /** @var ManyToManyLoader $loader */
-        $query = $loader->configureQuery($query, [$innerKey]);
-
-        //Additional pivot conditions
-        $pivotDecorator = new WhereDecorator($query, 'onWhere', $table->getName() . '_pivot');
-        $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
-
-        //Additional where conditions!
-        $decorator = new WhereDecorator($query, 'where', 'root');
-        $decorator->where($this->schema[Record::WHERE]);
-
-        return $query;
-    }
-
-    /**
-     * Init relations and populate pivot map.
-     *
-     * @return ManyToManyRelation
-     */
-    private function initInstances(): self
-    {
-        if (is_array($this->data) && !empty($this->data)) {
-            //Iterates and instantiate records
-            $iterator = new RecordIterator($this->data, $this->class, $this->orm);
-
-            foreach ($iterator as $pivotData => $item) {
-                if (in_array($item, $this->linked)) {
-                    //Skip duplicates (if any?)
-                    continue;
-                }
-
-                $this->pivotData->attach($item, $pivotData);
-                $this->linked[] = $item;
-            }
-        }
-
-        //Memory free
-        $this->data = [];
-
-        return $this;
     }
 
     /**

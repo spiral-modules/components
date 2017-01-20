@@ -21,7 +21,7 @@ trait LookupTrait
      *
      * @return mixed|null
      */
-    private function lookupKey(
+    protected function lookupKey(
         int $key,
         RecordInterface $record,
         ContextualCommandInterface $command

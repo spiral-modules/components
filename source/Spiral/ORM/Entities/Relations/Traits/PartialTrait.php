@@ -14,7 +14,7 @@ trait PartialTrait
     /**
      * @var bool
      */
-    private $autoload = true;
+    protected $autoload = true;
 
     /**
      * Partial selections will not be autoloaded.

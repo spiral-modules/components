@@ -21,7 +21,7 @@ trait MatchTrait
      *
      * @return bool
      */
-    private function match(RecordInterface $record, $query): bool
+    protected function match(RecordInterface $record, $query): bool
     {
         if ($record === $query) {
             //Strict search

@@ -25,9 +25,7 @@ class Post extends AbstactRecord
             self::HAS_MANY    => Comment::class,
             Comment::INVERSE  => 'post',
             Comment::NULLABLE => false,
-            Comment::WHERE    => [
-                '{@}.approved' => true
-            ]
+            Comment::WHERE    => ['{@}.approved' => true]
         ],
 
         'tags' => [

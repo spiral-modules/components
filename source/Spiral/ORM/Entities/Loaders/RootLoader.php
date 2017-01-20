@@ -82,6 +82,16 @@ class RootLoader extends AbstractLoader
     }
 
     /**
+     * We are using model role as alias. Visibility up.
+     *
+     * @return string
+     */
+    public function getAlias(): string
+    {
+        return $this->orm->define($this->class, ORMInterface::R_ROLE_NAME);
+    }
+
+    /**
      * @param SelectQuery $query
      *
      * @return SelectQuery
@@ -137,16 +147,6 @@ class RootLoader extends AbstractLoader
     {
         $this->query = clone $this->query;
         parent::__clone();
-    }
-
-    /**
-     * We are using model role as alias. Visibility up.
-     *
-     * @return string
-     */
-    protected function getAlias(): string
-    {
-        return $this->orm->define($this->class, ORMInterface::R_ROLE_NAME);
     }
 
     /**

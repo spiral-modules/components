@@ -98,6 +98,16 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Get alias used for primary table.
+     *
+     * @return string
+     */
+    public function getAlias(): string
+    {
+        return $this->loader->getAlias();
+    }
+
+    /**
      * Request primary selector loader to pre-load relation name. Any type of loader can be used
      * for
      * data preloading. ORM loaders by default will select the most efficient way to load related

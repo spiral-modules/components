@@ -17,6 +17,7 @@ use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
+use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
@@ -68,6 +69,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
         array $data = null
     ): RelationInterface {
         $hasMany = parent::withContext($parent, $loaded, $data);
+
         /** @var self $hasMany */
         return $hasMany->initInstances();
     }
@@ -311,11 +313,19 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
     {
         $innerKey = $this->key(Record::INNER_KEY);
         if (!empty($this->parent->getField($innerKey))) {
-            return $this->orm
-                ->selector($this->class)
-                ->where($this->key(Record::OUTER_KEY), $this->parent->getField($innerKey))
-                ->where($this->schema[Record::WHERE])
-                ->fetchData();
+            //Getting outer records selector
+            $selector = $this->orm->selector($this->class)->where(
+                $this->key(Record::OUTER_KEY),
+                $this->parent->getField($innerKey)
+            );
+
+            if (!empty($this->schema[Record::WHERE])) {
+                //Configuring where conditions with alias resolution
+                $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
+                $decorator->where($this->schema[Record::WHERE]);
+            }
+
+            return $selector->fetchData();
         }
 
         return [];

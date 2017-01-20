@@ -9,6 +9,7 @@ namespace Spiral\ORM\Helpers;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;
 use Spiral\Database\Exceptions\BuilderException;
+use Spiral\ORM\Entities\RecordSelector;
 
 /**
  * WhereDecorator used to trick user functions and route where() calls to specified destination
@@ -40,16 +41,16 @@ class WhereDecorator
     /**
      * Decorated query builder.
      *
-     * @var AbstractSelect
+     * @var AbstractSelect|RecordSelector
      */
     protected $query = null;
 
     /**
-     * @param AbstractSelect $query
-     * @param string         $target
-     * @param string         $alias
+     * @param AbstractSelect|RecordSelector $query
+     * @param string                        $target
+     * @param string                        $alias
      */
-    public function __construct(AbstractSelect $query, string $target = 'where', string $alias = '')
+    public function __construct($query, string $target = 'where', string $alias = '')
     {
         $this->query = $query;
         $this->target = $target;

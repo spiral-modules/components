@@ -705,13 +705,12 @@ abstract class HasManyRelationTest extends BaseTest
 
         $post = $this->orm->selector(Post::class)
             ->wherePK($post->primaryKey())
-            ->with('approved_comments')
-            ->load('comments', [
-                'using' => 'post_approved_comments'
-            ])
+            ->with('approved_comments', ['alias' => 'ac'])
+            ->load('comments', ['using' => 'ac'])
             ->findOne();
 
         $this->assertCount(1, $post->comments);
+        $this->assertCount(1, $post->approved_comments);
 
         $this->assertFalse($post->comments->has($comment));
         $this->assertTrue($post->comments->has($comment2));

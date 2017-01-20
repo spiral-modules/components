@@ -14,10 +14,20 @@ class Post extends AbstactRecord
         'content' => 'text',
         'public'  => 'bool',
 
-        'comments' => [
+        'comments'          => [
             self::HAS_MANY    => Comment::class,
             Comment::INVERSE  => 'post',
             Comment::NULLABLE => false
+        ],
+
+        //Only approved comments
+        'approved_comments' => [
+            self::HAS_MANY    => Comment::class,
+            Comment::INVERSE  => 'post',
+            Comment::NULLABLE => false,
+            Comment::WHERE    => [
+                '{@}.approved' => true
+            ]
         ],
 
         'tags' => [

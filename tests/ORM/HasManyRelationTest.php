@@ -123,7 +123,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(3, $dbPost->comments);
 
         $this->assertTrue($dbPost->comments->has($comment));
-        $this->assertTrue($dbPost->comments->has($comment2->getFields()));
+        $this->assertTrue($dbPost->comments->has($comment2));
         $this->assertTrue($dbPost->comments->has(['message' => 'hi3']));
     }
 
@@ -136,7 +136,7 @@ abstract class HasManyRelationTest extends BaseTest
         $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
 
         $this->assertTrue($post->comments->has($comment));
-        $this->assertTrue($post->comments->has($comment2->getFields()));
+        $this->assertTrue($post->comments->has($comment2));
         $this->assertTrue($post->comments->has(['message' => 'hi3']));
         $this->assertCount(3, $post->comments);
 
@@ -163,7 +163,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(3, $dbPost->comments);
 
         $this->assertTrue($dbPost->comments->has($comment));
-        $this->assertTrue($dbPost->comments->has($comment2->getFields()));
+        $this->assertTrue($dbPost->comments->has($comment2));
         $this->assertTrue($dbPost->comments->has(['message' => 'hi3']));
     }
 
@@ -201,7 +201,7 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertCount(3, $dbPost->comments);
 
         $this->assertTrue($dbPost->comments->has($comment));
-        $this->assertTrue($dbPost->comments->has($comment2->getFields()));
+        $this->assertTrue($dbPost->comments->has($comment2));
         $this->assertTrue($dbPost->comments->has(['message' => 'hi3']));
     }
 
@@ -335,7 +335,7 @@ abstract class HasManyRelationTest extends BaseTest
         $post = $this->orm->source(Post::class)->findByPK($post->primaryKey());
 
         $this->assertTrue($post->comments->has($comment));
-        $this->assertTrue($post->comments->has($comment2->getFields()));
+        $this->assertTrue($post->comments->has($comment2));
         $this->assertFalse($post->comments->has(['message' => 'hi3']));
 
         $this->assertSameInDB($post);
@@ -686,6 +686,35 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSimilar($post2, $this->orm->selector(Post::class)
             ->with('comments', ['where' => ['{@}.message' => 'hi3']])
             ->findOne());
+    }
+
+    public function testWithPartialUsing()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi', 'approved' => true]));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+        $post->save();
+
+        $this->assertCount(3, $this->db->comments);
+
+        $this->assertSame(1, $this->orm->selector(Post::class)
+            ->with('approved_comments')
+            ->count());
+
+        $post = $this->orm->selector(Post::class)
+            ->wherePK($post->primaryKey())
+            ->with('approved_comments')
+            ->load('comments', [
+                'using' => 'post_approved_comments'
+            ])
+            ->findOne();
+
+        $this->assertCount(1, $post->comments);
+
+        $this->assertFalse($post->comments->has($comment));
+        $this->assertTrue($post->comments->has($comment2));
     }
 
     public function testClearPartial()

@@ -754,7 +754,15 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertTrue((bool)$post->tags->getPivot($tag1)['magic']);
 
         $post->tags->link($tag1, ['magic' => false]);
+
+        //Ensure reference
+        $tag = $post->tags->matchOne($tag1);
+        $tag->name = 'tag x';
+
         $post->save();
+
+        //Must be updated
+        $this->assertSameInDB($tag);
 
         $this->assertFalse((bool)$post->tags->getPivot($tag1)['magic']);
 

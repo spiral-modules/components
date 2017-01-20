@@ -151,6 +151,9 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     /**
      * Link record with parent entity. Only record instances is accepted.
      *
+     * Attention, attached instances MIGHT be de-referenced IF parent object was reselected in a
+     * different scope.
+     *
      * @param RecordInterface $record
      * @param array           $pivotData
      *

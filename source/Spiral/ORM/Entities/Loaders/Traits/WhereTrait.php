@@ -22,7 +22,7 @@ trait WhereTrait
      * @param string      $target Query target section (accepts: where, having, onWhere, on)
      * @param array       $where  Where conditions in a form or short array form.
      */
-    public function setWhere(SelectQuery $query, string $table, string $target, array $where = null)
+    private function setWhere(SelectQuery $query, string $table, string $target, array $where = null)
     {
         if (empty($where)) {
             //No conditions, nothing to do

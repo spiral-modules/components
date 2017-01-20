@@ -12,7 +12,7 @@ use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\Loaders\RootLoader;
-use Spiral\ORM\Entities\Nodes\RootNode;
+use Spiral\ORM\Entities\Nodes\OutputNode;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
@@ -385,6 +385,16 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Query used as basement for relation.
+     *
+     * @return SelectQuery
+     */
+    public function initialQuery(): SelectQuery
+    {
+        return $this->loader->initialQuery();
+    }
+
+    /**
      * Get compiled version of SelectQuery, attentionly only first level query access is allowed.
      *
      * @return SelectQuery
@@ -397,14 +407,15 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     /**
      * Load data tree from databases and linked loaders in a form of array.
      *
+     * @param OutputNode $node When empty node will be created automatically by root relation
+     *                         loader.
+     *
      * @return array
      */
-    public function fetchData(): array
+    public function fetchData(OutputNode $node = null): array
     {
-        /**
-         * @var RootNode $node
-         */
-        $node = $this->loader->createNode();
+        /** @var OutputNode $node */
+        $node = $node ?? $this->loader->createNode();
 
         //Working with parser defined by loader itself
         $this->loader->loadData($node);

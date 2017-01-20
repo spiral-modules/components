@@ -12,6 +12,7 @@ use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordIterator;
+use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
@@ -311,24 +312,37 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
      */
     protected function loadRelated(): array
     {
-        $innerKey = $this->key(Record::INNER_KEY);
-        if (!empty($this->parent->getField($innerKey))) {
-            //Getting outer records selector
-            $selector = $this->orm->selector($this->class)->where(
-                $this->key(Record::OUTER_KEY),
-                $this->parent->getField($innerKey)
-            );
-
-            if (!empty($this->schema[Record::WHERE])) {
-                //Configuring where conditions with alias resolution
-                $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
-                $decorator->where($this->schema[Record::WHERE]);
-            }
-
-            return $selector->fetchData();
+        $innerKey = $this->parent->getField($this->key(Record::INNER_KEY));
+        if (!empty($innerKey)) {
+            return $this->createSelector($innerKey)->fetchData();
         }
 
         return [];
+    }
+
+    /**
+     * Create outer selector for a given inner key value.
+     *
+     * @param mixed $innerKey
+     *
+     * @return RecordSelector
+     */
+    protected function createSelector($innerKey): RecordSelector
+    {
+        $selector = $this->orm->selector($this->class)->where(
+            $this->key(Record::OUTER_KEY),
+            $this->parent->getField($innerKey)
+        );
+
+        if (!empty($this->schema[Record::WHERE])) {
+            //Configuring where conditions with alias resolution
+            $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
+            $decorator->where($this->schema[Record::WHERE]);
+
+            return $selector;
+        }
+
+        return $selector;
     }
 
     /**

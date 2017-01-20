@@ -41,8 +41,10 @@ class ManyToManyLoader extends RelationLoader
 
     /**
      * {@inheritdoc}
+     *
+     * Visibility up.
      */
-    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
         if ($this->isJoined()) {
             $query->join(
@@ -64,8 +66,12 @@ class ManyToManyLoader extends RelationLoader
         $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
 
         //Pivot conditions specified in relation schema
-        $this->setWhere($query, $this->pivotAlias(), $whereTarget,
-            $this->schema[Record::WHERE_PIVOT]);
+        $this->setWhere(
+            $query,
+            $this->pivotAlias(),
+            $whereTarget,
+            $this->schema[Record::WHERE_PIVOT]
+        );
 
         //Pivot conditions specified by user
         $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);

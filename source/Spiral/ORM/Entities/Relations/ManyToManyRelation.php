@@ -14,12 +14,16 @@ use Spiral\ORM\Commands\InsertCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\Commands\UpdateCommand;
 use Spiral\ORM\ContextualCommandInterface;
+use Spiral\ORM\Entities\Loaders\ManyToManyLoader;
+use Spiral\ORM\Entities\Loaders\RelationLoader;
+use Spiral\ORM\Entities\Nodes\PivotedRootNode;
 use Spiral\ORM\Entities\RecordIterator;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Entities\Relations\Traits\MatchTrait;
 use Spiral\ORM\Entities\Relations\Traits\PartialTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Exceptions\SelectorException;
+use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 use Spiral\ORM\RelationInterface;
@@ -411,17 +415,61 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
     }
 
     /**
-     * Fetch data from database. Lazy load.
+     * Fetch data from database. Lazy load. Method require a bit of love.
      *
      * @return array
      */
     protected function loadRelated(): array
     {
-        $innerKey = $this->key(Record::INNER_KEY);
+        $innerKey = $this->parent->getField($this->key(Record::INNER_KEY));
+        if (empty($innerKey)) {
+            return [];
+        }
 
-        //todo: load
+        //Let's work with query directly
+        $table = $this->orm->table($this->class);
+        $query = $table->select();
 
-        return [];
+        //Loader will take care of query configuration
+        $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
+
+        //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
+        $loader = $loader->withContext(
+            $loader,
+            ['alias' => $table->getName(), 'method' => RelationLoader::POSTLOAD]
+        );
+
+        //Configuring query using parent inner key value as reference
+        /** @var ManyToManyLoader $loader */
+        $query = $loader->configureQuery($query, [$innerKey]);
+
+        //Additional pivot conditions
+        $pivotDecorator = new WhereDecorator($query, 'onWhere', 'root_pivot');
+        $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
+
+        //Additional where conditions!
+        $decorator = new WhereDecorator($query, 'where', 'root');
+        $decorator->where($this->schema[Record::WHERE]);
+
+        //Use custom node to parse data
+        $node = new PivotedRootNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::PIVOT_COLUMNS],
+            $this->schema[Record::OUTER_KEY],
+            $this->schema[Record::THOUGHT_INNER_KEY],
+            $this->schema[Record::THOUGHT_OUTER_KEY]
+        );
+
+        $iterator = $query->getIterator();
+        foreach ($query->getIterator() as $row) {
+            //Time to parse some data
+            $node->parseRow(0, $row);
+        }
+
+        //Memory free
+        $iterator->close();
+
+        return $node->getResult();
     }
 
     /**

@@ -30,7 +30,20 @@ class Post extends AbstactRecord
 
         'tags' => [
             self::MANY_TO_MANY  => Tag::class,
-            self::PIVOT_COLUMNS => ['time_linked' => 'datetime'],
+            self::PIVOT_COLUMNS => [
+                'time_linked' => 'datetime',
+                'magic'       => 'bool'
+            ],
+            Tag::INVERSE        => 'posts'
+        ],
+
+        'magic_tags' => [
+            self::MANY_TO_MANY  => Tag::class,
+            self::PIVOT_COLUMNS => [
+                'time_linked' => 'datetime',
+                'magic'       => 'bool'
+            ],
+            self::WHERE_PIVOT   => ['{@}.magic' => true],
             Tag::INVERSE        => 'posts'
         ]
     ];

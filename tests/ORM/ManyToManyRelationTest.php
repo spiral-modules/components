@@ -461,6 +461,33 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertCount(0, $this->db->post_tag_map);
     }
 
+    public function testCleanPartial()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags = [
+            $tag1,
+            $tag2 = new Tag(['name' => 'tag b']),
+            null
+        ];
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post->tags = [$tag1];
+
+        $post->save();
+
+        $this->assertCount(1, $post->tags);
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertFalse($post->tags->has($tag2));
+        $this->assertCount(1, $this->db->post_tag_map);
+    }
+
     public function testCleanInMemory()
     {
         $tag1 = new Tag(['name' => 'tag a']);
@@ -480,6 +507,7 @@ abstract class ManyToManyRelationTest extends BaseTest
         $post->save($transaction);
         $post->tags = [];
         $post->save($transaction);
+        $this->assertCount(0, $post->tags);
 
         $transaction->run();
 

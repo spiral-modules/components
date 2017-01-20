@@ -33,7 +33,7 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
      *
      * @var RecordInterface[]
      */
-    private $deletedInstances = [];
+    private $deleteInstances = [];
 
     /**
      * {@inheritdoc}
@@ -52,21 +52,23 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
             throw new RelationException("HasMany relation can only be set with array of entities");
         }
 
-        //todo: optimize this section!? combine values with existed? use flat array
+        //Do not add items twice
+        $matched = [];
+        foreach ($value as $index => $item) {
+            if (is_null($item)) {
+                unset($value[$index]);
+                continue;
+            }
 
-        //Cleaning existed instances
-        $this->deletedInstances = array_unique(array_merge(
-            $this->deletedInstances,
-            $this->instances
-        ));
-
-        $this->instances = [];
-        foreach ($value as $item) {
-            if (!is_null($item)) {
-                $this->assertValid($item);
-                $this->instances[] = $item;
+            $this->assertValid($item);
+            if (!empty($instance = $this->matchOne($item))) {
+                $matched[] = $instance;
+                unset($value[$index]);
             }
         }
+
+        $this->deleteInstances = array_diff($this->instances, $matched);
+        $this->instances = $matched + $value;
     }
 
     /**
@@ -76,7 +78,7 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
      */
     public function getDeleted()
     {
-        return new \ArrayIterator($this->deletedInstances);
+        return new \ArrayIterator($this->deleteInstances);
     }
 
     /**
@@ -115,7 +117,7 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
             if ($this->match($instance, $record)) {
                 //Remove from save
                 unset($this->instances[$index]);
-                $this->deletedInstances[] = $instance;
+                $this->deleteInstances[] = $instance;
                 break;
             }
         }
@@ -132,14 +134,14 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
     {
         //No autoloading here
 
-        if (empty($this->instances) && empty($this->deletedInstances)) {
+        if (empty($this->instances) && empty($this->deleteInstances)) {
             return new NullCommand();
         }
 
         $transaction = new TransactionalCommand();
 
         //Delete old instances first
-        foreach ($this->deletedInstances as $deleted) {
+        foreach ($this->deleteInstances as $deleted) {
             //To de-associate use BELONGS_TO relation
             $transaction->addCommand($deleted->queueDelete());
         }
@@ -150,7 +152,7 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
         }
 
         //Flushing instances
-        $this->deletedInstances = [];
+        $this->deleteInstances = [];
 
         return $transaction;
     }

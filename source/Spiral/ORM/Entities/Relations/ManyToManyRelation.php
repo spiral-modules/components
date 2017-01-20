@@ -424,7 +424,7 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     /**
      * Init relations and populate pivot map.
      *
-     * @return ManyToManyRelation
+     * @return self|MultipleRelation
      */
     protected function initInstances(): MultipleRelation
     {

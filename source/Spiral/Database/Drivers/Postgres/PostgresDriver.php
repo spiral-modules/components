@@ -112,7 +112,7 @@ class PostgresDriver extends Driver
      *
      * @throws DriverException
      */
-    public function getPrimary(string $prefix, string $table): string
+    public function getPrimary(string $prefix, string $table)
     {
         if (!empty($this->memory) && empty($this->primaryKeys)) {
             $this->primaryKeys = (array)$this->memory->loadData($this->getSource() . '.keys');

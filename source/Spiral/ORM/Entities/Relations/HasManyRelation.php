@@ -331,7 +331,7 @@ class HasManyRelation extends AbstractRelation implements \IteratorAggregate, \C
     {
         $selector = $this->orm->selector($this->class)->where(
             $this->key(Record::OUTER_KEY),
-            $this->parent->getField($innerKey)
+            $innerKey
         );
 
         if (!empty($this->schema[Record::WHERE])) {

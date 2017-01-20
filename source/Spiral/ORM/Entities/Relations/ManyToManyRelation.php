@@ -6,6 +6,7 @@
  */
 namespace Spiral\ORM\Entities\Relations;
 
+use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Entities\Table;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\CommandInterface;
@@ -426,30 +427,8 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
             return [];
         }
 
-        //Let's work with query directly
-        $table = $this->orm->table($this->class);
-        $query = $table->select();
-
-        //Loader will take care of query configuration
-        $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
-
-        //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
-        $loader = $loader->withContext(
-            $loader,
-            ['alias' => $table->getName(), 'method' => RelationLoader::POSTLOAD]
-        );
-
-        //Configuring query using parent inner key value as reference
-        /** @var ManyToManyLoader $loader */
-        $query = $loader->configureQuery($query, [$innerKey]);
-
-        //Additional pivot conditions
-        $pivotDecorator = new WhereDecorator($query, 'onWhere', 'root_pivot');
-        $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
-
-        //Additional where conditions!
-        $decorator = new WhereDecorator($query, 'where', 'root');
-        $decorator->where($this->schema[Record::WHERE]);
+        //Work with pre-build query
+        $query = $this->createQuery($innerKey);
 
         //Use custom node to parse data
         $node = new PivotedRootNode(
@@ -554,6 +533,43 @@ class ManyToManyRelation extends AbstractRelation implements \IteratorAggregate,
         }
 
         return $this->pivotTable;
+    }
+
+
+    /**
+     * Create query for lazy loading.
+     *
+     * @param mixed $innerKey
+     *
+     * @return SelectQuery
+     */
+    protected function createQuery($innerKey): SelectQuery
+    {
+        $table = $this->orm->table($this->class);
+        $query = $table->select();
+
+        //Loader will take care of query configuration
+        $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
+
+        //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
+        $loader = $loader->withContext(
+            $loader,
+            ['alias' => $table->getName(), 'method' => RelationLoader::POSTLOAD]
+        );
+
+        //Configuring query using parent inner key value as reference
+        /** @var ManyToManyLoader $loader */
+        $query = $loader->configureQuery($query, [$innerKey]);
+
+        //Additional pivot conditions
+        $pivotDecorator = new WhereDecorator($query, 'onWhere', 'root_pivot');
+        $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
+
+        //Additional where conditions!
+        $decorator = new WhereDecorator($query, 'where', 'root');
+        $decorator->where($this->schema[Record::WHERE]);
+
+        return $query;
     }
 
     /**

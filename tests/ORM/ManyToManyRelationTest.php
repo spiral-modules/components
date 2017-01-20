@@ -234,7 +234,7 @@ abstract class ManyToManyRelationTest extends BaseTest
                 'method' => RelationLoader::INLOAD,
                 'where'  => ['{@}.id' => $tag1->primaryKey()]
             ])
-            ->load('author',[
+            ->load('author', [
                 'method' => RelationLoader::INLOAD,
             ])
             ->wherePK($post->primaryKey())
@@ -261,8 +261,8 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $post = $this->orm->source(Post::class)->find()
             ->load('tags', [
-                'method' => RelationLoader::INLOAD,
-                'wherePivot'  => ['{@}.tag_id' => $tag2->primaryKey()]
+                'method'     => RelationLoader::INLOAD,
+                'wherePivot' => ['{@}.tag_id' => $tag2->primaryKey()]
             ])
             ->wherePK($post->primaryKey())
             ->findOne();
@@ -340,8 +340,8 @@ abstract class ManyToManyRelationTest extends BaseTest
 
         $post = $this->orm->source(Post::class)->find()
             ->load('tags', [
-                'method' => RelationLoader::POSTLOAD,
-                'wherePivot'  => ['{@}.tag_id' => $tag2->primaryKey()]
+                'method'     => RelationLoader::POSTLOAD,
+                'wherePivot' => ['{@}.tag_id' => $tag2->primaryKey()]
             ])
             ->wherePK($post->primaryKey())
             ->findOne();
@@ -379,7 +379,112 @@ abstract class ManyToManyRelationTest extends BaseTest
         $this->assertNotEmpty($post->tags->getPivot($tag2));
     }
 
+    public function testSetRelated()
+    {
+        $post = new Post();
+        $post->author = new User();
 
+        $post->tags = [
+            $tag1 = new Tag(['name' => 'tag a']),
+            $tag2 = new Tag(['name' => 'tag b']),
+            null
+        ];
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertFalse($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(2, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertTrue($post->tags->has($tag2));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
+    }
+
+    public function testSetExisted()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags = [
+            $tag1,
+            $tag2 = new Tag(['name' => 'tag b']),
+            null
+        ];
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post = $this->orm->source(Post::class)->find()
+            ->wherePK($post->primaryKey())
+            ->findOne();
+
+        $this->assertFalse($post->getRelations()->get('tags')->isLoaded());
+        $this->assertCount(2, $post->tags);
+
+        $this->assertTrue($post->tags->has($tag1));
+        $this->assertTrue($post->tags->has($tag2));
+
+        $this->assertNotEmpty($post->tags->getPivot($tag1));
+        $this->assertNotEmpty($post->tags->getPivot($tag2));
+    }
+
+    public function testClean()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags = [
+            $tag1,
+            $tag2 = new Tag(['name' => 'tag b']),
+            null
+        ];
+
+        $post->save();
+        $this->assertCount(2, $this->db->post_tag_map);
+
+        $post->tags = [];
+
+        $post->save();
+        $this->assertCount(0, $this->db->post_tag_map);
+    }
+
+    public function testCleanInMemory()
+    {
+        $tag1 = new Tag(['name' => 'tag a']);
+        $tag1->save();
+
+        $transaction = new Transaction();
+
+        $post = new Post();
+        $post->author = new User();
+
+        $post->tags = [
+            $tag1,
+            $tag2 = new Tag(['name' => 'tag b']),
+            null
+        ];
+
+        $post->save($transaction);
+        $post->tags = [];
+        $post->save($transaction);
+
+        $transaction->run();
+
+        $this->assertCount(0, $this->db->post_tag_map);
+    }
 
     //todo: custom pivot
     //todo: update pivot

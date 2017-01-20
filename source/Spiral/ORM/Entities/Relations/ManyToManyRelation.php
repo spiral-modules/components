@@ -81,6 +81,8 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
 
     /**
      * {@inheritdoc}
+     *
+     * Pivot data must be set separatelly.
      */
     public function setRelated($value)
     {
@@ -94,7 +96,30 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
             throw new RelationException("HasMany relation can only be set with array of entities");
         }
 
-        //todo: write this section!!
+        //Do not add items twice
+        $matched = [];
+        foreach ($value as $index => $record) {
+            if (is_null($record)) {
+                unset($value[$index]);
+                continue;
+            }
+
+            $this->assertValid($record);
+            if (!empty($instance = $this->matchOne($record))) {
+                $matched[] = $instance;
+                unset($value[$index]);
+            }
+        }
+
+        //Unlink records
+        foreach (array_diff($this->instances, $matched) as $record) {
+            $this->unlink($record);
+        }
+
+        //Add new record
+        foreach ($value as $record) {
+            $this->link($record);
+        }
     }
 
     /**

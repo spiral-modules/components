@@ -277,6 +277,44 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     }
 
     /**
+     * Insane method used to properly set pivot command context (where or insert statement) based on
+     * parent and outer records AND/OR based on command promises.
+     *
+     * @param ContextualCommandInterface $pivotCommand
+     * @param RecordInterface            $parent
+     * @param ContextualCommandInterface $parentCommand
+     * @param RecordInterface            $outer
+     * @param ContextualCommandInterface $outerCommand
+     *
+     * @return ContextualCommandInterface
+     */
+    protected function ensureContext(
+        ContextualCommandInterface $pivotCommand,
+        RecordInterface $parent,
+        ContextualCommandInterface $parentCommand,
+        RecordInterface $outer,
+        ContextualCommandInterface $outerCommand
+    ) {
+        //Parent record dependency
+        $parentCommand->onExecute(function ($parentCommand) use ($pivotCommand, $parent) {
+            $pivotCommand->addContext(
+                $this->key(Record::THOUGHT_INNER_KEY),
+                $this->lookupKey(Record::INNER_KEY, $parent, $parentCommand)
+            );
+        });
+
+        //Outer record dependency
+        $outerCommand->onExecute(function ($outerCommand) use ($pivotCommand, $outer) {
+            $pivotCommand->addContext(
+                $this->key(Record::THOUGHT_OUTER_KEY),
+                $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
+            );
+        });
+
+        return $pivotCommand;
+    }
+
+    /**
      * Fetch data from database. Lazy load. Method require a bit of love.
      *
      * @return array
@@ -381,76 +419,9 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     }
 
     /**
-     * Indicates that records are not linked yet.
-     *
-     * @param RecordInterface $outer
-     *
-     * @return bool
-     */
-    protected function isLinked(RecordInterface $outer)
-    {
-        $pivotData = $this->pivotData->offsetGet($outer);
-        if (empty($pivotData)) {
-            //No pivot data at all
-            return false;
-        }
-
-        if (empty($pivotData[$this->key(Record::THOUGHT_OUTER_KEY)])) {
-            //No outer key value
-            return false;
-        }
-
-        if (empty($pivotData[$this->key(Record::THOUGHT_INNER_KEY)])) {
-            //No inner key value
-            return false;
-        }
-
-        //Both keys are set
-        return true;
-    }
-
-    /**
-     * Insane method used to properly set pivot command context (where or insert statement) based on
-     * parent and outer records AND/OR based on command promises.
-     *
-     * @param ContextualCommandInterface $pivotCommand
-     * @param RecordInterface            $parent
-     * @param ContextualCommandInterface $parentCommand
-     * @param RecordInterface            $outer
-     * @param ContextualCommandInterface $outerCommand
-     *
-     * @return ContextualCommandInterface
-     */
-    protected function ensureContext(
-        ContextualCommandInterface $pivotCommand,
-        RecordInterface $parent,
-        ContextualCommandInterface $parentCommand,
-        RecordInterface $outer,
-        ContextualCommandInterface $outerCommand
-    ) {
-        //Parent record dependency
-        $parentCommand->onExecute(function ($parentCommand) use ($pivotCommand, $parent) {
-            $pivotCommand->addContext(
-                $this->key(Record::THOUGHT_INNER_KEY),
-                $this->lookupKey(Record::INNER_KEY, $parent, $parentCommand)
-            );
-        });
-
-        //Outer record dependency
-        $outerCommand->onExecute(function ($outerCommand) use ($pivotCommand, $outer) {
-            $pivotCommand->addContext(
-                $this->key(Record::THOUGHT_OUTER_KEY),
-                $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
-            );
-        });
-
-        return $pivotCommand;
-    }
-
-    /**
      * @return Table
      */
-    protected function pivotTable()
+    private function pivotTable()
     {
         if (empty($this->pivotTable)) {
             $this->pivotTable = $this->orm->database(

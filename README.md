@@ -21,7 +21,7 @@ Spiral Core Components
   - ORM, schema scaffolding, eager loading, transactional operations, memory mapping
   - Migrations (DBAL based), automatic migration scaffolding
   - Iehahrical ODM
-  - Security (NIST RBAC)
+  - Security layer (NIST RBAC)
   - Reactor, code scaffolding
 
 # Running Tests

@@ -157,7 +157,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $container
         );
 
-        $dbal->addDatabase($this->db = new Database($this->getDriver($container), 'default', ''));
+        $dbal->addDatabase($this->db = new Database($this->getDriver($container), 'default', 'tests_'));
         $dbal->addDatabase(new Database($this->getDriver($container), 'slave', 'slave_'));
 
         return $dbal;

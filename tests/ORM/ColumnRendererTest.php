@@ -157,7 +157,7 @@ abstract class ColumnRendererTest extends BaseTest
 
     /**
      * @expectedException \Spiral\ORM\Exceptions\DefinitionException
-     * @expectedExceptionMessage Invalid column type definition in 'sample'.'column'
+     * @expectedExceptionMessage Invalid column type definition in 'tests_sample'.'column'
      */
     public function testRenderBadDeclaration()
     {
@@ -172,7 +172,7 @@ abstract class ColumnRendererTest extends BaseTest
 
     /**
      * @expectedException \Spiral\ORM\Exceptions\DefinitionException
-     * @expectedExceptionMessage Invalid column type definition in 'sample'.'column'
+     * @expectedExceptionMessage Invalid column type definition in 'tests_sample'.'column'
      */
     public function testRenderBadDeclaration2()
     {
@@ -187,7 +187,7 @@ abstract class ColumnRendererTest extends BaseTest
 
     /**
      * @expectedException \Spiral\ORM\Exceptions\DefinitionException
-     * @expectedExceptionMessage Invalid column type definition in 'sample'.'column'
+     * @expectedExceptionMessage Invalid column type definition in 'tests_sample'.'column'
      */
     public function testRenderBadDeclaration3()
     {

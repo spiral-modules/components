@@ -145,7 +145,8 @@ class FileRepository implements RepositoryInterface
         $this->files->write(
             $filename = $this->createFilename($name),
             $body,
-            FilesInterface::READONLY
+            FilesInterface::READONLY,
+            true
         );
 
         return basename($filename);

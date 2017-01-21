@@ -146,6 +146,73 @@ abstract class AtomizerTest extends BaseTest
         $this->assertFalse($this->db->hasTable('sample'));
     }
 
+    public function testCreateAndDropIndex()
+    {
+        //Create thought migration
+        $this->migrator->configure();
+
+        $schema = $this->schema('sample');
+        $schema->primary('id');
+        $schema->integer('value');
+        $schema->index(['value']);
+        $this->atomize('migration1', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasIndex(['value']));
+
+        $schema = $this->schema('sample');
+        $schema->dropIndex(['value']);
+
+        $this->atomize('migration2', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertFalse($this->schema('sample')->hasIndex(['value']));
+
+        $this->migrator->rollback();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasIndex(['value']));
+
+        $this->migrator->rollback();
+        $this->assertFalse($this->db->hasTable('sample'));
+    }
+
+    public function testCreateAndDropColumn()
+    {
+        //Create thought migration
+        $this->migrator->configure();
+
+        $schema = $this->schema('sample');
+        $schema->primary('id');
+        $schema->integer('value');
+        $schema->index(['value']);
+        $this->atomize('migration1', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasIndex(['value']));
+
+        $schema = $this->schema('sample');
+        $schema->dropColumn('value');
+        $schema->string('name', 120);
+
+        $this->atomize('migration2', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertFalse($this->schema('sample')->hasColumn('value'));
+        $this->assertTrue($this->schema('sample')->hasColumn('name'));
+
+        $this->migrator->rollback();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasColumn('value'));
+        $this->assertFalse($this->schema('sample')->hasColumn('name'));
+
+        $this->migrator->rollback();
+        $this->assertFalse($this->db->hasTable('sample'));
+    }
+
     public function testCreateAndThenUpdateEnumDefault()
     {
         //Create thought migration

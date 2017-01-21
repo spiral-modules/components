@@ -8,6 +8,7 @@ namespace Spiral\Database\Entities;
 
 use Psr\Log\LoggerInterface;
 use Spiral\Core\Exceptions\InvalidArgumentException;
+use Spiral\Database\Exceptions\DBALException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Exceptions\SchemaHandlerException;
@@ -127,6 +128,10 @@ abstract class AbstractHandler
     public function syncTable(AbstractTable $table, int $behaviour = self::DO_ALL)
     {
         $comparator = $table->getComparator();
+
+        if ($comparator->isPrimaryChanged()) {
+            throw new DBALException("Unable to change primary keys for existed table");
+        }
 
         if ($comparator->isRenamed() && $behaviour & self::DO_RENAME) {
             $this->log('Renaming table {table} to {name}.', [

@@ -69,4 +69,44 @@ abstract class ComplexAtomizerTest extends BaseTest
         $this->assertFalse($this->db->hasTable('sample1'));
         $this->assertFalse($this->db->hasTable('sample2'));
     }
+
+    public function testCreateAndAddFK()
+    {
+        //Create thought migration
+        $this->migrator->configure();
+
+        $schema = $this->schema('sample');
+        $schema->primary('id');
+        $schema->integer('value');
+        $schema->index(['value']);
+
+        $schema1 = $this->schema('sample1');
+        $schema1->primary('id');
+        $schema1->float('value');
+
+        $this->atomize('migration1', [$schema, $schema1]);
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->db->hasTable('sample1'));
+
+        $schema1 = $this->schema('sample1');
+        $schema1->integer('sample_id');
+        $schema1->foreign('sample_id')->references('sample', 'id');
+
+        $this->atomize('migration2', [$this->schema('sample'), $schema1]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->db->hasTable('sample1'));
+        $this->assertTrue($this->schema('sample1')->hasForeign('sample_id'));
+
+        $this->migrator->rollback();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->db->hasTable('sample1'));
+        $this->assertFalse($this->schema('sample1')->hasForeign('sample_id'));
+
+        $this->migrator->rollback();
+        $this->assertFalse($this->db->hasTable('sample'));
+        $this->assertFalse($this->db->hasTable('sample1'));
+    }
 }

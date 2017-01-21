@@ -213,6 +213,54 @@ abstract class AtomizerTest extends BaseTest
         $this->assertFalse($this->db->hasTable('sample'));
     }
 
+    public function testSetPrimaryKeys()
+    {
+        //Create thought migration
+        $this->migrator->configure();
+
+        $schema = $this->schema('sample');
+        $schema->integer('id')->nullable(false);
+        $schema->integer('value')->nullable(false);
+        $schema->setPrimaryKeys(['id', 'value']);
+
+        $this->atomize('migration1', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertSame(['id', 'value'], $this->schema('sample')->getPrimaryKeys());
+
+        $this->migrator->rollback();
+        $this->assertFalse($this->db->hasTable('sample'));
+    }
+
+    /**
+     * @expectedException \Spiral\Migrations\Exceptions\Operations\TableException
+     */
+    public function testChangePrimaryKeys()
+    {
+        //Create thought migration
+        $this->migrator->configure();
+
+        $schema = $this->schema('sample');
+        $schema->integer('id')->nullable(false);
+        $schema->integer('value')->nullable(false);
+        $schema->setPrimaryKeys(['id', 'value']);
+
+        $this->atomize('migration1', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertSame(['id', 'value'], $this->schema('sample')->getPrimaryKeys());
+
+        $schema = $this->schema('sample');
+        $schema->dropColumn('value');
+        $schema->setPrimaryKeys(['id']);
+
+        $this->atomize('migration2', [$schema]);
+        $this->migrator->run();
+    }
+
+
     public function testCreateAndThenUpdateEnumDefault()
     {
         //Create thought migration

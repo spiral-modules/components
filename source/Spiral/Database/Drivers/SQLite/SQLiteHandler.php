@@ -7,6 +7,7 @@
 namespace Spiral\Database\Drivers\SQLite;
 
 use Spiral\Database\Entities\AbstractHandler;
+use Spiral\Database\Exceptions\DBALException;
 use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
@@ -40,6 +41,10 @@ class SQLiteHandler extends AbstractHandler
             parent::syncTable($table, $behaviour);
 
             return;
+        }
+
+        if ($table->getComparator()->isPrimaryChanged()) {
+            throw new DBALException("Unable to change primary keys for existed table");
         }
 
         //Now we have to work with temporary table in order to perform every change

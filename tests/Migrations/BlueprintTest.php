@@ -189,7 +189,6 @@ abstract class BlueprintTest extends BaseTest
         $blueprint->addColumn('value', 'int')->update();
     }
 
-
     /**
      * @expectedException \Spiral\Migrations\Exceptions\Operations\IndexException
      */

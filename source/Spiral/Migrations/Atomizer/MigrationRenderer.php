@@ -50,6 +50,12 @@ class MigrationRenderer implements RendererInterface
         $this->declareIndexes($source, $comparator);
         $this->declareForeigns($source, $comparator, $table->getPrefix());
 
+        if (count($table->getPrimaryKeys())) {
+            $source->addString(
+                "    ->setPrimaryKeys({$this->getSerializer()->serialize($table->getPrimaryKeys())})"
+            );
+        }
+
         //Finalization
         $source->addLine("    ->create();");
     }
@@ -63,6 +69,12 @@ class MigrationRenderer implements RendererInterface
         $source->addLine("\$this->table({$this->tableAlias($table)})");
 
         $comparator = $table->getComparator();
+
+        if ($comparator->isPrimaryChanged()) {
+            $source->addString(
+                "    ->setPrimaryKeys({$this->getSerializer()->serialize($table->getPrimaryKeys())})"
+            );
+        }
 
         $this->declareColumns($source, $comparator);
         $this->declareIndexes($source, $comparator);

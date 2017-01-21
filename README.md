@@ -18,7 +18,7 @@ Spiral Core Components
   - FileManager and Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)
   - Pagination
   - DBAL, schema introspection, comparision, sql fallbacks, nested queries
-  - ORM, schema scaffolding, eager loading, transactional operations, memory mapping
+  - ORM, schema scaffolding, eager loading, lazy loading, transactional operations, memory mapping
   - Migrations (DBAL based), automatic migration scaffolding
   - Iehahrical ODM
   - Security layer (NIST RBAC)

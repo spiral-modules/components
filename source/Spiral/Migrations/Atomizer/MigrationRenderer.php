@@ -125,12 +125,23 @@ class MigrationRenderer implements RendererInterface
         foreach ($comparator->alteredColumns() as $pair) {
             /**
              * @var AbstractColumn $column
+             * @var AbstractColumn $original
              */
             $column = $pair[self::NEW_STATE];
+            $original = $pair[self::ORIGINAL_STATE];
 
-            $name = "'{$column->getName()}'";
+            if ($column->getName() != $original->getName()) {
+                $name = "'{$original->getName()}'";
+            } else {
+                $name = "'{$column->getName()}'";
+            }
+
             $type = "'{$column->abstractType()}'";
             $source->addString("    ->alterColumn({$name}, {$type}, {$this->columnOptions($column)})");
+
+            if ($column->getName() != $original->getName()) {
+                $source->addString("    ->renameColumn({$name}, '{$column->getName()}')");
+            }
         }
 
         foreach ($comparator->droppedColumns() as $column) {
@@ -222,12 +233,23 @@ class MigrationRenderer implements RendererInterface
         foreach ($comparator->alteredColumns() as $pair) {
             /**
              * @var AbstractColumn $column
+             * @var AbstractColumn $original
              */
             $column = $pair[self::ORIGINAL_STATE];
+            $original = $pair[self::NEW_STATE];
 
-            $name = "'{$column->getName()}'";
+            if ($column->getName() != $original->getName()) {
+                $name = "'{$original->getName()}'";
+            } else {
+                $name = "'{$column->getName()}'";
+            }
+
             $type = "'{$column->abstractType()}'";
             $source->addString("    ->alterColumn({$name}, {$type}, {$this->columnOptions($column)})");
+
+            if ($column->getName() != $original->getName()) {
+                $source->addString("    ->renameColumn({$name}, '{$column->getName()}')");
+            }
         }
 
         foreach ($comparator->addedColumns() as $column) {

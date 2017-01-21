@@ -79,7 +79,7 @@ class ManyToManyLoader extends RelationLoader
         if ($this->isJoined()) {
             //Actual data is always INNER join
             $query->join(
-                'INNER',
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
                 $this->getTable() . ' AS ' . $this->getAlias(),
                 [$this->localKey(Record::OUTER_KEY) => $this->pivotKey(Record::THOUGHT_OUTER_KEY)]
             );

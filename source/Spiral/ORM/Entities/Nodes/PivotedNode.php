@@ -64,7 +64,7 @@ class PivotedNode extends AbstractNode implements ArrayInterface
             throw new NodeException("Unable to register data tree, parent is missing");
         }
 
-        if (is_null($data[ORMInterface::PIVOT_DATA][$this->outerPivotKey])) {
+        if (is_null($data[$this->outerKey])) {
             //No data was loaded
             return;
         }

@@ -249,4 +249,28 @@ abstract class NestedRelationsTest extends BaseTest
             }
         }
     }
+
+    public function testComplexInverseButNoTags()
+    {
+        $post = new Post();
+        $post->title = 'title';
+        $post->author = new User();
+        $post->author->profile->bio = 'hello world';
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+
+        $post->save();
+
+        /**
+         * @var Post $dbPost
+         */
+        $dbPost = $this->orm->withMap(null)->selector(Post::class)
+            ->load('tags', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts.author', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts.author.profile', ['method' => RelationLoader::INLOAD])
+            ->load('tags.posts.comments', ['method' => RelationLoader::INLOAD])
+            ->findOne();
+
+        $this->assertNotEmpty($dbPost);
+    }
 }

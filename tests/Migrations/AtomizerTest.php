@@ -99,7 +99,7 @@ abstract class AtomizerTest extends BaseTest
         $this->assertFalse($this->db->hasTable('sample'));
     }
 
-    public function testCreateAndTThenAddIndex()
+    public function testCreateAndTThenAddIndexAndMakeUnique()
     {
         //Create thought migration
         $this->migrator->configure();
@@ -121,6 +121,22 @@ abstract class AtomizerTest extends BaseTest
         $this->migrator->run();
         $this->assertTrue($this->db->hasTable('sample'));
         $this->assertTrue($this->schema('sample')->hasIndex(['value']));
+        $this->assertFalse($this->schema('sample')->index(['value'])->isUnique());
+
+        $schema = $this->schema('sample');
+        $schema->index(['value'])->unique(true);
+
+        $this->atomize('migration3', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasIndex(['value']));
+        $this->assertTrue($this->schema('sample')->index(['value'])->isUnique());
+
+        $this->migrator->rollback();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasIndex(['value']));
+        $this->assertFalse($this->schema('sample')->index(['value'])->isUnique());
 
         $this->migrator->rollback();
         $this->assertTrue($this->db->hasTable('sample'));

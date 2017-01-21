@@ -22,7 +22,7 @@ Spiral Core Components
   - ORM, schema scaffolding, eager loading, transactional operations, memory mapping
   - Iehahrical ODM
   - Security (NIST RBAC)
-  - Code scaffolding
+  - Reactor, code scaffolding
 
 # Running Tests
 Install component dependencies first, make sure you have proper .env file with details about

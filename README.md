@@ -12,7 +12,7 @@ Spiral Core Components
 
 # Components included
   - Core interfaces, autowiring DI, declarative singletons and auto injections
-  - Stempler template processor
+  - Stempler template composer (HTML syntax)
   - Tokenizer, class locator, invocation locator
   - Debug, Profiling and Dump components
   - FileManager and Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)

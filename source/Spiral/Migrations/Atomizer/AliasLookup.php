@@ -33,17 +33,12 @@ class AliasLookup
      * Local database alias (no prefix included).
      *
      * @param AbstractTable $table
-     * @param bool          $initial Request initial table name.
      *
      * @return string
      */
-    public function tableAlias(AbstractTable $table, bool $initial = false): string
+    public function tableAlias(AbstractTable $table): string
     {
-        if ($initial) {
-            return substr($table->getInitialName(), strlen($table->getPrefix()));
-        }
-
-        return substr($table->getName(), strlen($table->getPrefix()));
+         return substr($table->getName(), strlen($table->getPrefix()));
     }
 
     /**

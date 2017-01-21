@@ -24,10 +24,10 @@ abstract class ColumnOperation extends TableOperation
      *
      * @var array
      */
-    private $aliases = [
-        'size'     => ['length', 'limit'],
-        'default'  => ['defaultValue'],
-        'nullable' => ['null']
+    protected $aliases = [
+        'size'    => ['length', 'limit'],
+        'default' => ['defaultValue'],
+        'null'    => ['nullable']
     ];
 
     /**

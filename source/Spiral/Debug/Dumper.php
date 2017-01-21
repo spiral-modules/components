@@ -249,8 +249,12 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         }
 
         //Let's use method specifically created for dumping
-        if (method_exists($object, '__debugInfo')) {
-            $debugInfo = $object->__debugInfo();
+        if (method_exists($object, '__debugInfo') || $object instanceof \Closure) {
+            if ($object instanceof \Closure) {
+                $debugInfo = $this->describeClosure($object);
+            } else {
+                $debugInfo = $object->__debugInfo();
+            }
 
             if (is_array($debugInfo)) {
                 //Pretty view
@@ -267,16 +271,11 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
                 . $indent . $this->style->apply(')', 'syntax', ')') . "\n";
         }
 
-        if ($object instanceof \Closure) {
-            //todo: future, dump source code of closure
-            $output = '';
-        } else {
-            $refection = new \ReflectionObject($object);
+        $refection = new \ReflectionObject($object);
 
-            $output = '';
-            foreach ($refection->getProperties() as $property) {
-                $output .= $this->dumpProperty($object, $property, $level);
-            }
+        $output = '';
+        foreach ($refection->getProperties() as $property) {
+            $output .= $this->dumpProperty($object, $property, $level);
         }
 
         //Header, content, footer
@@ -312,13 +311,32 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         $property->setAccessible(true);
 
         if ($object instanceof \stdClass) {
-            $access = 'dynamic';
+            //Let's keep access undefined for arrays converted into objects
+            $access = '';
         }
 
         //Property name includes access level
         $name = $property->getName() . $this->style->apply(':' . $access, 'access', $access);
 
         return $this->dumpValue($property->getValue($object), $name, $level + 1);
+    }
+
+    /**
+     * Fetch information about the closure.
+     *
+     * @param \Closure $closure
+     *
+     * @return array
+     */
+    private function describeClosure(\Closure $closure): array
+    {
+        $reflection = new \ReflectionFunction($closure);
+
+        return [
+            'name' => $reflection->getName() . " (lines {$reflection->getStartLine()}:{$reflection->getEndLine()})",
+            'file' => $reflection->getFileName(),
+            'this' => $reflection->getClosureThis()
+        ];
     }
 
     /**

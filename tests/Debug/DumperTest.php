@@ -137,4 +137,16 @@ class DumperTest extends \PHPUnit_Framework_TestCase
         $this->assertNotContains('_inner_', $dump);
         $this->assertNotContains('_kk_', $dump);
     }
+
+    public function testDumpClosure()
+    {
+        $dumper = new Dumper();
+
+        $dump = $dumper->dump(function () {
+            echo 'hello world';
+        }, Dumper::OUTPUT_RETURN);
+
+        $this->assertContains('Closure', $dump);
+        $this->assertContains('DumperTest.php', $dump);
+    }
 }

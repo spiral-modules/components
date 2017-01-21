@@ -136,7 +136,7 @@ final class Transaction implements TransactionInterface
             throw $e;
         }
 
-        foreach ($wrappedDrivers as $driver) {
+        foreach (array_reverse($wrappedDrivers) as $driver) {
             $driver->commitTransaction();
         }
 

@@ -17,7 +17,7 @@ Spiral Core Components
   - Debug, Profiling and Dump components
   - FileManager and Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)
   - Pagination
-  - DBAL, Schema introspection, comparation, scaffolding, nested queries
+  - DBAL, Schema introspection, comparision, scaffolding, nested queries
   - Migrations (DBAL based) and automatic migration scaffolding
   - ORM, schema scaffolding, eager loading, transactional active record, memory mapping
   - Iehahrical ODM

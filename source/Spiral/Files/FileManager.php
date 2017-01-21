@@ -340,7 +340,6 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      *
-     * @deprecated user Finder directly
      * @param Finder $finder Optional initial finder.
      */
     public function getFiles(string $location, string $pattern = null, Finder $finder = null): array

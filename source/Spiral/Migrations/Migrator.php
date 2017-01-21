@@ -77,7 +77,7 @@ class Migrator extends Component implements SingletonInterface
          * Schema update will automatically sync all needed data
          */
         $schema->primary('id');
-        $schema->string('migration', 255);
+        $schema->string('migration', 255)->nullable(false);
         $schema->datetime('time_executed')->datetime();
         $schema->index(['migration']);
 
@@ -252,6 +252,7 @@ class Migrator extends Component implements SingletonInterface
             $this->rollbackTransactions();
             throw $e;
         }
+
         $this->commitTransactions();
     }
 

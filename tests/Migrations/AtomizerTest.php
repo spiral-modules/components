@@ -103,7 +103,7 @@ abstract class AtomizerTest extends BaseTest
 
         $schema = $this->schema('sample');
         $schema->primary('id');
-        $schema->enum('value', ['a', 'b']);
+        $schema->enum('value', ['a', 'b'])->defaultValue('a');
         $schema->index(['value']);
         $this->atomize('migration1', [$schema]);
 
@@ -169,6 +169,9 @@ abstract class AtomizerTest extends BaseTest
 
     protected function atomize(string $name, array $tables)
     {
+        //Make sure name is unique
+        $name = $name . '_' . crc32(microtime(true));
+
         $atomizer = new Atomizer(
             new Atomizer\MigrationRenderer(new Atomizer\AliasLookup($this->dbal))
         );

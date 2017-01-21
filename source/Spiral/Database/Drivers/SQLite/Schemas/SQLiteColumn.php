@@ -17,6 +17,14 @@ class SQLiteColumn extends AbstractColumn
     const DATETIME_NOW = 'CURRENT_TIMESTAMP';
 
     /**
+     * Private state related values.
+     */
+    const EXCLUDE_FROM_COMPARE = [
+        'timezone',
+        'size'
+    ];
+
+    /**
      * {@inheritdoc}
      */
     protected $mapping = [
@@ -36,7 +44,7 @@ class SQLiteColumn extends AbstractColumn
         'enum'        => 'enum',
 
         //Logical types
-        'boolean'     => 'int',
+        'boolean'     => 'integer',
 
         //Integer types (size can always be changed with size method), longInteger has method alias
         //bigInteger

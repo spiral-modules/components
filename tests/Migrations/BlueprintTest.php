@@ -170,6 +170,27 @@ abstract class BlueprintTest extends BaseTest
     }
 
     /**
+     * @expectedException \Spiral\Migrations\Exceptions\Operations\ColumnException
+     */
+    public function testUpdateTableError5()
+    {
+        $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample');
+
+        $blueprint->addColumn('id', 'primary')
+            ->addColumn('value', 'enum', ['default' => 1])
+            ->addIndex(['value'], ['unique' => true])
+            ->create();
+
+        //Not created
+        $this->assertTrue($blueprint->getSchema()->exists());
+
+        $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample');
+
+        $blueprint->addColumn('value', 'int')->update();
+    }
+
+
+    /**
      * @expectedException \Spiral\Migrations\Exceptions\Operations\IndexException
      */
     public function testUpdateTableError3()

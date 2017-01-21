@@ -148,5 +148,9 @@ class DumperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertContains('Closure', $dump);
         $this->assertContains('DumperTest.php', $dump);
+
+        $dumper->dump(function () {
+            echo 'hello world';
+        });
     }
 }

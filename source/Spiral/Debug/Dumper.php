@@ -17,6 +17,8 @@ use Spiral\Debug\Dumper\Style;
 
 /**
  * One of the oldest spiral parts, used to dump variables content in user friendly way.
+ *
+ * @todo need cli style
  */
 class Dumper extends Component implements SingletonInterface, LoggerAwareInterface
 {
@@ -76,7 +78,7 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
     }
 
     /**
-     * Dump specified value.
+     * Dump specified value. Dumper will automatically detect CLI mode in OUTPUT_ECHO mode.
      *
      * @param mixed $value
      * @param int   $output

@@ -6,10 +6,7 @@
  */
 namespace Spiral\Tests\Migrations;
 
-use Spiral\Migrations\Atomizer;
 use Spiral\Migrations\Migration;
-use Spiral\Reactor\ClassDeclaration;
-use Spiral\Reactor\FileDeclaration;
 
 abstract class AtomizerTest extends BaseTest
 {
@@ -24,7 +21,13 @@ abstract class AtomizerTest extends BaseTest
         $schema->index(['value']);
 
         $this->atomize('migration1', [$schema]);
-        $this->migrator->run();
+        $migration = $this->migrator->run();
+
+        $this->assertInstanceOf(Migration::class, $migration);
+        $this->assertSame(Migration\State::STATUS_EXECUTED, $migration->getState()->getStatus());
+        $this->assertInstanceOf(\DateTime::class, $migration->getState()->getTimeCreated());
+        $this->assertInstanceOf(\DateTime::class, $migration->getState()->getTimeExecuted());
+
         $this->assertTrue($this->db->hasTable('sample'));
 
         $this->migrator->rollback();

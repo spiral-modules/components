@@ -145,7 +145,10 @@ class Migrator extends Component implements SingletonInterface
                 'time_executed' => new \DateTime('now')
             ]);
 
-            return $migration;
+            //Update migration state
+            return $migration->withState(
+                $this->resolveStatus($migration->getState())
+            );
         }
 
         return null;
@@ -187,7 +190,10 @@ class Migrator extends Component implements SingletonInterface
                 'migration' => $migration->getState()->getName()
             ])->run();
 
-            return $migration;
+            //Update migration state
+            return $migration->withState(
+                $this->resolveStatus($migration->getState())
+            );
         }
 
         return null;
@@ -210,24 +216,24 @@ class Migrator extends Component implements SingletonInterface
     /**
      * Clarify migration state with valid status and execution time
      *
-     * @param State $meta
+     * @param State $initialState
      *
      * @return State
      */
-    protected function resolveStatus(State $meta)
+    protected function resolveStatus(State $initialState)
     {
         //Fetch migration information from database
         $state = $this->stateTable()
             ->select('id', 'time_executed')
-            ->where(['migration' => $meta->getName()])
+            ->where(['migration' => $initialState->getName()])
             ->run()
             ->fetch();
 
         if (empty($state['time_executed'])) {
-            return $meta->withStatus(State::STATUS_PENDING);
+            return $initialState->withStatus(State::STATUS_PENDING);
         }
 
-        return $meta->withStatus(
+        return $initialState->withStatus(
             State::STATUS_EXECUTED,
             new \DateTime(
                 $state['time_executed'],

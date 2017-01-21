@@ -10,6 +10,7 @@ use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Exceptions\DBALException;
 use Spiral\Database\Exceptions\SchemaHandlerException;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
+use Spiral\Database\Schemas\Prototypes\AbstractIndex;
 use Spiral\Database\Schemas\Prototypes\AbstractReference;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 

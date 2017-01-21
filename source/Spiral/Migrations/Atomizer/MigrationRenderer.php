@@ -61,12 +61,8 @@ class MigrationRenderer implements RendererInterface
     {
         //Get table blueprint
         $source->addLine("\$this->table({$this->tableAlias($table)})");
-        $comparator = $table->getComparator();
 
-        if ($table->getInitialName() != $table->getName()) {
-            //Renamig table
-            $source->addLine("    ->renameTable({$this->lookup->tableAlias($table)})");
-        }
+        $comparator = $table->getComparator();
 
         $this->declareColumns($source, $comparator);
         $this->declareIndexes($source, $comparator);

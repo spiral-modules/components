@@ -18,7 +18,7 @@ class DropIndex extends IndexOperation
      */
     public function execute(CapsuleInterface $capsule)
     {
-        $schema = $capsule->getSchema($this->getDatabase(), $this->getTable());
+        $schema = $capsule->getSchema($this->getTable(), $this->getDatabase());
 
         if (!$schema->hasIndex($this->columns)) {
             $columns = join(',', $this->columns);

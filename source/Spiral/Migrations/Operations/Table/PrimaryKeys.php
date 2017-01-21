@@ -34,7 +34,7 @@ class PrimaryKeys extends TableOperation
      */
     public function execute(CapsuleInterface $capsule)
     {
-        $schema = $capsule->getSchema($this->getDatabase(), $this->getTable());
+        $schema = $capsule->getSchema($this->getTable(), $this->getDatabase());
         $database = $this->database ?? '[default]';
 
         if ($schema->exists()) {

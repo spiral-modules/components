@@ -18,7 +18,7 @@ class AlterColumn extends ColumnOperation
      */
     public function execute(CapsuleInterface $capsule)
     {
-        $schema = $capsule->getSchema($this->getDatabase(), $this->getTable());
+        $schema = $capsule->getSchema($this->getTable(), $this->getDatabase());
 
         if (!$schema->hasColumn($this->name)) {
             throw new ColumnException(

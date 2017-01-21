@@ -13,6 +13,7 @@ use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\Table;
 use Spiral\Migrations\Configs\MigrationsConfig;
+use Spiral\Migrations\Exceptions\MigrationException;
 use Spiral\Migrations\Migration\State;
 
 /**
@@ -118,6 +119,10 @@ class Migrator extends Component implements SingletonInterface
     {
         $capsule = $capsule ?? new MigrationCapsule($this->dbal);
 
+        if (!$this->isConfigured()) {
+            throw new MigrationException("Unable to run migration, Migrator not configured");
+        }
+
         /**
          * @var MigrationInterface $migration
          */
@@ -156,6 +161,10 @@ class Migrator extends Component implements SingletonInterface
     public function rollback(CapsuleInterface $capsule = null)
     {
         $capsule = $capsule ?? new MigrationCapsule($this->dbal);
+
+        if (!$this->isConfigured()) {
+            throw new MigrationException("Unable to run migration, Migrator not configured");
+        }
 
         /**
          * @var MigrationInterface $migration

@@ -66,7 +66,7 @@ class AddReference extends ReferenceOperation
      */
     public function execute(CapsuleInterface $capsule)
     {
-        $schema = $capsule->getSchema($this->getDatabase(), $this->getTable());
+        $schema = $capsule->getSchema($this->getTable(), $this->getDatabase());
 
         if ($schema->hasForeign($this->column)) {
             throw new ReferenceException(
@@ -75,7 +75,7 @@ class AddReference extends ReferenceOperation
             );
         }
 
-        $outerSchema = $capsule->getSchema($this->database, $this->foreignTable);
+        $outerSchema = $capsule->getSchema($this->foreignTable, $this->database);
 
         if ($this->foreignTable != $this->table && !$outerSchema->exists()) {
             throw new ReferenceException(

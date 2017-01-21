@@ -298,30 +298,22 @@ class MigrationRenderer implements RendererInterface
      */
     private function columnOptions(AbstractColumn $column): string
     {
-        $options = [];
+        $options = [
+            'nullable' => $column->isNullable(),
+            'default'  => $column->getDefaultValue()
+        ];
 
-        if (!empty($column->getEnumValues())) {
+        if ($column->abstractType() == 'enum') {
             $options['values'] = $column->getEnumValues();
         }
 
-        if (!empty($column->getSize()) && $column->phpType() == AbstractColumn::STRING) {
+        if ($column->abstractType() == 'string') {
             $options['size'] = $column->getSize();
         }
 
-        if (!empty($column->getScale())) {
+        if ($column->abstractType() == 'decimal') {
             $options['scale'] = $column->getScale();
-        }
-
-        if (!empty($column->getPrecision())) {
             $options['precision'] = $column->getPrecision();
-        }
-
-        if ($column->isNullable()) {
-            $options['null'] = true;
-        }
-
-        if ($column->hasDefaultValue() && !is_null($column->getDefaultValue())) {
-            $options['default'] = $column->getDefaultValue();
         }
 
         return $this->mountIndents($this->getSerializer()->serialize($options));
@@ -334,11 +326,9 @@ class MigrationRenderer implements RendererInterface
      */
     private function indexOptions(AbstractIndex $index): string
     {
-        $options = [];
-
-        if ($index->isUnique()) {
-            $options['unique'] = true;
-        }
+        $options = [
+            'unique' => $index->isUnique()
+        ];
 
         return $this->mountIndents($this->getSerializer()->serialize($options));
     }

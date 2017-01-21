@@ -76,11 +76,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $files->delete($file);
         }
 
-        //Cleanup
-
         $schemas = [];
         //Clean up
-        $this->db->getDriver()->setProfiling(false);
         foreach ($this->dbal->database()->getTables() as $table) {
             $schema = $table->getSchema();
             $schema->declareDropped();
@@ -90,8 +87,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         //Clear all tables
         $syncBus = new SynchronizationPool($schemas);
         $syncBus->run();
-
-        $this->db->getDriver()->setProfiling(true);
     }
 
     /**

@@ -43,7 +43,7 @@ class MigrationRenderer implements RendererInterface
     public function createTable(Source $source, AbstractTable $table)
     {
         //Get table blueprint
-        $source->addLine("\$this->table({$this->tableAlias($table)})");
+        $source->addLine("\$this->table({$this->table($table)})");
         $comparator = $table->getComparator();
 
         $this->declareColumns($source, $comparator);
@@ -66,7 +66,7 @@ class MigrationRenderer implements RendererInterface
     public function updateTable(Source $source, AbstractTable $table)
     {
         //Get table blueprint
-        $source->addLine("\$this->table({$this->tableAlias($table)})");
+        $source->addLine("\$this->table({$this->table($table)})");
 
         $comparator = $table->getComparator();
 
@@ -90,7 +90,7 @@ class MigrationRenderer implements RendererInterface
     public function revertTable(Source $source, AbstractTable $table)
     {
         //Get table blueprint
-        $source->addLine("\$this->table({$this->tableAlias($table)})");
+        $source->addLine("\$this->table({$this->table($table)})");
         $comparator = $table->getComparator();
 
         $this->revertForeigns($source, $comparator, $table->getPrefix());
@@ -106,7 +106,7 @@ class MigrationRenderer implements RendererInterface
      */
     public function dropTable(Source $source, AbstractTable $table)
     {
-        $source->addLine("\$this->table({$this->tableAlias($table)})->drop();");
+        $source->addLine("\$this->table({$this->table($table)})->drop();");
     }
 
     /**
@@ -116,32 +116,13 @@ class MigrationRenderer implements RendererInterface
     protected function declareColumns(Source $source, StateComparator $comparator)
     {
         foreach ($comparator->addedColumns() as $column) {
-            $name = "'{$column->getName()}'";
-            $type = "'{$column->abstractType()}'";
-
-            $source->addString("    ->addColumn({$name}, {$type}, {$this->columnOptions($column)})");
+            $source->addString(
+                "    ->addColumn('{$column->getName()}', '{$column->abstractType()}', {$this->columnOptions($column)})"
+            );
         }
 
         foreach ($comparator->alteredColumns() as $pair) {
-            /**
-             * @var AbstractColumn $column
-             * @var AbstractColumn $original
-             */
-            $column = $pair[self::NEW_STATE];
-            $original = $pair[self::ORIGINAL_STATE];
-
-            if ($column->getName() != $original->getName()) {
-                $name = "'{$original->getName()}'";
-            } else {
-                $name = "'{$column->getName()}'";
-            }
-
-            $type = "'{$column->abstractType()}'";
-            $source->addString("    ->alterColumn({$name}, {$type}, {$this->columnOptions($column)})");
-
-            if ($column->getName() != $original->getName()) {
-                $source->addString("    ->renameColumn({$name}, '{$column->getName()}')");
-            }
+            $this->changeColumn($source, $pair[self::NEW_STATE], $pair[self::ORIGINAL_STATE]);
         }
 
         foreach ($comparator->droppedColumns() as $column) {
@@ -231,25 +212,7 @@ class MigrationRenderer implements RendererInterface
         }
 
         foreach ($comparator->alteredColumns() as $pair) {
-            /**
-             * @var AbstractColumn $column
-             * @var AbstractColumn $original
-             */
-            $column = $pair[self::ORIGINAL_STATE];
-            $original = $pair[self::NEW_STATE];
-
-            if ($column->getName() != $original->getName()) {
-                $name = "'{$original->getName()}'";
-            } else {
-                $name = "'{$column->getName()}'";
-            }
-
-            $type = "'{$column->abstractType()}'";
-            $source->addString("    ->alterColumn({$name}, {$type}, {$this->columnOptions($column)})");
-
-            if ($column->getName() != $original->getName()) {
-                $source->addString("    ->renameColumn({$name}, '{$column->getName()}')");
-            }
+            $this->changeColumn($source, $pair[self::ORIGINAL_STATE], $pair[self::NEW_STATE]);
         }
 
         foreach ($comparator->addedColumns() as $column) {
@@ -326,34 +289,6 @@ class MigrationRenderer implements RendererInterface
     }
 
     /**
-     * @param AbstractColumn $column
-     *
-     * @return string
-     */
-    private function columnOptions(AbstractColumn $column): string
-    {
-        $options = [
-            'nullable' => $column->isNullable(),
-            'default'  => $column->getDefaultValue()
-        ];
-
-        if ($column->abstractType() == 'enum') {
-            $options['values'] = $column->getEnumValues();
-        }
-
-        if ($column->abstractType() == 'string') {
-            $options['size'] = $column->getSize();
-        }
-
-        if ($column->abstractType() == 'decimal') {
-            $options['scale'] = $column->getScale();
-            $options['precision'] = $column->getPrecision();
-        }
-
-        return $this->mountIndents($this->getSerializer()->serialize($options));
-    }
-
-    /**
      * @param AbstractIndex $index
      *
      * @return string
@@ -383,6 +318,70 @@ class MigrationRenderer implements RendererInterface
     }
 
     /**
+     * @param AbstractTable $table
+     *
+     * @return string
+     */
+    protected function table(AbstractTable $table): string
+    {
+        return "'{$this->lookup->tableAlias($table)}', '{$this->lookup->databaseAlias($table)}'";
+    }
+
+    /**
+     * @param Source         $source
+     * @param AbstractColumn $column
+     * @param AbstractColumn $original
+     */
+    protected function changeColumn(
+        Source $source,
+        AbstractColumn $column,
+        AbstractColumn $original
+    ) {
+        if ($column->getName() != $original->getName()) {
+            $name = "'{$original->getName()}'";
+        } else {
+            $name = "'{$column->getName()}'";
+        }
+
+        $type = "'{$column->abstractType()}'";
+        $source->addString("    ->alterColumn({$name}, {$type}, {$this->columnOptions($column)})");
+
+        if ($column->getName() != $original->getName()) {
+            $source->addString("    ->renameColumn({$name}, '{$column->getName()}')");
+        }
+    }
+
+    /**
+     * @param AbstractColumn $column
+     *
+     * @return string
+     */
+    private function columnOptions(AbstractColumn $column): string
+    {
+        $options = [
+            'nullable' => $column->isNullable(),
+            'default'  => $column->getDefaultValue()
+        ];
+
+        if ($column->abstractType() == 'enum') {
+            $options['values'] = $column->getEnumValues();
+        }
+
+        if ($column->abstractType() == 'string') {
+            $options['size'] = $column->getSize();
+        }
+
+        if ($column->abstractType() == 'decimal') {
+            $options['scale'] = $column->getScale();
+            $options['precision'] = $column->getPrecision();
+        }
+
+        return $this->mountIndents($this->getSerializer()->serialize($options));
+    }
+
+
+
+    /**
      * Mount indents for column and index options.
      *
      * @param $serialized
@@ -398,15 +397,5 @@ class MigrationRenderer implements RendererInterface
         }
 
         return ltrim(join("\n", $lines));
-    }
-
-    /**
-     * @param AbstractTable $table
-     *
-     * @return string
-     */
-    protected function tableAlias(AbstractTable $table): string
-    {
-        return "'{$this->lookup->tableAlias($table)}', '{$this->lookup->databaseAlias($table)}'";
     }
 }

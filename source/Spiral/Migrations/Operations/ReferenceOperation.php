@@ -10,6 +10,16 @@ namespace Spiral\Migrations\Operations;
 abstract class ReferenceOperation extends TableOperation
 {
     /**
+     * Some options has set of aliases.
+     *
+     * @var array
+     */
+    protected $aliases = [
+        'onDelete' => ['delete'],
+        'onUpdate' => ['update']
+    ];
+    
+    /**
      * Column foreign key associated to.
      *
      * @var string

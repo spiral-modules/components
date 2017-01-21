@@ -18,16 +18,6 @@ class AddReference extends ReferenceOperation
     use OptionsTrait;
 
     /**
-     * Some options has set of aliases.
-     *
-     * @var array
-     */
-    protected $aliases = [
-        'onDelete' => ['delete'],
-        'onUpdate' => ['update']
-    ];
-
-    /**
      * @var string
      */
     protected $foreignTable = '';

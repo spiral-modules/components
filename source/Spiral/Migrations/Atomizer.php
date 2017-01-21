@@ -6,7 +6,6 @@
  */
 namespace Spiral\Migrations;
 
-use Spiral\Core\Component;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Migrations\Atomizer\RendererInterface;
 use Spiral\Reactor\Body\Source;
@@ -16,7 +15,7 @@ use Spiral\Support\DFSSorter;
  * Atomizer provides ability to convert given AbstractTables and their changes into set of
  * migration commands.
  */
-class Atomizer extends Component
+class Atomizer
 {
     /**
      * Render changes into source.

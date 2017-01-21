@@ -231,8 +231,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $declaration->method('up')->setPublic();
         $declaration->method('down')->setPublic();
 
-        $atomizer->declareChanges($declaration->method('up')->source());
-        $atomizer->revertChanges($declaration->method('down')->source());
+        $atomizer->declareChanges($declaration->method('up')->getSource());
+        $atomizer->revertChanges($declaration->method('down')->getSource());
 
         $file = new FileDeclaration();
         $file->addElement($declaration);

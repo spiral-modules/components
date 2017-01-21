@@ -24,7 +24,7 @@ trait CommentTrait
      *
      * @return DocComment
      */
-    public function comment(): DocComment
+    public function getComment(): DocComment
     {
         return $this->docComment;
     }

@@ -42,7 +42,7 @@ class ReplaceTest extends \PHPUnit_Framework_TestCase
         $namespace->addElement($declaration);
 
         $file = new FileDeclaration();
-        $file->comment()->addLine('Full file of foxes');
+        $file->getComment()->addLine('Full file of foxes');
         $file->addElement($namespace);
 
         $this->assertSame(

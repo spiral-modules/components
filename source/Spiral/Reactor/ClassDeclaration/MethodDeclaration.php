@@ -72,9 +72,11 @@ class MethodDeclaration extends NamedDeclaration implements ReplaceableInterface
     }
 
     /**
+     * Rename to getSource()?
+     *
      * @return Source
      */
-    public function source(): Source
+    public function getSource(): Source
     {
         return $this->source;
     }

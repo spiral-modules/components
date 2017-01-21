@@ -311,12 +311,11 @@ class Dumper extends Component implements SingletonInterface, LoggerAwareInterfa
         $property->setAccessible(true);
 
         if ($object instanceof \stdClass) {
-            //Let's keep access undefined for arrays converted into objects
-            $access = '';
+            $name = $this->style->apply($property->getName(), 'dynamic');
+        } else {
+            //Property name includes access level
+            $name = $property->getName() . $this->style->apply(':' . $access, 'access', $access);
         }
-
-        //Property name includes access level
-        $name = $property->getName() . $this->style->apply(':' . $access, 'access', $access);
 
         return $this->dumpValue($property->getValue($object), $name, $level + 1);
     }

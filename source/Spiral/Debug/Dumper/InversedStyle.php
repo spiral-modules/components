@@ -28,6 +28,7 @@ class InversedStyle extends Style
     protected $styles = [
         'common'   => 'color: #E6E1DC',
         'name'     => 'color: #E6E1DC',
+        'dynamic'  => 'color: #7d95c1;',
         'maxLevel' => 'color: #ff9900',
         'syntax'   => [
             'common' => 'color: gray',

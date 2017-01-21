@@ -42,6 +42,7 @@ class Style
     protected $styles = [
         'common'   => 'color: black',
         'name'     => 'color: black',
+        'dynamic'  => 'color: purple;',
         'maxLevel' => 'color: #ff9900',
         'syntax'   => [
             'common' => 'color: #666',

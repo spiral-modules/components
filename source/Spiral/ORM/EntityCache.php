@@ -13,6 +13,7 @@ use Spiral\ORM\Exceptions\CacheException;
 
 /**
  * Entity cache support. Used to share same model instance across it's child or related objects.
+ * Attention, spiral declares isolated entity cache for each selection!
  *
  * @todo Interface is needed
  */

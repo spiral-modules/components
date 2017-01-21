@@ -30,7 +30,6 @@ abstract class MigratorTest extends BaseTest
     public function testGetEmptyMigrations()
     {
         $this->migrator->configure();
-
         $this->assertSame([], $this->migrator->getMigrations());
     }
 

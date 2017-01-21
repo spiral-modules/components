@@ -296,8 +296,9 @@ class Migrator extends Component implements SingletonInterface
     {
         $drivers = [];
         foreach ($this->dbal->getDatabases() as $database) {
-            if (!in_array($database->getDriver(), $drivers, true)) {
-                $drivers[] = $database->getDriver();
+            $driver = $database->getDriver();
+            if (!isset($drivers["{$driver->getName()}.{$driver->getSource()}"])) {
+                $drivers["{$driver->getName()}.{$driver->getSource()}"] = $database->getDriver();
             }
         }
 

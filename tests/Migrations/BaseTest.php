@@ -17,9 +17,13 @@ use Spiral\Database\Helpers\SynchronizationPool;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\Database\Schemas\StateComparator;
 use Spiral\Files\FileManager;
+use Spiral\Migrations\Atomizer;
 use Spiral\Migrations\Configs\MigrationsConfig;
 use Spiral\Migrations\FileRepository;
+use Spiral\Migrations\Migration;
 use Spiral\Migrations\Migrator;
+use Spiral\Reactor\ClassDeclaration;
+use Spiral\Reactor\FileDeclaration;
 use Spiral\Tokenizer\Configs\TokenizerConfig;
 use Spiral\Tokenizer\Tokenizer;
 
@@ -202,5 +206,33 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
     public function schema(string $table): AbstractTable
     {
         return $this->db->table($table)->getSchema();
+    }
+
+    protected function atomize(string $name, array $tables)
+    {
+        //Make sure name is unique
+        $name = $name . '_' . crc32(microtime(true));
+
+        $atomizer = new Atomizer(
+            new Atomizer\MigrationRenderer(new Atomizer\AliasLookup($this->dbal))
+        );
+
+        foreach ($tables as $table) {
+            $atomizer->addTable($table);
+        }
+
+        //Rendering
+        $declaration = new ClassDeclaration($name, Migration::class);
+
+        $declaration->method('up')->setPublic();
+        $declaration->method('down')->setPublic();
+
+        $atomizer->declareChanges($declaration->method('up')->source());
+        $atomizer->revertChanges($declaration->method('down')->source());
+
+        $file = new FileDeclaration();
+        $file->addElement($declaration);
+
+        $this->repository->registerMigration($name, $name, $file);
     }
 }

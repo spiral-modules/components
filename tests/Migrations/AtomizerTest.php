@@ -139,59 +139,31 @@ abstract class AtomizerTest extends BaseTest
 
         $schema = $this->schema('sample');
         $schema->primary('id');
-        $schema->decimal('value', 1, 2);
+        $schema->decimal('value', 2, 1);
         $this->atomize('migration1', [$schema]);
 
         $this->migrator->run();
-        $this->assertSame(1, $this->schema('sample')->column('value')->getPrecision());
-        $this->assertSame(2, $this->schema('sample')->column('value')->getScale());
+        $this->assertSame(2, $this->schema('sample')->column('value')->getPrecision());
+        $this->assertSame(1, $this->schema('sample')->column('value')->getScale());
 
         $schema = $this->schema('sample');
-        $schema->decimal('value', 2, 3);
+        $schema->decimal('value', 3, 2);
         $this->atomize('migration2', [$schema]);
 
         $this->migrator->run();
 
-        $this->assertSame(2, $this->schema('sample')->column('value')->getPrecision());
-        $this->assertSame(3, $this->schema('sample')->column('value')->getScale());
+        $this->assertSame(3, $this->schema('sample')->column('value')->getPrecision());
+        $this->assertSame(2, $this->schema('sample')->column('value')->getScale());
 
         $this->assertTrue($this->db->hasTable('sample'));
 
         $this->migrator->rollback();
-        $this->assertSame(1, $this->schema('sample')->column('value')->getPrecision());
-        $this->assertSame(2, $this->schema('sample')->column('value')->getScale());
+        $this->assertSame(2, $this->schema('sample')->column('value')->getPrecision());
+        $this->assertSame(1, $this->schema('sample')->column('value')->getScale());
 
         $this->assertTrue($this->db->hasTable('sample'));
 
         $this->migrator->rollback();
         $this->assertFalse($this->db->hasTable('sample'));
-    }
-
-    protected function atomize(string $name, array $tables)
-    {
-        //Make sure name is unique
-        $name = $name . '_' . crc32(microtime(true));
-
-        $atomizer = new Atomizer(
-            new Atomizer\MigrationRenderer(new Atomizer\AliasLookup($this->dbal))
-        );
-
-        foreach ($tables as $table) {
-            $atomizer->addTable($table);
-        }
-
-        //Rendering
-        $declaration = new ClassDeclaration($name, Migration::class);
-
-        $declaration->method('up')->setPublic();
-        $declaration->method('down')->setPublic();
-
-        $atomizer->declareChanges($declaration->method('up')->source());
-        $atomizer->revertChanges($declaration->method('down')->source());
-
-        $file = new FileDeclaration();
-        $file->addElement($declaration);
-
-        $this->repository->registerMigration($name, $name, $file);
     }
 }

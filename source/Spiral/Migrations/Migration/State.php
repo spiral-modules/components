@@ -25,7 +25,7 @@ final class State
     private $name = '';
 
     /**
-     * @var bool
+     * @var int
      */
     private $status = self::STATUS_PENDING;
 

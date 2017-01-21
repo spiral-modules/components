@@ -74,7 +74,32 @@ abstract class BlueprintTest extends BaseTest
             ->addColumn('sample_id', 'int')
             ->addForeignKey('sample_id', 'sample1', 'id', [
                 'onDelete' => AbstractReference::CASCADE,
-                'onUpdate' => AbstractReference::CASCADE,
+                'onUpdate' => AbstractReference::NO_ACTION,
+            ])
+            ->create();
+
+        //Not created
+        $this->assertTrue($blueprint->getSchema()->exists());
+    }
+
+    public function testCreateWithForeignAliased()
+    {
+        $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample1');
+
+        $blueprint->addColumn('id', 'primary')->create();
+
+        //Not created
+        $this->assertTrue($blueprint->getSchema()->exists());
+
+        $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample');
+
+        $blueprint->addColumn('id', 'primary')
+            ->addColumn('value', 'float', ['default' => 1])
+            ->addIndex(['value'], ['unique' => true])
+            ->addColumn('sample_id', 'int')
+            ->addForeignKey('sample_id', 'sample1', 'id', [
+                'delete' => AbstractReference::CASCADE,
+                'update' => AbstractReference::NO_ACTION,
             ])
             ->create();
 

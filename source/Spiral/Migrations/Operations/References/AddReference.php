@@ -22,7 +22,7 @@ class AddReference extends ReferenceOperation
      *
      * @var array
      */
-    private $aliases = [
+    protected $aliases = [
         'onDelete' => ['delete'],
         'onUpdate' => ['update']
     ];

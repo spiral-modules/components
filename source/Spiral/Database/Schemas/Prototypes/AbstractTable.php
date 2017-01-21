@@ -660,7 +660,7 @@ abstract class AbstractTable implements TableInterface
         }
 
         //Ensure that columns references to valid indexes and et
-        $prepared = $this->prepareSchema($behaviour & Behaviour::CREATE_FOREIGNS);
+        $prepared = $this->normalizeSchema($behaviour & Behaviour::CREATE_FOREIGNS);
 
         if ($this->status == self::STATUS_NEW) {
             //Executing table creation
@@ -687,7 +687,7 @@ abstract class AbstractTable implements TableInterface
      *
      * @return AbstractTable
      */
-    protected function prepareSchema(bool $withForeigns = true)
+    protected function normalizeSchema(bool $withForeigns = true)
     {
         //To make sure that no pre-sync modifications will be reflected on current table
         $target = clone $this;
@@ -731,6 +731,8 @@ abstract class AbstractTable implements TableInterface
                         unset($column);
                     }
 
+                    //We must not register column change as index change!
+                    $target->initial->findIndex($index->getColumns())->columns($columns);
                     $index->columns($columns);
                 }
             }

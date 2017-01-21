@@ -72,6 +72,37 @@ abstract class AtomizerTest extends BaseTest
         $schema = $this->schema('sample');
         $schema->primary('id');
         $schema->integer('value');
+        $this->atomize('migration1', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->schema('sample')->hasColumn('value'));
+
+        $schema = $this->schema('sample');
+        $schema->integer('value')->setName('value2');
+        $this->atomize('migration2', [$schema]);
+
+        $this->migrator->run();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasColumn('value2'));
+        $this->assertFalse($this->schema('sample')->hasColumn('value'));
+
+        $this->migrator->rollback();
+        $this->assertTrue($this->db->hasTable('sample'));
+        $this->assertTrue($this->schema('sample')->hasColumn('value'));
+        $this->assertFalse($this->schema('sample')->hasColumn('value2'));
+
+        $this->migrator->rollback();
+        $this->assertFalse($this->db->hasTable('sample'));
+    }
+
+    public function testCreateAndThenRenameColumnWithIndex()
+    {
+        //Create thought migration
+        $this->migrator->configure();
+
+        $schema = $this->schema('sample');
+        $schema->primary('id');
+        $schema->integer('value');
         $schema->index(['value']);
         $this->atomize('migration1', [$schema]);
 
@@ -79,6 +110,7 @@ abstract class AtomizerTest extends BaseTest
         $this->assertTrue($this->schema('sample')->hasColumn('value'));
 
         $schema = $this->schema('sample');
+
         $schema->integer('value')->setName('value2');
         $this->atomize('migration2', [$schema]);
 

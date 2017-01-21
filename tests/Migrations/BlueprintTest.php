@@ -44,7 +44,7 @@ abstract class BlueprintTest extends BaseTest
         $this->assertTrue($blueprint->getSchema()->exists());
     }
 
-    public function testCreateWithIndexes()
+    public function testCreateWithIndexesAndDropIndex()
     {
         $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample');
 
@@ -52,6 +52,13 @@ abstract class BlueprintTest extends BaseTest
             ->addColumn('value', 'float', ['default' => 1])
             ->addIndex(['value'], ['unique' => true])
             ->create();
+
+        //Not created
+        $this->assertTrue($blueprint->getSchema()->exists());
+
+        $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample');
+
+        $blueprint->dropIndex(['value'])->update();
 
         //Not created
         $this->assertTrue($blueprint->getSchema()->exists());

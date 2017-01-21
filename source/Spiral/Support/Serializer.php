@@ -115,11 +115,17 @@ class Serializer
         if (is_null($value)) {
             return "null";
         }
+
         if (is_bool($value)) {
             return ($value ? "true" : "false");
         }
 
+        if (is_object($value) && method_exists($value, '__set_state')) {
+            return var_export($value, true);
+        }
+
         if (!is_string($value) && !is_numeric($value)) {
+            print_r($value);
             throw new SerializeException("Unable to pack non scalar value");
         }
 

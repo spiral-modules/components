@@ -64,6 +64,18 @@ abstract class BlueprintTest extends BaseTest
         $this->assertTrue($blueprint->getSchema()->exists());
     }
 
+    public function testCreateWithNamedIndex()
+    {
+        $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample');
+
+        $blueprint->addColumn('id', 'primary')
+            ->addColumn('value', 'float', ['default' => 1])
+            ->addIndex(['value'], ['unique' => true, 'name' => 'super_index'])
+            ->create();
+
+        $this->assertSame('super_index',$this->schema('sample')->index(['value'])->getName());
+    }
+
     public function testCreateWithForeign()
     {
         $blueprint = new TableBlueprint($capsule = new MigrationCapsule($this->dbal), 'sample1');

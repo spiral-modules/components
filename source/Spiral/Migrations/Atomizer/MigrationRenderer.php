@@ -126,7 +126,7 @@ class MigrationRenderer implements RendererInterface
         }
 
         foreach ($comparator->droppedColumns() as $column) {
-            $source->addLine("    ->dropColumn('{$column->getName()}')");
+            $source->addString("    ->dropColumn('{$column->getName()}')");
         }
     }
 

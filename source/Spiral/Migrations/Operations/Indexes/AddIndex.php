@@ -45,5 +45,9 @@ class AddIndex extends IndexOperation
         $schema->index($this->columns)->unique(
             $this->getOption('unique', false)
         );
+
+        if ($this->hasOption('name')) {
+            $schema->index($this->columns)->setName($this->getOption('name'));
+        }
     }
 }

@@ -237,8 +237,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $file = new FileDeclaration();
         $file->addElement($declaration);
 
-        print_r($declaration->render());
-
         $this->repository->registerMigration($name, $name, $file);
     }
 }

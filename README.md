@@ -19,7 +19,7 @@ Spiral Core Components
   - Pagination
   - DBAL, schema introspection, comparision, sql fallbacks, nested queries
   - Migrations (DBAL based), automatic migration scaffolding
-  - ORM, schema scaffolding, eager loading, transactional active record, memory mapping
+  - ORM, schema scaffolding, eager loading, transactional operations, memory mapping
   - Iehahrical ODM
   - Security (NIST RBAC)
   - Code scaffolding

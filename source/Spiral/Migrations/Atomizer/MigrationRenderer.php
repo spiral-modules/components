@@ -296,7 +296,8 @@ class MigrationRenderer implements RendererInterface
     private function indexOptions(AbstractIndex $index): string
     {
         $options = [
-            'unique' => $index->isUnique()
+            'unique' => $index->isUnique(),
+            'name'   => $index->getName()
         ];
 
         return $this->mountIndents($this->getSerializer()->serialize($options));
@@ -378,7 +379,6 @@ class MigrationRenderer implements RendererInterface
 
         return $this->mountIndents($this->getSerializer()->serialize($options));
     }
-
 
 
     /**

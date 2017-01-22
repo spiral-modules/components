@@ -92,6 +92,10 @@ trait ORMTrait
             Record::BELONGS_TO_MORPHED => [
                 RelationsConfig::SCHEMA_CLASS => Schemas\Relations\BelongsToMorphedSchema::class,
                 RelationsConfig::ACCESS_CLASS => Relations\BelongsToMorphedRelation::class
+            ],
+            Record::MANY_TO_MORPHED    => [
+                RelationsConfig::SCHEMA_CLASS => Schemas\Relations\ManyToMorphedSchema::class,
+                RelationsConfig::ACCESS_CLASS => Relations\ManyToMorphedRelation::class
             ]
         ]);
     }

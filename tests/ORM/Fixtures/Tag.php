@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Tag extends AbstactRecord
+class Tag extends BaseRecord
 {
     const SCHEMA = [
         'id'   => 'primary',

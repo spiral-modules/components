@@ -124,7 +124,7 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
     /**
      *{@inheritdoc}
      */
-    public function inverseDefinition(SchemaBuilder $builder, $inverseTo):\Generator
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): \Generator
     {
         if (!is_string($inverseTo)) {
             throw new DefinitionException("Inversed relation must be specified as string");
@@ -206,15 +206,15 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         /*
          * Declare columns in map/pivot table.
          */
-        $innerKey = $pivotTable->column($this->option(Record::THOUGHT_INNER_KEY));
-        $innerKey->nullable(false);
-        $innerKey->setType($this->resolveType(
+        $thoughtInnerKey = $pivotTable->column($this->option(Record::THOUGHT_INNER_KEY));
+        $thoughtInnerKey->nullable(false);
+        $thoughtInnerKey->setType($this->resolveType(
             $sourceContext->getColumn($this->option(Record::INNER_KEY))
         ));
 
-        $outerKey = $pivotTable->column($this->option(Record::THOUGHT_OUTER_KEY));
-        $outerKey->nullable(false);
-        $outerKey->setType($this->resolveType(
+        $thoughtOuterKey = $pivotTable->column($this->option(Record::THOUGHT_OUTER_KEY));
+        $thoughtOuterKey->nullable(false);
+        $thoughtOuterKey->setType($this->resolveType(
             $targetContext->getColumn($this->option(Record::OUTER_KEY))
         ));
 
@@ -230,14 +230,17 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
 
         //Map might only contain unique link between source and target
         if ($this->option(Record::CREATE_INDEXES)) {
-            $pivotTable->index([$innerKey->getName(), $outerKey->getName()])->unique();
+            $pivotTable->index([
+                $thoughtInnerKey->getName(),
+                $thoughtOuterKey->getName()
+            ])->unique();
         }
 
         //There is 2 constrains between map table and source and table
         if ($this->isConstrained()) {
             $this->createForeign(
                 $pivotTable,
-                $innerKey,
+                $thoughtInnerKey,
                 $sourceContext->getColumn($this->option(Record::INNER_KEY)),
                 $this->option(Record::CONSTRAINT_ACTION),
                 $this->option(Record::CONSTRAINT_ACTION)
@@ -245,7 +248,7 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
 
             $this->createForeign(
                 $pivotTable,
-                $outerKey,
+                $thoughtOuterKey,
                 $targetContext->getColumn($this->option(Record::OUTER_KEY)),
                 $this->option(Record::CONSTRAINT_ACTION),
                 $this->option(Record::CONSTRAINT_ACTION)

@@ -9,7 +9,7 @@ namespace Spiral\Tests\ORM\Fixtures;
 
 use Spiral\ORM\Record;
 
-class Label extends AbstactRecord
+class Label extends BaseRecord
 {
     const SCHEMA = [
         'id'     => 'primary',

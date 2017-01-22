@@ -22,7 +22,7 @@ use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
 use Spiral\ORM\Schemas\SchemaBuilder;
 use Spiral\Tests\Core\Fixtures\SharedComponent;
-use Spiral\Tests\ORM\Fixtures\AbstactRecord;
+use Spiral\Tests\ORM\Fixtures\BaseRecord;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Node;
 use Spiral\Tests\ORM\Fixtures\Post;
@@ -103,7 +103,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $this->builder->addSource($model, $source);
         }
 
-        $this->db->getDriver()->setProfiling(false);
+        //$this->db->getDriver()->setProfiling(false);
         $this->builder->renderSchema();
         $this->builder->pushSchema();
         $this->db->getDriver()->setProfiling(true);
@@ -165,7 +165,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         return $dbal;
     }
 
-    protected function assertSameInDB(AbstactRecord $record)
+    protected function assertSameInDB(BaseRecord $record)
     {
         $this->assertTrue($record->isLoaded());
         $this->assertNotEmpty($record->primaryKey());

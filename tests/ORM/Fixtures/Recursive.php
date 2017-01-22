@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Recursive extends AbstactRecord
+class Recursive extends BaseRecord
 {
     const SCHEMA = [
         'id'     => 'bigPrimary',

@@ -169,7 +169,7 @@ class BelongsToMorphedSchema extends AbstractSchema implements InversableRelatio
 
         //Morph key is always string
         $morphKey = $sourceTable->column($this->option(Record::MORPH_KEY));
-        $morphKey->string(self::MORPH_COLUMN_SIZE);
+        $morphKey->string(static::MORPH_COLUMN_SIZE);
 
         //Do we need indexes?
         if ($this->option(Record::CREATE_INDEXES)) {

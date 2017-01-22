@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Profile extends AbstactRecord
+class Profile extends BaseRecord
 {
     const SCHEMA = [
         'id'  => 'bigPrimary',

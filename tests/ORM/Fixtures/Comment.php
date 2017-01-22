@@ -7,7 +7,7 @@
 
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Comment extends AbstactRecord
+class Comment extends BaseRecord
 {
     const SCHEMA = [
         'id'       => 'primary',

@@ -7,6 +7,7 @@
 
 namespace Spiral\ORM\Columns;
 
+use Spiral\Core\Component;
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\ORM\ColumnInterface;
 use Spiral\ORM\Exceptions\AccessException;
@@ -16,8 +17,10 @@ use Spiral\ORM\RecordAccessorInterface;
 /**
  * Mocks enums values and provides ability to describe associated AbstractColumn via set of
  * configuration constants.
+ *
+ * Extends Component so you can connect scope specific functionality.
  */
-class EnumColumn implements RecordAccessorInterface, ColumnInterface
+class EnumColumn extends Component implements RecordAccessorInterface, ColumnInterface
 {
     /**
      * Set of allowed enum values.

@@ -300,7 +300,7 @@ abstract class StoreInScopeTest extends BaseTest
         $this->assertInstanceOf(UserStatus::class, $user->status);
         $this->assertSame('active', (string)$user->status);
 
-        $user->status = 'disabled';
+        $user->status = UserStatus::DISABLED;
         $this->assertSame('disabled', (string)$user->status);
     }
 

@@ -11,7 +11,11 @@ use Spiral\ORM\Columns\EnumColumn;
 
 class UserStatus extends EnumColumn
 {
-    const VALUES  = ['active', 'disabled'];
+    //Values
+    const ACTIVE   = 'active';
+    const DISABLED = 'disabled';
 
-    const DEFAULT = 'active';
+    //Definition
+    const VALUES  = [self::ACTIVE, self::DISABLED];
+    const DEFAULT = self::ACTIVE;
 }

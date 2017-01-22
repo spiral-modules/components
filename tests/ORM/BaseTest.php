@@ -179,7 +179,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    protected function assertSimilar(RecordInterface $entity, RecordInterface $entityB)
+    protected function assertSameRecord(RecordInterface $entity, RecordInterface $entityB)
     {
         $this->assertTrue(empty(array_diff($entity->getFields(), $entityB->getFields())));
     }

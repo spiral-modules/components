@@ -387,9 +387,9 @@ abstract class HasManyRelationTest extends BaseTest
 
         $this->assertNotNull($post->comments->matchOne($comment));
 
-        $this->assertSimilar($comment, $post->comments->matchOne($comment));
-        $this->assertSimilar($comment, $post->comments->matchOne($comment->primaryKey()));
-        $this->assertSimilar($comment, $post->comments->matchOne(['message' => 'hi']));
+        $this->assertSameRecord($comment, $post->comments->matchOne($comment));
+        $this->assertSameRecord($comment, $post->comments->matchOne($comment->primaryKey()));
+        $this->assertSameRecord($comment, $post->comments->matchOne(['message' => 'hi']));
     }
 
     public function testReloadButLazy()
@@ -411,9 +411,9 @@ abstract class HasManyRelationTest extends BaseTest
             ->wherePK($post->primaryKey())
             ->findOne();
 
-        $this->assertSimilar($comment, $post->comments->matchOne($comment));
-        $this->assertSimilar($comment, $post->comments->matchOne($comment->primaryKey()));
-        $this->assertSimilar($comment, $post->comments->matchOne(['message' => 'hi']));
+        $this->assertSameRecord($comment, $post->comments->matchOne($comment));
+        $this->assertSameRecord($comment, $post->comments->matchOne($comment->primaryKey()));
+        $this->assertSameRecord($comment, $post->comments->matchOne(['message' => 'hi']));
     }
 
     public function testReloadButLazyButPartial()
@@ -679,11 +679,11 @@ abstract class HasManyRelationTest extends BaseTest
             ->with('comments', ['where' => ['{@}.message' => 'hi3']])
             ->count());
 
-        $this->assertSimilar($post, $this->orm->selector(Post::class)
+        $this->assertSameRecord($post, $this->orm->selector(Post::class)
             ->with('comments', ['where' => ['{@}.message' => 'hi2']])
             ->findOne());
 
-        $this->assertSimilar($post2, $this->orm->selector(Post::class)
+        $this->assertSameRecord($post2, $this->orm->selector(Post::class)
             ->with('comments', ['where' => ['{@}.message' => 'hi3']])
             ->findOne());
     }

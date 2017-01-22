@@ -37,8 +37,8 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
-        $this->assertSimilar($post->author->profile, $dbPost->author->profile);
+        $this->assertSameRecord($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author->profile, $dbPost->author->profile);
         $this->assertCount(1, $dbPost->comments);
     }
 
@@ -64,8 +64,8 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
-        $this->assertSimilar($post->author->profile, $dbPost->author->profile);
+        $this->assertSameRecord($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author->profile, $dbPost->author->profile);
         $this->assertCount(1, $dbPost->comments);
     }
 
@@ -94,8 +94,8 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
-        $this->assertSimilar($post->author->profile, $dbPost->author->profile);
+        $this->assertSameRecord($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author->profile, $dbPost->author->profile);
         $this->assertCount(1, $dbPost->comments);
     }
 
@@ -121,8 +121,8 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
-        $this->assertSimilar($post->author->profile, $dbPost->author->profile);
+        $this->assertSameRecord($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author->profile, $dbPost->author->profile);
         $this->assertCount(1, $dbPost->comments);
     }
 
@@ -152,8 +152,8 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
-        $this->assertSimilar($post->author->profile, $dbPost->author->profile);
+        $this->assertSameRecord($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author->profile, $dbPost->author->profile);
         $this->assertCount(1, $dbPost->comments);
     }
 
@@ -179,7 +179,7 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author, $dbPost->author);
         $this->assertFalse($post->author->profile->isLoaded());
         $this->assertCount(1, $dbPost->comments);
     }
@@ -206,8 +206,8 @@ abstract class NestedRelationsTest extends BaseTest
 
         $this->assertSame($post->primaryKey(), $dbPost->primaryKey());
 
-        $this->assertSimilar($post->author, $dbPost->author);
-        $this->assertSimilar($post->author->profile, $dbPost->author->profile);
+        $this->assertSameRecord($post->author, $dbPost->author);
+        $this->assertSameRecord($post->author->profile, $dbPost->author->profile);
         $this->assertCount(0, $dbPost->comments);
     }
 
@@ -241,11 +241,11 @@ abstract class NestedRelationsTest extends BaseTest
             $this->assertCount(1, $tag->posts);
 
             foreach ($tag->posts as $tagPost) {
-                $this->assertSimilar($post, $tagPost);
+                $this->assertSameRecord($post, $tagPost);
                 $this->assertTrue($tagPost->getRelations()->get('comments')->isLoaded());
                 $this->assertTrue($tagPost->getRelations()->get('author')->isLoaded());
                 $this->assertTrue($tagPost->author->getRelations()->get('profile')->isLoaded());
-                $this->assertSimilar($post->author->profile, $tagPost->author->profile);
+                $this->assertSameRecord($post->author->profile, $tagPost->author->profile);
             }
         }
     }

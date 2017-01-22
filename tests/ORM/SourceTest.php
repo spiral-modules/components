@@ -72,7 +72,7 @@ abstract class SourceTest extends BaseTest
 
         $selector = $this->orm->selector(User::class, true);
 
-        $this->assertSimilar($user, $selector->findOne());
+        $this->assertSameRecord($user, $selector->findOne());
         $this->assertNotSame($user, $selector->findOne());
     }
 
@@ -85,7 +85,7 @@ abstract class SourceTest extends BaseTest
         $this->orm->getMap()->remember($user);
         $selector = $this->orm->selector(User::class, true);
 
-        $this->assertSimilar($user, $selector->findOne());
+        $this->assertSameRecord($user, $selector->findOne());
         $this->assertSame($user, $selector->findOne());
     }
 
@@ -172,7 +172,7 @@ abstract class SourceTest extends BaseTest
         $count = 0;
         foreach ($this->orm->source(User::class) as $item) {
             $count++;
-            $this->assertSimilar($user, $item);
+            $this->assertSameRecord($user, $item);
         }
 
         $this->assertSame(1, $count);
@@ -232,7 +232,7 @@ abstract class SourceTest extends BaseTest
         $this->assertSame(1, $selector->getPaginator()->getLimit());
 
         foreach ($selector as $entity) {
-            $this->assertSimilar($user, $entity);
+            $this->assertSameRecord($user, $entity);
         }
 
         $selector->setPaginator($selector->getPaginator()->withPage(2));
@@ -241,7 +241,7 @@ abstract class SourceTest extends BaseTest
         $this->assertSame(1, $selector->getPaginator()->getLimit());
 
         foreach ($selector as $entity) {
-            $this->assertSimilar($user1, $entity);
+            $this->assertSameRecord($user1, $entity);
         }
     }
 
@@ -275,7 +275,7 @@ abstract class SourceTest extends BaseTest
         $this->assertSame(1, $selector->getPaginator()->getLimit());
 
         foreach ($selector as $entity) {
-            $this->assertSimilar($user, $entity);
+            $this->assertSameRecord($user, $entity);
         }
 
         $this->container->bind(PaginatorsInterface::class, new class implements PaginatorsInterface
@@ -330,7 +330,7 @@ abstract class SourceTest extends BaseTest
         );
 
         foreach ($cached as $item) {
-            $this->assertSimilar($user, $item);
+            $this->assertSameRecord($user, $item);
         }
     }
 
@@ -358,7 +358,7 @@ abstract class SourceTest extends BaseTest
         );
 
         foreach ($cached as $item) {
-            $this->assertSimilar($user, $item);
+            $this->assertSameRecord($user, $item);
         }
 
 
@@ -389,7 +389,7 @@ abstract class SourceTest extends BaseTest
         );
 
         foreach ($cached as $item) {
-            $this->assertSimilar($user, $item);
+            $this->assertSameRecord($user, $item);
         }
     }
 }

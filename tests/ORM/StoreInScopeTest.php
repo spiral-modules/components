@@ -194,7 +194,7 @@ abstract class StoreInScopeTest extends BaseTest
         $count = 0;
         foreach ($this->orm->source(User::class) as $item) {
             $count++;
-            $this->assertSimilar($user, $item);
+            $this->assertSameRecord($user, $item);
         }
 
         $this->assertSame(1, $count);
@@ -240,7 +240,7 @@ abstract class StoreInScopeTest extends BaseTest
         $count = 0;
         foreach ($this->orm->source(User::class) as $item) {
             $count++;
-            $this->assertSimilar($user, $item);
+            $this->assertSameRecord($user, $item);
             $this->assertNotSame($user, $item);
         }
 

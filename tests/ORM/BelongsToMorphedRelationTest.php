@@ -75,14 +75,14 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $picture->save();
 
         $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
-        $this->assertSimilar($user, $picture->parent);
+        $this->assertSameRecord($user, $picture->parent);
 
         $picture->parent = $post = new Post();
         $picture->parent->author = $user;
         $picture->save();
 
         $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
-        $this->assertSimilar($post, $picture->parent);
+        $this->assertSameRecord($post, $picture->parent);
     }
 
     public function testSetNull()
@@ -92,7 +92,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $picture->save();
 
         $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
-        $this->assertSimilar($user, $picture->parent);
+        $this->assertSameRecord($user, $picture->parent);
 
         $picture->parent = null;
         $picture->save();
@@ -109,14 +109,14 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 
         $user = $this->orm->source(User::class)->findByPK($user->primaryKey());
 
-        $this->assertSimilar($picture, $user->picture);
+        $this->assertSameRecord($picture, $user->picture);
 
         $picture->parent = $post = new Post();
         $picture->parent->author = $user;
         $picture->save();
 
         $post = $this->orm->source(Post::class)->findByPK($user->primaryKey());
-        $this->assertSimilar($picture, $post->picture);
+        $this->assertSameRecord($picture, $post->picture);
     }
 
     public function testInversedPostload()
@@ -131,7 +131,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 
         $this->assertTrue($user->getRelations()->get('picture')->isLoaded());
 
-        $this->assertSimilar($picture, $user->picture);
+        $this->assertSameRecord($picture, $user->picture);
 
         $picture = new Picture();
         $picture->parent = $post = new Post();
@@ -143,7 +143,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
             ->findOne();
 
         $this->assertTrue($post->getRelations()->get('picture')->isLoaded());
-        $this->assertSimilar($picture, $post->picture);
+        $this->assertSameRecord($picture, $post->picture);
     }
 
     public function testInversedInload()
@@ -159,7 +159,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 
         $this->assertTrue($user->getRelations()->get('picture')->isLoaded());
 
-        $this->assertSimilar($picture, $user->picture);
+        $this->assertSameRecord($picture, $user->picture);
 
         $picture = new Picture();
         $picture->parent = $post = new Post();
@@ -172,7 +172,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
             ->findOne();
 
         $this->assertTrue($post->getRelations()->get('picture')->isLoaded());
-        $this->assertSimilar($picture, $post->picture);
+        $this->assertSameRecord($picture, $post->picture);
     }
 
     public function testMorphedMany()

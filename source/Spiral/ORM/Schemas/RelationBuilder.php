@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas;
 
 use Spiral\Core\FactoryInterface;
@@ -149,12 +150,10 @@ class RelationBuilder
         foreach ($this->relations as $relation) {
             $definition = $relation->getDefinition();
 
+            //todo: magic?
             if ($definition->sourceContext()->getClass() == $class) {
                 //Packing relation, relation schema are given with associated table
-                $result[$definition->getName()] = $relation->packRelation($builder->requestTable(
-                    $definition->targetContext()->getTable(),
-                    $definition->targetContext()->getDatabase()
-                ));
+                $result[$definition->getName()] = $relation->packRelation($builder);
             }
         }
 

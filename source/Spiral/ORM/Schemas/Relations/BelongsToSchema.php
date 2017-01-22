@@ -27,7 +27,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  */
 class BelongsToSchema extends AbstractSchema
 {
-    use TablesTrait, TypecastTrait, ForeignsTrait;
+    use TypecastTrait, ForeignsTrait;
 
     /**
      * Relation type.

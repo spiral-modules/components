@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\ORM\Exceptions\DefinitionException;
@@ -12,7 +13,6 @@ use Spiral\ORM\Record;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\ForeignsTrait;
-use Spiral\ORM\Schemas\Relations\Traits\TablesTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
 use Spiral\ORM\Schemas\SchemaBuilder;
 
@@ -31,7 +31,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  */
 class HasManySchema extends AbstractSchema implements InversableRelationInterface
 {
-    use TablesTrait, TypecastTrait, ForeignsTrait;
+    use TypecastTrait, ForeignsTrait;
 
     /**
      * Relation type.

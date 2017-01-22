@@ -4,21 +4,25 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\Database\Schemas\Prototypes\AbstractTable;
 use Spiral\ORM\Exceptions\OptionsException;
 use Spiral\ORM\Helpers\RelationOptions;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 use Spiral\ORM\Schemas\RelationInterface;
+use Spiral\ORM\Schemas\Relations\Traits\TablesTrait;
+use Spiral\ORM\Schemas\SchemaBuilder;
 
 /**
  * Basic class for SQL specific relations.
  */
 abstract class AbstractSchema implements RelationInterface
 {
+    use TablesTrait;
+
     /**
      * Relation type to be stored in packed schema.
      */
@@ -81,8 +85,12 @@ abstract class AbstractSchema implements RelationInterface
     /**
      * {@inheritdoc}
      */
-    public function packRelation(AbstractTable $table): array
+    public function packRelation(SchemaBuilder $builder): array
     {
+        //Target table
+        $table = $this->targetTable($builder);
+
+        //Fetching all needed options
         $schema = $this->options->defineMultiple(static::PACK_OPTIONS);
 
         if (

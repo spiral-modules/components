@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Entities\RecordIterator;
@@ -142,8 +143,8 @@ abstract class MultipleRelation extends AbstractRelation
      *
      * @return self
      *
-     * @throws SelectorException
-     * @throws QueryException (needs wrapping)
+     * @throws \Spiral\ORM\Exceptions\SelectorException
+     * @throws \Spiral\Database\Exceptions\QueryException (needs wrapping)
      */
     protected function loadData(bool $autoload = true): self
     {
@@ -168,7 +169,7 @@ abstract class MultipleRelation extends AbstractRelation
     /**
      * Init pre-loaded data.
      *
-     * @return HasManyRelation
+     * @return HasManyRelation|self
      */
     protected function initInstances(): self
     {

@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
@@ -16,7 +17,6 @@ use Spiral\ORM\Record;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\ForeignsTrait;
-use Spiral\ORM\Schemas\Relations\Traits\TablesTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
 use Spiral\ORM\Schemas\SchemaBuilder;
 
@@ -41,7 +41,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  */
 class ManyToManySchema extends AbstractSchema implements InversableRelationInterface
 {
-    use TablesTrait, TypecastTrait, ForeignsTrait;
+    use TypecastTrait, ForeignsTrait;
 
     /**
      * Relation type.
@@ -183,11 +183,11 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         $sourceContext = $this->definition->sourceContext();
         $targetContext = $this->definition->targetContext();
 
-        //todo: support cross database and cross driver many to many
         if (
             $sourceTable->getDriver() != $targetTable->getDriver()
             || $sourceContext->getDatabase() != $sourceContext->getDatabase()
         ) {
+            //todo: support cross database and cross driver many to many
             throw new RelationSchemaException(
                 "ManyToMany relations can only exists inside same database"
             );
@@ -255,9 +255,9 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
     /**
      * {@inheritdoc}
      */
-    public function packRelation(AbstractTable $table): array
+    public function packRelation(SchemaBuilder $builder): array
     {
-        $packed = parent::packRelation($table);
+        $packed = parent::packRelation($builder);
 
         //Let's clarify pivot columns
         $schema = $packed[ORMInterface::R_SCHEMA];

@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
@@ -37,11 +38,11 @@ interface RelationInterface
     /**
      * Pack relation information info form or immutable array to be used as schema in runtime.
      *
-     * @param AbstractTable $table Table associated with relation in it's final form.
+     * @param SchemaBuilder $builder
      *
      * @return array
      *
      * @throws RelationSchemaException
      */
-    public function packRelation(AbstractTable $table): array;
+    public function packRelation(SchemaBuilder $builder): array;
 }

@@ -28,7 +28,6 @@ use Spiral\Tests\ORM\Fixtures\Node;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\Recursive;
-use Spiral\Tests\ORM\Fixtures\Supertag;
 use Spiral\Tests\ORM\Fixtures\Tag;
 use Spiral\Tests\ORM\Fixtures\User;
 use Spiral\Tests\ORM\Fixtures\UserSource;
@@ -110,10 +109,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $this->db->getDriver()->setProfiling(true);
 
         $this->orm->buildSchema($this->builder);
-
-        if (in_array(Supertag::class, static::MODELS)) {
-            print_r($this->builder->packSchema()[Supertag::class]);
-        }
 
         SharedComponent::shareContainer($container);
 

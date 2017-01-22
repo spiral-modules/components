@@ -177,7 +177,10 @@ class ManyToMorphedSchema extends AbstractSchema implements InversableRelationIn
                     Record::CREATE_CONSTRAINT => false,
                     Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
                     Record::CREATE_PIVOT      => false, //Table creation hes been already handled
-                    Record::PIVOT_COLUMNS     => $this->option(Record::PIVOT_COLUMNS),
+                    //We have to include morphed key in here
+                    Record::PIVOT_COLUMNS     => $this->option(Record::PIVOT_COLUMNS) + [
+                            $this->option(Record::MORPH_KEY) => 'string'
+                        ],
                     Record::WHERE_PIVOT       => $this->option(Record::WHERE_PIVOT),
                     Record::MORPH_KEY         => $this->option(Record::MORPH_KEY)
                 ]

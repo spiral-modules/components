@@ -435,8 +435,10 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         }
 
         //Additional where conditions!
-        $decorator = new WhereDecorator($query, 'where', 'root');
-        $decorator->where($this->schema[Record::WHERE]);
+        if (!empty($this->schema[Record::WHERE])) {
+            $decorator = new WhereDecorator($query, 'where', 'root');
+            $decorator->where($this->schema[Record::WHERE]);
+        }
 
         return $query;
     }

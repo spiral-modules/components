@@ -31,7 +31,7 @@ trait PartialTrait
      *
      * @param bool $partial
      *
-     * @return self|$this
+     * @return $this
      */
     public function partial(bool $partial = true)
     {

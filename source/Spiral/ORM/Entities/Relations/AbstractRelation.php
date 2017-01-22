@@ -118,19 +118,6 @@ abstract class AbstractRelation implements RelationInterface
     }
 
     /**
-     * Get value from record based on schema key.
-     *
-     * @param RecordInterface $record
-     * @param string          $key
-     *
-     * @return mixed
-     */
-    protected function value(RecordInterface $record, string $key)
-    {
-        return $record->getField($this->key($key));
-    }
-
-    /**
      * Key name from schema.
      *
      * @param int $key
@@ -172,28 +159,5 @@ abstract class AbstractRelation implements RelationInterface
                 "Must be an instance of '{$this->class}', '" . get_class($value) . "' given"
             );
         }
-    }
-
-    /**
-     * If record not synced or can't be synced. Only work for PK based relations.
-     *
-     * @param RecordInterface $inner
-     * @param RecordInterface $outer
-     *
-     * @return bool
-     */
-    protected function isSynced(RecordInterface $inner, RecordInterface $outer): bool
-    {
-        if (empty($outer->primaryKey())) {
-            //Parent not saved
-            return false;
-        }
-
-        //Comparing FK values
-        return $outer->getField(
-                $this->key(Record::OUTER_KEY)
-            ) == $inner->getField(
-                $this->key(Record::INNER_KEY)
-            );
     }
 }

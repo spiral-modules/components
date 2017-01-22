@@ -8,6 +8,7 @@
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\ORM\Entities\Relations\Traits\SyncedTrait;
 use Spiral\ORM\Exceptions\SelectorException;
 use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\ORMInterface;
@@ -19,6 +20,8 @@ use Spiral\ORM\RecordInterface;
  */
 abstract class SingularRelation extends AbstractRelation
 {
+    use SyncedTrait;
+
     /**
      * Create placeholder model when relation is empty.
      */

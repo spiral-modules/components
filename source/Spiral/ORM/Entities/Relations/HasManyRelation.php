@@ -13,6 +13,7 @@ use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
+use Spiral\ORM\Entities\Relations\Traits\SyncedTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\ORMInterface;
@@ -28,7 +29,7 @@ use Spiral\ORM\RecordInterface;
  */
 class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \Countable
 {
-    use LookupTrait;
+    use LookupTrait, SyncedTrait;
 
     /**
      * Records deleted from list. Potentially pre-schedule command?

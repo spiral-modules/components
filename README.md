@@ -10,7 +10,7 @@ Spiral Core Components
 
 <b>[Documentation](http://spiral-framework.com/guide)</b> | [CHANGELOG](/CHANGELOG.md) | [Framework Bundle](https://github.com/spiral/spiral) | [Skeleton Application](https://github.com/spiral/application)
 
-# Components included
+# Components Included
   - Core interfaces, autowiring DI, declarative singletons and auto injections
   - Stempler template composer (HTML syntax)
   - Tokenizer, class locator, invocation locator

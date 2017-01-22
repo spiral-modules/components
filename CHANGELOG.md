@@ -35,6 +35,7 @@ CHANGELOG for 0.9.0 RC
   * Bugfixes
     * Unions with ordering in SQLServer
     * Invalid parameter handling for update queries with nested selection
+  * Pagination classes are immutable now
 
 **Models**
   * Removed features
@@ -60,6 +61,8 @@ CHANGELOG for 0.9.0 RC
   * Definition of morphed relations must be explicit now
   * All ORM entities MUST have proper primary key now
   * Ability to define custom column types in combination with accessors
+  * Relation loaders and schemas are immutable now
+  * Memory scope are optional now
     
 **ODM**
    * Moved to latest PHP7 mongo drivers

@@ -66,14 +66,25 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     private $unlinked = [];
 
     /**
-     * @param string       $class
-     * @param array        $schema
-     * @param ORMInterface $orm
+     * When target role is null parent role to be used. Redefine this variable to revert behaviour
+     * of ManyToMany relation.
+     *
+     * @see ManyToMorphedRelation
+     * @var string|null
      */
-    public function __construct($class, array $schema, ORMInterface $orm)
+    private $targetRole = null;
+
+    /**
+     * @param string                   $class
+     * @param array                    $schema
+     * @param \Spiral\ORM\ORMInterface $orm
+     * @param string|null              $targetRole
+     */
+    public function __construct($class, array $schema, ORMInterface $orm, string $targetRole = null)
     {
         parent::__construct($class, $schema, $orm);
         $this->pivotData = new \SplObjectStorage();
+        $this->targetRole = $targetRole;
     }
 
     /**
@@ -347,11 +358,7 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         });
 
         if (!empty($this->key(Record::MORPH_KEY))) {
-            $pivotCommand->addContext(
-                $this->key(Record::MORPH_KEY),
-                //todo: overwrite
-                $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
-            );
+            $pivotCommand->addContext($this->key(Record::MORPH_KEY), $this->targetRole());
         }
 
         return $pivotCommand;
@@ -427,11 +434,7 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
 
         if (!empty($this->key(Record::MORPH_KEY))) {
-            $pivotDecorator->where(
-                '{@}.' . $this->key(Record::MORPH_KEY),
-                //todo: overwrite
-                $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
-            );
+            $pivotDecorator->where('{@}.' . $this->key(Record::MORPH_KEY), $this->targetRole());
         }
 
         //Additional where conditions!
@@ -501,5 +504,18 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
                 "Invalid pivot data, undefined columns found: " . join(', ', $diff)
             );
         }
+    }
+
+    /**
+     * Defined role to be used in morphed relations.
+     *
+     * @return string
+     */
+    private function targetRole(): string
+    {
+        return $this->targetRole ?? $this->orm->define(
+                get_class($this->parent),
+                ORMInterface::R_ROLE_NAME
+            );
     }
 }

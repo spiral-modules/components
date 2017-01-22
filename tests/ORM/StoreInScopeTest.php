@@ -298,10 +298,10 @@ abstract class StoreInScopeTest extends BaseTest
     {
         $user = new User();
         $this->assertInstanceOf(UserStatus::class, $user->status);
-        $this->assertSame('active', $user->status);
+        $this->assertSame('active', (string)$user->status);
 
         $user->status = 'disabled';
-        $this->assertSame('disabled', $user->status);
+        $this->assertSame('disabled', (string)$user->status);
     }
 
     /**
@@ -311,9 +311,9 @@ abstract class StoreInScopeTest extends BaseTest
     {
         $user = new User();
         $this->assertInstanceOf(UserStatus::class, $user->status);
-        $this->assertSame('active', $user->status);
+        $this->assertSame('active', (string)$user->status);
 
         $user->status = 'magic';
-        $this->assertSame('disabled', $user->status);
+        $this->assertSame('disabled', (string)$user->status);
     }
 }

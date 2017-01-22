@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas;
 
 use Doctrine\Common\Inflector\Inflector;
@@ -16,6 +17,7 @@ use Spiral\ORM\Entities\RecordInstantiator;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Helpers\ColumnRenderer;
 use Spiral\ORM\Record;
+use Spiral\ORM\RecordAccessorInterface;
 use Spiral\ORM\RecordEntity;
 use Spiral\ORM\Schemas\Definitions\IndexDefinition;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
@@ -287,6 +289,16 @@ class RecordSchema implements SchemaInterface
                 if (!array_key_exists($column->getName(), $mutators[$mutator])) {
                     $mutators[$mutator][$column->getName()] = $filter;
                 }
+            }
+        }
+
+        foreach ($this->getFields() as $field => $type) {
+            if (
+                class_exists($type)
+                && is_a($type, RecordAccessorInterface::class, true)
+            ) {
+                //Direct column accessor definition
+                $mutators['accessor'][$field] = $type;
             }
         }
 

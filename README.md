@@ -8,7 +8,7 @@ Spiral Core Components
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spiral/components/badges/quality-score.png)](https://scrutinizer-ci.com/g/spiral/components/?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/spiral/components/badge.svg?branch=feature/pre-split)](https://coveralls.io/github/spiral/components?branch=feature/pre-split)
 
-<b>[Documentation](http://spiral-framework.com/guide)</b> | [Framework Bundle](https://github.com/spiral/spiral) | [Skeleton Application](https://github.com/spiral/application)
+<b>[Documentation](http://spiral-framework.com/guide)</b> | [Changelog](/CHANGELOG.md) | [Framework Bundle](https://github.com/spiral/spiral) | [Skeleton Application](https://github.com/spiral/application)
 
 # Components included
   - Core interfaces, autowiring DI, declarative singletons and auto injections

@@ -4,7 +4,6 @@
  *
  * @author    Wolfy-J
  */
-
 namespace Spiral\Tests\ORM\Fixtures;
 
 class Post extends AbstactRecord implements PicturedInterface

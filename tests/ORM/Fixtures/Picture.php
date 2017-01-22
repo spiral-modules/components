@@ -14,7 +14,7 @@ class Picture extends AbstactRecord
         'url'    => 'string',
         'parent' => [
             self::BELONGS_TO_MORPHED => PicturedInterface::class,
-            //self::INVERSE            => 'picture'
+            self::INVERSE            => 'picture'
         ]
     ];
 }

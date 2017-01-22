@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Definitions;
 
 use Spiral\ORM\Exceptions\ORMException;
@@ -37,9 +38,9 @@ final class RelationDefinition
     private $options = [];
 
     /**
-     * Name of relation to be inversed to.
+     * Name or definition or inversion.
      *
-     * @var string
+     * @var string|array
      */
     private $inverse = null;
 
@@ -58,18 +59,18 @@ final class RelationDefinition
     private $targetContext;
 
     /**
-     * @param string $name
-     * @param string $type
-     * @param string $target
-     * @param array  $options
-     * @param mixed  $inverse Name of relation to inversed to.
+     * @param string       $name
+     * @param string       $type
+     * @param string       $target
+     * @param array        $options
+     * @param string|array $inverse Name or definition of relation to inversed to.
      */
     public function __construct(
         string $name,
         string $type,
         string $target,
         array $options,
-        string $inverse = null
+        $inverse = null
     ) {
         $this->name = $name;
         $this->type = $type;
@@ -181,9 +182,9 @@ final class RelationDefinition
     /**
      * Name of relation to be inversed to.
      *
-     * @return string
+     * @return string|array
      */
-    public function getInverse(): string
+    public function getInverse()
     {
         if (!$this->needInversion()) {
             throw new ORMException("Unable to get inversed name, not inversable");

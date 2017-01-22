@@ -10,6 +10,7 @@ namespace Spiral\ORM\Schemas\Relations;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
+use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\MorphedTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
 use Spiral\ORM\Schemas\SchemaBuilder;
@@ -27,6 +28,8 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  * Attention, be very careful using morphing relations, you must know what you doing!
  * Attention #2, relation like that can not be preloaded!
  *
+ * Attention #3, inverse morphed relation to use it efficiently (inversed into HAS_ONE relation).
+ *
  * Example, [Comment can belong to any CommentableInterface record], relation name "parent",
  * relation requested to be inversed into HAS_MANY "comments":
  * - relation will walk should every record implementing CommentableInterface to collect name and
@@ -42,7 +45,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  *
  * @see BelongsToSchema
  */
-class BelongsToMorphedSchema extends AbstractSchema
+class BelongsToMorphedSchema extends AbstractSchema implements InversableRelationInterface
 {
     use MorphedTrait, TypecastTrait;
 
@@ -90,6 +93,21 @@ class BelongsToMorphedSchema extends AbstractSchema
         //tables without raising an exceptions
         Record::NULLABLE       => true,
     ];
+
+    /**
+     * {@inheritdoc}
+     *
+     * Relation will be inversed into every associated parent.
+     */
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo)
+    {
+        $inversed = [];
+        foreach ($this->findTargets($builder) as $schema) {
+
+        }
+
+        return $inversed;
+    }
 
     /**
      * {@inheritdoc}

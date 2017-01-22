@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\Tests\ORM\Fixtures;
 
 class Comment extends AbstactRecord
@@ -12,6 +13,9 @@ class Comment extends AbstactRecord
         'id'       => 'primary',
         'message'  => 'string',
         'approved' => 'bool',
-        'author' => [self::BELONGS_TO => User::class]
+        'author'   => [
+            self::BELONGS_TO => User::class,
+            self::INVERSE    => [User::HAS_MANY, 'comments']
+        ]
     ];
 }

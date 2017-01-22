@@ -80,9 +80,11 @@ class RelationBuilder
     /**
      * Create inverse relations where needed.
      *
+     * @param SchemaBuilder $builder
+     *
      * @throws DefinitionException
      */
-    public function inverseRelations()
+    public function inverseRelations(SchemaBuilder $builder)
     {
         /**
          * Inverse process is relation specific.
@@ -100,10 +102,17 @@ class RelationBuilder
                     ));
                 }
 
-                //Worry about duplicates?
+                $inversed = $relation->inverseDefinition($builder, $definition->getInverse());
 
-                //Let's perform inversion
-                $this->registerRelation($relation->inverseDefinition($definition->getInverse()));
+                if ($inversed instanceof RelationDefinition) {
+                    //Inversed into singular relation
+                    $this->registerRelation($inversed);
+                } elseif (is_array($inversed)) {
+                    //Inversed into multiple back relation (see morphed relations)
+                    foreach ($inversed as $definition) {
+                        $this->registerRelation($definition);
+                    }
+                }
             }
         }
     }
@@ -150,7 +159,6 @@ class RelationBuilder
         foreach ($this->relations as $relation) {
             $definition = $relation->getDefinition();
 
-            //todo: magic?
             if ($definition->sourceContext()->getClass() == $class) {
                 //Packing relation, relation schema are given with associated table
                 $result[$definition->getName()] = $relation->packRelation($builder);

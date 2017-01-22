@@ -9,7 +9,7 @@ namespace Spiral\Tests\ORM\SQLite;
 
 use Spiral\Tests\Database\SQLite\DriverTrait;
 
-class BelongsToMorphedTest extends \Spiral\Tests\ORM\BelongsToMorphedTest
+class BelongsToMorphedRelationTest extends \Spiral\Tests\ORM\BelongsToMorphedRelationTest
 {
     use DriverTrait;
 }

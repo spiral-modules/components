@@ -34,6 +34,9 @@ abstract class BelongsToRelationTest extends BaseTest
 
         $user->name = 'Bobby';
 
+        //Create thought inversion
+        $this->assertFalse($user->getRelations()->get('comments')->isLoaded());
+
         $this->assertInstanceOf(User::class, $post->author);
         $this->assertTrue($post->getRelations()->get('author')->isLoaded());
 

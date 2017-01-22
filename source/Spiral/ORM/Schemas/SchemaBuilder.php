@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas;
 
 use Psr\Log\LoggerInterface;
@@ -204,7 +205,7 @@ class SchemaBuilder
         $this->renderRelations();
 
         //Inverse relations (if requested)
-        $this->relations->inverseRelations();
+        $this->relations->inverseRelations($this);
 
         //Rendering needed columns, FKs and indexes needed for our relations (if relation is ORM specific)
         foreach ($this->relations->declareTables($this) as $table) {

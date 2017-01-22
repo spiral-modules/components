@@ -4,12 +4,15 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Relations;
 
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Record;
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
+use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\ForeignsTrait;
-use Spiral\ORM\Schemas\Relations\Traits\TablesTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
 use Spiral\ORM\Schemas\SchemaBuilder;
 
@@ -25,7 +28,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  * - relation will create index on column "author_id" in "posts" table if allowed
  * - relation will create foreign key "posts"."author_id" => "users"."id" if allowed
  */
-class BelongsToSchema extends AbstractSchema
+class BelongsToSchema extends AbstractSchema implements InversableRelationInterface
 {
     use TypecastTrait, ForeignsTrait;
 
@@ -67,6 +70,50 @@ class BelongsToSchema extends AbstractSchema
         //tables without raising an exceptions
         Record::NULLABLE          => true,
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo)
+    {
+        if (!is_array($inverseTo) || count($inverseTo) != 2) {
+            throw new DefinitionException(
+                "BelongsToRelation inverse must be defined as [type, outer relation name]"
+            );
+        }
+
+        if (empty($this->definition->targetContext())) {
+            throw new DefinitionException(sprintf(
+                "Unable to inverse relation '%s.''%s', unspecified relation target",
+                $this->definition->sourceContext()->getClass(),
+                $this->definition->getName()
+            ));
+        }
+
+
+        /**
+         * We are going to simply replace outer key with inner key and keep the rest of options intact.
+         */
+        $inversed = new RelationDefinition(
+            $inverseTo[1],
+            $inverseTo[0],
+            $this->definition->sourceContext()->getClass(),
+            [
+                Record::INNER_KEY         => $this->option(Record::OUTER_KEY),
+                Record::OUTER_KEY         => $this->option(Record::INNER_KEY),
+                Record::CREATE_CONSTRAINT => $this->option(Record::CREATE_CONSTRAINT),
+                Record::CONSTRAINT_ACTION => $this->option(Record::CONSTRAINT_ACTION),
+                Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
+                Record::NULLABLE          => $this->option(Record::NULLABLE),
+            ]
+        );
+
+        //In back order :)
+        return $inversed->withContext(
+            $this->definition->targetContext(),
+            $this->definition->sourceContext()
+        );
+    }
 
     /**
      * {@inheritdoc}

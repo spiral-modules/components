@@ -1,9 +1,9 @@
 <?php
 
 /**
- * components
+ * Spiral, Core Components
  *
- * @author    Wolfy-J
+ * @author Wolfy-J
  */
 namespace Spiral\Tests\Support;
 

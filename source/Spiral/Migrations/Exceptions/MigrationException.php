@@ -2,7 +2,7 @@
 /**
  * libraries
  *
- * @author    Wolfy-J
+ * @author Wolfy-J
  */
 namespace Spiral\Migrations\Exceptions;
 

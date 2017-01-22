@@ -1,8 +1,8 @@
 <?php
 /**
- * Spiral Framework, Core Components
+ * Spiral, Core Components
  *
- * @author    Wolfy-J
+ * @author Wolfy-J
  */
 namespace Spiral\Models\Traits;
 

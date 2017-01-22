@@ -2,7 +2,7 @@
 /**
  * spiral-empty.dev
  *
- * @author    Wolfy-J
+ * @author Wolfy-J
  */
 
 namespace Spiral\Tests\ORM\Fixtures;

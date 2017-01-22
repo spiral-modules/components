@@ -1,6 +1,6 @@
 <?php
 /**
- * Spiral Framework, Core Components
+ * Spiral, Core Components
  *
  * @author    Dmitry Mironov <dmitry.mironov@spiralscout.com>
  */

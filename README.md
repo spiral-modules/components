@@ -11,18 +11,18 @@ Spiral Core Components
 <b>[Documentation](http://spiral-framework.com/guide)</b> | [Framework Bundle](https://github.com/spiral/spiral) | [Skeleton Application](https://github.com/spiral/application)
 
 # Components included
-  - Core interfaces, autowiring DI, lazy singletons
-  - Stempler template processor
+  - Core interfaces, autowiring DI, declarative singletons and auto injections
+  - Stempler template composer (HTML syntax)
   - Tokenizer, class locator, invocation locator
   - Debug, Profiling and Dump components
   - FileManager and Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)
   - Pagination
-  - DBAL, Schema introspection, comparision, scaffolding, nested queries
-  - Migrations (DBAL based) and automatic migration scaffolding
-  - ORM, schema scaffolding, eager loading, transactional active record, memory mapping
+  - DBAL, schema introspection, comparision, sql fallbacks, nested queries
+  - ORM, schema scaffolding, eager, inner and lazy loading, transactional, memory mapping
+  - Migrations (DBAL based), automatic migration scaffolding
   - Iehahrical ODM
-  - Security (NIST RBAC)
-  - Code scaffolding
+  - Security layer (NIST RBAC)
+  - Reactor, code scaffolding
 
 # Running Tests
 Install component dependencies first, make sure you have proper .env file with details about

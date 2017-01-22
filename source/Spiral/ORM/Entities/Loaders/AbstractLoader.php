@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Builders\SelectQuery;
@@ -103,6 +104,14 @@ abstract class AbstractLoader implements LoaderInterface
         $this->class = $class;
         $this->schema = $schema;
         $this->orm = $orm;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass(): string
+    {
+        return $this->class;
     }
 
     /**

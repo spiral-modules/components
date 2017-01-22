@@ -4,12 +4,15 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;
+use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\SingularNode;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
 /**
@@ -21,6 +24,8 @@ use Spiral\ORM\Record;
  */
 class HasOneLoader extends RelationLoader
 {
+    use WhereTrait;
+
     /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
@@ -51,6 +56,21 @@ class HasOneLoader extends RelationLoader
                 $this->localKey(Record::OUTER_KEY),
                 'IN',
                 new Parameter($outerKeys)
+            );
+        }
+
+        //Morphed records
+        if (!empty($this->schema[Record::MORPH_KEY])) {
+            $this->setWhere(
+                $query,
+                $this->getAlias(),
+                $this->isJoined() ? 'onWhere' : 'where',
+                [
+                    $this->schema[Record::MORPH_KEY] => $this->orm->define(
+                        $this->parent->getClass(),
+                        ORMInterface::R_ROLE_NAME
+                    )
+                ]
             );
         }
 

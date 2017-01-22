@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM;
 
 use Spiral\ORM\Entities\Nodes\AbstractNode;
@@ -15,6 +16,13 @@ use Spiral\ORM\Exceptions\LoaderException;
  */
 interface LoaderInterface
 {
+    /**
+     * Class name relation points to.
+     *
+     * @return string
+     */
+    public function getClass(): string;
+
     /**
      * Declare loader context, parent will declare TreeParser where loader can mount his data, in
      * addition each loader will declare set of fields to be aggregated in a parent and used to

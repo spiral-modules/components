@@ -7,6 +7,7 @@
 
 namespace Spiral\Tests\ORM;
 
+use Spiral\ORM\Entities\Loaders\RelationLoader;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Label;
 use Spiral\Tests\ORM\Fixtures\Picture;
@@ -118,5 +119,55 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $this->assertSimilar($picture, $post->picture);
     }
 
+    public function testInversedPostload()
+    {
+        $picture = new Picture();
+        $picture->parent = $user = new User();
+        $picture->save();
 
+        $user = $this->orm->selector(User::class)->wherePK($user->primaryKey())
+            ->load('picture', ['method' => RelationLoader::POSTLOAD])
+            ->findOne();
+
+        $this->assertTrue($user->getRelations()->get('picture')->isLoaded());
+
+        $this->assertSimilar($picture, $user->picture);
+
+        $picture->parent = $post = new Post();
+        $picture->parent->author = $user;
+        $picture->save();
+
+        $post = $this->orm->selector(Post::class)->wherePK($post->primaryKey())
+            ->load('picture', ['method' => RelationLoader::POSTLOAD])
+            ->findOne();
+
+        $this->assertTrue($post->getRelations()->get('picture')->isLoaded());
+        $this->assertSimilar($picture, $post->picture);
+    }
+
+    public function testInversedInload()
+    {
+        $picture = new Picture();
+        $picture->parent = $user = new User();
+        $picture->save();
+
+        $user = $this->orm->selector(User::class)->wherePK($user->primaryKey())
+            ->load('picture', ['method' => RelationLoader::INLOAD])
+            ->findOne();
+
+        $this->assertTrue($user->getRelations()->get('picture')->isLoaded());
+
+        $this->assertSimilar($picture, $user->picture);
+
+        $picture->parent = $post = new Post();
+        $picture->parent->author = $user;
+        $picture->save();
+
+        $post = $this->orm->selector(Post::class)->wherePK($post->primaryKey())
+            ->load('picture', ['method' => RelationLoader::INLOAD])
+            ->findOne();
+
+        $this->assertTrue($post->getRelations()->get('picture')->isLoaded());
+        $this->assertSimilar($picture, $post->picture);
+    }
 }

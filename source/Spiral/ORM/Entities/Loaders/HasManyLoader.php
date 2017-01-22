@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Builders\SelectQuery;
@@ -11,6 +12,7 @@ use Spiral\Database\Injections\Parameter;
 use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
 use Spiral\ORM\Entities\Nodes\AbstractNode;
 use Spiral\ORM\Entities\Nodes\ArrayNode;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
 /**
@@ -65,6 +67,21 @@ class HasManyLoader extends RelationLoader
 
         //User specified WHERE conditions
         $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+
+        //Morphed records
+        if (!empty($this->schema[Record::MORPH_KEY])) {
+            $this->setWhere(
+                $query,
+                $this->getAlias(),
+                $whereTarget,
+                [
+                    $this->schema[Record::MORPH_KEY] => $this->orm->define(
+                        $this->parent->getClass(),
+                        ORMInterface::R_ROLE_NAME
+                    )
+                ]
+            );
+        }
 
         return parent::configureQuery($query);
     }

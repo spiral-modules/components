@@ -133,6 +133,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 
         $this->assertSimilar($picture, $user->picture);
 
+        $picture = new Picture();
         $picture->parent = $post = new Post();
         $picture->parent->author = $user;
         $picture->save();
@@ -160,6 +161,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
 
         $this->assertSimilar($picture, $user->picture);
 
+        $picture = new Picture();
         $picture->parent = $post = new Post();
         $picture->parent->author = $user;
         $picture->save();

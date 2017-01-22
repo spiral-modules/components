@@ -33,6 +33,19 @@ class BelongsToMorphedRelation extends SingularRelation
     /**
      * {@inheritdoc}
      */
+    public function getClass(): string
+    {
+        if (empty($parentType = $this->parent->getField($this->key(Record::MORPH_KEY)))) {
+            return parent::getClass();
+        }
+
+        //Resolve parent using role map
+        return $this->schema[ORMInterface::R_ROLE_NAME][$parentType];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function setRelated($value)
     {
         //Make sure value is accepted

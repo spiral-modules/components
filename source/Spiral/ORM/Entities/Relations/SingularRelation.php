@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Exceptions\QueryException;
@@ -64,7 +65,7 @@ abstract class SingularRelation extends AbstractRelation
             if (static::CREATE_PLACEHOLDER) {
                 //Stub instance
                 return $this->instance = $this->orm->make(
-                    $this->class,
+                    $this->getClass(),
                     [],
                     ORMInterface::STATE_NEW
                 );
@@ -75,7 +76,7 @@ abstract class SingularRelation extends AbstractRelation
 
         //Create instance based on loaded data
         return $this->instance = $this->orm->make(
-            $this->class,
+            $this->getClass(),
             $this->data,
             ORMInterface::STATE_LOADED,
             true
@@ -98,7 +99,7 @@ abstract class SingularRelation extends AbstractRelation
             return;
         }
 
-        $this->data = $this->orm->selector($this->class)->where(
+        $this->data = $this->orm->selector($this->getClass())->where(
             $this->key(Record::OUTER_KEY),
             $this->parent->getField($innerKey)
         )->fetchData();

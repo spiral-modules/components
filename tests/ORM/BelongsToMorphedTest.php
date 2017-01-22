@@ -64,4 +64,37 @@ abstract class BelongsToMorphedTest extends BaseTest
         $this->assertEquals('post', $picture->parent_type);
         $this->assertEquals($post->primaryKey(), $picture->parent_id);
     }
+
+    public function testLazyLoad()
+    {
+        $picture = new Picture();
+        $picture->parent = $user = new User();
+        $picture->save();
+
+        $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
+        $this->assertSimilar($user, $picture->parent);
+
+        $picture->parent = $post = new Post();
+        $picture->parent->author = $user;
+        $picture->save();
+
+        $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
+        $this->assertSimilar($post, $picture->parent);
+    }
+
+    public function testSetNull()
+    {
+        $picture = new Picture();
+        $picture->parent = $user = new User();
+        $picture->save();
+
+        $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
+        $this->assertSimilar($user, $picture->parent);
+
+        $picture->parent = null;
+        $picture->save();
+
+        $picture = $this->orm->source(Picture::class)->findByPK($picture->primaryKey());
+        $this->assertSame(null, $picture->parent);
+    }
 }

@@ -28,12 +28,12 @@ CHANGELOG for 0.9.0 RC
   * Container now validates scalar agument types when supplied by user
 
 **DBAL** 
-  * Improved polyfils for SQLServer
+  * Improved polyfills for SQLServer
   * Improved SQL injection prevention
   * Improved timezone management
   * Refactoring of DBAL schemas
   * Bugfixes
-    * Unions with with ordering in SQLServer
+    * Unions with ordering in SQLServer
     * Invalid parameter handling for update queries with nested selection
 
 **Models**
@@ -55,8 +55,8 @@ CHANGELOG for 0.9.0 RC
     * MutableNumber accessor
     * Validations
   * Bugfixes
-    * Bugfix: ManyToMany relations to non saved records
-    * BelongsToRelation to non saved records
+    * Bugfix: ManyToMany relations to non-saved records
+    * BelongsToRelation to non-saved records
   * Definition of morphed relations must be explicit now
   * All ORM entities MUST have proper primary key now
   * Ability to define custom column types in combination with accessors

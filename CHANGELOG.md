@@ -44,7 +44,7 @@ CHANGELOG for 0.9.0 RC
     * Bugfix: ManyToMany relations to non saved records
     * BelongsToRelation to non saved records
     
- **ODM**
+**ODM**
    * Moved to latest PHP7 mongo drivers
    * Removed features
      * Validations
@@ -53,5 +53,3 @@ CHANGELOG for 0.9.0 RC
 **Storage**
    * Improved implementation of RackspaceServer
    * Added GridFS server support
-   
-   

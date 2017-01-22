@@ -259,7 +259,7 @@ class HtmlTokenizer
         }
 
         //Local PHP isolation
-        $isolator = new Isolator('-argument-', '-block-', true);
+        $isolator = new Isolator('-argument-', '-block-');
 
         //No PHP blocks
         $content = $isolator->isolatePHP($content);

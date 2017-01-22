@@ -4,12 +4,14 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Commands\CallbackCommand;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Transaction;
 use Spiral\Tests\ORM\Fixtures\User;
+use Spiral\Tests\ORM\Fixtures\UserStatus;
 
 abstract class StoreInScopeTest extends BaseTest
 {
@@ -290,5 +292,28 @@ abstract class StoreInScopeTest extends BaseTest
         $user->name = 'Anton';
 
         $this->orm->getMap()->remember($user);
+    }
+
+    public function testEnumColumn()
+    {
+        $user = new User();
+        $this->assertInstanceOf(UserStatus::class, $user->status);
+        $this->assertSame('active', $user->status);
+
+        $user->status = 'disabled';
+        $this->assertSame('disabled', $user->status);
+    }
+
+    /**
+     * @expectedException \Spiral\ORM\Exceptions\EnumException
+     */
+    public function testEnumColumnError()
+    {
+        $user = new User();
+        $this->assertInstanceOf(UserStatus::class, $user->status);
+        $this->assertSame('active', $user->status);
+
+        $user->status = 'magic';
+        $this->assertSame('disabled', $user->status);
     }
 }

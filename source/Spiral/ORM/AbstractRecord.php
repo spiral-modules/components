@@ -187,7 +187,7 @@ abstract class AbstractRecord extends SchematicEntity
 
             //Do not force accessor creation
             $value = $this->getField($field, null, false);
-            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof RecordAccessorInterface && $value->hasChanges()) {
                 return true;
             }
 
@@ -201,7 +201,7 @@ abstract class AbstractRecord extends SchematicEntity
         //Do not force accessor creation
         foreach ($this->getFields(false) as $value) {
             //Checking all fields for changes (handled internally)
-            if ($value instanceof RecordAccessorInterface && $value->hasUpdates()) {
+            if ($value instanceof RecordAccessorInterface && $value->hasChanges()) {
                 return true;
             }
         }
@@ -308,7 +308,7 @@ abstract class AbstractRecord extends SchematicEntity
             foreach ($this->getFields(false) as $field => $value) {
                 //Handled by sub-accessor
                 if ($value instanceof RecordAccessorInterface) {
-                    if ($value->hasUpdates()) {
+                    if ($value->hasChanges()) {
                         $updates[$field] = $value->compileUpdates($field);
                         continue;
                     }
@@ -339,7 +339,7 @@ abstract class AbstractRecord extends SchematicEntity
 
         foreach ($this->getFields(false) as $field => $value) {
             if ($value instanceof RecordAccessorInterface) {
-                $value->flushUpdates();
+                $value->flushChanges();
             }
         }
     }

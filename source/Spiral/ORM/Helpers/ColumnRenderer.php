@@ -4,10 +4,12 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Helpers;
 
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\Database\Schemas\Prototypes\AbstractTable;
+use Spiral\ORM\ColumnInterface;
 use Spiral\ORM\Exceptions\ColumnRenderException;
 use Spiral\ORM\Exceptions\DefinitionException;
 
@@ -101,6 +103,16 @@ class ColumnRenderer
         bool $hasDefault,
         $default = null
     ) {
+        if (
+            class_exists($definition)
+            && is_a($definition, ColumnInterface::class, true)
+        ) {
+            //Dedicating column definition to our column class
+            call_user_func([$definition, 'describeColumn'], $column);
+
+            return $column;
+        }
+
         //Expression used to declare column type, easy to read
         $pattern = '/(?P<type>[a-z]+)(?: *\((?P<options>[^\)]+)\))?(?: *, *(?P<nullable>null(?:able)?))?/i';
 

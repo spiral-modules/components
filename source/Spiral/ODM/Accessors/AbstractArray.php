@@ -160,7 +160,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * {@inheritdoc}
      */
-    public function flushUpdates()
+    public function flushChanges()
     {
         $this->atomics = [];
     }

@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\Tests\ORM\Fixtures;
 
 /**
@@ -21,7 +22,7 @@ class User extends AbstactRecord
     const SCHEMA = [
         'id'      => 'primary',
         'name'    => 'string',
-        'status'  => 'enum(active, disabled)',
+        'status'  => UserStatus::class,
         'balance' => 'float',
 
         //Relations
@@ -36,8 +37,7 @@ class User extends AbstactRecord
     ];
 
     const DEFAULTS = [
-        'name'   => null,
-        'status' => 'active'
+        'name' => null
     ];
 
     const INDEXES = [

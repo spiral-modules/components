@@ -23,7 +23,7 @@ interface CompositableInterface extends AccessorInterface
     /**
      * Indicate that composition been properly saved.
      */
-    public function flushUpdates();
+    public function flushChanges();
 
     /**
      * Get generated and manually set document/object atomic updates.

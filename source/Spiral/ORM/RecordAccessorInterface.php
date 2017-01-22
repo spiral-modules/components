@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ORM;
 
 use Spiral\Database\Injections\FragmentInterface;
@@ -20,7 +21,12 @@ interface RecordAccessorInterface extends AccessorInterface
      *
      * @return bool
      */
-    public function hasUpdates();
+    public function hasChanges(): bool;
+
+    /**
+     * Indicate that all updates done, reset dirty state.
+     */
+    public function flushChanges();
 
     /**
      * Create update value or statement to be used in DBAL update builder. May return SQLFragments
@@ -31,9 +37,4 @@ interface RecordAccessorInterface extends AccessorInterface
      * @return mixed|FragmentInterface
      */
     public function compileUpdates(string $field = '');
-
-    /**
-     * Indicate that all updates done, reset dirty state.
-     */
-    public function flushUpdates();
 }

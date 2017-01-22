@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM;
 
 use Interop\Container\ContainerInterface;
@@ -19,6 +20,7 @@ use Spiral\Database\Entities\Table;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
+use Spiral\ORM\Entities\Relations\AbstractRelation;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\LocatorInterface;
@@ -358,9 +360,16 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             throw new ORMException("Undefined relation type '{$schema[self::R_TYPE]}'");
         }
 
-        //Generating relation
+        $class = $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS);
+
+        if (is_a($class, AbstractRelation::class, true)) {
+            //Minor performance shortcut
+            return new $class($schema[self::R_CLASS], $schema[self::R_SCHEMA], $this);
+        }
+
+        //Generating relation (might require performance improvements)
         return $this->getFactory()->make(
-            $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS),
+            $class,
             [
                 'class'  => $schema[self::R_CLASS],
                 'schema' => $schema[self::R_SCHEMA],

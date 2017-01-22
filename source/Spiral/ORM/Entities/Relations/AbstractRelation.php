@@ -135,9 +135,9 @@ abstract class AbstractRelation implements RelationInterface
      *
      * @param int $key
      *
-     * @return string
+     * @return string|null
      */
-    protected function key(int $key): string
+    protected function key(int $key)
     {
         return $this->schema[$key];
     }

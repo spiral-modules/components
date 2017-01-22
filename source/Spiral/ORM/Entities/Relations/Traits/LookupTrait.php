@@ -49,9 +49,9 @@ trait LookupTrait
      *
      * @param int $key
      *
-     * @return string
+     * @return string|null
      */
-    abstract protected function key(int $key): string;
+    abstract protected function key(int $key);
 
     /**
      * Get primary key column

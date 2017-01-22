@@ -98,6 +98,7 @@ class BelongsToSchema extends AbstractSchema
 
         //Do we need indexes?
         if ($this->option(Record::CREATE_INDEXES)) {
+            //Always belongs to one parent
             $sourceTable->index([$innerKey->getName()]);
         }
 

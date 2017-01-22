@@ -22,10 +22,11 @@ abstract class BelongsToMorphedTest extends BaseTest
         Comment::class,
         Tag::class,
         Profile::class,
-       // Picture::class
+        Picture::class
     ];
 
-    public function testInverse()
+    public function testBelongsToMorphedSchema()
     {
+
     }
 }

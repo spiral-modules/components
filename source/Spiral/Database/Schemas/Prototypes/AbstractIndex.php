@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Schemas\Prototypes;
 
 use Spiral\Database\Entities\Driver;

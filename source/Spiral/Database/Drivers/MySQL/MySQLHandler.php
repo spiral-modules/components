@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Drivers\MySQL;
 
 use Spiral\Database\Drivers\MySQL\Schemas\MySQLTable;

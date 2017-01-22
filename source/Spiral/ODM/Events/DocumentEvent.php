@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Events;
 
 use Spiral\Models\Events\EntityEvent;

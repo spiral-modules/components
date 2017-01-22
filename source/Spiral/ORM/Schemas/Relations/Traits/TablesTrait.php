@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Relations\Traits;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;

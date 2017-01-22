@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Reactor\Prototypes;
 
 use Spiral\Core\Component;

@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Entities;
 
 use Spiral\Core\Component;

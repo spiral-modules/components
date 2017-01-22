@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Stempler\Importers;
 
 use Spiral\Stempler\ImporterInterface;

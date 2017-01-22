@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Exceptions\Drivers;
 
 use Spiral\Database\Exceptions\DriverException;

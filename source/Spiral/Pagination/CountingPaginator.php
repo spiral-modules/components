@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Pagination;
 
 class CountingPaginator implements PredictableInterface, \Countable

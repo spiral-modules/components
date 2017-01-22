@@ -5,12 +5,13 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Models\Prototypes;
 
 use Spiral\Models\AccessorInterface;
 use Spiral\Models\EntityInterface;
-use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\AccessExceptionInterface;
+use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\PublishableInterface;
 use Spiral\Models\Traits\EventsTrait;
 

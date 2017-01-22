@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Models\Reflections;
 
 use Spiral\Models\Prototypes\AbstractEntity;

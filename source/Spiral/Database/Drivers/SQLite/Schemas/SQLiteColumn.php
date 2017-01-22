@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Drivers\SQLite\Schemas;
 
 use Spiral\Database\Entities\Driver;

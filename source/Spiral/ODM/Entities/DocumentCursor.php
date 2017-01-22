@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Entities;
 
 use MongoDB\Driver\Cursor;

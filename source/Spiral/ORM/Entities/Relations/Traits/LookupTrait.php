@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations\Traits;
 
 use Spiral\ORM\ContextualCommandInterface;

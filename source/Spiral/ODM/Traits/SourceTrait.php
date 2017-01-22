@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ODM\Traits;
 
 use Interop\Container\ContainerInterface;

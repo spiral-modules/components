@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\Exceptions\RelationException;

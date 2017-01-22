@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Accessors;
 
 use Spiral\Models\Traits\SolidableTrait;

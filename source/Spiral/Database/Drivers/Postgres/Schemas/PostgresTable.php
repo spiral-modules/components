@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Drivers\Postgres\Schemas;
 
 use Psr\Log\LoggerInterface;

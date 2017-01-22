@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Storage\Entities;
 
 use Psr\Http\Message\StreamInterface;

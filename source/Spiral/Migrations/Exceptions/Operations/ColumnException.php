@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Migrations\Exceptions\Operations;
 
 use Spiral\Migrations\Exceptions\OperationException;

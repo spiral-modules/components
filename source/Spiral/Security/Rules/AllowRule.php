@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Security\Rules;
 
 use Spiral\Core\Container\SingletonInterface;

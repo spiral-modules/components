@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Migrations\Atomizer;
 
 use Spiral\Atomizer\Exceptions\AtomizerException;
@@ -38,7 +39,7 @@ class AliasLookup
      */
     public function tableAlias(AbstractTable $table): string
     {
-         return substr($table->getName(), strlen($table->getPrefix()));
+        return substr($table->getName(), strlen($table->getPrefix()));
     }
 
     /**

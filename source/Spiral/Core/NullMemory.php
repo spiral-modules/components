@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Core;
 
 final class NullMemory implements MemoryInterface

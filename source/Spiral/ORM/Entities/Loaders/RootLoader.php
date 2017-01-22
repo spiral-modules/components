@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
 use Spiral\Database\Builders\SelectQuery;

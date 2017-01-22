@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Migrations\Operations;
 
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;

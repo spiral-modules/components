@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Drivers\SQLServer;
 
 use Interop\Container\ContainerInterface;

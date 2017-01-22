@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Migrations\Operations\References;
 
 use Spiral\Database\Schemas\Prototypes\AbstractReference;

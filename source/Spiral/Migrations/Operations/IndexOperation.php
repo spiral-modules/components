@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Migrations\Operations;
 
 abstract class IndexOperation extends TableOperation

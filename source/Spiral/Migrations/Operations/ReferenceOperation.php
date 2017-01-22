@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Migrations\Operations;
 
 abstract class ReferenceOperation extends TableOperation
@@ -18,7 +19,7 @@ abstract class ReferenceOperation extends TableOperation
         'onDelete' => ['delete'],
         'onUpdate' => ['update']
     ];
-    
+
     /**
      * Column foreign key associated to.
      *

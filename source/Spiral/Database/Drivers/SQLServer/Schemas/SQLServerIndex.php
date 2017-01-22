@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Database\Drivers\SQLServer\Schemas;
 
 use Spiral\Database\Schemas\Prototypes\AbstractIndex;

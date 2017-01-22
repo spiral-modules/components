@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Helpers;
 
 use Spiral\Models\AccessorInterface;

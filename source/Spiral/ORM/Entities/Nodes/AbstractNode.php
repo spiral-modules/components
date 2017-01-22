@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Nodes;
 
 use Spiral\ORM\Exceptions\NodeException;

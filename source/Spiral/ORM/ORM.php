@@ -20,7 +20,6 @@ use Spiral\Database\Entities\Table;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
-use Spiral\ORM\Entities\Relations\AbstractRelation;
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
 use Spiral\ORM\Schemas\LocatorInterface;

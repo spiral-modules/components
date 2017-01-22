@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Migrations\Atomizer;
 
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;

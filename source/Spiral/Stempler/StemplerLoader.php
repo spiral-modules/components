@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Stempler;
 
 use Spiral\Files\FileManager;

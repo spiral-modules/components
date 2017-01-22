@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Stempler\Syntaxes;
 
 use Spiral\Stempler\Exceptions\SyntaxException;

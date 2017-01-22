@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer;
 
 use Spiral\Tokenizer\Exceptions\ReflectionException;

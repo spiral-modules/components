@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ORM\Helpers;
 
 use Spiral\Database\Builders\Prototypes\AbstractSelect;

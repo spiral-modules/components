@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities;
 
 use Spiral\ORM\Commands\TransactionalCommand;
@@ -137,7 +138,7 @@ class RelationMap
     public function hasRelated(string $relation): bool
     {
         //Checking with only loaded records
-        return $this->get($relation)->hasRelated() ;
+        return $this->get($relation)->hasRelated();
     }
 
     /**

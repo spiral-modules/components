@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Events;
 
 use Spiral\Models\EntityInterface;

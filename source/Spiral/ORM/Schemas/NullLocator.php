@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas;
 
 class NullLocator implements LocatorInterface

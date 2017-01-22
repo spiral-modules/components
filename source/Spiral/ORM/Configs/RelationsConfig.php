@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Configs;
 
 use Spiral\Core\InjectableConfig;

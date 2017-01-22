@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Migrations;
 
 use Spiral\Database\Schemas\Prototypes\AbstractTable;

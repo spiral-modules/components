@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Commands;
 
 class CallbackCommand extends AbstractCommand

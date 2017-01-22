@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Exceptions;
 
 use Spiral\ODM\Entities\DocumentInstantiator;

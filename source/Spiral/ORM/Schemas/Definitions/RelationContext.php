@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Definitions;
 
 use Spiral\Database\Schemas\ColumnInterface;

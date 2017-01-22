@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ODM\Schemas;
 
 use Interop\Container\ContainerInterface;

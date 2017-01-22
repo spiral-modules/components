@@ -5,14 +5,15 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Security;
 
 use Spiral\Core\ResolverInterface;
 use Spiral\Security\Exceptions\RuleException;
 
 /**
- * Rule class provides ability to verify permission request via specified method (by default "check")
- * using resolver interface. As side effect check method will support method injections.
+ * Rule class provides ability to verify permission request via specified method (by default
+ * "check") using resolver interface. As side effect check method will support method injections.
  *
  * Example:
  *

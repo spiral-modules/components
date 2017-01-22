@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Helpers;
 
 use Doctrine\Common\Inflector\Inflector;

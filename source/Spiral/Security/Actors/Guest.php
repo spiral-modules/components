@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Security\Actors;
 
 use Spiral\Security\ActorInterface;

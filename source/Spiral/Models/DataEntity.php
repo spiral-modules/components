@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityException;

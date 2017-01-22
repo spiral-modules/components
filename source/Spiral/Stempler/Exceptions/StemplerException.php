@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Stempler\Exceptions;
 
 use Spiral\Core\Exceptions\RuntimeException;

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Migrations\Operations\Columns;
 
 use Spiral\Migrations\CapsuleInterface;

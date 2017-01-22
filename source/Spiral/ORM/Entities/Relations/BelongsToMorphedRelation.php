@@ -11,14 +11,17 @@ use Spiral\ORM\CommandInterface;
 use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
-use Spiral\ORM\Entities\Relations\Traits\MorphedTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 
+/**
+ * Similar to BelongsTo, however morph key value used to resolve parent record. Record allows
+ * mutable parent type.
+ */
 class BelongsToMorphedRelation extends SingularRelation
 {
-    use LookupTrait, MorphedTrait;
+    use LookupTrait;
 
     /**
      * Always saved before parent.
@@ -110,7 +113,7 @@ class BelongsToMorphedRelation extends SingularRelation
                 //Morph key value
                 $parentCommand->addContext(
                     $this->key(Record::MORPH_KEY),
-                    $this->getRole($this->instance)
+                    $this->orm->define(get_class($this->instance), ORMInterface::R_ROLE_NAME)
                 );
             });
         }

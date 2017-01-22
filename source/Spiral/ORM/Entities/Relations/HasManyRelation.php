@@ -179,6 +179,14 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
                     $this->key(Record::OUTER_KEY),
                     $this->lookupKey(Record::INNER_KEY, $this->parent, $outerCommand)
                 );
+
+                if (!empty($morphKey = $this->key(Record::MORPH_KEY))) {
+                    //HasOne relation support additional morph key
+                    $innerCommand->addContext(
+                        $this->key(Record::MORPH_KEY),
+                        $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
+                    );
+                }
             });
         }
 
@@ -218,16 +226,14 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
             //Configuring where conditions with alias resolution
             $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
             $decorator->where($this->schema[Record::WHERE]);
+        }
 
-            if (!empty($this->key(Record::MORPH_KEY))) {
-                //Clarifying where statement
-                $decorator->where(
-                    $this->key(Record::MORPH_KEY),
-                    $this->orm->define($this->parent, ORMInterface::R_ROLE_NAME)
-                );
-            }
-
-            return $selector;
+        if (!empty($this->key(Record::MORPH_KEY))) {
+            //Clarifying where statement
+            $selector->where(
+                $this->key(Record::MORPH_KEY),
+                $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
+            );
         }
 
         return $selector;

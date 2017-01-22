@@ -4,9 +4,10 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Post extends AbstactRecord
+class Post extends AbstactRecord implements PicturedInterface
 {
     const SCHEMA = [
         'id'      => 'bigPrimary',

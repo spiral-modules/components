@@ -27,6 +27,15 @@ class ManyToManyLoader extends RelationLoader
     use WhereTrait;
 
     /**
+     * When target role is null parent role to be used. Redefine this variable to revert behaviour
+     * of ManyToMany relation.
+     *
+     * @see ManyToMorphedRelation
+     * @var string|null
+     */
+    private $targetRole = null;
+
+    /**
      * Default set of relation options. Child implementation might defined their of default options.
      *
      * @var array
@@ -40,6 +49,24 @@ class ManyToManyLoader extends RelationLoader
         'where'      => null,
         'wherePivot' => null
     ];
+
+    /**
+     * @param string                   $class
+     * @param string                   $relation
+     * @param array                    $schema
+     * @param \Spiral\ORM\ORMInterface $orm
+     * @param string|null              $targetRole
+     */
+    public function __construct(
+        $class,
+        $relation,
+        array $schema,
+        ORMInterface $orm,
+        string $targetRole = null
+    ) {
+        parent::__construct($class, $relation, $schema, $orm);
+        $this->targetRole = $targetRole;
+    }
 
     /**
      * {@inheritdoc}
@@ -80,13 +107,8 @@ class ManyToManyLoader extends RelationLoader
             $this->setWhere(
                 $query,
                 $this->pivotAlias(),
-                $whereTarget,
-                [
-                    $this->pivotKey(Record::MORPH_KEY) => $this->orm->define(
-                        $this->parent->getClass(),
-                        ORMInterface::R_ROLE_NAME
-                    )
-                ]
+                'onWhere',
+                [$this->pivotKey(Record::MORPH_KEY) => $this->targetRole()]
             );
         }
 
@@ -211,5 +233,18 @@ class ManyToManyLoader extends RelationLoader
         }
 
         return $this->pivotAlias() . '.' . $this->schema[$key];
+    }
+
+    /**
+     * Defined role to be used in morphed relations.
+     *
+     * @return string
+     */
+    private function targetRole(): string
+    {
+        return $this->targetRole ?? $this->orm->define(
+                $this->parent->getClass(),
+                ORMInterface::R_ROLE_NAME
+            );
     }
 }

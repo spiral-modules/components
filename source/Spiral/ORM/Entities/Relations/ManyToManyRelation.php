@@ -413,7 +413,13 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         $query = $this->orm->table($this->class)->select();
 
         //Loader will take care of query configuration
-        $loader = new ManyToManyLoader($this->class, $table->getName(), $this->schema, $this->orm);
+        $loader = new ManyToManyLoader(
+            $this->class,
+            $table->getName(),
+            $this->schema,
+            $this->orm,
+            $this->targetRole()
+        );
 
         //This is root loader, we can do self-alias (THIS IS SAFE due loader in POSTLOAD mode)
         $loader = $loader->withContext(
@@ -432,10 +438,6 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         //Additional pivot conditions
         $pivotDecorator = new WhereDecorator($query, 'onWhere', $table->getName() . '_pivot');
         $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
-
-        if (!empty($this->key(Record::MORPH_KEY))) {
-            $pivotDecorator->where('{@}.' . $this->key(Record::MORPH_KEY), $this->targetRole());
-        }
 
         //Additional where conditions!
         if (!empty($this->schema[Record::WHERE])) {

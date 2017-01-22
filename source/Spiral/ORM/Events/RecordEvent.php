@@ -19,6 +19,10 @@ class RecordEvent extends EntityEvent
      */
     private $command;
 
+    /**
+     * @param EntityInterface  $entity
+     * @param CommandInterface $command
+     */
     public function __construct(EntityInterface $entity, CommandInterface $command)
     {
         parent::__construct($entity);

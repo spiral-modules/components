@@ -7,9 +7,7 @@
 
 namespace Spiral\Tests\ORM\Fixtures;
 
-use Spiral\ORM\RecordEntity;
-
-class Picture extends RecordEntity
+class Picture extends AbstactRecord
 {
     const SCHEMA = [
         'id'     => 'primary',

@@ -30,6 +30,13 @@ CHANGELOG for 0.9.0 RC
     * Unions with with ordering in SQLServer
     * Invalid parameter handling for update queries with nested selection
 
+**Models**
+  * Removed features
+    * Embedded validations
+    * Magic getter and setter methods
+  * setValue and packValue methods added
+  * "fields" property is now private
+
 **ORM**
   * Refactoring of SchemaBuilder
   * RecordSelector does not extend SeletQuery anymore

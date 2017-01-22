@@ -8,6 +8,7 @@
 namespace Spiral\Tests\ORM;
 
 use Spiral\Tests\ORM\Fixtures\Comment;
+use Spiral\Tests\ORM\Fixtures\Label;
 use Spiral\Tests\ORM\Fixtures\Picture;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Profile;
@@ -22,7 +23,8 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         Comment::class,
         Tag::class,
         Profile::class,
-        Picture::class
+        Picture::class,
+        Label::class
     ];
 
     public function testSchemaBuilding()

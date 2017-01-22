@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Post extends AbstactRecord implements PicturedInterface
+class Post extends AbstactRecord implements PicturedInterface, LabelledInterface
 {
     const SCHEMA = [
         'id'      => 'bigPrimary',

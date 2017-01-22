@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\Tests\ORM;
 
 use Interop\Container\ContainerInterface;
@@ -24,7 +25,6 @@ use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ORM\Fixtures\AbstactRecord;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Node;
-use Spiral\Tests\ORM\Fixtures\Picture;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\Recursive;
@@ -46,7 +46,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         Tag::class,
         Profile::class,
         Recursive::class,
-        Node::class
+        Node::class,
     ];
 
     const SOURCES = [User::class => UserSource::class];
@@ -158,7 +158,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $container
         );
 
-        $dbal->addDatabase($this->db = new Database($this->getDriver($container), 'default', 'tests_'));
+        $dbal->addDatabase($this->db = new Database($this->getDriver($container), 'default',
+            'tests_'));
         $dbal->addDatabase(new Database($this->getDriver($container), 'slave', 'slave_'));
 
         return $dbal;

@@ -14,7 +14,7 @@ namespace Spiral\Tests\ORM\Fixtures;
  * @property Post[]  $posts
  * @property Profile $profile
  */
-class User extends AbstactRecord implements PicturedInterface
+class User extends AbstactRecord implements PicturedInterface, LabelledInterface
 {
     //nothing is secured
     const SECURED = [];

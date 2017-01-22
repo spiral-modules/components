@@ -363,7 +363,7 @@ class ORM extends Component implements ORMInterface, SingletonInterface
         $class = $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS);
 
         if (is_a($class, AbstractRelation::class, true)) {
-            //Minor performance shortcut
+            //Minor performance optimization
             return new $class($schema[self::R_CLASS], $schema[self::R_SCHEMA], $this);
         }
 

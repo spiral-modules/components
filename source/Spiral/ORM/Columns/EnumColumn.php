@@ -9,7 +9,7 @@ namespace Spiral\ORM\Columns;
 
 use Spiral\Database\Schemas\Prototypes\AbstractColumn;
 use Spiral\ORM\ColumnInterface;
-use Spiral\ORM\Exceptions\AccessorException;
+use Spiral\ORM\Exceptions\AccessException;
 use Spiral\ORM\Exceptions\EnumException;
 use Spiral\ORM\RecordAccessorInterface;
 
@@ -53,7 +53,7 @@ class EnumColumn implements RecordAccessorInterface, ColumnInterface
     public function stateValue($data)
     {
         if (!in_array($data, static::VALUES)) {
-            throw new AccessorException("Unable to set enum value, invalid value given");
+            throw new AccessException("Unable to set enum value, invalid value given");
         }
 
         $this->value = $data;

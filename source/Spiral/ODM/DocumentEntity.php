@@ -16,7 +16,7 @@ use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ODM\Entities\DocumentCompositor;
 use Spiral\ODM\Entities\DocumentInstantiator;
-use Spiral\ODM\Exceptions\AccessorException;
+use Spiral\ODM\Exceptions\AccessException;
 use Spiral\ODM\Exceptions\AggregationException;
 use Spiral\ODM\Exceptions\DocumentException;
 use Spiral\ODM\Helpers\AggregationHelper;
@@ -452,7 +452,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
                     return new DocumentCompositor($accessor[1], $value, $this->odm);
             }
 
-            throw new AccessorException("Invalid accessor definition for field '{$name}'");
+            throw new AccessException("Invalid accessor definition for field '{$name}'");
         }
 
         //Field as a context

@@ -13,7 +13,6 @@ use Spiral\Models\Exceptions\EntityException;
 use Spiral\Models\Exceptions\AccessExceptionInterface;
 use Spiral\Models\PublishableInterface;
 use Spiral\Models\Traits\EventsTrait;
-use Spiral\ODM\Exceptions\AccessException;
 
 /**
  * AbstractEntity with ability to define field mutators and access
@@ -85,7 +84,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param bool $filter If false, associated field setter or accessor will be ignored.
      *
-     * @throws AccessException
+     * @throws \Spiral\Models\Exceptions\AccessException
      */
     public function setField(string $name, $value, bool $filter = true)
     {
@@ -120,7 +119,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param bool $filter If false, associated field getter will be ignored.
      *
-     * @throws AccessException
+     * @throws \Spiral\Models\Exceptions\AccessException
      */
     public function getField(string $name, $default = null, bool $filter = true)
     {
@@ -154,7 +153,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return $this
      *
-     * @throws AccessException
+     * @throws \Spiral\Models\Exceptions\AccessException
      */
     public function setFields($fields = [], bool $all = false)
     {
@@ -190,7 +189,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @param bool $filter
      *
-     * @throws AccessException
+     * @throws \Spiral\Models\Exceptions\AccessException
      */
     public function getFields(bool $filter = true): array
     {
@@ -284,7 +283,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return array
      *
-     * @throws AccessException
+     * @throws \Spiral\Models\Exceptions\AccessException
      */
     public function packFields(): array
     {

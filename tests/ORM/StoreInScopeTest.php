@@ -305,7 +305,7 @@ abstract class StoreInScopeTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\ORM\Exceptions\EnumException
+     * @expectedException \Spiral\ORM\Exceptions\AccessException
      */
     public function testEnumColumnError()
     {

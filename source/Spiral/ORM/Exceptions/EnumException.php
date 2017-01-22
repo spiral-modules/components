@@ -7,7 +7,7 @@
 
 namespace Spiral\ORM\Exceptions;
 
-class EnumException extends AccessorException
+class EnumException extends AccessException
 {
 
 }

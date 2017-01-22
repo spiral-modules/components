@@ -6,7 +6,7 @@
  */
 namespace Spiral\ODM\Exceptions;
 
-class CompositorException extends AccessorException
+class CompositorException extends AccessException
 {
 
 }

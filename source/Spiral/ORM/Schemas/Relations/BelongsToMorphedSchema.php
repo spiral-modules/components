@@ -7,9 +7,12 @@
 
 namespace Spiral\ORM\Schemas\Relations;
 
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
+use Spiral\ORM\Schemas\Definitions\RelationContext;
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\MorphedTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
@@ -99,14 +102,41 @@ class BelongsToMorphedSchema extends AbstractSchema implements InversableRelatio
      *
      * Relation will be inversed into every associated parent.
      */
-    public function inverseDefinition(SchemaBuilder $builder, $inverseTo)
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): \Generator
     {
-        $inversed = [];
-        foreach ($this->findTargets($builder) as $schema) {
-
+        if (!is_array($inverseTo) || count($inverseTo) != 2) {
+            throw new DefinitionException(
+                "BelongsToMorphed relation inverse must be defined as [type, outer relation name]"
+            );
         }
 
-        return $inversed;
+        foreach ($this->findTargets($builder) as $schema) {
+            /**
+             * We are going to simply replace outer key with inner key and keep the rest of options intact.
+             */
+            $inversed = new RelationDefinition(
+                $inverseTo[1],
+                $inverseTo[0],
+                $this->definition->sourceContext()->getClass(),
+                [
+                    Record::INNER_KEY         => $this->findOuter($builder)->getName(),
+                    Record::OUTER_KEY         => $this->option(Record::INNER_KEY),
+                    Record::CREATE_CONSTRAINT => false,
+                    Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
+                    Record::NULLABLE          => $this->option(Record::NULLABLE),
+                    Record::MORPH_KEY         => $this->option(Record::MORPH_KEY)
+                ]
+            );
+
+            //In back order :)
+            yield $inversed->withContext(
+                RelationContext::createContent(
+                    $schema,
+                    $builder->requestTable($schema->getTable(), $schema->getDatabase())
+                ),
+                $this->definition->sourceContext()
+            );
+        }
     }
 
     /**

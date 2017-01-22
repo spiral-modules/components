@@ -7,6 +7,8 @@
 
 namespace Spiral\Tests\ORM\Fixtures;
 
+use Spiral\ORM\Record;
+
 class Picture extends AbstactRecord
 {
     const SCHEMA = [
@@ -14,7 +16,7 @@ class Picture extends AbstactRecord
         'url'    => 'string',
         'parent' => [
             self::BELONGS_TO_MORPHED => PicturedInterface::class,
-            self::INVERSE            => 'picture'
+            self::INVERSE            => [Record::HAS_ONE, 'picture']
         ]
     ];
 }

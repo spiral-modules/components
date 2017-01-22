@@ -74,11 +74,11 @@ class BelongsToSchema extends AbstractSchema implements InversableRelationInterf
     /**
      * {@inheritdoc}
      */
-    public function inverseDefinition(SchemaBuilder $builder, $inverseTo)
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): \Generator
     {
         if (!is_array($inverseTo) || count($inverseTo) != 2) {
             throw new DefinitionException(
-                "BelongsToRelation inverse must be defined as [type, outer relation name]"
+                "BelongsTo relation inverse must be defined as [type, outer relation name]"
             );
         }
 
@@ -89,7 +89,6 @@ class BelongsToSchema extends AbstractSchema implements InversableRelationInterf
                 $this->definition->getName()
             ));
         }
-
 
         /**
          * We are going to simply replace outer key with inner key and keep the rest of options intact.
@@ -109,7 +108,7 @@ class BelongsToSchema extends AbstractSchema implements InversableRelationInterf
         );
 
         //In back order :)
-        return $inversed->withContext(
+        yield $inversed->withContext(
             $this->definition->targetContext(),
             $this->definition->sourceContext()
         );

@@ -79,7 +79,7 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
     /**
      *{@inheritdoc}
      */
-    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): RelationDefinition
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): \Generator
     {
         if (!is_string($inverseTo)) {
             throw new DefinitionException("Inversed relation must be specified as string");
@@ -111,7 +111,7 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
         );
 
         //In back order :)
-        return $inversed->withContext(
+        yield $inversed->withContext(
             $this->definition->targetContext(),
             $this->definition->sourceContext()
         );

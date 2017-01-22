@@ -124,7 +124,7 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
     /**
      *{@inheritdoc}
      */
-    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): RelationDefinition
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo):\Generator
     {
         if (!is_string($inverseTo)) {
             throw new DefinitionException("Inversed relation must be specified as string");
@@ -161,7 +161,7 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         );
 
         //In back order :)
-        return $inversed->withContext(
+        yield $inversed->withContext(
             $this->definition->targetContext(),
             $this->definition->sourceContext()
         );

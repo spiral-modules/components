@@ -103,15 +103,8 @@ class RelationBuilder
                 }
 
                 $inversed = $relation->inverseDefinition($builder, $definition->getInverse());
-
-                if ($inversed instanceof RelationDefinition) {
-                    //Inversed into singular relation
-                    $this->registerRelation($inversed);
-                } elseif (is_array($inversed)) {
-                    //Inversed into multiple back relation (see morphed relations)
-                    foreach ($inversed as $definition) {
-                        $this->registerRelation($definition);
-                    }
+                foreach ($inversed as $definition) {
+                    $this->registerRelation($definition);
                 }
             }
         }

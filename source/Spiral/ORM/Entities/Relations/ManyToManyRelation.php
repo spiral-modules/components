@@ -389,7 +389,7 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         );
 
         $iterator = $query->getIterator();
-        foreach ($query->getIterator() as $row) {
+        foreach ($iterator as $row) {
             //Time to parse some data
             $node->parseRow(0, $row);
         }
@@ -410,7 +410,7 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     protected function createQuery($innerKey): SelectQuery
     {
         $table = $this->orm->table($this->class);
-        $query = $this->orm->table($this->class)->select();
+        $query = $table->select();
 
         //Loader will take care of query configuration
         $loader = new ManyToManyLoader(

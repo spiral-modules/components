@@ -59,6 +59,51 @@ abstract class ManyToMorphedRelationTest extends BaseTest
         $tag->tagged->magic;
     }
 
+    public function testCount()
+    {
+        $tag = new Supertag(['name' => 'A']);
+        $tag->save();
+
+        $this->assertCount(0, $tag->tagged->users);
+        $this->assertCount(0, $tag->tagged->posts);
+    }
+
+    public function testMultilinking()
+    {
+        $tag = new Supertag(['name' => 'A']);
+        $tag->tagged->users->link($user = new User(['name' => 'Anton']));
+        $tag->tagged->users->link($user1 = new User(['name' => 'John']));
+
+        $post = new Post();
+        $post->title = 'new title';
+        $post->author = $user;
+
+        $tag->tagged->posts->link($post);
+
+        $post1 = new Post();
+        $post1->title = 'new title 2';
+        $post1->author = $user1;
+
+        $tag->tagged->posts->link($post1);
+
+        $tag->save();
+
+        $this->assertCount(2, $tag->tagged->users);
+        $this->assertCount(2, $tag->tagged->posts);
+
+        $this->assertSameInDB($tag);
+        $this->assertSameInDB($user);
+        $this->assertSameInDB($user1);
+        $this->assertSameInDB($post);
+        $this->assertSameInDB($post1);
+
+        $user = $this->orm->source(User::class)->findByPK($user->primaryKey());
+        $this->assertTrue($user->supertags->has($tag));
+
+        $post = $this->orm->source(Post::class)->findByPK($post->primaryKey());
+        $this->assertTrue($post->supertags->has($tag));
+    }
+
     public function testLinkInversedLazyLoad()
     {
         $user = new User();

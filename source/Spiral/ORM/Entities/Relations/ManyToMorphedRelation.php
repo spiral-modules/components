@@ -98,7 +98,7 @@ class ManyToMorphedRelation extends AbstractRelation
 
         $relation = new ManyToManyRelation(
             $class,
-            $this->schema,
+            $this->makeSchema($class),
             $this->orm,
             $this->orm->define($class, ORMInterface::R_ROLE_NAME)
         );
@@ -154,5 +154,28 @@ class ManyToMorphedRelation extends AbstractRelation
         }
 
         return $transaction;
+    }
+
+    /**
+     * Create relation schema for nested relation.
+     *
+     * @param string $class
+     *
+     * @return array
+     */
+    protected function makeSchema(string $class): array
+    {
+        //Using as basement
+        $schema = $this->schema;
+        unset($schema[Record::MORPHED_ALIASES]);
+
+        //We do not have this information in morphed relation but it's required for ManyToMany
+        $schema[Record::WHERE] = [];
+
+        //This must be unified in future, for now we can fetch columns directly from there
+        $recordSchema = $this->orm->define($class, ORMInterface::R_SCHEMA);
+        $schema[Record::RELATION_COLUMNS] = array_keys($recordSchema[Record::SH_DEFAULTS]);
+
+        return $schema;
     }
 }

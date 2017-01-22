@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations\Traits;
 
 use Spiral\ORM\RecordInterface;
@@ -40,7 +41,7 @@ trait MatchTrait
                 return true;
             }
 
-            //Matched by content
+            //Matched by content (this is a bit tricky!)
             if ($record->packValue() == $query->packValue()) {
                 return true;
             }

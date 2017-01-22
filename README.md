@@ -1,4 +1,4 @@
-Spiral Core Components
+Spiral Core Components (PHP7+)
 ================================
 
 [![Latest Stable Version](https://poser.pugx.org/spiral/components/v/stable)](https://packagist.org/packages/spiral/components) 

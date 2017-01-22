@@ -88,7 +88,7 @@ class DocumentInstantiator implements InstantiatorInterface
         }
 
         //Must pass value thought all needed filters
-        $entity->stateValue($fields);
+        $entity->setValue($fields);
 
         return $entity;
     }

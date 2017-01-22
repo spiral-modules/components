@@ -56,7 +56,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * {@inheritdoc}
      */
-    public function stateValue($data)
+    public function setValue($data)
     {
         return $this->setFields($data);
     }
@@ -501,6 +501,6 @@ abstract class AbstractEntity extends MutableObject implements
         }
 
         //Letting accessor to set value
-        $field->stateValue($value);
+        $field->setValue($value);
     }
 }

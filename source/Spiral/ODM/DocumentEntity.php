@@ -379,7 +379,7 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     public function __clone()
     {
         //De-serialize document in order to ensure that all compositions are recreated
-        $this->stateValue($this->packValue());
+        $this->setValue($this->packValue());
 
         //Since document embedded as one piece let's ensure that it is solid
         $this->solidState = true;

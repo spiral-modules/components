@@ -232,7 +232,7 @@ class DocumentCompositor implements
      * $user->addresses->mountValue([$address]);
      * $address->city = 'Minsk'; //this will have no effect of $user->addresses
      */
-    public function stateValue($data)
+    public function setValue($data)
     {
         //Manually altered compositions must always end in solid state
         $this->solidState = true;
@@ -385,7 +385,7 @@ class DocumentCompositor implements
         $this->atomics = [];
 
         //De-serialize composition in order to ensure that all compositions are recreated
-        $this->stateValue($this->packValue());
+        $this->setValue($this->packValue());
     }
 
     /**

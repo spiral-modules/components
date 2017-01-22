@@ -53,7 +53,7 @@ class EnumColumn extends Component implements RecordAccessorInterface, ColumnInt
     /**
      * {@inheritdoc}
      */
-    public function stateValue($data)
+    public function setValue($data)
     {
         if (!in_array($data, static::VALUES)) {
             throw new AccessException("Unable to set enum value, invalid value given");

@@ -137,7 +137,7 @@ abstract class AbstractArray implements CompositableInterface, \Countable, \Iter
     /**
      * {@inheritdoc}
      */
-    public function stateValue($data)
+    public function setValue($data)
     {
         //Manually altered arrays must always end in solid state
         $this->solidState = true;

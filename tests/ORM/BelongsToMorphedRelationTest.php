@@ -107,5 +107,12 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $user = $this->orm->source(User::class)->findByPK($user->primaryKey());
 
         $this->assertSimilar($picture, $user->picture);
+
+        $picture->parent = $post = new Post();
+        $picture->parent->author = $user;
+        $picture->save();
+
+        $post = $this->orm->source(Post::class)->findByPK($user->primaryKey());
+        $this->assertSimilar($picture, $post->picture);
     }
 }

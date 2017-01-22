@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Schemas\Relations;
 
 use Spiral\ORM\Record;
@@ -36,6 +37,7 @@ class HasOneSchema extends HasManySchema
         Record::INNER_KEY,
         Record::OUTER_KEY,
         Record::NULLABLE,
-        Record::RELATION_COLUMNS
+        Record::RELATION_COLUMNS,
+        Record::MORPH_KEY
     ];
 }

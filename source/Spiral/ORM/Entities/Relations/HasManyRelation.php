@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\CommandInterface;
@@ -14,6 +15,7 @@ use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
 use Spiral\ORM\Exceptions\RelationException;
 use Spiral\ORM\Helpers\WhereDecorator;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 
@@ -216,6 +218,14 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
             //Configuring where conditions with alias resolution
             $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
             $decorator->where($this->schema[Record::WHERE]);
+
+            if (!empty($this->key(Record::MORPH_KEY))) {
+                //Clarifying where statement
+                $decorator->where(
+                    $this->key(Record::MORPH_KEY),
+                    $this->orm->define($this->parent, ORMInterface::R_ROLE_NAME)
+                );
+            }
 
             return $selector;
         }

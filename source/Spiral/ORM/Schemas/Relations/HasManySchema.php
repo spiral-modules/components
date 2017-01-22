@@ -28,6 +28,8 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  *   by default
  * - relation will create index on column "user_id" in "comments" table if allowed
  * - relation will create foreign key "comments"."user_id" => "users"."id" if allowed
+ *
+ * Note: relation can point to morphed records
  */
 class HasManySchema extends AbstractSchema implements InversableRelationInterface
 {
@@ -46,7 +48,8 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
         Record::OUTER_KEY,
         Record::NULLABLE,
         Record::WHERE,
-        Record::RELATION_COLUMNS
+        Record::RELATION_COLUMNS,
+        Record::MORPH_KEY
     ];
 
     /**
@@ -74,6 +77,9 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
 
         //HasMany allow us to define default WHERE statement for relation in a simplified array form
         Record::WHERE             => [],
+
+        //Relation can point to morphed record
+        Record::MORPH_KEY         => null
     ];
 
     /**

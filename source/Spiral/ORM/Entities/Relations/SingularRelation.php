@@ -100,13 +100,24 @@ abstract class SingularRelation extends AbstractRelation
         }
 
         $this->data = $this->orm->selector($this->getClass())->where(
-            $this->key(Record::OUTER_KEY),
-            $this->parent->getField($innerKey)
+            $this->whereStatement()
         )->fetchData();
 
         if (!empty($this->data[0])) {
             //Use first result
             $this->data = $this->data[0];
         }
+    }
+
+    /**
+     * Where statement to load outer record.
+     *
+     * @return array
+     */
+    protected function whereStatement(): array
+    {
+        return [
+            $this->key(Record::OUTER_KEY) => $this->parent->getField($this->key(Record::INNER_KEY))
+        ];
     }
 }

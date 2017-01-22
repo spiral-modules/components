@@ -4,6 +4,7 @@
  *
  * @author    Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\ORM\CommandInterface;
@@ -11,6 +12,7 @@ use Spiral\ORM\Commands\NullCommand;
 use Spiral\ORM\Commands\TransactionalCommand;
 use Spiral\ORM\ContextualCommandInterface;
 use Spiral\ORM\Entities\Relations\Traits\LookupTrait;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
 
@@ -92,9 +94,37 @@ class HasOneRelation extends SingularRelation
                     $this->key(Record::OUTER_KEY),
                     $this->lookupKey(Record::INNER_KEY, $this->parent, $outerCommand)
                 );
+
+                if (!empty($morphKey = $this->key(Record::MORPH_KEY))) {
+                    //HasOne relation support additional morph key
+                    $innerCommand->addContext(
+                        $this->key(Record::MORPH_KEY),
+                        $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
+                    );
+                }
             });
         }
 
         return $innerCommand;
+    }
+
+    /**
+     * Where statement to load outer record.
+     *
+     * @return array
+     */
+    protected function whereStatement(): array
+    {
+        $where = parent::whereStatement();
+
+        if (!empty($morphKey = $this->key(Record::MORPH_KEY))) {
+            //HasOne relation support additional morph key
+            $where[$this->key(Record::MORPH_KEY)] = $this->orm->define(
+                get_class($this->parent),
+                ORMInterface::R_ROLE_NAME
+            );
+        }
+
+        return $where;
     }
 }

@@ -24,6 +24,7 @@ CHANGELOG for 0.9.0 RC
 **DBAL** 
   * Improved polyfils for SQLServer
   * Improved SQL injection prevention
+  * Improved timezone management
   * Refactoring of DBAL schemas
   * Bugfixes
     * Unions with with ordering in SQLServer
@@ -32,10 +33,9 @@ CHANGELOG for 0.9.0 RC
 **ORM**
   * Refactoring of SchemaBuilder
   * RecordSelector does not extend SeletQuery anymore
-  * New Features
-    * Transactional support
-    * Improvment memory mapping
-    * Improvement tree operations (save)
+  * Transactional (UnitOfWork) support
+  * Improvment memory mapping
+  * Improvement tree operations (save)
   * Removed features
     * ActiveRecord thought direct table communication
     * MutableNumber accessor

@@ -9,6 +9,7 @@ namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Exceptions\QueryException;
 use Spiral\ORM\Exceptions\SelectorException;
+use Spiral\ORM\Helpers\WhereDecorator;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
 use Spiral\ORM\RecordInterface;
@@ -99,9 +100,11 @@ abstract class SingularRelation extends AbstractRelation
             return;
         }
 
-        $this->data = $this->orm->selector($this->getClass())->where(
-            $this->whereStatement()
-        )->fetchData();
+        $selector = $this->orm->selector($this->getClass());
+        $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
+        $decorator->where($this->whereStatement());
+
+        $this->data = $selector->fetchData();
 
         if (!empty($this->data[0])) {
             //Use first result

@@ -103,7 +103,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
             $this->builder->addSource($model, $source);
         }
 
-        //$this->db->getDriver()->setProfiling(false);
+        $this->db->getDriver()->setProfiling(false);
         $this->builder->renderSchema();
         $this->builder->pushSchema();
         $this->db->getDriver()->setProfiling(true);

@@ -267,10 +267,14 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
                 $command = new UpdateCommand(
                     $this->pivotTable(),
                     [
-                        $this->key(Record::THOUGHT_INNER_KEY) => $this->lookupKey(Record::INNER_KEY,
-                            $this->parent),
-                        $this->key(Record::THOUGHT_OUTER_KEY) => $this->lookupKey(Record::OUTER_KEY,
-                            $record),
+                        $this->key(Record::THOUGHT_INNER_KEY) => $this->lookupKey(
+                            Record::INNER_KEY,
+                            $this->parent
+                        ),
+                        $this->key(Record::THOUGHT_OUTER_KEY) => $this->lookupKey(
+                            Record::OUTER_KEY,
+                            $record
+                        ),
                     ],
                     $this->pivotData->offsetGet($record)
                 );
@@ -341,6 +345,14 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
                 $this->lookupKey(Record::OUTER_KEY, $outer, $outerCommand)
             );
         });
+
+        if (!empty($this->key(Record::MORPH_KEY))) {
+            $pivotCommand->addContext(
+                $this->key(Record::MORPH_KEY),
+                //todo: overwrite
+                $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
+            );
+        }
 
         return $pivotCommand;
     }
@@ -413,6 +425,14 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
         //Additional pivot conditions
         $pivotDecorator = new WhereDecorator($query, 'onWhere', $table->getName() . '_pivot');
         $pivotDecorator->where($this->schema[Record::WHERE_PIVOT]);
+
+        if (!empty($this->key(Record::MORPH_KEY))) {
+            $pivotDecorator->where(
+                '{@}.' . $this->key(Record::MORPH_KEY),
+                //todo: overwrite
+                $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
+            );
+        }
 
         //Additional where conditions!
         $decorator = new WhereDecorator($query, 'where', 'root');

@@ -229,9 +229,10 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
         }
 
         if (!empty($this->key(Record::MORPH_KEY))) {
-            //Clarifying where statement
-            $selector->where(
-                $this->key(Record::MORPH_KEY),
+            //Morph key
+            $decorator = new WhereDecorator($selector, 'where', $selector->getAlias());
+            $decorator->where(
+                '{@}.' . $this->key(Record::MORPH_KEY),
                 $this->orm->define(get_class($this->parent), ORMInterface::R_ROLE_NAME)
             );
         }

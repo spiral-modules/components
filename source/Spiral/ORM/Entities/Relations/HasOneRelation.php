@@ -119,7 +119,7 @@ class HasOneRelation extends SingularRelation
 
         if (!empty($morphKey = $this->key(Record::MORPH_KEY))) {
             //HasOne relation support additional morph key
-            $where[$this->key(Record::MORPH_KEY)] = $this->orm->define(
+            $where['{@}.' . $this->key(Record::MORPH_KEY)] = $this->orm->define(
                 get_class($this->parent),
                 ORMInterface::R_ROLE_NAME
             );

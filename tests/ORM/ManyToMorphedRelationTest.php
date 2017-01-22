@@ -25,8 +25,23 @@ abstract class ManyToMorphedRelationTest extends BaseTest
         Supertag::class
     ];
 
-    public function testInstance()
+    public function testSchemaBuilding()
     {
-
+        $schema = $this->db->table('tagged_map')->getSchema();
+        $this->assertTrue($schema->hasColumn('supertag_id'));
+        $this->assertTrue($schema->hasColumn('tagged_id'));
+        $this->assertTrue($schema->hasColumn('tagged_type'));
     }
+
+    /*
+     * Testing inversed relations.
+     */
+    public function testLinkInversed()
+    {
+        $user = new User();
+        $user->supertags->link(new Supertag(['name' => 'A']));
+        $user->save();
+    }
+
+    //todo: other tests
 }

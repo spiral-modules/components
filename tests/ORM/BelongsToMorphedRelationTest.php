@@ -152,6 +152,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $picture->save();
 
         $user = $this->orm->selector(User::class)->wherePK($user->primaryKey())
+            ->with('picture')
             ->load('picture', ['method' => RelationLoader::INLOAD])
             ->findOne();
 
@@ -164,6 +165,7 @@ abstract class BelongsToMorphedRelationTest extends BaseTest
         $picture->save();
 
         $post = $this->orm->selector(Post::class)->wherePK($post->primaryKey())
+            ->with('picture')
             ->load('picture', ['method' => RelationLoader::INLOAD])
             ->findOne();
 

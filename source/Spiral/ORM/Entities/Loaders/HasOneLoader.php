@@ -66,7 +66,7 @@ class HasOneLoader extends RelationLoader
                 $this->getAlias(),
                 $this->isJoined() ? 'onWhere' : 'where',
                 [
-                    $this->schema[Record::MORPH_KEY] => $this->orm->define(
+                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
                         $this->parent->getClass(),
                         ORMInterface::R_ROLE_NAME
                     )

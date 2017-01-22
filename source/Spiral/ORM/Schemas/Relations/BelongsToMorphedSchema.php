@@ -191,7 +191,7 @@ class BelongsToMorphedSchema extends AbstractSchema implements InversableRelatio
 
         foreach ($this->findTargets($builder) as $outer) {
             //Role => model mapping
-            $schema[ORMInterface::R_SCHEMA][ORMInterface::R_ROLE_NAME][$outer->getRole()] = $outer->getClass();
+            $schema[ORMInterface::R_SCHEMA][Record::MORPHED_ALIASES][$outer->getRole()] = $outer->getClass();
         }
 
         return $schema;

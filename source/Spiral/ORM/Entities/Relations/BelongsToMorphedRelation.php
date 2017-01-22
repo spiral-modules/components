@@ -43,7 +43,7 @@ class BelongsToMorphedRelation extends SingularRelation
         }
 
         //Resolve parent using role map
-        return $this->schema[ORMInterface::R_ROLE_NAME][$parentType];
+        return $this->schema[Record::MORPHED_ALIASES][$parentType];
     }
 
     /**

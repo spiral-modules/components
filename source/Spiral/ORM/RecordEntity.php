@@ -70,7 +70,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     const OUTER_KEY         = 901; //Outer key name
     const INNER_KEY         = 902; //Inner key name
-    const MORPH_KEY         = 903; //Morph key name
+    const MORPH_KEY         = 903; //Morph key name (internal)
     const PIVOT_TABLE       = 904; //Pivot table name
     const PIVOT_COLUMNS     = 905; //Pre-defined pivot table columns
     const PIVOT_DEFAULTS    = 906; //Pre-defined pivot table default values

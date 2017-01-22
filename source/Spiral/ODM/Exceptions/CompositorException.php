@@ -1,16 +1,12 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM\Exceptions;
 
-/**
- * Errors inside ODM document compositor.
- */
-class CompositorException extends AccessorException
+class CompositorException extends AccessException
 {
 
 }

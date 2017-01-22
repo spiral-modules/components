@@ -5,14 +5,16 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Drivers\Postgres;
 
-use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
+use Interop\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
+use Spiral\Core\MemoryInterface;
+use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\Postgres\Schemas\Commander;
-use Spiral\Database\Drivers\Postgres\Schemas\TableSchema;
-use Spiral\Database\Entities\Database;
+use Spiral\Database\Drivers\Postgres\Schemas\PostgresTable;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
 
@@ -29,22 +31,12 @@ class PostgresDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE = TableSchema::class;
-
-    /**
-     * Commander used to execute commands. :)
-     */
-    const COMMANDER = Commander::class;
+    const TABLE_SCHEMA_CLASS = PostgresTable::class;
 
     /**
      * Query compiler class.
      */
-    const QUERY_COMPILER = QueryCompiler::class;
-
-    /**
-     * Default timestamp expression.
-     */
-    const TIMESTAMP_NOW = 'now()';
+    const QUERY_COMPILER = PostgresCompiler::class;
 
     /**
      * Cached list of primary keys associated with their table names. Used by InsertBuilder to
@@ -55,38 +47,34 @@ class PostgresDriver extends Driver
     private $primaryKeys = [];
 
     /**
-     * Needed to remember table primary keys.
+     * Used to store information about associated primary keys.
      *
-     * @invisible
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
     protected $memory = null;
 
     /**
-     * {@inheritdoc}
-     * @param string               $name
-     * @param array                $config
-     * @param FactoryInterface     $factory
-     * @param HippocampusInterface $memory
+     * @param string             $name
+     * @param array              $options
+     * @param ContainerInterface $container
+     * @param MemoryInterface    $memory Optional.
      */
     public function __construct(
         $name,
-        array $config,
-        FactoryInterface $factory = null,
-        HippocampusInterface $memory = null
+        array $options,
+        ContainerInterface $container = null,
+        MemoryInterface $memory = null
     ) {
-        parent::__construct($name, $config, $factory);
-
+        parent::__construct($name, $options, $container);
         $this->memory = $memory;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\' AND "table_name" = ?';
+        $query = "SELECT COUNT(table_name) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' AND table_name = ?";
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }
@@ -94,10 +82,17 @@ class PostgresDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function truncateData(string $table)
     {
-        $query = 'SELECT "table_name" FROM "information_schema"."tables" '
-            . 'WHERE "table_schema" = \'public\' AND "table_type" = \'BASE TABLE\'';
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function tableNames(): array
+    {
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
 
         $tables = [];
         foreach ($this->query($query) as $row) {
@@ -110,27 +105,30 @@ class PostgresDriver extends Driver
     /**
      * Get singular primary key associated with desired table. Used to emulate last insert id.
      *
-     * @param string $table Fully specified table name, including postfix.
-     * @return string
+     * @param string $prefix Database prefix if any.
+     * @param string $table  Fully specified table name, including postfix.
+     *
+     * @return string|null
+     *
      * @throws DriverException
      */
-    public function getPrimary($table)
+    public function getPrimary(string $prefix, string $table)
     {
         if (!empty($this->memory) && empty($this->primaryKeys)) {
-            $this->primaryKeys = (array)$this->memory->loadData($this->getSource() . '-primary');
+            $this->primaryKeys = (array)$this->memory->loadData($this->getSource() . '.keys');
         }
 
         if (!empty($this->primaryKeys) && array_key_exists($table, $this->primaryKeys)) {
             return $this->primaryKeys[$table];
         }
 
-        if (!$this->hasTable($table)) {
+        if (!$this->hasTable($prefix . $table)) {
             throw new DriverException(
-                "Unable to fetch table primary key, no such table '{$table}' exists."
+                "Unable to fetch table primary key, no such table '{$prefix}{$table}' exists"
             );
         }
 
-        $this->primaryKeys[$table] = $this->tableSchema($table)->getPrimaryKeys();
+        $this->primaryKeys[$table] = $this->tableSchema($table, $prefix)->getPrimaryKeys();
         if (count($this->primaryKeys[$table]) === 1) {
             //We do support only single primary key
             $this->primaryKeys[$table] = $this->primaryKeys[$table][0];
@@ -140,7 +138,7 @@ class PostgresDriver extends Driver
 
         //Caching
         if (!empty($this->memory)) {
-            $this->memory->saveData($this->getSource() . '-primary', $this->primaryKeys);
+            $this->memory->saveData($this->getSource() . '.keys', $this->primaryKeys);
         }
 
         return $this->primaryKeys[$table];
@@ -148,24 +146,34 @@ class PostgresDriver extends Driver
 
     /**
      * {@inheritdoc}
+     *
+     * Postgres uses custom insert query builder in order to return value of inserted row.
      */
-    public function insertBuilder(Database $database, array $parameters = [])
+    public function insertBuilder(string $prefix, array $parameters = []): InsertQuery
     {
-        return $this->factory->make(InsertQuery::class, [
-                'database' => $database,
-                'compiler' => $this->queryCompiler($database->getPrefix())
-            ] + $parameters);
+        return $this->container->make(
+            PostgresInsertQuery::class,
+            ['driver' => $this, 'compiler' => $this->queryCompiler($prefix),] + $parameters
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function createPDO()
+    protected function createPDO(): \PDO
     {
         //Spiral is purely UTF-8
         $pdo = parent::createPDO();
         $pdo->exec("SET NAMES 'UTF-8'");
 
         return $pdo;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandler(LoggerInterface $logger = null): AbstractHandler
+    {
+        return new PostgresHandler($this, $logger);
     }
 }

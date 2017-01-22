@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer\Prototypes;
 
 use Psr\Log\LoggerAwareInterface;
@@ -23,9 +24,6 @@ use Symfony\Component\Finder\SplFileInfo;
  */
 class AbstractLocator extends Component implements InjectableInterface, LoggerAwareInterface
 {
-    /**
-     * Injection over constant.
-     */
     use LoggerTrait;
 
     /**
@@ -35,6 +33,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
 
     /**
      * @invisible
+     *
      * @var TokenizerInterface
      */
     protected $tokenizer = null;
@@ -45,7 +44,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     protected $finder = null;
 
     /**
-     * @param TokenizerInterface $tokenizer
+     * @param TokenizerInterface $tokenizer Required to provide ReflectionFile.
      * @param Finder             $finder
      */
     public function __construct(TokenizerInterface $tokenizer, Finder $finder)
@@ -57,28 +56,22 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
     /**
      * Available file reflections. Generator.
      *
-     *
-     * @generate ReflectionFile[]
+     * @return ReflectionFile[]|\Generator
      */
-    protected function availableReflections()
+    protected function availableReflections(): \Generator
     {
         /**
-         * @var SplFileInfo $file
+         * @var SplFileInfo
          */
         foreach ($this->finder->getIterator() as $file) {
             $reflection = $this->tokenizer->fileReflection((string)$file);
 
-            //We are not analyzing files which has includes, it's not safe to require such reflections
             if ($reflection->hasIncludes()) {
-                $this->logger()->warning(
-                    "File '{filename}' has includes and will be excluded from analysis.",
-                    ['filename' => (string)$file]
-                );
-
+                //We are not analyzing files which has includes, it's not safe to require such reflections
                 continue;
             }
 
-            /**
+            /*
              * @var ReflectionFile $reflection
              */
             yield $reflection;
@@ -90,26 +83,29 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
      * excluded from analysis.
      *
      * @param string $class
-     * @return \ReflectionClass|null
+     *
+     * @return \ReflectionClass
      */
-    protected function classReflection($class)
+    protected function classReflection(string $class): \ReflectionClass
     {
         $loader = function ($class) {
-            throw new LocatorException("Class '{$class}' can not be loaded.");
+            throw new LocatorException("Class '{$class}' can not be loaded");
         };
 
         //To suspend class dependency exception
         spl_autoload_register($loader);
 
         try {
+            //In some cases reflection can thrown an exception if class invalid or can not be loaded,
+            //we are going to handle such exception and convert it soft exception
             return new \ReflectionClass($class);
-        } catch (\Exception $exception) {
+        } catch (\Throwable $e) {
             $this->logger()->error(
-                "Unable to resolve class '{class}', error '{message}'.",
-                ['class' => $class, 'message' => $exception->getMessage()]
+                "Unable to resolve class '{class}', error '{message}'",
+                ['class' => $class, 'message' => $e->getMessage()]
             );
 
-            return null;
+            throw new LocatorException($e->getMessage(), $e->getCode());
         } finally {
             spl_autoload_unregister($loader);
         }
@@ -119,9 +115,10 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
      * Get every class trait (including traits used in parents).
      *
      * @param string $class
+     *
      * @return array
      */
-    protected function getTraits($class)
+    protected function fetchTraits(string $class): array
     {
         $traits = [];
 

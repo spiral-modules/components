@@ -1,15 +1,11 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Exceptions;
 
-/**
- * Relation configuration/request exception.
- */
 class RelationException extends ORMException
 {
 

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
@@ -20,8 +21,10 @@ interface ResolverInterface
      *
      * @param ContextFunction $reflection Target function or method.
      * @param array           $parameters User specified parameters.
+     *
      * @return array
+     *
      * @throws ArgumentException
      */
-    public function resolveArguments(ContextFunction $reflection, array $parameters = []);
+    public function resolveArguments(ContextFunction $reflection, array $parameters = []): array;
 }

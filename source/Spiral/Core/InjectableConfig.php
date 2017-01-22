@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core;
 
 use Spiral\Core\Exceptions\ConfigException;
@@ -12,9 +13,9 @@ use Spiral\Core\Exceptions\ConfigException;
 /**
  * Generic implementation of array based configuration.
  *
- * Attention! Config has to be serialiable and be depdended ONLY on enviroment or runtime
+ * Attention! Config has to be serialiable and be depended ONLY on environment or runtime
  * modifications/requests. No custom logic is allowed to initiate config, in other case config cache
- * will be invalid.
+ * will be invalid (pss... there is no config cache anymore).
  */
 class InjectableConfig extends Component implements ConfigInterface, \IteratorAggregate
 {
@@ -35,7 +36,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
      *
      * @param array $config
      */
-    final public function __construct(array $config = [])
+    public function __construct(array $config = [])
     {
         $this->config = $config;
     }
@@ -43,7 +44,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->config;
     }
@@ -62,7 +63,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
     public function offsetGet($offset)
     {
         if (!$this->offsetExists($offset)) {
-            throw new ConfigException("Undefined configuration key '{$offset}'.");
+            throw new ConfigException("Undefined configuration key '{$offset}'");
         }
 
         return $this->config[$offset];
@@ -76,7 +77,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
     public function offsetSet($offset, $value)
     {
         throw new ConfigException(
-            "Unable to change configuration data, configs are treated as immutable."
+            'Unable to change configuration data, configs are treated as immutable by default'
         );
     }
 
@@ -88,7 +89,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
     public function offsetUnset($offset)
     {
         throw new ConfigException(
-            "Unable to change configuration data, configs are treated as immutable."
+            'Unable to change configuration data, configs are treated as immutable by default'
         );
     }
 
@@ -104,6 +105,7 @@ class InjectableConfig extends Component implements ConfigInterface, \IteratorAg
      * Restoring state.
      *
      * @param array $an_array
+     *
      * @return static
      */
     public static function __set_state($an_array)

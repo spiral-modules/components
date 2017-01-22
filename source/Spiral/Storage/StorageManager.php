@@ -8,6 +8,7 @@
 namespace Spiral\Storage;
 
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\FactoryInterface;
 use Spiral\Storage\Configs\StorageConfig;
@@ -16,7 +17,13 @@ use Spiral\Storage\Entities\StorageObject;
 use Spiral\Storage\Exceptions\StorageException;
 
 /**
- * Default implementation of StorageInterface.
+ * Default implementation of StorageInterface. Please note that StorageManager component provides
+ * general purpose abstraction for file storage, it does not and will not support directory
+ * listings and features specific to storage adapter (however such functionality can be added at
+ * server level).
+ *
+ * @todo check Guzzle dependency and if there is something lighter for PSR7 curl wrappers
+ * @todo add async processing?
  */
 class StorageManager extends Component implements StorageInterface, InjectorInterface
 {
@@ -33,52 +40,86 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
     /**
      * @var StorageConfig
      */
-    protected $config = null;
+    protected $config;
 
     /**
      * @invisible
+     *
      * @var FactoryInterface
      */
-    protected $factory = null;
+    protected $factory;
 
     /**
      * @param StorageConfig    $config
      * @param FactoryInterface $factory
      */
-    public function __construct(StorageConfig $config, FactoryInterface $factory)
+    public function __construct(StorageConfig $config, FactoryInterface $factory = null)
     {
         $this->config = $config;
-        $this->factory = $factory;
+        $this->factory = $factory ?? new Container();
 
-        //Loading buckets
+        //Loading buckets (we need all instances to properly allocate bucket name by address) (really?)
         foreach ($this->config->getBuckets() as $name => $bucket) {
             //Using default implementation
-            $this->buckets[$name] = $this->createBucket($name, $bucket);
+            $this->buckets[$name] = $this->constructBucket($name, $bucket);
         }
     }
 
     /**
-     * {@inheritdoc}
+     * @param BucketInterface $bucket
+     *
+     * @return self
+     *
+     * @throws StorageException
      */
-    public function registerBucket($name, $prefix, array $options = [], ServerInterface $server)
+    public function addBucket(BucketInterface $bucket): StorageManager
     {
-        if (isset($this->buckets[$name])) {
-            throw new StorageException("Unable to create bucket '{$name}', name already taken.");
+        if (isset($this->buckets[$bucket->getName()])) {
+            throw new StorageException("Unable to create bucket '{$bucket->getName()}', already exists");
         }
 
-        return $this->buckets[$name] = $this->factory->make(
-            StorageBucket::class,
-            ['storage' => $this] + compact('prefix', 'options', 'server')
-        );
+        $this->buckets[$bucket->getName()] = $bucket;
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function bucket($bucket)
+    public function createBucket(
+        string $name,
+        string $prefix,
+        $server,
+        array $options = []
+    ): BucketInterface {
+        if (isset($this->buckets[$name])) {
+            throw new StorageException("Unable to create bucket '{$name}', already exists");
+        }
+
+        //One of default implementation options
+        $storage = $this;
+
+        if (!$server instanceof ServerInterface) {
+            $server = $this->getServer($server);
+        }
+
+        $bucket = $this->factory->make(
+            StorageBucket::class,
+            compact('storage', 'prefix', 'options', 'server')
+        );
+
+        $this->addBucket($bucket);
+
+        return $bucket;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBucket(string $bucket): BucketInterface
     {
         if (empty($bucket)) {
-            throw new StorageException("Unable to fetch bucket, name can not be empty.");
+            throw new StorageException("Unable to fetch bucket, name can not be empty");
         }
 
         $bucket = $this->config->resolveAlias($bucket);
@@ -87,25 +128,63 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             return $this->buckets[$bucket];
         }
 
-        throw new StorageException("Unable to fetch bucket '{$bucket}', no presets found.");
+        throw new StorageException("Unable to fetch bucket '{$bucket}', no presets found");
     }
 
     /**
-     * {@inheritdoc}
+     * Add server.
+     *
+     * @param string          $name
+     * @param ServerInterface $server
+     *
+     * @return $this
+     *
+     * @throws StorageException
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function addServer($name, ServerInterface $server)
     {
-        if (empty($context)) {
-            throw new StorageException("Storage bucket can be requested without specified context.");
+        if (isset($this->servers[$name])) {
+            throw new StorageException(
+                "Unable to set storage server '{$server}', name is already taken"
+            );
         }
 
-        return $this->bucket($context);
+        $this->servers[$name] = $server;
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function locateBucket($address, &$name = null)
+    public function getServer(string $server): ServerInterface
+    {
+        if (isset($this->servers[$server])) {
+            return $this->servers[$server];
+        }
+
+        if (!$this->config->hasServer($server)) {
+            throw new StorageException("Undefined storage server '{$server}'");
+        }
+
+        return $this->servers[$server] = $this->factory->make(
+            $this->config->serverClass($server),
+            $this->config->serverOptions($server)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function open(string $address): ObjectInterface
+    {
+        return new StorageObject($address, $this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function locateBucket(string $address, string &$name = null): BucketInterface
     {
         /**
          * @var BucketInterface $bestBucket
@@ -120,44 +199,33 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
             }
         }
 
+        if (empty($bestBucket)) {
+            throw new StorageException("Unable to locate bucket for a given address '{$address}'");
+        }
+
         return $bestBucket;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function server($server)
+    public function put(string $bucket, string $name, $source = ''): ObjectInterface
     {
-        if (isset($this->servers[$server])) {
-            return $this->servers[$server];
-        }
+        $bucket = is_string($bucket) ? $this->getBucket($bucket) : $bucket;
 
-        if (!$this->config->hasServer($server)) {
-            throw new StorageException("Undefined storage server '{$server}'.");
-        }
-
-        return $this->servers[$server] = $this->factory->make(
-            $this->config->serverClass($server),
-            $this->config->serverOptions($server)
-        );
+        return $this->open($bucket->put($name, $source));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put($bucket, $name, $source = '')
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
-        $bucket = is_string($bucket) ? $this->bucket($bucket) : $bucket;
+        if (empty($context)) {
+            throw new StorageException("Storage bucket can be requested without specified context");
+        }
 
-        return $bucket->put($name, $source);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function open($address)
-    {
-        return new StorageObject($address, $this);
+        return $this->getBucket($context);
     }
 
     /**
@@ -165,27 +233,33 @@ class StorageManager extends Component implements StorageInterface, InjectorInte
      *
      * @param string $name
      * @param array  $bucket
-     * @return BucketInterface
+     *
+     * @return StorageBucket
+     *
+     * @throws StorageException
      */
-    private function createBucket($name, array $bucket)
+    private function constructBucket(string $name, array $bucket): StorageBucket
     {
         $parameters = $bucket + compact('name');
+        unset($parameters['server']);
 
         if (!array_key_exists('options', $bucket)) {
-            throw new StorageException("Bucket configuration must include options.");
+            throw new StorageException("Bucket configuration must include options");
         }
 
         if (!array_key_exists('prefix', $bucket)) {
-            throw new StorageException("Bucket configuration must include prefix.");
+            throw new StorageException("Bucket configuration must include prefix");
         }
 
         if (!array_key_exists('server', $bucket)) {
-            throw new StorageException("Bucket configuration must include server id.");
+            throw new StorageException("Bucket configuration must include server id");
         }
 
-        $parameters['server'] = $this->server($bucket['server']);
-        $parameters['storage'] = $this;
-
-        return $this->factory->make(StorageBucket::class, $parameters);
+        return $this->factory->make(
+            StorageBucket::class,
+            $parameters + [
+                'server' => $this->getServer($bucket['server'])
+            ]
+        );
     }
 }

@@ -1,16 +1,12 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Exceptions;
 
-/**
- * Source related exceptions.
- */
-class SourceException extends SelectorException
+class SourceException extends ORMException
 {
 
 }

@@ -73,6 +73,7 @@ class StreamWrapper
      * @param int    $mode
      * @param int    $options
      * @param string &$opened_path
+     *
      * @return bool
      */
     public function stream_open($path, $mode, $options, &$opened_path)
@@ -93,6 +94,7 @@ class StreamWrapper
      * Read data from StreamInterface.
      *
      * @param int $count
+     *
      * @return string
      */
     public function stream_read($count)
@@ -105,10 +107,13 @@ class StreamWrapper
      *
      * @param int $offset
      * @param int $whence = SEEK_SET
+     *
      * @return bool
      */
     public function stream_seek($offset, $whence = SEEK_SET)
     {
+        //Note, MongoDB native streams DO NOT support seeking at the moment
+        //@see https://jira.mongodb.org/browse/PHPLIB-213
         $this->stream->seek($offset, $whence);
 
         return true;
@@ -132,6 +137,8 @@ class StreamWrapper
      */
     public function stream_tell()
     {
+        //Note, MongoDB native streams DO NOT support seeking at the moment
+        //@see https://jira.mongodb.org/browse/PHPLIB-213
         return $this->stream->tell();
     }
 
@@ -139,6 +146,7 @@ class StreamWrapper
      * Write content into StreamInterface.
      *
      * @param string $data
+     *
      * @return int
      */
     public function stream_write($data)
@@ -150,8 +158,10 @@ class StreamWrapper
      * Get stats based on wrapped StreamInterface by it's mocked uri.
      *
      * @see stat()
+     *
      * @param string $path
      * @param int    $flags
+     *
      * @return array|null
      */
     public function url_stat($path, $flags)
@@ -167,6 +177,7 @@ class StreamWrapper
      * Helper method used to correctly resolve StreamInterface stats.
      *
      * @param StreamInterface $stream
+     *
      * @return array
      */
     private function getStreamStats(StreamInterface $stream)
@@ -216,9 +227,10 @@ class StreamWrapper
      * Register StreamInterface and get unique url for it.
      *
      * @param StreamInterface $stream
+     *
      * @return string
      */
-    public static function getUri(StreamInterface $stream)
+    public static function localFilename(StreamInterface $stream)
     {
         self::register();
 
@@ -232,6 +244,7 @@ class StreamWrapper
      * Check if given uri points to one of wrapped streams.
      *
      * @param string $uri
+     *
      * @return bool
      */
     public static function isWrapped($uri)
@@ -243,6 +256,7 @@ class StreamWrapper
      * Create StreamInterface associated resource.
      *
      * @param StreamInterface $stream
+     *
      * @return resource
      * @throws WrapperException
      */
@@ -258,10 +272,10 @@ class StreamWrapper
         }
 
         if (empty($mode)) {
-            throw new WrapperException("Stream is not available in read or write modes.");
+            throw new WrapperException("Stream is not available in read or write modes");
         }
 
-        return fopen(self::getUri($stream), $mode);
+        return fopen(self::localFilename($stream), $mode);
     }
 
     /**

@@ -5,24 +5,18 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders\Prototypes;
 
-use Psr\Log\LoggerAwareInterface;
-use Spiral\Database\Entities\Database;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Debug\Traits\LoggerTrait;
 
 /**
  * Generic prototype for affect queries with WHERE and JOIN supports. At this moment used as parent
  * for delete and update query builders.
  */
-abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterface
+abstract class AbstractAffect extends AbstractWhere
 {
-    /**
-     * Few builder warnings.
-     */
-    use LoggerTrait;
-
     /**
      * Every affect builder must be associated with specific table.
      *
@@ -37,12 +31,12 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
      * @param array  $where Initial set of where rules specified as array.
      */
     public function __construct(
-        Database $database,
+        Driver $driver,
         QueryCompiler $compiler,
-        $table = '',
+        string $table = '',
         array $where = []
     ) {
-        parent::__construct($database, $compiler);
+        parent::__construct($driver, $compiler);
 
         $this->table = $table;
 
@@ -58,12 +52,8 @@ abstract class AbstractAffect extends AbstractWhere implements LoggerAwareInterf
      *
      * @return int
      */
-    public function run()
+    public function run(): int
     {
-        if (empty($this->whereTokens)) {
-            $this->logger()->warning("Affect query performed without any limiting condition.");
-        }
-
         return $this->pdoStatement()->rowCount();
     }
 }

@@ -56,25 +56,25 @@ class InversedStyle extends Style
             T_FOREACH,
             T_RETURN,
             T_EXIT,
-            T_EXTENDS
+            T_EXTENDS,
         ],
         'color: black; font: weight: bold;'  => [
             T_OPEN_TAG,
             T_CLOSE_TAG,
-            T_OPEN_TAG_WITH_ECHO
+            T_OPEN_TAG_WITH_ECHO,
         ],
         'color: #BC9458;'                    => [
             T_COMMENT,
-            T_DOC_COMMENT
+            T_DOC_COMMENT,
         ],
         'color: #A5C261;'                    => [
             T_CONSTANT_ENCAPSED_STRING,
             T_ENCAPSED_AND_WHITESPACE,
             T_DNUMBER,
-            T_LNUMBER
+            T_LNUMBER,
         ],
         'color: #D0D0FF;'                    => [
-            T_VARIABLE
-        ]
+            T_VARIABLE,
+        ],
     ];
 }

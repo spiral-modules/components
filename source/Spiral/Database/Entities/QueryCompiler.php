@@ -5,9 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Entities;
 
-use Spiral\Core\Component;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Exceptions\CompilerException;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
@@ -19,7 +20,7 @@ use Spiral\Database\Injections\ParameterInterface;
  *
  * Source of Compiler must be optimized in nearest future.
  */
-class QueryCompiler extends Component
+class QueryCompiler
 {
     /**
      * Query types for parameter ordering.
@@ -30,37 +31,38 @@ class QueryCompiler extends Component
     const INSERT_QUERY = 'insert';
 
     /**
-     * Associated driver instance, may be required for some data assumptions.
-     *
-     * @var PDODriver
-     */
-    protected $driver = null;
-
-    /**
      * Quotes names and expressions.
      *
      * @var Quoter
      */
-    protected $quoter = null;
+    private $quoter = null;
 
     /**
      * QueryCompiler constructor.
      *
-     * @param PDODriver $driver
-     * @param Quoter    $quoter
+     * @param Quoter $quoter
      */
-    public function __construct(PDODriver $driver, Quoter $quoter)
+    public function __construct(Quoter $quoter)
     {
-        $this->driver = $driver;
         $this->quoter = $quoter;
+    }
+
+    /**
+     * Prefix associated with compiler.
+     *
+     * @return string
+     */
+    public function getPrefix(): string
+    {
+        return $this->quoter->getPrefix();
     }
 
     /**
      * Reset table aliases cache, required if same compiler used twice.
      *
-     * @return $this
+     * @return self
      */
-    public function resetQuoter()
+    public function resetQuoter(): QueryCompiler
     {
         $this->quoter->reset();
 
@@ -70,42 +72,21 @@ class QueryCompiler extends Component
     /**
      * Query query identifier, if identified stated as table - table prefix must be added.
      *
-     * @param string $identifier Identifier can include simple column operations and functions,
-     *                           having "." in it will automatically force table prefix to first
-     *                           value.
-     * @param bool   $table      Set to true to let quote method know that identified is related
-     *                           to table name.
-     * @return mixed|string
+     * @param string|FragmentInterface $identifier Identifier can include simple column operations
+     *                                             and functions, having "." in it will
+     *                                             automatically force table prefix to first value.
+     * @param bool                     $isTable    Set to true to let quote method know that
+     *                                             identified is related to table name.
+     *
+     * @return string
      */
-    public function quote($identifier, $table = false)
+    public function quote($identifier, bool $isTable = false): string
     {
         if ($identifier instanceof FragmentInterface) {
             return $this->prepareFragment($identifier);
         }
 
-        return $this->quoter->quote($identifier, $table);
-    }
-
-    /**
-     * Sort list of parameters in dbms query specific order, query type must be provided. This
-     * method was used at times when delete and update queries supported joins, i might need to
-     * drop it now.
-     *
-     * @param int   $queryType
-     * @param array $whereParameters
-     * @param array $onParameters
-     * @param array $havingParameters
-     * @param array $columnIdentifiers Column names (if any).
-     * @return array
-     */
-    public function orderParameters(
-        $queryType,
-        array $whereParameters = [],
-        array $onParameters = [],
-        array $havingParameters = [],
-        array $columnIdentifiers = []
-    ) {
-        return array_merge($columnIdentifiers, $onParameters, $whereParameters, $havingParameters);
+        return $this->quoter->quote($identifier, $isTable);
     }
 
     /**
@@ -116,18 +97,22 @@ class QueryCompiler extends Component
      * @param array               $columns
      * @param FragmentInterface[] $rowsets Every rowset has to be convertable into string. Raw data
      *                                     not allowed!
+     *
      * @return string
+     *
      * @throws CompilerException
      */
-    public function compileInsert($table, array $columns, array $rowsets)
+    public function compileInsert(string $table, array $columns, array $rowsets): string
     {
         if (empty($columns)) {
-            throw new CompilerException("Unable to build insert statement, columns must be set.");
+            throw new CompilerException(
+                'Unable to build insert statement, columns must be set'
+            );
         }
 
         if (empty($rowsets)) {
             throw new CompilerException(
-                "Unable to build insert statement, at least one value set must be provided."
+                'Unable to build insert statement, at least one value set must be provided'
             );
         }
 
@@ -138,7 +123,7 @@ class QueryCompiler extends Component
         $columns = $this->prepareColumns($columns);
 
         //Simply joining every rowset
-        $rowsets = join(",\n", $rowsets);
+        $rowsets = implode(",\n", $rowsets);
 
         return "INSERT INTO {$table} ({$columns})\nVALUES {$rowsets}";
     }
@@ -149,10 +134,12 @@ class QueryCompiler extends Component
      * @param string $table
      * @param array  $updates
      * @param array  $whereTokens
+     *
      * @return string
+     *
      * @throws CompilerException
      */
-    public function compileUpdate($table, array $updates, array $whereTokens = [])
+    public function compileUpdate(string $table, array $updates, array $whereTokens = []): string
     {
         $table = $this->quote($table, true);
 
@@ -170,10 +157,12 @@ class QueryCompiler extends Component
      *
      * @param string $table
      * @param array  $whereTokens
+     *
      * @return string
+     *
      * @throws CompilerException
      */
-    public function compileDelete($table, array $whereTokens = [])
+    public function compileDelete(string $table, array $whereTokens = []): string
     {
         $table = $this->quote($table, true);
 
@@ -187,18 +176,20 @@ class QueryCompiler extends Component
      * Create select statement. Compiler must validly resolve table and column aliases used in
      * conditions and joins.
      *
-     * @param array          $fromTables
-     * @param boolean|string $distinct String only for PostgresSQL.
-     * @param array          $columns
-     * @param array          $joinTokens
-     * @param array          $whereTokens
-     * @param array          $havingTokens
-     * @param array          $grouping
-     * @param array          $ordering
-     * @param int            $limit
-     * @param int            $offset
-     * @param array          $unionTokens
+     * @param array       $fromTables
+     * @param bool|string $distinct String only for PostgresSQL.
+     * @param array       $columns
+     * @param array       $joinTokens
+     * @param array       $whereTokens
+     * @param array       $havingTokens
+     * @param array       $grouping
+     * @param array       $ordering
+     * @param int         $limit
+     * @param int         $offset
+     * @param array       $unionTokens
+     *
      * @return string
+     *
      * @throws CompilerException
      */
     public function compileSelect(
@@ -210,10 +201,10 @@ class QueryCompiler extends Component
         array $havingTokens = [],
         array $grouping = [],
         array $ordering = [],
-        $limit = 0,
-        $offset = 0,
+        int $limit = 0,
+        int $offset = 0,
         array $unionTokens = []
-    ) {
+    ): string {
         //This statement parts should be processed first to define set of table and column aliases
         $fromTables = $this->compileTables($fromTables);
 
@@ -222,7 +213,7 @@ class QueryCompiler extends Component
         //Distinct flag (if any)
         $distinct = $this->optional(' ', $this->compileDistinct($distinct));
 
-        //Columns are compiled after table names and joins to enshure aliases and prefixes
+        //Columns are compiled after table names and joins to ensure aliases and prefixes
         $columns = $this->prepareColumns($columns);
 
         //A lot of constrain and other statements
@@ -232,7 +223,7 @@ class QueryCompiler extends Component
 
         //Union statement has new line at beginning of every union
         $unionsStatement = $this->optional("\n", $this->compileUnions($unionTokens));
-        $orderingStatement = $this->optional("\nORDER BY ", $this->compileOrdering($ordering));
+        $orderingStatement = $this->optional("\nORDER BY", $this->compileOrdering($ordering));
 
         $limingStatement = $this->optional("\n", $this->compileLimit($limit, $offset));
 
@@ -249,23 +240,25 @@ class QueryCompiler extends Component
      *
      * @param array $columnIdentifiers
      * @param int   $maxLength Automatically wrap columns.
+     *
      * @return string
      */
-    protected function prepareColumns(array $columnIdentifiers, $maxLength = 180)
+    protected function prepareColumns(array $columnIdentifiers, int $maxLength = 180): string
     {
         //Let's quote every identifier
         $columnIdentifiers = array_map([$this, 'quote'], $columnIdentifiers);
 
-        return wordwrap(join(', ', $columnIdentifiers), $maxLength);
+        return wordwrap(implode(', ', $columnIdentifiers), $maxLength);
     }
 
     /**
      * Prepare column values to be used in UPDATE statement.
      *
      * @param array $updates
-     * @return array
+     *
+     * @return string
      */
-    protected function prepareUpdates(array $updates)
+    protected function prepareUpdates(array $updates): string
     {
         foreach ($updates as $column => &$value) {
             if ($value instanceof FragmentInterface) {
@@ -280,47 +273,50 @@ class QueryCompiler extends Component
             unset($value);
         }
 
-        return trim(join(",", $updates));
+        return trim(implode(', ', $updates));
     }
 
     /**
      * Compile DISTINCT statement.
      *
      * @param mixed $distinct Not every DBMS support distinct expression, only Postgres does.
+     *
      * @return string
      */
-    protected function compileDistinct($distinct)
+    protected function compileDistinct($distinct): string
     {
         if (empty($distinct)) {
             return '';
         }
 
-        return "DISTINCT";
+        return 'DISTINCT';
     }
 
     /**
      * Compile table names statement.
      *
      * @param array $tables
+     *
      * @return string
      */
-    protected function compileTables(array $tables)
+    protected function compileTables(array $tables): string
     {
         foreach ($tables as &$table) {
             $table = $this->quote($table, true);
             unset($table);
         }
 
-        return join(', ', $tables);
+        return implode(', ', $tables);
     }
 
     /**
      * Compiler joins statement.
      *
      * @param array $joinTokens
+     *
      * @return string
      */
-    protected function compileJoins(array $joinTokens)
+    protected function compileJoins(array $joinTokens): string
     {
         $statement = '';
         foreach ($joinTokens as $table => $join) {
@@ -336,9 +332,10 @@ class QueryCompiler extends Component
      * automatically move every union on new line.
      *
      * @param array $unionTokens
+     *
      * @return string
      */
-    protected function compileUnions(array $unionTokens)
+    protected function compileUnions(array $unionTokens): string
     {
         if (empty($unionTokens)) {
             return '';
@@ -346,8 +343,13 @@ class QueryCompiler extends Component
 
         $statement = '';
         foreach ($unionTokens as $union) {
-            //First key is union type, second united query (no need to share compiler)
-            $statement .= "\nUNION {$union[1]}\n({$union[0]})";
+            if (!empty($union[0])) {
+                //First key is union type, second united query (no need to share compiler)
+                $statement .= "\nUNION {$union[0]}\n({$union[1]})";
+            } else {
+                //No extra space
+                $statement .= "\nUNION \n({$union[1]})";
+            }
         }
 
         return ltrim($statement, "\n");
@@ -357,25 +359,33 @@ class QueryCompiler extends Component
      * Compile ORDER BY statement.
      *
      * @param array $ordering
+     *
      * @return string
      */
-    protected function compileOrdering(array $ordering)
+    protected function compileOrdering(array $ordering): string
     {
         $result = [];
         foreach ($ordering as $order) {
-            $result[] = $this->quote($order[0]) . ' ' . strtoupper($order[1]);
+            $direction = strtoupper($order[1]);
+
+            if (!in_array($direction, ['ASC', 'DESC'])) {
+                throw new CompilerException("Invalid sorting direction, only ASC and DESC are allowed");
+            }
+
+            $result[] = $this->quote($order[0]) . ' ' . $direction;
         }
 
-        return join(', ', $result);
+        return implode(', ', $result);
     }
 
     /**
      * Compiler GROUP BY statement.
      *
      * @param array $grouping
+     *
      * @return string
      */
-    protected function compileGrouping(array $grouping)
+    protected function compileGrouping(array $grouping): string
     {
         $statement = '';
         foreach ($grouping as $identifier) {
@@ -390,9 +400,10 @@ class QueryCompiler extends Component
      *
      * @param int $limit
      * @param int $offset
+     *
      * @return string
      */
-    protected function compileLimit($limit, $offset)
+    protected function compileLimit(int $limit, int $offset): string
     {
         if (empty($limit) && empty($offset)) {
             return '';
@@ -414,10 +425,12 @@ class QueryCompiler extends Component
      * Compile where statement.
      *
      * @param array $tokens
+     *
      * @return string
+     *
      * @throws CompilerException
      */
-    protected function compileWhere(array $tokens)
+    protected function compileWhere(array $tokens): string
     {
         if (empty($tokens)) {
             return '';
@@ -442,7 +455,7 @@ class QueryCompiler extends Component
                 $activeGroup = false;
             }
 
-            /**
+            /*
              * When context is string it usually represent control keyword/syntax such as opening
              * or closing braces.
              */
@@ -452,13 +465,13 @@ class QueryCompiler extends Component
                     $activeGroup = true;
                 }
 
-                $postfix = ' ';
-                if ($context == '(') {
-                    //We don't need space after opening brace
-                    $postfix = '';
+                $statement .= ltrim("{$boolean} {$context} ");
+
+                if ($context == ')') {
+                    //We don't need trailing space
+                    $statement = rtrim($statement);
                 }
 
-                $statement .= ltrim("{$boolean} {$context}{$postfix}");
                 continue;
             }
 
@@ -468,13 +481,12 @@ class QueryCompiler extends Component
                 continue;
             }
 
+            //Now we are operating with "class" where function, where we need 3 variables where(id, =, 1)
             if (!is_array($context)) {
-                throw new CompilerException(
-                    "Invalid where token, context expected to be an array."
-                );
+                throw new CompilerException('Invalid where token, context expected to be an array');
             }
 
-            /**
+            /*
              * This is "normal" where token which includes identifier, operator and value.
              */
             list($identifier, $operator, $value) = $context;
@@ -493,14 +505,14 @@ class QueryCompiler extends Component
                 continue;
             }
 
-            //Compiler can switch equal to IN if value points to array
+            //Compiler can switch equal to IN if value points to array (do we need it?)
             $operator = $this->prepareOperator($value, $operator);
 
             $statement .= "{$boolean} {$identifier} {$operator} {$placeholder} ";
         }
 
         if ($activeGroup) {
-            throw new CompilerException("Unable to build where statement, unclosed where group.");
+            throw new CompilerException('Unable to build where statement, unclosed where group');
         }
 
         return trim($statement);
@@ -513,15 +525,16 @@ class QueryCompiler extends Component
      * @param string $prefix
      * @param string $expression
      * @param string $postfix
+     *
      * @return string
      */
-    protected function optional($prefix, $expression, $postfix = '')
+    protected function optional(string $prefix, string $expression, string $postfix = ''): string
     {
         if (empty($expression)) {
             return '';
         }
 
-        if ($prefix != "\n") {
+        if ($prefix != "\n" && $prefix != ' ') {
             $prefix .= ' ';
         }
 
@@ -529,13 +542,14 @@ class QueryCompiler extends Component
     }
 
     /**
-     * Resolve operator value based on value value. ;)
+     * Resolve operator value based on value value. ;).
      *
      * @param mixed  $parameter
      * @param string $operator
+     *
      * @return string
      */
-    protected function prepareOperator($parameter, $operator)
+    protected function prepareOperator($parameter, string $operator): string
     {
         if (!$parameter instanceof ParameterInterface) {
             //Probably fragment
@@ -547,7 +561,7 @@ class QueryCompiler extends Component
             return $operator;
         }
 
-        if (is_array($parameter->getValue())) {
+        if ($parameter->isArray()) {
             //Automatically switching between equal and IN
             return 'IN';
         }
@@ -558,10 +572,11 @@ class QueryCompiler extends Component
     /**
      * Prepare value to be replaced into query (replace ?).
      *
-     * @param string $value
+     * @param mixed $value
+     *
      * @return string
      */
-    protected function prepareValue($value)
+    protected function prepareValue($value): string
     {
         if ($value instanceof FragmentInterface) {
             return $this->prepareFragment($value);
@@ -575,9 +590,10 @@ class QueryCompiler extends Component
      * Prepare where fragment to be injected into statement.
      *
      * @param FragmentInterface $context
+     *
      * @return string
      */
-    protected function prepareFragment(FragmentInterface $context)
+    protected function prepareFragment(FragmentInterface $context): string
     {
         if ($context instanceof QueryBuilder) {
             //Nested queries has to be wrapped with braces

@@ -1,19 +1,19 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
+use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;
-use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\RecordSelector;
-use Spiral\ORM\Entities\WhereDecorator;
-use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\ORM;
-use Spiral\ORM\RecordEntity;
+use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
+use Spiral\ORM\Entities\Nodes\AbstractNode;
+use Spiral\ORM\Entities\Nodes\PivotedNode;
+use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Record;
 
 /**
  * ManyToMany loader will not only load related data, but will include pivot table data into record
@@ -22,58 +22,167 @@ use Spiral\ORM\RecordEntity;
  * It's STRONGLY recommended to load many-to-many data using postload method. However relation still
  * can be used to filter query.
  */
-class ManyToManyLoader extends Loader
+class ManyToManyLoader extends RelationLoader
 {
-    /**
-     * Relation type is required to correctly resolve foreign record class based on relation
-     * definition.
-     */
-    const RELATION_TYPE = RecordEntity::MANY_TO_MANY;
+    use WhereTrait;
 
     /**
-     * Default load method (inload or postload).
+     * When target role is null parent role to be used. Redefine this variable to revert behaviour
+     * of ManyToMany relation.
+     *
+     * @see ManyToMorphedRelation
+     * @var string|null
      */
-    const LOAD_METHOD = self::POSTLOAD;
+    private $targetRole = null;
 
     /**
-     * Internal loader constant used to decide how to aggregate data tree, true for relations like
-     * MANY TO MANY or HAS MANY.
-     */
-    const MULTIPLE = true;
-
-    /**
-     * We have to redefine default Loader deduplication as many to many dedup data based on pivot
-     * table, not record data itself.
+     * Default set of relation options. Child implementation might defined their of default options.
      *
      * @var array
      */
-    protected $duplicates = [];
+    protected $options = [
+        'method'     => self::POSTLOAD,
+        'minify'     => true,
+        'alias'      => null,
+        'pivotAlias' => null,
+        'using'      => null,
+        'where'      => null,
+        'wherePivot' => null
+    ];
 
     /**
-     * Set of pivot table columns has to be fetched from resulted query.
-     *
-     * @var array
+     * @param string                   $class
+     * @param string                   $relation
+     * @param array                    $schema
+     * @param \Spiral\ORM\ORMInterface $orm
+     * @param string|null              $targetRole
      */
-    protected $pivotColumns = [];
+    public function __construct(
+        $class,
+        $relation,
+        array $schema,
+        ORMInterface $orm,
+        string $targetRole = null
+    ) {
+        parent::__construct($class, $relation, $schema, $orm);
+        $this->targetRole = $targetRole;
+    }
 
     /**
-     * Pivot columns offset in resulted query row.
+     * {@inheritdoc}
      *
-     * @var int
+     * Visibility up.
      */
-    protected $pivotOffset = 0;
+    public function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
+    {
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->pivotTable() . ' AS ' . $this->pivotAlias(),
+                [$this->pivotKey(Record::THOUGHT_INNER_KEY) => $this->parentKey(Record::INNER_KEY)]
+            );
+        } else {
+            $query->innerJoin(
+                $this->pivotTable() . ' AS ' . $this->pivotAlias(),
+                [$this->pivotKey(Record::THOUGHT_OUTER_KEY) => $this->localKey(Record::OUTER_KEY)]
+            )->where(
+                $this->pivotKey(Record::THOUGHT_INNER_KEY),
+                new Parameter($outerKeys)
+            );
+        }
+
+        //When relation is joined we will use ON statements, when not - normal WHERE
+        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
+
+        //Pivot conditions specified in relation schema
+        $this->setWhere(
+            $query,
+            $this->pivotAlias(),
+            $whereTarget,
+            $this->schema[Record::WHERE_PIVOT]
+        );
+
+        //Additional morphed conditions
+        if (!empty($this->schema[Record::MORPH_KEY])) {
+            $this->setWhere(
+                $query,
+                $this->pivotAlias(),
+                'onWhere',
+                [$this->pivotKey(Record::MORPH_KEY) => $this->targetRole()]
+            );
+        }
+
+        //Pivot conditions specified by user
+        $this->setWhere($query, $this->pivotAlias(), $whereTarget, $this->options['wherePivot']);
+
+        if ($this->isJoined()) {
+            //Actual data is always INNER join
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                $this->getTable() . ' AS ' . $this->getAlias(),
+                [$this->localKey(Record::OUTER_KEY) => $this->pivotKey(Record::THOUGHT_OUTER_KEY)]
+            );
+        }
+
+        //Where conditions specified in relation definition
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
+
+        //User specified WHERE conditions
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+
+        return parent::configureQuery($query);
+    }
+
+    /**
+     * Set columns into SelectQuery.
+     *
+     * @param SelectQuery $query
+     * @param bool        $minify    Minify column names (will work in case when query parsed in
+     *                               FETCH_NUM mode).
+     * @param string      $prefix    Prefix to be added for each column name.
+     * @param bool        $overwrite When set to true existed columns will be removed.
+     */
+    protected function mountColumns(
+        SelectQuery $query,
+        bool $minify = false,
+        string $prefix = '',
+        bool $overwrite = false
+    ) {
+        //Pivot table source alias
+        $alias = $this->pivotAlias();
+
+        $columns = $overwrite ? [] : $query->getColumns();
+        foreach ($this->pivotColumns() as $name) {
+            $column = $name;
+
+            if ($minify) {
+                //Let's use column number instead of full name
+                $column = 'p_c' . count($columns);
+            }
+
+            $columns[] = "{$alias}.{$name} AS {$prefix}{$column}";
+        }
+
+        //Updating column set
+        $query->columns($columns);
+
+        parent::mountColumns($query, $minify, $prefix, false);
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(
-        ORM $orm,
-        $container,
-        array $definition = [],
-        LoaderInterface $parent = null
-    ) {
-        parent::__construct($orm, $container, $definition, $parent);
-        $this->pivotColumns = $this->definition[RecordEntity::PIVOT_COLUMNS];
+    protected function initNode(): AbstractNode
+    {
+        $node = new PivotedNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::PIVOT_COLUMNS],
+            $this->schema[Record::OUTER_KEY],
+            $this->schema[Record::THOUGHT_INNER_KEY],
+            $this->schema[Record::THOUGHT_OUTER_KEY]
+        );
+
+        return $node->asJoined($this->isJoined());
     }
 
     /**
@@ -81,9 +190,9 @@ class ManyToManyLoader extends Loader
      *
      * @return string
      */
-    public function pivotTable()
+    protected function pivotTable(): string
     {
-        return $this->definition[RecordEntity::PIVOT_TABLE];
+        return $this->schema[Record::PIVOT_TABLE];
     }
 
     /**
@@ -91,7 +200,7 @@ class ManyToManyLoader extends Loader
      *
      * @return string
      */
-    public function pivotAlias()
+    protected function pivotAlias(): string
     {
         if (!empty($this->options['pivotAlias'])) {
             return $this->options['pivotAlias'];
@@ -101,223 +210,41 @@ class ManyToManyLoader extends Loader
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param string $parentRole Helps ManyToMany relation to force record role for morphed
-     *                           relations.
+     * @return array
      */
-    public function createSelector($parentRole = '')
+    protected function pivotColumns(): array
     {
-        if (empty($selector = parent::createSelector())) {
-            return null;
-        }
-
-        //Pivot table joining (INNER in post selection)
-        $pivotOuterKey = $this->getPivotKey(RecordEntity::THOUGHT_OUTER_KEY);
-        $selector->innerJoin($this->pivotTable() . ' AS ' . $this->pivotAlias(), [
-            $pivotOuterKey => $this->getKey(RecordEntity::OUTER_KEY)
-        ]);
-
-        //Pivot table conditions
-        $this->pivotConditions($selector, $parentRole);
-
-        if (empty($this->parent)) {
-            return $selector;
-        }
-
-        //Where and morph conditions
-        $this->mountConditions($selector);
-
-        if (empty($this->parent)) {
-            //For Many-To-Many loader
-            return $selector;
-        }
-
-        //Aggregated keys (example: all parent ids)
-        if (empty($aggregatedKeys = $this->parent->aggregatedKeys($this->getReferenceKey()))) {
-            //Nothing to postload, no parents
-            return null;
-        }
-
-        //Adding condition
-        $selector->where(
-            $this->getPivotKey(RecordEntity::THOUGHT_INNER_KEY),
-            'IN',
-            new Parameter($aggregatedKeys)
-        );
-
-        return $selector;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function clarifySelector(RecordSelector $selector)
-    {
-        $selector->join(
-            $this->joinType(),
-            $this->pivotTable() . ' AS ' . $this->pivotAlias(),
-            [$this->getPivotKey(RecordEntity::THOUGHT_INNER_KEY) => $this->getParentKey()]
-        );
-
-        $this->pivotConditions($selector);
-
-        $pivotOuterKey = $this->getPivotKey(RecordEntity::THOUGHT_OUTER_KEY);
-        $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
-            $pivotOuterKey => $this->getKey(RecordEntity::OUTER_KEY)
-        ]);
-
-        $this->mountConditions($selector);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Pivot table columns will be included.
-     */
-    protected function configureColumns(RecordSelector $selector)
-    {
-        if (!$this->isLoadable()) {
-            return;
-        }
-
-        $this->dataOffset = $selector->generateColumns(
-            $this->getAlias(),
-            $this->dataColumns
-        );
-
-        $this->pivotOffset = $selector->generateColumns(
-            $this->pivotAlias(),
-            $this->pivotColumns
-        );
+        return $this->schema[Record::PIVOT_COLUMNS];
     }
 
     /**
      * Key related to pivot table. Must include pivot table alias.
      *
-     * @see getKey()
+     * @see pivotKey()
+     *
      * @param string $key
+     *
      * @return null|string
      */
-    protected function getPivotKey($key)
+    protected function pivotKey(string $key)
     {
-        if (!isset($this->definition[$key])) {
+        if (!isset($this->schema[$key])) {
             return null;
         }
 
-        return $this->pivotAlias() . '.' . $this->definition[$key];
+        return $this->pivotAlias() . '.' . $this->schema[$key];
     }
 
     /**
-     * Mounting pivot table conditions including user defined and morph key.
+     * Defined role to be used in morphed relations.
      *
-     * @param RecordSelector $selector
-     * @param string         $parentRole
-     * @return RecordSelector
+     * @return string
      */
-    protected function pivotConditions(RecordSelector $selector, $parentRole = '')
+    private function targetRole(): string
     {
-        //We have to route all conditions to ON statement
-        $router = new WhereDecorator($selector, 'onWhere', $this->pivotAlias());
-
-        if (!empty($morphKey = $this->getPivotKey(RecordEntity::MORPH_KEY))) {
-            $router->where(
-                $morphKey,
-                !empty($parentRole) ? $parentRole : $this->parent->schema[ORM::M_ROLE_NAME]
+        return $this->targetRole ?? $this->orm->define(
+                $this->parent->getClass(),
+                ORMInterface::R_ROLE_NAME
             );
-        }
-
-        if (!empty($this->definition[RecordEntity::WHERE_PIVOT])) {
-            //Relation WHERE_PIVOT conditions
-            $router->where($this->definition[RecordEntity::WHERE_PIVOT]);
-        }
-
-        //User specified WHERE conditions
-        !empty($this->options['wherePivot']) && $router->where($this->options['wherePivot']);
-    }
-
-    /**
-     * Set relational and user conditions.
-     *
-     * @param RecordSelector $selector
-     * @return RecordSelector
-     */
-    protected function mountConditions(RecordSelector $selector)
-    {
-        //Let's use where decorator to set conditions, it will automatically route tokens to valid
-        //destination (JOIN or WHERE)
-        $decorator = new WhereDecorator(
-            $selector,
-            $this->isJoinable() ? 'onWhere' : 'where',
-            $this->getAlias()
-        );
-
-        if (!empty($this->definition[RecordEntity::WHERE])) {
-            //Relation WHERE conditions
-            $decorator->where($this->definition[RecordEntity::WHERE]);
-        }
-
-        //User specified WHERE conditions
-        !empty($this->options['where']) && $decorator->where($this->options['where']);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * We must parse pivot data.
-     */
-    protected function fetchData(array $row)
-    {
-        $data = parent::fetchData($row);
-
-        $data[ORM::PIVOT_DATA] = array_combine(
-            $this->pivotColumns,
-            array_slice($row, $this->pivotOffset, count($this->pivotColumns))
-        );
-
-        return $data;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Parent criteria located in pivot data, not in record itself.
-     */
-    protected function fetchCriteria(array $data)
-    {
-        if (!isset($data[ORM::PIVOT_DATA][$this->definition[RecordEntity::THOUGHT_INNER_KEY]])) {
-            return null;
-        }
-
-        return $data[ORM::PIVOT_DATA][$this->definition[RecordEntity::THOUGHT_INNER_KEY]];
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * We have to redefine default Loader deduplication as many to many dedup data based on pivot
-     * table, not record data itself.
-     */
-    protected function deduplicate(array &$data)
-    {
-        $criteria = $data[ORM::PIVOT_DATA][$this->definition[RecordEntity::THOUGHT_INNER_KEY]]
-            . '.' . $data[ORM::PIVOT_DATA][$this->definition[RecordEntity::THOUGHT_OUTER_KEY]];
-
-        if (!empty($this->definition[RecordEntity::MORPH_KEY])) {
-            $criteria .= ':' . $data[ORM::PIVOT_DATA][$this->definition[RecordEntity::MORPH_KEY]];
-        }
-
-        if (isset($this->duplicates[$criteria])) {
-            //Duplicate is presented, let's reduplicate
-            $data = $this->duplicates[$criteria];
-
-            //Duplicate is presented
-            return false;
-        }
-
-        //Let's remember record to prevent future duplicates
-        $this->duplicates[$criteria] = &$data;
-
-        return true;
     }
 }

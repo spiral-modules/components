@@ -5,11 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders;
 
-use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
+use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Parameter;
 
 /**
@@ -17,6 +18,11 @@ use Spiral\Database\Injections\Parameter;
  */
 class InsertQuery extends QueryBuilder
 {
+    /**
+     * Query type.
+     */
+    const QUERY_TYPE = QueryCompiler::INSERT_QUERY;
+
     /**
      * @var string
      */
@@ -37,13 +43,13 @@ class InsertQuery extends QueryBuilder
     protected $rowsets = [];
 
     /**
-     * @param Database      $database Parent database.
-     * @param QueryCompiler $compiler Driver specific QueryGrammar instance (one per builder).
-     * @param string        $table    Associated table name.
+     * {@inheritdoc}
+     *
+     * @param string $table Associated table name.
      */
-    public function __construct(Database $database, QueryCompiler $compiler, $table = '')
+    public function __construct(Driver $driver, QueryCompiler $compiler, string $table = '')
     {
-        parent::__construct($database, $compiler);
+        parent::__construct($driver, $compiler);
         $this->table = $table;
     }
 
@@ -51,9 +57,10 @@ class InsertQuery extends QueryBuilder
      * Set target insertion table.
      *
      * @param string $into
-     * @return $this
+     *
+     * @return self
      */
-    public function into($into)
+    public function into(string $into): InsertQuery
     {
         $this->table = $into;
 
@@ -70,11 +77,12 @@ class InsertQuery extends QueryBuilder
      * $insert->columns("name, email");
      *
      * @param array|string $columns
-     * @return $this
+     *
+     * @return self
      */
-    public function columns($columns)
+    public function columns(...$columns): InsertQuery
     {
-        $this->columns = $this->fetchIdentifiers(func_get_args());
+        $this->columns = $this->fetchIdentifiers($columns);
 
         return $this;
     }
@@ -102,12 +110,17 @@ class InsertQuery extends QueryBuilder
      * ]);
      *
      * @param mixed $rowsets
-     * @return $this
+     *
+     * @return self
      */
-    public function values($rowsets)
+    public function values($rowsets): InsertQuery
     {
         if (!is_array($rowsets)) {
             return $this->values(func_get_args());
+        }
+
+        if (empty($rowsets)) {
+            throw new BuilderException("Insert rowsets must not be empty");
         }
 
         //Checking if provided set is array of multiple
@@ -131,19 +144,15 @@ class InsertQuery extends QueryBuilder
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(): array
     {
-        $compiler = !empty($compiler) ? $compiler : $this->compiler;
-
-        return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::INSERT_QUERY, [], [], [], $this->rowsets
-        ));
+        return $this->flattenParameters($this->rowsets);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();
@@ -160,7 +169,7 @@ class InsertQuery extends QueryBuilder
         //This must execute our query
         $this->pdoStatement();
 
-        return $this->database->driver()->lastInsertID();
+        return $this->driver->lastInsertID();
     }
 
     /**

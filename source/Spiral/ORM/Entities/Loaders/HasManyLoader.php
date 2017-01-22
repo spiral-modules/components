@@ -1,63 +1,103 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
-use Spiral\ORM\Entities\RecordSelector;
-use Spiral\ORM\Entities\WhereDecorator;
-use Spiral\ORM\RecordEntity;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Database\Injections\Parameter;
+use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
+use Spiral\ORM\Entities\Nodes\AbstractNode;
+use Spiral\ORM\Entities\Nodes\ArrayNode;
+use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Record;
 
 /**
  * Dedicated to load HAS_MANY relation data, POSTLOAD is preferred loading method. Additional where
  * conditions and morph keys are supported.
+ *
+ * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
+ * purposes).
  */
-class HasManyLoader extends HasOneLoader
+class HasManyLoader extends RelationLoader
 {
-    /**
-     * Relation type is required to correctly resolve foreign record class based on relation
-     * definition.
-     */
-    const RELATION_TYPE = RecordEntity::HAS_MANY;
+    use WhereTrait;
 
     /**
-     * Default load method (inload or postload).
+     * Default set of relation options. Child implementation might defined their of default options.
+     *
+     * @var array
      */
-    const LOAD_METHOD = self::POSTLOAD;
-
-    /**
-     * Internal loader constant used to decide how to aggregate data tree, true for relations like
-     * MANY TO MANY or HAS MANY.
-     */
-    const MULTIPLE = true;
+    protected $options = [
+        'method' => self::POSTLOAD,
+        'minify' => true,
+        'alias'  => null,
+        'using'  => null,
+        'where'  => null,
+    ];
 
     /**
      * {@inheritdoc}
-     *
-     * Where conditions will be mounted using WhereDecorator to unify logic between POSTLOAD and
-     * INLOAD methods.
      */
-    protected function mountConditions(RecordSelector $selector)
+    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        $selector = parent::mountConditions($selector);
-
-        //Let's use where decorator to set conditions, it will automatically route tokens to valid
-        //destination (JOIN or WHERE)
-        $decorator = new WhereDecorator(
-            $selector, $this->isJoinable() ? 'onWhere' : 'where', $this->getAlias()
-        );
-
-        if (!empty($this->definition[RecordEntity::WHERE])) {
-            //Relation WHERE conditions
-            $decorator->where($this->definition[RecordEntity::WHERE]);
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                "{$this->getTable()} AS {$this->getAlias()}",
+                [$this->localKey(Record::OUTER_KEY) => $this->parentKey(Record::INNER_KEY)]
+            );
+        } else {
+            //This relation is loaded using external query
+            $query->where(
+                $this->localKey(Record::OUTER_KEY),
+                'IN',
+                new Parameter($outerKeys)
+            );
         }
+
+        //When relation is joined we will use ON statements, when not - normal WHERE
+        $whereTarget = $this->isJoined() ? 'onWhere' : 'where';
+
+        //Where conditions specified in relation definition
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->schema[Record::WHERE]);
 
         //User specified WHERE conditions
-        if (!empty($this->options['where'])) {
-            $decorator->where($this->options['where']);
+        $this->setWhere($query, $this->getAlias(), $whereTarget, $this->options['where']);
+
+        //Morphed records
+        if (!empty($this->schema[Record::MORPH_KEY])) {
+            $this->setWhere(
+                $query,
+                $this->getAlias(),
+                $whereTarget,
+                [
+                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
+                        $this->parent->getClass(),
+                        ORMInterface::R_ROLE_NAME
+                    )
+                ]
+            );
         }
+
+        return parent::configureQuery($query);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function initNode(): AbstractNode
+    {
+        $node = new ArrayNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::OUTER_KEY],
+            $this->schema[Record::INNER_KEY],
+            $this->schema[Record::SH_PRIMARY_KEY]
+        );
+
+        return $node->asJoined($this->isJoined());
     }
 }

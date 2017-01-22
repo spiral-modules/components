@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer\Exceptions;
 
 /**
@@ -12,5 +13,4 @@ namespace Spiral\Tokenizer\Exceptions;
  */
 class LocatorException extends TokenizerException
 {
-
 }

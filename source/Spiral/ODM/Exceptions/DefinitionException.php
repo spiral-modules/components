@@ -1,19 +1,20 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM\Exceptions;
+
+use Spiral\ODM\Entities\DocumentInstantiator;
 
 /**
  * Raised what document class can not be resolved based on set of provided fields or using logic
  * method.
  *
- * @see Document::defineClass();
+ * @see DocumentInstantiator::defineClass();
  */
-class DefinitionException extends DocumentException
+class DefinitionException extends ODMException
 {
 
 }

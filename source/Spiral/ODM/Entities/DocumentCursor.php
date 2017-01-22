@@ -1,218 +1,97 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM\Entities;
 
-use Spiral\ODM\Document;
-use Spiral\ODM\Exceptions\DefinitionException;
-use Spiral\ODM\Exceptions\ODMException;
-use Spiral\ODM\ODM;
+use MongoDB\Driver\Cursor;
+use Spiral\ODM\CompositableInterface;
+use Spiral\ODM\ODMInterface;
 
 /**
- * Walks thought query result and creates instances of Document on demand. Class decorates methods
- * of MongoCursor.
+ * Iterates over given cursor and convert its values in a proper objects using instantiation
+ * manager. Attention, this class is very important as it provides ability to story inherited
+ * documents in one collection.
  *
- * @see MongoCursor
+ * Note: since new mongo drivers arrived you can emulate same functionality using '__pclass'
+ * property.
  *
- * Wrapped methods.
- * @method bool hasNext()
- * @method static limit($number)
- * @method static batchSize($number)
- * @method static skip($number)
- * @method static addOption($key, $value)
- * @method static snapshot()
- * @method static sort($fields)
- * @method static hint($keyPattern)
- * @method array  explain()
- * @method static setFlag($bit, $set)
- * @method static slaveOkay($okay)
- * @method static tailable($tail)
- * @method static immortal($liveForever)
- * @method static awaitData($wait)
- * @method static partial($okay)
- * @method array getReadPreference()
- * @method static setReadPreference($read_preference, array $tags)
- * @method static timeout()
- * @method static info()
- * @method bool dead()
- * @method static reset()
- * @method int count($foundOnly)
+ * Note #2: ideally this class to be tested, but Cursor is final class and it seems unrealistic
+ * without adding extra layer which will harm core readability .
  */
-class DocumentCursor implements \Iterator, \JsonSerializable
+class DocumentCursor extends \IteratorIterator
 {
     /**
-     * MongoCursor instance.
-     *
-     * @var \MongoCursor
+     * @var Cursor
      */
-    protected $cursor = null;
+    private $cursor;
 
     /**
-     * ODM component.
-     *
-     * @var ODM
+     * @var string
      */
-    protected $odm = null;
+    private $class;
 
     /**
-     * Document class being iterated.
-     *
-     * @var string|null
+     * @var ODMInterface
      */
-    protected $class = '';
+    private $odm;
 
     /**
-     * @param \MongoCursor $cursor
-     * @param ODM          $odm
-     * @param string|null  $class
-     * @param array        $sort
-     * @param int          $limit
-     * @param int          $offset
+     * @param Cursor       $cursor
+     * @param string       $class
+     * @param ODMInterface $odm
      */
-    public function __construct(
-        \MongoCursor $cursor,
-        ODM $odm,
-        $class,
-        array $sort = [],
-        $limit = null,
-        $offset = null
-    ) {
-        $this->cursor = $cursor;
-        $this->odm = $odm;
+    public function __construct(Cursor $cursor, string $class, ODMInterface $odm)
+    {
+        //Ensuring cursor fetch types
+        $cursor->setTypeMap([
+            'root'     => 'array',
+            'document' => 'array',
+            'array'    => 'array'
+        ]);
+
+        parent::__construct($this->cursor = $cursor);
+
         $this->class = $class;
-
-        !empty($sort) && $this->cursor->sort($sort);
-        !empty($limit) && $this->cursor->limit($limit);
-        !empty($offset) && $this->cursor->skip($offset);
+        $this->odm = $odm;
     }
 
     /**
-     * Sets the fields for a query. Query will return arrays instead of Documents if selection
-     * fields are set.
-     *
-     * @link http://www.php.net/manual/en/mongocursor.fields.php
-     * @param array $fields Fields to return (or not return).
-     * @throws \MongoCursorException
-     * @return $this
+     * @return \Spiral\ODM\CompositableInterface
      */
-    public function fields(array $fields)
+    public function current(): CompositableInterface
     {
-        $this->cursor->fields($fields);
-        $this->class = null;
-
-        return $this;
+        return $this->odm->make($this->class, parent::current(), false);
     }
 
     /**
-     * Select all documents.
-     *
-     * @return Document[]
-     * @throws ODMException
-     * @throws DefinitionException
+     * @return Cursor
      */
-    public function all()
+    public function getCursor(): Cursor
+    {
+        return $this->cursor;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->fetchAll();
+    }
+
+    /**
+     * Fetch all documents.
+     *
+     * @return CompositableInterface[]
+     */
+    public function fetchAll(): array
     {
         $result = [];
-        foreach ($this as $document) {
-            $result[] = $document;
-        }
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return array|Document
-     * @throws ODMException
-     * @throws DefinitionException
-     */
-    public function current()
-    {
-        $fields = $this->cursor->current();
-        if (empty($this->class)) {
-            return $fields;
-        }
-
-        return $fields ? $this->odm->document($this->class, $fields) : null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        $this->cursor->next();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->cursor->key();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return $this->cursor->valid();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->cursor->rewind();
-    }
-
-    /**
-     * Return the next object to which this cursor points, and advance the cursor
-     *
-     * @link http://www.php.net/manual/en/mongocursor.getnext.php
-     * @throws \MongoConnectionException
-     * @throws \MongoCursorTimeoutException
-     * @return array|Document Returns the next object
-     */
-    public function getNext()
-    {
-        $this->cursor->next();
-
-        return $this->current();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        $result = [];
-        foreach ($this as $document) {
-            $result[] = $document->publicFields();
-        }
-
-        return $result;
-    }
-
-    /**
-     * Forward call to cursor.
-     *
-     * @param string $method
-     * @param array  $arguments
-     * @return mixed
-     */
-    public function __call($method, array $arguments)
-    {
-        $result = call_user_func_array([$this->cursor, $method], $arguments);
-        if ($result === $this->cursor || $result === null) {
-            return $this;
+        foreach ($this as $item) {
+            $result[] = $item;
         }
 
         return $result;

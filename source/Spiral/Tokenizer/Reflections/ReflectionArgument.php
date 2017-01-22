@@ -5,7 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer\Reflections;
+
+use Spiral\Tokenizer\Exceptions\ReflectionException;
 
 /**
  * Represent argument using in method or function invocation with it's type and value.
@@ -21,31 +24,31 @@ class ReflectionArgument
     const STRING     = 'string';     //Simple scalar string, can be fetched using stringValue().
 
     /**
-     * @var int
+     * @var string
      */
-    private $type = null;
+    private $type;
 
     /**
      * @var string
      */
-    private $value = '';
+    private $value;
 
     /**
      * New instance of ReflectionArgument.
      *
-     * @param mixed $type
-     * @param mixed $value
+     * @param string $type  Argument type (see top constants).
+     * @param string $value Value in a form of php code.
      */
-    public function __construct($type, $value)
+    public function __construct($type, string $value)
     {
         $this->type = $type;
         $this->value = $value;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -53,7 +56,7 @@ class ReflectionArgument
     /**
      * @return string
      */
-    public function getValue()
+    public function getValue(): string
     {
         return $this->value;
     }
@@ -61,12 +64,16 @@ class ReflectionArgument
     /**
      * Convert argument value into valid string. Can be applied only for STRING type arguments.
      *
-     * @return null|string
+     * @return string
+     *
+     * @throws ReflectionException When value can not be converted into string.
      */
-    public function stringValue()
+    public function stringValue(): string
     {
         if ($this->type != self::STRING) {
-            return null;
+            throw new ReflectionException(
+                "Unable to represent value as string, value type is '{$this->type}'"
+            );
         }
 
         //The most reliable way
@@ -77,9 +84,10 @@ class ReflectionArgument
      * Create Argument reflections based on provided set of tokens (fetched from invoke).
      *
      * @param array $tokens
+     *
      * @return self[]
      */
-    public static function locateArguments(array $tokens)
+    public static function locateArguments(array $tokens): array
     {
         $definition = null;
         $level = 0;
@@ -98,7 +106,7 @@ class ReflectionArgument
                 $token[ReflectionFile::TOKEN_TYPE] == '('
                 || $token[ReflectionFile::TOKEN_TYPE] == '['
             ) {
-                $level++;
+                ++$level;
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
@@ -107,7 +115,7 @@ class ReflectionArgument
                 $token[ReflectionFile::TOKEN_TYPE] == ')'
                 || $token[ReflectionFile::TOKEN_TYPE] == ']'
             ) {
-                $level--;
+                --$level;
                 $definition['value'] .= $token[ReflectionFile::TOKEN_CODE];
                 continue;
             }
@@ -142,10 +150,12 @@ class ReflectionArgument
      * Create Argument reflection using token definition. Internal method.
      *
      * @see locateArguments
+     *
      * @param array $definition
-     * @return static
+     *
+     * @return self
      */
-    private static function createArgument(array $definition)
+    private static function createArgument(array $definition): ReflectionArgument
     {
         $result = new static(self::EXPRESSION, $definition['value']);
 

@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Pagination\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+namespace Spiral\Pagination\Exceptions;
 
 /**
  * Generic pagination error.
  */
-class PaginationException extends RuntimeException
+class PaginationException extends \RuntimeException
 {
-
 }

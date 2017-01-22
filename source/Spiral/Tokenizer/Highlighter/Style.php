@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer\Highlighter;
 
 /**
@@ -18,9 +19,9 @@ class Style
      * @var array
      */
     protected $templates = [
-        'token'       => "<span style=\"{style}\">{code}</span>",
+        'token'       => '<span style="{style}">{code}</span>',
         'line'        => "<div><span class=\"number\">{number}</span>{code}</div>\n",
-        'highlighted' => "<div class=\"highlighted\"><span class=\"number\">{number}</span>{code}</div>\n"
+        'highlighted' => "<div class=\"highlighted\"><span class=\"number\">{number}</span>{code}</div>\n",
     ];
 
     /**
@@ -65,41 +66,42 @@ class Style
             T_UNSET,
             T_FOREACH,
             T_RETURN,
-            T_EXIT
+            T_EXIT,
         ],
         'color: blue'                       => [
             T_DNUMBER,
-            T_LNUMBER
+            T_LNUMBER,
         ],
         'color: black; font: weight: bold;' => [
             T_OPEN_TAG,
             T_CLOSE_TAG,
-            T_OPEN_TAG_WITH_ECHO
+            T_OPEN_TAG_WITH_ECHO,
         ],
         'color: gray;'                      => [
             T_COMMENT,
-            T_DOC_COMMENT
+            T_DOC_COMMENT,
         ],
         'color: green; font-weight: bold;'  => [
             T_CONSTANT_ENCAPSED_STRING,
-            T_ENCAPSED_AND_WHITESPACE
+            T_ENCAPSED_AND_WHITESPACE,
         ],
         'color: #660000;'                   => [
-            T_VARIABLE
-        ]
+            T_VARIABLE,
+        ],
     ];
 
     /**
      * Highlight given token.
      *
-     * @param int    $tokenType
-     * @param string $code
+     * @param int    $token PHP token type used to correctly resolve proper color.
+     * @param string $code  Token source code.
+     *
      * @return string
      */
-    public function highlightToken($tokenType, $code)
+    public function highlightToken($token, string $code): string
     {
         foreach ($this->styles as $style => $tokens) {
-            if (!in_array($tokenType, $tokens)) {
+            if (!in_array($token, $tokens)) {
                 //Nothing to highlight
                 continue;
             }
@@ -112,28 +114,29 @@ class Style
             foreach (explode("\n", $code) as $line) {
                 $lines[] = \Spiral\interpolate($this->templates['token'], [
                     'style' => $style,
-                    'code'  => $line
+                    'code'  => $line,
                 ]);
             }
 
-            return join("\n", $lines);
+            return implode("\n", $lines);
         }
 
         return $code;
     }
 
     /**
-     * Highlight one line.
+     * Highlight one line of code.
      *
-     * @param int    $number
-     * @param string $code
-     * @param bool   $highlighted
+     * @param int    $number        Line number in file.
+     * @param string $code          Line code.
+     * @param bool   $highlightLine Indication that line must be highlighted (i.e. current line).
+     *
      * @return string
      */
-    public function line($number, $code, $highlighted = false)
+    public function line(int $number, string $code, bool $highlightLine = false): string
     {
         return \Spiral\interpolate(
-            $this->templates[$highlighted ? 'highlighted' : 'line'],
+            $this->templates[$highlightLine ? 'highlighted' : 'line'],
             compact('number', 'code')
         );
     }

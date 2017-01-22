@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Injections;
 
 /**
@@ -16,7 +17,7 @@ namespace Spiral\Database\Injections;
  * Database implementation must inject parameter SQL into expression, but use parameter value to be
  * sent to database.
  */
-interface ParameterInterface extends ExpressionInterface
+interface ParameterInterface extends FragmentInterface
 {
     /**
      * Get mocked parameter value or values in array form.
@@ -33,6 +34,15 @@ interface ParameterInterface extends ExpressionInterface
     public function setValue($value);
 
     /**
+     * Create copy of self with new value but same type.
+     *
+     * @param mixed $value
+     *
+     * @return self
+     */
+    public function withValue($value);
+
+    /**
      * Parameter type.
      *
      * @return int|mixed
@@ -40,10 +50,18 @@ interface ParameterInterface extends ExpressionInterface
     public function getType();
 
     /**
-     * In cases when parameter mock arrays such method has to return all nested values on one level,
-     * when parameter mock singular value - it has to return array of itself.
+     * Indication that parameter represent multiple values.
+     *
+     * @return bool
+     */
+    public function isArray(): bool;
+
+    /**
+     * Expand itself into array of Parameters each of what represent one nested value.
+     * Attention, parameter reference LOST at this moment, make sure to alter original parmater
+     * not flattened values.
      *
      * @return ParameterInterface[]
      */
-    public function flatten();
+    public function flatten(): array;
 }

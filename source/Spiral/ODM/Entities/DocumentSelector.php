@@ -1,162 +1,154 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM\Entities;
 
-use Psr\Log\LoggerAwareInterface;
+use MongoDB\BSON\UTCDateTime;
+use MongoDB\Collection;
+use MongoDB\Driver\Cursor;
 use Spiral\Core\Component;
-use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\ODM\Document;
-use Spiral\ODM\DocumentEntity;
-use Spiral\ODM\ODM;
-use Spiral\Pagination\PaginableInterface;
+use Spiral\ODM\CompositableInterface;
+use Spiral\ODM\ODMInterface;
+use Spiral\Pagination\PaginatorAwareInterface;
+use Spiral\Pagination\Traits\LimitsTrait;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
 /**
- * Mocks MongoCollection to aggregate query, limits and sorting values and product DocumentIterator
- * as result.
- *
- * @see  DocumentIterator
- * @link http://docs.mongodb.org/manual/tutorial/query-documents/
- *
- * Set of MongoCollection mocked methods:
- * @method bool getSlaveOkay()
- * @method bool setSlaveOkay($slave_okay)
- * @method array getReadPreference()
- * @method bool setReadPreference($read_preference, $tags)
- * @method array drop()
- * @method array validate($validate)
- * @method bool|array insert($array_of_fields_OR_object, $options = [])
- * @method mixed batchInsert($documents, $options = [])
- * @method bool update($old_array_of_fields_OR_object, $new_fields_OR_object, $options = [])
- * @method bool|array remove($array_of_fields_OR_object, $options = [])
- * @method bool ensureIndex($key_OR_array_of_keys, $options = [])
- * @method array deleteIndex($string_OR_array_of_keys)
- * @method array deleteIndexes()
- * @method array getIndexInfo()
- * @method save($array_of_fields_OR_object, $options = [])
- * @method array createDBRef($array_with_id_fields_OR_MongoID)
- * @method array getDBRef($reference)
- * @method array group($keys_or_MongoCode, $initial_value, $array_OR_MongoCode, $options = [])
- * @method bool|array distinct($key, $query)
- * @method array aggregate(array $pipeline, array $op, array $pipelineOperators)
+ * Provides fluent interface to build document selections.
  */
 class DocumentSelector extends Component implements
     \Countable,
     \IteratorAggregate,
-    PaginableInterface,
-    LoggerAwareInterface,
-    \JsonSerializable
+    \JsonSerializable,
+    PaginatorAwareInterface
 {
-    /**
-     * Collection queries can be paginated, in addition profiling messages will be dumped into log.
-     */
-    use LoggerTrait, PaginatorTrait;
+    use LimitsTrait, PaginatorTrait;
 
     /**
-     * Sort order.
-     *
-     * @link http://php.net/manual/en/class.mongocollection.php#mongocollection.constants.ascending
+     * Sort orders.
      */
-    const ASCENDING = 1;
-
-    /**
-     * Sort order.
-     *
-     * @link http://php.net/manual/en/class.mongocollection.php#mongocollection.constants.descending
-     */
+    const ASCENDING  = 1;
     const DESCENDING = -1;
 
     /**
-     * @var string
+     * Default selection type map.
      */
-    private $name = '';
+    const TYPE_MAP = [
+        'root'     => 'array',
+        'document' => 'array',
+        'array'    => 'array'
+    ];
 
     /**
-     * @var string
+     * @var Collection
      */
-    private $database = 'default';
+    private $collection;
 
     /**
-     * Associated MongoCollection.
+     * Document class being selected.
      *
-     * @var \MongoCollection
+     * @var string
      */
-    private $collection = null;
+    private $class;
+
+    /**
+     * @var ODMInterface
+     */
+    private $odm;
 
     /**
      * Fields and conditions to query by.
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
+     *
      * @var array
      */
-    protected $query = [];
+    private $query = [];
 
     /**
      * Fields to sort.
      *
      * @var array
      */
-    protected $sort = [];
+    private $sort = [];
 
     /**
-     * @invisible
-     * @var ODM
+     * @param Collection   $collection
+     * @param string       $class
+     * @param ODMInterface $odm
      */
-    protected $odm = null;
-
-    /**
-     * @link http://docs.mongodb.org/manual/tutorial/query-documents/
-     * @param ODM    $odm        ODMManager component instance.
-     * @param string $database   Associated database name/id.
-     * @param string $collection Collection name.
-     * @param array  $query      Fields and conditions to query by.
-     */
-    public function __construct(ODM $odm, $database, $collection, array $query = [])
+    public function __construct(Collection $collection, string $class, ODMInterface $odm)
     {
+        $this->collection = $collection;
+        $this->class = $class;
         $this->odm = $odm;
-
-        $this->name = $collection;
-        $this->database = $database;
-
-        $this->query = $query;
     }
 
     /**
-     * @return string
+     * Associated ODM instance.
+     *
+     * @return ODMInterface
      */
-    public function getName()
+    public function getODM(): ODMInterface
     {
-        return $this->name;
+        return $this->odm;
     }
 
     /**
+     * Associated class name.
+     *
      * @return string
      */
-    public function getDatabase()
+    public function getClass(): string
     {
-        return $this->database;
+        return $this->class;
     }
 
     /**
      * Set additional query, fields will be merged to currently existed request using array_merge.
+     * Alias for query.
+     *
+     * Attention, MongoDB is strictly typed!
      *
      * @link http://docs.mongodb.org/manual/tutorial/query-documents/
-     * @param array $query Fields and conditions to query by.
-     * @return $this
+     *
+     * @see  query()
+     *
+     * @param array $query          Fields and conditions to query by.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
+     *
+     * @return self|$this
      */
-    public function query(array $query = [])
+    public function find(array $query = [], bool $normalizeDates = true): DocumentSelector
     {
-        array_walk_recursive($query, function (&$value) {
-            if ($value instanceof \DateTime) {
-                //MongoDate is always UTC, which is good :)
-                $value = new \MongoDate($value->getTimestamp());
-            }
-        });
+        return $this->where($query, $normalizeDates);
+    }
+
+    /**
+     * Set additional query, fields will be merged to currently existed request using array_merge.
+     * Alias for query.
+     *
+     * Attention, MongoDB is strictly typed!
+     *
+     * @link http://docs.mongodb.org/manual/tutorial/query-documents/
+     *
+     * @see  find()
+     *
+     * @param array $query          Fields and conditions to query by.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
+     *
+     * @return self|$this
+     */
+    public function where(array $query = [], bool $normalizeDates = true): DocumentSelector
+    {
+        if ($normalizeDates) {
+            $query = $this->normalizeDates($query);
+        }
 
         $this->query = array_merge($this->query, $query);
 
@@ -164,76 +156,17 @@ class DocumentSelector extends Component implements
     }
 
     /**
-     * Set additional query field, fields will be merged to currently existed request using
-     * array_merge. Alias for query.
-     *
-     * @link http://docs.mongodb.org/manual/tutorial/query-documents/
-     * @param array $query Fields and conditions to query by.
-     * @return $this
-     */
-    public function where(array $query = [])
-    {
-        return $this->query($query);
-    }
-
-    /**
-     * Set additional query field, fields will be merged to currently existed request using
-     * array_merge. Alias for query.
-     *
-     * @link http://docs.mongodb.org/manual/tutorial/query-documents/
-     * @param array $query Fields and conditions to query by.
-     * @return $this
-     */
-    public function find(array $query = [])
-    {
-        return $this->query($query);
-    }
-
-    /**
-     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
-     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
-     *
-     * @see findOne()
-     * @param mixed $id Primary key value.
-     * @return DocumentEntity|null
-     */
-    public function findByPK($id)
-    {
-        return $this->findOne(['_id' => $this->odm->mongoID($id)]);
-    }
-
-    /**
-     * Select one document or it's fields from collection.
-     *
-     * @param array $query Fields and conditions to query by.
-     * @return DocumentEntity|array
-     */
-    public function findOne(array $query = [])
-    {
-        return $this->createCursor($query, [], 1)->getNext();
-    }
-
-    /**
-     * Current fields and conditions to query by.
-     *
-     * @link http://docs.mongodb.org/manual/tutorial/query-documents/
-     * @return array
-     */
-    public function getQuery()
-    {
-        return $this->query;
-    }
-
-    /**
      * Sorts the results by given fields.
      *
      * @link http://www.php.net/manual/en/mongocursor.sort.php
+     *
      * @param array $fields An array of fields by which to sort. Each element in the array has as
      *                      key the field name, and as value either 1 for ascending sort, or -1 for
      *                      descending sort.
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function sortBy(array $fields)
+    public function sortBy(array $fields): DocumentSelector
     {
         $this->sort = $fields;
 
@@ -241,74 +174,102 @@ class DocumentSelector extends Component implements
     }
 
     /**
-     * Fetch all available document instances from query.
+     * Alias for sortBy.
      *
-     * @return Document[]
+     * @param string $field
+     * @param int    $direction
+     *
+     * @return self|$this
      */
-    public function fetchDocuments()
+    public function orderBy(string $field, int $direction = self::ASCENDING): DocumentSelector
     {
-        $result = [];
-        foreach ($this->createCursor() as $document) {
-            $result[] = $document;
+        return $this->sortBy($this->sort + [$field => $direction]);
+    }
+
+    /**
+     * Select one document or it's fields from collection.
+     *
+     * Attention, MongoDB is strictly typed!
+     *
+     * @param array $query          Fields and conditions to query by. Query will not be added to an
+     *                              existed query array.
+     * @param bool  $normalizeDates When true (default) all DateTime objects will be converted into
+     *                              MongoDate.
+     *
+     * @return CompositableInterface|null
+     */
+    public function findOne(array $query = [], bool $normalizeDates = true)
+    {
+        if ($normalizeDates) {
+            $query = $this->normalizeDates($query);
+        }
+
+        $result = $this->collection->findOne(
+            array_merge($this->query, $query),
+            $this->createOptions()
+        );
+
+        if (!is_null($result)) {
+            $result = $this->odm->make($this->class, $result, false);
         }
 
         return $result;
     }
 
     /**
-     * Fetch all available documents as arrays of fields.
+     * Count collection. Attention, this method depends on current values set for limit and offset!
      *
-     * @param array $fields Fields of the results to return.
-     * @return array
-     */
-    public function fetchFields($fields = [])
-    {
-        $result = [];
-        foreach ($this->createCursor([], $fields) as $document) {
-            $result[] = $document;
-        }
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        return $this->mongoCollection()->count($this->query);
-    }
-
-    /**
-     * {@inheritdoc}
+     * Attention, MongoDB is strictly typed!
      *
-     * @return DocumentCursor|Document[]
+     * @param array $query
+     *
+     * @return int
      */
-    public function getIterator()
+    public function count(array $query = []): int
     {
-        return $this->createCursor();
+        //Create options?
+        return $this->collection->count(
+            array_merge($this->query, $query),
+            ['skip' => $this->offset, 'limit' => $this->limit]
+        );
     }
 
     /**
-     * Get instance of DocumentCursor.
+     * Fetch all documents.
+     *
+     * @return CompositableInterface[]
+     */
+    public function fetchAll(): array
+    {
+        return $this->getIterator()->fetchAll();
+    }
+
+    /**
+     * Create cursor with partial selection. Attention, you can not exclude _id from result!
+     *
+     * Example: $selector->fetchFields(['name', ...])->toArray();
+     *
+     * @param array $fields
+     *
+     * @return Cursor
+     */
+    public function getProjection(array $fields = []): Cursor
+    {
+        return $this->createCursor($fields);
+    }
+
+    /**
+     * Create selection and wrap it using DocumentCursor.
      *
      * @return DocumentCursor
      */
-    public function getCursor()
+    public function getIterator(): DocumentCursor
     {
-        return $this->createCursor();
-    }
-
-    /**
-     * Bypass call to MongoCollection.
-     *
-     * @param string $method    Method name.
-     * @param array  $arguments Method arguments.
-     * @return mixed
-     */
-    public function __call($method, array $arguments = [])
-    {
-        return call_user_func_array([$this->mongoCollection(), $method], $arguments);
+        return new DocumentCursor(
+            $this->createCursor(),
+            $this->class,
+            $this->odm
+        );
     }
 
     /**
@@ -316,16 +277,7 @@ class DocumentSelector extends Component implements
      */
     public function jsonSerialize()
     {
-        return $this->getIterator();
-    }
-
-    /**
-     * Destructing.
-     */
-    public function __destruct()
-    {
-        $this->odm = $this->collection = $this->paginator = null;
-        $this->query = [];
+        return $this->fetchAll();
     }
 
     /**
@@ -334,7 +286,8 @@ class DocumentSelector extends Component implements
     public function __debugInfo()
     {
         return [
-            'collection' => $this->database . '/' . $this->name,
+            'database'   => $this->collection->getDatabaseName(),
+            'collection' => $this->collection->getCollectionName(),
             'query'      => $this->query,
             'limit'      => $this->limit,
             'offset'     => $this->offset,
@@ -343,97 +296,88 @@ class DocumentSelector extends Component implements
     }
 
     /**
-     * Create CursorReader based on stored query, limits and sorting.
-     *
-     * @param array    $query  Fields and conditions to query by.
-     * @param array    $fields Fields of the results to return.
-     * @param int|null $limit  Custom limit value.
-     * @return DocumentCursor
-     * @throws \MongoException
+     * Destructing.
      */
-    protected function createCursor($query = [], $fields = [], $limit = null)
+    public function __destruct()
     {
-        $this->query($query);
-        $this->applyPagination();
-
-        $cursorReader = new DocumentCursor(
-            $this->mongoCollection()->find($this->query, $fields),
-            $this->odm,
-            empty($fields) ? $this->primaryDocument() : null,
-            $this->sort,
-            !empty($limit) ? $limit : $this->limit,
-            $this->offset
-        );
-
-        if ((!empty($this->limit) || !empty($this->offset)) && empty($this->sort)) {
-            //Document can travel in mongo collection
-            $this->logger()->warning(
-                "MongoDB query executed with limit/offset but without specified sorting."
-            );
-        }
-
-        //This is not the same profiling as one defined in getProfilingLevel().
-        if (!$this->mongoDatabase()->isProfiling()) {
-            return $cursorReader;
-        }
-
-        $queryInfo = ['query' => $this->query, 'sort' => $this->sort];
-
-        if (!empty($this->limit)) {
-            $queryInfo['limit'] = !empty($limit) ? (int)$limit : (int)$this->limit;
-        }
-
-        if (!empty($this->offset)) {
-            $queryInfo['offset'] = (int)$this->offset;
-        }
-
-        if ($this->mongoDatabase()->getProfiling() == MongoDatabase::PROFILE_EXPLAIN) {
-            $queryInfo['explained'] = $cursorReader->explain();
-        }
-
-        $this->logger()->debug(
-            "{database}/{collection}: " . json_encode($queryInfo, JSON_PRETTY_PRINT),
-            [
-                'collection' => $this->name,
-                'database'   => $this->database,
-                'queryInfo'  => $queryInfo
-            ]
-        );
-
-        return $cursorReader;
+        $this->collection = null;
+        $this->odm = null;
+        $this->paginator = null;
+        $this->query = [];
+        $this->sort = [];
     }
 
     /**
-     * Associated document class.
+     * @param array $fields Fields to be selected (keep empty to select all).
      *
-     * @return string
+     * @return Cursor
      */
-    protected function primaryDocument()
+    protected function createCursor(array $fields = [])
     {
-        return $this->odm->primaryDocument($this->database, $this->name);
-    }
+        if ($this->hasPaginator()) {
+            $paginator = $this->configurePaginator($this->count());
 
-    /**
-     * MongoDatabase instance.
-     *
-     * @return MongoDatabase
-     */
-    protected function mongoDatabase()
-    {
-        return $this->odm->database($this->database);
-    }
-
-    /**
-     * Get associated mongo collection.
-     *
-     * @return \MongoCollection
-     */
-    protected function mongoCollection()
-    {
-        if (!empty($this->collection)) {
-            return $this->collection;
+            //Paginate in isolation
+            $selector = clone $this;
+            $selector->limit($paginator->getLimit())->offset($paginator->getOffset());
+            $options = $selector->createOptions();
+        } else {
+            $options = $this->createOptions();
         }
 
-        return $this->collection = $this->mongoDatabase()->selectCollection($this->name);
+        if (!empty($fields)) {
+            $options['projection'] = array_fill_keys($fields, 1);
+        }
+
+        return $this->collection->find($this->query, $options);
+    }
+
+    /**
+     * Options to be send to find() method of MongoDB\Collection. Options are based on how selector
+     * was configured.
+     **
+     *
+     * @return array
+     */
+    protected function createOptions(): array
+    {
+        return [
+            'skip'    => $this->offset,
+            'limit'   => $this->limit,
+            'sort'    => $this->sort,
+            'typeMap' => self::TYPE_MAP
+        ];
+    }
+
+    /**
+     * Converts DateTime objects into MongoDatetime.
+     *
+     * @param array $query
+     *
+     * @return array
+     */
+    protected function normalizeDates(array $query): array
+    {
+        array_walk_recursive($query, function (&$value) {
+            if ($value instanceof \DateTime) {
+                //MongoDate is always UTC, which is good :)
+                $value = new UTCDateTime($value);
+            }
+        });
+
+        return $query;
+    }
+
+    /**
+     * @return \Interop\Container\ContainerInterface|null
+     */
+    protected function iocContainer()
+    {
+        if ($this->odm instanceof Component) {
+            //Forwarding container scope
+            return $this->odm->iocContainer();
+        }
+
+        return parent::iocContainer();
     }
 }

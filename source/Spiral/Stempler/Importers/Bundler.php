@@ -30,7 +30,7 @@ class Bundler implements ImporterInterface
     public function __construct(Supervisor $supervisor, $path, array $token = [])
     {
         $node = $supervisor->createNode($path, $token);
-        $supervisor = $node->supervisor();
+        $supervisor = $node->getSupervisor();
 
         if ($supervisor instanceof Supervisor) {
             $this->importers = $supervisor->getImporters();

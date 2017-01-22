@@ -1,18 +1,14 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Models\Exceptions\EntityException;
+use Spiral\Models\Exceptions\EntityExceptionInterface;
 
-/**
- * Record related exception.
- */
-class RecordException extends EntityException
+class RecordException extends ORMException implements EntityExceptionInterface
 {
 
 }

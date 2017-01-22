@@ -1,47 +1,38 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM;
 
-use Spiral\Models\EntityInterface;
+use Spiral\Models\AccessorInterface;
 
 /**
- * Declares that object can be embedded into Document as some instance and control it's owm (located
- * in instance) updates, public fields and validations. Basically it's embeddable entity.
- *
- * Compositable instance is primary entity type for ODM.
+ * Declares ability of object to be embedded into RecordEntity or represent set of embedded objects.
  */
-interface CompositableInterface extends EntityInterface, DocumentAccessorInterface
+interface CompositableInterface extends AccessorInterface
 {
     /**
-     * {@inheritdoc}
+     * Check if composition have any change.
      *
-     * @param ODM   $odm     ODM component if any.
-     * @param mixed $options Implementation specific options. In ODM will always contain field type.
+     * @return bool
      */
-    public function __construct(
-        $value,
-        EntityInterface $parent = null,
-        ODM $odm = null,
-        $options = null
-    );
+    public function hasChanges(): bool;
 
     /**
-     * Instance must re-validate data.
-     *
-     * @return $this
+     * Indicate that composition been properly saved.
      */
-    public function invalidate();
+    public function flushChanges();
 
     /**
-     * Every composited object must know how to give it's public data (safe to send to client) to
-     * parent.
+     * Get generated and manually set document/object atomic updates.
+     *
+     * Example: $set: {'key': 'value'}
+     *
+     * @param string $container Name of field or index where object stored under parent.
      *
      * @return array
      */
-    public function publicFields();
+    public function buildAtomics(string $container = ''): array;
 }

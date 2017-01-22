@@ -1,320 +1,205 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM;
 
-use Spiral\Core\Exceptions\SugarException;
+use MongoDB\BSON\ObjectID;
+use Spiral\Core\Component;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\EntityInterface;
-use Spiral\Models\Events\EntityEvent;
 use Spiral\Models\SchematicEntity;
-use Spiral\ODM\Exceptions\DefinitionException;
+use Spiral\Models\Traits\SolidableTrait;
+use Spiral\ODM\Entities\DocumentCompositor;
+use Spiral\ODM\Entities\DocumentInstantiator;
+use Spiral\ODM\Exceptions\AccessException;
+use Spiral\ODM\Exceptions\AggregationException;
 use Spiral\ODM\Exceptions\DocumentException;
-use Spiral\ODM\Exceptions\FieldException;
-use Spiral\ODM\Exceptions\ODMException;
+use Spiral\ODM\Helpers\AggregationHelper;
+use Spiral\ODM\Schemas\Definitions\CompositionDefinition;
 
 /**
- * DocumentEntity is base data model for ODM component, it describes it's own schema,
- * compositions, validations and etc. ODM component will automatically analyze existed
- * Documents and create cached version of their schema.
+ * Primary class for spiral ODM, provides ability to pack it's own updates in a form of atomic
+ * updates.
  *
- * Can create set of mongo atomic operations and be embedded into other documents.
+ * You can use same properties to configure entity as in DataEntity + schema property.
+ *
+ * Example:
+ *
+ * class Test extends DocumentEntity
+ * {
+ *    const SCHEMA = [
+ *       'name' => 'string'
+ *    ];
+ * }
+ *
+ * Configuration properties:
+ * - schema
+ * - defaults
+ * - secured (* by default)
+ * - fillable
  */
 abstract class DocumentEntity extends SchematicEntity implements CompositableInterface
 {
-    /**
-     * Optional constructor arguments.
+    use SaturateTrait, SolidableTrait;
+
+    /*
+     * Begin set of behaviour and description constants.
+     * ================================================
      */
-    use SaturateTrait;
 
     /**
-     * We are going to inherit parent validation rules, this will let spiral translator know about
-     * it and merge i18n messages.
-     *
-     * @see TranslatorTrait
+     * Set of schema sections needed to describe entity behaviour.
      */
-    const I18N_INHERIT_MESSAGES = true;
+    const SH_INSTANTIATION = 0;
+    const SH_DEFAULTS      = 1;
+    const SH_COMPOSITIONS  = 6;
+    const SH_AGGREGATIONS  = 7;
 
     /**
-     * Helper constant to identify atomic SET operations.
-     */
-    const ATOMIC_SET = '$set';
-
-    /**
-     * Tells ODM component that Document class must be resolved using document fields. ODM must
-     * match fields to every child of this documents and find best match. This is default definition
-     * behaviour.
+     * Constants used to describe aggregation relations (also used internally to identify
+     * composition).
      *
      * Example:
-     * > Class A: _id, name, address
-     * > Class B extends A: _id, name, address, email
-     * < Class B will be used to represent all documents with existed email field.
+     * 'items' => [self::MANY => Item::class, ['parentID' => 'key::_id']]
      *
-     * @see DocumentSchema
-     */
-    const DEFINITION_FIELDS = 1;
-
-    /**
-     * Tells ODM that logical method (defineClass) must be used to define document class. Method
-     * will receive document fields as input and must return document class name.
-     *
-     * Example:
-     * > Class A: _id, name, type (a)
-     * > Class B extends A: _id, name, type (b)
-     * > Class C extends B: _id, name, type (c)
-     * < Static method in class A (parent) should return A, B or C based on type field value (as
-     * example).
-     *
-     * Attention, ODM will always ask TOP PARENT (in collection) to define class when you loading
-     * documents from collections.
-     *
-     * @see defineClass($fields)
-     * @see DocumentSchema
-     */
-    const DEFINITION_LOGICAL = 2;
-
-    /**
-     * Indication to ODM component of method to resolve Document class using it's fieldset. This
-     * constant is required due Document can inherit another Document.
-     */
-    const DEFINITION = self::DEFINITION_FIELDS;
-
-    /**
-     * Automatically convert "_id" to "id" in publicFields() method.
-     */
-    const REMOVE_ID_UNDERSCORE = true;
-
-    /**
-     * Additional index options must be located under this key.
-     */
-    const INDEX_OPTIONS = '@options';
-
-    /**
-     * Constants used to describe aggregation relations.
-     *
-     * Example:
-     * 'items' => [self::MANY => 'Models\Database\Item', [
-     *      'parentID' => 'key::_id'
-     * ]]
-     *
-     * @see Document::$schema
+     * @see DocumentEntity::SCHEMA
      */
     const MANY = 778;
     const ONE  = 899;
 
-    /**
-     * Errors in nested documents and acessors.
-     *
-     * @var array
+    /*
+     * ================================================
+     * End set of behaviour and description constants.
      */
-    private $nestedErrors = [];
 
     /**
-     * Model schema provided by ODM compoent.
-     *
-     * @var array
+     * Class responsible for instance construction.
      */
-    private $odmSchema = [];
-
-    /**
-     * SolidState will force document to be saved as one big data set without any atomic operations
-     * (dirty fields).
-     *
-     * @var bool
-     */
-    private $solidState = false;
-
-    /**
-     * Document field updates (changed values).
-     *
-     * @var array
-     */
-    private $updates = [];
-
-    /**
-     * User specified set of atomic operation to be applied to document on save() call.
-     *
-     * @var array
-     */
-    private $atomics = [];
+    const INSTANTIATOR = DocumentInstantiator::class;
 
     /**
      * Document fields, accessors and relations. ODM will generate setters and getters for some
      * fields based on their types.
      *
      * Example, fields:
-     * protected $schema = [
+     * const SCHEMA = [
      *      '_id'    => 'MongoId', //Primary key field
      *      'value'  => 'string',  //Default string field
      *      'values' => ['string'] //ScalarArray accessor will be applied for fields like that
      * ];
      *
      * Compositions:
-     * protected $schema = [
+     * const SCHEMA = [
      *     ...,
      *     'child'       => Child::class,   //One document are composited, for example user Profile
      *     'many'        => [Child::class]  //Compositor accessor will be applied, allows to
-     *     composite
-     *                                      //many document instances
+     *                                      //composite many document instances
      * ];
      *
      * Documents can extend each other, in this case schema will also be inherited.
      *
+     * Attention, make sure you properly set FILLABLE option in parent class to use constructions
+     * like:
+     * $parent->child = [...];
+     *
+     * or
+     * $parent->setFields(['child'=>[...]]);
+     *
      * @var array
      */
-    protected $schema = [];
+    const SCHEMA = [];
 
     /**
      * Default field values.
      *
      * @var array
      */
-    protected $defaults = [];
+    const DEFAULTS = [];
 
     /**
+     * Model behaviour configurations.
+     */
+    const SECURED   = '*';
+    const HIDDEN    = [];
+    const FILLABLE  = [];
+    const SETTERS   = [];
+    const GETTERS   = [];
+    const ACCESSORS = [];
+
+    /**
+     * Document behaviour schema.
+     *
+     * @var array
+     */
+    private $documentSchema = [];
+
+    /**
+     * Document field updates (changed values).
+     *
+     * @var array
+     */
+    private $changes = [];
+
+    /**
+     * Parent ODM instance, responsible for aggregations and lazy loading operations.
+     *
      * @invisible
-     * @var EntityInterface
+     * @var ODMInterface
      */
-    protected $parent = null;
+    protected $odm;
 
     /**
-     * @invisible
-     * @var ODM
+     * {@inheritdoc}
+     *
+     * @param ODMInterface $odm To lazy create nested document ang aggregations.
+     *
+     * @throws ScopeException When no ODM instance can be resolved.
      */
-    protected $odm = null;
-
-    /**
-     * @param array           $fields
-     * @param EntityInterface $parent
-     * @param ODM             $odm
-     * @param array           $odmSchema
-     * @throws SugarException
-     */
-    public function __construct(
-        $fields = [],
-        EntityInterface $parent = null,
-        ODM $odm = null,
-        $odmSchema = null
-    ) {
-        $this->parent = $parent;
-
+    public function __construct(array $data = [], ODMInterface $odm = null, array $schema = null)
+    {
         //We can use global container as fallback if no default values were provided
-        $this->odm = $this->saturate($odm, ODM::class);
+        $this->odm = $this->saturate($odm, ODMInterface::class);
 
-        $this->odmSchema = !empty($odmSchema)
-            ? $odmSchema
-            : $this->odm->schema(static::class);
+        //Use supplied schema or fetch one from ODM
+        $this->documentSchema = !empty($schema) ? $schema : $this->odm->define(
+            static::class,
+            ODMInterface::D_SCHEMA
+        );
 
-
-        if (empty($fields)) {
-            $this->invalidate();
-        }
-
-        $fields = is_array($fields) ? $fields : [];
-        if (!empty($this->odmSchema[ODM::D_DEFAULTS])) {
+        $data = is_array($data) ? $data : [];
+        if (!empty($this->documentSchema[self::SH_DEFAULTS])) {
             //Merging with default values
-            $fields = array_replace_recursive($this->odmSchema[ODM::D_DEFAULTS], $fields);
+            $data = array_replace_recursive($this->documentSchema[self::SH_DEFAULTS], $data);
         }
 
-        parent::__construct($fields, $this->odmSchema);
-    }
-
-    /**
-     * Change document solid state. SolidState will force document to be saved as one big data set
-     * without any atomic operations (dirty fields).
-     *
-     * @param bool $solidState
-     * @param bool $forceUpdate Mark all fields as changed to force update later.
-     * @return $this
-     */
-    public function solidState($solidState, $forceUpdate = false)
-    {
-        $this->solidState = $solidState;
-
-        if ($forceUpdate) {
-            $this->updates = $this->odmSchema[ODM::D_DEFAULTS];
-        }
-
-        return $this;
-    }
-
-    /**
-     * Is document is solid state?
-     *
-     * @see solidState()
-     * @return bool
-     */
-    public function isSolid()
-    {
-        return $this->solidState;
-    }
-
-    /**
-     * Check if document has parent.
-     *
-     * @return bool
-     */
-    public function isEmbedded()
-    {
-        return !empty($this->parent);
+        parent::__construct($data, $this->documentSchema);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function embed(EntityInterface $parent)
+    public function getField(string $name, $default = null, bool $filter = true)
     {
-        if (empty($this->parent)) {
-            $this->parent = $parent;
+        $this->assertField($name);
 
-            //Moving under new parent
-            return $this->solidState(true, true);
-        }
-
-        if ($parent === $this->parent) {
-            return $this;
-        }
-
-        /**
-         * @var Document $document
-         */
-        $document = new static($this->serializeData(), $parent, $this->odm, $this->odmSchema);
-
-        return $document->solidState(true, true);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setValue($data)
-    {
-        return $this->setFields($data);
+        return parent::getField($name, $default, $filter);
     }
 
     /**
      * {@inheritdoc}
      *
-     * Must track field updates.
+     * Tracks field changes.
      */
-    public function setField($name, $value, $filter = true)
+    public function setField(string $name, $value, bool $filter = true)
     {
-        if (!array_key_exists($name, $this->fields)) {
-            throw new FieldException("Undefined field '{$name}' in '" . static::class . "'.");
-        }
+        $this->assertField($name);
+        $this->registerChange($name);
 
-        $original = isset($this->fields[$name]) ? $this->fields[$name] : null;
         parent::setField($name, $value, $filter);
-
-        if (!array_key_exists($name, $this->updates)) {
-            $this->updates[$name] = $original instanceof AccessorInterface
-                ? $original->serializeData()
-                : $original;
-        }
     }
 
     /**
@@ -324,157 +209,68 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
      */
     public function __unset($offset)
     {
-        if (!array_key_exists($offset, $this->updates)) {
-            //Let document know that field value changed, but without overwriting previous change
-            $this->updates[$offset] = isset($this->odmSchema[ODM::D_DEFAULTS][$offset])
-                ? $this->odmSchema[ODM::D_DEFAULTS][$offset]
-                : null;
+        if (!$this->isNullable($offset)) {
+            throw new AccessException("Unable to unset not nullable field '{$offset}'");
         }
 
-        $this->fields[$offset] = null;
-        if (isset($this->odmSchema[ODM::D_DEFAULTS][$offset])) {
-            //Restoring default value if presented (required for typecasting)
-            $this->fields[$offset] = $this->odmSchema[ODM::D_DEFAULTS][$offset];
-        }
+        $this->setField($offset, null, false);
     }
 
     /**
-     * Alias for atomic operation $set. Attention, this operation is not identical to setField()
-     * method, it performs low level operation and can be used only on simple fields. No filters
-     * will be applied to field!
+     * Provides ability to invoke document aggregation.
      *
-     * @param string $field
-     * @param mixed  $value
-     * @return $this
-     * @throws DocumentException
-     */
-    public function set($field, $value)
-    {
-        if ($this->hasUpdates($field, true)) {
-            throw new FieldException(
-                "Unable to apply multiple atomic operation to field '{$field}'."
-            );
-        }
-
-        $this->atomics[self::ATOMIC_SET][$field] = $value;
-        $this->fields[$field] = $value;
-
-        return $this;
-    }
-
-    /**
-     * Alias for atomic operation $inc.
+     * @param string $method
+     * @param array  $arguments
      *
-     * @param string $field
-     * @param string $value
-     * @return $this
-     * @throws DocumentException
+     * @return mixed|null|AccessorInterface|CompositableInterface|Document|Entities\DocumentSelector
      */
-    public function inc($field, $value)
+    public function __call($method, array $arguments)
     {
-        if ($this->hasUpdates($field, true) && !isset($this->atomics['$inc'][$field])) {
-            throw new FieldException(
-                "Unable to apply multiple atomic operation to field '{$field}'."
-            );
+        if (isset($this->documentSchema[self::SH_AGGREGATIONS][$method])) {
+            if (!empty($arguments)) {
+                throw new AggregationException("Aggregation method call except 0 parameters");
+            }
+
+            $helper = new AggregationHelper($this, $this->odm);
+
+            return $helper->createAggregation($method);
         }
 
-        if (!isset($this->atomics['$inc'][$field])) {
-            $this->atomics['$inc'][$field] = 0;
-        }
-
-        $this->atomics['$inc'][$field] += $value;
-        $this->fields[$field] += $value;
-
-        return $this;
+        throw new DocumentException("Undefined method call '{$method}' in '" . get_called_class() . "'");
     }
 
     /**
      * {@inheritdoc}
      *
-     * Include every composition public data into result.
+     * @param string $field Check once specific field changes.
      */
-    public function publicFields()
+    public function hasChanges(string $field = null): bool
     {
-        $result = [];
-
-        foreach ($this->fields as $field => $value) {
-            if (in_array($field, $this->odmSchema[ODM::D_HIDDEN])) {
-                //We might need to use isset in future, for performance
-                continue;
-            }
-
-            /**
-             * @var mixed|array|DocumentAccessorInterface|CompositableInterface
-             */
-            $value = $this->getField($field);
-
-            if ($value instanceof CompositableInterface) {
-                $result[$field] = $value->publicFields();
-                continue;
-            }
-
-            if ($value instanceof \MongoId) {
-                $value = (string)$value;
-            }
-
-            if (is_array($value)) {
-                array_walk_recursive($value, function (&$value) {
-                    if ($value instanceof \MongoId) {
-                        $value = (string)$value;
-                    }
-                });
-            }
-
-            if (static::REMOVE_ID_UNDERSCORE && $field == '_id') {
-                $field = 'id';
-            }
-
-            $result[$field] = $value;
-        }
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string $field       Specific field name to check for updates.
-     * @param bool   $atomicsOnly Check if field has any atomic operation associated with.
-     */
-    public function hasUpdates($field = null, $atomicsOnly = false)
-    {
-        if (empty($field)) {
-            if (!empty($this->updates) || !empty($this->atomics)) {
+        //Check updates for specific field
+        if (!empty($field)) {
+            if (array_key_exists($field, $this->changes)) {
                 return true;
             }
 
-            foreach ($this->fields as $field => $value) {
-                if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
-                    return true;
-                }
+            //Do not force accessor creation
+            $value = $this->getField($field, null, false);
+            if ($value instanceof CompositableInterface && $value->hasChanges()) {
+                return true;
             }
 
             return false;
         }
 
-        foreach ($this->atomics as $operations) {
-            if (array_key_exists($field, $operations)) {
-                //Property already changed by atomic operation
+        if (!empty($this->changes)) {
+            return true;
+        }
+
+        //Do not force accessor creation
+        foreach ($this->getFields(false) as $value) {
+            //Checking all fields for changes (handled internally)
+            if ($value instanceof CompositableInterface && $value->hasChanges()) {
                 return true;
             }
-        }
-
-        if ($atomicsOnly) {
-            return false;
-        }
-
-        if (array_key_exists($field, $this->updates)) {
-            return true;
-        }
-
-        $value = $this->getField($field);
-        if ($value instanceof DocumentAccessorInterface && $value->hasUpdates()) {
-            return true;
         }
 
         return false;
@@ -483,79 +279,111 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     /**
      * {@inheritdoc}
      */
-    public function flushUpdates()
+    public function buildAtomics(string $container = null): array
     {
-        $this->updates = $this->atomics = [];
-
-        foreach ($this->fields as $value) {
-            if ($value instanceof DocumentAccessorInterface) {
-                $value->flushUpdates();
-            }
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function buildAtomics($container = '')
-    {
-        if (!$this->hasUpdates() && !$this->isSolid()) {
+        if (!$this->hasChanges() && !$this->isSolid()) {
             return [];
         }
 
         if ($this->isSolid()) {
             if (!empty($container)) {
                 //Simple nested document in solid state
-                return [self::ATOMIC_SET => [$container => $this->serializeData()]];
+                return ['$set' => [$container => $this->packValue(false)]];
             }
 
-            //Direct document save
-            $atomics = [self::ATOMIC_SET => $this->serializeData()];
-            unset($atomics[self::ATOMIC_SET]['_id']);
-
-            return $atomics;
+            //No parent container
+            return ['$set' => $this->packValue(false)];
         }
 
-        if (empty($container)) {
-            $atomics = $this->atomics;
-        } else {
-            $atomics = [];
+        //Aggregate atomics from every nested composition
+        $atomics = [];
 
-            foreach ($this->atomics as $atomic => $fields) {
-                foreach ($fields as $field => $value) {
-                    $atomics[$atomic][$container . '.' . $field] = $value;
-                }
-            }
-        }
-
-        foreach ($this->fields as $field => $value) {
-            if ($field == '_id') {
-                continue;
-            }
-
-            if ($value instanceof DocumentAccessorInterface) {
+        foreach ($this->getFields(false) as $field => $value) {
+            if ($value instanceof CompositableInterface) {
                 $atomics = array_merge_recursive(
                     $atomics,
-                    $value->buildAtomics(($container ? $container . '.' : '') . $field)
+                    $value->buildAtomics((!empty($container) ? $container . '.' : '') . $field)
                 );
 
                 continue;
             }
 
             foreach ($atomics as $atomic => $operations) {
-                if (array_key_exists($field, $operations) && $atomic != self::ATOMIC_SET) {
+                if (array_key_exists($field, $operations) && $atomic != '$set') {
                     //Property already changed by atomic operation
                     continue;
                 }
             }
 
-            if (array_key_exists($field, $this->updates)) {
+            if (array_key_exists($field, $this->changes)) {
                 //Generating set operation for changed field
-                $atomics[self::ATOMIC_SET][($container ? $container . '.' : '') . $field] = $value;
+                $atomics['$set'][(!empty($container) ? $container . '.' : '') . $field] = $value;
             }
         }
 
         return $atomics;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function flushChanges()
+    {
+        $this->changes = [];
+
+        foreach ($this->getFields(false) as $field => $value) {
+            if ($value instanceof CompositableInterface) {
+                $value->flushChanges();
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $includeID Set to false to exclude _id from packed fields.
+     */
+    public function packValue(bool $includeID = true)
+    {
+        $values = parent::packValue();
+
+        if (!$includeID) {
+            unset($values['_id']);
+        }
+
+        return $values;
+    }
+
+    /**
+     * Since most of ODM documents might contain ObjectIDs and other fields we will try to normalize
+     * them into string values.
+     *
+     * @return array
+     */
+    public function publicValue(): array
+    {
+        $public = parent::publicValue();
+
+        array_walk_recursive($public, function (&$value) {
+            if ($value instanceof ObjectID) {
+                $value = (string)$value;
+            }
+        });
+
+        return $public;
+    }
+
+    /**
+     * Cloning will be called when object will be embedded into another document.
+     */
+    public function __clone()
+    {
+        //De-serialize document in order to ensure that all compositions are recreated
+        $this->setValue($this->packValue());
+
+        //Since document embedded as one piece let's ensure that it is solid
+        $this->solidState = true;
+        $this->changes = [];
     }
 
     /**
@@ -565,146 +393,112 @@ abstract class DocumentEntity extends SchematicEntity implements CompositableInt
     {
         return [
             'fields'  => $this->getFields(),
-            'atomics' => $this->hasUpdates() ? $this->buildAtomics() : [],
-            'errors'  => $this->getErrors()
+            'atomics' => $this->hasChanges() ? $this->buildAtomics() : [],
         ];
     }
 
     /**
      * {@inheritdoc}
-     */
-    public function defaultValue()
-    {
-        return $this->odmSchema[ODM::D_DEFAULTS];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isValid()
-    {
-        $this->validate();
-
-        return empty($this->errors) && empty($this->nestedErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getErrors($reset = false)
-    {
-        return parent::getErrors($reset) + $this->nestedErrors;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function container()
-    {
-        if (empty($this->odm)) {
-            return parent::container();
-        }
-
-        return $this->odm->container();
-    }
-
-    /**
-     * Related and cached ODM schema.
      *
-     * @return array
+     * @see CompositionDefinition
      */
-    protected function odmSchema()
-    {
-        return $this->odmSchema;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Will validate every CompositableInterface instance.
-     *
-     * @param bool $reset
-     * @throws DocumentException
-     */
-    protected function validate($reset = false)
-    {
-        $this->nestedErrors = [];
-
-        //Validating all compositions
-        foreach ($this->odmSchema[ODM::D_COMPOSITIONS] as $field) {
-            $composition = $this->getField($field);
-            if (!$composition instanceof CompositableInterface) {
-                //Something weird.
-                continue;
-            }
-
-            if (!$composition->isValid()) {
-                $this->nestedErrors[$field] = $composition->getErrors($reset);
-            }
-        }
-
-        parent::validate($reset);
-
-        return empty($this->errors + $this->nestedErrors);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Accessor options include field type resolved by DocumentSchema.
-     *
-     * @throws ODMException
-     * @throws DefinitionException
-     */
-    protected function createAccessor($accessor, $value)
-    {
-        $options = null;
-        if (is_array($accessor)) {
-            list($accessor, $options) = $accessor;
-        }
-
-        if ($accessor == ODM::CMP_ONE) {
-            //Pointing to document instance
-            $accessor = $this->odm->document($options, $value, $this);
-        } else {
-            //Additional options are supplied for CompositableInterface
-            $accessor = new $accessor($value, $this, $this->odm, $options);
-        }
-
-        return $accessor;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see   Component::staticContainer()
-     * @param array $fields Model fields to set, will be passed thought filters.
-     * @param ODM   $odm    ODM component, global container will be called if not instance provided.
-     * @event created()
-     */
-    public static function create($fields = [], ODM $odm = null)
+    protected function getMutator(string $field, string $mutator)
     {
         /**
-         * @var DocumentEntity $document
+         * Every document composition is valid accessor but defined a bit differently.
          */
-        $document = new static([], null, $odm);
+        if (isset($this->documentSchema[self::SH_COMPOSITIONS][$field])) {
+            return $this->documentSchema[self::SH_COMPOSITIONS][$field];
+        }
 
-        //Forcing validation (empty set of fields is not valid set of fields)
-        $document->setFields($fields)->dispatch('created', new EntityEvent($document));
-
-        return $document;
+        return parent::getMutator($field, $mutator);
     }
 
     /**
-     * Called by ODM with set of loaded fields. Must return name of appropriate class.
-     *
-     * @param array $fields
-     * @param ODM   $odm
-     * @return string
-     * @throws DefinitionException
+     * {@inheritdoc}
      */
-    public static function defineClass(array $fields, ODM $odm)
+    protected function isNullable(string $field): bool
     {
-        throw new DefinitionException("Class definition methods was not implemented.");
+        if (array_key_exists($field, $this->documentSchema[self::SH_DEFAULTS])) {
+            //Only fields with default null value can be nullable
+            return is_null($this->documentSchema[self::SH_DEFAULTS][$field]);
+        }
+
+        //Values unknown to schema always nullable
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * DocumentEntity will pass ODM instance as part of accessor context.
+     *
+     * @see CompositionDefinition
+     */
+    protected function createAccessor(
+        $accessor,
+        string $name,
+        $value,
+        array $context = []
+    ): AccessorInterface {
+        if (is_array($accessor)) {
+            //We are working with definition of composition.
+            switch ($accessor[0]) {
+                case self::ONE:
+                    //Singular embedded document
+                    return $this->odm->make($accessor[1], $value, false);
+                case self::MANY:
+                    return new DocumentCompositor($accessor[1], $value, $this->odm);
+            }
+
+            throw new AccessException("Invalid accessor definition for field '{$name}'");
+        }
+
+        //Field as a context
+        return parent::createAccessor($accessor, $name, $value, $context + ['odm' => $this->odm]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function iocContainer()
+    {
+        if ($this->odm instanceof Component) {
+            //Forwarding IoC scope to parent ODM instance
+            return $this->odm->iocContainer();
+        }
+
+        return parent::iocContainer();
+    }
+
+    /**
+     * @param string $name
+     */
+    private function registerChange(string $name)
+    {
+        $original = $this->getField($name, null, false);
+
+        if (!array_key_exists($name, $this->changes)) {
+            //Let's keep track of how field looked before first change
+            $this->changes[$name] = $original instanceof AccessorInterface
+                ? $original->packValue()
+                : $original;
+        }
+    }
+
+    /**
+     * @param string $name
+     *
+     * @throws AccessException
+     */
+    private function assertField(string $name)
+    {
+        if (!$this->hasField($name)) {
+            throw new AccessException(sprintf(
+                "No such property '%s' in '%s', check schema being relevant",
+                $name,
+                get_called_class()
+            ));
+        }
     }
 }

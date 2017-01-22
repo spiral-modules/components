@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer\Traits;
 
 use Spiral\Tokenizer\TokenizerInterface;
@@ -18,9 +19,10 @@ trait TokensTrait
      * Normalize tokens by wrapping every token into array and forcing line value.
      *
      * @param array $tokens
+     *
      * @return array
      */
-    private function normalizeTokens(array $tokens)
+    private function normalizeTokens(array $tokens): array
     {
         $line = 0;
         foreach ($tokens as &$token) {

@@ -14,23 +14,20 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Log\LoggerAwareInterface;
-use Spiral\Cache\StoreInterface;
+use Psr\SimpleCache\CacheInterface;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in Rackspace cloud.
  */
-class RackspaceServer extends StorageServer implements LoggerAwareInterface
+class RackspaceServer extends AbstractServer implements LoggerAwareInterface
 {
-    /**
-     * There is few warning messages.
-     */
     use LoggerTrait;
 
     /**
@@ -61,46 +58,51 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * Cache store to remember connection.
      *
      * @invisible
-     * @var StoreInterface
+     * @var CacheInterface
      */
-    protected $store = null;
+    protected $cache = null;
 
     /**
-     * @todo DI in constructor
      * @var ClientInterface
      */
     protected $client = null;
 
     /**
-     * @param FilesInterface $files
-     * @param StoreInterface $store
-     * @param array          $options
+     * @param array                $options
+     * @param CacheInterface|null  $cache
+     * @param FilesInterface|null  $files
+     * @param ClientInterface|null $client
      */
-    public function __construct(FilesInterface $files, StoreInterface $store, array $options)
-    {
-        parent::__construct($files, $options);
-        $this->store = $store;
+    public function __construct(
+        array $options,
+        CacheInterface $cache = null,
+        FilesInterface $files = null,
 
-        if ($this->options['cache']) {
-            $this->authToken = $this->store->get(
+        ClientInterface $client = null
+    ) {
+        parent::__construct($options, $files);
+        $this->cache = $cache;
+
+        if (!empty($this->cache) && $this->options['cache']) {
+            $this->authToken = $this->cache->get(
                 $this->options['username'] . '@rackspace-token'
             );
 
-            $this->regions = (array)$this->store->get(
+            $this->regions = (array)$this->cache->get(
                 $this->options['username'] . '@rackspace-regions'
             );
         }
 
-        //This code is going to use additional abstraction layer to connect storage and guzzle
-        $this->client = new Client($this->options);
-        $this->connect();
+        //Initiating Guzzle
+        $this->setClient($client ?? new Client($this->options))->connect();
     }
 
     /**
      * @param ClientInterface $client
-     * @return $this
+     *
+     * @return self
      */
-    public function setClient(ClientInterface $client)
+    public function setClient(ClientInterface $client): RackspaceServer
     {
         $this->client = $client;
 
@@ -110,50 +112,59 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      *
-     * @return bool|ResponseInterface
+     * @param ResponseInterface $response Reference.
+     *
+     * @return bool
      */
-    public function exists(BucketInterface $bucket, $name)
-    {
+    public function exists(
+        BucketInterface $bucket,
+        string $name,
+        ResponseInterface &$response = null
+    ): bool {
         try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 404) {
                 return false;
             }
 
-            if ($exception->getCode() == 401) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
-                return $this->exists($bucket, $name);
+                //Retry
+                return $this->exists($bucket, $name, $response);
             }
 
             //Some unexpected error
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         if ($response->getStatusCode() !== 200) {
             return false;
         }
 
-        return $response;
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
-        if (empty($response = $this->exists($bucket, $name))) {
-            return false;
+        if (!$this->exists($bucket, $name, $response)) {
+            return null;
         }
 
+        /**
+         * @var ResponseInterface $response
+         */
         return (int)$response->getHeaderLine('Content-Length');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
@@ -166,15 +177,15 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             ]);
 
             $this->client->send($request->withBody($this->castStream($source)));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->put($bucket, $name, $source);
             }
 
             //Some unexpected error
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return true;
@@ -183,18 +194,18 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->allocateStream($bucket, $name);
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $response->getBody();
@@ -202,18 +213,26 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @todo debug to figure out why Rackspace is not reliable
+     * @see  https://github.com/rackspace/php-opencloud/issues/477
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name, bool $retry = true)
     {
         try {
             $this->client->send($this->buildRequest('DELETE', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 409 && $retry) {
+
+                //Giving retry in 0.5 seconds, hate myself for doing so
+                usleep(500000);
+                $this->delete($bucket, $name, false);
+
+            } elseif ($e->getCode() == 401) {
                 $this->reconnect();
                 $this->delete($bucket, $name);
-            } elseif ($exception->getCode() != 404) {
-                throw new ServerException($exception->getMessage(), $exception->getCode(),
-                    $exception);
+            } elseif ($e->getCode() != 404) {
+                throw new ServerException($e->getMessage(), $e->getCode(), $e);
             }
         }
     }
@@ -221,27 +240,27 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         try {
-            $request = $this->buildRequest('PUT', $bucket, $newname, [
-                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldname),
+            $request = $this->buildRequest('PUT', $bucket, $newName, [
+                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($oldName),
                 'Content-Length' => 0
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
-                return $this->rename($bucket, $oldname, $newname);
+                return $this->rename($bucket, $oldName, $newName);
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         //Deleting old file
-        $this->delete($bucket, $oldname);
+        $this->delete($bucket, $oldName);
 
         return true;
     }
@@ -249,7 +268,7 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool
     {
         if ($bucket->getOption('region') != $destination->getOption('region')) {
             $this->logger()->warning(
@@ -262,19 +281,19 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
 
         try {
             $request = $this->buildRequest('PUT', $destination, $name, [
-                'X-Copy-From'    => '/' . $bucket->getOPtion('container') . '/' . rawurlencode($name),
+                'X-Copy-From'    => '/' . $bucket->getOption('container') . '/' . rawurlencode($name),
                 'Content-Length' => 0
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 $this->reconnect();
 
                 return $this->copy($bucket, $destination, $name);
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return true;
@@ -292,18 +311,16 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
             return;
         }
 
+        $username = $this->options['username'];
+        $apiKey = $this->options['apiKey'];
+
         //Credentials request
         $request = new Request(
             'POST',
             $this->options['authServer'],
             ['Content-Type' => 'application/json'],
             json_encode([
-                'auth' => [
-                    'RAX-KSKEY:apiKeyCredentials' => [
-                        'username' => $this->options['username'],
-                        'apiKey'   => $this->options['apiKey']
-                    ]
-                ]
+                'auth' => ['RAX-KSKEY:apiKeyCredentials' => compact('username', 'apiKey')]
             ])
         );
 
@@ -312,14 +329,14 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
              * @var ResponseInterface $response
              */
             $response = $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 401) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 401) {
                 throw new ServerException(
-                    "Unable to perform Rackspace authorization using given credentials."
+                    "Unable to perform RackSpace authorization using given credentials"
                 );
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         $response = json_decode((string)$response->getBody(), 1);
@@ -332,20 +349,21 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
         }
 
         if (!isset($response['access']['token']['id'])) {
-            throw new ServerException("Unable to fetch rackspace auth token.");
+            throw new ServerException("Unable to fetch rackspace auth token");
         }
 
+        //We got our authorization token (which will expire in some time)
         $this->authToken = $response['access']['token']['id'];
 
-        if ($this->options['cache']) {
-            $this->store->set(
-                $this->options['username'] . '@rackspace-token',
+        if (!empty($this->cache) && $this->options['cache']) {
+            $this->cache->set(
+                $username . '@rackspace-token',
                 $this->authToken,
                 $this->options['lifetime']
             );
 
-            $this->store->set(
-                $this->options['username'] . '@rackspace-regions',
+            $this->cache->set(
+                $username . '@rackspace-regions',
                 $this->regions,
                 $this->options['lifetime']
             );
@@ -368,18 +386,19 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return UriInterface
      * @throws ServerException
      */
-    protected function buildUri(BucketInterface $bucket, $name)
+    protected function buildUri(BucketInterface $bucket, string $name): UriInterface
     {
         if (empty($bucket->getOption('region'))) {
-            throw new ServerException("Every rackspace container should have specified region.");
+            throw new ServerException("Every RackSpace container should have specified region");
         }
 
         $region = $bucket->getOption('region');
         if (!isset($this->regions[$region])) {
-            throw new ServerException("'{$region}' region is not supported by Rackspace.");
+            throw new ServerException("'{$region}' region is not supported by RackSpace");
         }
 
         return new Uri(
@@ -394,16 +413,23 @@ class RackspaceServer extends StorageServer implements LoggerAwareInterface
      * @param BucketInterface $bucket
      * @param string          $name
      * @param array           $headers
+     *
      * @return RequestInterface
      */
-    protected function buildRequest($method, BucketInterface $bucket, $name, array $headers = [])
-    {
-        //Adding auth headers
-        $headers += [
-            'X-Auth-Token' => $this->authToken,
-            'Date'         => gmdate('D, d M Y H:i:s T')
-        ];
-
-        return new Request($method, $this->buildUri($bucket, $name), $headers);
+    protected function buildRequest(
+        string $method,
+        BucketInterface $bucket,
+        string $name,
+        array $headers = []
+    ): RequestInterface {
+        //Request with added auth headers
+        return new Request(
+            $method,
+            $this->buildUri($bucket, $name),
+            $headers + [
+                'X-Auth-Token' => $this->authToken,
+                'Date'         => gmdate('D, d M Y H:i:s T')
+            ]
+        );
     }
 }

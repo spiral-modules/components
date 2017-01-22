@@ -7,91 +7,111 @@
  */
 namespace Spiral\Models\Reflections;
 
-use Spiral\Models\DataEntity;
+use Spiral\Models\Prototypes\AbstractEntity;
+use Spiral\Models\SchematicEntity;
 
 /**
- * Reflection associated with one specific DataEntity class.
+ * Provides ability to generate entity schema based on given entity class and default property
+ * values, support value inheritance!
+ *
+ * @method bool isAbstract()
+ * @method string getName()
+ * @method string getShortName()
+ * @method bool isSubclassOf($class)
+ * @method bool hasConstant($name)
+ * @method mixed getConstant($name)
+ * @method \ReflectionMethod[] getMethods()
+ * @method \ReflectionClass|null getParentClass()
  */
-abstract class ReflectionEntity extends \ReflectionClass
+class ReflectionEntity
 {
     /**
      * Required to validly merge parent and children attributes.
      */
-    const BASE_CLASS = DataEntity::class;
-
-    /**
-     * Mutator names.
-     */
-    const MUTATOR_SETTER   = 'setter';
-    const MUTATOR_GETTER   = 'getter';
-    const MUTATOR_ACCESSOR = 'accessor';
+    const BASE_CLASS = AbstractEntity::class;
 
     /**
      * Properties cache.
      *
      * @invisible
+     *
      * @var array
      */
     private $cache = [];
 
     /**
-     * @return array
+     * @var \ReflectionClass
+     */
+    private $reflection = null;
+
+    /**
+     * Only support SchematicEntity classes!
+     *
+     * @param string $class
+     */
+    public function __construct(string $class)
+    {
+        $this->reflection = new \ReflectionClass($class);
+    }
+
+    /**
+     * @return \ReflectionClass
+     */
+    public function getReflection(): \ReflectionClass
+    {
+        return $this->reflection;
+    }
+
+    /**
+     * @return array|string
      */
     public function getSecured()
     {
-        if ($this->property('secured', true) === '*') {
-            return $this->property('secured', true);
+        if ($this->getProperty('secured', true) === '*') {
+            return $this->getProperty('secured', true);
         }
 
-        return array_unique($this->property('secured', true));
+        return array_unique((array)$this->getProperty('secured', true));
     }
 
     /**
      * @return array
      */
-    public function getFillable()
+    public function getFillable(): array
     {
-        return array_unique($this->property('fillable', true));
+        return array_unique((array)$this->getProperty('fillable', true));
     }
 
     /**
      * @return array
      */
-    public function getHidden()
+    public function getHidden(): array
     {
-        return array_unique($this->property('hidden', true));
+        return array_unique((array)$this->getProperty('hidden', true));
     }
 
     /**
      * @return array
      */
-    public function getValidates()
+    public function getSetters(): array
     {
-        return $this->property('validates', true);
+        return $this->getMutators()[AbstractEntity::MUTATOR_SETTER];
     }
 
     /**
      * @return array
      */
-    public function getSetters()
+    public function getGetters(): array
     {
-        return $this->getMutators()[self::MUTATOR_SETTER];
+        return $this->getMutators()[AbstractEntity::MUTATOR_GETTER];
     }
 
     /**
      * @return array
      */
-    public function getGetters()
+    public function getAccessors(): array
     {
-        return $this->getMutators()[self::MUTATOR_GETTER];
-    }
-
-    /**
-     * @return array
-     */
-    public function getAccessors()
-    {
-        return $this->getMutators()[self::MUTATOR_ACCESSOR];
+        return $this->getMutators()[AbstractEntity::MUTATOR_ACCESSOR];
     }
 
     /**
@@ -99,7 +119,7 @@ abstract class ReflectionEntity extends \ReflectionClass
      *
      * @return \ReflectionMethod[]
      */
-    public function getLocalMethods()
+    public function declaredMethods(): array
     {
         $methods = [];
         foreach ($this->getMethods() as $method) {
@@ -114,54 +134,43 @@ abstract class ReflectionEntity extends \ReflectionClass
     }
 
     /**
-     * Fields associated with their type.
+     * Entity schema.
      *
      * @return array
      */
-    abstract public function getFields();
+    public function getSchema(): array
+    {
+        //Default property to store schema
+        return (array)$this->getProperty('schema', true);
+    }
 
     /**
      * Model mutators grouped by their type.
      *
      * @return array
      */
-    public function getMutators()
+    public function getMutators(): array
     {
         $mutators = [
-            self::MUTATOR_GETTER   => [],
-            self::MUTATOR_SETTER   => [],
-            self::MUTATOR_ACCESSOR => []
+            AbstractEntity::MUTATOR_GETTER   => [],
+            AbstractEntity::MUTATOR_SETTER   => [],
+            AbstractEntity::MUTATOR_ACCESSOR => [],
         ];
 
-        foreach ($this->property('getters', true) as $field => $filter) {
-            $mutators[self::MUTATOR_GETTER][$field] = $filter;
+        foreach ((array)$this->getProperty('getters', true) as $field => $filter) {
+            $mutators[AbstractEntity::MUTATOR_GETTER][$field] = $filter;
         }
 
-        foreach ($this->property('setters', true) as $field => $filter) {
-            $mutators[self::MUTATOR_SETTER][$field] = $filter;
+        foreach ((array)$this->getProperty('setters', true) as $field => $filter) {
+            $mutators[AbstractEntity::MUTATOR_SETTER][$field] = $filter;
         }
 
-        foreach ($this->property('accessors', true) as $field => $filter) {
-            $mutators[self::MUTATOR_ACCESSOR][$field] = $filter;
+        foreach ((array)$this->getProperty('accessors', true) as $field => $filter) {
+            $mutators[AbstractEntity::MUTATOR_ACCESSOR][$field] = $filter;
         }
 
         return $mutators;
     }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getName();
-    }
-
-    /**
-     * Must return instance of ReflectionEntity or null if no parent found.
-     *
-     * @return self|null
-     */
-    abstract protected function parentSchema();
 
     /**
      * Read default model property value, will read "protected" and "private" properties. Method
@@ -169,34 +178,94 @@ abstract class ReflectionEntity extends \ReflectionClass
      *
      * @param string $property Property name.
      * @param bool   $merge    If true value will be merged with all parent declarations.
+     *
      * @return mixed
      */
-    final protected function property($property, $merge = false)
+    public function getProperty(string $property, bool $merge = false)
     {
         if (isset($this->cache[$property])) {
             //Property merging and trait events are pretty slow
             return $this->cache[$property];
         }
 
-        $properties = $this->getDefaultProperties();
+        $properties = $this->reflection->getDefaultProperties();
+        $constants = $this->reflection->getConstants();
+
         if (isset($properties[$property])) {
+            //Read from default value
             $value = $properties[$property];
+        } elseif (isset($constants[strtoupper($property)])) {
+            //Read from a constant
+            $value = $constants[strtoupper($property)];
         } else {
             return null;
         }
 
         //Merge with parent value requested
-        if ($merge && ($this->getParentClass()->getName() != static::BASE_CLASS)) {
+        if ($merge && is_array($value) && !empty($parent = $this->parentReflection())) {
+            $parentValue = $parent->getProperty($property, $merge);
 
-            //For the reasons we can merge only arrays
-            if (is_array($value) && !empty($parent = $this->parentSchema())) {
-                $value = array_merge($parent->property($property, $merge), $value);
+            if (is_array($parentValue)) {
+                //Class values prior to parent values
+                $value = array_merge($parentValue, $value);
             }
+        }
+
+        if (!$this->reflection->isSubclassOf(SchematicEntity::class)) {
+            return $value;
         }
 
         //To let traits apply schema changes
         return $this->cache[$property] = call_user_func(
             [$this->getName(), 'describeProperty'], $this, $property, $value
         );
+    }
+
+    /**
+     * Parent entity schema/
+     *
+     * @return ReflectionEntity|null
+     */
+    public function parentReflection()
+    {
+        $parentClass = $this->reflection->getParentClass();
+
+        if (!empty($parentClass) && $parentClass->getName() != static::BASE_CLASS) {
+            $parent = clone $this;
+            $parent->reflection = $this->getParentClass();
+
+            return $parent;
+        }
+
+        return null;
+    }
+
+    /**
+     * Bypassing call to reflection.
+     *
+     * @param string $name
+     * @param array  $arguments
+     *
+     * @return mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        return call_user_func_array([$this->reflection, $name], $arguments);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getName();
+    }
+
+    /**
+     * Cloning and flushing cache.
+     */
+    public function __clone()
+    {
+        $this->cache = [];
     }
 }

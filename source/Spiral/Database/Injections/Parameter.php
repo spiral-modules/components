@@ -5,16 +5,14 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Injections;
 
-use Spiral\Database\Entities\QueryCompiler;
+namespace Spiral\Database\Injections;
 
 /**
  * Default implementation of ParameterInterface, provides ability to mock value or array of values
  * and automatically create valid query placeholder at moment of query compilation (? vs (?, ?, ?)).
  *
- * In a nearest future Parameter class will be used for every QueryBuilder parameter, it can also
- * be used to detect value type automatically.
+ * @todo implement custom sqlStatement value?
  */
 class Parameter implements ParameterInterface
 {
@@ -33,33 +31,19 @@ class Parameter implements ParameterInterface
     /**
      * Parameter type.
      *
-     * @var int|null
+     * @var int
      */
-    private $type = null;
+    private $type = \PDO::PARAM_STR;
 
     /**
      * @param mixed $value
      * @param int   $type
      */
-    public function __construct($value, $type = self::DETECT_TYPE)
+    public function __construct($value, int $type = self::DETECT_TYPE)
     {
         $this->value = $value;
 
-        if ($type == self::DETECT_TYPE && !is_array($value)) {
-            $this->type = $this->detectType($value);
-        } else {
-            $this->type = $type;
-        }
-    }
-
-    /**
-     * Change mocked parameter value.
-     *
-     * @param mixed $value
-     */
-    public function setValue($value)
-    {
-        $this->value = $value;
+        $this->resolveType($value, $type);
     }
 
     /**
@@ -71,11 +55,32 @@ class Parameter implements ParameterInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function withValue($value, int $type = self::DETECT_TYPE): Parameter
+    {
+        $parameter = clone $this;
+        $parameter->value = $value;
+
+        $parameter->resolveType($value, $type);
+
+        return $parameter;
+    }
+
+    /**
      * Parameter type.
      *
      * @return int
      */
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
@@ -83,28 +88,37 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function flatten()
+    public function isArray(): bool
     {
-        if (is_array($this->value)) {
-            $result = [];
-            foreach ($this->value as $value) {
-                if (!$value instanceof ParameterInterface) {
-                    $value = new self($value, $this->type);
-                }
-
-                $result = array_merge($result, $value->flatten());
-            }
-
-            return $result;
-        }
-
-        return [$this];
+        return is_array($this->value);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function flatten(): array
+    {
+        if (!is_array($this->value)) {
+            return [clone $this];
+        }
+
+        $result = [];
+        foreach ($this->value as $value) {
+            if (!$value instanceof ParameterInterface) {
+                //Self copy
+                $value = $this->withValue($value, self::DETECT_TYPE);
+            }
+
+            $result = array_merge($result, $value->flatten());
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function sqlStatement(): string
     {
         if (is_array($this->value)) {
             //Array were mocked
@@ -117,7 +131,7 @@ class Parameter implements ParameterInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->sqlStatement();
     }
@@ -129,18 +143,41 @@ class Parameter implements ParameterInterface
     {
         return [
             'statement' => $this->sqlStatement(),
-            'value'     => $this->value
+            'value'     => $this->value,
+            'type'      => $this->type
         ];
     }
 
-    protected function detectType($value)
+    /**
+     * @param mixed $value
+     * @param int   $type
+     */
+    protected function resolveType($value, int $type)
+    {
+        if ($type === self::DETECT_TYPE) {
+            if (!is_array($value)) {
+                $this->type = $this->detectType($value);
+            } else {
+                $this->type = \PDO::PARAM_STMT;
+            }
+        } else {
+            $this->type = $type;
+        }
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return int
+     */
+    protected function detectType($value): int
     {
         switch (gettype($value)) {
-            case "boolean":
+            case 'boolean':
                 return \PDO::PARAM_BOOL;
-            case "integer":
+            case 'integer':
                 return \PDO::PARAM_INT;
-            case "NULL":
+            case 'NULL':
                 return \PDO::PARAM_NULL;
             default:
                 return \PDO::PARAM_STR;

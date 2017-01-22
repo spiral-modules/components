@@ -5,11 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core\Traits;
 
 use Interop\Container\ContainerInterface;
 use Interop\Container\Exception\ContainerException;
-use Spiral\Core\Exceptions\SugarException;
+use Spiral\Core\Exceptions\ScopeException;
 
 /**
  * Saturate optional constructor or method argument (class) using internal (usually static)
@@ -26,8 +27,10 @@ trait SaturateTrait
      *
      * @param mixed  $default Default value.
      * @param string $class   Requested class.
+     *
      * @return mixed|null|object
-     * @throws SugarException
+     *
+     * @throws ScopeException
      */
     private function saturate($default, $class)
     {
@@ -35,13 +38,17 @@ trait SaturateTrait
             return $default;
         }
 
+        $container = $this->iocContainer();
+
+        if (empty($container)) {
+            throw new ScopeException("Unable to saturate '{$class}': no container available");
+        }
+
         //Only when global container is set
         try {
-            return $this->container()->get($class);
-        } catch (ContainerException $exception) {
-            throw new SugarException(
-                "Unable to saturate '{$class}': {$exception->getMessage()}", 0, $exception
-            );
+            return $container->get($class);
+        } catch (ContainerException $e) {
+            throw new ScopeException("Unable to saturate '{$class}': {$e->getMessage()}", 0, $e);
         }
     }
 
@@ -50,5 +57,5 @@ trait SaturateTrait
      *
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

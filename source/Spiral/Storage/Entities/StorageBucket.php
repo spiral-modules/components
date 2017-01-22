@@ -7,17 +7,16 @@
  */
 namespace Spiral\Storage\Entities;
 
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\ServerInterface;
-use Spiral\Storage\StorageInterface;
 use Spiral\Storage\StorageManager;
 
 /**
@@ -28,14 +27,10 @@ class StorageBucket extends Component implements
     LoggerAwareInterface,
     InjectableInterface
 {
-    /**
-     * Most of storage operations are pretty slow, we might record and explain all of them.
-     */
     use BenchmarkTrait, LoggerTrait;
 
     /**
-     * This is magick constant used by Spiral Constant, it helps system to resolve controllable
-     * injections, once set - Container will ask specific binding for injection.
+     * To let IoC who need to inject us.
      */
     const INJECTOR = StorageManager::class;
 
@@ -60,40 +55,24 @@ class StorageBucket extends Component implements
     private $options = [];
 
     /**
-     * @invisible
-     * @var StorageInterface
-     */
-    protected $storage = null;
-
-    /**
-     * @invisible
-     * @var FilesInterface
-     */
-    protected $files = null;
-
-    /**
      * {@inheritdoc}
      */
     public function __construct(
-        $name,
-        $prefix,
+        string $name,
+        string $prefix,
         array $options,
-        ServerInterface $server,
-        StorageInterface $storage,
-        FilesInterface $files
+        ServerInterface $server
     ) {
         $this->name = $name;
         $this->prefix = $prefix;
         $this->options = $options;
         $this->server = $server;
-        $this->storage = $storage;
-        $this->files = $files;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -101,7 +80,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function server()
+    public function getServer(): ServerInterface
     {
         return $this->server;
     }
@@ -109,7 +88,18 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function getOption($name, $default = null)
+    public function withOption(string $name, $value): BucketInterface
+    {
+        $bucket = clone $this;
+        $bucket->options[$name] = $value;
+
+        return $bucket;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getOption(string $name, $default = null)
     {
         return isset($this->options[$name]) ? $this->options[$name] : $default;
     }
@@ -118,7 +108,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->prefix;
     }
@@ -126,7 +116,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function hasAddress($address)
+    public function hasAddress(string $address)
     {
         if (strpos($address, $this->prefix) === 0) {
             return strlen($this->prefix);
@@ -138,7 +128,7 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function buildAddress($name)
+    public function buildAddress(string $name): string
     {
         return $this->prefix . $name;
     }
@@ -146,10 +136,10 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function exists($name)
+    public function exists(string $name): bool
     {
         $this->logger()->info(
-            "Check existence of '{$this->buildAddress($name)}' at '{$this->getName()}'."
+            "Check existence of '{$this->buildAddress($name)}' in '{$this->getName()}' bucket."
         );
 
         $benchmark = $this->benchmark($this->getName(), "exists::{$this->buildAddress($name)}");
@@ -163,10 +153,10 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function size($name)
+    public function size(string $name)
     {
         $this->logger()->info(
-            "Get size of '{$this->buildAddress($name)}' at '{$this->getName()}'."
+            "Get size of '{$this->buildAddress($name)}' in '{$this->getName()}' bucket."
         );
 
         $benchmark = $this->benchmark($this->getName(), "size::{$this->buildAddress($name)}");
@@ -180,10 +170,10 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function put($name, $source)
+    public function put(string $name, $source): string
     {
         $this->logger()->info(
-            "Put '{$this->buildAddress($name)}' at '{$this->getName()}' server."
+            "Put '{$this->buildAddress($name)}' in '{$this->getName()}' bucket."
         );
 
         if ($source instanceof UploadedFileInterface || $source instanceof StreamableInterface) {
@@ -200,7 +190,7 @@ class StorageBucket extends Component implements
             $this->server->put($this, $name, $source);
 
             //Reopening
-            return $this->storage->open($this->buildAddress($name));
+            return $this->buildAddress($name);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -209,10 +199,10 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function allocateFilename($name)
+    public function allocateFilename(string $name): string
     {
         $this->logger()->info(
-            "Allocate filename of '{$this->buildAddress($name)}' at '{$this->getName()}' server."
+            "Allocate filename of '{$this->buildAddress($name)}' in '{$this->getName()}' bucket."
         );
 
         $benchmark = $this->benchmark(
@@ -220,7 +210,7 @@ class StorageBucket extends Component implements
         );
 
         try {
-            return $this->server()->allocateFilename($this, $name);
+            return $this->getServer()->allocateFilename($this, $name);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -229,10 +219,10 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function allocateStream($name)
+    public function allocateStream(string $name): StreamInterface
     {
         $this->logger()->info(
-            "Get stream for '{$this->buildAddress($name)}' at '{$this->getName()}' server."
+            "Get stream for '{$this->buildAddress($name)}' in '{$this->getName()}' bucket."
         );
 
         $benchmark = $this->benchmark(
@@ -240,7 +230,7 @@ class StorageBucket extends Component implements
         );
 
         try {
-            return $this->server()->allocateStream($this, $name);
+            return $this->getServer()->allocateStream($this, $name);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -249,10 +239,10 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function delete($name)
+    public function delete(string $name)
     {
         $this->logger()->info(
-            "Delete '{$this->buildAddress($name)}' at '{$this->getName()}' server."
+            "Delete '{$this->buildAddress($name)}' in '{$this->getName()}' bucket."
         );
 
         $benchmark = $this->benchmark(
@@ -269,25 +259,25 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function rename($oldname, $newname)
+    public function rename(string $oldName, string $newName): string
     {
-        if ($oldname == $newname) {
+        if ($oldName == $newName) {
             return true;
         }
 
         $this->logger()->info(
-            "Rename '{$this->buildAddress($oldname)}' to '{$this->buildAddress($newname)}' "
-            . "at '{$this->server}' server."
+            "Rename '{$this->buildAddress($oldName)}' to '{$this->buildAddress($newName)}' "
+            . "in '{$this->getName()}' bucket."
         );
 
         $benchmark = $this->benchmark(
-            $this->getName(), "rename::{$this->buildAddress($oldname)}"
+            $this->getName(), "rename::{$this->buildAddress($oldName)}"
         );
 
         try {
-            $this->server->rename($this, $oldname, $newname);
+            $this->server->rename($this, $oldName, $newName);
 
-            return $this->buildAddress($newname);
+            return $this->buildAddress($newName);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -296,17 +286,17 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $destination, $name)
+    public function copy(BucketInterface $destination, string $name): string
     {
         if ($destination == $this) {
             return $this->buildAddress($name);
         }
 
         //Internal copying
-        if ($this->server() === $destination->server()) {
+        if ($this->getServer() === $destination->getServer()) {
             $this->logger()->info(
                 "Internal copy of '{$this->buildAddress($name)}' "
-                . "to '{$destination->buildAddress($name)}' at '{$this->getName()}' server."
+                . "to '{$destination->buildAddress($name)}' in '{$this->getName()}' bucket."
             );
 
             $benchmark = $this->benchmark(
@@ -314,7 +304,7 @@ class StorageBucket extends Component implements
             );
 
             try {
-                $this->server()->copy($this, $destination, $name);
+                $this->getServer()->copy($this, $destination, $name);
             } finally {
                 $this->benchmark($benchmark);
             }
@@ -324,7 +314,8 @@ class StorageBucket extends Component implements
                 . "to '{$destination->getName()}'.'{$destination->buildAddress($name)}'."
             );
 
-            $destination->put($name, $this->allocateStream($name));
+            $destination->put($name, $stream = $this->allocateStream($name));
+            $stream->detach();
         }
 
         return $destination->buildAddress($name);
@@ -333,17 +324,17 @@ class StorageBucket extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function replace(BucketInterface $destination, $name)
+    public function replace(BucketInterface $destination, string $name): string
     {
         if ($destination == $this) {
             return $this->buildAddress($name);
         }
 
         //Internal copying
-        if ($this->getName() == $destination->getName()) {
+        if ($this->getServer() == $destination->getServer()) {
             $this->logger()->info(
                 "Internal move '{$this->buildAddress($name)}' "
-                . "to '{$destination->buildAddress($name)}' at '{$this->getName()}' server."
+                . "to '{$destination->buildAddress($name)}' in '{$this->getName()}' bucket."
             );
 
             $benchmark = $this->benchmark(
@@ -351,7 +342,7 @@ class StorageBucket extends Component implements
             );
 
             try {
-                $this->server()->replace($this, $destination, $name);
+                $this->getServer()->replace($this, $destination, $name);
             } finally {
                 $this->benchmark($benchmark);
             }

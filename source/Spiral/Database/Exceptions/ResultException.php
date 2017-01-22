@@ -5,12 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Exceptions;
 
 /**
  * Exceptions happen inside result iterators.
  */
-class ResultException extends DatabaseException
+class ResultException extends DBALException
 {
-
 }

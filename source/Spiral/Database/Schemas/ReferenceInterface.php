@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Schemas;
 
 /**
@@ -23,40 +24,40 @@ interface ReferenceInterface
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Get column name foreign key assigned to.
      *
      * @return string
      */
-    public function getColumn();
+    public function getColumn(): string;
 
     /**
      * Foreign table name.
      *
      * @return string
      */
-    public function getForeignTable();
+    public function getForeignTable(): string;
 
     /**
      * Foreign key (column name).
      *
      * @return string
      */
-    public function getForeignKey();
+    public function getForeignKey(): string;
 
     /**
      * Get delete rule, possible values: NO ACTION, CASCADE and etc.
      *
      * @return string
      */
-    public function getDeleteRule();
+    public function getDeleteRule(): string;
 
     /**
      * Get update rule, possible values: NO ACTION, CASCADE and etc.
      *
      * @return string
      */
-    public function getUpdateRule();
+    public function getUpdateRule(): string;
 }

@@ -5,25 +5,21 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer\Reflections;
 
 use Spiral\Core\Component;
-use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Tokenizer\ReflectionFileInterface;
 use Spiral\Tokenizer\TokenizerInterface;
 
 /**
  * File reflections can fetch information about classes, interfaces, functions and traits declared
  * in file. In addition file reflection provides ability to fetch and describe every method/function
  * call.
+ *
+ * @todo rewrite using AST, facelift
  */
-class ReflectionFile extends Component implements ReflectionFileInterface
+class ReflectionFile extends Component
 {
-    /**
-     * Development sugar.
-     */
-    use SaturateTrait;
-
     /**
      * Namespace separator.
      */
@@ -53,7 +49,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @var array
      */
-    static private $processTokens = [
+    private static $processTokens = [
         '{',
         '}',
         ';',
@@ -70,7 +66,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         T_REQUIRE,
         T_REQUIRE_ONCE,
         T_USE,
-        T_AS
+        T_AS,
     ];
 
     /**
@@ -82,6 +78,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Parsed tokens array.
      *
      * @invisible
+     *
      * @var array
      */
     private $tokens = [];
@@ -90,6 +87,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Total tokens count.
      *
      * @invisible
+     *
      * @var int
      */
     private $countTokens = 0;
@@ -98,6 +96,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Indicator that file has external includes.
      *
      * @invisible
+     *
      * @var bool
      */
     private $hasIncludes = false;
@@ -106,6 +105,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Namespaces used in file and their token positions.
      *
      * @invisible
+     *
      * @var array
      */
     private $namespaces = [];
@@ -114,6 +114,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Declarations of classes, interfaces and traits.
      *
      * @invisible
+     *
      * @var array
      */
     private $declarations = [];
@@ -122,6 +123,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Declarations of new functions.
      *
      * @invisible
+     *
      * @var array
      */
     private $functions = [];
@@ -130,18 +132,22 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Every found method/function invocation.
      *
      * @invisible
+     *
      * @var ReflectionInvocation[]
      */
     private $invocations = [];
 
     /**
-     * @param array $tokens
-     * @param array $cache Tokenizer can construct reflection with pre-created cache to speed up
-     *                     indexation.
+     * @param string $filename
+     * @param array  $tokens
+     * @param array  $cache Tokenizer can construct reflection with pre-created cache to speed up
+     *                      indexation.
      */
-    public function __construct(array $tokens, array $cache = [])
+    public function __construct(string $filename, array $tokens, array $cache = [])
     {
+        $this->filename = $filename;
         $this->tokens = $tokens;
+        $this->countTokens = count($tokens);
 
         if (!empty($cache)) {
             //Locating file schema from file, can speed up class location a LOT
@@ -155,17 +161,21 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared function names
+     *
+     * @return array
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return array_keys($this->functions);
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared class names
+     *
+     * @return array
      */
-    public function getClasses()
+    public function getClasses(): array
     {
         if (!isset($this->declarations['T_CLASS'])) {
             return [];
@@ -175,9 +185,11 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared trait names
+     *
+     * @return array
      */
-    public function getTraits()
+    public function getTraits(): array
     {
         if (!isset($this->declarations['T_TRAIT'])) {
             return [];
@@ -187,9 +199,11 @@ class ReflectionFile extends Component implements ReflectionFileInterface
     }
 
     /**
-     * {@inheritdoc}
+     * List of declared interface names
+     *
+     * @return array
      */
-    public function getInterfaces()
+    public function getInterfaces(): array
     {
         if (!isset($this->declarations['T_INTERFACE'])) {
             return [];
@@ -203,23 +217,28 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @return array
      */
-    public function getTokens()
+    public function getTokens(): array
     {
         return $this->tokens;
     }
 
     /**
-     * {@inheritdoc}
+     * Indication that file contains require/include statements
+     *
+     * @return bool
      */
-    public function hasIncludes()
+    public function hasIncludes(): bool
     {
         return $this->hasIncludes;
     }
 
     /**
-     * {@inheritdoc}
+     * Locate and return list of every method or function call in specified file. Only static and
+     * $this calls will be indexed
+     *
+     * @return ReflectionInvocation[]
      */
-    public function getInvocations()
+    public function getInvocations(): array
     {
         if (empty($this->invocations)) {
             $this->locateInvocations($this->getTokens());
@@ -233,7 +252,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @return array
      */
-    public function exportSchema()
+    public function exportSchema(): array
     {
         return [$this->hasIncludes, $this->declarations, $this->functions, $this->namespaces];
     }
@@ -272,7 +291,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
                     break;
 
                 case T_CLASS:
-                case T_TRAIT;
+                case T_TRAIT:
                 case T_INTERFACE:
                     if (
                         $this->tokens[$tokenID][self::TOKEN_TYPE] == T_CLASS
@@ -306,7 +325,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @param int $tokenID
      */
-    private function registerNamespace($tokenID)
+    private function registerNamespace(int $tokenID)
     {
         $namespace = '';
         $localID = $tokenID + 1;
@@ -341,7 +360,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         $this->namespaces[$namespace] = [
             self::O_TOKEN => $tokenID,
             self::C_TOKEN => $endingID,
-            self::N_USES  => $uses
+            self::N_USES  => $uses,
         ];
     }
 
@@ -350,13 +369,13 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @param int $tokenID
      */
-    private function registerUse($tokenID)
+    private function registerUse(int $tokenID)
     {
         $namespace = rtrim($this->activeNamespace($tokenID), '\\');
 
         $class = '';
         $localAlias = null;
-        for ($localID = $tokenID + 1; $this->tokens[$localID][self::TOKEN_CODE] != ';'; $localID++) {
+        for ($localID = $tokenID + 1; $this->tokens[$localID][self::TOKEN_CODE] != ';'; ++$localID) {
             if ($this->tokens[$localID][self::TOKEN_TYPE] == T_AS) {
                 $localAlias = '';
                 continue;
@@ -382,7 +401,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @param int $tokenID
      */
-    private function registerFunction($tokenID)
+    private function registerFunction(int $tokenID)
     {
         foreach ($this->declarations as $declarations) {
             foreach ($declarations as $location) {
@@ -396,7 +415,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         $localID = $tokenID + 1;
         while ($this->tokens[$localID][self::TOKEN_TYPE] != T_STRING) {
             //Fetching function name
-            $localID++;
+            ++$localID;
         }
 
         $name = $this->tokens[$localID][self::TOKEN_CODE];
@@ -406,7 +425,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
 
         $this->functions[$name] = [
             self::O_TOKEN => $tokenID,
-            self::C_TOKEN => $this->endingToken($tokenID)
+            self::C_TOKEN => $this->endingToken($tokenID),
         ];
     }
 
@@ -417,11 +436,11 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * @param int $tokenID
      * @param int $tokenType
      */
-    private function registerDeclaration($tokenID, $tokenType)
+    private function registerDeclaration(int $tokenID, int $tokenType)
     {
         $localID = $tokenID + 1;
         while ($this->tokens[$localID][self::TOKEN_TYPE] != T_STRING) {
-            $localID++;
+            ++$localID;
         }
 
         $name = $this->tokens[$localID][self::TOKEN_CODE];
@@ -431,17 +450,19 @@ class ReflectionFile extends Component implements ReflectionFileInterface
 
         $this->declarations[token_name($tokenType)][$name] = [
             self::O_TOKEN => $tokenID,
-            self::C_TOKEN => $this->endingToken($tokenID)
+            self::C_TOKEN => $this->endingToken($tokenID),
         ];
     }
 
     /**
      * Locate every function or static method call (including $this calls).
      *
+     * This is pretty old code, potentially to be improved using AST.
+     *
      * @param array $tokens
      * @param int   $invocationLevel
      */
-    private function locateInvocations(array $tokens, $invocationLevel = 0)
+    private function locateInvocations(array $tokens, int $invocationLevel = 0)
     {
         //Multiple "(" and ")" statements nested.
         $level = 0;
@@ -462,7 +483,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
             $tokenType = $token[self::TOKEN_TYPE];
 
             //We are not indexing function declarations or functions called from $objects.
-            if ($tokenType == T_FUNCTION || $tokenType == T_OBJECT_OPERATOR || $tokenType == T_NEW) {
+            if (in_array($tokenType, [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW])) {
                 if (
                     empty($argumentsTID)
                     && (
@@ -488,7 +509,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
                     $argumentsTID = $tokenID;
                 }
 
-                $level++;
+                ++$level;
                 if ($level != 1) {
                     //Not arguments beginning, but arguments part
                     $arguments[$tokenID] = $token;
@@ -499,7 +520,8 @@ class ReflectionFile extends Component implements ReflectionFileInterface
 
             //We are inside function arguments and ")" met.
             if (!empty($invocationTID) && ($tokenType == ')' || $tokenType == ']')) {
-                $level--;
+
+                --$level;
                 if ($level == -1) {
                     $invocationTID = false;
                     $level = 0;
@@ -568,16 +590,17 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * @param int   $invocationLevel
      */
     private function registerInvocation(
-        $invocationID,
-        $argumentsID,
-        $endID,
+        int $invocationID,
+        int $argumentsID,
+        int $endID,
         array $arguments,
-        $invocationLevel
+        int $invocationLevel
     ) {
         //Nested invocations
         $this->locateInvocations($arguments, $invocationLevel + 1);
 
         list($class, $operator, $name) = $this->fetchContext($invocationID, $argumentsID);
+
         if (!empty($operator) && empty($class)) {
             //Non detectable
             return;
@@ -600,9 +623,10 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @param int $invocationTID
      * @param int $argumentsTID
+     *
      * @return array
      */
-    private function fetchContext($invocationTID, $argumentsTID)
+    private function fetchContext(int $invocationTID, int $argumentsTID): array
     {
         $class = $operator = '';
         $name = trim($this->getSource($invocationTID, $argumentsTID), '( ');
@@ -630,9 +654,10 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Get declaration which is active in given token position.
      *
      * @param int $tokenID
+     *
      * @return string|null
      */
-    private function activeDeclaration($tokenID)
+    private function activeDeclaration(int $tokenID): string
     {
         foreach ($this->declarations as $declarations) {
             foreach ($declarations as $name => $position) {
@@ -643,16 +668,17 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         }
 
         //Can not be detected
-        return null;
+        return '';
     }
 
     /**
      * Get namespace name active at specified token position.
      *
      * @param int $tokenID
+     *
      * @return string
      */
-    private function activeNamespace($tokenID)
+    private function activeNamespace(int $tokenID): string
     {
         foreach ($this->namespaces as $namespace => $position) {
             if ($tokenID >= $position[self::O_TOKEN] && $tokenID <= $position[self::C_TOKEN]) {
@@ -664,7 +690,7 @@ class ReflectionFile extends Component implements ReflectionFileInterface
         $this->namespaces[''] = [
             self::O_TOKEN => 0,
             self::C_TOKEN => count($this->tokens),
-            self::N_USES  => []
+            self::N_USES  => [],
         ];
 
         return '';
@@ -674,20 +700,21 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Find token ID of ending brace.
      *
      * @param int $tokenID
-     * @return mixed
+     *
+     * @return int
      */
-    private function endingToken($tokenID)
+    private function endingToken(int $tokenID): int
     {
         $level = null;
-        for ($localID = $tokenID; $localID < $this->countTokens; $localID++) {
+        for ($localID = $tokenID; $localID < $this->countTokens; ++$localID) {
             $token = $this->tokens[$localID];
             if ($token[self::TOKEN_CODE] == '{') {
-                $level++;
+                ++$level;
                 continue;
             }
 
             if ($token[self::TOKEN_CODE] == '}') {
-                $level--;
+                --$level;
             }
 
             if ($level === 0) {
@@ -702,12 +729,13 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      * Get line number associated with token.
      *
      * @param int $tokenID
+     *
      * @return int
      */
-    private function lineNumber($tokenID)
+    private function lineNumber(int $tokenID): int
     {
         while (empty($this->tokens[$tokenID][self::TOKEN_LINE])) {
-            $tokenID--;
+            --$tokenID;
         }
 
         return $this->tokens[$tokenID][self::TOKEN_LINE];
@@ -718,12 +746,13 @@ class ReflectionFile extends Component implements ReflectionFileInterface
      *
      * @param int $startID
      * @param int $endID
+     *
      * @return string
      */
-    private function getSource($startID, $endID)
+    private function getSource(int $startID, int $endID): string
     {
         $result = '';
-        for ($tokenID = $startID; $tokenID <= $endID; $tokenID++) {
+        for ($tokenID = $startID; $tokenID <= $endID; ++$tokenID) {
             //Collecting function usage source
             $result .= $this->tokens[$tokenID][self::TOKEN_CODE];
         }

@@ -1,374 +1,291 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ODM;
 
+use Interop\Container\ContainerInterface;
+use MongoDB\BSON\ObjectID;
+use MongoDB\Collection;
 use Spiral\Core\Component;
-use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\Container;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
-use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Models\DataEntity;
-use Spiral\Models\SchematicEntity;
-use Spiral\ODM\Configs\ODMConfig;
+use Spiral\Core\MemoryInterface;
+use Spiral\Core\NullMemory;
 use Spiral\ODM\Entities\DocumentSelector;
 use Spiral\ODM\Entities\DocumentSource;
-use Spiral\ODM\Entities\MongoDatabase;
-use Spiral\ODM\Entities\SchemaBuilder;
-use Spiral\ODM\Exceptions\DefinitionException;
 use Spiral\ODM\Exceptions\ODMException;
-use Spiral\Tokenizer\ClassLocatorInterface;
+use Spiral\ODM\Exceptions\SchemaException;
+use Spiral\ODM\Schemas\LocatorInterface;
+use Spiral\ODM\Schemas\NullLocator;
+use Spiral\ODM\Schemas\SchemaBuilder;
 
 /**
- * ODM component used to manage state of cached Document's schema, document creation and schema
- * analysis.
+ * Provides supporting functionality for ODM classes such as selectors, instantiators and schema
+ * builders.
+ *
+ * @todo add ODM strict mode which must thrown an exception in AbstractArray and DocumentCompositor
+ * @todo when multiple atomic operations applied to a field instead of forcing $set command.
  */
-class ODM extends Component implements SingletonInterface, InjectorInterface
+class ODM extends Component implements ODMInterface, SingletonInterface
 {
-    /**
-     * Has it's own configuration, in addition MongoDatabase creation can take some time.
-     */
-    use BenchmarkTrait;
-
     /**
      * Memory section to store ODM schema.
      */
     const MEMORY = 'odm.schema';
 
     /**
-     * Class definition options.
-     */
-    const DEFINITION         = 0;
-    const DEFINITION_OPTIONS = 1;
-
-    /**
-     * Normalized document constants.
-     */
-    const D_DEFINITION   = self::DEFINITION;
-    const D_COLLECTION   = 1;
-    const D_DB           = 2;
-    const D_SOURCE       = 3;
-    const D_HIDDEN       = SchematicEntity::SH_HIDDEN;
-    const D_SECURED      = SchematicEntity::SH_SECURED;
-    const D_FILLABLE     = SchematicEntity::SH_FILLABLE;
-    const D_MUTATORS     = SchematicEntity::SH_MUTATORS;
-    const D_VALIDATES    = SchematicEntity::SH_VALIDATES;
-    const D_DEFAULTS     = 9;
-    const D_AGGREGATIONS = 10;
-    const D_COMPOSITIONS = 11;
-
-    /**
-     * Normalized aggregation constants.
-     */
-    const AGR_TYPE  = 1;
-    const ARG_CLASS = 2;
-    const AGR_QUERY = 3;
-
-    /**
-     * Normalized composition constants.
-     */
-    const CMP_TYPE  = 0;
-    const CMP_CLASS = 1;
-    const CMP_ONE   = 0x111;
-    const CMP_MANY  = 0x222;
-    const CMP_HASH  = 0x333;
-
-    /**
-     * @var ODMConfig
-     */
-    protected $config = null;
-
-    /**
-     * Cached documents and collections schema.
+     * Already created instantiators.
      *
-     * @var array|null
+     * @invisible
+     * @var InstantiatorInterface[]
      */
-    protected $schema = null;
+    private $instantiators = [];
 
     /**
-     * Mongo databases instances.
+     * ODM schema.
      *
-     * @var MongoDatabase[]
+     * @invisible
+     * @var array
      */
-    protected $databases = [];
+    private $schema = [];
+
+    /**
+     * @var MongoManager
+     */
+    protected $manager;
+
+    /**
+     * @var LocatorInterface
+     */
+    protected $locator;
 
     /**
      * @invisible
-     * @var HippocampusInterface
+     * @var MemoryInterface
      */
-    protected $memory = null;
+    protected $memory;
 
     /**
-     * @invisible
-     * @var FactoryInterface
+     * Container defines working scope for all Documents and DocumentEntities.
+     *
+     * @var ContainerInterface
      */
-    protected $factory = null;
+    protected $container;
 
     /**
-     * @param ODMConfig            $config
-     * @param HippocampusInterface $memory
-     * @param FactoryInterface     $factory
+     * @param MongoManager       $manager
+     * @param LocatorInterface   $locator
+     * @param MemoryInterface    $memory
+     * @param ContainerInterface $container
      */
     public function __construct(
-        ODMConfig $config,
-        HippocampusInterface $memory,
-        FactoryInterface $factory
+        MongoManager $manager,
+        LocatorInterface $locator = null,
+        MemoryInterface $memory = null,
+        ContainerInterface $container = null
     ) {
-        $this->config = $config;
-        $this->memory = $memory;
+        $this->manager = $manager;
 
-        //Loading schema from memory
-        $this->schema = (array)$memory->loadData(static::MEMORY);
-        $this->factory = $factory;
+        $this->locator = $locator ?? new NullLocator();
+        $this->memory = $memory ?? new NullMemory();
+        $this->container = $container ?? new Container();
+
+        //Loading schema from memory (if any)
+        $this->schema = $this->loadSchema();
     }
 
     /**
-     * Create specified or select default instance of MongoDatabase.
+     * Create instance of ORM SchemaBuilder.
      *
-     * @param string $database Database name (internal).
-     * @return MongoDatabase
-     * @throws ODMException
-     */
-    public function database($database = null)
-    {
-        if (empty($database)) {
-            $database = $this->config->defaultDatabase();
-        }
-
-        //Spiral support ability to link multiple virtual databases together using aliases
-        $database = $this->config->resolveAlias($database);
-
-        if (isset($this->databases[$database])) {
-            return $this->databases[$database];
-        }
-
-        if (!$this->config->hasDatabase($database)) {
-            throw new ODMException(
-                "Unable to initiate mongo database, no presets for '{$database}' found."
-            );
-        }
-
-        $benchmark = $this->benchmark('database', $database);
-        try {
-            $this->databases[$database] = $this->factory->make(MongoDatabase::class, [
-                'name'   => $database,
-                'config' => $this->config->databaseConfig($database),
-                'odm'    => $this
-            ]);
-        } finally {
-            $this->benchmark($benchmark);
-        }
-
-        return $this->databases[$database];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function createInjection(\ReflectionClass $class, $context = null)
-    {
-        return $this->database($context);
-    }
-
-    /**
-     * Create instance of document by given class name and set of fields, ODM component must
-     * automatically find appropriate class to be used as ODM support model inheritance.
+     * @param bool $locate Set to true to automatically locate available documents and document
+     *                     sources in a project files (based on tokenizer scope).
      *
-     * @todo hydrate external class type!
-     * @param string                $class
-     * @param array                 $fields
-     * @param CompositableInterface $parent
-     * @return Document
-     * @throws DefinitionException
-     */
-    public function document($class, $fields, CompositableInterface $parent = null)
-    {
-        $class = $this->defineClass($class, $fields, $schema);
-
-        return new $class($fields, $parent, $this, $schema);
-    }
-
-    /**
-     * Get instance of ODM source associated with given model class.
-     *
-     * @param string $class
-     * @return DocumentSource
-     */
-    public function source($class)
-    {
-        $schema = $this->schema($class);
-        if (empty($source = $schema[self::D_SOURCE])) {
-            $source = DocumentSource::class;
-        }
-
-        return new $source($class, $this);
-    }
-
-    /**
-     * Mongo collection associated with given model class.
-     *
-     * @param string $class
-     * @return \MongoCollection
-     */
-    public function mongoCollection($class)
-    {
-        $schema = $this->schema($class);
-
-        return $this->database($schema[ODM::D_DB])->selectCollection($schema[ODM::D_COLLECTION]);
-    }
-
-    /**
-     * Get instance of ODM Selector associated with given class.
-     *
-     * @param       $class
-     * @param array $query
-     * @return DocumentSelector
-     */
-    public function selector($class, array $query = [])
-    {
-        $schema = $this->schema($class);
-
-        return new DocumentSelector($this, $schema[ODM::D_DB], $schema[ODM::D_COLLECTION], $query);
-    }
-
-    /**
-     * Define document class using it's fieldset and definition.
-     *
-     * @see Document::DEFINITION
-     * @param string $class
-     * @param array  $fields
-     * @param array  $schema Found class schema, reference.
-     * @return string
-     * @throws DefinitionException
-     */
-    public function defineClass($class, $fields, &$schema = [])
-    {
-        $schema = $this->schema($class);
-
-        $definition = $schema[self::D_DEFINITION];
-        if (is_string($definition)) {
-            //Document has no variations
-            return $definition;
-        }
-
-        if (!is_array($fields)) {
-            //Unable to resolve
-            return $class;
-        }
-
-        $defined = $class;
-        if ($definition[self::DEFINITION] == DocumentEntity::DEFINITION_LOGICAL) {
-
-            //Resolve using logic function
-            $defined = call_user_func($definition[self::DEFINITION_OPTIONS], $fields, $this);
-
-            if (empty($defined)) {
-                throw new DefinitionException(
-                    "Unable to resolve (logical definition) valid class for document '{$class}'."
-                );
-            }
-        } elseif ($definition[self::DEFINITION] == DocumentEntity::DEFINITION_FIELDS) {
-            foreach ($definition[self::DEFINITION_OPTIONS] as $field => $child) {
-                if (array_key_exists($field, $fields)) {
-                    //Apparently this is child
-                    $defined = $child;
-                    break;
-                }
-            }
-        }
-
-        //Child may change definition method or declare it's own children
-        return $defined == $class ? $class : $this->defineClass($defined, $fields, $schema);
-    }
-
-    /**
-     * Get cached schema data by it's item name (document name, collection name).
-     *
-     * @param string $item
-     * @return array|string
-     * @throws ODMException
-     */
-    public function schema($item)
-    {
-        if (!isset($this->schema[$item])) {
-            $this->updateSchema();
-        }
-
-        if (!isset($this->schema[$item])) {
-            throw new ODMException("Undefined ODM schema item '{$item}'.");
-        }
-
-        return $this->schema[$item];
-    }
-
-    /**
-     * Get primary document class to be associated with collection. Attention, collection may return
-     * parent document instance even if query was made using children implementation.
-     *
-     * @param string $database
-     * @param string $collection
-     * @return string
-     */
-    public function primaryDocument($database, $collection)
-    {
-        return $this->schema($database . '/' . $collection);
-    }
-
-    /**
-     * Update ODM documents schema and return instance of SchemaBuilder.
-     *
-     * @param SchemaBuilder $builder User specified schema builder.
-     * @param bool          $createIndexes
      * @return SchemaBuilder
+     *
+     * @throws SchemaException
      */
-    public function updateSchema(SchemaBuilder $builder = null, $createIndexes = false)
+    public function schemaBuilder(bool $locate = true): SchemaBuilder
     {
-        if (empty($builder)) {
-            $builder = $this->schemaBuilder();
+        /**
+         * @var SchemaBuilder $builder
+         */
+        $builder = $this->getFactory()->make(SchemaBuilder::class, ['manager' => $this->manager]);
+
+        if ($locate) {
+            foreach ($this->locator->locateSchemas() as $schema) {
+                $builder->addSchema($schema);
+            }
+
+            foreach ($this->locator->locateSources() as $class => $source) {
+                $builder->addSource($class, $source);
+            }
         }
-
-        //We will create all required indexes now
-        if ($createIndexes) {
-            $builder->createIndexes();
-        }
-
-        //Getting cached/normalized schema
-        $this->schema = $builder->normalizeSchema();
-
-        //Saving
-        $this->memory->saveData(static::MEMORY, $this->schema);
-
-        //Let's reinitialize models
-        DataEntity::resetInitiated();
 
         return $builder;
     }
 
     /**
-     * Get instance of ODM SchemaBuilder.
+     * Specify behaviour schema for ODM to be used.
      *
-     * @param ClassLocatorInterface $locator
-     * @return SchemaBuilder
+     * @param SchemaBuilder $builder
+     * @param bool          $remember Set to true to remember packed schema in memory.
      */
-    public function schemaBuilder(ClassLocatorInterface $locator = null)
+    public function buildSchema(SchemaBuilder $builder, bool $remember = false)
     {
-        return $this->factory->make(SchemaBuilder::class, [
-            'odm'     => $this,
-            'config'  => $this->config['schemas'],
-            'locator' => $locator
+        $this->schema = $builder->packSchema();
+
+        if ($remember) {
+            $this->memory->saveData(static::MEMORY, $this->schema);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function define(string $class, int $property)
+    {
+        if (empty($this->schema)) {
+            //Update and remember
+            $this->buildSchema($this->schemaBuilder(), true);
+        }
+
+        //Check value
+        if (!isset($this->schema[$class])) {
+            throw new ODMException("Undefined ODM schema item '{$class}', make sure schema is updated");
+        }
+
+        if (!array_key_exists($property, $this->schema[$class])) {
+            throw new ODMException("Undefined ODM schema property '{$class}'.'{$property}'");
+        }
+
+        return $this->schema[$class][$property];
+    }
+
+    /**
+     * Get source (selection repository) for specific entity class.
+     *
+     * @param string $class
+     *
+     * @return DocumentSource
+     */
+    public function source(string $class): DocumentSource
+    {
+        $source = $this->define($class, self::D_SOURCE_CLASS);
+
+        if (empty($source)) {
+            //Let's use default source
+            $source = DocumentSource::class;
+        }
+
+        $handles = $source::DOCUMENT;
+        if (empty($handles)) {
+            //All sources are linked to primary class (i.e. Admin source => User class), unless specified
+            //in source directly
+            $handles = $class;
+        }
+
+        return $this->getFactory()->make($source, [
+            'class' => $handles,
+            'odm'   => $this
         ]);
     }
 
     /**
-     * Create valid MongoId object based on string or id provided from client side.
+     * {@inheritdoc}
+     */
+    public function selector(string $class): DocumentSelector
+    {
+        return new DocumentSelector(
+            $this->collection($class),
+            $this->define($class, self::D_PRIMARY_CLASS),
+            $this
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function collection(string $class): Collection
+    {
+        return $this->manager->database(
+            $this->define($class, self::D_DATABASE)
+        )->selectCollection(
+            $this->define($class, self::D_COLLECTION)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function make(
+        string $class,
+        $fields = [],
+        bool $filter = false
+    ): CompositableInterface {
+        return $this->instantiator($class)->make($fields, $filter);
+    }
+
+    /**
+     * Get object responsible for class instantiation.
+     *
+     * @param string $class
+     *
+     * @return InstantiatorInterface
+     */
+    protected function instantiator(string $class): InstantiatorInterface
+    {
+        if (isset($this->instantiators[$class])) {
+            return $this->instantiators[$class];
+        }
+
+        //Potential optimization
+        $instantiator = $this->getFactory()->make(
+            $this->define($class, self::D_INSTANTIATOR),
+            [
+                'class'  => $class,
+                'odm'    => $this,
+                'schema' => $this->define($class, self::D_SCHEMA)
+            ]
+        );
+
+        //Constructing instantiator and storing it in cache
+        return $this->instantiators[$class] = $instantiator;
+    }
+
+    /**
+     * Load packed schema from memory.
+     *
+     * @return array
+     */
+    protected function loadSchema(): array
+    {
+        return (array)$this->memory->loadData(static::MEMORY);
+    }
+
+    /**
+     * Get ODM specific factory.
+     *
+     * @return FactoryInterface
+     */
+    protected function getFactory(): FactoryInterface
+    {
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
+        }
+
+        return $this->container->get(FactoryInterface::class);
+    }
+
+    /**
+     * Create valid MongoId (ObjectID now) object based on string or id provided from client side.
      *
      * @param mixed $mongoID String or MongoId object.
-     * @return \MongoId|null
+     *
+     * @return ObjectID|null
      */
     public static function mongoID($mongoID)
     {
@@ -383,8 +300,8 @@ class ODM extends Component implements SingletonInterface, InjectorInterface
             }
 
             try {
-                $mongoID = new \MongoId($mongoID);
-            } catch (\Exception $exception) {
+                $mongoID = new ObjectID($mongoID);
+            } catch (\Exception $e) {
                 return null;
             }
         }

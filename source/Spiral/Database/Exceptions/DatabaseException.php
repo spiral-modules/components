@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
+namespace Spiral\Database\Exceptions;
 
 /**
  * Generic database exception.
  */
-class DatabaseException extends LogicException
+class DatabaseException extends DBALException
 {
-
 }

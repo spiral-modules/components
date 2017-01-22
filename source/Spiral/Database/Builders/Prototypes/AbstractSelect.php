@@ -5,30 +5,28 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders\Prototypes;
 
-use Spiral\Cache\StoreInterface;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Builders\Traits\JoinsTrait;
-use Spiral\Database\Entities\QueryBuilder;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
-use Spiral\Database\Exceptions\QueryException;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Query\QueryResult;
-use Spiral\Pagination\PaginableInterface;
 use Spiral\Pagination\PaginatorAwareInterface;
+use Spiral\Pagination\Traits\LimitsTrait;
 use Spiral\Pagination\Traits\PaginatorTrait;
 
 /**
  * Prototype for select queries, include ability to cache, paginate or chunk results. Support WHERE,
  * JOIN, HAVING, ORDER BY, GROUP BY, UNION and DISTINCT statements. In addition only desired set
- * of columns can be selected. In addition select
+ * of columns can be selected. In addition select.
  *
  * @see AbstractWhere
+ *
  * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
  * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
  * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
@@ -36,14 +34,14 @@ use Spiral\Pagination\Traits\PaginatorTrait;
  */
 abstract class AbstractSelect extends AbstractWhere implements
     \IteratorAggregate,
-    PaginableInterface,
-    PaginatorAwareInterface,
-    \JsonSerializable
+    PaginatorAwareInterface
 {
+    use JoinsTrait, LimitsTrait, PaginatorTrait;
+
     /**
-     * Abstract select query must fully support joins and be paginable.
+     * Query type.
      */
-    use JoinsTrait, PaginatorTrait;
+    const QUERY_TYPE = QueryCompiler::SELECT_QUERY;
 
     /**
      * Sort directions.
@@ -69,6 +67,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Set of generated having tokens, format must be supported by QueryCompilers.
      *
      * @see AbstractWhere
+     *
      * @var array
      */
     protected $havingTokens = [];
@@ -78,6 +77,7 @@ abstract class AbstractSelect extends AbstractWhere implements
      * in resulted query.
      *
      * @see AbstractWhere
+     *
      * @var array
      */
     protected $havingParameters = [];
@@ -97,53 +97,25 @@ abstract class AbstractSelect extends AbstractWhere implements
     protected $grouping = [];
 
     /**
-     * Associated cache store.
-     *
-     * @var StoreInterface
-     */
-    protected $cacheStore = null;
-
-    /**
-     * Cache lifetime in seconds.
-     *
-     * @var int
-     */
-    protected $cacheLifetime = 0;
-
-    /**
-     * User specified cache key (optional).
-     *
-     * @var string
-     */
-    protected $cacheKey = '';
-
-    /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(): array
     {
-        if (empty($compiler)) {
-            //Using associated compiler
-            $compiler = $this->compiler;
-        }
-
-        return $this->flattenParameters(
-            $compiler->orderParameters(
-                QueryCompiler::SELECT_QUERY,
-                $this->whereParameters,
-                $this->onParameters,
-                $this->havingParameters
-            )
-        );
+        return $this->flattenParameters(array_merge(
+            $this->onParameters,
+            $this->whereParameters,
+            $this->havingParameters
+        ));
     }
 
     /**
      * Mark query to return only distinct results.
      *
      * @param bool|string $distinct You are only allowed to use string value for Postgres databases.
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function distinct($distinct = true)
+    public function distinct($distinct = true): AbstractSelect
     {
         $this->distinct = $distinct;
 
@@ -154,16 +126,16 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Simple HAVING condition with various set of arguments.
      *
      * @see AbstractWhere
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
-     * @return $this
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
+     * @return self|$this
+     *
      * @throws BuilderException
      */
-    public function having($identifier, $variousA = null, $variousB = null, $variousC = null)
+    public function having(...$args): AbstractSelect
     {
-        $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
+        $this->whereToken('AND', $args, $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }
@@ -172,16 +144,16 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Simple AND HAVING condition with various set of arguments.
      *
      * @see AbstractWhere
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
-     * @return $this
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
+     * @return self|$this
+     *
      * @throws BuilderException
      */
-    public function andHaving($identifier, $variousA = null, $variousB = null, $variousC = null)
+    public function andHaving(...$args): AbstractSelect
     {
-        $this->whereToken('AND', func_get_args(), $this->havingTokens, $this->havingWrapper());
+        $this->whereToken('AND', $args, $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }
@@ -190,23 +162,23 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Simple OR HAVING condition with various set of arguments.
      *
      * @see AbstractWhere
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
-     * @return $this
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
+     * @return self|$this
+     *
      * @throws BuilderException
      */
-    public function orHaving($identifier, $variousA = [], $variousB = null, $variousC = null)
+    public function orHaving(...$args): AbstractSelect
     {
-        $this->whereToken('OR', func_get_args(), $this->havingTokens, $this->havingWrapper());
+        $this->whereToken('OR', $args, $this->havingTokens, $this->havingWrapper());
 
         return $this;
     }
 
     /**
      * Sort result by column/expression. You can apply multiple sortings to query via calling method
-     * few times or by specifying values using array of sort parameters:
+     * few times or by specifying values using array of sort parameters.
      *
      * $select->orderBy([
      *      'id'   => SelectQuery::SORT_DESC,
@@ -215,9 +187,10 @@ abstract class AbstractSelect extends AbstractWhere implements
      *
      * @param string|array $expression
      * @param string       $direction Sorting direction, ASC|DESC.
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function orderBy($expression, $direction = self::SORT_ASC)
+    public function orderBy($expression, $direction = self::SORT_ASC): AbstractSelect
     {
         if (!is_array($expression)) {
             $this->ordering[] = [$expression, $direction];
@@ -236,181 +209,14 @@ abstract class AbstractSelect extends AbstractWhere implements
      * Column or expression to group query by.
      *
      * @param string $expression
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function groupBy($expression)
+    public function groupBy($expression): AbstractSelect
     {
         $this->grouping[] = $expression;
 
         return $this;
-    }
-
-    /**
-     * Mark selection as cached one, result will be passed thought database->cached() method and
-     * will be stored in cache storage for specified amount of seconds.
-     *
-     * @see Database::cached()
-     * @param int            $lifetime Cache lifetime in seconds.
-     * @param string         $key      Optional, Database will generate key based on query.
-     * @param StoreInterface $store    Optional, Database will resolve cache store using container.
-     * @return $this
-     */
-    public function cache($lifetime, $key = '', StoreInterface $store = null)
-    {
-        $this->cacheLifetime = $lifetime;
-        $this->cacheKey = $key;
-        $this->cacheStore = $store;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param bool $paginate Apply pagination to result, can be disabled in honor of count method.
-     * @return QueryResult|CachedResult
-     */
-    public function run($paginate = true)
-    {
-        $backup = [$this->limit, $this->offset];
-
-        if ($paginate) {
-            $this->applyPagination();
-        } else {
-            //We have to flush limit and offset values when pagination is not required.
-            $this->limit = $this->offset = 0;
-        }
-
-        if (empty($this->cacheLifetime)) {
-            $result = $this->database->query(
-                $this->sqlStatement(),
-                $this->getParameters()
-            );
-        } else {
-            $result = $this->database->cached(
-                $this->cacheLifetime,
-                $this->sqlStatement(),
-                $this->getParameters(),
-                $this->cacheKey,
-                $this->cacheStore
-            );
-        }
-
-        //Restoring limit and offset values
-        list($this->limit, $this->offset) = $backup;
-
-        return $result;
-    }
-
-    /**
-     * Iterate thought result using smaller data chinks with defined size and walk function.
-     *
-     * Example:
-     * $select->chunked(100, function(QueryResult $result, $offset, $count) {
-     *      dump($result);
-     * });
-     *
-     * You must return FALSE from walk function to stop chunking.
-     *
-     * @param int      $limit
-     * @param callable $callback
-     */
-    public function chunked($limit, callable $callback)
-    {
-        $count = $this->count();
-
-        $this->limit($limit);
-        $offset = 0;
-
-        while ($offset + $limit <= $count) {
-            $result = call_user_func_array($callback, [
-                $this->offset($offset)->getIterator(),
-                $offset,
-                $count
-            ]);
-
-            if ($result === false) {
-                //Stop iteration
-                return;
-            }
-
-            $offset += $limit;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Count number of rows in query. Limit, offset, order by, group by values will be ignored. Do
-     * not count united queries, or queries in complex joins.
-     *
-     * @param string $column Column to count by (every column by default).
-     * @return int
-     */
-    public function count($column = '*')
-    {
-        $backup = [$this->columns, $this->ordering, $this->grouping, $this->limit, $this->offset];
-        $this->columns = ["COUNT({$column})"];
-
-        //Can not be used with COUNT()
-        $this->ordering = $this->grouping = [];
-        $this->limit = $this->offset = 0;
-
-        $result = $this->run(false)->fetchColumn();
-        list($this->columns, $this->ordering, $this->grouping, $this->limit, $this->offset) = $backup;
-
-        return (int)$result;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * Shortcut to execute one of aggregation methods (AVG, MAX, MIN, SUM) using method name as
-     * reference.
-     *
-     * Example:
-     * echo $select->sum('user.balance');
-     *
-     * @param string $method
-     * @param string $arguments
-     * @return int
-     * @throws BuilderException
-     * @throws QueryException
-     */
-    public function __call($method, $arguments)
-    {
-        if (!in_array($method = strtoupper($method), ['AVG', 'MIN', 'MAX', 'SUM'])) {
-            throw new BuilderException("Unknown aggregation method '{$method}'.");
-        }
-
-        if (!isset($arguments[0]) || count($arguments) > 1) {
-            throw new BuilderException("Aggregation methods can support exactly one column.");
-        }
-
-        $columns = $this->columns;
-        $this->columns = ["{$method}({$arguments[0]})"];
-        $result = $this->run(false)->fetchColumn();
-        $this->columns = $columns;
-
-        return (int)$result;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return QueryResult
-     */
-    public function getIterator()
-    {
-        return $this->run();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->getIterator()->jsonSerialize();
     }
 
     /**
@@ -422,6 +228,7 @@ abstract class AbstractSelect extends AbstractWhere implements
     {
         return function ($parameter) {
             if ($parameter instanceof FragmentInterface) {
+
                 //We are only not creating bindings for plan fragments
                 if (!$parameter instanceof ParameterInterface && !$parameter instanceof QueryBuilder) {
                     return $parameter;
@@ -429,7 +236,7 @@ abstract class AbstractSelect extends AbstractWhere implements
             }
 
             if (is_array($parameter)) {
-                throw new BuilderException("Arrays must be wrapped with Parameter instance.");
+                throw new BuilderException('Arrays must be wrapped with Parameter instance');
             }
 
             //Wrapping all values with ParameterInterface

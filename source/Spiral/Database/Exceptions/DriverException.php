@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+namespace Spiral\Database\Exceptions;
 
 /**
  * Driver specific exception.
  */
-class DriverException extends RuntimeException
+class DriverException extends DBALException
 {
-
 }

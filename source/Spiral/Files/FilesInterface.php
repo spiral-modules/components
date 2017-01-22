@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Files;
 
 use Spiral\Files\Exceptions\FileNotFoundException;
@@ -12,8 +13,6 @@ use Spiral\Files\Exceptions\WriteErrorException;
 
 /**
  * Access to hard drive or local store. Does not provide full filesystem abstractions.
- *
- * @todo more methods needed? access to finder?
  */
 interface FilesInterface
 {
@@ -44,18 +43,21 @@ interface FilesInterface
      *
      * @param string $directory
      * @param int    $mode
+     *
      * @return bool
      */
-    public function ensureDirectory($directory, $mode = self::RUNTIME);
+    public function ensureDirectory(string $directory, int $mode = self::RUNTIME): bool;
 
     /**
      * Read file content into string.
      *
      * @param string $filename
+     *
      * @return string
+     *
      * @throws FileNotFoundException
      */
-    public function read($filename);
+    public function read(string $filename): string;
 
     /**
      * Write file data with specified mode. Ensure location option should be used only if desired
@@ -65,39 +67,55 @@ interface FilesInterface
      * @param string $data
      * @param int    $mode            One of mode constants.
      * @param bool   $ensureDirectory Ensure final destination!
+     *
      * @return bool
+     *
      * @throws WriteErrorException
      */
-    public function write($filename, $data, $mode = null, $ensureDirectory = false);
+    public function write(
+        string $filename,
+        string $data,
+        int $mode = null,
+        bool $ensureDirectory = false
+    ): bool;
 
     /**
      * Same as write method with will append data at the end of existed file without replacing it.
      *
      * @see write()
+     *
      * @param string $filename
      * @param string $data
      * @param int    $mode
      * @param bool   $ensureDirectory
+     *
      * @return bool
+     *
      * @throws WriteErrorException
      */
-    public function append($filename, $data, $mode = null, $ensureDirectory = false);
+    public function append(
+        string $filename,
+        string $data,
+        int $mode = null,
+        bool $ensureDirectory = false
+    ): bool;
 
     /**
      * Method has to return local uri which can be used in require and include statements.
      * Implementation is allowed to use virtual stream uris if it's not local.
      *
      * @param string $filename
+     *
      * @return string
      */
-    public function localUri($filename);
+    public function localFilename(string $filename): string;
 
     /**
      * Delete local file if possible. No error should be raised if file does not exists.
      *
      * @param string $filename
      */
-    public function delete($filename);
+    public function delete(string $filename);
 
     /**
      * Delete directory all content in it.
@@ -105,27 +123,31 @@ interface FilesInterface
      * @param string $directory
      * @param bool   $contentOnly
      */
-    public function deleteDirectory($directory, $contentOnly = false);
+    public function deleteDirectory(string $directory, bool $contentOnly = false);
 
     /**
      * Move file from one location to another. Location must exist.
      *
      * @param string $filename
      * @param string $destination
+     *
      * @return bool
+     *
      * @throws FileNotFoundException
      */
-    public function move($filename, $destination);
+    public function move(string $filename, string $destination): bool;
 
     /**
      * Copy file at new location. Location must exist.
      *
      * @param string $filename
      * @param string $destination
+     *
      * @return bool
+     *
      * @throws FileNotFoundException
      */
-    public function copy($filename, $destination);
+    public function copy(string $filename, string $destination): bool;
 
     /**
      * Touch file to update it's timeUpdated value or create new file. Location must exist.
@@ -133,80 +155,93 @@ interface FilesInterface
      * @param string $filename
      * @param int    $mode
      */
-    public function touch($filename, $mode = null);
+    public function touch(string $filename, int $mode = null);
 
     /**
      * Check if file exists.
      *
      * @param string $filename
+     *
      * @return bool
      */
-    public function exists($filename);
+    public function exists(string $filename): bool;
 
     /**
      * Get filesize in bytes if file does exists.
      *
      * @param string $filename
+     *
      * @return int
+     *
      * @throws FileNotFoundException
      */
-    public function size($filename);
+    public function size(string $filename): int;
 
     /**
      * Get file extension using it's name. Simple but pretty common method.
      *
      * @param string $filename
+     *
      * @return string
      */
-    public function extension($filename);
+    public function extension(string $filename): string;
 
     /**
      * Get file MD5 hash.
      *
      * @param string $filename
+     *
      * @return string
+     *
      * @throws FileNotFoundException
      */
-    public function md5($filename);
+    public function md5(string $filename): string;
 
     /**
      * Timestamp when file being updated/created.
      *
      * @param string $filename
+     *
      * @return int
+     *
      * @throws FileNotFoundException
      */
-    public function time($filename);
+    public function time(string $filename): int;
 
     /**
      * @param string $filename
+     *
      * @return bool
      */
-    public function isDirectory($filename);
+    public function isDirectory(string $filename): bool;
 
     /**
      * @param string $filename
+     *
      * @return bool
      */
-    public function isFile($filename);
+    public function isFile(string $filename): bool;
 
     /**
      * Current file permissions (if exists).
      *
      * @param string $filename
+     *
      * @return int|bool
+     *
      * @throws FileNotFoundException
      */
-    public function getPermissions($filename);
+    public function getPermissions(string $filename): int;
 
     /**
      * Update file permissions.
      *
      * @param string $filename
      * @param int    $mode
+     *
      * @throws FileNotFoundException
      */
-    public function setPermissions($filename, $mode);
+    public function setPermissions(string $filename, int $mode);
 
     /**
      * Flat list of every file in every sub location. Locations must be normalized.
@@ -215,9 +250,10 @@ interface FilesInterface
      *
      * @param string $location Location for search.
      * @param string $pattern  Extension pattern.
+     *
      * @return array
      */
-    public function getFiles($location, $pattern = null);
+    public function getFiles(string $location, string $pattern = null): array;
 
     /**
      * Return unique name of temporary (should be removed when interface implementation destructed)
@@ -225,25 +261,28 @@ interface FilesInterface
      *
      * @param string $extension Desired file extension.
      * @param string $location
+     *
      * @return string
      */
-    public function tempFilename($extension = '', $location = null);
+    public function tempFilename(string $extension = '', string $location = null): string;
 
     /**
      * Create the most normalized version for path to file or location.
      *
      * @param string $path      File or location path.
      * @param bool   $directory Path points to directory.
+     *
      * @return string
      */
-    public function normalizePath($path, $directory = false);
+    public function normalizePath(string $path, bool $directory = false): string;
 
     /**
      * Get relative location based on absolute path.
      *
      * @param string $path Original file or directory location (to).
      * @param string $from Path will be converted to be relative to this directory (from).
+     *
      * @return string
      */
-    public function relativePath($path, $from);
+    public function relativePath(string $path, string $from): string;
 }

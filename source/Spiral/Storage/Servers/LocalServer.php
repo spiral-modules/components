@@ -8,20 +8,20 @@
  */
 namespace Spiral\Storage\Servers;
 
+use Psr\Http\Message\StreamInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in local filesystem.
  */
-class LocalServer extends StorageServer
+class LocalServer extends AbstractServer
 {
     /**
      * {@inheritdoc}
      */
-    public function exists(BucketInterface $bucket, $name)
+    public function exists(BucketInterface $bucket, string $name): bool
     {
         return $this->files->exists($this->getPath($bucket, $name));
     }
@@ -29,10 +29,10 @@ class LocalServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->files->exists($this->getPath($bucket, $name))) {
-            return false;
+            return null;
         }
 
         return $this->files->size($this->getPath($bucket, $name));
@@ -41,7 +41,7 @@ class LocalServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         return $this->internalCopy(
             $bucket,
@@ -52,27 +52,30 @@ class LocalServer extends StorageServer
 
     /**
      * {@inheritdoc}
+     *
+     * Note, this method will return real filename, DO NOT remove or write into it! User streams
+     * instead as more safer method.
      */
-    public function allocateFilename(BucketInterface $bucket, $name)
+    public function allocateFilename(BucketInterface $bucket, string $name): string
     {
         if (!$this->exists($bucket, $name)) {
             throw new ServerException(
-                "Unable to create local filename for '{$name}', object does not exists."
+                "Unable to create local filename for '{$name}', object does not exists"
             );
         }
 
-        //localUri call is required to mock filesystem operations
-        return $this->files->localUri($this->getPath($bucket, $name));
+        //localFilename call is required to mock filesystem operations (clone file in a future?)
+        return $this->files->localFilename($this->getPath($bucket, $name));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         if (!$this->exists($bucket, $name)) {
             throw new ServerException(
-                "Unable to create stream for '{$name}', object does not exists."
+                "Unable to create stream for '{$name}', object does not exists"
             );
         }
 
@@ -85,7 +88,7 @@ class LocalServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         $this->files->delete($this->getPath($bucket, $name));
     }
@@ -93,19 +96,19 @@ class LocalServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         return $this->internalMove(
             $bucket,
-            $this->getPath($bucket, $oldname),
-            $this->getPath($bucket, $newname)
+            $this->getPath($bucket, $oldName),
+            $this->getPath($bucket, $newName)
         );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool
     {
         return $this->internalCopy(
             $destination,
@@ -117,8 +120,11 @@ class LocalServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function replace(BucketInterface $bucket, BucketInterface $destination, $name)
-    {
+    public function replace(
+        BucketInterface $bucket,
+        BucketInterface $destination,
+        string $name
+    ): bool {
         return $this->internalMove(
             $destination,
             $this->getPath($bucket, $name),
@@ -132,13 +138,17 @@ class LocalServer extends StorageServer
      * @param BucketInterface $bucket
      * @param string          $filename
      * @param string          $destination
+     *
      * @return bool
      * @throws ServerException
      */
-    protected function internalMove(BucketInterface $bucket, $filename, $destination)
-    {
+    protected function internalMove(
+        BucketInterface $bucket,
+        string $filename,
+        string $destination
+    ): bool {
         if (!$this->files->exists($filename)) {
-            throw new ServerException("Unable to move '{$filename}', object does not exists.");
+            throw new ServerException("Unable to move '{$filename}', object does not exists");
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
@@ -159,13 +169,17 @@ class LocalServer extends StorageServer
      * @param BucketInterface $bucket
      * @param string          $filename
      * @param string          $destination
+     *
      * @return bool
      * @throws ServerException
      */
-    protected function internalCopy(BucketInterface $bucket, $filename, $destination)
-    {
+    protected function internalCopy(
+        BucketInterface $bucket,
+        string $filename,
+        string $destination
+    ): bool {
         if (!$this->files->exists($filename)) {
-            throw new ServerException("Unable to copy '{$filename}', object does not exists.");
+            throw new ServerException("Unable to copy '{$filename}', object does not exists");
         }
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
@@ -174,7 +188,7 @@ class LocalServer extends StorageServer
         $this->files->ensureDirectory(dirname($destination), $mode);
 
         if (!$this->files->copy($filename, $destination)) {
-            throw new ServerException("Unable to copy '{$filename}' to '{$destination}'.");
+            throw new ServerException("Unable to copy '{$filename}' to '{$destination}'");
         }
 
         return $this->files->setPermissions($destination, $mode);
@@ -185,9 +199,10 @@ class LocalServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      */
-    protected function getPath(BucketInterface $bucket, $name)
+    protected function getPath(BucketInterface $bucket, string $name): string
     {
         if (empty($this->options['home'])) {
             return $this->files->normalizePath($bucket->getOption('directory') . $name);

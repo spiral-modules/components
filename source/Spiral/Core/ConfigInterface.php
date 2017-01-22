@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core;
 
 use Spiral\Core\Container\InjectableInterface;
@@ -19,5 +20,5 @@ interface ConfigInterface extends InjectableInterface, \ArrayAccess
      *
      * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 }

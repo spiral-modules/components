@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core;
 
 use Spiral\Core\Container\InjectorInterface;
@@ -21,8 +22,10 @@ interface ConfiguratorInterface extends InjectorInterface
      * array.
      *
      * @param string $section
+     *
      * @return array
+     *
      * @throws ConfiguratorException
      */
-    public function getConfig($section = null);
+    public function getConfig(string $section = null): array;
 }

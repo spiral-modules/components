@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Debug\Dumper;
 
 /**
@@ -27,6 +28,7 @@ class InversedStyle extends Style
     protected $styles = [
         'common'   => 'color: #E6E1DC',
         'name'     => 'color: #E6E1DC',
+        'dynamic'  => 'color: #7d95c1;',
         'maxLevel' => 'color: #ff9900',
         'syntax'   => [
             'common' => 'color: gray',
@@ -52,7 +54,7 @@ class InversedStyle extends Style
             'common'    => 'color: #666',
             'public'    => 'color: #8dc17d',
             'private'   => 'color: #c18c7d',
-            'protected' => 'color: #7d95c1'
-        ]
+            'protected' => 'color: #7d95c1',
+        ],
     ];
 }

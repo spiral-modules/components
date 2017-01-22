@@ -7,14 +7,13 @@
  */
 namespace Spiral\Stempler\Exceptions;
 
-use Spiral\Core\Exceptions\ExceptionInterface;
 use Spiral\Core\Exceptions\RuntimeException;
 
 /**
  * StemplerException has ability to specify context token which will can used to define location
  * of html code caused error.
  */
-class StemplerException extends RuntimeException implements ExceptionInterface
+class StemplerException extends RuntimeException
 {
     /**
      * @var array
@@ -25,9 +24,9 @@ class StemplerException extends RuntimeException implements ExceptionInterface
      * @param string     $message
      * @param array      $token
      * @param int        $code
-     * @param \Exception $previous
+     * @param \Throwable $previous
      */
-    public function __construct($message, array $token = [], $code = 0, \Exception $previous = null)
+    public function __construct($message, array $token = [], $code = 0, \Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->token = $token;

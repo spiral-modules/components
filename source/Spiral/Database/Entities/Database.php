@@ -5,13 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Entities;
 
-use Spiral\Cache\CacheInterface;
-use Spiral\Cache\StoreInterface;
-use Spiral\Core\Component;
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\Core\Exceptions\SugarException;
 use Spiral\Database\Builders\DeleteQuery;
 use Spiral\Database\Builders\InsertQuery;
 use Spiral\Database\Builders\SelectQuery;
@@ -20,16 +17,12 @@ use Spiral\Database\DatabaseInterface;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
-use Spiral\Database\Query\CachedResult;
-use Spiral\Database\Query\QueryResult;
-
 
 /**
- * Database class is high level abstraction at top of Driver. Multiple databases can use same driver
- * and use different by table prefix. Databases usually linked to real database or logical portion
- * of database (filtered by prefix).
+ * Database class is high level abstraction at top of Driver. Databases usually linked to real 
+ * database or logical portion of database (filtered by prefix).
  */
-class Database extends Component implements DatabaseInterface, InjectableInterface
+class Database implements DatabaseInterface, InjectableInterface
 {
     /**
      * This is magick constant used by Spiral Container, it helps system to resolve controllable
@@ -101,16 +94,6 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     const ISOLATION_READ_UNCOMMITTED = 'READ UNCOMMITTED';
 
     /**
-     * Default timestamp expression (must be handler by driver as native expressions).
-     */
-    const TIMESTAMP_NOW = 'DRIVER_SPECIFIC_NOW_EXPRESSION';
-
-    /**
-     * @var Driver
-     */
-    private $driver = null;
-
-    /**
      * @var string
      */
     private $name = '';
@@ -121,46 +104,27 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     private $prefix = '';
 
     /**
-     * @invisible
-     * @var CacheInterface
+     * @var Driver
      */
-    protected $cache = null;
+    private $driver = null;
 
     /**
-     * @todo replace container with factory?
-     * @param Driver         $driver               Driver instance responsible for database
-     *                                             connection.
-     * @param string         $name                 Internal database name/id.
-     * @param string         $prefix               Default database table prefix, will be used for
-     *                                             all table identifiers.
-     * @param CacheInterface $cache                Needed to receive cache store on demand.
+     * @param Driver $driver Driver instance responsible for database connection.
+     * @param string $name   Internal database name/id.
+     * @param string $prefix Default database table prefix, will be used for all table
+     *                       identifiers.
      */
-    public function __construct(
-        Driver $driver,
-        $name,
-        $prefix = '',
-        CacheInterface $cache = null
-    ) {
+    public function __construct(Driver $driver, string $name, string $prefix = '')
+    {
         $this->driver = $driver;
         $this->name = $name;
-        $this->setPrefix($prefix);
-
-        //Not mandratory
-        $this->cache = $cache;
-    }
-
-    /**
-     * @return Driver
-     */
-    public function driver()
-    {
-        return $this->driver;
+        $this->prefix = $prefix;
     }
 
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -168,16 +132,28 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->driver->getType();
     }
 
     /**
-     * @param string $prefix
-     * @return $this
+     * @return Driver
      */
-    public function setPrefix($prefix)
+    public function getDriver(): Driver
+    {
+        return $this->driver;
+    }
+
+    /**
+     * Update database prefix.
+     *
+     * @todo immutable?
+     * @param string $prefix
+     *
+     * @return self
+     */
+    public function setPrefix(string $prefix): Database
     {
         $this->prefix = $prefix;
 
@@ -187,7 +163,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * @return string
      */
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->prefix;
     }
@@ -195,89 +171,46 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      */
-    public function execute($query, array $parameters = [])
+    public function execute(string $query, array $parameters = []): int
     {
-        return $this->statement($query, $parameters)->rowCount();
+        return $this->driver->statement($query, $parameters)->rowCount();
+    }
+
+    /**
+     * Prepare PDO statement.
+     *
+     * @param string $query
+     *
+     * @return \PDOStatement
+     *
+     * @throws DriverException
+     * @throws QueryException
+     */
+    public function prepare(string $query): \PDOStatement
+    {
+        return $this->driver->prepare($query);
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return QueryResult
-     * @event statement($statement, $query, $parameters, $database): statement
+     * @return QueryStatement
      */
-    public function query($query, array $parameters = [])
+    public function query(string $query, array $parameters = []): QueryStatement
     {
         return $this->driver->query($query, $parameters);
-    }
-
-    /**
-     * Get instance of PDOStatement from Driver.
-     *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     * @return \PDOStatement
-     * @throws DriverException
-     * @throws QueryException
-     * @event statement($statement, $query, $parameters, $database): statement
-     */
-    public function statement($query, array $parameters = [])
-    {
-        return $this->driver->statement($query, $parameters);
-    }
-
-    /**
-     * Execute statement or fetch result from cache and return cached query iterator.
-     *
-     * @param int            $lifetime   Cache lifetime in seconds.
-     * @param string         $query
-     * @param array          $parameters Parameters to be binded into query.
-     * @param string         $key        Cache key to be used to store query result.
-     * @param StoreInterface $store      Cache store to store result in, if null default store will
-     *                                   be used.
-     * @return CachedResult
-     * @throws DriverException
-     * @throws QueryException
-     */
-    public function cached(
-        $lifetime,
-        $query,
-        array $parameters = [],
-        $key = '',
-        StoreInterface $store = null
-    ) {
-        if (empty($store) && empty($this->cache)) {
-            throw new SugarException(
-                "Unable to receive cache 'StoreInterface', no cache provider or user store provided."
-            );
-        }
-
-        if (empty($store)) {
-            //todo use different stores for different dbs
-            $store = $this->cache->store();
-        }
-
-        if (empty($key)) {
-            //Trying to build unique query id based on provided options and environment.
-            $key = md5(serialize([$query, $parameters, $this->name, $this->prefix]));
-        }
-
-        $data = $store->remember($key, $lifetime, function () use ($query, $parameters) {
-            return $this->query($query, $parameters)->fetchAll();
-        });
-
-        return new CachedResult($store, $key, $query, $parameters, $data);
     }
 
     /**
      * Get instance of InsertBuilder associated with current Database.
      *
      * @param string $table Table where values should be inserted to.
+     *
      * @return InsertQuery
      */
-    public function insert($table = '')
+    public function insert(string $table = ''): InsertQuery
     {
-        return $this->driver->insertBuilder($this, compact('table'));
+        return $this->driver->insertBuilder($this->prefix, compact('table'));
     }
 
     /**
@@ -286,11 +219,12 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * @param string $table  Table where rows should be updated in.
      * @param array  $values Initial set of columns to update associated with their values.
      * @param array  $where  Initial set of where rules specified as array.
+     *
      * @return UpdateQuery
      */
-    public function update($table = '', array $values = [], array $where = [])
+    public function update(string $table = '', array $values = [], array $where = []): UpdateQuery
     {
-        return $this->driver->updateBuilder($this, compact('table', 'where', 'values'));
+        return $this->driver->updateBuilder($this->prefix, compact('table', 'where', 'values'));
     }
 
     /**
@@ -298,20 +232,22 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @param string $table Table where rows should be deleted from.
      * @param array  $where Initial set of where rules specified as array.
+     *
      * @return DeleteQuery
      */
-    public function delete($table = '', array $where = [])
+    public function delete(string $table = '', array $where = []): DeleteQuery
     {
-        return $this->driver->deleteBuilder($this, compact('table', 'where'));
+        return $this->driver->deleteBuilder($this->prefix, compact('table', 'where'));
     }
 
     /**
      * Get instance of SelectBuilder associated with current Database.
      *
      * @param array|string $columns Columns to select.
+     *
      * @return SelectQuery
      */
-    public function select($columns = '*')
+    public function select($columns = '*'): SelectQuery
     {
         $columns = func_get_args();
         if (is_array($columns) && isset($columns[0]) && is_array($columns[0])) {
@@ -319,16 +255,17 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
             $columns = $columns[0];
         }
 
-        return $this->driver->selectBuilder($this, ['columns' => $columns]);
+        return $this->driver->selectBuilder($this->prefix, ['columns' => $columns]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $isolationLevel
+     *
      * @throws \Exception
      */
-    public function transaction(callable $callback, $isolationLevel = null)
+    public function transaction(callable $callback, string $isolationLevel = null)
     {
         $this->begin($isolationLevel);
 
@@ -337,12 +274,9 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
             $this->commit();
 
             return $result;
-        } catch (\Exception $exception) {
+        } catch (\Throwable $e) {
             $this->rollBack();
-            throw $exception;
-        } catch (\Throwable $exception) {
-            $this->rollBack();
-            throw $exception;
+            throw $e;
         }
     }
 
@@ -350,9 +284,10 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * {@inheritdoc}
      *
      * @link http://en.wikipedia.org/wiki/Isolation_(database_systems)
+     *
      * @param string $isolationLevel
      */
-    public function begin($isolationLevel = null)
+    public function begin(string $isolationLevel = null)
     {
         return $this->driver->beginTransaction($isolationLevel);
     }
@@ -376,7 +311,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
         return $this->driver->hasTable($this->prefix . $name);
     }
@@ -386,7 +321,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return Table
      */
-    public function table($name)
+    public function table(string $name): Table
     {
         return new Table($this, $name);
     }
@@ -396,7 +331,7 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      *
      * @return Table[]
      */
-    public function getTables()
+    public function getTables(): array
     {
         $result = [];
         foreach ($this->driver->tableNames() as $table) {
@@ -415,9 +350,10 @@ class Database extends Component implements DatabaseInterface, InjectableInterfa
      * Shortcut to get table abstraction.
      *
      * @param string $name Table name without prefix.
+     *
      * @return Table
      */
-    public function __get($name)
+    public function __get(string $name): Table
     {
         return $this->table($name);
     }

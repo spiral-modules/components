@@ -28,6 +28,11 @@ class DarkSyntax implements SyntaxInterface
     const PATH_ATTRIBUTE = 'path';
 
     /**
+     * Short tags expression, usually used inside attributes and etc.
+     */
+    const SHORT_TAGS = '/\${(?P<name>[a-z0-9_\.\-]+)(?: *\| *(?P<default>[^}]+) *)?}/i';
+
+    /**
      * @var bool
      */
     private $strict = true;
@@ -112,12 +117,20 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
+    public function shortTags()
+    {
+        return self::SHORT_TAGS;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createImporter(array $token, Supervisor $supervisor)
     {
         //Fetching path
         $path = $this->resolvePath($token);
         if (empty($attributes = $token[HtmlTokenizer::TOKEN_ATTRIBUTES])) {
-            throw new SyntaxException("Invalid import element syntax, attributes missing.", $token);
+            throw new SyntaxException("Invalid import element syntax, attributes missing", $token);
         }
 
         /**
@@ -143,7 +156,7 @@ class DarkSyntax implements SyntaxInterface
         if (isset($attributes['namespace']) || isset($attributes['prefix'])) {
             if (strpos($path, '*') === false) {
                 throw new SyntaxException(
-                    "Path in namespace/prefix import must include start symbol.", $token
+                    "Path in namespace/prefix import must include start symbol", $token
                 );
             }
 
@@ -158,7 +171,7 @@ class DarkSyntax implements SyntaxInterface
             return new Stopper($attributes['stop']);
         }
 
-        throw new SyntaxException("Undefined use element.", $token);
+        throw new SyntaxException("Undefined use element", $token);
     }
 
     /**

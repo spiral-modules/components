@@ -9,9 +9,10 @@ namespace Spiral\Tokenizer;
 
 use Spiral\Tokenizer\Exceptions\ReflectionException;
 use Spiral\Tokenizer\Exceptions\TokenizerException;
+use Spiral\Tokenizer\Reflections\ReflectionFile;
 
 /**
- * Simple wrapper at top of token_get_all.
+ * Provides ability to get file reflections and fetch normalized tokens for a specified filename.
  */
 interface TokenizerInterface
 {
@@ -23,21 +24,14 @@ interface TokenizerInterface
     const LINE = 2;
 
     /**
-     * Fetch PHP tokens for specified filename. Usually links to token_get_all() function. Every
-     * token MUST be converted into array.
-     *
-     * @param string $filename
-     * @return array
-     */
-    public function fetchTokens($filename);
-
-    /**
      * Get file reflection for given filename.
      *
      * @param string $filename
-     * @return ReflectionFileInterface
+     *
+     * @return ReflectionFile
+     *
      * @throws TokenizerException
      * @throws ReflectionException
      */
-    public function fileReflection($filename);
+    public function fileReflection(string $filename): ReflectionFile;
 }

@@ -17,6 +17,7 @@ interface ExporterInterface
     /**
      * @param string $content
      * @param array  $inject
+     *
      * @return string
      */
     public function mountBlocks($content, array $inject);

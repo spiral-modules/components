@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core\Exceptions;
 
 /**
@@ -12,5 +13,4 @@ namespace Spiral\Core\Exceptions;
  */
 class DependencyException extends RuntimeException
 {
-
 }

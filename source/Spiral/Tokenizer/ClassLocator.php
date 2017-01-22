@@ -7,17 +7,18 @@
  */
 namespace Spiral\Tokenizer;
 
+use Spiral\Tokenizer\Exceptions\LocatorException;
 use Spiral\Tokenizer\Prototypes\AbstractLocator;
 
 /**
  * Can locate classes in a specified directory.
  */
-class ClassLocator extends AbstractLocator implements ClassLocatorInterface
+class ClassLocator extends AbstractLocator implements ClassesInterface
 {
     /**
      * {!@inheritdoc}
      */
-    public function getClasses($target = null)
+    public function getClasses($target = null): array
     {
         if (!empty($target) && (is_object($target) || is_string($target))) {
             $target = new \ReflectionClass($target);
@@ -25,8 +26,10 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
 
         $result = [];
         foreach ($this->availableClasses() as $class) {
-            if (empty($reflection = $this->classReflection($class))) {
-                //Unable to get reflection
+            try {
+                $reflection = $this->classReflection($class);
+            } catch (LocatorException $e) {
+                //Ignoring
                 continue;
             }
 
@@ -49,7 +52,7 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
      *
      * @return array
      */
-    protected function availableClasses()
+    protected function availableClasses(): array
     {
         $classes = [];
 
@@ -65,9 +68,10 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
      *
      * @param \ReflectionClass      $class
      * @param \ReflectionClass|null $target
+     *
      * @return bool
      */
-    protected function isTargeted(\ReflectionClass $class, \ReflectionClass $target = null)
+    protected function isTargeted(\ReflectionClass $class, \ReflectionClass $target = null): bool
     {
         if (empty($target)) {
             return true;
@@ -79,6 +83,6 @@ class ClassLocator extends AbstractLocator implements ClassLocatorInterface
         }
 
         //Checking using traits
-        return in_array($target->getName(), $this->getTraits($class->getName()));
+        return in_array($target->getName(), $this->fetchTraits($class->getName()));
     }
 }

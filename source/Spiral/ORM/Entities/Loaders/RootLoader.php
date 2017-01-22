@@ -1,69 +1,161 @@
 <?php
-
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Entities\Loaders;
 
-use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\RecordSelector;
-use Spiral\ORM\LoaderInterface;
-use Spiral\ORM\ORM;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\ORM\Entities\Loaders\Traits\ColumnsTrait;
+use Spiral\ORM\Entities\Nodes\AbstractNode;
+use Spiral\ORM\Entities\Nodes\RootNode;
+use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Record;
 
-class RootLoader extends Loader
+/**
+ * Primary ORM loader. Loader wraps at top of select query in order to modify it's conditions, joins
+ * and etc based on nested loaders.
+ *
+ * Note, in RootLoader schema represent record schema since there is no self to self relation.
+ */
+class RootLoader extends AbstractLoader
 {
-    /**
-     * RootLoader always work via INLOAD.
-     */
-    const LOAD_METHOD = self::INLOAD;
+    use ColumnsTrait;
 
     /**
-     * {@inheritdoc}
+     * Root loader always define primary SelectQuery.
      *
-     * We don't need to initiate parent constructor as root loader is pretty simple and used only
-     * for primary record parsing without any conditions.
+     * @var SelectQuery
      */
-    public function __construct(
-        ORM $orm,
-        $container,
-        array $definition = [],
-        LoaderInterface $parent = null
-    ) {
-        $this->orm = $orm;
-        $this->schema = $definition;
+    private $query;
 
-        //No need for aliases
-        $this->options['method'] = self::INLOAD;
+    /**
+     * @param string       $class
+     * @param array        $schema Record schema for root loader.
+     * @param ORMInterface $orm
+     */
+    public function __construct(string $class, array $schema, ORMInterface $orm)
+    {
+        //Constructing with truncated schema
+        parent::__construct(
+            $class,
+            [
+                Record::SH_PRIMARY_KEY   => $schema[Record::SH_PRIMARY_KEY],
+                Record::RELATION_COLUMNS => array_keys($schema[Record::SH_DEFAULTS])
+            ],
+            $orm
+        );
 
-        //Primary table will be named under it's declared table name by default (without prefix)
-        $this->options['alias'] = $this->schema[ORM::M_ROLE_NAME];
+        //Getting our initial select query
+        $this->query = $orm->table($class)->select();
+    }
 
-        $this->dataColumns = array_keys($this->schema[ORM::M_COLUMNS]);
+    /**
+     * Return initial loader query (attention, mutable instance).
+     *
+     * @return SelectQuery
+     */
+    public function initialQuery(): SelectQuery
+    {
+        return $this->query;
+    }
 
-        //No need to call parent constructor
+    /**
+     * Return build version of query.
+     *
+     * @return SelectQuery
+     */
+    public function compiledQuery(): SelectQuery
+    {
+        return $this->configureQuery(clone $this->query);
+    }
+
+    /**
+     * Get primary key column if possible (aliased). Null when key is missing or non singular.
+     *
+     * @return string|null
+     */
+    public function primaryKey(): string
+    {
+        return $this->getAlias() . '.' . $this->schema[Record::SH_PRIMARY_KEY];
+    }
+
+    /**
+     * We are using model role as alias. Visibility up.
+     *
+     * @return string
+     */
+    public function getAlias(): string
+    {
+        return $this->orm->define($this->class, ORMInterface::R_ROLE_NAME);
+    }
+
+    /**
+     * @param SelectQuery $query
+     *
+     * @return SelectQuery
+     */
+    protected function configureQuery(SelectQuery $query): SelectQuery
+    {
+        //Clarifying table name
+        $query->from("{$this->getTable()} AS {$this->getAlias()}");
+
+        //Columns to be loaded for primary model
+        $this->mountColumns($query, true, '', true);
+
+        return parent::configureQuery($query);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function configureSelector(RecordSelector $selector)
+    public function loadData(AbstractNode $node)
     {
-        if (empty($this->loaders) && empty($this->joiners)) {
-            //No need to create any column aliases
-            return;
+        //Fetching results from database
+        $statement = $this->configureQuery(clone $this->query)->run();
+        $statement->setFetchMode(\PDO::FETCH_NUM);
+
+        foreach ($statement as $row) {
+            $node->parseRow(0, $row);
         }
 
-        parent::configureSelector($selector);
+        //Destroying statement
+        $statement->close();
+
+        //Executing child loaders
+        foreach ($this->loaders as $relation => $loader) {
+            $loader->loadData($node->fetchNode($relation));
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function clarifySelector(RecordSelector $selector)
+    public function initNode(): AbstractNode
     {
-        //Nothing to do for root loader, no conditions required
+        return new RootNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::SH_PRIMARY_KEY]
+        );
+    }
+
+    /**
+     * Clone with initial query.
+     */
+    public function __clone()
+    {
+        $this->query = clone $this->query;
+        parent::__clone();
+    }
+
+    /**
+     * Relation columns.
+     *
+     * @return array
+     */
+    protected function getColumns(): array
+    {
+        return $this->schema[Record::RELATION_COLUMNS];
     }
 }

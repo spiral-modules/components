@@ -1,102 +1,88 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
+
 namespace Spiral\ORM;
 
-use Spiral\Models\EntityInterface;
-use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\RelationException;
-use Spiral\Validation\ValidatesInterface;
 
 /**
- * Relations used to represent data related to parent record. Every relation must be embedded into
- * record, be callable and provide related data by record request. In addition, relations must know
- * how to associate data/entity provided by user.
- *
- * @see Record
+ * Base definition for cross RecordInterface relations.
  */
-interface RelationInterface extends ValidatesInterface
+interface RelationInterface
 {
     /**
-     * @param ORM                  $orm        ORM component.
-     * @param null|RecordInterface $parent     Parent RecordEntity.
-     * @param array                $definition Relation definition, crated by RelationSchema.
-     * @param mixed                $data       Pre-loaded relation data.
-     * @param bool                 $loaded     Indication that relation data has been loaded from
-     *                                         database.
-     */
-    public function __construct(
-        ORM $orm,
-        RecordInterface $parent,
-        array $definition,
-        $data = null,
-        $loaded = false
-    );
-
-    /**
-     * Check if relation data was loaded (even if no data presented).
+     * Indicates that relation commands must be executed prior to parent command.
      *
      * @return bool
      */
-    public function isLoaded();
+    public function isLeading(): bool;
 
     /**
-     * Return data, object or instances handled by relation, resulted type depends of relation
-     * implementation and might be: Record, RecordIterator, itself (ManyToMorphed), Document and
-     * etc. Related data must be loaded if relation was not pre-loaded with record.
+     * Create version of relation with given parent and loaded data (if any).
      *
-     * Example:
-     * echo $user->profile->facebookUID;
+     * @param RecordInterface $parent
+     * @param bool            $loaded
+     * @param array|null      $data
      *
-     * @see Record::__get()
-     * @return null|EntityInterface
-     * @throws EntityInterface
+     * @return RelationInterface
+     */
+    public function withContext(
+        RecordInterface $parent,
+        bool $loaded = false,
+        array $data = null
+    ): RelationInterface;
+
+    /**
+     * Get class relation points to. Usually for debug purposes.
+     *
+     * @return string
+     */
+    public function getClass(): string;
+
+    /**
+     * Return true if relation has any loaded data (method withContext) must be called prior to
+     * that.
+     *
+     * @return bool
+     */
+    public function isLoaded(): bool;
+
+    /**
+     * Indication that relation has any relation data, WILL force autoloading.
+     *
+     * @return bool
+     */
+    public function hasRelated(): bool;
+
+    /**
+     * Assign new value to relation. Make sure type is compatible.
+     *
+     * @param mixed $value
+     *
+     * @throws RelationException
+     */
+    public function setRelated($value);
+
+    /**
+     * Get related data representation.
+     *
+     * @return mixed|self
+     *
+     * @throws RelationException
      */
     public function getRelated();
 
     /**
-     * Associate relation to new object data. Method will be called by parent record when field
-     * with name = relation name set with some value. Relation must update inner and outer keys
-     * in parent and related records.
+     * Create relation specific command or multiple commands in relation to parent object command.
+     * Parent command must be contextual in order to provide ability to exchange FK keys.
      *
-     * Example:
-     * $user->profile = new Profile();
+     * @param ContextualCommandInterface $parentCommand
      *
-     * You should be able to disassociate some relations by providing null as value, but only if
-     * relation was configured as nullable.
-     *
-     * Example:
-     * $post->picture = null;
-     *
-     * @see Record::__set()
-     * @param EntityInterface|null $related
-     * @throws RelationException
-     * @throws ORMException
+     * @return CommandInterface
      */
-    public function associate(EntityInterface $related = null);
-
-    /**
-     * Must save related data into database by parent Record request.
-     *
-     * @see Record::save()
-     * @param bool $validate
-     * @return bool
-     * @throws RelationException
-     */
-    public function saveAssociation($validate = true);
-
-    /**
-     * Reset relation state. By default it must flush all relation data. Method used by Record when
-     * context were changed.
-     *
-     * @see Record::setContext()
-     * @param array $data   Set relation data in array form.
-     * @param bool  $loaded Indication that relation data has been loaded.
-     * @throws RelationException
-     */
-    public function reset(array $data = [], $loaded = false);
+    public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface;
 }

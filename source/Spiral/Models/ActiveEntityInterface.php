@@ -1,27 +1,29 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\Models;
 
 use Spiral\Models\Exceptions\EntityExceptionInterface;
 
 /**
- * Represents generic "ActiveRecord" like patten.
+ * Common interface to indicate that entity implements ActiveRecord pattern.
  */
-interface ActiveEntityInterface extends IdentifiedInterface
+interface ActiveEntityInterface
 {
+    const CREATED   = 1;
+    const UPDATED   = 2;
+    const UNCHANGED = 3;
+
     /**
-     * Save entity content into it's primary storage and return true if operation went successfully.
+     * Create entity or update entity state in database.
      *
-     * @param bool $validate
-     * @return bool
+     * @return int Must return one of constants self::CREATED, self::UPDATED, self::UNCHANGED
      * @throws EntityExceptionInterface
      */
-    public function save($validate = null);
+    public function save(): int;
 
     /**
      * Delete entity from it's primary storage, entity object must not be used anymore after that

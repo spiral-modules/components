@@ -12,5 +12,4 @@ namespace Spiral\ODM\Exceptions;
  */
 class SourceException extends ODMException
 {
-
 }

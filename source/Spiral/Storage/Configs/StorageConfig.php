@@ -32,35 +32,43 @@ class StorageConfig extends InjectableConfig
 
     /**
      * @param string $server
+     *
      * @return bool
      */
-    public function hasServer($server)
+    public function hasServer(string $server): bool
     {
         return isset($this->config['servers'][$server]);
     }
 
     /**
      * @param string $server
+     *
      * @return string
      */
-    public function serverClass($server)
+    public function serverClass(string $server): string
     {
         return $this->config['servers'][$server]['class'];
     }
 
     /**
      * @param string $server
+     *
      * @return array
      */
-    public function serverOptions($server)
+    public function serverOptions(string $server): array
     {
-        return $this->config['servers'][$server];
+        $options = $this->config['servers'][$server];
+        unset($options['class']);
+
+        return $options;
     }
 
     /**
+     * Every available bucket with it's config.
+     *
      * @return array
      */
-    public function getBuckets()
+    public function getBuckets(): array
     {
         return $this->config['buckets'];
     }

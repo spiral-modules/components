@@ -5,15 +5,15 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Pagination\Traits;
 
 use Interop\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\FactoryInterface;
+use Spiral\Core\Exceptions\ScopeException;
+use Spiral\Pagination\CountingInterface;
 use Spiral\Pagination\Exceptions\PaginationException;
-use Spiral\Pagination\Paginator;
 use Spiral\Pagination\PaginatorInterface;
+use Spiral\Pagination\PaginatorsInterface;
 
 /**
  * Provides ability to paginate associated instance. Will work with default Paginator or fetch one
@@ -25,74 +25,26 @@ trait PaginatorTrait
 {
     /**
      * @internal
-     * @var PaginatorInterface
-     */
-    private $paginator = null;
-
-    /**
-     * @var int
-     */
-    protected $limit = 0;
-
-    /**
-     * @var int
-     */
-    protected $offset = 0;
-
-    /**
-     * Count elements of an object.
      *
-     * @link http://php.net/manual/en/countable.count.php
-     * @return int
+     * @var PaginatorInterface|null
      */
-    abstract public function count();
+    private $paginator;
 
     /**
-     * Set selection limit.
+     * Indication that object was paginated.
      *
-     * @param int $limit
-     * @return mixed
+     * @return bool
      */
-    public function limit($limit = 0)
+    public function hasPaginator(): bool
     {
-        $this->limit = $limit;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLimit()
-    {
-        return $this->limit;
-    }
-
-    /**
-     * Set selection offset.
-     *
-     * @param int $offset
-     * @return mixed
-     */
-    public function offset($offset = 0)
-    {
-        $this->offset = $offset;
-
-        return $this;
-    }
-
-    /**
-     * @return int
-     */
-    public function getOffset()
-    {
-        return $this->offset;
+        return $this->paginator instanceof PaginatorInterface;
     }
 
     /**
      * Manually set paginator instance for specific object.
      *
      * @param PaginatorInterface $paginator
+     *
      * @return $this
      */
     public function setPaginator(PaginatorInterface $paginator)
@@ -105,107 +57,79 @@ trait PaginatorTrait
     /**
      * Get paginator for the current selection. Paginate method should be already called.
      *
-     * @see isPaginated()
+     * @see hasPaginator()
      * @see paginate()
-     * @return PaginatorInterface|Paginator|null
-     */
-    public function paginator()
-    {
-        return $this->paginator;
-    }
-
-    /**
-     * Get paginator for the current selection. Paginate method should be already called.
      *
-     * @see isPaginated()
-     * @see paginate()
-     * @return PaginatorInterface|Paginator|null
+     * @return PaginatorInterface
      */
-    public function getPaginator()
+    public function getPaginator(): PaginatorInterface
     {
-        return $this->paginator;
-    }
+        if (!$this->hasPaginator()) {
+            throw new PaginationException("Unable to get paginator, no paginator were set");
+        }
 
-    /**
-     * Indication that object was paginated.
-     *
-     * @return bool
-     */
-    public function isPaginated()
-    {
-        return !empty($this->paginator);
+        return $this->paginator;
     }
 
     /**
      * Paginate current selection using Paginator class.
      *
-     * @param int                    $limit         Pagination limit.
-     * @param string                 $pageParameter Name of parameter in request query which is
-     *                                              used to store the current page number. "page"
-     *                                              by default.
-     * @param ServerRequestInterface $request       Has to be specified if no global container set.
+     * @param int    $limit     Pagination limit.
+     * @param string $parameter Name of parameter to associate paginator with, by default query
+     *                          parameter of active request to be used.
+     *
      * @return $this
-     * @throws PaginationException
+     *
+     * @throws ScopeException
      */
-    public function paginate(
-        $limit = Paginator::DEFAULT_LIMIT,
-        $pageParameter = Paginator::DEFAULT_PARAMETER,
-        ServerRequestInterface $request = null
-    ) {
-        //Will be used in two places
-        $container = $this->container();
+    public function paginate(int $limit = 25, string $parameter = 'page')
+    {
+        //We are required to fetch paginator from associated container or shared container
+        $container = $this->iocContainer();
 
-        if (empty($request)) {
-            if (empty($container) || !$container->has(ServerRequestInterface::class)) {
-                throw new SugarException(
-                    "Unable to create pagination without specified request."
-                );
-            }
-
-            //Getting request from container scope
-            $request = $container->get(ServerRequestInterface::class);
+        if (empty($container) || !$container->has(PaginatorsInterface::class)) {
+            throw new ScopeException(
+                'Unable to create paginator, PaginatorsInterface binding is missing or container not set'
+            );
         }
 
-        if (empty($container) || !$container->has(PaginatorInterface::class)) {
-            //Let's use default paginator
-            $this->paginator = new Paginator($request, $pageParameter);
-        } else {
-            //We need constructor
-            if ($container instanceof FactoryInterface) {
-                $constructor = $container;
-            } else {
-                $constructor = $container->get(FactoryInterface::class);
-            }
+        /**
+         * @var PaginatorsInterface $factory
+         */
+        $factory = $container->get(PaginatorsInterface::class);
 
-            //We can also create paginator using container
-            $this->paginator = $constructor->make(PaginatorInterface::class, compact(
-                'request', 'pageParameter'
-            ));
-        }
-
-        $this->paginator->setLimit($limit);
+        //Now we can create new instance of paginator using factory
+        $this->paginator = $factory->createPaginator($parameter, $limit);
 
         return $this;
     }
 
     /**
-     * Apply pagination to current object. Will be applied only if internal paginator already
-     * constructed.
+     * Get paginator instance configured for a given count. Must not affect already associated
+     * paginator instance.
      *
-     * @return $this
-     * @throws PaginationException
+     * Attention: this method MUST be called from a child class in order to properly set paginator
+     * counts IF paginator support it.
+     *
+     * @param int|null $count Can be skipped.
+     *
+     * @return PaginatorInterface
      */
-    protected function applyPagination()
+    protected function configurePaginator(int $count = null): PaginatorInterface
     {
-        if (empty($this->paginator)) {
-            return $this;
+        $paginator = $this->getPaginator();
+
+        if (!empty($count) && $paginator instanceof CountingInterface) {
+            $paginator = $paginator->withCount($count);
+        } else {
+            $paginator = clone $paginator;
         }
 
-        return $this->paginator->paginate($this);
+        return $paginator;
     }
 
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

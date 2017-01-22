@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Models\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+namespace Spiral\Models\Exceptions;
 
 /**
  * Errors raised by Entity logic in runtime.
  */
-class EntityException extends RuntimeException implements EntityExceptionInterface
+class EntityException extends \RuntimeException implements EntityExceptionInterface
 {
-
 }

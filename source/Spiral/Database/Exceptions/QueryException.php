@@ -5,33 +5,50 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+namespace Spiral\Database\Exceptions;
 
 /**
  * Query specific exception (bad parameters, database failure).
  *
- * @todo change hierarchy?
- * @todo add ConstrainException
+ * @todo add more sub exceptions
  */
-class QueryException extends RuntimeException
+class QueryException extends DatabaseException implements QueryExceptionInterface
 {
+    /**
+     * @var string
+     */
+    private $query;
+
     /**
      * {@inheritdoc}
      *
      * @param \PDOException $exception
      */
-    public function __construct(\PDOException $exception)
+    public function __construct(\PDOException $exception, string $query)
     {
         parent::__construct($exception->getMessage(), (int)$exception->getCode(), $exception);
+        $this->query = $query;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getQuery(): string
+    {
+        return $this->query;
     }
 
     /**
      * @return \PDOException
      */
-    public function pdoException()
+    public function pdoException(): \PDOException
     {
-        return $this->getPrevious();
+        /**
+         * @var \PDOException $previous
+         */
+        $previous = $this->getPrevious();
+
+        return $previous;
     }
 }

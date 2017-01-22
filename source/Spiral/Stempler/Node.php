@@ -15,16 +15,9 @@ use Spiral\Stempler\Exceptions\StrictModeException;
 /**
  * Stempler Node represents simple XML like tree of blocks defined by behaviours provided by it's
  * supervisor. Node utilizes HtmlTokenizer to create set of tokens being feeded to supervisor.
- * 
- * @todo move shortTags to syntax! ASAP!
  */
 class Node
 {
-    /**
-     * Short tags expression, usually used inside attributes and etc.
-     */
-    const SHORT_TAGS = '/\${(?P<name>[a-z0-9_\.\-]+)(?: *\| *(?P<default>[^}]+) *)?}/i';
-
     /**
      * Node name (usually related to block name).
      *
@@ -93,7 +86,7 @@ class Node
     /**
      * @return SupervisorInterface
      */
-    public function supervisor()
+    public function getSupervisor()
     {
         return $this->supervisor;
     }
@@ -147,6 +140,7 @@ class Node
      * Recursively find a children node by it's name.
      *
      * @param string $name
+     *
      * @return Node|null
      */
     public function findNode($name)
@@ -171,6 +165,7 @@ class Node
      *
      * @param array $dynamic  All outer blocks will be aggregated in this array (in compiled form).
      * @param array $compiled Internal complication memory (method called recursively)
+     *
      * @return string
      */
     public function compile(&$dynamic = [], &$compiled = [])
@@ -228,6 +223,7 @@ class Node
      * constructions. Basically it will try to created html tree.
      *
      * @param array $tokens
+     *
      * @throws StrictModeException
      */
     protected function parseTokens(array $tokens)
@@ -257,7 +253,7 @@ class Node
                         break;
 
                     case HtmlTokenizer::TAG_CLOSE:
-                        if ($this->supervisor->syntax()->isStrict()) {
+                        if ($this->supervisor->getSyntax()->isStrict()) {
                             throw new StrictModeException(
                                 "Unpaired close tag '{$token[HtmlTokenizer::TOKEN_NAME]}'.", $token
                             );
@@ -360,7 +356,7 @@ class Node
         }
 
         //Looking for short tag definitions (${title|DEFAULT})
-        if (preg_match(self::SHORT_TAGS, $content, $matches)) {
+        if (preg_match($this->supervisor->getSyntax()->shortTags(), $content, $matches)) {
             $chunks = explode($matches[0], $content);
 
             //We expecting first chunk to be string (before block)

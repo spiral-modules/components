@@ -5,13 +5,14 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tokenizer;
 
 use Spiral\Tokenizer\Exceptions\IsolatorException;
 
 /**
- * Isolators used to find and replace php blocks in given source. Can
- * be used by view processors, or to remove php code from some string.
+ * Isolators used to find and replace php blocks in given source. Can be used by view processors,
+ * or to remove php code from some string.
  */
 class Isolator
 {
@@ -28,7 +29,7 @@ class Isolator
      *
      * @var string
      */
-    private $prefix = '';
+    private $prefix;
 
     /**
      * Isolation postfix. Use any values that will not corrupt HTML
@@ -36,13 +37,13 @@ class Isolator
      *
      * @var string
      */
-    private $postfix = '';
+    private $postfix;
 
     /**
      * @param string $prefix  Replaced block prefix, -php by default.
      * @param string $postfix Replaced block postfix, block- by default.
      */
-    public function __construct($prefix = '-php-', $postfix = '-block-')
+    public function __construct(string $prefix = '-php-', string $postfix = '-block-')
     {
         $this->prefix = $prefix;
         $this->postfix = $postfix;
@@ -54,9 +55,10 @@ class Isolator
      * with non executable placeholder.
      *
      * @param string $source
+     *
      * @return string
      */
-    public function isolatePHP($source)
+    public function isolatePHP(string $source): string
     {
         $phpBlock = false;
 
@@ -80,6 +82,7 @@ class Isolator
             }
 
             $tokenContent = is_array($token) ? $token[1] : $token;
+
             if (!empty($phpBlock)) {
                 $phpBlock .= $tokenContent;
             } else {
@@ -95,10 +98,12 @@ class Isolator
      *
      * @param string $blockID
      * @param string $source
-     * @return $this
+     *
+     * @return self
+     *
      * @throws IsolatorException
      */
-    public function setBlock($blockID, $source)
+    public function setBlock(string $blockID, string $source): Isolator
     {
         if (!isset($this->phpBlocks[$blockID])) {
             throw new IsolatorException("Undefined block {$blockID}");
@@ -110,25 +115,11 @@ class Isolator
     }
 
     /**
-     * Replace every isolated block.
-     *
-     * @deprecated Use setBlock instead!
-     * @param array $blocks
-     * @return $this
-     */
-    public function setBlocks(array $blocks)
-    {
-        $this->phpBlocks = $blocks;
-
-        return $this;
-    }
-
-    /**
      * List of all found and replaced php blocks.
      *
      * @return array
      */
-    public function getBlocks()
+    public function getBlocks(): array
     {
         return $this->phpBlocks;
     }
@@ -138,13 +129,20 @@ class Isolator
      * be already called).
      *
      * @param string $source
+     * @param bool   $partial  Set to true to restore only some blocks (listed in a 3rd paramater).
+     * @param array  $blockIDs Blocks to be restored when partial mode is on.
+     *
      * @return string
      */
-    public function repairPHP($source)
+    public function repairPHP(string $source, bool $partial = false, array $blockIDs = []): string
     {
         return preg_replace_callback(
             $this->blockRegex(),
-            function ($match) {
+            function ($match) use ($partial, $blockIDs) {
+                if ($partial && !in_array($match['id'], $blockIDs)) {
+                    return $match[0];
+                }
+
                 if (!isset($this->phpBlocks[$match['id']])) {
                     return $match[0];
                 }
@@ -160,9 +158,10 @@ class Isolator
      * already called).
      *
      * @param string $isolatedSource
+     *
      * @return string
      */
-    public function removePHP($isolatedSource)
+    public function removePHP(string $isolatedSource): string
     {
         return preg_replace($this->blockRegex(), '', $isolatedSource);
     }
@@ -178,37 +177,39 @@ class Isolator
     /**
      * @return string
      */
-    private function blockRegex()
+    private function blockRegex(): string
     {
         return '/' .
-        preg_quote($this->prefix)
-        . '(?P<id>[0-9a-z]+)'
-        . preg_quote($this->postfix)
-        . '/';
+            preg_quote($this->prefix)
+            . '(?P<id>[0-9a-z]+)'
+            . preg_quote($this->postfix)
+            . '/';
     }
 
     /**
      * @return string
      */
-    private function uniqueID()
+    private function uniqueID(): string
     {
         return md5(count($this->phpBlocks) . uniqid(true));
     }
 
     /**
-     * @param int $blockID
+     * @param string $blockID
+     *
      * @return string
      */
-    private function placeholder($blockID)
+    private function placeholder(string $blockID): string
     {
         return $this->prefix . $blockID . $this->postfix;
     }
 
     /**
      * @param mixed $token
+     *
      * @return bool
      */
-    private function isOpenTag($token)
+    private function isOpenTag($token): bool
     {
         if (!is_array($token)) {
             return false;
@@ -224,9 +225,10 @@ class Isolator
 
     /**
      * @param mixed $token
+     *
      * @return bool
      */
-    public function isCloseTag($token)
+    public function isCloseTag($token): bool
     {
         if (!is_array($token)) {
             return false;

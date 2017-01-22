@@ -18,6 +18,7 @@ interface ImporterInterface
      *
      * @param string $element Element name.
      * @param array  $token   Context token.
+     *
      * @return bool
      */
     public function importable($element, array $token);
@@ -27,6 +28,7 @@ interface ImporterInterface
      *
      * @param string $element Element name.
      * @param array  $token   Context token.
+     *
      * @return mixed
      */
     public function resolvePath($element, array $token);

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Files\Streams;
 
 use Psr\Http\Message\StreamInterface;
@@ -17,5 +18,5 @@ interface StreamableInterface
     /**
      * @return StreamInterface
      */
-    public function getStream();
+    public function getStream(): StreamInterface;
 }

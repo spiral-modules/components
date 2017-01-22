@@ -5,17 +5,14 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\ORM;
 
-use Spiral\Database\Entities\Driver;
 use Spiral\Database\Injections\FragmentInterface;
 use Spiral\Models\AccessorInterface;
 
 /**
- * Declares requirement for every ORM field accessor to declare it's driver depended value and
- * control it's updates.
- *
- * ORM accessors are much more simple by initiation that ODM accessors.
+ * Declares requirement for every ORM field accessor to control it's updates and state.
  */
 interface RecordAccessorInterface extends AccessorInterface
 {
@@ -24,27 +21,20 @@ interface RecordAccessorInterface extends AccessorInterface
      *
      * @return bool
      */
-    public function hasUpdates();
+    public function hasChanges(): bool;
 
     /**
-     * Mark object as successfully updated and flush all existed atomic operations and updates.
+     * Indicate that all updates done, reset dirty state.
      */
-    public function flushUpdates();
+    public function flushChanges();
 
     /**
      * Create update value or statement to be used in DBAL update builder. May return SQLFragments
      * and expressions.
      *
      * @param string $field Name of field where accessor associated to.
+     *
      * @return mixed|FragmentInterface
      */
-    public function compileUpdates($field = '');
-
-    /**
-     * Accessor default value (must be specific to driver).
-     *
-     * @param Driver $driver
-     * @return mixed
-     */
-    public function defaultValue(Driver $driver);
+    public function compileUpdates(string $field = '');
 }

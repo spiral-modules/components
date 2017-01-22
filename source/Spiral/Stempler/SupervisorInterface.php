@@ -21,7 +21,7 @@ interface SupervisorInterface
     /**
      * @return SyntaxInterface
      */
-    public function syntax();
+    public function getSyntax(): SyntaxInterface;
 
     /**
      * Define html tag behaviour based on supervisor syntax settings.
@@ -29,6 +29,7 @@ interface SupervisorInterface
      * @param array $token
      * @param array $content
      * @param Node  $node Node which called behaviour creation. Just in case.
+     *
      * @return mixed|BehaviourInterface
      */
     public function tokenBehaviour(array $token, array $content, Node $node);

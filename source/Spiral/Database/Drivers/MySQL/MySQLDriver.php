@@ -5,12 +5,14 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Drivers\MySQL;
 
 use PDO;
+use Psr\Log\LoggerInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\MySQL\Schemas\Commander;
-use Spiral\Database\Drivers\MySQL\Schemas\TableSchema;
+use Spiral\Database\Drivers\MySQL\Schemas\MySQLTable;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 
 /**
@@ -26,36 +28,27 @@ class MySQLDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE = TableSchema::class;
-
-    /**
-     * Commander used to execute commands. :)
-     */
-    const COMMANDER = Commander::class;
+    const TABLE_SCHEMA_CLASS = MySQLTable::class;
 
     /**
      * Query compiler class.
      */
-    const QUERY_COMPILER = QueryCompiler::class;
-
-    /**
-     * Default timestamp expression.
-     */
-    const TIMESTAMP_NOW = 'CURRENT_TIMESTAMP';
+    const QUERY_COMPILER = MySQLCompiler::class;
 
     /**
      * {@inheritdoc}
      */
-    protected $options = [
+    protected $pdoOptions = [
         PDO::ATTR_CASE               => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "UTF8"'
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "UTF8"',
+        PDO::ATTR_STRINGIFY_FETCHES  => false,
     ];
 
     /**
      * {@inheritdoc}
      */
-    public function identifier($identifier)
+    public function identifier(string $identifier): string
     {
         return $identifier == '*' ? '*' : '`' . str_replace('`', '``', $identifier) . '`';
     }
@@ -63,9 +56,9 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?';
+        $query = "SELECT COUNT(*) FROM `information_schema`.`tables` WHERE `table_schema` = ? AND `table_name` = ?";
 
         return (bool)$this->query($query, [$this->getSource(), $name])->fetchColumn();
     }
@@ -73,13 +66,29 @@ class MySQLDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function truncateData(string $table)
+    {
+        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function tableNames(): array
     {
         $result = [];
-        foreach ($this->query('SHOW TABLES')->fetchMode(PDO::FETCH_NUM) as $row) {
+        foreach ($this->query("SHOW TABLES")->fetchAll(PDO::FETCH_NUM) as $row) {
             $result[] = $row[0];
         }
 
         return $result;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandler(LoggerInterface $logger = null): AbstractHandler
+    {
+        return new MySQLHandler($this, $logger);
     }
 }

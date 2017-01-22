@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Injections;
 
 use Spiral\Database\Entities\QueryCompiler;
@@ -21,15 +22,25 @@ use Spiral\Database\Entities\QueryCompiler;
 class Expression extends Fragment implements ExpressionInterface
 {
     /**
+     * Unescaped expression.
+     *
+     * @return string
+     */
+    public function getExpression(): string
+    {
+        return $this->statement;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($compiler)) {
             //We might need to throw an exception here in some cases
-            return parent::sqlStatement();
+            return $this->statement;
         }
 
-        return $compiler->quote(parent::sqlStatement($compiler));
+        return $compiler->quote(parent::sqlStatement());
     }
 }

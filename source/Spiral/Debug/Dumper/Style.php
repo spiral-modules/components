@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Debug\Dumper;
 
 /**
@@ -41,6 +42,7 @@ class Style
     protected $styles = [
         'common'   => 'color: black',
         'name'     => 'color: black',
+        'dynamic'  => 'color: purple;',
         'maxLevel' => 'color: #ff9900',
         'syntax'   => [
             'common' => 'color: #666',
@@ -66,17 +68,18 @@ class Style
             'common'    => 'color: #666',
             'public'    => 'color: #8dc17d',
             'private'   => 'color: #c18c7d',
-            'protected' => 'color: #7d95c1'
-        ]
+            'protected' => 'color: #7d95c1',
+        ],
     ];
 
     /**
      * Inject dumped value into dump container.
      *
      * @param string $dump
+     *
      * @return string
      */
-    public function mountContainer($dump)
+    public function wrapContainer(string $dump): string
     {
         return \Spiral\interpolate($this->container, compact('dump'));
     }
@@ -85,26 +88,28 @@ class Style
      * Set indent to line based on it's level.
      *
      * @param int $level
+     *
      * @return string
      */
-    public function indent($level)
+    public function indent(int $level): string
     {
         if ($level == 0) {
             return '';
         }
 
-        return $this->style(str_repeat($this->indent, $level), 'indent');
+        return $this->apply(str_repeat($this->indent, $level), 'indent');
     }
 
     /**
      * Stylize content using pre-defined style.
      *
-     * @param string $element
-     * @param string $type
-     * @param string $context
+     * @param string|null $element
+     * @param string      $type
+     * @param string      $context
+     *
      * @return string
      */
-    public function style($element, $type, $context = '')
+    public function apply($element, string $type, string $context = ''): string
     {
         if (!empty($style = $this->getStyle($type, $context))) {
             return \Spiral\interpolate(
@@ -117,13 +122,14 @@ class Style
     }
 
     /**
-     * Get valid stype based on type and context/
+     * Get valid stype based on type and context/.
      *
      * @param string $type
      * @param string $context
+     *
      * @return string
      */
-    private function getStyle($type, $context)
+    private function getStyle(string $type, string $context): string
     {
         if (isset($this->styles[$type][$context])) {
             return $this->styles[$type][$context];

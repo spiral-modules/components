@@ -5,57 +5,33 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Entities;
 
 use PDO;
 use Psr\Log\LoggerAwareInterface;
 use Spiral\Core\Component;
-use Spiral\Core\Exceptions\SugarException;
-use Spiral\Core\FactoryInterface;
-use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Database\DatabaseManager;
-use Spiral\Database\Exceptions\ConstrainException;
+use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Database\Exceptions\DriverException;
 use Spiral\Database\Exceptions\QueryException;
+use Spiral\Database\Helpers\QueryInterpolator;
 use Spiral\Database\Injections\Parameter;
 use Spiral\Database\Injections\ParameterInterface;
-use Spiral\Database\Query\QueryResult;
 use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 
 /**
- * Basic implementation of DBAL Driver, can talk to PDO, send queries and etc.
+ * Basic implementation of DBAL Driver, basically decorates PDO. Extends component to provide access
+ *  to functionality like shared loggers and benchmarking.
  */
 abstract class PDODriver extends Component implements LoggerAwareInterface
 {
-    /**
-     * There is few points can raise warning message or take long time to execute, we better profile
-     * them.
-     */
-    use LoggerTrait, BenchmarkTrait, SaturateTrait;
+    use LoggerTrait, BenchmarkTrait;
 
     /**
-     * One of DatabaseInterface types.
+     * One of DatabaseInterface types, must be set on implementation.
      */
-    const TYPE = '';
-
-    /**
-     * Driver schemas.
-     */
-    const SCHEMA_TABLE     = '';
-    const SCHEMA_COLUMN    = '';
-    const SCHEMA_INDEX     = '';
-    const SCHEMA_REFERENCE = '';
-
-    /**
-     * Query result class.
-     */
-    const QUERY_RESULT = QueryResult::class;
-
-    /**
-     * Query compiler class.
-     */
-    const QUERY_COMPILER = QueryCompiler::class;
+    const TYPE = null;
 
     /**
      * DateTime format to be used to perform automatic conversion of DateTime objects.
@@ -65,19 +41,6 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     const DATETIME = 'Y-m-d H:i:s';
 
     /**
-     * @var PDO|null
-     */
-    private $pdo = null;
-
-    /**
-     * Transaction level (count of nested transactions). Not all drives can support nested
-     * transactions.
-     *
-     * @var int
-     */
-    private $transactionLevel = 0;
-
-    /**
      * Driver name.
      *
      * @var string
@@ -85,17 +48,27 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     private $name = '';
 
     /**
+     * @var PDO|null
+     */
+    private $pdo = null;
+
+    /**
      * Connection configuration described in DBAL config file. Any driver can be used as data source
      * for multiple databases as table prefix and quotation defined on Database instance level.
      *
      * @var array
      */
-    protected $config = [
+    protected $options = [
         'profiling'  => false,
+
+        //All datetime objects will be converted relative to this timezone (must match with DB timezone!)
+        'timezone'   => 'UTC',
+
+        //DSN
         'connection' => '',
         'username'   => '',
         'password'   => '',
-        'options'    => []
+        'options'    => [],
     ];
 
     /**
@@ -103,37 +76,28 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @var array
      */
-    protected $options = [
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_STRINGIFY_FETCHES => true
+    protected $pdoOptions = [
+        PDO::ATTR_CASE             => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_EMULATE_PREPARES => false
     ];
 
     /**
-     * Container is needed to construct instances of QueryCompiler.
+     * @param string $name
+     * @param array  $options
      *
-     * @invisible
-     * @var FactoryInterface
+     * @throws ScopeException
      */
-    protected $factory = null;
-
-    /**
-     * @param string           $name
-     * @param array            $config
-     * @param FactoryInterface $factory Factory is needed to construct instances of QueryCompiler.
-     *                                  Sugared using static container.
-     * @throws SugarException
-     */
-    public function __construct($name, array $config, FactoryInterface $factory = null)
+    public function __construct(string $name, array $options)
     {
         $this->name = $name;
 
-        $this->config = $config + $this->config;
+        $this->options = $options + $this->options;
 
-        //PDO connection options has to be stored under key "options" of config
-        $this->options = $config['options'] + $this->options;
-
-        $this->factory = $this->saturate($factory, FactoryInterface::class);
+        if (!empty($options['options'])) {
+            //PDO connection options has to be stored under key "options" of config
+            $this->pdoOptions = $options['options'] + $this->pdoOptions;
+        }
     }
 
     /**
@@ -141,7 +105,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -150,15 +114,19 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Get driver source database or file name.
      *
      * @return string
+     *
      * @throws DriverException
      */
-    public function getSource()
+    public function getSource(): string
     {
-        if (preg_match('/(?:dbname|database)=([^;]+)/i', $this->config['connection'], $matches)) {
+        if (preg_match(
+            '/(?:dbname|database)=([^;]+)/i', $this->options['connection'],
+            $matches
+        )) {
             return $matches[1];
         }
 
-        throw new DriverException("Unable to locate source name.");
+        throw new DriverException('Unable to locate source name');
     }
 
     /**
@@ -166,7 +134,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return static::TYPE;
     }
@@ -174,23 +142,23 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Connection specific timezone, at this moment locked to UTC.
      *
-     * @todo Support connection specific timezones.
      * @return \DateTimeZone
      */
-    public function getTimezone()
+    public function getTimezone(): \DateTimeZone
     {
-        return new \DateTimeZone(DatabaseManager::DEFAULT_TIMEZONE);
+        return new \DateTimeZone($this->options['timezone']);
     }
 
     /**
      * Enabled profiling will raise set of log messages and benchmarks associated with PDO queries.
      *
      * @param bool $enabled Enable or disable driver profiling.
-     * @return $this
+     *
+     * @return self
      */
-    public function setProfiling($enabled = true)
+    public function setProfiling(bool $enabled = true): PDODriver
     {
-        $this->config['profiling'] = $enabled;
+        $this->options['profiling'] = $enabled;
 
         return $this;
     }
@@ -200,20 +168,25 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function isProfiling()
+    public function isProfiling(): bool
     {
-        return $this->config['profiling'];
+        return $this->options['profiling'];
     }
 
     /**
      * Force driver to connect.
      *
      * @return PDO
+     *
+     * @throws DriverException
      */
-    public function connect()
+    public function connect(): PDO
     {
-        //todo: exception if already connected
-        $benchmark = $this->benchmark('connect', $this->config['connection']);
+        if ($this->isConnected()) {
+            return $this->pdo;
+        }
+
+        $benchmark = $this->benchmark('connect', $this->options['connection']);
         try {
             $this->pdo = $this->createPDO();
         } finally {
@@ -226,9 +199,9 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Disconnect driver.
      *
-     * @return $this
+     * @return self
      */
-    public function disconnect()
+    public function disconnect(): PDODriver
     {
         $this->pdo = null;
 
@@ -240,22 +213,24 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return bool
      */
-    public function isConnected()
+    public function isConnected(): bool
     {
         return !empty($this->pdo);
     }
 
     /**
-     * Change PDO instance associated with driver.
+     * Change PDO instance associated with driver. Returns new copy of driver.
      *
      * @param PDO $pdo
-     * @return $this
+     *
+     * @return self
      */
-    public function setPDO(PDO $pdo)
+    public function withPDO(PDO $pdo): PDODriver
     {
-        $this->pdo = $pdo;
+        $driver = clone $this;
+        $driver->pdo = $pdo;
 
-        return $this;
+        return $driver;
     }
 
     /**
@@ -263,7 +238,7 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return PDO
      */
-    public function getPDO()
+    public function getPDO(): PDO
     {
         if (!$this->isConnected()) {
             $this->connect();
@@ -276,58 +251,82 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Driver specific database/table identifier quotation.
      *
      * @param string $identifier
+     *
      * @return string
      */
-    public function identifier($identifier)
+    public function identifier(string $identifier): string
     {
         return $identifier == '*' ? '*' : '"' . str_replace('"', '""', $identifier) . '"';
     }
 
     /**
-     * Execute sql statement and wrap resulted rows using driver specific or default instance of
-     * QueryResult.
+     * Quote value using PDO.
      *
-     * @param string $query
-     * @param array  $parameters Parameters to be binded into query.
-     * @return QueryResult
-     * @throws QueryException
+     * @param mixed $value
+     * @param int   $type Parameter type.
+     *
+     * @return string
      */
-    public function query($query, array $parameters = [])
+    public function quote($value, int $type = PDO::PARAM_STR): string
     {
-        return $this->factory->make(static::QUERY_RESULT, [
-            'statement'  => $this->statement($query, $parameters),
-            'parameters' => $parameters
-        ]);
+        if ($value instanceof \DateTimeInterface) {
+            $value = $this->normalizeTimestamp($value);
+        }
+
+        return $this->getPDO()->quote($value, $type);
     }
 
     /**
-     * Create instance of PDOStatement using provided SQL query and set of parameters.
+     * Wraps PDO query method with custom representation class.
      *
-     * @todo more exceptions to be thrown
+     * @param string $statement
+     * @param array  $parameters
+     *
+     * @return QueryStatement
+     */
+    public function query(string $statement, array $parameters = []): QueryStatement
+    {
+        //Forcing specific return class
+        $result = $this->statement($statement, $parameters, QueryStatement::class);
+
+        /**
+         * @var QueryStatement $result
+         */
+        return $result;
+    }
+
+    /**
+     * Create instance of PDOStatement using provided SQL query and set of parameters and execute
+     * it.
+     *
      * @param string $query
      * @param array  $parameters Parameters to be binded into query.
+     * @param string $class      Class to be used to represent results.
+     *
      * @return \PDOStatement
+     *
      * @throws QueryException
      */
-    public function statement($query, array $parameters = [])
-    {
+    public function statement(
+        string $query,
+        array $parameters = [],
+        $class = QueryStatement::class
+    ): \PDOStatement {
+
         try {
+            //Filtered and normalized parameters
+            $parameters = $this->flattenParameters($parameters);
+
             if ($this->isProfiling()) {
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
                 $benchmark = $this->benchmark($this->name, $queryString);
             }
 
-            /**
-             * This code requires minor improvements to support prepared statements on user level.
-             */
+            //PDOStatement instance (prepared)
+            $pdoStatement = $this->prepare($query, $class);
 
-            //Prepared statement
-            $pdoStatement = $this->prepare($query);
-
-            foreach ($this->flattenParameters($parameters) as $index => $parameter) {
-                //Let's mount statement parameters
-                $pdoStatement->bindValue($index + 1, $parameter->getValue(), $parameter->getType());
-            }
+            //Mounting all input parameters
+            $pdoStatement = $this->bindParameters($pdoStatement, $parameters);
 
             try {
                 $pdoStatement->execute();
@@ -339,17 +338,22 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
 
             //Only exists if profiling on
             if (!empty($queryString)) {
+                //This is place you can use to handle ALL sql messages passed thought the driver
                 $this->logger()->info($queryString, compact('query', 'parameters'));
             }
-        } catch (\PDOException $exception) {
+        } catch (\PDOException $e) {
             if (empty($queryString)) {
                 $queryString = QueryInterpolator::interpolate($query, $parameters);
             }
 
+            //Logging error even when no profiling is enabled
             $this->logger()->error($queryString, compact('query', 'parameters'));
 
+            //Logging error even when no profiling is enabled
+            $this->logger()->alert($e->getMessage());
+
             //Converting exception into query or integrity exception
-            throw $this->clarifyException($exception);
+            throw $this->clarifyException($e, $queryString);
         }
 
         return $pdoStatement;
@@ -358,13 +362,18 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     /**
      * Get prepared PDO statement.
      *
-     * @param string $statement
+     * @param string $statement Query statement.
+     * @param string $class     Class to represent PDO statement.
+     *
      * @return \PDOStatement
      */
-    public function prepare($statement)
+    public function prepare(string $statement, $class = QueryStatement::class): \PDOStatement
     {
-        //todo: what about caching prepared statements?
-        return $this->getPDO()->prepare($statement);
+        $pdo = $this->getPDO();
+
+        $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [$class]);
+
+        return $pdo->prepare($statement);
     }
 
     /**
@@ -373,13 +382,19 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @param string|null $sequence Name of the sequence object from which the ID should be
      *                              returned.
+     *
      * @return mixed
      */
-    public function lastInsertID($sequence = null)
+    public function lastInsertID(string $sequence = null)
     {
-        return $sequence
-            ? (int)$this->getPDO()->lastInsertId($sequence)
-            : (int)$this->getPDO()->lastInsertId();
+        $pdo = $this->getPDO();
+        $result = $sequence ? (int)$pdo->lastInsertId($sequence) : (int)$pdo->lastInsertId();
+
+        if ($this->isProfiling()) {
+            $this->logger()->debug("Given insert ID: {$result}");
+        }
+
+        return $result;
     }
 
     /**
@@ -389,126 +404,64 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Every value has to wrapped with parameter interface.
      *
      * @param array $parameters
+     *
      * @return ParameterInterface[]
+     *
+     * @throws DriverException
      */
-    public function flattenParameters(array $parameters)
+    public function flattenParameters(array $parameters): array
     {
         $flatten = [];
-        foreach ($parameters as $parameter) {
+        foreach ($parameters as $key => $parameter) {
             if (!$parameter instanceof ParameterInterface) {
                 //Let's wrap value
                 $parameter = new Parameter($parameter, Parameter::DETECT_TYPE);
             }
 
-            //Converting into flat array
-            $flattenParameter = $parameter->flatten();
+            if ($parameter->isArray()) {
+                if (!is_numeric($key)) {
+                    throw new DriverException("Array parameters can not be named");
+                }
 
-            /**
-             * @var ParameterInterface $value
-             */
-            foreach ($flattenParameter as $value) {
-                if ($value->getValue() instanceof \DateTime) {
-                    //Converting datetime object into string representation
-                    $value->setValue($this->prepareDateTime($value->getValue()));
+                //Flattening arrays
+                $nestedParameters = $parameter->flatten();
+
+                /**
+                 * @var ParameterInterface $parameter []
+                 */
+                foreach ($nestedParameters as &$nestedParameter) {
+                    if ($nestedParameter->getValue() instanceof \DateTime) {
+
+                        //Original parameter must not be altered
+                        $nestedParameter = $nestedParameter->withValue(
+                            $this->normalizeTimestamp($nestedParameter->getValue())
+                        );
+                    }
+
+                    unset($nestedParameter);
+                }
+
+                //Quick and dirty
+                $flatten = array_merge($flatten, $nestedParameters);
+
+            } else {
+                if ($parameter->getValue() instanceof \DateTime) {
+                    //Original parameter must not be altered
+                    $parameter = $parameter->withValue(
+                        $this->normalizeTimestamp($parameter->getValue())
+                    );
+                }
+
+                if (is_numeric($key)) {
+                    //Numeric keys can be shifted
+                    $flatten[] = $parameter;
+                } else {
+                    $flatten[$key] = $parameter;
                 }
             }
-
-            //We have to flatten all parameters as some of them can be provided in array form
-            $flatten = array_merge($flatten, $flattenParameter);
         }
 
         return $flatten;
-    }
-
-    /**
-     * Start SQL transaction with specified isolation level (not all DBMS support it). Nested
-     * transactions are processed using savepoints.
-     *
-     * @link   http://en.wikipedia.org/wiki/Database_transaction
-     * @link   http://en.wikipedia.org/wiki/Isolation_(database_systems)
-     * @param string $isolationLevel
-     * @return bool
-     */
-    public function beginTransaction($isolationLevel = null)
-    {
-        $this->transactionLevel++;
-        if ($this->transactionLevel == 1) {
-            if (!empty($isolationLevel)) {
-                $this->isolationLevel($isolationLevel);
-            }
-
-            $this->logger()->info('Begin transaction');
-
-            return $this->getPDO()->beginTransaction();
-        }
-
-        $this->savepointCreate($this->transactionLevel);
-
-        return true;
-    }
-
-    /**
-     * Commit the active database transaction.
-     *
-     * @return bool
-     */
-    public function commitTransaction()
-    {
-        $this->transactionLevel--;
-        if ($this->transactionLevel == 0) {
-            $this->logger()->info('Commit transaction');
-
-            return $this->getPDO()->commit();
-        }
-
-        $this->savepointRelease($this->transactionLevel + 1);
-
-        return true;
-    }
-
-    /**
-     * Rollback the active database transaction.
-     *
-     * @return bool
-     */
-    public function rollbackTransaction()
-    {
-        $this->transactionLevel--;
-
-        if ($this->transactionLevel == 0) {
-            $this->logger()->info('Rollback transaction');
-
-            return $this->getPDO()->rollBack();
-        }
-
-        $this->savepointRollback($this->transactionLevel + 1);
-
-        return true;
-    }
-
-    /**
-     * Clean (truncate) specified driver table.
-     *
-     * @param string $table Table name with prefix included.
-     */
-    public function truncate($table)
-    {
-        $this->statement("TRUNCATE TABLE {$this->identifier($table)}");
-    }
-
-    /**
-     * Get instance of Driver specific QueryCompiler.
-     *
-     * @param string $prefix Database specific table prefix, used to quote table names and build
-     *                       aliases.
-     * @return QueryCompiler
-     */
-    public function queryCompiler($prefix = '')
-    {
-        return $this->factory->make(static::QUERY_COMPILER, [
-            'driver' => $this,
-            'quoter' => new Quoter($this, $prefix)
-        ]);
     }
 
     /**
@@ -517,11 +470,11 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
     public function __debugInfo()
     {
         return [
-            'connection' => $this->config['connection'],
+            'connection' => $this->options['connection'],
             'connected'  => $this->isConnected(),
             'profiling'  => $this->isProfiling(),
-            'database'   => $this->getSource(),
-            'options'    => $this->options
+            'source'     => $this->getSource(),
+            'options'    => $this->pdoOptions,
         ];
     }
 
@@ -530,13 +483,13 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      *
      * @return PDO
      */
-    protected function createPDO()
+    protected function createPDO(): PDO
     {
         return new PDO(
-            $this->config['connection'],
-            $this->config['username'],
-            $this->config['password'],
-            $this->options
+            $this->options['connection'],
+            $this->options['username'],
+            $this->options['password'],
+            $this->pdoOptions
         );
     }
 
@@ -544,76 +497,53 @@ abstract class PDODriver extends Component implements LoggerAwareInterface
      * Convert PDO exception into query or integrity exception.
      *
      * @param \PDOException $exception
-     * @return QueryException|ConstrainException
-     */
-    protected function clarifyException(\PDOException $exception)
-    {
-        return new QueryException($exception);
-    }
-
-    /**
-     * Set transaction isolation level, this feature may not be supported by specific database
-     * driver.
+     * @param string        $query
      *
-     * @param string $level
+     * @return QueryException
      */
-    protected function isolationLevel($level)
+    protected function clarifyException(\PDOException $exception, string $query): QueryException
     {
-        $this->logger()->info("Set transaction isolation level to '{$level}'.");
-
-        if (!empty($level)) {
-            $this->statement("SET TRANSACTION ISOLATION LEVEL {$level}");
-        }
-    }
-
-    /**
-     * Create nested transaction save point.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database
-     *                     identifier.
-     */
-    protected function savepointCreate($name)
-    {
-        $this->logger()->info("Creating savepoint '{$name}'.");
-        $this->statement("SAVEPOINT " . $this->identifier("SVP{$name}"));
-    }
-
-    /**
-     * Commit/release savepoint.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database
-     *                     identifier.
-     */
-    protected function savepointRelease($name)
-    {
-        $this->logger()->info("Releasing savepoint '{$name}'.");
-        $this->statement("RELEASE SAVEPOINT " . $this->identifier("SVP{$name}"));
-    }
-
-    /**
-     * Rollback savepoint.
-     *
-     * @link http://en.wikipedia.org/wiki/Savepoint
-     * @param string $name Savepoint name/id, must not contain spaces and be valid database
-     *                     identifier.
-     */
-    protected function savepointRollback($name)
-    {
-        $this->logger()->info("Rolling back savepoint '{$name}'.");
-        $this->statement("ROLLBACK TO SAVEPOINT " . $this->identifier("SVP{$name}"));
+        //@todo more exceptions to be thrown
+        return new QueryException($exception, $query);
     }
 
     /**
      * Convert DateTime object into local database representation. Driver will automatically force
      * needed timezone.
      *
-     * @param \DateTime $dateTime
+     * @param \DateTimeInterface $value
+     *
      * @return string
      */
-    protected function prepareDateTime(\DateTime $dateTime)
+    protected function normalizeTimestamp(\DateTimeInterface $value): string
     {
-        return $dateTime->setTimezone($this->getTimezone())->format(static::DATETIME);
+        //Immutable and prepared??
+        $datetime = new \DateTime('now', $this->getTimezone());
+        $datetime->setTimestamp($value->getTimestamp());
+
+        return $datetime->format(static::DATETIME);
+    }
+
+    /**
+     * Bind parameters into statement.
+     *
+     * @param \PDOStatement        $statement
+     * @param ParameterInterface[] $parameters Named hash of ParameterInterface.
+     *
+     * @return \PDOStatement
+     */
+    private function bindParameters(\PDOStatement $statement, array $parameters): \PDOStatement
+    {
+        foreach ($parameters as $index => $parameter) {
+            if (is_numeric($index)) {
+                //Numeric, @see http://php.net/manual/en/pdostatement.bindparam.php
+                $statement->bindValue($index + 1, $parameter->getValue(), $parameter->getType());
+            } else {
+                //Named
+                $statement->bindValue($index, $parameter->getValue(), $parameter->getType());
+            }
+        }
+
+        return $statement;
     }
 }

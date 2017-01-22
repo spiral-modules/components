@@ -5,9 +5,8 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Injections;
 
-use Spiral\Database\Entities\QueryCompiler;
+namespace Spiral\Database\Injections;
 
 /**
  * Default implementation of SQLFragmentInterface, provides ability to inject custom SQL code into
@@ -20,22 +19,20 @@ class Fragment implements FragmentInterface
     /**
      * @var string
      */
-    private $statement = null;
+    protected $statement = null;
 
     /**
      * @param string $statement
      */
-    public function __construct($statement)
+    public function __construct(string $statement)
     {
         $this->statement = $statement;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @param QueryCompiler $compiler
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(): string
     {
         return $this->statement;
     }
@@ -43,7 +40,7 @@ class Fragment implements FragmentInterface
     /**
      * {@inheritdoc}
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->sqlStatement();
     }
@@ -54,5 +51,15 @@ class Fragment implements FragmentInterface
     public function __debugInfo()
     {
         return ['statement' => $this->sqlStatement()];
+    }
+
+    /**
+     * @param array $an_array
+     *
+     * @return Fragment
+     */
+    public static function __set_state(array $an_array): Fragment
+    {
+        return new static($an_array['statement']);
     }
 }

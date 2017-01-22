@@ -15,18 +15,19 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Spiral\Files\FilesInterface;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
 
 /**
  * Provides abstraction level to work with data located in Amazon S3 cloud.
  */
-class AmazonServer extends StorageServer
+class AmazonServer extends AbstractServer
 {
     /**
+     * @invisible
      * @var array
      */
     protected $options = [
@@ -37,27 +38,33 @@ class AmazonServer extends StorageServer
     ];
 
     /**
-     * @todo DI in constructor
+     * @invisible
      * @var ClientInterface
      */
     protected $client = null;
 
     /**
-     * {@inheritdoc}
+     * @param array                $options
+     * @param FilesInterface|null  $files
+     * @param ClientInterface|null $client
      */
-    public function __construct(FilesInterface $files, array $options)
-    {
-        parent::__construct($files, $options);
+    public function __construct(
+        array $options,
+        FilesInterface $files = null,
+        ClientInterface $client = null
+    ) {
+        parent::__construct($options, $files);
 
         //This code is going to use additional abstraction layer to connect storage and guzzle
-        $this->client = new Client($this->options);
+        $this->setClient($client ?? new Client($this->options));
     }
 
     /**
      * @param ClientInterface $client
-     * @return $this
+     *
+     * @return self
      */
-    public function setClient(ClientInterface $client)
+    public function setClient(ClientInterface $client): AmazonServer
     {
         $this->client = $client;
 
@@ -67,44 +74,52 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      *
+     * @param ResponseInterface $response Reference.
+     *
      * @return bool|ResponseInterface
      */
-    public function exists(BucketInterface $bucket, $name)
-    {
+    public function exists(
+        BucketInterface $bucket,
+        string $name,
+        ResponseInterface &$response = null
+    ): bool {
         try {
             $response = $this->client->send($this->buildRequest('HEAD', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() == 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() == 404) {
                 return false;
             }
 
             //Something wrong with connection
-            throw $exception;
+            throw $e;
         }
 
         if ($response->getStatusCode() !== 200) {
             return false;
         }
 
-        return $response;
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
-        if (empty($response = $this->exists($bucket, $name))) {
-            return false;
+        if (!$this->exists($bucket, $name, $response)) {
+            return null;
         }
 
+        /**
+         * @var ResponseInterface $response
+         */
         return (int)$response->getHeaderLine('Content-Length');
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
@@ -123,24 +138,26 @@ class AmazonServer extends StorageServer
 
         $response = $this->client->send($request->withBody($this->castStream($source)));
         if ($response->getStatusCode() != 200) {
-            throw new ServerException("Unable to put '{$name}' to Amazon server.");
+            throw new ServerException("Unable to put '{$name}' to Amazon server");
         }
+
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
         try {
             $response = $this->client->send($this->buildRequest('GET', $bucket, $name));
-        } catch (ClientException $exception) {
-            if ($exception->getCode() != 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() != 404) {
                 //Some authorization or other error
-                throw $exception;
+                throw $e;
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $response->getBody();
@@ -149,7 +166,7 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         $this->client->send($this->buildRequest('DELETE', $bucket, $name));
     }
@@ -157,25 +174,25 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
         try {
-            $request = $this->buildRequest('PUT', $bucket, $newname, [], [
+            $request = $this->buildRequest('PUT', $bucket, $newName, [], [
                 'Acl'         => $bucket->getOption('public') ? 'public-read' : 'private',
-                'Copy-Source' => $this->buildUri($bucket, $oldname)->getPath()
+                'Copy-Source' => $this->buildUri($bucket, $oldName)->getPath()
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() != 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() != 404) {
                 //Some authorization or other error
-                throw $exception;
+                throw $e;
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $this->delete($bucket, $oldname);
+        $this->delete($bucket, $oldName);
 
         return true;
     }
@@ -183,7 +200,7 @@ class AmazonServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function copy(BucketInterface $bucket, BucketInterface $destination, $name)
+    public function copy(BucketInterface $bucket, BucketInterface $destination, string $name): bool
     {
         try {
             $request = $this->buildRequest('PUT', $destination, $name, [], [
@@ -192,13 +209,13 @@ class AmazonServer extends StorageServer
             ]);
 
             $this->client->send($request);
-        } catch (ClientException $exception) {
-            if ($exception->getCode() != 404) {
+        } catch (ClientException $e) {
+            if ($e->getCode() != 404) {
                 //Some authorization or other error
-                throw $exception;
+                throw $e;
             }
 
-            throw new ServerException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new ServerException($e->getMessage(), $e->getCode(), $e);
         }
 
         return true;
@@ -209,9 +226,10 @@ class AmazonServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return UriInterface
      */
-    protected function buildUri(BucketInterface $bucket, $name)
+    protected function buildUri(BucketInterface $bucket, string $name): UriInterface
     {
         return new Uri(
             $this->options['server'] . '/' . $bucket->getOption('bucket') . '/' . rawurlencode($name)
@@ -226,15 +244,16 @@ class AmazonServer extends StorageServer
      * @param string          $name
      * @param array           $headers
      * @param array           $commands Amazon commands associated with values.
+     *
      * @return RequestInterface
      */
     protected function buildRequest(
-        $method,
+        string $method,
         BucketInterface $bucket,
-        $name,
+        string $name,
         array $headers = [],
         array $commands = []
-    ) {
+    ): RequestInterface {
         $headers += [
             'Date'         => gmdate('D, d M Y H:i:s T'),
             'Content-MD5'  => '',
@@ -253,9 +272,10 @@ class AmazonServer extends StorageServer
      * Generate request headers based on provided set of amazon commands.
      *
      * @param array $commands
+     *
      * @return array
      */
-    private function packCommands(array $commands)
+    private function packCommands(array $commands): array
     {
         $headers = [];
         foreach ($commands as $command => $value) {
@@ -271,10 +291,13 @@ class AmazonServer extends StorageServer
      * @param RequestInterface $request
      * @param array            $packedCommands Headers generated based on request commands, see
      *                                         packCommands() method for more information.
+     *
      * @return RequestInterface
      */
-    private function signRequest(RequestInterface $request, array $packedCommands = [])
-    {
+    private function signRequest(
+        RequestInterface $request,
+        array $packedCommands = []
+    ): RequestInterface {
         $signature = [
             $request->getMethod(),
             $request->getHeaderLine('Content-MD5'),
@@ -289,7 +312,7 @@ class AmazonServer extends StorageServer
             }
         }
 
-        if ($normalizedCommands) {
+        if (!empty($normalizedCommands)) {
             sort($normalizedCommands);
             $signature[] = join("\n", $normalizedCommands);
         }
@@ -310,14 +333,16 @@ class AmazonServer extends StorageServer
      * @param BucketInterface $bucket
      * @param string          $name
      * @param mixed           $source
+     *
      * @return array
      */
-    private function createHeaders(BucketInterface $bucket, $name, $source)
+    private function createHeaders(BucketInterface $bucket, string $name, $source): array
     {
         if (empty($mimetype = \GuzzleHttp\Psr7\mimetype_from_filename($name))) {
             $mimetype = self::DEFAULT_MIMETYPE;
         };
 
+        //Possible to add custom headers into the bucket
         $headers = $bucket->getOption('headers', []);
 
         if (!empty($maxAge = $bucket->getOption('maxAge', 0))) {
@@ -330,8 +355,8 @@ class AmazonServer extends StorageServer
         }
 
         return $headers + [
-            'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
-            'Content-Type' => $mimetype
-        ];
+                'Content-MD5'  => base64_encode(md5_file($this->castFilename($source), true)),
+                'Content-Type' => $mimetype
+            ];
     }
 } 

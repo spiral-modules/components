@@ -7,7 +7,7 @@
  */
 namespace Spiral\Stempler\Exporters;
 
-use Spiral\Stempler\ConditionalExporter;
+use Spiral\Stempler\Prototypes\ConditionalExporter;
 
 /**
  * Export user defined (outer) blocks as tag attributes.

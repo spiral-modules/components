@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Debug\Traits;
 
 use Interop\Container\ContainerInterface;
@@ -17,9 +18,10 @@ trait BenchmarkTrait
 {
     /**
      * @invisible
+     *
      * @var BenchmarkerInterface
      */
-    private $benchmarker = null;
+    private $benchmarker;
 
     /**
      * Set custom benchmarker.
@@ -36,16 +38,17 @@ trait BenchmarkTrait
      * should return elapsed time when record are be closed (same set of arguments has to be
      * provided).
      *
-     * @param string $record  Benchmark record name.
-     * @param string $context Record context (if any).
+     * @param string|array $record  Benchmark record name or set of names.
+     * @param string       $context Record context (if any).
+     *
      * @return bool|float|mixed
      */
-    protected function benchmark($record, $context = '')
+    private function benchmark($record, string $context = '')
     {
         if (empty($this->benchmarker)) {
-            if (
-                empty($container = $this->container()) || !$container->has(BenchmarkerInterface::class)
-            ) {
+            $container = $this->iocContainer();
+
+            if (empty($container) || !$container->has(BenchmarkerInterface::class)) {
                 //Nothing to do
                 return false;
             }
@@ -59,5 +62,5 @@ trait BenchmarkTrait
     /**
      * @return ContainerInterface
      */
-    abstract protected function container();
+    abstract protected function iocContainer();
 }

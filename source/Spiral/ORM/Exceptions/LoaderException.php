@@ -1,16 +1,12 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Exceptions;
 
-/**
- * Loader related exceptions.
- */
-class LoaderException extends SelectorException
+class LoaderException extends ORMException
 {
 
 }

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Schemas;
 
 /**
@@ -17,19 +18,19 @@ interface IndexInterface
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Check if index is unique.
      *
      * @return bool
      */
-    public function isUnique();
+    public function isUnique(): bool;
 
     /**
      * Column names used to form index.
      *
      * @return array
      */
-    public function getColumns();
+    public function getColumns(): array;
 }

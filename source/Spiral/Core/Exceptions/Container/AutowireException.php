@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Core\Exceptions\Container;
 
 /**
@@ -12,5 +13,4 @@ namespace Spiral\Core\Exceptions\Container;
  */
 class AutowireException extends ContainerException
 {
-
 }

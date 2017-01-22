@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Tokenizer\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+namespace Spiral\Tokenizer\Exceptions;
 
 /**
  * Generic tokenizer exception.
  */
-class TokenizerException extends RuntimeException
+class TokenizerException extends \RuntimeException
 {
-
 }

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractAffect;
@@ -16,12 +17,18 @@ use Spiral\Database\Entities\QueryCompiler;
 class DeleteQuery extends AbstractAffect
 {
     /**
+     * Query type.
+     */
+    const QUERY_TYPE = QueryCompiler::DELETE_QUERY;
+
+    /**
      * Change target table.
      *
      * @param string $into Table name without prefix.
-     * @return $this
+     *
+     * @return self
      */
-    public function from($into)
+    public function from(string $into): DeleteQuery
     {
         $this->table = $into;
 
@@ -31,21 +38,15 @@ class DeleteQuery extends AbstractAffect
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(): array
     {
-        if (empty($compiler)) {
-            $compiler = $this->compiler;
-        }
-
-        return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::DELETE_QUERY, $this->whereParameters
-        ));
+        return $this->flattenParameters($this->whereParameters);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($compiler)) {
             $compiler = $this->compiler->resetQuoter();

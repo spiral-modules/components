@@ -5,9 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders\Prototypes;
 
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\ExpressionInterface;
 use Spiral\Database\Injections\FragmentInterface;
@@ -18,7 +19,7 @@ use Spiral\Database\Injections\ParameterInterface;
  * Abstract query with WHERE conditions generation support. Provides simplified way to generate
  * WHERE tokens using set of where methods. Class support different where conditions, simplified
  * definitions
- * (using arrays) and closures to describe nested conditions:
+ * (using arrays) and closures to describe nested conditions:.
  *
  * 1) Simple token/nested query or expression
  * $select->where(new SQLFragment('(SELECT count(*) from `table`)'));
@@ -83,8 +84,8 @@ abstract class AbstractWhere extends QueryBuilder
     /**
      * Tokens for nested OR and AND conditions.
      */
-    const TOKEN_AND = "@AND";
-    const TOKEN_OR  = "@OR";
+    const TOKEN_AND = '@AND';
+    const TOKEN_OR  = '@OR';
 
     /**
      * Set of generated where tokens, format must be supported by QueryCompilers.
@@ -105,16 +106,16 @@ abstract class AbstractWhere extends QueryBuilder
      * Simple WHERE condition with various set of arguments.
      *
      * @see AbstractWhere
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
-     * @return $this
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
+     * @return self|$this
+     *
      * @throws BuilderException
      */
-    public function where($identifier, $variousA = null, $variousB = null, $variousC = null)
+    public function where(...$args): AbstractWhere
     {
-        $this->whereToken('AND', func_get_args(), $this->whereTokens, $this->whereWrapper());
+        $this->whereToken('AND', $args, $this->whereTokens, $this->whereWrapper());
 
         return $this;
     }
@@ -123,16 +124,16 @@ abstract class AbstractWhere extends QueryBuilder
      * Simple AND WHERE condition with various set of arguments.
      *
      * @see AbstractWhere
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
-     * @return $this
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
+     * @return self|$this
+     *
      * @throws BuilderException
      */
-    public function andWhere($identifier, $variousA = null, $variousB = null, $variousC = null)
+    public function andWhere(...$args): AbstractWhere
     {
-        $this->whereToken('AND', func_get_args(), $this->whereTokens, $this->whereWrapper());
+        $this->whereToken('AND', $args, $this->whereTokens, $this->whereWrapper());
 
         return $this;
     }
@@ -141,16 +142,16 @@ abstract class AbstractWhere extends QueryBuilder
      * Simple OR WHERE condition with various set of arguments.
      *
      * @see AbstractWhere
-     * @param string|mixed $identifier Column or expression.
-     * @param mixed        $variousA   Operator or value.
-     * @param mixed        $variousB   Value, if operator specified.
-     * @param mixed        $variousC   Required only in between statements.
-     * @return $this
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
+     * @return self|$this
+     *
      * @throws BuilderException
      */
-    public function orWhere($identifier, $variousA = [], $variousB = null, $variousC = null)
+    public function orWhere(...$args): AbstractWhere
     {
-        $this->whereToken('OR', func_get_args(), $this->whereTokens, $this->whereWrapper());
+        $this->whereToken('OR', $args, $this->whereTokens, $this->whereWrapper());
 
         return $this;
     }
@@ -159,11 +160,13 @@ abstract class AbstractWhere extends QueryBuilder
      * Convert various amount of where function arguments into valid where token.
      *
      * @see AbstractWhere
+     *
      * @param string   $joiner     Boolean joiner (AND | OR).
      * @param array    $parameters Set of parameters collected from where functions.
      * @param array    $tokens     Array to aggregate compiled tokens. Reference.
      * @param callable $wrapper    Callback or closure used to wrap/collect every potential
      *                             parameter.
+     *
      * @throws BuilderException
      */
     protected function whereToken($joiner, array $parameters, &$tokens = [], callable $wrapper)
@@ -218,6 +221,10 @@ abstract class AbstractWhere extends QueryBuilder
                 $tokens[] = [$joiner, [$identifier, '=', $wrapper($valueA)]];
                 break;
             case 3:
+                if (in_array(strtoupper($valueA), ['BETWEEN', 'NOT BETWEEN'])) {
+                    throw new BuilderException('Between statements expects exactly 2 values');
+                }
+
                 //AND|OR [identifier] [valueA: OPERATION] [valueA]
                 $tokens[] = [$joiner, [$identifier, strtoupper($valueA), $wrapper($valueB)]];
                 break;
@@ -226,7 +233,7 @@ abstract class AbstractWhere extends QueryBuilder
                 $valueA = strtoupper($valueA);
                 if (!in_array($valueA, ['BETWEEN', 'NOT BETWEEN'])) {
                     throw new BuilderException(
-                        'Only "BETWEEN" or "NOT BETWEEN" can define second comparasions value.'
+                        'Only "BETWEEN" or "NOT BETWEEN" can define second comparasions value'
                     );
                 }
 
@@ -239,14 +246,16 @@ abstract class AbstractWhere extends QueryBuilder
      * Convert simplified where definition into valid set of where tokens.
      *
      * @see AbstractWhere
-     * @param string   $grouper         Grouper type (see self::TOKEN_AND, self::TOKEN_OR).
-     * @param array    $where           Simplified where definition.
-     * @param array    $tokens          Array to aggregate compiled tokens. Reference.
-     * @param callable $wrapper         Callback or closure used to wrap/collect every potential
-     *                                  parameter.
+     *
+     * @param string   $grouper Grouper type (see self::TOKEN_AND, self::TOKEN_OR).
+     * @param array    $where   Simplified where definition.
+     * @param array    $tokens  Array to aggregate compiled tokens. Reference.
+     * @param callable $wrapper Callback or closure used to wrap/collect every potential
+     *                          parameter.
+     *
      * @throws BuilderException
      */
-    private function arrayWhere($grouper, array $where, &$tokens, callable $wrapper)
+    private function arrayWhere(string $grouper, array $where, &$tokens, callable $wrapper)
     {
         $joiner = ($grouper == self::TOKEN_AND ? 'AND' : 'OR');
 
@@ -295,19 +304,27 @@ abstract class AbstractWhere extends QueryBuilder
     /**
      * Build set of conditions for specified identifier.
      *
-     * @param string   $innerJoiner     Inner boolean joiner.
-     * @param string   $key             Column identifier.
-     * @param array    $where           Operations associated with identifier.
-     * @param array    $tokens          Array to aggregate compiled tokens. Reference.
-     * @param callable $wrapper         Callback or closure used to wrap/collect every potential
-     *                                  parameter.
+     * @param string   $innerJoiner Inner boolean joiner.
+     * @param string   $key         Column identifier.
+     * @param array    $where       Operations associated with identifier.
+     * @param array    $tokens      Array to aggregate compiled tokens. Reference.
+     * @param callable $wrapper     Callback or closure used to wrap/collect every potential
+     *                              parameter.
+     *
      * @return array
+     *
+     * @throws BuilderException
      */
-    private function builtConditions($innerJoiner, $key, $where, &$tokens, callable $wrapper)
-    {
+    private function builtConditions(
+        string $innerJoiner,
+        string $key,
+        $where,
+        &$tokens,
+        callable $wrapper
+    ) {
         foreach ($where as $operation => $value) {
             if (is_numeric($operation)) {
-                throw new BuilderException("Nested conditions should have defined operator.");
+                throw new BuilderException('Nested conditions should have defined operator');
             }
 
             $operation = strtoupper($operation);
@@ -317,20 +334,20 @@ abstract class AbstractWhere extends QueryBuilder
                 continue;
             }
 
-            /**
+            /*
              * Between and not between condition described using array of [left, right] syntax.
              */
 
             if (!is_array($value) || count($value) != 2) {
                 throw new BuilderException(
-                    "Exactly 2 array values are required for between statement."
+                    'Exactly 2 array values are required for between statement'
                 );
             }
 
             $tokens[] = [
                 //AND|OR [name] [BETWEEN|NOT BETWEEN] [value 1] [value 2]
                 $innerJoiner,
-                [$key, $operation, $wrapper($value[0]), $wrapper($value[1])]
+                [$key, $operation, $wrapper($value[0]), $wrapper($value[1])],
             ];
         }
 
@@ -354,7 +371,7 @@ abstract class AbstractWhere extends QueryBuilder
             }
 
             if (is_array($parameter)) {
-                throw new BuilderException("Arrays must be wrapped with Parameter instance.");
+                throw new BuilderException('Arrays must be wrapped with Parameter instance');
             }
 
             //Wrapping all values with ParameterInterface

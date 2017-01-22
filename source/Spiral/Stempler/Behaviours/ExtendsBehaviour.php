@@ -65,7 +65,7 @@ class ExtendsBehaviour implements BehaviourInterface
      */
     public function parentImports()
     {
-        $supervisor = $this->parent->supervisor();
+        $supervisor = $this->parent->getSupervisor();
         if (!$supervisor instanceof Supervisor) {
             return [];
         }

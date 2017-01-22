@@ -26,9 +26,11 @@ interface FactoryInterface
      *
      * @param string $class
      * @param array  $parameters Parameters to construct new class.
+     *
      * @return mixed|null|object
+     *
      * @throws AutowireException
      * @throws ArgumentException
      */
-    public function make($class, $parameters = []);
+    public function make(string $class, $parameters = []);
 }

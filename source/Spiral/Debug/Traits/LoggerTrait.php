@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Debug\Traits;
 
 use Interop\Container\ContainerInterface;
@@ -13,14 +14,14 @@ use Psr\Log\NullLogger;
 use Spiral\Debug\LogsInterface;
 
 /**
- * On demand logger creation. Allows class to share same logger between instances.
- * 
- * @todo create logger using container intstance registration (see Container::registerInstance)
+ * On demand logger creation. Allows class to share same logger between instances. Logger trait work
+ * thought IoC scope!
  */
 trait LoggerTrait
 {
     /**
      * @internal
+     *
      * @var LoggerInterface[]
      */
     private static $loggers = [];
@@ -29,6 +30,7 @@ trait LoggerTrait
      * Private and null.
      *
      * @internal
+     *
      * @var LoggerInterface|null
      */
     private $logger = null;
@@ -48,9 +50,19 @@ trait LoggerTrait
      *
      * @param LoggerInterface $logger
      */
-    public static function shareLogger(LoggerInterface $logger)
+    public static function shareLogger(LoggerInterface $logger = null)
     {
         self::$loggers[static::class] = $logger;
+    }
+
+    /**
+     * Alias for "logger" function.
+     *
+     * @return LoggerInterface
+     */
+    protected function getLogger(): LoggerInterface
+    {
+        return $this->logger();
     }
 
     /**
@@ -58,7 +70,7 @@ trait LoggerTrait
      *
      * @return LoggerInterface
      */
-    protected function logger()
+    protected function logger(): LoggerInterface
     {
         if (!empty($this->logger)) {
             return $this->logger;
@@ -73,22 +85,23 @@ trait LoggerTrait
     }
 
     /**
-     * Create new instance of associated logger.
+     * @return ContainerInterface
+     */
+    abstract protected function iocContainer();
+
+    /**
+     * Create new instance of associated logger (on demand creation).
      *
      * @return LoggerInterface
      */
-    protected function createLogger()
+    private function createLogger(): LoggerInterface
     {
-        if (empty($container = $this->container()) || !$container->has(LogsInterface::class)) {
+        $container = $this->iocContainer();
+        if (empty($container) || !$container->has(LogsInterface::class)) {
             return new NullLogger();
         }
 
         //We are using class name as log channel (name) by default
         return $container->get(LogsInterface::class)->getLogger(static::class);
     }
-
-    /**
-     * @return ContainerInterface
-     */
-    abstract protected function container();
 }

@@ -57,7 +57,7 @@ class Supervisor implements SupervisorInterface
     /**
      * {@inheritdoc}
      */
-    public function syntax()
+    public function getSyntax(): SyntaxInterface
     {
         return $this->syntax;
     }
@@ -145,6 +145,7 @@ class Supervisor implements SupervisorInterface
      *
      * @param string $path
      * @param array  $token Context token.
+     *
      * @return Node
      * @throws StemplerException
      */
@@ -157,15 +158,16 @@ class Supervisor implements SupervisorInterface
 
         try {
             $source = $this->loader->getSource($path);
-        } catch (LoaderExceptionInterface $exception) {
-            throw new StemplerException($exception->getMessage(), $token, 0, $exception);
+        } catch (LoaderExceptionInterface $e) {
+            throw new StemplerException($e->getMessage(), $token, 0, $e);
         }
 
         try {
+            //In isolation
             return new Node(clone $this, $this->uniquePlaceholder(), $source);
-        } catch (StemplerException $exception) {
+        } catch (StemplerException $e) {
             //Wrapping to clarify location of error
-            throw $this->clarifyException($path, $exception);
+            throw $this->clarifyException($path, $e);
         }
     }
 
@@ -185,6 +187,7 @@ class Supervisor implements SupervisorInterface
      *
      * @param string            $path
      * @param StemplerException $exception
+     *
      * @return StemplerException
      */
     protected function clarifyException($path, StemplerException $exception)
@@ -203,7 +206,10 @@ class Supervisor implements SupervisorInterface
         foreach ($lines as $number => $line) {
             if (strpos($line, $target) !== false) {
                 //We found where token were used (!!)
-                $exception->setLocation($this->loader->localFilename($path), $number + 1);
+                $exception->setLocation(
+                    $this->loader->localFilename($path),
+                    $number + 1
+                );
 
                 break;
             }

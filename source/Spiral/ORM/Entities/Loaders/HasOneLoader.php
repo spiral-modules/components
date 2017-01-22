@@ -1,104 +1,94 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Loaders;
 
+use Spiral\Database\Builders\SelectQuery;
 use Spiral\Database\Injections\Parameter;
-use Spiral\ORM\Entities\Loader;
-use Spiral\ORM\Entities\RecordSelector;
-use Spiral\ORM\ORM;
-use Spiral\ORM\RecordEntity;
+use Spiral\ORM\Entities\Loaders\Traits\WhereTrait;
+use Spiral\ORM\Entities\Nodes\AbstractNode;
+use Spiral\ORM\Entities\Nodes\SingularNode;
+use Spiral\ORM\ORMInterface;
+use Spiral\ORM\Record;
 
 /**
  * Dedicated to load HAS_ONE relations, by default loader will prefer to join data into query.
  * Loader support MORPH_KEY.
+ *
+ * Please note that OUTER and INNER keys defined from perspective of parent (reversed for our
+ * purposes).
  */
-class HasOneLoader extends Loader
+class HasOneLoader extends RelationLoader
 {
-    /**
-     * Relation type is required to correctly resolve foreign record class based on relation
-     * definition.
-     */
-    const RELATION_TYPE = RecordEntity::HAS_ONE;
+    use WhereTrait;
 
     /**
-     * Default load method (inload or postload).
+     * Default set of relation options. Child implementation might defined their of default options.
+     *
+     * @var array
      */
-    const LOAD_METHOD = self::INLOAD;
-
-    /**
-     * Internal loader constant used to decide how to aggregate data tree, true for relations like
-     * MANY TO MANY or HAS MANY.
-     */
-    const MULTIPLE = false;
+    protected $options = [
+        'method' => self::INLOAD,
+        'minify' => true,
+        'alias'  => null,
+        'using'  => null,
+        'where'  => null,
+    ];
 
     /**
      * {@inheritdoc}
      */
-    public function createSelector()
+    protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
-        if (empty($selector = parent::createSelector())) {
-            return null;
+        if ($this->isJoined()) {
+            $query->join(
+                $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
+                "{$this->getTable()} AS {$this->getAlias()}",
+                [$this->localKey(Record::OUTER_KEY) => $this->parentKey(Record::INNER_KEY)]
+            );
+        } else {
+            //This relation is loaded using external query
+            $query->where(
+                $this->localKey(Record::OUTER_KEY),
+                'IN',
+                new Parameter($outerKeys)
+            );
         }
 
-        if (empty($this->parent)) {
-            //No need for where conditions
-            return $selector;
+        //Morphed records
+        if (!empty($this->schema[Record::MORPH_KEY])) {
+            $this->setWhere(
+                $query,
+                $this->getAlias(),
+                $this->isJoined() ? 'onWhere' : 'where',
+                [
+                    $this->localKey(Record::MORPH_KEY) => $this->orm->define(
+                        $this->parent->getClass(),
+                        ORMInterface::R_ROLE_NAME
+                    )
+                ]
+            );
         }
 
-        //Mounting where conditions
-        $this->mountConditions($selector);
+        return parent::configureQuery($query);
+    }
 
-        //Aggregated keys (example: all parent ids)
-        if (empty($aggregatedKeys = $this->parent->aggregatedKeys($this->getReferenceKey()))) {
-            //Nothing to postload, no parents
-            return null;
-        }
-
-        //Adding condition
-        $selector->where(
-            $this->getKey(RecordEntity::OUTER_KEY),
-            'IN',
-            new Parameter($aggregatedKeys)
+    /**
+     * {@inheritdoc}
+     */
+    protected function initNode(): AbstractNode
+    {
+        $node = new SingularNode(
+            $this->schema[Record::RELATION_COLUMNS],
+            $this->schema[Record::OUTER_KEY],
+            $this->schema[Record::INNER_KEY],
+            $this->schema[Record::SH_PRIMARY_KEY]
         );
 
-        return $selector;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function clarifySelector(RecordSelector $selector)
-    {
-        $selector->join($this->joinType(), $this->getTable() . ' AS ' . $this->getAlias(), [
-            $this->getKey(RecordEntity::OUTER_KEY) => $this->getParentKey()
-        ]);
-
-        $this->mountConditions($selector);
-    }
-
-    /**
-     * Mount additional (not related to parent key) conditions, extended by child loaders
-     * (HAS_MANY, BELONGS_TO).
-     *
-     * @param RecordSelector $selector
-     * @return RecordSelector
-     */
-    protected function mountConditions(RecordSelector $selector)
-    {
-        //We only going to mount morph key as additional condition
-        if (!empty($morphKey = $this->getKey(RecordEntity::MORPH_KEY))) {
-            if ($this->isJoinable()) {
-                $selector->onWhere($morphKey, $this->parent->schema[ORM::M_ROLE_NAME]);
-            } else {
-                $selector->where($morphKey, $this->parent->schema[ORM::M_ROLE_NAME]);
-            }
-        }
-
-        return $selector;
+        return $node->asJoined($this->isJoined());
     }
 }

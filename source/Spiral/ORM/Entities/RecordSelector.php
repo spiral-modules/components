@@ -1,162 +1,110 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Entities;
 
-use Psr\Log\LoggerAwareInterface;
-use Spiral\Cache\CacheInterface;
+use Psr\SimpleCache\CacheInterface;
+use Spiral\Core\Component;
 use Spiral\Core\Traits\SaturateTrait;
-use Spiral\Database\Builders\Prototypes\AbstractSelect;
-use Spiral\Database\Entities\QueryCompiler;
-use Spiral\Database\Query\QueryResult;
-use Spiral\Debug\Traits\BenchmarkTrait;
-use Spiral\Debug\Traits\LoggerTrait;
+use Spiral\Database\Builders\SelectQuery;
+use Spiral\Models\EntityInterface;
 use Spiral\ORM\Entities\Loaders\RootLoader;
+use Spiral\ORM\Entities\Nodes\OutputNode;
 use Spiral\ORM\Exceptions\SelectorException;
-use Spiral\ORM\ORM;
-use Spiral\ORM\RecordEntity;
+use Spiral\ORM\ORMInterface;
 use Spiral\ORM\RecordInterface;
+use Spiral\Pagination\PaginatorAwareInterface;
+use Spiral\Pagination\PaginatorInterface;
 
 /**
- * Selectors provide QueryBuilder (see Database) like syntax and support for ORM records to be
- * fetched from database. In addition, selection uses set of internal data loaders dedicated to
- * every of record relation and used to pre-load (joins) or post-load (separate query) data for
- * this relations, including additional where conditions and using relation data for parent record
- * filtering queries.
+ * Attention, RecordSelector DOES NOT extends QueryBuilder but mocks it!
  *
- * Selector loaders may not only be related to SQL databases, but might load data from external
- * sources.
+ * @method $this where(...$args);
+ * @method $this andWhere(...$args);
+ * @method $this orWhere(...$args);
  *
- * @see with()
- * @see load()
- * @see LoaderInterface
- * @see AbstractSelect
+ * @method $this having(...$args);
+ * @method $this andHaving(...$args);
+ * @method $this orHaving(...$args);
+ *
+ * @method $this paginate($limit = 25, $page = 'page')
+ *
+ * @method $this orderBy($expression, $direction = 'ASC');
+ *
+ * @method int avg($identifier) Perform aggregation (AVG) based on column or expression value.
+ * @method int min($identifier) Perform aggregation (MIN) based on column or expression value.
+ * @method int max($identifier) Perform aggregation (MAX) based on column or expression value.
+ * @method int sum($identifier) Perform aggregation (SUM) based on column or expression value.
  */
-class RecordSelector extends AbstractSelect implements LoggerAwareInterface
+class RecordSelector extends Component implements \IteratorAggregate, \Countable, PaginatorAwareInterface
 {
-    const DEFAULT_COUNTING_FIELD = '*';
+    use SaturateTrait;
 
     /**
-     * Selector provides set of profiling functionality helps to understand what is going on with
-     * query and data parsing.
-     */
-    use LoggerTrait, BenchmarkTrait, SaturateTrait;
-
-    /**
-     * Class name of record to be loaded.
-     *
      * @var string
      */
-    protected $class = '';
-
-    /**
-     * Data columns are set of columns automatically created by inner loaders using
-     * generateColumns() method, this is not the same column set as one provided by user using
-     * columns() method. Do not define columns using generateColumns() method outside of loaders.
-     *
-     * @see generateColumns()
-     * @var array
-     */
-    protected $dataColumns = [];
-
-    /**
-     * We have to track count of loader columns to define correct offsets.
-     *
-     * @var int
-     */
-    protected $countColumns = 0;
-
-    /**
-     * Primary selection loader.
-     *
-     * @var Loader
-     */
-    protected $loader = null;
+    private $class;
 
     /**
      * @invisible
-     * @var ORM
+     * @var ORMInterface
      */
-    protected $orm = null;
+    private $orm;
 
     /**
-     * @param string $class
-     * @param ORM    $orm
-     * @param Loader $loader
+     * @var RootLoader
      */
-    public function __construct($class, ORM $orm = null, Loader $loader = null)
+    private $loader;
+
+    /**
+     * @param string       $class
+     * @param ORMInterface $orm
+     */
+    public function __construct(string $class, ORMInterface $orm)
     {
         $this->class = $class;
-        $this->orm = $this->saturate($orm, ORM::class);
-        $this->columns = $this->dataColumns = [];
+        $this->orm = $orm;
 
-        //We aways need primary loader
-        if (empty($this->loader = $loader)) {
-            //Selector always need primary data loaded to define data structure and perform query
-            //parsing, in most of cases we can easily use RootLoader associated with primary record
-            //schema
-            $this->loader = new RootLoader($this->orm, null, $this->orm->schema($class));
-        }
-
-        //Every ORM loader has ability to declare it's primary database, we are going to use
-        //primary loader database to initiate selector
-        $database = $this->loader->dbalDatabase();
-
-        //AbstractSelect construction
-        parent::__construct($database, $database->driver()->queryCompiler($database->getPrefix()));
+        $this->loader = new RootLoader(
+            $class,
+            $orm->define($class, ORMInterface::R_SCHEMA),
+            $orm
+        );
     }
 
     /**
-     * Primary selection table.
+     * Get associated ORM instance, can be used to create separate query/selection using same
+     * (nested) memory scope for ORM cache.
      *
-     * @return string
+     * @see ORM::selector()
+     * @return ORMInterface
      */
-    public function primaryTable()
+    public function getORM(): ORMInterface
     {
-        return $this->loader->getTable();
+        return $this->orm;
     }
 
     /**
-     * Primary alias points to table related to parent record.
+     * Get associated class.
      *
      * @return string
      */
-    public function primaryAlias()
+    public function getClass(): string
+    {
+        return $this->class;
+    }
+
+    /**
+     * Get alias used for primary table.
+     *
+     * @return string
+     */
+    public function getAlias(): string
     {
         return $this->loader->getAlias();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function columns($columns = ['*'])
-    {
-        $this->columns = $this->fetchIdentifiers(func_get_args());
-
-        return $this;
-    }
-
-    /**
-     * Automatically generate set of columns for specified table or alias, method used by loaders
-     * in cases where data is joined.
-     *
-     * @param string $table   Source table name or alias.
-     * @param array  $columns Original set of record columns.
-     * @return int
-     */
-    public function generateColumns($table, array $columns)
-    {
-        $offset = count($this->dataColumns);
-        foreach ($columns as $column) {
-            $columnAlias = 'c' . (++$this->countColumns);
-            $this->dataColumns[] = $table . '.' . $column . ' AS ' . $columnAlias;
-        }
-
-        return $offset;
     }
 
     /**
@@ -208,12 +156,17 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      * Example:
      * User::find()->load(['posts', 'comments', 'profile']);
      *
+     * Attention, consider disabling entity map if you want to use recursive loading (i.e.
+     * post.tags.posts), but first think why you even need recursive relation loading.
+     *
      * @see with()
-     * @param string $relation
-     * @param array  $options
-     * @return $this
+     *
+     * @param string|array $relation
+     * @param array        $options
+     *
+     * @return $this|RecordSelector
      */
-    public function load($relation, array $options = [])
+    public function load($relation, array $options = []): self
     {
         if (is_array($relation)) {
             foreach ($relation as $name => $subOption) {
@@ -230,7 +183,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         }
 
         //We are requesting primary loaded to pre-load nested relation
-        $this->loader->loader($relation, $options);
+        $this->loader->loadRelation($relation, $options);
 
         return $this;
     }
@@ -244,7 +197,7 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      * Attention, with() method WILL NOT load relation data, it will only make it accessible in
      * query.
      *
-     * By default joined tables will be available in query based on realtion name, you can change
+     * By default joined tables will be available in query based on relation name, you can change
      * joined table alias using relation option "alias".
      *
      * Do not forget to set DISTINCT flag while including HAS_MANY and MANY_TO_MANY relations. In
@@ -295,20 +248,24 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
      * //As you might notice previous construction will create 2 queries, however we can simplify
      * //this construction to use already joined table as source of data for relation via "using"
      * //keyword
-     * User::find()->with('comments')->where('comments.approved', true)
+     * User::find()->with('comments')
+     *             ->where('comments.approved', true)
      *             ->load('comments', ['using' => 'comments']);
      *
      * //You will get only one query with INNER JOIN, to better understand this example let's use
      * //custom alias for comments in with() method.
-     * User::find()->with('comments', ['alias' => 'commentsR'])->where('commentsR.approved', true)
+     * User::find()->with('comments', ['alias' => 'commentsR'])
+     *             ->where('commentsR.approved', true)
      *             ->load('comments', ['using' => 'commentsR']);
      *
      * @see load()
-     * @param string $relation
-     * @param array  $options
-     * @return $this
+     *
+     * @param string|array $relation
+     * @param array        $options
+     *
+     * @return $this|RecordSelector
      */
-    public function with($relation, array $options = [])
+    public function with($relation, array $options = []): self
     {
         if (is_array($relation)) {
             foreach ($relation as $name => $options) {
@@ -325,198 +282,203 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
         }
 
         //Requesting primary loader to join nested relation, will only work for ORM loaders
-        $this->loader->joiner($relation, $options);
+        $this->loader->loadRelation($relation, $options, true);
 
         return $this;
     }
 
     /**
-     * Fetch one record from database using it's primary key. You can use INLOAD and JOIN_ONLY
-     * loaders with HAS_MANY or MANY_TO_MANY relations with this method as no limit were used.
+     * Shortcut to where method to set AND condition for parent record primary key.
      *
-     * @see findOne()
-     * @param mixed $id Primary key value.
-     * @return RecordEntity|null
+     * @param string|int $id
+     *
+     * @return RecordSelector
+     *
      * @throws SelectorException
      */
-    public function findByPK($id)
+    public function wherePK($id): self
     {
-        $primaryKey = $this->loader->getPrimaryKey();
-
-        if (empty($primaryKey)) {
-            throw new SelectorException(
-                "Unable to fetch data by primary key, no primary key found."
-            );
+        if (empty($this->loader->primaryKey())) {
+            //This MUST never happen due ORM requires PK now for every entity
+            throw new SelectorException("Unable to set wherePK condition, no proper PK were defined");
         }
 
-        //No limit here
-        return $this->findOne([$primaryKey => $id], false);
+        //Adding condition to initial query
+        $this->loader->initialQuery()->where([
+            //Must be already aliased
+            $this->loader->primaryKey() => $id
+        ]);
+
+        return $this;
     }
 
     /**
-     * Fetch one record from database. Attention, LIMIT statement will be used, meaning you can not
-     * use loaders for HAS_MANY or MANY_TO_MANY relations with data inload (joins), use default
-     * loading method.
+     * Find one entity or return null.
      *
-     * @see findByPK()
-     * @param array $where     Selection WHERE statement.
-     * @param bool  $withLimit Use limit 1.
-     * @return RecordEntity|null
+     * @param array|null $query
+     *
+     * @return EntityInterface|null
      */
-    public function findOne(array $where = [], $withLimit = true)
+    public function findOne(array $query = null)
     {
-        if (!empty($where)) {
-            $this->where($where);
-        }
+        $data = (clone $this)->where($query)->fetchData();
 
-        $data = $this->limit($withLimit ? 1 : null)->fetchData();
-        if (empty($data)) {
+        if (empty($data[0])) {
             return null;
         }
 
-        //Letting ORM to do it's job
-        return $this->orm->record($this->class, $data[0]);
+        return $this->orm->make($this->class, $data[0], ORMInterface::STATE_LOADED, true);
     }
 
     /**
-     * {@inheritdoc}
+     * Get RecordIterator (entity iterator) for a requested data. Provide cache key and lifetime in
+     * order to cache request data.
+     *
+     * @param string              $cacheKey
+     * @param int|\DateInterval   $ttl
+     * @param CacheInterface|null $cache Can be automatically resoled via ORM container scope.
+     *
+     * @return RecordIterator|RecordInterface[]
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
-    {
-        if (empty($compiler)) {
-            $compiler = $this->compiler->resetQuoter();
+    public function getIterator(
+        string $cacheKey = '',
+        $ttl = 0,
+        CacheInterface $cache = null
+    ): RecordIterator {
+        if (!empty($cacheKey)) {
+            /**
+             * When no cache is provided saturate it using container scope
+             *
+             * @var CacheInterface $cache
+             */
+            $cache = $this->saturate($cache, CacheInterface::class);
+
+            if ($cache->has($cacheKey)) {
+                $data = $cache->get($cacheKey);
+            } else {
+                //Cache parsed tree with all sub queries executed!
+                $cache->set($cacheKey, $data = $this->fetchData(), $ttl);
+            }
+        } else {
+            $data = $this->fetchData();
         }
 
-        //Primary loader may add custom conditions to select query
-        $this->loader->configureSelector($this);
+        return new RecordIterator($data, $this->class, $this->orm);
+    }
 
-        if (empty($columns = $this->columns)) {
-            //If no user columns were specified we are going to use columns defined by our loaders
-            //in addition it will return RecordIterator instance as result instead of QueryResult
-            $columns = !empty($this->dataColumns) ? $this->dataColumns : ['*'];
+    /**
+     * Attention, column will be quoted by driver!
+     *
+     * @param string|null $column When column is null DISTINCT(PK) will be generated.
+     *
+     * @return int
+     */
+    public function count(string $column = null): int
+    {
+        if (is_null($column)) {
+            if (!empty($this->loader->primaryKey())) {
+                //@tuneyourserver solves the issue with counting on queries with joins.
+                $column = "DISTINCT({$this->loader->primaryKey()})";
+            } else {
+                $column = '*';
+            }
         }
 
-        return $compiler->compileSelect(
-            ["{$this->primaryTable()} AS {$this->primaryAlias()}"],
-            $this->distinct,
-            $columns,
-            $this->joinTokens,
-            $this->whereTokens,
-            $this->havingTokens,
-            $this->grouping,
-            $this->ordering,
-            $this->limit,
-            $this->offset
-        );
+        return $this->compiledQuery()->count($column);
     }
 
     /**
-     * {@inheritdoc}
+     * Query used as basement for relation.
      *
-     * Return type will depend if custom columns set were used.
-     *
-     * @param array $callbacks Callbacks to be used in record iterator as magic methods.
-     * @return QueryResult|RecordIterator
+     * @return SelectQuery
      */
-    public function getIterator(array $callbacks = [])
+    public function initialQuery(): SelectQuery
     {
-        if (!empty($this->columns) || !empty($this->grouping)) {
-            //QueryResult for user requests
-            return $this->run();
-        }
-
-        /*
-         * We are getting copy of ORM with cloned cache, so all our entities are isolated in it.
-         */
-
-        return new RecordIterator(
-            clone $this->orm,
-            $this->class,
-            $this->fetchData(),
-            true,
-            $callbacks
-        );
+        return $this->loader->initialQuery();
     }
 
     /**
-     * All records.
+     * Get compiled version of SelectQuery, attentionly only first level query access is allowed.
      *
-     * @return RecordInterface[]
+     * @return SelectQuery
      */
-    public function all()
+    public function compiledQuery(): SelectQuery
     {
-        return $this->getIterator()->all();
+        return $this->loader->compiledQuery();
     }
 
     /**
-     * Execute query and every related query to compile records data in tree form - every relation
-     * data will be included as sub key.
+     * Load data tree from databases and linked loaders in a form of array.
      *
-     * Attention, Selector will cache compiled data tree and not query itself to keep data integrity
-     * and to skip data compilation on second query.
+     * @param OutputNode $node When empty node will be created automatically by root relation
+     *                         loader.
      *
      * @return array
      */
-    public function fetchData()
+    public function fetchData(OutputNode $node = null): array
     {
-        //Pagination!
-        $this->applyPagination();
+        /** @var OutputNode $node */
+        $node = $node ?? $this->loader->createNode();
 
-        //Generating statement
-        $statement = $this->sqlStatement();
+        //Working with parser defined by loader itself
+        $this->loader->loadData($node);
 
-        if (!empty($this->cacheLifetime)) {
-            $cacheKey = $this->cacheKey ?: md5(serialize([$statement, $this->getParameters()]));
-
-            if (empty($this->cacheStore)) {
-                $this->cacheStore = $this->orm->container()->get(CacheInterface::class)->store();
-            }
-
-            if ($this->cacheStore->has($cacheKey)) {
-                $this->logger()->debug("Selector result were fetched from cache.");
-
-                //We are going to store parsed result, not queries
-                return $this->cacheStore->get($cacheKey);
-            }
-        }
-
-        //We are bypassing run() method here to prevent query caching, we will prefer to cache
-        //parsed data rather that database response
-        $result = $this->database->query($statement, $this->getParameters());
-
-        //In many cases (too many inloads, too complex queries) parsing can take significant amount
-        //of time, so we better profile it
-        $benchmark = $this->benchmark('parseResult', $statement);
-
-        //Here we are feeding selected data to our primary loaded to parse it and and create
-        //data tree for our records
-        $this->loader->parseResult($result, $rowsCount);
-
-        $this->benchmark($benchmark);
-
-        //Memory freeing
-        $result->close();
-
-        //This must force loader to execute all post loaders (including ODM and etc)
-        $this->loader->loadData();
-
-        //Now we can request our primary loader for compiled data
-        $data = $this->loader->getResult();
-
-        //Memory free! Attention, it will not reset columns aliases but only make possible to run
-        //query again
-        $this->loader->clean();
-
-        if (!empty($this->cacheLifetime) && !empty($cacheKey)) {
-            //We are caching full records tree, not queries
-            $this->cacheStore->set($cacheKey, $data, $this->cacheLifetime);
-        }
-
-        return $data;
+        return $node->getResult();
     }
 
     /**
-     * Cloning selector presets
+     * {@inheritdoc}
+     */
+    public function hasPaginator(): bool
+    {
+        return $this->loader->initialQuery()->hasPaginator();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPaginator(PaginatorInterface $paginator)
+    {
+        $this->loader->initialQuery()->setPaginator($paginator);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPaginator(): PaginatorInterface
+    {
+        return $this->loader->initialQuery()->getPaginator();
+    }
+
+    /**
+     * Bypassing call to primary select query.
+     *
+     * @param string $name
+     * @param        $arguments
+     *
+     * @return $this|mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (in_array(strtoupper($name), ['AVG', 'MIN', 'MAX', 'SUM'])) {
+            //One of aggregation requests
+            $result = call_user_func_array([$this->compiledQuery(), $name], $arguments);
+        } else {
+            //Where condition or statement
+            $result = call_user_func_array([$this->loader->initialQuery(), $name], $arguments);
+        }
+
+        if ($result === $this->loader->initialQuery()) {
+            return $this;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Cloning with loader tree cloning.
+     *
+     * @attention at this moment binded query parameters would't be cloned!
      */
     public function __clone()
     {
@@ -524,14 +486,24 @@ class RecordSelector extends AbstractSelect implements LoggerAwareInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Remove nested loaders and clean ORM link.
      */
-    public function count($column = self::DEFAULT_COUNTING_FIELD)
+    public function __destruct()
     {
-        if ($column == self::DEFAULT_COUNTING_FIELD && !empty($this->loader->getPrimaryKey())) {
-            $column = 'DISTINCT(' . $this->loader->getPrimaryKey().')';
+        $this->orm = null;
+        $this->loader = null;
+    }
+
+    /**
+     * @return \Interop\Container\ContainerInterface|null
+     */
+    protected function iocContainer()
+    {
+        if ($this->orm instanceof Component) {
+            //Working inside ORM container scope
+            return $this->orm->iocContainer();
         }
 
-        return parent::count($column);
+        return parent::iocContainer();
     }
 }

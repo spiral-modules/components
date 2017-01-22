@@ -1,261 +1,75 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Entities;
 
-use Spiral\ORM\Exceptions\IteratorException;
-use Spiral\ORM\Exceptions\ORMException;
-use Spiral\ORM\ORM;
-use Spiral\ORM\RecordEntity;
-use Spiral\ORM\RecordInterface;
+use Spiral\ORM\ORMInterface;
 
 /**
- * Provides iteration over set of specified records data using internal instances cache. In
- * addition, allows to decorate set of callbacks with association by their name (@see __call()).
- * Keeps record context.
+ * Instantiates array of entities. At this moment implementation is rather simple.
  */
-class RecordIterator implements \Iterator, \Countable, \JsonSerializable
+class RecordIterator implements \IteratorAggregate
 {
     /**
-     * Current iterator position.
-     *
-     * @var int
-     */
-    private $position = 0;
-
-    /**
-     * Set of "methods" to be decorated.
-     *
-     * @var callable[]
-     */
-    private $callbacks = [];
-
-    /**
-     * @var string
-     */
-    protected $class = '';
-
-    /**
-     * Indication that entity cache must be used.
-     *
-     * @var bool
-     */
-    protected $cache = true;
-
-    /**
-     * Data to be iterated.
+     * Array of entity data to be fed into instantiators.
      *
      * @var array
      */
-    protected $data = [];
+    private $data = [];
 
     /**
-     * Constructed record instances. Cache.
+     * Class to be instantiated.
      *
-     * @var RecordEntity[]
+     * @var string
      */
-    protected $instances = [];
+    private $class;
 
     /**
+     * Responsible for entity construction.
+     *
      * @invisible
-     * @var ORM
+     * @var ORMInterface
      */
-    protected $orm = null;
+    private $orm;
 
     /**
-     * @param ORM        $orm
-     * @param string     $class
-     * @param array      $data
-     * @param bool       $cache
-     * @param callable[] $callbacks
+     * @param array        $data
+     * @param string       $class
+     * @param ORMInterface $orm
      */
-    public function __construct(ORM $orm, $class, array $data, $cache = true, array $callbacks = [])
+    public function __construct(array $data, string $class, ORMInterface $orm)
     {
-        $this->class = $class;
-        $this->cache = $cache;
-
-        $this->orm = $orm;
         $this->data = $data;
-
-        //Magic functionality provided by outer parent
-        $this->callbacks = $callbacks;
+        $this->class = $class;
+        $this->orm = $orm;
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function count()
-    {
-        return count($this->data);
-    }
-
-    /**
-     * Get all Records as array.
+     * Generate over data.
+     * Method will use pibot
      *
-     * @return RecordInterface[]
+     * @return \Generator
      */
-    public function all()
+    public function getIterator(): \Generator
     {
-        $result = [];
-
-        /**
-         * @var self|RecordInterface[] $iterator
-         */
-        $iterator = clone $this;
-        foreach ($iterator as $nested) {
-            $result[] = $nested;
-        }
-
-        //Copying instances just in case
-        $this->instances = $iterator->instances;
-
-        return $result;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return RecordInterface
-     * @see ORM::record()
-     * @see Record::setContext()
-     * @throws ORMException
-     */
-    public function current()
-    {
-        if (isset($this->instances[$this->position])) {
-            //Due record was pre-constructed we must update it's context to force values for relations
-            //and pivot fields
-            return $this->instances[$this->position];
-        }
-
-        //Let's ask ORM to create needed record
-        return $this->instances[$this->position] = $this->orm->record(
-            $this->class,
-            $this->data[$this->position],
-            $this->cache
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function next()
-    {
-        $this->position++;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function key()
-    {
-        return $this->position;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function valid()
-    {
-        return isset($this->data[$this->position]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rewind()
-    {
-        $this->position = 0;
-    }
-
-    /**
-     * Check if record or record with specified id presents in iteration.
-     *
-     * @param RecordEntity|string|int $record
-     * @return true
-     */
-    public function has($record)
-    {
-        /**
-         * @var self|RecordEntity[] $iterator
-         */
-        $iterator = clone $this;
-        foreach ($iterator as $nested) {
-            $found = false;
-            if (is_array($record)) {
-                if (array_intersect_assoc($nested->getFields(), $record) == $record) {
-                    //Comparing fields intersection
-                    $found = true;
-                }
-            } elseif (!$record instanceof RecordEntity) {
-
-                if (!empty($record) && $nested->primaryKey() == $record) {
-                    //Comparing using primary keys
-                    $found = true;
-                }
-            } elseif ($nested == $record || $nested->getFields() == $record->getFields()) {
-                //Comparing as class
-                $found = true;
+        foreach ($this->data as $index => $data) {
+            if (isset($data[ORMInterface::PIVOT_DATA])) {
+                /*
+                 * When pivot data is provided we are able to use it as array key.
+                 */
+                $index = $data[ORMInterface::PIVOT_DATA];
+                unset($data[ORMInterface::PIVOT_DATA]);
             }
 
-            if ($found) {
-                //They all must be iterated already
-                $this->instances = $iterator->instances;
-
-                return true;
-            }
+            yield $index => $this->orm->make(
+                $this->class,
+                $data,
+                ORMInterface::STATE_LOADED,
+                true
+            );
         }
-
-        //They all must be iterated already
-        $this->instances = $iterator->instances;
-
-        return false;
-    }
-
-    /**
-     * Executes decorated method providing itself as function argument.
-     *
-     * @param string $method
-     * @param array  $arguments
-     * @return mixed
-     * @throws IteratorException
-     */
-    public function __call($method, array $arguments)
-    {
-        if (!isset($this->callbacks[$method])) {
-            throw new IteratorException("Undefined method or callback.");
-        }
-
-        return call_user_func($this->callbacks[$method], $this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function jsonSerialize()
-    {
-        return $this->all();
-    }
-
-    /**
-     * @return RecordEntity[]
-     */
-    public function __debugInfo()
-    {
-        return $this->all();
-    }
-
-    /**
-     * Flushing references.
-     */
-    public function __destruct()
-    {
-        $this->data = [];
-        $this->instances = [];
-        $this->orm = null;
     }
 }

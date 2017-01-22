@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Files\Exceptions;
 
 /**
@@ -17,6 +18,6 @@ class FileNotFoundException extends FilesException
      */
     public function __construct($filename)
     {
-        parent::__construct("File '{$filename}' not found.");
+        parent::__construct("File '{$filename}' not found");
     }
 }

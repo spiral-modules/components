@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Debug;
 
 use Psr\Log\LoggerInterface;
@@ -17,8 +18,9 @@ interface LogsInterface
     /**
      * Get pre-configured logger instance.
      *
-     * @param string $name
+     * @param string $channel
+     *
      * @return LoggerInterface
      */
-    public function getLogger($name);
+    public function getLogger(string $channel): LoggerInterface;
 }

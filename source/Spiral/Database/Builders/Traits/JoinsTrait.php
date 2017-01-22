@@ -5,9 +5,10 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders\Traits;
 
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Builders\QueryBuilder;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\Expression;
 use Spiral\Database\Injections\ExpressionInterface;
@@ -71,6 +72,7 @@ trait JoinsTrait
      * will not be aggregated.
      *
      * @see AbstractWhere
+     *
      * @var array
      */
     protected $onParameters = [];
@@ -83,7 +85,9 @@ trait JoinsTrait
      * @param string $table Joined table name (without prefix), may include AS statement.
      * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
      *                      closure.
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
     public function join($type, $table, $on = null)
@@ -99,10 +103,13 @@ trait JoinsTrait
      *
      * @link http://www.w3schools.com/sql/sql_join_inner.asp
      * @see  join()
+     *
      * @param string $table Joined table name (without prefix), may include AS statement.
      * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
      *                      closure.
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
     public function innerJoin($table, $on = null)
@@ -118,10 +125,13 @@ trait JoinsTrait
      *
      * @link http://www.w3schools.com/sql/sql_join_right.asp
      * @see  join()
+     *
      * @param string $table Joined table name (without prefix), may include AS statement.
      * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
      *                      closure.
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
     public function rightJoin($table, $on = null)
@@ -137,10 +147,13 @@ trait JoinsTrait
      *
      * @link http://www.w3schools.com/sql/sql_join_left.asp
      * @see  join()
+     *
      * @param string $table Joined table name (without prefix), may include AS statement.
      * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
      *                      closure.
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
     public function leftJoin($table, $on = null)
@@ -156,10 +169,13 @@ trait JoinsTrait
      *
      * @link http://www.w3schools.com/sql/sql_join_full.asp
      * @see  join()
+     *
      * @param string $table Joined table name (without prefix), may include AS statement.
      * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
      *                      closure.
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
     public function fullJoin($table, $on = null)
@@ -173,16 +189,18 @@ trait JoinsTrait
      * Simple ON condition with various set of arguments. Can only be used to link column values
      * together, no parametric values allowed.
      *
-     * @param mixed $joined   Joined column name or expression.
-     * @param mixed $operator Foreign column name, if operator specified.
-     * @param mixed $outer    Foreign column name.
+     * @param mixed ...$args [(column, outer column), (column, operator, outer column)]
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
-    public function on($joined = null, $operator = null, $outer = null)
+    public function on(...$args)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            $args,
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
@@ -193,16 +211,18 @@ trait JoinsTrait
      * Simple AND ON condition with various set of arguments. Can only be used to link column values
      * together, no parametric values allowed.
      *
-     * @param mixed $joined   Joined column name or expression.
-     * @param mixed $operator Foreign column name, if operator specified.
-     * @param mixed $outer    Foreign column name.
+     * @param mixed ...$args [(column, outer column), (column, operator, outer column)]
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
-    public function andOn($joined = null, $operator = null, $outer = null)
+    public function andOn(...$args)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
+            'AND',
+            $args,
+            $this->joinTokens[$this->activeJoin]['on'],
             $this->onWrapper()
         );
 
@@ -213,16 +233,19 @@ trait JoinsTrait
      * Simple OR ON condition with various set of arguments. Can only be used to link column values
      * together, no parametric values allowed.
      *
-     * @param mixed $joined   Joined column name or expression.
-     * @param mixed $operator Foreign column name, if operator specified.
-     * @param mixed $outer    Foreign column name.
+     * @param mixed ...$args [(column, outer column), (column, operator, outer column)]
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
-    public function orOn($joined = null, $operator = null, $outer = null)
+    public function orOn(...$args)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'], $this->onWrapper()
+            'OR',
+            $args,
+            $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWrapper()
         );
 
         return $this;
@@ -233,18 +256,20 @@ trait JoinsTrait
      * such methods.
      *
      * @see AbstractWhere
-     * @param string|mixed $joined   Joined column or expression.
-     * @param mixed        $variousA Operator or value.
-     * @param mixed        $variousB Value, if operator specified.
-     * @param mixed        $variousC Required only in between statements.
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
-    public function onWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+    public function onWhere(...$args)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
-            $this->whereWrapper()
+            'AND',
+            $args,
+            $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWhereWrapper()
         );
 
         return $this;
@@ -255,18 +280,20 @@ trait JoinsTrait
      * such methods.
      *
      * @see AbstractWhere
-     * @param string|mixed $joined   Joined column or expression.
-     * @param mixed        $variousA Operator or value.
-     * @param mixed        $variousB Value, if operator specified.
-     * @param mixed        $variousC Required only in between statements.
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
-    public function andOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+    public function andOnWhere(...$args)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
-            $this->whereWrapper()
+            'AND',
+            $args,
+            $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWhereWrapper()
         );
 
         return $this;
@@ -277,18 +304,20 @@ trait JoinsTrait
      * such methods.
      *
      * @see AbstractWhere
-     * @param string|mixed $joined   Joined column or expression.
-     * @param mixed        $variousA Operator or value.
-     * @param mixed        $variousB Value, if operator specified.
-     * @param mixed        $variousC Required only in between statements.
+     *
+     * @param mixed ...$args [(column, value), (column, operator, value)]
+     *
      * @return $this
+     *
      * @throws BuilderException
      */
-    public function orOnWhere($joined, $variousA = null, $variousB = null, $variousC = null)
+    public function orOnWhere(...$args)
     {
         $this->whereToken(
-            'AND', func_get_args(), $this->joinTokens[$this->activeJoin]['on'],
-            $this->whereWrapper()
+            'OR',
+            $args,
+            $this->joinTokens[$this->activeJoin]['on'],
+            $this->onWhereWrapper()
         );
 
         return $this;
@@ -298,11 +327,13 @@ trait JoinsTrait
      * Convert various amount of where function arguments into valid where token.
      *
      * @see AbstractWhere
-     * @param string        $joiner     Boolean joiner (AND | OR).
-     * @param array         $parameters Set of parameters collected from where functions.
-     * @param array         $tokens     Array to aggregate compiled tokens. Reference.
-     * @param \Closure|null $wrapper    Callback or closure used to wrap/collect every potential
-     *                                  parameter.
+     *
+     * @param string                 $joiner     Boolean joiner (AND | OR).
+     * @param array                  $parameters Set of parameters collected from where functions.
+     * @param array                  $tokens     Array to aggregate compiled tokens. Reference.
+     * @param \Closure|null|callable $wrapper    Callback or closure used to wrap/collect every
+     *                                           potential parameter.
+     *
      * @throws BuilderException
      */
     abstract protected function whereToken(
@@ -333,7 +364,7 @@ trait JoinsTrait
      *
      * @return \Closure
      */
-    private function whereWrapper()
+    private function onWhereWrapper()
     {
         return function ($parameter) {
             if ($parameter instanceof FragmentInterface) {
@@ -344,7 +375,7 @@ trait JoinsTrait
             }
 
             if (is_array($parameter)) {
-                throw new BuilderException("Arrays must be wrapped with Parameter instance.");
+                throw new BuilderException('Arrays must be wrapped with Parameter instance');
             }
 
             //Wrapping all values with ParameterInterface

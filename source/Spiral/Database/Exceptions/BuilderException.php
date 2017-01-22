@@ -5,14 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Database\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
+namespace Spiral\Database\Exceptions;
 
 /**
  * Exception raised by query builders.
  */
-class BuilderException extends RuntimeException
+class BuilderException extends DBALException
 {
-
 }

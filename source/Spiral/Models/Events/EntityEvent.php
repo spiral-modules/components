@@ -30,9 +30,9 @@ class EntityEvent extends Event
     }
 
     /**
-     * @return null|EntityInterface
+     * @return EntityInterface
      */
-    public function entity()
+    public function getEntity(): EntityInterface
     {
         return $this->entity;
     }

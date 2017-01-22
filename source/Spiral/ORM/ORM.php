@@ -1,404 +1,438 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
+
 namespace Spiral\ORM;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
+use Spiral\Core\Container;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Core\FactoryInterface;
-use Spiral\Core\HippocampusInterface;
+use Spiral\Core\MemoryInterface;
+use Spiral\Core\NullMemory;
 use Spiral\Database\DatabaseManager;
 use Spiral\Database\Entities\Database;
-use Spiral\Debug\Traits\LoggerTrait;
-use Spiral\Models\DataEntity;
-use Spiral\Models\SchematicEntity;
-use Spiral\ORM\Configs\ORMConfig;
-use Spiral\ORM\Entities\Loader;
+use Spiral\Database\Entities\Table;
+use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Entities\RecordSelector;
 use Spiral\ORM\Entities\RecordSource;
-use Spiral\ORM\Entities\SchemaBuilder;
-use Spiral\ORM\Entities\Schemas\RecordSchema;
+use Spiral\ORM\Entities\Relations\AbstractRelation;
 use Spiral\ORM\Exceptions\ORMException;
-use Spiral\Tokenizer\ClassLocatorInterface;
+use Spiral\ORM\Exceptions\SchemaException;
+use Spiral\ORM\Schemas\LocatorInterface;
+use Spiral\ORM\Schemas\NullLocator;
+use Spiral\ORM\Schemas\SchemaBuilder;
 
-/**
- * ORM component used to manage state of cached Record's schema, record creation and schema
- * analysis.
- *
- * Attention, do not forget to reset cache between requests.
- *
- * @todo Think about using views for complex queries? Using views for entities? ViewRecord?
- * @todo ability to merge multiple tables into one entity - like SearchEntity? Partial entities?
- *
- * @todo think about entity cache and potential use cases when model can be accessed from outside
- */
-class ORM extends Component implements SingletonInterface
+class ORM extends Component implements ORMInterface, SingletonInterface
 {
-    use LoggerTrait;
-
     /**
      * Memory section to store ORM schema.
      */
     const MEMORY = 'orm.schema';
 
     /**
-     * Normalized record constants.
-     */
-    const M_ROLE_NAME   = 0;
-    const M_SOURCE      = 1;
-    const M_TABLE       = 2;
-    const M_DB          = 3;
-    const M_HIDDEN      = SchematicEntity::SH_HIDDEN;
-    const M_SECURED     = SchematicEntity::SH_SECURED;
-    const M_FILLABLE    = SchematicEntity::SH_FILLABLE;
-    const M_MUTATORS    = SchematicEntity::SH_MUTATORS;
-    const M_VALIDATES   = SchematicEntity::SH_VALIDATES;
-    const M_COLUMNS     = 9;
-    const M_NULLABLE    = 10;
-    const M_RELATIONS   = 11;
-    const M_PRIMARY_KEY = 12;
-
-    /**
-     * Normalized relation options.
-     */
-    const R_TYPE       = 0;
-    const R_TABLE      = 1;
-    const R_DEFINITION = 2;
-    const R_DATABASE   = 3;
-
-    /**
-     * Pivot table data location in Record fields. Pivot data only provided when record is loaded
-     * using many-to-many relation.
-     */
-    const PIVOT_DATA = '@pivot';
-
-    /**
-     * @var EntityCache
-     */
-    private $cache = null;
-
-    /**
-     * @var ORMConfig
-     */
-    protected $config = null;
-
-    /**
-     * Cached records schema.
-     *
-     * @whatif private
-     * @var array|null
-     */
-    protected $schema = null;
-
-    /**
      * @invisible
+     * @var EntityMap|null
+     */
+    private $map = null;
+
+    /**
+     * @var LocatorInterface
+     */
+    private $locator;
+
+    /**
+     * Already created instantiators.
+     *
+     * @invisible
+     * @var InstantiatorInterface[]
+     */
+    private $instantiators = [];
+
+    /**
+     * ORM schema.
+     *
+     * @invisible
+     * @var array
+     */
+    private $schema = [];
+
+    /**
      * @var DatabaseManager
      */
-    protected $databases = null;
+    protected $manager;
+
+    /**
+     * @var RelationsConfig
+     */
+    protected $config;
 
     /**
      * @invisible
-     * @var FactoryInterface
+     * @var MemoryInterface
      */
-    protected $factory = null;
+    protected $memory;
 
     /**
-     * @invisible
-     * @var HippocampusInterface
+     * Container defines working scope for all Documents and DocumentEntities.
+     *
+     * @var ContainerInterface
      */
-    protected $memory = null;
+    protected $container;
 
     /**
-     * @param ORMConfig            $config
-     * @param EntityCache          $cache
-     * @param HippocampusInterface $memory
-     * @param DatabaseManager      $databases
-     * @param FactoryInterface     $factory
+     * @param DatabaseManager         $manager
+     * @param RelationsConfig         $config
+     * @param LocatorInterface|null   $locator
+     * @param EntityMap|null          $map
+     * @param MemoryInterface|null    $memory
+     * @param ContainerInterface|null $container
      */
     public function __construct(
-        ORMConfig $config,
-        EntityCache $cache,
-        HippocampusInterface $memory,
-        DatabaseManager $databases,
-        FactoryInterface $factory
+        DatabaseManager $manager,
+        RelationsConfig $config,
+        //Following arguments can be resolved automatically
+        LocatorInterface $locator = null,
+        EntityMap $map = null,
+        MemoryInterface $memory = null,
+        ContainerInterface $container = null
     ) {
+        $this->manager = $manager;
         $this->config = $config;
-        $this->memory = $memory;
 
-        $this->cache = $cache;
+        //If null is passed = no caching is expected
+        $this->map = $map;
 
-        $this->schema = (array)$memory->loadData(static::MEMORY);
+        $this->locator = $locator ?? new NullLocator();
+        $this->memory = $memory ?? new NullMemory();
+        $this->container = $container ?? new Container();
 
-        $this->databases = $databases;
-        $this->factory = $factory;
+        //Loading schema from memory (if any)
+        $this->schema = $this->loadSchema();
     }
 
     /**
-     * @param EntityCache $cache
-     * @return $this
+     * {@inheritdoc}
      */
-    public function setCache(EntityCache $cache)
+    public function hasMap(): bool
     {
-        $this->cache = $cache;
-
-        return $this;
+        return !empty($this->map);
     }
 
     /**
-     * @return EntityCache
+     * {@inheritdoc}
      */
-    public function cache()
+    public function getMap(): EntityMap
     {
-        return $this->cache;
+        if (empty($this->map)) {
+            throw new ORMException("Attempts to access entity map in mapless mode");
+        }
+
+        return $this->map;
     }
 
     /**
-     * When ORM is cloned we are automatically cloning it's cache as well to create 
+     * {@inheritdoc}
+     */
+    public function withMap(EntityMap $map = null): ORMInterface
+    {
+        $orm = clone $this;
+        $orm->map = $map;
+
+        return $orm;
+    }
+
+    /**
+     * Create instance of ORM SchemaBuilder.
+     *
+     * @param bool $locate Set to true to automatically locate available records and record sources
+     *                     sources in a project files (based on tokenizer scope).
+     *
+     * @return SchemaBuilder
+     *
+     * @throws SchemaException
+     */
+    public function schemaBuilder(bool $locate = true): SchemaBuilder
+    {
+        /**
+         * @var SchemaBuilder $builder
+         */
+        $builder = $this->getFactory()->make(SchemaBuilder::class, ['manager' => $this->manager]);
+
+        if ($locate) {
+            foreach ($this->locator->locateSchemas() as $schema) {
+                $builder->addSchema($schema);
+            }
+
+            foreach ($this->locator->locateSources() as $class => $source) {
+                $builder->addSource($class, $source);
+            }
+        }
+
+        return $builder;
+    }
+
+    /**
+     * Specify behaviour schema for ORM to be used. Attention, you have to call renderSchema()
+     * prior to passing builder into this method.
+     *
+     * @param SchemaBuilder $builder
+     * @param bool          $remember Set to true to remember packed schema in memory.
+     */
+    public function buildSchema(SchemaBuilder $builder, bool $remember = false)
+    {
+        $this->schema = $builder->packSchema();
+
+        if ($remember) {
+            $this->memory->saveData(static::MEMORY, $this->schema);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function define(string $class, int $property)
+    {
+        if (empty($this->schema)) {
+            $this->buildSchema($this->schemaBuilder()->renderSchema(), true);
+        }
+
+        //Check value
+        if (!isset($this->schema[$class])) {
+            throw new ORMException("Undefined ORM schema item '{$class}', make sure schema is updated");
+        }
+
+        if (!array_key_exists($property, $this->schema[$class])) {
+            throw new ORMException("Undefined ORM schema property '{$class}'.'{$property}'");
+        }
+
+        return $this->schema[$class][$property];
+    }
+
+    /**
+     * Get source (selection repository) for specific entity class.
+     *
+     * @param string $class
+     *
+     * @return RecordSource
+     */
+    public function source(string $class): RecordSource
+    {
+        $source = $this->define($class, self::R_SOURCE_CLASS);
+
+        if (empty($source)) {
+            //Let's use default source
+            $source = RecordSource::class;
+        }
+
+        $handles = $source::RECORD;
+        if (empty($handles)) {
+            //Force class to be handled
+            $handles = $class;
+        }
+
+        return $this->getFactory()->make($source, [
+            'class' => $handles,
+            'orm'   => $this
+        ]);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $isolated Set to true (by default) to create new isolated entity map for
+     *                       selection.
+     */
+    public function selector(string $class, bool $isolated = true): RecordSelector
+    {
+        //ORM is cloned in order to isolate cache scope.
+        return new RecordSelector($class, $isolated ? clone $this : $this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function table(string $class): Table
+    {
+        return $this->manager->database(
+            $this->define($class, self::R_DATABASE)
+        )->table(
+            $this->define($class, self::R_TABLE)
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function database(string $alias = null): Database
+    {
+        return $this->manager->database($alias);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function make(
+        string $class,
+        $fields = [],
+        int $state = self::STATE_NEW,
+        bool $cache = true
+    ): RecordInterface {
+        $instantiator = $this->instantiator($class);
+
+        if ($state == self::STATE_NEW) {
+            //No caching for entities created with user input
+            $cache = false;
+        }
+
+        if ($fields instanceof \Traversable) {
+            $fields = iterator_to_array($fields);
+        }
+
+        if (!$cache || !$this->hasMap()) {
+            return $instantiator->make($fields, $state);
+        }
+
+        //Always expect PK in our records
+        if (
+            !isset($fields[$this->define($class, self::R_PRIMARY_KEY)])
+            || empty($identity = $fields[$this->define($class, self::R_PRIMARY_KEY)])
+        ) {
+            //Unable to cache non identified instance
+            return $instantiator->make($fields, $state);
+        }
+
+        if ($this->map->has($class, $identity)) {
+            return $this->map->get($class, $identity);
+        }
+
+        //Storing entity in a cache right after creating it
+        return $this->map->remember($instantiator->make($fields, $state));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function makeLoader(string $class, string $relation): LoaderInterface
+    {
+        $schema = $this->define($class, self::R_RELATIONS);
+
+        if (!isset($schema[$relation])) {
+            throw new ORMException("Undefined relation '{$class}'.'{$relation}'");
+        }
+
+        $schema = $schema[$relation];
+
+        if (!$this->config->hasRelation($schema[self::R_TYPE])) {
+            throw new ORMException("Undefined relation type '{$schema[self::R_TYPE]}'");
+        }
+
+        //Generating relation
+        return $this->getFactory()->make(
+            $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::LOADER_CLASS),
+            [
+                'class'    => $schema[self::R_CLASS],
+                'relation' => $relation,
+                'schema'   => $schema[self::R_SCHEMA],
+                'orm'      => $this
+            ]
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function makeRelation(string $class, string $relation): RelationInterface
+    {
+        $schema = $this->define($class, self::R_RELATIONS);
+
+        if (!isset($schema[$relation])) {
+            throw new ORMException("Undefined relation '{$class}'.'{$relation}'");
+        }
+
+        $schema = $schema[$relation];
+
+        if (!$this->config->hasRelation($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS)) {
+            throw new ORMException("Undefined relation type '{$schema[self::R_TYPE]}'");
+        }
+
+        //Generating relation (might require performance improvements)
+        return $this->getFactory()->make(
+            $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS),
+            [
+                'class'  => $schema[self::R_CLASS],
+                'schema' => $schema[self::R_SCHEMA],
+                'orm'    => $this
+            ]
+        );
+    }
+
+    /**
+     * When ORM is cloned we are automatically cloning it's cache as well to create
      * new isolated area. Basically we have cache enabled per selection.
      *
      * @see RecordSelector::getIterator()
      */
     public function __clone()
     {
-        $this->cache = clone $this->cache;
-
-        if (!$this->cache->isEnabled()) {
-            $this->logger()->warning("ORM are cloned with disabled state.");
+        //Each ORM clone must have isolated entity cache/map
+        if (!empty($this->map)) {
+            $this->map = clone $this->map;
         }
     }
 
     /**
-     * Get database by it's name from DatabaseManager associated with ORM component.
+     * Get object responsible for class instantiation.
      *
-     * @param string $database
-     * @return Database
-     */
-    public function database($database)
-    {
-        return $this->databases->database($database);
-    }
-
-    /**
-     * Construct instance of Record or receive it from cache (if enabled). Only records with
-     * declared primary key can be cached.
+     * @param string $class
      *
-     * @todo hydrate external class type!
-     * @param string $class Record class name.
-     * @param array  $data
-     * @param bool   $cache Add record to entity cache if enabled.
-     * @return RecordInterface
+     * @return InstantiatorInterface
      */
-    public function record($class, array $data = [], $cache = true)
+    protected function instantiator(string $class): InstantiatorInterface
     {
-        $schema = $this->schema($class);
-
-        if (!$this->cache->isEnabled() || !$cache) {
-            //Entity cache is disabled, we can create record right now
-            return new $class($data, !empty($data), $this, $schema);
+        if (isset($this->instantiators[$class])) {
+            return $this->instantiators[$class];
         }
 
-        //We have to find unique object criteria (will work for objects with primary key only)
-        $primaryKey = null;
-
-        if (
-            !empty($schema[self::M_PRIMARY_KEY])
-            && !empty($data[$schema[self::M_PRIMARY_KEY]])
-        ) {
-            $primaryKey = $data[$schema[self::M_PRIMARY_KEY]];
-        }
-
-        if ($this->cache->has($class, $primaryKey)) {
-            /**
-             * @var RecordInterface $entity
-             */
-            return $this->cache->get($class, $primaryKey);
-        }
-
-        return $this->cache->remember(
-            new $class($data, !empty($data), $this, $schema)
+        //Potential optimization
+        $instantiator = $this->getFactory()->make(
+            $this->define($class, self::R_INSTANTIATOR),
+            [
+                'class'  => $class,
+                'orm'    => $this,
+                'schema' => $this->define($class, self::R_SCHEMA)
+            ]
         );
+
+        //Constructing instantiator and storing it in cache
+        return $this->instantiators[$class] = $instantiator;
     }
 
     /**
-     * Get ORM source for given class.
+     * Load packed schema from memory.
      *
-     * @param string $class
-     * @return RecordSource
-     * @throws ORMException
-     */
-    public function source($class)
-    {
-        $schema = $this->schema($class);
-        if (empty($source = $schema[self::M_SOURCE])) {
-            //Default source
-            $source = RecordSource::class;
-        }
-
-        return new $source($class, $this);
-    }
-
-    /**
-     * Get ORM selector for given class.
-     *
-     * @param string $class
-     * @param Loader $loader
-     * @return RecordSelector
-     */
-    public function selector($class, Loader $loader = null)
-    {
-        return new RecordSelector($class, $this, $loader);
-    }
-
-    /**
-     * Get cached schema for specified record by it's name.
-     *
-     * @param string $record
      * @return array
-     * @throws ORMException
      */
-    public function schema($record)
+    protected function loadSchema(): array
     {
-        if (!isset($this->schema[$record])) {
-            $this->updateSchema();
-        }
-
-        if (!isset($this->schema[$record])) {
-            throw new ORMException("Undefined ORM schema item, unknown record '{$record}'.");
-        }
-
-        return $this->schema[$record];
+        return (array)$this->memory->loadData(static::MEMORY);
     }
 
     /**
-     * Create record relation instance by given relation type, parent and definition (options).
+     * Get ODM specific factory.
      *
-     * @param int             $type
-     * @param RecordInterface $parent
-     * @param array           $definition Relation definition.
-     * @param array           $data
-     * @param bool            $loaded
-     * @return RelationInterface
-     * @throws ORMException
+     * @return FactoryInterface
      */
-    public function relation(
-        $type,
-        RecordInterface $parent,
-        $definition,
-        $data = null,
-        $loaded = false
-    ) {
-        if (!$this->config->hasRelation($type, 'class')) {
-            throw new ORMException("Undefined relation type '{$type}'.");
-        }
-
-        $class = $this->config->relationClass($type, 'class');
-
-        //For performance reasons class constructed without container
-        return new $class($this, $parent, $definition, $data, $loaded);
-    }
-
-    /**
-     * Get instance of relation/selection loader based on relation type and definition.
-     *
-     * @param int    $type       Relation type.
-     * @param string $container  Container related to parent loader.
-     * @param array  $definition Relation definition.
-     * @param Loader $parent     Parent loader (if presented).
-     * @return LoaderInterface
-     * @throws ORMException
-     */
-    public function loader($type, $container, array $definition, Loader $parent = null)
+    protected function getFactory(): FactoryInterface
     {
-        if (!$this->config->hasRelation($type, 'loader')) {
-            throw new ORMException("Undefined relation loader '{$type}'.");
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
         }
 
-        $class = $this->config->relationClass($type, 'loader');
-
-        //For performance reasons class constructed without container
-        return new $class($this, $container, $definition, $parent);
-    }
-
-    /**
-     * Update ORM records schema, synchronize declared and database schemas and return instance of
-     * SchemaBuilder.
-     *
-     * Attention, syncronize option to be deprecated in a future releases in order to automatically
-     * generate migrations (Phinx for example) based on declared table difference. See guide.
-     * 
-     * @param SchemaBuilder $builder    User specified schema builder.
-     * @param bool          $syncronize Create all required tables and columns
-     * @return SchemaBuilder
-     */
-    public function updateSchema(SchemaBuilder $builder = null, $syncronize = false)
-    {
-        if (empty($builder)) {
-            $builder = $this->schemaBuilder();
-        }
-
-        //Create all required tables and columns
-        if ($syncronize) {
-            $builder->synchronizeSchema();
-        }
-
-        //Getting normalized (cached) version of schema
-        $this->schema = $builder->normalizeSchema();
-
-        //Saving
-        $this->memory->saveData(static::MEMORY, $this->schema);
-
-        //Let's reinitialize records
-        DataEntity::resetInitiated();
-
-        return $builder;
-    }
-
-    /**
-     * Get instance of ORM SchemaBuilder.
-     *
-     * @param ClassLocatorInterface $locator
-     * @return SchemaBuilder
-     */
-    public function schemaBuilder(ClassLocatorInterface $locator = null)
-    {
-        return $this->factory->make(SchemaBuilder::class, [
-            'config'  => $this->config,
-            'orm'     => $this,
-            'locator' => $locator
-        ]);
-    }
-
-    /**
-     * Create instance of relation schema based on relation type and given definition (declared in
-     * record). Resolve using container to support any possible relation type. You can create your
-     * own relations, loaders and schemas by altering ORM config.
-     *
-     * @param mixed         $type
-     * @param SchemaBuilder $builder
-     * @param RecordSchema  $record
-     * @param string        $name
-     * @param array         $definition
-     * @return Schemas\RelationInterface
-     */
-    public function relationSchema(
-        $type,
-        SchemaBuilder $builder,
-        RecordSchema $record,
-        $name,
-        array $definition
-    ) {
-        if (!$this->config->hasRelation($type, 'schema')) {
-            throw new ORMException("Undefined relation schema '{$type}'.");
-        }
-
-        //Getting needed relation schema builder
-        return $this->factory->make(
-            $this->config->relationClass($type, 'schema'),
-            compact('builder', 'record', 'name', 'definition')
-        );
+        return $this->container->get(FactoryInterface::class);
     }
 }

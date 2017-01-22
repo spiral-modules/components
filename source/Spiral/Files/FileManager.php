@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Files;
 
 use Spiral\Core\Component;
@@ -16,25 +17,24 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 /**
- * Default files storage, points to local hard drive.
+ * Default abstraction for file management operations.
  */
 class FileManager extends Component implements SingletonInterface, FilesInterface
 {
+    const DEFAULT_FILE_MODE = self::READONLY;
+
     /**
      * Files to be removed when component destructed.
      *
      * @var array
      */
-    private $destruct = [];
+    private $destructFiles = [];
 
     /**
-     * New File Manager.
-     *
-     * @todo Potentially can be depended on Symfony Filesystem.
+     * FileManager constructor.
      */
     public function __construct()
     {
-        //Safety mechanism
         register_shutdown_function([$this, '__destruct']);
     }
 
@@ -43,8 +43,15 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @param bool $recursive Every created directory will get specified permissions.
      */
-    public function ensureDirectory($directory, $mode = self::RUNTIME, $recursive = true)
-    {
+    public function ensureDirectory(
+        string $directory,
+        int $mode = null,
+        bool $recursive = true
+    ): bool {
+        if (empty($mode)) {
+            $mode = self::DEFAULT_FILE_MODE;
+        }
+
         $mode = $mode | 0111;
         if (is_dir($directory)) {
             //Exists :(
@@ -76,7 +83,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function read($filename)
+    public function read(string $filename): string
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -90,8 +97,17 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @param bool $append To append data at the end of existed file.
      */
-    public function write($filename, $data, $mode = null, $ensureDirectory = false, $append = false)
-    {
+    public function write(
+        string $filename,
+        string $data,
+        int $mode = null,
+        bool $ensureDirectory = false,
+        bool $append = false
+    ): bool {
+        if (empty($mode)) {
+            $mode = self::DEFAULT_FILE_MODE;
+        }
+
         try {
             if ($ensureDirectory) {
                 $this->ensureDirectory(dirname($filename), $mode);
@@ -110,12 +126,8 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
                 //Forcing mode after file creation
                 $this->setPermissions($filename, $mode);
             }
-        } catch (\ErrorException $exception) {
-            throw new WriteErrorException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+        } catch (\Exception $e) {
+            throw new WriteErrorException($e->getMessage(), $e->getCode(), $e);
         }
 
         return $result;
@@ -124,15 +136,19 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function append($filename, $data, $mode = null, $ensureDirectory = false)
-    {
+    public function append(
+        string $filename,
+        string $data,
+        int $mode = null,
+        bool $ensureDirectory = false
+    ): bool {
         return $this->write($filename, $data, $mode, $ensureDirectory, true);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function localUri($filename)
+    public function localFilename(string $filename): string
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -145,10 +161,15 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function delete($filename)
+    public function delete(string $filename)
     {
         if ($this->exists($filename)) {
-            return unlink($filename);
+            $result = unlink($filename);
+
+            //Wiping out changes in local file cache
+            clearstatcache(false, $filename);
+
+            return $result;
         }
 
         return false;
@@ -158,11 +179,13 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      * {@inheritdoc}
      *
      * @see http://stackoverflow.com/questions/3349753/delete-directory-with-files-in-it
+     *
      * @param string $directory
      * @param bool   $contentOnly
+     *
      * @throws FilesException
      */
-    public function deleteDirectory($directory, $contentOnly = false)
+    public function deleteDirectory(string $directory, bool $contentOnly = false)
     {
         if (!$this->isDirectory($directory)) {
             throw new FilesException("Undefined or invalid directory {$directory}");
@@ -189,7 +212,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function move($filename, $destination)
+    public function move(string $filename, string $destination): bool
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -201,7 +224,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function copy($filename, $destination)
+    public function copy(string $filename, string $destination): bool
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -213,15 +236,19 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function touch($filename, $mode = null, $ensureLocation = false)
+    public function touch(string $filename, int $mode = null): bool
     {
-        return touch($filename);
+        if (!touch($filename)) {
+            return false;
+        }
+
+        return $this->setPermissions($filename, !empty($mode) ? $mode : self::DEFAULT_FILE_MODE);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function exists($filename)
+    public function exists(string $filename): bool
     {
         return file_exists($filename);
     }
@@ -229,7 +256,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function size($filename)
+    public function size(string $filename): int
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -241,7 +268,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function extension($filename)
+    public function extension(string $filename): string
     {
         return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     }
@@ -249,7 +276,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function md5($filename)
+    public function md5(string $filename): string
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -261,7 +288,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function time($filename)
+    public function time(string $filename): int
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -273,7 +300,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function isDirectory($filename)
+    public function isDirectory(string $filename): bool
     {
         return is_dir($filename);
     }
@@ -281,7 +308,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function isFile($filename)
+    public function isFile(string $filename): bool
     {
         return is_file($filename);
     }
@@ -289,7 +316,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function getPermissions($filename)
+    public function getPermissions(string $filename): int
     {
         if (!$this->exists($filename)) {
             throw new FileNotFoundException($filename);
@@ -301,7 +328,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function setPermissions($filename, $mode)
+    public function setPermissions(string $filename, int $mode)
     {
         if (is_dir($filename)) {
             $mode |= 0111;
@@ -315,12 +342,9 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      *
      * @param Finder $finder Optional initial finder.
      */
-    public function getFiles($location, $pattern = null, Finder $finder = null)
+    public function getFiles(string $location, string $pattern = null, Finder $finder = null): array
     {
-        if (empty($finder)) {
-            $finder = new Finder();
-        }
-
+        $finder = $finder ?? new Finder();
         $finder->files()->in($location);
 
         if (!empty($pattern)) {
@@ -338,18 +362,18 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function tempFilename($extension = '', $location = null)
+    public function tempFilename(string $extension = '', string $location = null): string
     {
-        if (!empty($location)) {
+        if (empty($location)) {
             $location = sys_get_temp_dir();
         }
 
         $filename = tempnam($location, 'spiral');
 
-        if ($extension) {
+        if (!empty($extension)) {
             //I should find more original way of doing that
             rename($filename, $filename = $filename . '.' . $extension);
-            $this->destruct[] = $filename;
+            $this->destructFiles[] = $filename;
         }
 
         return $filename;
@@ -358,7 +382,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function normalizePath($path, $directory = false)
+    public function normalizePath(string $path, bool $directory = false): string
     {
         $path = str_replace('\\', '/', $path);
 
@@ -370,8 +394,10 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      * {@inheritdoc}
      *
      * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
+     *
+     * @todo http://stackoverflow.com/questions/4049856/replace-phps-realpath/4050444#4050444
      */
-    public function relativePath($path, $from)
+    public function relativePath(string $path, string $from): string
     {
         $path = $this->normalizePath($path);
         $from = $this->normalizePath($from);
@@ -407,7 +433,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
      */
     public function __destruct()
     {
-        foreach ($this->destruct as $filename) {
+        foreach ($this->destructFiles as $filename) {
             $this->delete($filename);
         }
     }

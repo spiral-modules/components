@@ -23,14 +23,14 @@ interface ObjectInterface extends StreamableInterface
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * Get full object address.
      *
      * @return string
      */
-    public function getAddress();
+    public function getAddress(): string;
 
     /**
      * Get associated bucket instance.
@@ -47,7 +47,7 @@ interface ObjectInterface extends StreamableInterface
      * @throws BucketException
      * @throws ObjectException
      */
-    public function exists();
+    public function exists(): bool;
 
     /**
      * Get object size or return false of object does not exists.
@@ -69,7 +69,7 @@ interface ObjectInterface extends StreamableInterface
      * @throws BucketException
      * @throws ObjectException
      */
-    public function localFilename();
+    public function localFilename(): string;
 
     /**
      * Delete object from associated bucket.
@@ -83,41 +83,44 @@ interface ObjectInterface extends StreamableInterface
     /**
      * Rename storage object without changing it's bucket.
      *
-     * @param string $newname
+     * @param string $newName
+     *
      * @return self
      * @throws ServerException
      * @throws BucketException
      * @throws ObjectException
      */
-    public function rename($newname);
+    public function rename(string $newName): ObjectInterface;
 
     /**
      * Copy storage object to another bucket. Method must return ObjectInterface which points to
      * new storage object.
      *
      * @param BucketInterface|string $destination
+     *
      * @return self
      * @throws ServerException
      * @throws BucketException
      * @throws ObjectException
      */
-    public function copy($destination);
+    public function copy($destination): ObjectInterface;
 
     /**
      * Move storage object data to another bucket.
      *
      * @param BucketInterface|string $destination
+     *
      * @return self
      * @throws ServerException
      * @throws BucketException
      * @throws ObjectException
      */
-    public function replace($destination);
+    public function replace($destination): ObjectInterface;
 
     /**
      * Must be serialized into object address.
      *
      * @return string
      */
-    public function __toString();
+    public function __toString(): string;
 }

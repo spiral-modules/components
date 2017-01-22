@@ -1,51 +1,47 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM;
 
-use Spiral\Models\IdentifiedInterface;
+use Spiral\Models\EntityInterface;
+use Spiral\ORM\Exceptions\RecordException;
+use Spiral\ORM\Exceptions\RelationException;
 
-/**
- * Generic ORM contract for records to be constructed and updated by ORM.
- * 
- * @todo add additional layer responsible for custom model constructions?
- */
-interface RecordInterface extends IdentifiedInterface
+interface RecordInterface extends EntityInterface
 {
     /**
-     * Due setContext() method and entity cache of ORM any custom initiation code in constructor
-     * must not depends on relations data.
+     * Can be null.
      *
-     * @see Component::staticContainer()
-     * @see setContext
-     * @param array      $data
-     * @param bool|false $loaded
-     * @param ORM|null   $orm
-     * @param array      $ormSchema
+     * @return mixed
      */
-    //public function __construct(
-    //    array $data = [],
-    //    $loaded = false,
-    //    ORM $orm = null,
-    //    array $ormSchema = []
-    //);
+    public function primaryKey();
 
     /**
-     * Indication that record data was deleted.
+     * Pack entity data into array form, no accessors is allowed. Not typed strictly to be
+     * compatible with AccessorInterface.
      *
-     * @return bool
+     * @return array
      */
-    public function isDeleted();
+    public function packValue();
 
     /**
-     * Role name used in morphed relations to detect outer record table and class. In general case
-     * must simply return unique name.
+     * {@inheritdoc}
      *
-     * @return string
+     * @param bool $queueRelations
+     *
+     * @throws RecordException
+     * @throws RelationException
      */
-    public function recordRole();
+    public function queueStore(bool $queueRelations = true): ContextualCommandInterface;
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws RecordException
+     * @throws RelationException
+     */
+    public function queueDelete(): CommandInterface;
 }

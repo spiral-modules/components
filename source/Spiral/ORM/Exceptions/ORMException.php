@@ -1,18 +1,12 @@
 <?php
 /**
- * Spiral Framework.
+ * Spiral, Core Components
  *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
+ * @author Wolfy-J
  */
 namespace Spiral\ORM\Exceptions;
 
-use Spiral\Core\Exceptions\LogicException;
-
-/**
- * Generic ORM exception.
- */
-class ORMException extends LogicException
+class ORMException extends \RuntimeException
 {
 
 }

@@ -5,11 +5,11 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Builders;
 
 use Spiral\Database\Builders\Prototypes\AbstractAffect;
-use Spiral\Database\Entities\Database;
-use Spiral\Database\Entities\QueryBuilder;
+use Spiral\Database\Entities\Driver;
 use Spiral\Database\Entities\QueryCompiler;
 use Spiral\Database\Exceptions\BuilderException;
 use Spiral\Database\Injections\FragmentInterface;
@@ -20,6 +20,11 @@ use Spiral\Database\Injections\ParameterInterface;
  */
 class UpdateQuery extends AbstractAffect
 {
+    /**
+     * Query type.
+     */
+    const QUERY_TYPE = QueryCompiler::UPDATE_QUERY;
+
     /**
      * Column names associated with their values.
      *
@@ -33,13 +38,14 @@ class UpdateQuery extends AbstractAffect
      * @param array $values Initial set of column updates.
      */
     public function __construct(
-        Database $database,
+        Driver $driver,
         QueryCompiler $compiler,
-        $table = '',
+        string $table = '',
         array $where = [],
         array $values = []
     ) {
-        parent::__construct($database, $compiler, $table, $where);
+        parent::__construct($driver, $compiler, $table, $where);
+
         $this->values = $values;
     }
 
@@ -47,9 +53,10 @@ class UpdateQuery extends AbstractAffect
      * Change target table.
      *
      * @param string $table Table name without prefix.
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function in($table)
+    public function in(string $table): UpdateQuery
     {
         $this->table = $table;
 
@@ -61,9 +68,10 @@ class UpdateQuery extends AbstractAffect
      * value to be set.
      *
      * @param array $values
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function values(array $values)
+    public function values(array $values): UpdateQuery
     {
         $this->values = $values;
 
@@ -75,7 +83,7 @@ class UpdateQuery extends AbstractAffect
      *
      * @return array
      */
-    public function getValues()
+    public function getValues(): array
     {
         return $this->values;
     }
@@ -85,9 +93,10 @@ class UpdateQuery extends AbstractAffect
      *
      * @param string $column
      * @param mixed  $value
-     * @return $this
+     *
+     * @return self|$this
      */
-    public function set($column, $value)
+    public function set(string $column, $value): UpdateQuery
     {
         $this->values[$column] = $value;
 
@@ -97,12 +106,8 @@ class UpdateQuery extends AbstractAffect
     /**
      * {@inheritdoc}
      */
-    public function getParameters(QueryCompiler $compiler = null)
+    public function getParameters(): array
     {
-        if (empty($compiler)) {
-            $compiler = $this->compiler;
-        }
-
         $values = [];
         foreach ($this->values as $value) {
             if ($value instanceof QueryBuilder) {
@@ -122,18 +127,16 @@ class UpdateQuery extends AbstractAffect
         }
 
         //Join and where parameters are going after values
-        return $this->flattenParameters($compiler->orderParameters(
-            QueryCompiler::UPDATE_QUERY, $this->whereParameters, [], [], $values
-        ));
+        return $this->flattenParameters(array_merge($values, $this->whereParameters));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function sqlStatement(QueryCompiler $compiler = null)
+    public function sqlStatement(QueryCompiler $compiler = null): string
     {
         if (empty($this->values)) {
-            throw new BuilderException("Update values must be specified.");
+            throw new BuilderException('Update values must be specified');
         }
 
         if (empty($compiler)) {

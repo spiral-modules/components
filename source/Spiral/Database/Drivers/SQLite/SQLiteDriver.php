@@ -5,11 +5,13 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Drivers\SQLite;
 
+use Psr\Log\LoggerInterface;
 use Spiral\Database\DatabaseInterface;
-use Spiral\Database\Drivers\SQLite\Schemas\Commander;
-use Spiral\Database\Drivers\SQLite\Schemas\TableSchema;
+use Spiral\Database\Drivers\SQLite\Schemas\SQLiteTable;
+use Spiral\Database\Entities\AbstractHandler;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DriverException;
 
@@ -26,41 +28,32 @@ class SQLiteDriver extends Driver
     /**
      * Driver schemas.
      */
-    const SCHEMA_TABLE = TableSchema::class;
-
-    /**
-     * Commander used to execute commands. :)
-     */
-    const COMMANDER = Commander::class;
+    const TABLE_SCHEMA_CLASS = SQLiteTable::class;
 
     /**
      * Query compiler class.
      */
-    const QUERY_COMPILER = QueryCompiler::class;
-
-    /**
-     * Default timestamp expression.
-     */
-    const TIMESTAMP_NOW = 'CURRENT_TIMESTAMP';
+    const QUERY_COMPILER = SQLiteCompiler::class;
 
     /**
      * Get driver source database or file name.
      *
      * @return string
+     *
      * @throws DriverException
      */
-    public function getSource()
+    public function getSource(): string
     {
         //Remove "sqlite:"
-        return substr($this->config['connection'], 7);
+        return substr($this->options['connection'], 7);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function hasTable($name)
+    public function hasTable(string $name): bool
     {
-        $query = 'SELECT sql FROM sqlite_master WHERE type = \'table\' and name = ?';
+        $query = "SELECT COUNT('sql') FROM 'sqlite_master' WHERE type = 'table' and name = ?";
 
         return (bool)$this->query($query, [$name])->fetchColumn();
     }
@@ -68,7 +61,7 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function truncate($table)
+    public function truncateData(string $table)
     {
         $this->statement("DELETE FROM {$this->identifier($table)}");
     }
@@ -76,10 +69,10 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    public function tableNames()
+    public function tableNames(): array
     {
         $tables = [];
-        foreach ($this->query("SELECT * FROM sqlite_master WHERE type = 'table'") as $table) {
+        foreach ($this->query("SELECT name FROM 'sqlite_master' WHERE type = 'table'") as $table) {
             if ($table['name'] != 'sqlite_sequence') {
                 $tables[] = $table['name'];
             }
@@ -91,11 +84,20 @@ class SQLiteDriver extends Driver
     /**
      * {@inheritdoc}
      */
-    protected function isolationLevel($level)
+    protected function isolationLevel(string $level)
     {
-        $this->logger()->alert(
-            "Transaction isolation level is not fully supported by SQLite ({level}).",
-            compact('level')
-        );
+        if ($this->isProfiling()) {
+            $this->logger()->alert(
+                "Transaction isolation level is not fully supported by SQLite ({$level})."
+            );
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getHandler(LoggerInterface $logger = null): AbstractHandler
+    {
+        return new SQLiteHandler($this, $logger);
     }
 }

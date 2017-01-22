@@ -7,33 +7,72 @@
  */
 namespace Spiral\Database;
 
+use Interop\Container\ContainerInterface;
 use Spiral\Core\Component;
-use Spiral\Core\FactoryInterface;
+use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\FactoryInterface;
 use Spiral\Database\Configs\DatabasesConfig;
 use Spiral\Database\Entities\Database;
 use Spiral\Database\Entities\Driver;
 use Spiral\Database\Exceptions\DatabaseException;
+use Spiral\Database\Exceptions\DBALException;
 
 /**
- * DatabaseManager responsible for database creation, configuration storage and drivers factory.
+ * Automatic factory and configurator for Drivers and Databases.
+ *
+ * Example:
+ * $config = [
+ *  'default'     => 'default',
+ *  'aliases'     => [
+ *      'default'  => 'primary',
+ *      'database' => 'primary',
+ *      'db'       => 'primary',
+ *  ],
+ *  'databases'   => [
+ *      'primary'   => [
+ *          'connection'  => 'mysql',
+ *          'tablePrefix' => 'db_'
+ *      ],
+ *      'secondary' => [
+ *          'connection'  => 'postgres',
+ *          'tablePrefix' => '',
+ *      ],
+ *  ],
+ *  'connections' => [
+ *      'mysql'     => [
+ *          'driver'     => Drivers\MySQL\MySQLDriver::class,
+ *          'connection' => 'mysql:host=127.0.0.1;dbname=database',
+ *          'username'   => 'mysql',
+ *          'password'   => 'mysql',
+ *      ],
+ *      'postgres'  => [
+ *          'driver'     => Drivers\Postgres\PostgresDriver::class,
+ *          'connection' => 'pgsql:host=127.0.0.1;dbname=database',
+ *          'username'   => 'postgres',
+ *          'password'   => 'postgres',
+ *      ],
+ *      'runtime'   => [
+ *          'driver'     => Drivers\SQLite\SQLiteDriver::class,
+ *          'connection' => 'sqlite:' . directory('runtime') . 'runtime.db',
+ *          'username'   => 'sqlite',
+ *          'options'    => []
+ *      ],
+ *      'sqlServer' => [
+ *          'driver'     => Drivers\SQLServer\SQLServerDriver::class,
+ *          'connection' => 'sqlsrv:Server=OWNER;Database=DATABASE',
+ *          'username'   => 'sqlServer',
+ *          'password'   => 'sqlServer',
+ *      ],
+ *  ]
+ * ];
+ *
+ * $manager = new DatabaseManager(new DatabaseConfig($config));
+ * echo $manager->database('runtime')->select()->from('users')->count();
  */
-class DatabaseManager extends Component implements
-    InjectorInterface, 
-    DatabasesInterface,
-    SingletonInterface
+class DatabaseManager extends Component implements SingletonInterface, InjectorInterface
 {
-    /**
-     * By default spiral will force time conversion into single timezone before storing in
-     * database, it will help us to ensure that we have no problems with switching timezones and
-     * save a lot of time while development (potentially).
-     * 
-     * Current implementation of drivers leaves a room and possibility to define driver/connection
-     * specific timezone.
-     */
-    const DEFAULT_TIMEZONE = 'UTC';
-
     /**
      * @var Database[]
      */
@@ -51,26 +90,84 @@ class DatabaseManager extends Component implements
 
     /**
      * @invisible
-     * @var FactoryInterface
+     *
+     * @var ContainerInterface
      */
-    protected $factory = null;
+    protected $container = null;
 
     /**
-     * @param DatabasesConfig  $config
-     * @param FactoryInterface $factory
+     * @param DatabasesConfig    $config
+     * @param ContainerInterface $container Factory provider. Also used to define driver and
+     *                                      builders scope.
      */
-    public function __construct(DatabasesConfig $config, FactoryInterface $factory)
+    public function __construct(DatabasesConfig $config, ContainerInterface $container = null)
     {
         $this->config = $config;
-        $this->factory = $factory;
+        $this->container = $container ?? new Container();
     }
 
     /**
-     * {@inheritdoc}
+     * Manually set database.
+     *
+     * @param Database $database
+     *
+     * @return self
+     *
+     * @throws DBALException
+     */
+    public function addDatabase(Database $database): DatabaseManager
+    {
+        if (isset($this->databases[$database->getName()])) {
+            throw new DBALException("Database '{$database->getName()}' already exists");
+        }
+
+        $this->databases[$database->getName()] = $database;
+
+        return $this;
+    }
+
+    /**
+     * Automatically create database instance based on given options and connection (in a form or
+     * instance or alias).
+     *
+     * @param string        $name
+     * @param string        $prefix
+     * @param string|Driver $connection Connection name or instance.
      *
      * @return Database
+     *
+     * @throws DBALException
      */
-    public function database($database = null)
+    public function createDatabase(string $name, string $prefix, $connection): Database
+    {
+        if (!$connection instanceof Driver) {
+            $connection = $this->driver($connection);
+        }
+
+        $instance = $this->getFactory()->make(
+            Database::class,
+            [
+                'name'   => $name,
+                'prefix' => $prefix,
+                'driver' => $connection
+            ]
+        );
+
+        $this->addDatabase($instance);
+
+        return $instance;
+    }
+
+    /**
+     * Get Database associated with a given database alias or automatically created one.
+     *
+     * @param string|null $database
+     *
+     * @return Database
+     *
+     * @throws DBALException
+     */
+    public function database(string $database = null): Database
     {
         if (empty($database)) {
             $database = $this->config->defaultDatabase();
@@ -84,63 +181,133 @@ class DatabaseManager extends Component implements
         }
 
         if (!$this->config->hasDatabase($database)) {
-            throw new DatabaseException(
-                "Unable to create database, no presets for '{$database}' found."
+            throw new DBALException(
+                "Unable to create Database, no presets for '{$database}' found"
             );
         }
 
         //No need to benchmark here, due connection will happen later
-        $this->databases[$database] = $this->factory->make(Database::class, [
-            'name'   => $database,
-            'driver' => $this->driver($this->config->databaseConnection($database)),
-            'prefix' => $this->config->databasePrefix($database)
-        ]);
+        $instance = $this->getFactory()->make(
+            Database::class,
+            [
+                'name'   => $database,
+                'prefix' => $this->config->databasePrefix($database),
+                'driver' => $this->driver(
+                    $this->config->databaseDriver($database)
+                ),
+            ]
+        );
 
-        return $this->databases[$database];
+        return $this->databases[$database] = $instance;
     }
 
     /**
-     * Get driver by it's name. Every driver associated with configured connection, there is minor
-     * de-sync in naming due legacy code.
+     * Manually set connection instance.
+     *
+     * @param Driver $driver
+     *
+     * @return self
+     *
+     * @throws DBALException
+     */
+    public function addDriver(Driver $driver): DatabaseManager
+    {
+        if (isset($this->drivers[$driver->getName()])) {
+            throw new DBALException("Connection '{$driver->getName()}' already exists");
+        }
+
+        $this->drivers[$driver->getName()] = $driver;
+
+        return $this;
+    }
+
+    /**
+     * Create and register connection under given name.
+     *
+     * @param string $name
+     * @param string $driver Driver class.
+     * @param string $dns
+     * @param string $username
+     * @param string $password
+     *
+     * @return Driver
+     */
+    public function createDriver(
+        string $name,
+        string $driver,
+        string $dns,
+        string $username,
+        string $password = ''
+    ): Driver {
+        $instance = $this->getFactory()->make(
+            $driver,
+            [
+                'name'    => $name,
+                'options' => [
+                    'connection' => $dns,
+                    'username'   => $username,
+                    'password'   => $password
+                ]
+            ]
+        );
+
+        $this->addDriver($instance);
+
+        return $instance;
+    }
+
+    /**
+     * Get connection/driver by it's name. Every driver associated with configured connection,
+     * there is minor de-sync in naming due legacy code.
      *
      * @param string $connection
+     *
      * @return Driver
-     * @throws DatabaseException
+     *
+     * @throws DBALException
      */
-    public function driver($connection)
+    public function driver(string $connection): Driver
     {
         if (isset($this->drivers[$connection])) {
             return $this->drivers[$connection];
         }
 
-        if (!$this->config->hasConnection($connection)) {
-            throw new DatabaseException(
-                "Unable to create Driver, no presets for '{$connection}' found."
+        if (!$this->config->hasDriver($connection)) {
+            throw new DBALException(
+                "Unable to create Driver, no presets for '{$connection}' found"
             );
         }
 
-        $this->drivers[$connection] = $this->factory->make(
-            $this->config->connectionDriver($connection),
+        $instance = $this->getFactory()->make(
+            $this->config->driverClass($connection),
             [
-                'name'   => $connection,
-                'config' => $this->config->connectionConfig($connection)
+                'name'    => $connection,
+                'options' => $this->config->driverOptions($connection),
             ]
         );
 
-        return $this->drivers[$connection];
+        return $this->drivers[$connection] = $instance;
     }
 
     /**
      * Get instance of every available database.
      *
      * @return Database[]
+     *
      * @throws DatabaseException
      */
-    public function getDatabases()
+    public function getDatabases(): array
     {
         $result = [];
+
         foreach ($this->config->databaseNames() as $name) {
             $result[] = $this->database($name);
+        }
+
+        foreach ($this->databases as $database) {
+            if (!in_array($database, $result)) {
+                $result[] = $database;
+            }
         }
 
         return $result;
@@ -150,13 +317,21 @@ class DatabaseManager extends Component implements
      * Get instance of every available driver/connection.
      *
      * @return Driver[]
+     *
      * @throws DatabaseException
      */
-    public function getDrivers()
+    public function getDrivers(): array
     {
         $result = [];
-        foreach ($this->config->connectionNames() as $name) {
+
+        foreach ($this->config->driverNames() as $name) {
             $result[] = $this->driver($name);
+        }
+
+        foreach ($this->drivers as $driver) {
+            if (!in_array($driver, $result)) {
+                $result[] = $driver;
+            }
         }
 
         return $result;
@@ -165,9 +340,23 @@ class DatabaseManager extends Component implements
     /**
      * {@inheritdoc}
      */
-    public function createInjection(\ReflectionClass $class, $context = null)
+    public function createInjection(\ReflectionClass $class, string $context = null)
     {
         //If context is empty default database will be returned
         return $this->database($context);
+    }
+
+    /**
+     * Get ODM specific factory.
+     *
+     * @return FactoryInterface
+     */
+    protected function getFactory(): FactoryInterface
+    {
+        if ($this->container instanceof FactoryInterface) {
+            return $this->container;
+        }
+
+        return $this->container->get(FactoryInterface::class);
     }
 }

@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Injections;
 
 /**
@@ -15,7 +16,7 @@ interface FragmentInterface
     /**
      * @return string
      */
-    public function sqlStatement();
+    public function sqlStatement(): string;
 
     /**
      * @return string

@@ -12,12 +12,11 @@ use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamWrapper;
 use Spiral\Storage\BucketInterface;
 use Spiral\Storage\Exceptions\ServerException;
-use Spiral\Storage\StorageServer;
 
 /**
  * Provides abstraction level to work with data located at remove SFTP server.
  */
-class SftpServer extends StorageServer
+class SftpServer extends AbstractServer
 {
     /**
      * Authorization methods.
@@ -58,13 +57,13 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function __construct(FilesInterface $files, array $options)
+    public function __construct(array $options, FilesInterface $files = null)
     {
-        parent::__construct($files, $options);
+        parent::__construct($options, $files);
 
         if (!extension_loaded('ssh2')) {
             throw new ServerException(
-                "Unable to initialize sftp storage server, extension 'ssh2' not found."
+                "Unable to initialize sftp storage server, extension 'ssh2' not found"
             );
         }
 
@@ -75,46 +74,44 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function exists(BucketInterface $bucket, $name)
+    public function exists(BucketInterface $bucket, string $name): bool
     {
-        return file_exists($this->getUri($bucket, $name));
+        return file_exists($this->castRemoteFilename($bucket, $name));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function size(BucketInterface $bucket, $name)
+    public function size(BucketInterface $bucket, string $name)
     {
         if (!$this->exists($bucket, $name)) {
-            return false;
+            return null;
         }
 
-        return filesize($this->getUri($bucket, $name));
+        return filesize($this->castRemoteFilename($bucket, $name));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put(BucketInterface $bucket, $name, $source)
+    public function put(BucketInterface $bucket, string $name, $source): bool
     {
-        if ($source instanceof StreamInterface) {
-            $expectedSize = $source->getSize();
-            $source = StreamWrapper::getResource($source);
-        } else {
-            $expectedSize = filesize($source);
-            $source = fopen($source, 'r');
-        }
+        //Converting into stream
+        $stream = $this->castStream($source);
+
+        $expectedSize = $stream->getSize();
+        $resource = StreamWrapper::getResource($stream);
 
         //Make sure target directory exists
         $this->ensureLocation($bucket, $name);
 
         //Remote file
-        $destination = fopen($this->getUri($bucket, $name), 'w');
+        $destination = fopen($this->castRemoteFilename($bucket, $name), 'w');
 
         //We can check size here
-        $size = stream_copy_to_stream($source, $destination);
+        $size = stream_copy_to_stream($resource, $destination);
 
-        fclose($source);
+        fclose($resource);
         fclose($destination);
 
         return $expectedSize == $size && $this->refreshPermissions($bucket, $name);
@@ -123,45 +120,51 @@ class SftpServer extends StorageServer
     /**
      * {@inheritdoc}
      */
-    public function allocateStream(BucketInterface $bucket, $name)
+    public function allocateStream(BucketInterface $bucket, string $name): StreamInterface
     {
-        return \GuzzleHttp\Psr7\stream_for(fopen($this->getUri($bucket, $name), 'rb'));
+        //Thought native sftp resource
+        return \GuzzleHttp\Psr7\stream_for(
+            fopen($this->castRemoteFilename($bucket, $name), 'rb')
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete(BucketInterface $bucket, $name)
+    public function delete(BucketInterface $bucket, string $name)
     {
         if ($this->exists($bucket, $name)) {
-            ssh2_sftp_unlink($this->sftp, $this->getPath($bucket, $name));
+            ssh2_sftp_unlink($this->sftp, $path = $this->castPath($bucket, $name));
+
+            //Cleaning file cache for removed file
+            clearstatcache(false, $path);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rename(BucketInterface $bucket, $oldname, $newname)
+    public function rename(BucketInterface $bucket, string $oldName, string $newName): bool
     {
-        if (!$this->exists($bucket, $oldname)) {
+        if (!$this->exists($bucket, $oldName)) {
             throw new ServerException(
-                "Unable to rename storage object '{$oldname}', object does not exists at SFTP server."
+                "Unable to rename storage object '{$oldName}', object does not exists at SFTP server"
             );
         }
 
-        $location = $this->ensureLocation($bucket, $newname);
-        if (file_exists($this->getUri($bucket, $newname))) {
+        $location = $this->ensureLocation($bucket, $newName);
+        if (file_exists($this->castRemoteFilename($bucket, $newName))) {
             //We have to clean location before renaming
-            $this->delete($bucket, $newname);
+            $this->delete($bucket, $newName);
         }
 
-        if (!ssh2_sftp_rename($this->sftp, $this->getPath($bucket, $oldname), $location)) {
+        if (!ssh2_sftp_rename($this->sftp, $this->castPath($bucket, $oldName), $location)) {
             throw new ServerException(
-                "Unable to rename storage object '{$oldname}' to '{$newname}'."
+                "Unable to rename storage object '{$oldName}' to '{$newName}'"
             );
         }
 
-        return $this->refreshPermissions($bucket, $newname);
+        return $this->refreshPermissions($bucket, $newName);
     }
 
     /**
@@ -179,7 +182,7 @@ class SftpServer extends StorageServer
 
         if (empty($session)) {
             throw new ServerException(
-                "Unable to connect to remote SSH server '{$this->options['host']}'."
+                "Unable to connect to remote SSH server '{$this->options['host']}'"
             );
         }
 
@@ -190,8 +193,11 @@ class SftpServer extends StorageServer
                 break;
 
             case self::PASSWORD:
-                ssh2_auth_password($session, $this->options['username'],
-                    $this->options['password']);
+                ssh2_auth_password(
+                    $session,
+                    $this->options['username'],
+                    $this->options['password']
+                );
                 break;
 
             case self::PUB_KEY:
@@ -209,13 +215,28 @@ class SftpServer extends StorageServer
     }
 
     /**
+     * Get ssh2 specific uri which can be used in default php functions. Assigned to ssh2.sftp
+     * stream wrapper.
+     *
+     * @param BucketInterface $bucket
+     * @param string          $name
+     *
+     * @return string
+     */
+    protected function castRemoteFilename(BucketInterface $bucket, string $name): string
+    {
+        return 'ssh2.sftp://' . $this->sftp . $this->castPath($bucket, $name);
+    }
+
+    /**
      * Get full file location on server including homedir.
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      */
-    protected function getPath(BucketInterface $bucket, $name)
+    protected function castPath(BucketInterface $bucket, string $name): string
     {
         return $this->files->normalizePath(
             $this->options['home'] . '/' . $bucket->getOption('directory') . '/' . $name
@@ -223,29 +244,17 @@ class SftpServer extends StorageServer
     }
 
     /**
-     * Get ssh2 specific uri which can be used in default php functions. Assigned to ssh2.sftp
-     * stream wrapper.
-     *
-     * @param BucketInterface $bucket
-     * @param string          $name
-     * @return string
-     */
-    protected function getUri(BucketInterface $bucket, $name)
-    {
-        return 'ssh2.sftp://' . $this->sftp . $this->getPath($bucket, $name);
-    }
-
-    /**
      * Ensure that target directory exists and has right permissions.
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return string
      * @throws ServerException
      */
-    protected function ensureLocation(BucketInterface $bucket, $name)
+    protected function ensureLocation(BucketInterface $bucket, string $name): string
     {
-        $directory = dirname($this->getPath($bucket, $name));
+        $directory = dirname($this->castPath($bucket, $name));
 
         $mode = $bucket->getOption('mode', FilesInterface::RUNTIME);
         if (file_exists('ssh2.sftp://' . $this->sftp . $directory)) {
@@ -253,7 +262,7 @@ class SftpServer extends StorageServer
                 ssh2_sftp_chmod($this->sftp, $directory, $mode | 0111);
             }
 
-            return $this->getPath($bucket, $name);
+            return $this->castPath($bucket, $name);
         }
 
         $directories = explode('/', substr($directory, strlen($this->options['home'])));
@@ -269,7 +278,7 @@ class SftpServer extends StorageServer
             if (!file_exists('ssh2.sftp://' . $this->sftp . $location)) {
                 if (!ssh2_sftp_mkdir($this->sftp, $location)) {
                     throw new ServerException(
-                        "Unable to create directory {$location} using sftp connection."
+                        "Unable to create directory {$location} using sftp connection"
                     );
                 }
 
@@ -279,7 +288,7 @@ class SftpServer extends StorageServer
             }
         }
 
-        return $this->getPath($bucket, $name);
+        return $this->castPath($bucket, $name);
     }
 
     /**
@@ -287,9 +296,10 @@ class SftpServer extends StorageServer
      *
      * @param BucketInterface $bucket
      * @param string          $name
+     *
      * @return bool
      */
-    protected function refreshPermissions(BucketInterface $bucket, $name)
+    protected function refreshPermissions(BucketInterface $bucket, string $name): bool
     {
         if (!function_exists('ssh2_sftp_chmod')) {
             return true;
@@ -297,7 +307,7 @@ class SftpServer extends StorageServer
 
         return ssh2_sftp_chmod(
             $this->sftp,
-            $this->getPath($bucket, $name),
+            $this->castPath($bucket, $name),
             $bucket->getOption('mode', FilesInterface::RUNTIME)
         );
     }

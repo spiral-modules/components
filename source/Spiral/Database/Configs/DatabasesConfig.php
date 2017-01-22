@@ -5,6 +5,7 @@
  * @license MIT
  * @author  Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Database\Configs;
 
 use Spiral\Core\InjectableConfig;
@@ -23,37 +24,40 @@ class DatabasesConfig extends InjectableConfig
     const CONFIG = 'databases';
 
     /**
+     * @invisible
      * @var array
      */
     protected $config = [
         'default'     => 'default',
         'aliases'     => [],
         'databases'   => [],
-        'connections' => []
+        'connections' => [],
     ];
 
     /**
      * @return string
      */
-    public function defaultDatabase()
+    public function defaultDatabase(): string
     {
         return $this->config['default'];
     }
 
     /**
      * @param string $database
+     *
      * @return bool
      */
-    public function hasDatabase($database)
+    public function hasDatabase(string $database): bool
     {
         return isset($this->config['databases'][$database]);
     }
 
     /**
      * @param string $connection
+     *
      * @return bool
      */
-    public function hasConnection($connection)
+    public function hasDriver(string $connection): bool
     {
         return isset($this->config['connections'][$connection]);
     }
@@ -61,7 +65,7 @@ class DatabasesConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function databaseNames()
+    public function databaseNames(): array
     {
         return array_keys($this->config['databases']);
     }
@@ -69,25 +73,27 @@ class DatabasesConfig extends InjectableConfig
     /**
      * @return array
      */
-    public function connectionNames()
+    public function driverNames(): array
     {
         return array_keys($this->config['connections']);
     }
 
     /**
      * @param string $database
+     *
      * @return string
      */
-    public function databaseConnection($database)
+    public function databaseDriver(string $database): string
     {
         return $this->config['databases'][$database]['connection'];
     }
 
     /**
      * @param string $database
+     *
      * @return string
      */
-    public function databasePrefix($database)
+    public function databasePrefix(string $database): string
     {
         if (isset($this->config['databases'][$database]['tablePrefix'])) {
             return $this->config['databases'][$database]['tablePrefix'];
@@ -97,20 +103,25 @@ class DatabasesConfig extends InjectableConfig
     }
 
     /**
-     * @param string $connection
+     * @param string $driver
+     *
      * @return string
      */
-    public function connectionDriver($connection)
+    public function driverClass(string $driver): string
     {
-        return $this->config['connections'][$connection]['driver'];
+        return $this->config['connections'][$driver]['driver'];
     }
 
     /**
-     * @param string $connection
+     * @param string $driver
+     *
      * @return array
      */
-    public function connectionConfig($connection)
+    public function driverOptions(string $driver): array
     {
-        return $this->config['connections'][$connection];
+        $options = $this->config['connections'][$driver];
+        unset($options['driver']);
+
+        return $options;
     }
 }

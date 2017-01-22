@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Models\Events;
 
 use Spiral\Models\Reflections\ReflectionEntity;
@@ -18,24 +19,24 @@ class DescribeEvent extends Event
     /**
      * @var ReflectionEntity
      */
-    private $reflection = null;
+    private $reflection;
 
     /**
      * @var string
      */
-    private $property = '';
+    private $property;
 
     /**
      * @var mixed
      */
-    private $value = null;
+    private $value;
 
     /**
      * @param ReflectionEntity $reflection
      * @param string           $property
      * @param mixed            $value
      */
-    public function __construct(ReflectionEntity $reflection, $property, $value)
+    public function __construct(ReflectionEntity $reflection, string $property, $value)
     {
         $this->reflection = $reflection;
         $this->property = $property;
@@ -45,7 +46,7 @@ class DescribeEvent extends Event
     /**
      * @return ReflectionEntity
      */
-    public function reflection()
+    public function getReflection(): ReflectionEntity
     {
         return $this->reflection;
     }
@@ -53,17 +54,9 @@ class DescribeEvent extends Event
     /**
      * @return string
      */
-    public function getProperty()
+    public function getProperty(): string
     {
         return $this->property;
-    }
-
-    /**
-     * @param string $property
-     */
-    public function setProperty($property)
-    {
-        $this->property = $property;
     }
 
     /**
@@ -75,6 +68,8 @@ class DescribeEvent extends Event
     }
 
     /**
+     * Alter value.
+     *
      * @param mixed $value
      */
     public function setValue($value)

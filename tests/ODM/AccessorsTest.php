@@ -101,7 +101,7 @@ class AccessorsTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Spiral\Models\Exceptions\AccessException
+     * @expectedException \Spiral\ODM\Exceptions\AccessException
      * @expectedExceptionMessage No such property 'test' in 'Spiral\Tests\ODM\Fixtures\Accessed',
      *                           check schema being relevant
      */

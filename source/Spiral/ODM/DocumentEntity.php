@@ -11,7 +11,6 @@ use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Models\AccessorInterface;
-use Spiral\Models\Exceptions\AccessException;
 use Spiral\Models\SchematicEntity;
 use Spiral\Models\Traits\SolidableTrait;
 use Spiral\ODM\Entities\DocumentCompositor;

@@ -360,16 +360,9 @@ class ORM extends Component implements ORMInterface, SingletonInterface
             throw new ORMException("Undefined relation type '{$schema[self::R_TYPE]}'");
         }
 
-        $class = $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS);
-
-        if (is_a($class, AbstractRelation::class, true)) {
-            //Minor performance optimization
-            return new $class($schema[self::R_CLASS], $schema[self::R_SCHEMA], $this);
-        }
-
         //Generating relation (might require performance improvements)
         return $this->getFactory()->make(
-            $class,
+            $this->config->relationClass($schema[self::R_TYPE], RelationsConfig::ACCESS_CLASS),
             [
                 'class'  => $schema[self::R_CLASS],
                 'schema' => $schema[self::R_SCHEMA],

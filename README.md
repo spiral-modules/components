@@ -1,4 +1,4 @@
-Spiral Core Components
+Spiral Core Components (PHP7+)
 ================================
 
 [![Latest Stable Version](https://poser.pugx.org/spiral/components/v/stable)](https://packagist.org/packages/spiral/components) 
@@ -13,7 +13,7 @@ Spiral Core Components
 # Components Included
   - Core interfaces, autowiring DI, declarative singletons and auto injections
   - Stempler template composer (HTML syntax)
-  - Tokenizer, class locator, invocation locator
+  - Tokenizer, static code analysis
   - Debug, Profiling and Dump components
   - FileManager and Abstract Storage (Amazon, Rackspace, SFTP, FTP, GridFS)
   - Pagination

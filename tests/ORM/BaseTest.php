@@ -110,8 +110,6 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
 
         $this->orm->buildSchema($this->builder);
 
-        print_r($this->builder->packSchema()[Picture::class]);
-
         SharedComponent::shareContainer($container);
 
         //Make all tests with map

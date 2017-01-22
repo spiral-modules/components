@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM\Entities\Relations;
 
 use Spiral\Database\Builders\SelectQuery;
@@ -32,10 +33,6 @@ use Spiral\ORM\RecordInterface;
 class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate, \Countable
 {
     use LookupTrait;
-
-    /** Schema shortcuts */
-    const PIVOT_TABLE    = Record::PIVOT_TABLE;
-    const PIVOT_DATABASE = 917;
 
     /**
      * @var Table|null
@@ -459,9 +456,9 @@ class ManyToManyRelation extends MultipleRelation implements \IteratorAggregate,
     {
         if (empty($this->pivotTable)) {
             $this->pivotTable = $this->orm->database(
-                $this->schema[self::PIVOT_DATABASE]
+                $this->schema[Record::PIVOT_DATABASE]
             )->table(
-                $this->schema[self::PIVOT_TABLE]
+                $this->schema[Record::PIVOT_TABLE]
             );
         }
 

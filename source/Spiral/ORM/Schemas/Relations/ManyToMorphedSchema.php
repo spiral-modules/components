@@ -7,10 +7,15 @@
 
 namespace Spiral\ORM\Schemas\Relations;
 
+use Doctrine\Common\Inflector\Inflector;
+use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Helpers\ColumnRenderer;
 use Spiral\ORM\ORMInterface;
 use Spiral\ORM\Record;
+use Spiral\ORM\Schemas\Definitions\RelationContext;
+use Spiral\ORM\Schemas\Definitions\RelationDefinition;
+use Spiral\ORM\Schemas\InversableRelationInterface;
 use Spiral\ORM\Schemas\Relations\Traits\ForeignsTrait;
 use Spiral\ORM\Schemas\Relations\Traits\MorphedTrait;
 use Spiral\ORM\Schemas\Relations\Traits\TypecastTrait;
@@ -56,7 +61,7 @@ use Spiral\ORM\Schemas\SchemaBuilder;
  * @see BelongsToMorhedSchema
  * @see ManyToManySchema
  */
-class ManyToMorphedSchema extends AbstractSchema //implements InversableRelationInterface
+class ManyToMorphedSchema extends AbstractSchema implements InversableRelationInterface
 {
     use TypecastTrait, ForeignsTrait, MorphedTrait;
 
@@ -85,7 +90,8 @@ class ManyToMorphedSchema extends AbstractSchema //implements InversableRelation
         Record::THOUGHT_OUTER_KEY,
         Record::RELATION_COLUMNS,
         Record::PIVOT_COLUMNS,
-        Record::WHERE_PIVOT
+        Record::WHERE_PIVOT,
+        Record::MORPH_KEY
     ];
 
     /**
@@ -144,6 +150,49 @@ class ManyToMorphedSchema extends AbstractSchema //implements InversableRelation
         //data.
         Record::WHERE_PIVOT       => [],
     ];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function inverseDefinition(SchemaBuilder $builder, $inverseTo): \Generator
+    {
+        if (!is_string($inverseTo)) {
+            throw new DefinitionException("Inversed relation must be specified as string");
+        }
+
+        foreach ($this->findTargets($builder) as $schema) {
+            /**
+             * We are going to simply replace outer key with inner key and keep the rest of options intact.
+             */
+            $inversed = new RelationDefinition(
+                $inverseTo,
+                Record::MANY_TO_MANY,
+                $this->definition->sourceContext()->getClass(),
+                [
+                    Record::PIVOT_TABLE       => $this->option(Record::PIVOT_TABLE),
+                    Record::OUTER_KEY         => $this->option(Record::INNER_KEY),
+                    Record::INNER_KEY         => $this->findOuter($builder)->getName(),
+                    Record::THOUGHT_INNER_KEY => $this->option(Record::THOUGHT_OUTER_KEY),
+                    Record::THOUGHT_OUTER_KEY => $this->option(Record::THOUGHT_INNER_KEY),
+                    Record::CREATE_CONSTRAINT => false,
+                    Record::CREATE_INDEXES    => $this->option(Record::CREATE_INDEXES),
+                    Record::CREATE_PIVOT      => false, //Table creation hes been already handled
+                    Record::PIVOT_COLUMNS     => $this->option(Record::PIVOT_COLUMNS),
+                    Record::WHERE_PIVOT       => $this->option(Record::WHERE_PIVOT),
+                    Record::MORPH_KEY         => $this->option(Record::MORPH_KEY)
+                ]
+            );
+
+            //In back order :)
+            yield $inversed->withContext(
+                RelationContext::createContent(
+                    $schema,
+                    $builder->requestTable($schema->getTable(), $schema->getDatabase())
+                ),
+                $this->definition->sourceContext()
+            );
+        }
+    }
 
     /**
      * {@inheritdoc}
@@ -235,6 +284,38 @@ class ManyToMorphedSchema extends AbstractSchema //implements InversableRelation
      */
     public function packRelation(SchemaBuilder $builder): array
     {
-        return [];
+        $packed = parent::packRelation($builder);
+        $schema = &$packed[ORMInterface::R_SCHEMA];
+
+        //Must be resolved thought builder (can't be defined manually)
+        $schema[Record::OUTER_KEY] = $this->findOuter($builder)->getName();
+
+        //Clarifying location
+        $schema[Record::PIVOT_DATABASE] = $this->definition->sourceContext()->getDatabase();
+        $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
+
+        //Ensure that inner keys are always presented
+        $schema[Record::PIVOT_COLUMNS] = array_merge(
+            [
+                $this->option(Record::THOUGHT_INNER_KEY),
+                $this->option(Record::THOUGHT_OUTER_KEY),
+                $this->option(Record::MORPH_KEY)
+            ],
+            $schema[Record::PIVOT_COLUMNS]
+        );
+
+        //Model-role mapping
+        foreach ($this->findTargets($builder) as $outer) {
+            /*
+             * //Must be pluralized
+             * $tag->tagged->posts->count();
+             */
+            $role = Inflector::pluralize($outer->getRole());
+
+            //Role => model mapping
+            $schema[Record::MORPHED_ALIASES][$role] = $outer->getClass();
+        }
+
+        return $packed;
     }
 }

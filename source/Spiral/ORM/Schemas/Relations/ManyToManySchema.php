@@ -7,7 +7,6 @@
 
 namespace Spiral\ORM\Schemas\Relations;
 
-use Spiral\ORM\Entities\Relations\ManyToManyRelation;
 use Spiral\ORM\Exceptions\DefinitionException;
 use Spiral\ORM\Exceptions\RelationSchemaException;
 use Spiral\ORM\Helpers\ColumnRenderer;
@@ -59,7 +58,8 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         Record::RELATION_COLUMNS,
         Record::PIVOT_COLUMNS,
         Record::WHERE_PIVOT,
-        Record::WHERE
+        Record::WHERE,
+        Record::MORPH_KEY
     ];
 
     /**
@@ -119,6 +119,9 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         //can not be inversed. Attention, WHERE conditions not used in has(), link() and sync()
         //methods.
         Record::WHERE             => [],
+
+        //Used when relation is created as inverse of ManyToMorphed relation
+        Record::MORPH_KEY         => null
     ];
 
     /**
@@ -266,11 +269,11 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
         $packed = parent::packRelation($builder);
 
         //Let's clarify pivot columns
-        $schema = $packed[ORMInterface::R_SCHEMA];
+        $schema = &$packed[ORMInterface::R_SCHEMA];
 
         //Pivot table location (for now always in context database)
         $schema[Record::PIVOT_TABLE] = $this->pivotTable();
-        $schema[ManyToManyRelation::PIVOT_DATABASE] = $this->definition->sourceContext()->getDatabase();
+        $schema[Record::PIVOT_DATABASE] = $this->definition->sourceContext()->getDatabase();
 
         $schema[Record::PIVOT_COLUMNS] = array_keys($schema[Record::PIVOT_COLUMNS]);
 
@@ -282,8 +285,6 @@ class ManyToManySchema extends AbstractSchema implements InversableRelationInter
             ],
             $schema[Record::PIVOT_COLUMNS]
         );
-
-        $packed[ORMInterface::R_SCHEMA] = $schema;
 
         return $packed;
     }

@@ -186,14 +186,16 @@ class BelongsToMorphedSchema extends AbstractSchema implements InversableRelatio
      */
     public function packRelation(SchemaBuilder $builder): array
     {
-        $schema = parent::packRelation($builder);
-        $schema[ORMInterface::R_SCHEMA][Record::OUTER_KEY] = $this->findOuter($builder)->getName();
+        $packed = parent::packRelation($builder);
+
+        $schema = &$packed[ORMInterface::R_SCHEMA];
+        $schema[Record::OUTER_KEY] = $this->findOuter($builder)->getName();
 
         foreach ($this->findTargets($builder) as $outer) {
             //Role => model mapping
-            $schema[ORMInterface::R_SCHEMA][Record::MORPHED_ALIASES][$outer->getRole()] = $outer->getClass();
+            $schema[Record::MORPHED_ALIASES][$outer->getRole()] = $outer->getClass();
         }
 
-        return $schema;
+        return $packed;
     }
 }

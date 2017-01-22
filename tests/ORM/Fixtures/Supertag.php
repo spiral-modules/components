@@ -13,7 +13,8 @@ class Supertag extends BaseRecord
         'id'     => 'primary',
         'name'   => 'string(32)',
         'tagged' => [
-            self::MANY_TO_MORPHED => TaggableInterface::class
+            self::MANY_TO_MORPHED => TaggableInterface::class,
+            self::INVERSE         => 'supertags'
         ]
     ];
 }

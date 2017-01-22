@@ -19,7 +19,5 @@ use Spiral\ORM\Record;
  */
 class ManyToMorphedRelation
 {
-    /** Schema shortcuts */
-    const PIVOT_TABLE    = Record::PIVOT_TABLE;
-    const PIVOT_DATABASE = 917;
+
 }

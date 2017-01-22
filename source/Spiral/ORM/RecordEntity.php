@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\ORM;
 
 use Spiral\Core\Traits\SaturateTrait;
@@ -72,12 +73,13 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     const INNER_KEY         = 902; //Inner key name
     const MORPH_KEY         = 903; //Morph key name (internal)
     const PIVOT_TABLE       = 904; //Pivot table name
-    const PIVOT_COLUMNS     = 905; //Pre-defined pivot table columns
-    const PIVOT_DEFAULTS    = 906; //Pre-defined pivot table default values
-    const THOUGHT_INNER_KEY = 907; //Pivot table options
-    const THOUGHT_OUTER_KEY = 908; //Pivot table options
-    const WHERE             = 909; //Where conditions
-    const WHERE_PIVOT       = 910; //Where pivot conditions
+    const PIVOT_DATABASE    = 905; //Pivot database (internal)
+    const PIVOT_COLUMNS     = 906; //Pre-defined pivot table columns
+    const PIVOT_DEFAULTS    = 907; //Pre-defined pivot table default values
+    const THOUGHT_INNER_KEY = 908; //Pivot table options
+    const THOUGHT_OUTER_KEY = 909; //Pivot table options
+    const WHERE             = 910; //Where conditions
+    const WHERE_PIVOT       = 911; //Where pivot conditions
 
     /**
      * Additional constants used to control relation schema behaviour.

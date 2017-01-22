@@ -23,7 +23,7 @@ abstract class Migration implements MigrationInterface
     private $state = null;
 
     /**
-     * @var MigrationCapsule
+     * @var CapsuleInterface
      */
     private $capsule = null;
 

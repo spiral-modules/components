@@ -25,8 +25,12 @@ abstract class BelongsToMorphedTest extends BaseTest
         Picture::class
     ];
 
-    public function testBelongsToMorphedSchema()
+    public function testSchemaBuilding()
     {
-
+        $picture = new Picture();
+        $this->assertTrue($picture->hasField('parent_id'));
+        $this->assertTrue($picture->hasField('parent_type'));
     }
+
+
 }

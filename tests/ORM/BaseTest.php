@@ -24,6 +24,7 @@ use Spiral\Tests\Core\Fixtures\SharedComponent;
 use Spiral\Tests\ORM\Fixtures\AbstactRecord;
 use Spiral\Tests\ORM\Fixtures\Comment;
 use Spiral\Tests\ORM\Fixtures\Node;
+use Spiral\Tests\ORM\Fixtures\Picture;
 use Spiral\Tests\ORM\Fixtures\Post;
 use Spiral\Tests\ORM\Fixtures\Profile;
 use Spiral\Tests\ORM\Fixtures\Recursive;
@@ -108,6 +109,8 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $this->db->getDriver()->setProfiling(true);
 
         $this->orm->buildSchema($this->builder);
+
+        print_r($this->builder->packSchema()[Picture::class]);
 
         SharedComponent::shareContainer($container);
 

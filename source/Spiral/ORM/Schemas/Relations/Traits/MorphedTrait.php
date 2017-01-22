@@ -87,7 +87,7 @@ trait MorphedTrait
      *
      * @param \Spiral\ORM\Schemas\SchemaBuilder $builder
      *
-     * @return \Generator
+     * @return \Generator|\Spiral\ORM\Schemas\SchemaInterface[]
      */
     protected function findTargets(SchemaBuilder $builder): \Generator
     {

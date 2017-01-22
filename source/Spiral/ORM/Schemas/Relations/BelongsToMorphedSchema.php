@@ -61,6 +61,16 @@ class BelongsToMorphedSchema extends AbstractSchema
     const MORPH_COLUMN_SIZE = 32;
 
     /**
+     * Options needed in runtime.
+     */
+    const PACK_OPTIONS = [
+        Record::INNER_KEY,
+        Record::OUTER_KEY,
+        Record::MORPH_KEY,
+        Record::NULLABLE
+    ];
+
+    /**
      * {@inheritdoc}
      */
     const OPTIONS_TEMPLATE = [
@@ -128,6 +138,14 @@ class BelongsToMorphedSchema extends AbstractSchema
      */
     public function packRelation(SchemaBuilder $builder): array
     {
-        return [];
+        $schema = parent::packRelation($builder);
+        $schema[ORMInterface::R_SCHEMA][Record::OUTER_KEY] = $this->findOuter($builder)->getName();
+
+        foreach ($this->findTargets($builder) as $outer) {
+            //Role => model mapping
+            $schema[ORMInterface::R_SCHEMA][ORMInterface::R_ROLE_NAME][$outer->getRole()] = $outer->getClass();
+        }
+
+        return $schema;
     }
 }

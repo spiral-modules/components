@@ -87,16 +87,17 @@ abstract class AbstractSchema implements RelationInterface
      */
     public function packRelation(SchemaBuilder $builder): array
     {
-        //Target table
-        $table = $this->targetTable($builder);
-
         //Fetching all needed options
         $schema = $this->options->defineMultiple(static::PACK_OPTIONS);
 
         if (
             in_array(Record::RELATION_COLUMNS, static::PACK_OPTIONS)
             && empty($schema[Record::RELATION_COLUMNS])
+            && !empty($this->definition->targetContext())
         ) {
+            //Target table
+            $table = $this->targetTable($builder);
+
             //Let's read list of columns
             foreach ($table->getColumns() as $column) {
                 $schema[Record::RELATION_COLUMNS][] = $column->getName();

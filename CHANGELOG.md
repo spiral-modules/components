@@ -56,7 +56,7 @@ CHANGELOG for 0.9.0 RC
     * MutableNumber accessor
     * Validations
   * Bugfixes
-    * Bugfix: ManyToMany relations to non-saved records
+    * ManyToMany relations to non-saved records
     * BelongsToRelation to non-saved records
   * Definition of morphed relations must be explicit now
   * All ORM entities MUST have proper primary key now

@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Tests\ORM;
 
 use Mockery as m;
@@ -98,6 +99,12 @@ abstract class SourceTest extends BaseTest
 
         $this->assertInstanceOf(RecordSelector::class, $source->getIterator());
         $this->assertInstanceOf(RecordSelector::class, $source->find());
+    }
+
+    public function testTrait()
+    {
+        $this->assertInstanceOf(UserSource::class, User::source());
+        $this->assertInstanceOf(RecordSelector::class, User::find());
     }
 
     public function testInstanceScoped()

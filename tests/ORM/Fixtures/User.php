@@ -7,6 +7,8 @@
 
 namespace Spiral\Tests\ORM\Fixtures;
 
+use Spiral\ORM\Traits\SourceTrait;
+
 /**
  * @property int     $id
  * @property string  $name
@@ -16,6 +18,8 @@ namespace Spiral\Tests\ORM\Fixtures;
  */
 class User extends BaseRecord implements PicturedInterface, LabelledInterface, TaggableInterface
 {
+    use SourceTrait;
+
     //nothing is secured
     const SECURED = [];
 

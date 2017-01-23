@@ -113,13 +113,14 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      *
      * @see findOne()
      *
-     * @param string|int $id Primary key value.
+     * @param string|int $id   Primary key value.
+     * @param array      $load Relations to pre-load.
      *
      * @return EntityInterface|Record|null
      */
-    public function findByPK($id)
+    public function findByPK($id, array $load = [])
     {
-        return $this->getSelector()->wherePK($id)->findOne();
+        return $this->getSelector()->wherePK($id)->load($load)->findOne();
     }
 
     /**
@@ -127,12 +128,13 @@ class RecordSource extends Component implements \Countable, \IteratorAggregate
      *
      * @param array $query  Fields and conditions to query by.
      * @param array $sortBy Always specify sort by to ensure that results are stable.
+     * @param array $load   Relations to pre-load.
      *
      * @return EntityInterface|Record|null
      */
-    public function findOne(array $query = [], array $sortBy = [])
+    public function findOne(array $query = [], array $sortBy = [], array $load = [])
     {
-        return $this->getSelector()->orderBy($sortBy)->findOne($query);
+        return $this->getSelector()->orderBy($sortBy)->load($load)->findOne($query);
     }
 
     /**

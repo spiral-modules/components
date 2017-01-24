@@ -12,7 +12,7 @@ final class NullMemory implements MemoryInterface
     /**
      * {@inheritdoc}
      */
-    public function loadData(string $section, string $location = null)
+    public function loadData(string $section)
     {
         return null;
     }
@@ -20,7 +20,7 @@ final class NullMemory implements MemoryInterface
     /**
      * {@inheritdoc}
      */
-    public function saveData(string $section, $data, string $location = null)
+    public function saveData(string $section, $data)
     {
         //Nothing to do
     }

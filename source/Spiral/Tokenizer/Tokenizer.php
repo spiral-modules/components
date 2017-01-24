@@ -84,11 +84,11 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
         $reflection = new ReflectionFile(
             $filename,
             $this->normalizeTokens(token_get_all($this->files->read($filename))),
-            (array)$this->memory->loadData($fileMD5, self::MEMORY)
+            (array)$this->memory->loadData(self::MEMORY . '.' . $fileMD5)
         );
 
         //Let's save to cache
-        $this->memory->saveData($fileMD5, $reflection->exportSchema(), static::MEMORY);
+        $this->memory->saveData(self::MEMORY . '.' . $fileMD5, $reflection->exportSchema());
 
         return $reflection;
     }

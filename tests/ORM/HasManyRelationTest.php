@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Tests\ORM;
 
 use Spiral\ORM\Entities\Loaders\RelationLoader;
@@ -271,6 +272,36 @@ abstract class HasManyRelationTest extends BaseTest
         $this->assertSameInDB($comment2);
 
         $this->assertCount(2, $this->db->comments);
+    }
+
+    public function testTransferDetach()
+    {
+        $post = new Post();
+        $post->author = new User();
+        $post->comments->add($comment = new Comment(['message' => 'hi']));
+        $post->comments->add($comment2 = new Comment(['message' => 'hi2']));
+        $post->comments->add($comment3 = new Comment(['message' => 'hi3']));
+
+        $post1 = new Post();
+        $post1->author = new User();
+        $post1->comments->add($comment4 = new Comment(['message' => 'hi4']));
+        $post1->comments->add($comment5 = new Comment(['message' => 'hi5']));
+        $post1->comments->add($comment6 = new Comment(['message' => 'hi6']));
+
+        $post->save();
+        $post1->save();
+
+        $this->assertEquals($comment4->post_id, $post1->id);
+
+        $post->comments->add(
+            $post1->comments->detach($comment4)
+        );
+
+        $post->save();
+        $post1->save();
+
+        $this->assertSameInDB($comment4);
+        $this->assertEquals($comment4->post_id, $post->id);
     }
 
     public function testDeleteAfterSave()

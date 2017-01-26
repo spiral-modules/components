@@ -131,6 +131,31 @@ class HasManyRelation extends MultipleRelation implements \IteratorAggregate, \C
     }
 
     /**
+     * Detach given object from set of instances but do not delete it in database, use it to
+     * transfer object between sets.
+     *
+     * @param \Spiral\ORM\RecordInterface $record
+     *
+     * @return \Spiral\ORM\RecordInterface
+     *
+     * @throws RelationException When object not presented in a set.
+     */
+    public function detach(RecordInterface $record): RecordInterface
+    {
+        $this->loadData(true);
+        foreach ($this->instances as $index => $instance) {
+            if ($this->match($instance, $record)) {
+                //Remove from save
+                unset($this->instances[$index]);
+
+                return $instance;
+            }
+        }
+
+        throw new RelationException("Record {$record} not found in HasMany relation");
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function queueCommands(ContextualCommandInterface $parentCommand): CommandInterface

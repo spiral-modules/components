@@ -102,6 +102,23 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
     const RELATION_COLUMNS = 1009;
 
     /**
+     * Mark relation with such constant will allow ORM detect outer record automatically based on
+     * given role OR interface. You can not combine this constant with MORPHED relations.
+     *
+     * Example:
+     * 'author' => [
+     *     self::BELONGS_TO   => AuthorInterface::class,
+     *     self::LATE_BINDING => true
+     * ]
+     *
+     * 'author' => [
+     *     self::BELONGS_TO   => 'user', //Model role
+     *     self::LATE_BINDING => true
+     * ]
+     */
+    const LATE_BINDING = 777;
+
+    /**
      * Constants used to declare indexes in record schema.
      *
      * @see Record::INDEXES

@@ -93,7 +93,7 @@ class HasManySchema extends AbstractSchema implements InversableRelationInterfac
 
         if (empty($this->definition->targetContext())) {
             throw new DefinitionException(sprintf(
-                "Unable to inverse relation '%s.''%s', unspecified relation target",
+                "Unable to inverse relation %s.%s, unspecified relation target",
                 $this->definition->sourceContext()->getClass(),
                 $this->definition->getName()
             ));

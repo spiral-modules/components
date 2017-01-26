@@ -108,7 +108,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         $this->builder->pushSchema();
         $this->db->getDriver()->setProfiling(true);
 
-        $this->orm->buildSchema($this->builder);
+        $this->orm->setSchema($this->builder);
 
         SharedComponent::shareContainer($container);
 

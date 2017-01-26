@@ -104,9 +104,16 @@ abstract class AbstractSchema implements RelationInterface
             }
         }
 
+
+        $target = $this->getDefinition()->getTarget();
+        if ($this->definition->isLateBinded()) {
+            //Located while rendering
+            $target = $this->definition->targetContext()->getClass();
+        }
+
         return [
             ORMInterface::R_TYPE   => static::RELATION_TYPE,
-            ORMInterface::R_CLASS  => $this->getDefinition()->getTarget(),
+            ORMInterface::R_CLASS  => $target,
             ORMInterface::R_SCHEMA => $schema
         ];
     }

@@ -9,6 +9,7 @@ namespace Spiral\ORM\Schemas\Definitions;
 
 use Spiral\ORM\Exceptions\ORMException;
 use Spiral\ORM\Exceptions\SchemaException;
+use Spiral\ORM\RecordEntity;
 
 /**
  * Defines relation in schema.
@@ -103,6 +104,17 @@ final class RelationDefinition
     public function getTarget(): string
     {
         return $this->target;
+    }
+
+    /**
+     * Indicates that relation must be late binded. In relations like that targetContext() can
+     * return null.
+     *
+     * @return bool
+     */
+    public function isLateBinded(): bool
+    {
+        return !empty($this->options[RecordEntity::LATE_BINDING]);
     }
 
     /**

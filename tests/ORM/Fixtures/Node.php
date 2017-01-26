@@ -6,7 +6,7 @@
  */
 namespace Spiral\Tests\ORM\Fixtures;
 
-class Node extends BaseRecord
+class Node extends BaseRecord implements TargetInterface
 {
     const SCHEMA = [
         'id'    => 'primary',

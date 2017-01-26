@@ -453,6 +453,7 @@ class SchemaBuilder
                 }
 
                 $this->relations->registerRelation(
+                    $this,
                     $relation->withContext($sourceContext, $targetContext)
                 );
             }

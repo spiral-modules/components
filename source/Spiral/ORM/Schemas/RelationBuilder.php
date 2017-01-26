@@ -10,6 +10,7 @@ namespace Spiral\ORM\Schemas;
 use Spiral\Core\FactoryInterface;
 use Spiral\ORM\Configs\RelationsConfig;
 use Spiral\ORM\Exceptions\DefinitionException;
+use Spiral\ORM\Schemas\Definitions\RelationContext;
 use Spiral\ORM\Schemas\Definitions\RelationDefinition;
 
 /**
@@ -51,11 +52,12 @@ class RelationBuilder
      * Registering new relation definition. At this moment function would not check if relation is
      * unique and will redeclare it.
      *
+     * @param SchemaBuilder      $builder
      * @param RelationDefinition $definition Relation options (definition).
      *
      * @throws DefinitionException
      */
-    public function registerRelation(RelationDefinition $definition)
+    public function registerRelation(SchemaBuilder $builder, RelationDefinition $definition)
     {
         if (!$this->config->hasRelation($definition->getType())) {
             throw new DefinitionException(sprintf(
@@ -64,6 +66,13 @@ class RelationBuilder
                 $definition->sourceContext()->getClass(),
                 $definition->getName()
             ));
+        }
+
+        if ($definition->isLateBinded()) {
+            /**
+             * Late binded relations locate their parent based on all existed records.
+             */
+            $definition = $this->locateOuter($builder, $definition);
         }
 
         $class = $this->config->relationClass(
@@ -104,7 +113,7 @@ class RelationBuilder
 
                 $inversed = $relation->inverseDefinition($builder, $definition->getInverse());
                 foreach ($inversed as $definition) {
-                    $this->registerRelation($definition);
+                    $this->registerRelation($builder, $definition);
                 }
             }
         }
@@ -159,5 +168,81 @@ class RelationBuilder
         }
 
         return $result;
+    }
+
+    /**
+     * Populate entity target based on interface or role.
+     *
+     * @param SchemaBuilder                                      $builder
+     * @param \Spiral\ORM\Schemas\Definitions\RelationDefinition $definition
+     *
+     * @return \Spiral\ORM\Schemas\Definitions\RelationDefinition
+     *
+     * @throws DefinitionException
+     */
+    protected function locateOuter(
+        SchemaBuilder $builder,
+        RelationDefinition $definition
+    ): RelationDefinition {
+        if (!empty($definition->targetContext())) {
+            //Nothing to do, already have outer parent
+            return $definition;
+        }
+
+        $found = null;
+        foreach ($builder->getSchemas() as $schema) {
+            if ($this->matchBinded($definition->getTarget(), $schema)) {
+                if (!empty($found)) {
+                    //Multiple records found
+                    throw new DefinitionException(sprintf(
+                        "Ambiguous target of '%s' for late binded relation %s.%s",
+                        $definition->getTarget(),
+                        $definition->sourceContext()->getClass(),
+                        $definition->getName()
+                    ));
+                }
+
+                $found = $schema;
+            }
+        }
+
+        if (empty($found)) {
+            throw new DefinitionException(sprintf(
+                "Unable to locate outer record of '%s' for late binded relation %s.%s",
+                $definition->getTarget(),
+                $definition->sourceContext()->getClass(),
+                $definition->getName()
+            ));
+        }
+
+        return $definition->withContext(
+            $definition->sourceContext(),
+            RelationContext::createContent(
+                $found,
+                $builder->requestTable($found->getTable(), $found->getDatabase())
+            )
+        );
+    }
+
+    /**
+     * Check if schema matches relation target.
+     *
+     * @param string                              $target
+     * @param \Spiral\ORM\Schemas\SchemaInterface $schema
+     *
+     * @return bool
+     */
+    private function matchBinded(string $target, SchemaInterface $schema): bool
+    {
+        if ($schema->getRole() == $target) {
+            return true;
+        }
+
+        if (interface_exists($target) && is_a($schema->getClass(), $target, true)) {
+            //Match by interface
+            return true;
+        }
+
+        return false;
     }
 }

@@ -16,7 +16,11 @@ use Spiral\ORM\Traits\SourceTrait;
  * @property Post[]  $posts
  * @property Profile $profile
  */
-class User extends BaseRecord implements PicturedInterface, LabelledInterface, TaggableInterface
+class User extends BaseRecord implements
+    PicturedInterface,
+    LabelledInterface,
+    TaggableInterface,
+    TargetInterface
 {
     use SourceTrait;
 

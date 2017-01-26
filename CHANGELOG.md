@@ -1,7 +1,7 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
-0.9.1 (27.01.2017)
+0.9.2 (27.01.2017)
 -----
 **ORM**
   * Added late bindings (locate outer record based on Interface or role name)

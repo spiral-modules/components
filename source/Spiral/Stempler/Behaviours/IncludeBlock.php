@@ -99,6 +99,7 @@ class IncludeBlock implements BehaviourInterface
         //rendering technique, for example every "extra" attribute can be passed to specific
         //template location. Stempler to decide.
         foreach ($this->supervisor->getSyntax()->blockExporters() as $exporter) {
+            /** @var array $dynamic */
             $content = $exporter->mountBlocks($content, $dynamic);
         }
 

@@ -16,6 +16,9 @@ use Spiral\ODM\Configs\MongoConfig;
 use Spiral\ODM\Entities\MongoDatabase;
 use Spiral\ODM\Exceptions\ODMException;
 
+/**
+ * Manages set of mongo databases and injects them into container when needed.
+ */
 class MongoManager implements InjectorInterface, SingletonInterface
 {
     /**

@@ -27,6 +27,8 @@ use Spiral\Core\Exceptions\Container\NotFoundException;
  * with classes only to be as much invisible as possible. Attention, this is hungry implementation
  * of container, meaning it WILL try to resolve dependency unless you specified custom lazy factory.
  *
+ * You can use injectors to delegate class resolution to external container.
+ *
  * @see \Spiral\Core\Container::registerInstance() to add your own behaviours.
  *
  * @see InjectableInterface

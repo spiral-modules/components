@@ -21,7 +21,6 @@ class LoggerTraitTest extends \PHPUnit_Framework_TestCase
     public function tearDown()
     {
         SharedComponent::shareContainer(null);
-        LoggedClass::shareLogger(null);
     }
 
     public function testNoContainer()
@@ -38,18 +37,6 @@ class LoggerTraitTest extends \PHPUnit_Framework_TestCase
         $class->setLogger($logger);
 
         $this->assertSame($logger, $class->getLogger());
-    }
-
-    public function testSharedLogger()
-    {
-        $logger = new NullLogger();
-        LoggedClass::shareLogger($logger);
-
-        $classA = new LoggedClass();
-        $this->assertSame($logger, $classA->getLogger());
-
-        $classB = new LoggedClass();
-        $this->assertSame($logger, $classB->getLogger());
     }
 
     public function testLoggerThoughtContainer()

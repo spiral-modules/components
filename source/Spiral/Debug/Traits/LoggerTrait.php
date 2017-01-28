@@ -20,15 +20,6 @@ use Spiral\Debug\LogsInterface;
 trait LoggerTrait
 {
     /**
-     * Currently under direction to be deprecated.
-     *
-     * @internal
-     *
-     * @var LoggerInterface[]
-     */
-    private static $loggers = [];
-
-    /**
      * Private and null.
      *
      * @internal
@@ -45,18 +36,6 @@ trait LoggerTrait
     public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
-    }
-
-    /**
-     * Set class specific logger (associated with every instance).
-     *
-     * @deprecated Use runtime log binding.
-     *
-     * @param LoggerInterface $logger
-     */
-    public static function shareLogger(LoggerInterface $logger = null)
-    {
-        self::$loggers[static::class] = $logger;
     }
 
     /**
@@ -80,12 +59,8 @@ trait LoggerTrait
             return $this->logger;
         }
 
-        if (!empty(self::$loggers[static::class])) {
-            return self::$loggers[static::class];
-        }
-
         //We are using class name as log channel (name) by default
-        return self::$loggers[static::class] = $this->createLogger();
+        return $this->logger = $this->createLogger();
     }
 
     /**

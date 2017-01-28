@@ -20,6 +20,8 @@ use Spiral\Debug\LogsInterface;
 trait LoggerTrait
 {
     /**
+     * Currently under direction to be deprecated.
+     *
      * @internal
      *
      * @var LoggerInterface[]
@@ -47,6 +49,8 @@ trait LoggerTrait
 
     /**
      * Set class specific logger (associated with every instance).
+     *
+     * @deprecated Use runtime log binding.
      *
      * @param LoggerInterface $logger
      */

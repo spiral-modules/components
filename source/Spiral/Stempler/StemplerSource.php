@@ -10,7 +10,7 @@ namespace Spiral\Stempler;
 /**
  * Default implementation for ContextInterface.
  */
-final class SourceContext implements SourceContextInterface
+final class StemplerSource
 {
     /**
      * Must be local stream.
@@ -20,11 +20,17 @@ final class SourceContext implements SourceContextInterface
     private $filename;
 
     /**
+     * @var null|string
+     */
+    private $source = null;
+
+    /**
      * @param string $filename
      */
-    public function __construct(string $filename)
+    public function __construct(string $filename, string $source = null)
     {
         $this->filename = $filename;
+        $this->source = $source;
     }
 
     /**
@@ -40,6 +46,6 @@ final class SourceContext implements SourceContextInterface
      */
     public function getSource(): string
     {
-        return file_get_contents($this->filename);
+        return $this->source ?? file_get_contents($this->filename);
     }
 }

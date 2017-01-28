@@ -156,20 +156,18 @@ class Supervisor implements SupervisorInterface
             $path = str_replace('.', '/', $path);
         }
 
-        $sourceContext = $this->loader->getSourceContext($path);
-
         try {
-            $sourceContext = $this->loader->getSourceContext($path);
+            $context = $this->loader->getSourceContext($path);
         } catch (LoaderExceptionInterface $e) {
             throw new StemplerException($e->getMessage(), $token, 0, $e);
         }
 
         try {
             //In isolation
-            return new Node(clone $this, $this->uniquePlaceholder(), $sourceContext->getSource());
+            return new Node(clone $this, $this->uniquePlaceholder(), $context->getSource());
         } catch (StemplerException $e) {
             //Wrapping to clarify location of error
-            throw $this->clarifyException($sourceContext, $e);
+            throw $this->clarifyException($context, $e);
         }
     }
 
@@ -187,13 +185,13 @@ class Supervisor implements SupervisorInterface
     /**
      * Clarify exeption with it's actual location.
      *
-     * @param SourceContextInterface $sourceContext
-     * @param StemplerException      $exception
+     * @param StemplerSource    $sourceContext
+     * @param StemplerException $exception
      *
      * @return StemplerException
      */
     protected function clarifyException(
-        SourceContextInterface $sourceContext,
+        StemplerSource $sourceContext,
         StemplerException $exception
     ) {
         if (empty($exception->getToken())) {

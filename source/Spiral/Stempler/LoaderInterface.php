@@ -20,9 +20,9 @@ interface LoaderInterface
      *
      * @param string $path
      *
-     * @return SourceContextInterface
+     * @return StemplerSource
      *
      * @throws LoaderExceptionInterface
      */
-    public function getSourceContext(string $path): SourceContextInterface;
+    public function getSourceContext(string $path): StemplerSource;
 }

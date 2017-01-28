@@ -1,6 +1,11 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
+0.9.3 (28.01.2017)
+-----
+**Stempler**
+  * SourceContext (twig like) have been added
+
 0.9.2 (27.01.2017)
 -----
 **ORM**

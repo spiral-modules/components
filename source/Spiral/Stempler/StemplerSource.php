@@ -26,11 +26,12 @@ final class StemplerSource
 
     /**
      * @param string $filename
+     * @param string $code
      */
-    public function __construct(string $filename, string $source = null)
+    public function __construct(string $filename, string $code = null)
     {
         $this->filename = $filename;
-        $this->source = $source;
+        $this->source = $code;
     }
 
     /**
@@ -44,7 +45,7 @@ final class StemplerSource
     /**
      * {@inheritdoc}
      */
-    public function getSource(): string
+    public function getCode(): string
     {
         return $this->source ?? file_get_contents($this->filename);
     }

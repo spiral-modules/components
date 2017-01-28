@@ -51,7 +51,7 @@ class StemplerLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function getSourceContext(string $path): StemplerSource
+    public function getSource(string $path): StemplerSource
     {
         return new StemplerSource(
             $this->locateView($path)[self::VIEW_FILENAME]

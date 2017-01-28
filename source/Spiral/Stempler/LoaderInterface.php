@@ -24,5 +24,5 @@ interface LoaderInterface
      *
      * @throws LoaderExceptionInterface
      */
-    public function getSourceContext(string $path): StemplerSource;
+    public function getSource(string $path): StemplerSource;
 }

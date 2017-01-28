@@ -157,14 +157,14 @@ class Supervisor implements SupervisorInterface
         }
 
         try {
-            $context = $this->loader->getSourceContext($path);
+            $context = $this->loader->getSource($path);
         } catch (LoaderExceptionInterface $e) {
             throw new StemplerException($e->getMessage(), $token, 0, $e);
         }
 
         try {
             //In isolation
-            return new Node(clone $this, $this->uniquePlaceholder(), $context->getSource());
+            return new Node(clone $this, $this->uniquePlaceholder(), $context->getCode());
         } catch (StemplerException $e) {
             //Wrapping to clarify location of error
             throw $this->clarifyException($context, $e);
@@ -203,7 +203,7 @@ class Supervisor implements SupervisorInterface
         $target = explode("\n", $exception->getToken()[HtmlTokenizer::TOKEN_CONTENT])[0];
 
         //Let's try to locate place where exception was used
-        $lines = explode("\n", $sourceContext->getSource());
+        $lines = explode("\n", $sourceContext->getCode());
 
         foreach ($lines as $number => $line) {
             if (strpos($line, $target) !== false) {

@@ -32,7 +32,7 @@ class Aliaser implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct($alias, $path)
+    public function __construct(string $alias, string $path)
     {
         $this->alias = $alias;
         $this->path = $path;
@@ -41,7 +41,7 @@ class Aliaser implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function importable($element, array $token)
+    public function importable(string $element, array $token): bool
     {
         return strtolower($element) == strtolower($this->alias);
     }
@@ -49,7 +49,7 @@ class Aliaser implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function resolvePath($element, array $token)
+    public function resolvePath(string $element, array $token)
     {
         return $this->path;
     }

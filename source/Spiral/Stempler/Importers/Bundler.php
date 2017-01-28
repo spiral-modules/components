@@ -28,7 +28,7 @@ class Bundler implements ImporterInterface
      * @param string     $path
      * @param array      $token
      */
-    public function __construct(Supervisor $supervisor, $path, array $token = [])
+    public function __construct(Supervisor $supervisor, string $path, array $token = [])
     {
         $node = $supervisor->createNode($path, $token);
         $supervisor = $node->getSupervisor();
@@ -41,7 +41,7 @@ class Bundler implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function importable($element, array $token)
+    public function importable(string $element, array $token): bool
     {
         foreach ($this->importers as $importer) {
             if ($importer->importable($element, $token)) {
@@ -55,7 +55,7 @@ class Bundler implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function resolvePath($element, array $token)
+    public function resolvePath(string $element, array $token)
     {
         foreach ($this->importers as $importer) {
             if ($importer->importable($element, $token)) {

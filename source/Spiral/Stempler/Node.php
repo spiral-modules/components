@@ -8,9 +8,9 @@
 
 namespace Spiral\Stempler;
 
-use Spiral\Stempler\Behaviours\BlockBehaviour;
-use Spiral\Stempler\Behaviours\ExtendsBehaviour;
-use Spiral\Stempler\Behaviours\IncludeBehaviour;
+use Spiral\Stempler\Behaviours\ExtendLayout;
+use Spiral\Stempler\Behaviours\IncludeBlock;
+use Spiral\Stempler\Behaviours\InnerBlock;
 use Spiral\Stempler\Exceptions\StrictModeException;
 
 /**
@@ -87,7 +87,7 @@ class Node
     /**
      * @return SupervisorInterface
      */
-    public function getSupervisor()
+    public function getSupervisor(): SupervisorInterface
     {
         return $this->supervisor;
     }
@@ -101,8 +101,12 @@ class Node
      * @param array        $blocks  Used to redefine node content and bypass token parsing.
      * @param bool         $replace Set to true to send created Node directly to outer blocks.
      */
-    public function mountBlock($name, $source, $blocks = [], $replace = false)
-    {
+    public function mountBlock(
+        string $name,
+        $source,
+        array $blocks = [],
+        bool $replace = false
+    ) {
         $node = new static($this->supervisor, $name, $source);
 
         if (!empty($blocks)) {
@@ -164,12 +168,13 @@ class Node
     /**
      * Compile node data (inner nodes) into string.
      *
-     * @param array $dynamic  All outer blocks will be aggregated in this array (in compiled form).
-     * @param array $compiled Internal complication memory (method called recursively)
+     * @param array|null $dynamic  All outer blocks will be aggregated in this array (in compiled
+     *                             form).
+     * @param array|null $compiled Internal complication memory (method called recursively)
      *
      * @return string
      */
-    public function compile(&$dynamic = [], &$compiled = [])
+    public function compile(&$dynamic = null, &$compiled = null): string
     {
         if (!is_array($dynamic)) {
             $dynamic = [];
@@ -391,28 +396,28 @@ class Node
      */
     protected function applyBehaviour(BehaviourInterface $behaviour, array $content = [])
     {
-        if ($behaviour instanceof ExtendsBehaviour) {
+        if ($behaviour instanceof ExtendLayout) {
             //We have to copy nodes from parent
-            $this->nodes = $behaviour->extendedNode()->nodes;
+            $this->nodes = $behaviour->parentNode()->nodes;
 
             //Indication that this node has parent, meaning we have to handle blocks little
             //bit different way
             $this->extended = true;
 
-            foreach ($behaviour->dynamicBlocks() as $block => $blockContent) {
+            foreach ($behaviour->getAttributes() as $block => $blockContent) {
                 $this->mountBlock($block, $blockContent);
             }
 
             return;
         }
 
-        if ($behaviour instanceof BlockBehaviour) {
+        if ($behaviour instanceof InnerBlock) {
             $this->mountBlock($behaviour->blockName(), $content);
 
             return;
         }
 
-        if ($behaviour instanceof IncludeBehaviour) {
+        if ($behaviour instanceof IncludeBlock) {
             $this->nodes[] = $behaviour->createNode();
         }
 

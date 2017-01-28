@@ -22,7 +22,7 @@ interface ImporterInterface
      *
      * @return bool
      */
-    public function importable($element, array $token);
+    public function importable(string $element, array $token): bool;
 
     /**
      * Get imported element location. Must be supported by Stempler implementation.
@@ -30,7 +30,7 @@ interface ImporterInterface
      * @param string $element Element name.
      * @param array  $token   Context token.
      *
-     * @return mixed
+     * @return string|null
      */
-    public function resolvePath($element, array $token);
+    public function resolvePath(string $element, array $token);
 }

@@ -12,8 +12,7 @@ use Spiral\Stempler\ImporterInterface;
 
 /**
  * Declares to templater that element must be treated as html tag, not Node include. Stop keyword
- * must be located in
- * "stop" attribute of tag caused import.
+ * must be located in "stop" attribute of tag caused import.
  */
 class Stopper implements ImporterInterface
 {
@@ -35,7 +34,7 @@ class Stopper implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function importable($element, array $token)
+    public function importable(string $element, array $token): bool
     {
         if ($this->element == '*') {
             //To disable every lower level importer, you can still define more importers after that
@@ -48,7 +47,7 @@ class Stopper implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function resolvePath($element, array $token)
+    public function resolvePath(string $element, array $token)
     {
         return null;
     }

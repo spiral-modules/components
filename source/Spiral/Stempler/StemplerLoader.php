@@ -51,17 +51,11 @@ class StemplerLoader implements LoaderInterface
     /**
      * {@inheritdoc}
      */
-    public function localFilename(string $path): string
+    public function getSourceContext(string $path): SourceContextInterface
     {
-        return $this->locateView($path)[self::VIEW_FILENAME];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getSource($path): string
-    {
-        return $this->files->read($this->locateView($path)[self::VIEW_FILENAME]);
+        return new SourceContext(
+            $this->locateView($path)[self::VIEW_FILENAME]
+        );
     }
 
     /**

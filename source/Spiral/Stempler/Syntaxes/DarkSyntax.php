@@ -11,6 +11,7 @@ namespace Spiral\Stempler\Syntaxes;
 use Spiral\Stempler\Exceptions\SyntaxException;
 use Spiral\Stempler\Exporters\AttributesExporter;
 use Spiral\Stempler\HtmlTokenizer;
+use Spiral\Stempler\ImporterInterface;
 use Spiral\Stempler\Importers\Aliaser;
 use Spiral\Stempler\Importers\Bundler;
 use Spiral\Stempler\Importers\Prefixer;
@@ -64,7 +65,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * @param bool $strict
      */
-    public function __construct($strict = true)
+    public function __construct(bool $strict = true)
     {
         $this->strict = $strict;
     }
@@ -72,7 +73,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
-    public function tokenType(array $token, &$name = null)
+    public function tokenType(array $token, &$name = null): string
     {
         $name = $token[HtmlTokenizer::TOKEN_NAME];
         foreach ($this->constructions as $type => $prefixes) {
@@ -92,7 +93,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
-    public function resolvePath(array $token)
+    public function resolvePath(array $token): string
     {
         //Needed to fetch token name
         $this->tokenType($token, $name);
@@ -110,7 +111,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
-    public function isStrict()
+    public function isStrict(): bool
     {
         return $this->strict;
     }
@@ -118,7 +119,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
-    public function shortTags()
+    public function shortTags(): string
     {
         return self::SHORT_TAGS;
     }
@@ -126,7 +127,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
-    public function createImporter(array $token, Supervisor $supervisor)
+    public function createImporter(array $token, Supervisor $supervisor): ImporterInterface
     {
         //Fetching path
         $path = $this->resolvePath($token);
@@ -178,7 +179,7 @@ class DarkSyntax implements SyntaxInterface
     /**
      * {@inheritdoc}
      */
-    public function blockExporters()
+    public function blockExporters(): array
     {
         return [
             new AttributesExporter()

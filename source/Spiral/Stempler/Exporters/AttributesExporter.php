@@ -20,7 +20,7 @@ class AttributesExporter extends ConditionalExporter
     /**
      * {@inheritdoc}
      */
-    public function mountBlocks($content, array $blocks)
+    public function mountBlocks(string $content, array $blocks): string
     {
         if (preg_match_all('/ node:attributes(?:=\"([^\'"]+)\")?/i', $content, $matches)) {
             //We have to sort from longest to shortest

@@ -27,8 +27,12 @@ class StemplerException extends RuntimeException
      * @param int        $code
      * @param \Throwable $previous
      */
-    public function __construct($message, array $token = [], $code = 0, \Throwable $previous = null)
-    {
+    public function __construct(
+        string $message,
+        array $token = [],
+        int $code = 0,
+        \Throwable $previous = null
+    ) {
         parent::__construct($message, $code, $previous);
         $this->token = $token;
     }
@@ -36,7 +40,7 @@ class StemplerException extends RuntimeException
     /**
      * @return array
      */
-    public function getToken()
+    public function getToken(): array
     {
         return $this->token;
     }
@@ -45,9 +49,9 @@ class StemplerException extends RuntimeException
      * Set exception location.
      *
      * @param string $file
-     * @param string $line
+     * @param int    $line
      */
-    public function setLocation($file, $line)
+    public function setLocation(string $file, int $line)
     {
         $this->file = $file;
         $this->line = $line;

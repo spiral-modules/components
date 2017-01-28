@@ -17,7 +17,7 @@ use Spiral\Stempler\Supervisor;
  * Replaces specified block (including tag) with external node, automatically uses inner tag
  * content as "context" block and all other tag attributes as additional node child.
  */
-class IncludeBehaviour implements BehaviourInterface
+class IncludeBlock implements BehaviourInterface
 {
     /**
      * Name of block used to represent import context.
@@ -56,8 +56,12 @@ class IncludeBehaviour implements BehaviourInterface
      * @param array      $context
      * @param array      $token
      */
-    public function __construct(Supervisor $supervisor, $path, array $context, array $token = [])
-    {
+    public function __construct(
+        Supervisor $supervisor,
+        string $path,
+        array $context,
+        array $token = []
+    ) {
         $this->supervisor = $supervisor;
         $this->path = $path;
 
@@ -70,7 +74,7 @@ class IncludeBehaviour implements BehaviourInterface
      *
      * @return Node
      */
-    public function createNode()
+    public function createNode(): Node
     {
         //Content of node to be imported
         $node = $this->supervisor->createNode($this->path, $this->token);
@@ -118,7 +122,7 @@ class IncludeBehaviour implements BehaviourInterface
      *
      * @return Node
      */
-    protected function contextNode()
+    protected function contextNode(): Node
     {
         $context = '';
         foreach ($this->context as $token) {
@@ -131,12 +135,12 @@ class IncludeBehaviour implements BehaviourInterface
     /**
      * Create placeholder block (to be injected with inner blocks defined in context).
      *
-     * @param string $name
-     * @param string $blockID
+     * @param string      $name
+     * @param string|null $blockID
      *
      * @return string
      */
-    protected function createPlaceholder($name, &$blockID)
+    protected function createPlaceholder(string $name, string &$blockID = null): string
     {
         $blockID = $name . '-' . $this->supervisor->uniquePlaceholder();
 

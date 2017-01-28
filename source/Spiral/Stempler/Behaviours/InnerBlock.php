@@ -13,7 +13,7 @@ use Spiral\Stempler\BehaviourInterface;
 /**
  * Defines new block.
  */
-class BlockBehaviour implements BehaviourInterface
+class InnerBlock implements BehaviourInterface
 {
     /**
      * @var string
@@ -23,7 +23,7 @@ class BlockBehaviour implements BehaviourInterface
     /**
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
     }
@@ -33,7 +33,7 @@ class BlockBehaviour implements BehaviourInterface
      *
      * @return string
      */
-    public function blockName()
+    public function blockName(): string
     {
         return $this->name;
     }

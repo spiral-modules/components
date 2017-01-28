@@ -24,7 +24,7 @@ interface SyntaxInterface
     const TYPE_INCLUDE  = 'include';
     const TYPE_NONE     = 'none';
 
-    //todo: yep, self modifiable syntax
+    //Must be implemented
     const TYPE_DIRECTIVE = 'directive';
 
     /**
@@ -33,15 +33,15 @@ interface SyntaxInterface
      *
      * @return bool
      */
-    public function isStrict();
+    public function isStrict(): bool;
 
     /**
      * Regular expression which defined short node tag, must declare named pattern with "name" and
      * "default" keys
      *
-     * @return mixed
+     * @return string
      */
-    public function shortTags();
+    public function shortTags(): string;
 
     /**
      * Detect token behaviour.
@@ -51,7 +51,7 @@ interface SyntaxInterface
      *
      * @return string
      */
-    public function tokenType(array $token, &$name = null);
+    public function tokenType(array $token, &$name = null): string;
 
     /**
      * Resolve include or extend location based on given token.
@@ -61,21 +61,22 @@ interface SyntaxInterface
      * @return string
      * @throws SyntaxException
      */
-    public function resolvePath(array $token);
+    public function resolvePath(array $token): string;
 
     /**
      * @param array      $token
      * @param Supervisor $supervisor
      *
      * @return ImporterInterface
+     *
      * @throws SyntaxException
      */
-    public function createImporter(array $token, Supervisor $supervisor);
+    public function createImporter(array $token, Supervisor $supervisor): ImporterInterface;
 
     /**
      * Get all syntax block exporters.
      *
      * @return ExporterInterface[]
      */
-    public function blockExporters();
+    public function blockExporters(): array;
 }

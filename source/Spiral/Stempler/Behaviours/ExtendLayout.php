@@ -17,7 +17,7 @@ use Spiral\Stempler\Supervisor;
 /**
  * Points node to it's parent.
  */
-class ExtendsBehaviour implements BehaviourInterface
+class ExtendLayout implements BehaviourInterface
 {
     /**
      * Parent (extended) node, treat it as page or element layout.
@@ -54,17 +54,17 @@ class ExtendsBehaviour implements BehaviourInterface
      *
      * @return Node
      */
-    public function extendedNode()
+    public function parentNode(): Node
     {
         return $this->parent;
     }
 
     /**
-     * Every import defined in parent (extended node).
+     * Every importer defined in parent (extended node).
      *
      * @return ImporterInterface[]
      */
-    public function parentImports()
+    public function parentImports(): array
     {
         $supervisor = $this->parent->getSupervisor();
         if (!$supervisor instanceof Supervisor) {
@@ -75,11 +75,11 @@ class ExtendsBehaviour implements BehaviourInterface
     }
 
     /**
-     * Set of blocks defined at moment of extend definition.
+     * Set of blocks (attributes) defined at moment of extend definition.
      *
      * @return array
      */
-    public function dynamicBlocks()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }

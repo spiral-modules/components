@@ -8,9 +8,9 @@
 
 namespace Spiral\Stempler;
 
-use Spiral\Stempler\Behaviours\BlockBehaviour;
-use Spiral\Stempler\Behaviours\ExtendsBehaviour;
-use Spiral\Stempler\Behaviours\IncludeBehaviour;
+use Spiral\Stempler\Behaviours\ExtendLayout;
+use Spiral\Stempler\Behaviours\IncludeBlock;
+use Spiral\Stempler\Behaviours\InnerBlock;
 use Spiral\Stempler\Exceptions\LoaderExceptionInterface;
 use Spiral\Stempler\Exceptions\StemplerException;
 use Spiral\Stempler\Importers\Stopper;
@@ -98,11 +98,11 @@ class Supervisor implements SupervisorInterface
         switch ($this->syntax->tokenType($token, $name)) {
             case SyntaxInterface::TYPE_BLOCK:
                 //Tag declares block (section)
-                return new BlockBehaviour($name);
+                return new InnerBlock($name);
 
             case SyntaxInterface::TYPE_EXTENDS:
                 //Declares parent extending
-                $extends = new ExtendsBehaviour(
+                $extends = new ExtendLayout(
                     $this->createNode($this->syntax->resolvePath($token), $token),
                     $token
                 );
@@ -131,7 +131,7 @@ class Supervisor implements SupervisorInterface
                 }
 
                 //Let's include!
-                return new IncludeBehaviour(
+                return new IncludeBlock(
                     $this, $importer->resolvePath($name, $token), $content, $token
                 );
             }
@@ -149,25 +149,27 @@ class Supervisor implements SupervisorInterface
      * @return Node
      * @throws StemplerException
      */
-    public function createNode($path, array $token = [])
+    public function createNode(string $path, array $token = []): Node
     {
         //We support dots!
         if (!empty($token)) {
             $path = str_replace('.', '/', $path);
         }
 
+        $sourceContext = $this->loader->getSourceContext($path);
+
         try {
-            $source = $this->loader->getSource($path);
+            $sourceContext = $this->loader->getSourceContext($path);
         } catch (LoaderExceptionInterface $e) {
             throw new StemplerException($e->getMessage(), $token, 0, $e);
         }
 
         try {
             //In isolation
-            return new Node(clone $this, $this->uniquePlaceholder(), $source);
+            return new Node(clone $this, $this->uniquePlaceholder(), $sourceContext->getSource());
         } catch (StemplerException $e) {
             //Wrapping to clarify location of error
-            throw $this->clarifyException($path, $e);
+            throw $this->clarifyException($sourceContext, $e);
         }
     }
 
@@ -177,7 +179,7 @@ class Supervisor implements SupervisorInterface
      *
      * @return string
      */
-    public function uniquePlaceholder()
+    public function uniquePlaceholder(): string
     {
         return md5(self::$index++);
     }
@@ -185,13 +187,15 @@ class Supervisor implements SupervisorInterface
     /**
      * Clarify exeption with it's actual location.
      *
-     * @param string            $path
-     * @param StemplerException $exception
+     * @param SourceContextInterface $sourceContext
+     * @param StemplerException      $exception
      *
      * @return StemplerException
      */
-    protected function clarifyException($path, StemplerException $exception)
-    {
+    protected function clarifyException(
+        SourceContextInterface $sourceContext,
+        StemplerException $exception
+    ) {
         if (empty($exception->getToken())) {
             //Unable to locate
             return $exception;
@@ -201,13 +205,13 @@ class Supervisor implements SupervisorInterface
         $target = explode("\n", $exception->getToken()[HtmlTokenizer::TOKEN_CONTENT])[0];
 
         //Let's try to locate place where exception was used
-        $lines = explode("\n", $this->loader->getSource($path));
+        $lines = explode("\n", $sourceContext->getSource());
 
         foreach ($lines as $number => $line) {
             if (strpos($line, $target) !== false) {
                 //We found where token were used (!!)
                 $exception->setLocation(
-                    $this->loader->localFilename($path),
+                    $sourceContext->getFilename(),
                     $number + 1
                 );
 

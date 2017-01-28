@@ -31,7 +31,7 @@ class Prefixer implements ImporterInterface
      * @param string $prefix
      * @param string $target
      */
-    public function __construct($prefix, $target)
+    public function __construct(string $prefix, string $target)
     {
         $this->prefix = $prefix;
         $this->target = $target;
@@ -40,7 +40,7 @@ class Prefixer implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function importable($element, array $token)
+    public function importable(string $element, array $token): bool
     {
         $element = strtolower($element);
 
@@ -50,7 +50,7 @@ class Prefixer implements ImporterInterface
     /**
      * {@inheritdoc}
      */
-    public function resolvePath($element, array $token)
+    public function resolvePath(string $element, array $token)
     {
         $element = substr($element, strlen($this->prefix));
 

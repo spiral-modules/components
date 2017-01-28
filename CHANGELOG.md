@@ -1,6 +1,12 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
+0.9.2 (27.01.2017)
+-----
+**ORM**
+  * Added late bindings (locate outer record based on Interface or role name)
+  * Added detach() method into HasMany relation
+
 0.9.0 (23.01.2017)
 -----
 **General**

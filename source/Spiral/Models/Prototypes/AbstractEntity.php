@@ -413,7 +413,7 @@ abstract class AbstractEntity extends MutableObject implements
      *
      * @return AccessorInterface|null
      *
-     * @throws AccessException
+     * @throws \Spiral\Models\Exceptions\AccessException
      * @throws EntityException
      */
     protected function createAccessor(

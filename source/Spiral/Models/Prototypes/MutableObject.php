@@ -49,7 +49,7 @@ abstract class MutableObject extends Component
 
         if ($analysis) {
             //Normal and initialization for analysis must load different methods
-            $state = "{$class}~";
+            $state = "{$class}@static";
 
             $prefix = '__describe__';
         } else {

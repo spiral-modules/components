@@ -354,6 +354,7 @@ abstract class RecordEntity extends AbstractRecord implements RecordInterface
      */
     private function prepareUpdate(): UpdateCommand
     {
+        //Must be moved to post update event
         $command = new UpdateCommand(
             $this->orm->table(static::class),
             [$this->primaryColumn() => $this->primaryKey()],

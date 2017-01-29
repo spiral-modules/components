@@ -18,6 +18,7 @@ use Spiral\Core\Exceptions\Container\AutowireException;
 use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\Exceptions\Container\NotFoundException;
+use Spiral\Core\Exceptions\LogicException;
 
 /**
  * 500 lines of code size auto-wiring container with declarative singletons, contextual injections,
@@ -67,6 +68,14 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     {
         $this->bindings[static::class] = self::class;
         $this->bindings[self::class] = $this;
+    }
+
+    /**
+     * Container can not be cloned.
+     */
+    public function __clone()
+    {
+        throw new LogicException("Container is not clonable");
     }
 
     /**

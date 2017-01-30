@@ -28,7 +28,7 @@ CHANGELOG for 0.9.0 RC
   * Cache component removed (replaced with PSR-16)
   * Views component moved to Framework bundle
   * Validation component moved to Framework bundle
-  * Transaction component moved to Framework bundle
+  * Translation component moved to Framework bundle
   * Encryption component moved to Framework bundle
   * Migrations component moved in
     * Automatic migration generation is now part of Migration component

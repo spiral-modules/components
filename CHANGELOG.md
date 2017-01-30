@@ -66,10 +66,10 @@ CHANGELOG for 0.9.0 RC
 
 **ORM**
   * Refactoring of SchemaBuilder
-  * RecordSelector does not extend SeletQuery anymore
+  * RecordSelector does not extend SelectQuery anymore
   * Transactional (UnitOfWork) support
-  * Improvment memory mapping
-  * Improvement tree operations (save)
+  * Improvements in memory mapping
+  * Improvements in tree operations (save)
   * Removed features
     * ActiveRecord thought direct table communication
     * MutableNumber accessor

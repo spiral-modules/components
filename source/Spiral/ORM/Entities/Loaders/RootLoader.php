@@ -32,6 +32,13 @@ class RootLoader extends AbstractLoader
     private $query;
 
     /**
+     * Only columns to be selected, by default all columns.
+     *
+     * @var null|array
+     */
+    private $columns = null;
+
+    /**
      * @param string       $class
      * @param array        $schema Record schema for root loader.
      * @param ORMInterface $orm
@@ -50,6 +57,25 @@ class RootLoader extends AbstractLoader
 
         //Getting our initial select query
         $this->query = $orm->table($class)->select();
+    }
+
+    /**
+     * Columns to be selected, please note, primary will always be included, DO not include
+     * column aliases in here, aliases will be added automatically. Creates new loader tree copy.
+     *
+     * @param array $columns
+     *
+     * @return RootLoader
+     */
+    public function withColumns(array $columns): self
+    {
+        $loader = clone $this;
+        $loader->columns = array_merge(
+            [$loader->schema[Record::SH_PRIMARY_KEY]],
+            $columns
+        );
+
+        return $loader;
     }
 
     /**
@@ -136,7 +162,7 @@ class RootLoader extends AbstractLoader
     public function initNode(): AbstractNode
     {
         return new RootNode(
-            $this->schema[Record::RELATION_COLUMNS],
+            $this->getColumns(),
             $this->schema[Record::SH_PRIMARY_KEY]
         );
     }
@@ -157,6 +183,6 @@ class RootLoader extends AbstractLoader
      */
     protected function getColumns(): array
     {
-        return $this->schema[Record::RELATION_COLUMNS];
+        return $this->columns ?? $this->schema[Record::RELATION_COLUMNS];
     }
 }

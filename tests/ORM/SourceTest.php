@@ -7,15 +7,7 @@
 
 namespace Spiral\Tests\ORM;
 
-use Mockery as m;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\SimpleCache\CacheInterface;
-use Spiral\ORM\Entities\RecordSelector;
-use Spiral\Pagination\Paginator;
-use Spiral\Pagination\PaginatorInterface;
-use Spiral\Pagination\PaginatorsInterface;
 use Spiral\Tests\ORM\Fixtures\User;
-use Spiral\Tests\ORM\Fixtures\UserSource;
 
 abstract class SourceTest extends BaseTest
 {
@@ -398,5 +390,22 @@ abstract class SourceTest extends BaseTest
         foreach ($cached as $item) {
             $this->assertSameRecord($user, $item);
         }
+    }
+
+    public function testParialSelection()
+    {
+        $user = new User();
+        $user->name = 'Anton';
+        $user->balance = 900;
+        $user->save();
+
+        $selector = $this->orm->selector(User::class)->withColumns(['balance']);
+
+        $dbUser = $selector->findOne();
+
+        $this->assertEmpty($dbUser->name);
+        $this->assertNotEmpty($user->balance);
+        $this->assertNotEmpty($dbUser->balance);
+        $this->assertSame($dbUser->balance, $user->balance);
     }
 }

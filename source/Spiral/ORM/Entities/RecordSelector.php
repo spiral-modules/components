@@ -109,6 +109,22 @@ class RecordSelector extends Component implements \IteratorAggregate, \Countable
     }
 
     /**
+     * Columns to be selected, please note, primary will always be included, DO not include
+     * column aliases in here, aliases will be added automatically. Creates selector as response.
+     *
+     * @param array $columns
+     *
+     * @return RecordSelector
+     */
+    public function withColumns(array $columns): self
+    {
+        $selector = clone $this;
+        $selector->loader = $selector->loader->withColumns($columns);
+
+        return $selector;
+    }
+
+    /**
      * Request primary selector loader to pre-load relation name. Any type of loader can be used
      * for
      * data preloading. ORM loaders by default will select the most efficient way to load related

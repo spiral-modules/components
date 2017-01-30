@@ -1,6 +1,14 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
+0.9.4 (30.01.2017)
+-----
+**General**
+  * Container is not clonable
+  
+**Stempler**
+  * StemplerLoader synced with Twig abstraction, StemplerSource introduced
+
 0.9.3 (28.01.2017)
 -----
 **Stempler**

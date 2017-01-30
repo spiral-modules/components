@@ -7,7 +7,15 @@
 
 namespace Spiral\Tests\ORM;
 
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\SimpleCache\CacheInterface;
+use Spiral\ORM\Entities\RecordSelector;
+use Spiral\Pagination\Paginator;
+use Spiral\Pagination\PaginatorInterface;
+use Spiral\Pagination\PaginatorsInterface;
 use Spiral\Tests\ORM\Fixtures\User;
+use Spiral\Tests\ORM\Fixtures\UserSource;
+use Mockery as m;
 
 abstract class SourceTest extends BaseTest
 {

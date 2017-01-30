@@ -59,7 +59,7 @@ CHANGELOG for 0.9.0 RC
 **Models**
   * Removed features
     * Embedded validations
-    * Magic getter and setter methods
+    * Magic getter and setter methods via __call()
   * setValue and packValue methods added
   * "fields" property is now private
   * SolidableTrait is now part of models

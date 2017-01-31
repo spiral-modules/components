@@ -184,6 +184,10 @@ class RelationBuilder
         SchemaBuilder $builder,
         RelationDefinition $definition
     ): RelationDefinition {
+        /**
+         * todo: add functionality to resolve database alias
+         */
+
         if (!empty($definition->targetContext())) {
             //Nothing to do, already have outer parent
             return $definition;

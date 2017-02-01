@@ -1,6 +1,15 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
+0.9.5 (01.02.2017)
+-----
+**DBAL**
+  * Ability to use nested queries in JOIN statements
+  * on argument in join() methods is deprecated, use on() function directly
+
+**ORM**
+  * Optimizations in load method with "using" option
+  
 0.9.4 (30.01.2017)
 -----
 **General**

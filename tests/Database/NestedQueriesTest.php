@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Tests\Database;
 
 use Spiral\Database\Builders\QueryBuilder;
@@ -52,8 +53,7 @@ abstract class NestedQueriesTest extends BaseQueryTest
 
     public function testSimpleWhere()
     {
-        $select = $this->database->select()->from('table')
-            ->where('id', 1);
+        $select = $this->database->select()->from('table')->where('id', 1);
 
         $this->assertSameQuery("SELECT * FROM {table} WHERE {id} = ?", $select);
         $this->assertSameParameters([

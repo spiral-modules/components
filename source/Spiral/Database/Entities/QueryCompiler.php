@@ -319,8 +319,14 @@ class QueryCompiler
     protected function compileJoins(array $joinTokens): string
     {
         $statement = '';
-        foreach ($joinTokens as $table => $join) {
-            $statement .= "\n" . $join['type'] . ' JOIN ' . $this->quote($table, true);
+        foreach ($joinTokens as $join) {
+            $statement .= "\n{$join['type']} JOIN {$this->quote($join['outer'], true)}";
+
+            if (!empty($join['alias'])) {
+                $this->quoter->registerAlias($join['alias'], (string)$join['outer']);
+                $statement .= " AS " . $this->quote($join['alias']);
+            }
+
             $statement .= $this->optional("\n    ON", $this->compileWhere($join['on']));
         }
 

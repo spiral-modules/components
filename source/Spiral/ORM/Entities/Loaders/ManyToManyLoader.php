@@ -83,12 +83,14 @@ class ManyToManyLoader extends RelationLoader
             );
         } else {
             $query->innerJoin(
-                $this->pivotTable() . ' AS ' . $this->pivotAlias(),
-                [$this->pivotKey(Record::THOUGHT_OUTER_KEY) => $this->localKey(Record::OUTER_KEY)]
-            )->where(
-                $this->pivotKey(Record::THOUGHT_INNER_KEY),
-                new Parameter($outerKeys)
-            );
+                $this->pivotTable() . ' AS ' . $this->pivotAlias())
+                ->on(
+                    $this->pivotKey(Record::THOUGHT_OUTER_KEY),
+                    $this->localKey(Record::OUTER_KEY)
+                )->where(
+                    $this->pivotKey(Record::THOUGHT_INNER_KEY),
+                    new Parameter($outerKeys)
+                );
         }
 
         //When relation is joined we will use ON statements, when not - normal WHERE
@@ -119,8 +121,10 @@ class ManyToManyLoader extends RelationLoader
             //Actual data is always INNER join
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->getTable() . ' AS ' . $this->getAlias(),
-                [$this->localKey(Record::OUTER_KEY) => $this->pivotKey(Record::THOUGHT_OUTER_KEY)]
+                $this->getTable() . ' AS ' . $this->getAlias()
+            )->on(
+                $this->localKey(Record::OUTER_KEY),
+                $this->pivotKey(Record::THOUGHT_OUTER_KEY)
             );
         }
 

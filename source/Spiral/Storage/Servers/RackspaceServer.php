@@ -220,6 +220,10 @@ class RackspaceServer extends AbstractServer implements LoggerAwareInterface
      */
     public function delete(BucketInterface $bucket, string $name, bool $retry = true)
     {
+        if (!$this->exists($bucket, $name)) {
+            throw new ServerException("Unable to delete object, file not found");
+        }
+
         try {
             $this->client->send($this->buildRequest('DELETE', $bucket, $name));
         } catch (ClientException $e) {

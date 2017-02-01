@@ -13,6 +13,7 @@ use Spiral\Core\Component;
 use Spiral\Core\Exceptions\ScopeException;
 use Spiral\Core\Traits\SaturateTrait;
 use Spiral\Storage\BucketInterface;
+use Spiral\Storage\Exceptions\BucketException;
 use Spiral\Storage\Exceptions\ObjectException;
 use Spiral\Storage\ObjectInterface;
 use Spiral\Storage\StorageInterface;
@@ -112,7 +113,11 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function localFilename(): string
     {
-        return $this->bucket->allocateFilename($this->name);
+        try {
+            return $this->bucket->allocateFilename($this->name);
+        } catch (BucketException $e) {
+            throw new ObjectException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -120,7 +125,11 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function getStream(): StreamInterface
     {
-        return $this->bucket->allocateStream($this->name);
+        try {
+            return $this->bucket->allocateStream($this->name);
+        } catch (BucketException $e) {
+            throw new ObjectException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -128,7 +137,11 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function delete()
     {
-        $this->bucket->delete($this->name);
+        try {
+            $this->bucket->delete($this->name);
+        } catch (BucketException $e) {
+            throw new ObjectException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -136,7 +149,12 @@ class StorageObject extends Component implements ObjectInterface
      */
     public function rename(string $newName): ObjectInterface
     {
-        $this->address = $this->bucket->rename($this->name, $newName);
+        try {
+            $this->address = $this->bucket->rename($this->name, $newName);
+        } catch (BucketException $e) {
+            throw new ObjectException($e->getMessage(), $e->getCode(), $e);
+        }
+
         $this->name = $newName;
 
         return $this;
@@ -153,7 +171,11 @@ class StorageObject extends Component implements ObjectInterface
 
         $object = clone $this;
         $object->bucket = $destination;
-        $object->address = $this->bucket->copy($destination, $this->name);
+        try {
+            $object->address = $this->bucket->copy($destination, $this->name);
+        } catch (BucketException $e) {
+            throw new ObjectException($e->getMessage(), $e->getCode(), $e);
+        }
 
         return $object;
     }
@@ -166,8 +188,12 @@ class StorageObject extends Component implements ObjectInterface
         if (is_string($destination)) {
             $destination = $this->storage->getBucket($destination);
         }
+        try {
+            $this->address = $this->bucket->replace($destination, $this->name);
+        } catch (BucketException $e) {
+            throw new ObjectException($e->getMessage(), $e->getCode(), $e);
+        }
 
-        $this->address = $this->bucket->replace($destination, $this->name);
         $this->bucket = $destination;
 
         return $this;

@@ -132,9 +132,11 @@ class FtpServer extends AbstractServer
      */
     public function delete(BucketInterface $bucket, string $name)
     {
-        if ($this->exists($bucket, $name)) {
-            ftp_delete($this->connection, $this->getPath($bucket, $name));
+        if (!$this->exists($bucket, $name)) {
+            throw new ServerException("Unable to delete object, file not found");
         }
+
+        ftp_delete($this->connection, $this->getPath($bucket, $name));
     }
 
     /**

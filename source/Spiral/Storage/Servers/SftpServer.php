@@ -134,12 +134,14 @@ class SftpServer extends AbstractServer
      */
     public function delete(BucketInterface $bucket, string $name)
     {
-        if ($this->exists($bucket, $name)) {
-            ssh2_sftp_unlink($this->sftp, $path = $this->castPath($bucket, $name));
-
-            //Cleaning file cache for removed file
-            clearstatcache(false, $path);
+        if (!$this->exists($bucket, $name)) {
+            throw new ServerException("Unable to delete object, file not found");
         }
+
+        ssh2_sftp_unlink($this->sftp, $path = $this->castPath($bucket, $name));
+
+        //Cleaning file cache for removed file
+        clearstatcache(false, $path);
     }
 
     /**

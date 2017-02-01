@@ -169,6 +169,10 @@ class AmazonServer extends AbstractServer
      */
     public function delete(BucketInterface $bucket, string $name)
     {
+        if (!$this->exists($bucket, $name)) {
+            throw new ServerException("Unable to delete object, file not found");
+        }
+
         $this->client->send($this->buildRequest('DELETE', $bucket, $name));
     }
 

@@ -17,6 +17,8 @@ use Spiral\Debug\Traits\BenchmarkTrait;
 use Spiral\Debug\Traits\LoggerTrait;
 use Spiral\Files\Streams\StreamableInterface;
 use Spiral\Storage\BucketInterface;
+use Spiral\Storage\Exceptions\BucketException;
+use Spiral\Storage\Exceptions\ServerException;
 use Spiral\Storage\ServerInterface;
 use Spiral\Storage\StorageManager;
 
@@ -146,6 +148,8 @@ class StorageBucket extends Component implements
         $benchmark = $this->benchmark($this->getName(), "exists::{$this->buildAddress($name)}");
         try {
             return (bool)$this->server->exists($this, $name);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -163,6 +167,8 @@ class StorageBucket extends Component implements
         $benchmark = $this->benchmark($this->getName(), "size::{$this->buildAddress($name)}");
         try {
             return $this->server->size($this, $name);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -192,6 +198,8 @@ class StorageBucket extends Component implements
 
             //Reopening
             return $this->buildAddress($name);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -212,6 +220,8 @@ class StorageBucket extends Component implements
 
         try {
             return $this->getServer()->allocateFilename($this, $name);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -232,6 +242,8 @@ class StorageBucket extends Component implements
 
         try {
             return $this->getServer()->allocateStream($this, $name);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -252,6 +264,8 @@ class StorageBucket extends Component implements
 
         try {
             $this->server->delete($this, $name);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -279,6 +293,8 @@ class StorageBucket extends Component implements
             $this->server->rename($this, $oldName, $newName);
 
             return $this->buildAddress($newName);
+        } catch (ServerException$e) {
+            throw new BucketException($e->getMessage(), $e->getCode(), $e);
         } finally {
             $this->benchmark($benchmark);
         }
@@ -306,6 +322,8 @@ class StorageBucket extends Component implements
 
             try {
                 $this->getServer()->copy($this, $destination, $name);
+            } catch (ServerException$e) {
+                throw new BucketException($e->getMessage(), $e->getCode(), $e);
             } finally {
                 $this->benchmark($benchmark);
             }
@@ -344,6 +362,8 @@ class StorageBucket extends Component implements
 
             try {
                 $this->getServer()->replace($this, $destination, $name);
+            } catch (ServerException$e) {
+                throw new BucketException($e->getMessage(), $e->getCode(), $e);
             } finally {
                 $this->benchmark($benchmark);
             }

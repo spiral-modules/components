@@ -114,11 +114,12 @@ class GridFSServer extends AbstractServer
      */
     public function delete(BucketInterface $bucket, string $name)
     {
-        $file = $this->gridFS($bucket)->findOne(['filename' => $name]);
-
-        if (!empty($file)) {
-            $this->gridFS($bucket)->delete($file->_id);
+        if (!$this->exists($bucket, $name)) {
+            throw new ServerException("Unable to delete object, file not found");
         }
+
+        $file = $this->gridFS($bucket)->findOne(['filename' => $name]);
+        $this->gridFS($bucket)->delete($file->_id);
     }
 
     /**

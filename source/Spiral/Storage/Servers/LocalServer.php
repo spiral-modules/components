@@ -91,6 +91,10 @@ class LocalServer extends AbstractServer
      */
     public function delete(BucketInterface $bucket, string $name)
     {
+        if (!$this->exists($bucket, $name)) {
+            throw new ServerException("Unable to delete object, file not found");
+        }
+
         $this->files->delete($this->getPath($bucket, $name));
     }
 

@@ -264,7 +264,6 @@ abstract class RelationLoader extends AbstractLoader
             } else {
                 //Let's use parent alias to continue chain
                 $this->options['alias'] = $parent->getAlias() . '_' . $this->relation;
-
             }
         }
     }

@@ -1,6 +1,15 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
+0.9.5 (01.02.2017)
+-----
+**DBAL**
+  * Ability to use nested queries in JOIN statements
+  * on argument in join() methods is deprecated, use on() function directly
+
+**ORM**
+  * Optimizations in load method with "using" option
+  
 0.9.4 (30.01.2017)
 -----
 **General**
@@ -28,7 +37,7 @@ CHANGELOG for 0.9.0 RC
   * Cache component removed (replaced with PSR-16)
   * Views component moved to Framework bundle
   * Validation component moved to Framework bundle
-  * Transaction component moved to Framework bundle
+  * Translation component moved to Framework bundle
   * Encryption component moved to Framework bundle
   * Migrations component moved in
     * Automatic migration generation is now part of Migration component
@@ -59,17 +68,17 @@ CHANGELOG for 0.9.0 RC
 **Models**
   * Removed features
     * Embedded validations
-    * Magic getter and setter methods
+    * Magic getter and setter methods via __call()
   * setValue and packValue methods added
   * "fields" property is now private
   * SolidableTrait is now part of models
 
 **ORM**
   * Refactoring of SchemaBuilder
-  * RecordSelector does not extend SeletQuery anymore
+  * RecordSelector does not extend SelectQuery anymore
   * Transactional (UnitOfWork) support
-  * Improvment memory mapping
-  * Improvement tree operations (save)
+  * Improvements in memory mapping
+  * Improvements in tree operations (save)
   * Removed features
     * ActiveRecord thought direct table communication
     * MutableNumber accessor

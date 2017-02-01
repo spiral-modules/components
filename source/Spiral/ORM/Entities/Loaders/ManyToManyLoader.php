@@ -78,9 +78,11 @@ class ManyToManyLoader extends RelationLoader
         if ($this->isJoined()) {
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                $this->pivotTable() . ' AS ' . $this->pivotAlias(),
-                [$this->pivotKey(Record::THOUGHT_INNER_KEY) => $this->parentKey(Record::INNER_KEY)]
-            );
+                $this->pivotTable() . ' AS ' . $this->pivotAlias())
+                ->on(
+                    $this->pivotKey(Record::THOUGHT_INNER_KEY),
+                    $this->parentKey(Record::INNER_KEY)
+                );
         } else {
             $query->innerJoin(
                 $this->pivotTable() . ' AS ' . $this->pivotAlias())

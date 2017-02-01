@@ -93,7 +93,6 @@ interface BucketInterface
      *
      * @return bool
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function exists(string $name): bool;
@@ -105,7 +104,6 @@ interface BucketInterface
      *
      * @return int|null
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function size(string $name);
@@ -120,7 +118,6 @@ interface BucketInterface
      *
      * @return string Return inserted object address.
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function put(string $name, $source): string;
@@ -134,7 +131,6 @@ interface BucketInterface
      *
      * @return string
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function allocateFilename(string $name): string;
@@ -146,7 +142,6 @@ interface BucketInterface
      *
      * @return StreamInterface
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function allocateStream(string $name): StreamInterface;
@@ -156,7 +151,6 @@ interface BucketInterface
      *
      * @param string $name Storage object name.
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function delete(string $name);
@@ -170,7 +164,6 @@ interface BucketInterface
      * @return string
      *
      * @throws StorageException
-     * @throws ServerException
      * @throws BucketException
      */
     public function rename(string $oldName, string $newName): string;
@@ -184,7 +177,6 @@ interface BucketInterface
      *
      * @return string
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function copy(BucketInterface $destination, string $name): string;
@@ -199,7 +191,6 @@ interface BucketInterface
      *
      * @return string
      *
-     * @throws ServerException
      * @throws BucketException
      */
     public function replace(BucketInterface $destination, string $name): string;

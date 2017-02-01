@@ -44,7 +44,7 @@ abstract class ObjectTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\Storage\Exceptions\ServerException
+     * @expectedException \Spiral\Storage\Exceptions\ObjectException
      * @expectedExceptionMessage Source must be a valid resource, stream or filename, invalid value
      *                           given
      */

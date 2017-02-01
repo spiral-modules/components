@@ -44,8 +44,6 @@ interface ObjectInterface extends StreamableInterface
      * Check if object exists.
      *
      * @return bool
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function exists(): bool;
@@ -54,8 +52,6 @@ interface ObjectInterface extends StreamableInterface
      * Get object size or return false of object does not exists.
      *
      * @return int|bool
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function getSize();
@@ -66,8 +62,6 @@ interface ObjectInterface extends StreamableInterface
      * between sessions. You must never write anything to this file.
      *
      * @return string
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function localFilename(): string;
@@ -75,8 +69,6 @@ interface ObjectInterface extends StreamableInterface
     /**
      * Delete object from associated bucket.
      *
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function delete();
@@ -87,8 +79,6 @@ interface ObjectInterface extends StreamableInterface
      * @param string $newName
      *
      * @return self
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function rename(string $newName): ObjectInterface;
@@ -100,8 +90,6 @@ interface ObjectInterface extends StreamableInterface
      * @param BucketInterface|string $destination
      *
      * @return self
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function copy($destination): ObjectInterface;
@@ -112,8 +100,6 @@ interface ObjectInterface extends StreamableInterface
      * @param BucketInterface|string $destination
      *
      * @return self
-     * @throws ServerException
-     * @throws BucketException
      * @throws ObjectException
      */
     public function replace($destination): ObjectInterface;

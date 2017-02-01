@@ -22,7 +22,7 @@ abstract class OperationsTest extends BaseTest
     }
 
     /**
-     * @expectedException \Spiral\Storage\Exceptions\ServerException
+     * @expectedException \Spiral\Storage\Exceptions\BucketException
      * @expectedExceptionMessage Source must be a valid resource, stream or filename, invalid value
      *                           given
      */

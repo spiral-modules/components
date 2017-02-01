@@ -64,7 +64,9 @@ class GridFSServer extends AbstractServer
     public function put(BucketInterface $bucket, string $name, $source): bool
     {
         //No updates, only delete and re-upload
-        $this->delete($bucket, $name);
+        if ($this->exists($bucket, $name)) {
+            $this->delete($bucket, $name);
+        }
 
         $result = $this->gridFS($bucket)->uploadFromStream(
             $name,

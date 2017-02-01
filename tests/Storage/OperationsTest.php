@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Tests\Storage;
 
 use Psr\Http\Message\StreamInterface;
@@ -311,5 +312,16 @@ abstract class OperationsTest extends BaseTest
 
         $bucket->delete('target');
         $this->assertFalse($bucket->exists('target'));
+    }
+
+    /**
+     * @expectedException \Spiral\Storage\Exceptions\BucketException
+     */
+    public function testDeleteUndefined()
+    {
+        $bucket = $this->getBucket();
+
+        $this->assertFalse($bucket->exists('target'));
+        $bucket->delete('target');
     }
 }

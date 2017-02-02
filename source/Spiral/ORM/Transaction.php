@@ -18,7 +18,7 @@ use Spiral\ORM\Exceptions\RecordException;
  * to optimize commands inside it (batch insert, batch delete and etc).
  *
  * Technically Transaction can work as classic UnitOfWork with ability to watch entities, but it's
- * recommended to create additional abstraction to prevent domain mixing.
+ * recommended to create additional abstraction at top with proper business rules.
  */
 final class Transaction implements TransactionInterface
 {

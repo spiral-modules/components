@@ -396,6 +396,42 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
+     */
+    public function relativePath(string $path, string $from): string
+    {
+        $path = $this->normalizePath($path);
+        $from = $this->normalizePath($from);
+
+        $from = explode('/', $from);
+        $path = explode('/', $path);
+        $relative = $path;
+
+        foreach ($from as $depth => $dir) {
+            //Find first non-matching dir
+            if ($dir === $path[$depth]) {
+                //Ignore this directory
+                array_shift($relative);
+            } else {
+                //Get number of remaining dirs to $from
+                $remaining = count($from) - $depth;
+                if ($remaining > 1) {
+                    //Add traversals up to first matching directory
+                    $padLength = (count($relative) + $remaining - 1) * -1;
+                    $relative = array_pad($relative, $padLength, '..');
+                    break;
+                } else {
+                    $relative[0] = './' . $relative[0];
+                }
+            }
+        }
+
+        return implode('/', $relative);
+    }
+
+    /**
      * Destruct every temporary file.
      */
     public function __destruct()

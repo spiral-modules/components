@@ -44,12 +44,12 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      *
-     * @param bool $recursive Every created directory will get specified permissions.
+     * @param bool $recursivePermissions Propagate permissions on created directories.
      */
     public function ensureDirectory(
         string $directory,
         int $mode = null,
-        bool $recursive = true
+        bool $recursivePermissions = true
     ): bool {
         if (empty($mode)) {
             $mode = self::DEFAULT_FILE_MODE;
@@ -62,7 +62,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
             return $this->setPermissions($directory, $mode);
         }
 
-        if (!$recursive) {
+        if (!$recursivePermissions) {
             return mkdir($directory, $mode, true);
         }
 

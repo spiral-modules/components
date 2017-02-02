@@ -22,6 +22,9 @@ use Spiral\Core\Exceptions\Container\NotFoundException;
 use Spiral\Core\Exceptions\LogicException;
 
 /**
+ * Auto-wiring container: declarative singletons, contextual injections, outer delegation and
+ * ability to lazy wire.
+ *
  * Container does not support setter injections, private properties and etc. Normally it will work
  * with classes only to be as much invisible as possible. Attention, this is hungry implementation
  * of container, meaning it WILL try to resolve dependency unless you specified custom lazy factory.

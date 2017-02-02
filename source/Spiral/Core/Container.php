@@ -35,6 +35,13 @@ use Spiral\Core\Exceptions\LogicException;
 class Container extends Component implements ContainerInterface, FactoryInterface, ResolverInterface
 {
     /**
+     * Outer container responsible for low level dependency configuration (i.e. config based).
+     *
+     * @var ContainerInterface
+     */
+    private $outerContainer = null;
+
+    /**
      * IoC bindings.
      *
      * @what-if private
@@ -60,10 +67,13 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     protected $injectors = [];
 
     /**
-     * Container constructor.
+     * Provide outer container in order to proxy get and has requests.
+     *
+     * @param ContainerInterface|null $outerContainer
      */
-    public function __construct()
+    public function __construct(ContainerInterface $outerContainer = null)
     {
+        $this->outerContainer = $outerContainer;
         $this->bindings[static::class] = self::class;
         $this->bindings[self::class] = $this;
     }
@@ -81,6 +91,10 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     public function has($alias)
     {
+        if ($this->outerContainer !== null && $this->outerContainer->has($alias)) {
+            return true;
+        }
+
         return array_key_exists($alias, $this->bindings);
     }
 
@@ -91,12 +105,18 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      * as:
      * $this->container->get(DatabaseInterface::class, 'default');
      *
+     * Attention, context ignored when outer container has instance by alias.
+     *
      * @param string|null $context Call context.
      *
      * @throws ContainerException
      */
-    public function get($alias, $context = null)
+    public function get($alias, string $context = null)
     {
+        if ($this->outerContainer !== null && $this->outerContainer->has($alias)) {
+            return $this->outerContainer->get($alias);
+        }
+
         //Direct bypass to construct, i might think about this option... or not.
         return $this->make($alias, [], $context);
     }
@@ -214,7 +234,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             }
 
             try {
-                //Trying to resolve dependency (contextually)
+                //Requesting for contextual dependency
                 $arguments[] = $this->get($class->getName(), $name);
 
                 continue;

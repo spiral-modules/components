@@ -16,8 +16,11 @@ use Spiral\Files\Exceptions\WriteErrorException;
  */
 interface FilesInterface
 {
-    const RUNTIME  = 0664;
-    const READONLY = 0644;
+    //Owner and group can write
+    const RUNTIME  = 0665;
+
+    //Only owner can write
+    const READONLY = 0655;
 
     /**
      * Few size constants for better size manipulations.

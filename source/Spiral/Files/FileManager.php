@@ -331,6 +331,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     public function setPermissions(string $filename, int $mode)
     {
         if (is_dir($filename)) {
+            //Directories must always be executable (i.e. 664 for dir => 775)
             $mode |= 0111;
         }
 

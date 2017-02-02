@@ -415,7 +415,7 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
      */
     protected function registerInstance($instance, array $parameters)
     {
-        //Declarative singletons
+        //Declarative singletons (only when class received via direct get)
         if (empty($parameters) && $instance instanceof SingletonInterface) {
             $alias = get_class($instance);
 

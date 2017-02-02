@@ -96,35 +96,31 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     /**
      * Get pre-configured class locator.
      *
-     * @param array  $directories
-     * @param array  $exclude
-     * @param Finder $finder
+     * @param array $directories
+     * @param array $exclude
      *
      * @return ClassesInterface
      */
     public function classLocator(
         array $directories = [],
-        array $exclude = [],
-        Finder $finder = null
+        array $exclude = []
     ): ClassesInterface {
-        return new ClassLocator($this, $this->prepareFinder($finder, $directories, $exclude));
+        return new ClassLocator($this, $this->makeFinder($directories, $exclude));
     }
 
     /**
      * Get pre-configured invocation locator.
      *
-     * @param array  $directories
-     * @param array  $exclude
-     * @param Finder $finder
+     * @param array $directories
+     * @param array $exclude
      *
      * @return InvocationsInterface
      */
     public function invocationLocator(
         array $directories = [],
-        array $exclude = [],
-        Finder $finder = null
+        array $exclude = []
     ): InvocationsInterface {
-        return new InvocationsLocator($this, $this->prepareFinder($finder, $directories, $exclude));
+        return new InvocationsLocator($this, $this->makeFinder($directories, $exclude));
     }
 
     /**
@@ -144,18 +140,16 @@ class Tokenizer extends Component implements SingletonInterface, TokenizerInterf
     }
 
     /**
-     * @param Finder|null $finder
-     * @param array       $directories
-     * @param array       $exclude
+     * @param array $directories
+     * @param array $exclude
      *
      * @return Finder
      */
-    private function prepareFinder(
-        Finder $finder = null,
+    private function makeFinder(
         array $directories = [],
         array $exclude = []
     ): Finder {
-        $finder = $finder ?? new Finder();
+        $finder = new Finder();
 
         if (empty($directories)) {
             $directories = $this->config->getDirectories();

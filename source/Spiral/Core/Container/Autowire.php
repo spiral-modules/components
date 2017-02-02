@@ -8,6 +8,7 @@
 namespace Spiral\Core\Container;
 
 use Spiral\Core\Container;
+use Spiral\Core\FactoryInterface;
 
 /**
  * Provides ability to delegate option to container.
@@ -39,7 +40,7 @@ final class Autowire
     }
 
     /**
-     * @param Container $container
+     * @param FactoryInterface $factory
      *
      * @return mixed
      *
@@ -47,9 +48,9 @@ final class Autowire
      *                                                         identifier.
      * @throws \Interop\Container\Exception\ContainerException Error while retrieving the entry.
      */
-    public function resolve(Container $container)
+    public function resolve(FactoryInterface $factory)
     {
-        return $container->make($this->alias, $this->parameters);
+        return $factory->make($this->alias, $this->parameters);
     }
 
     /**

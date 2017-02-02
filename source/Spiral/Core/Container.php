@@ -10,6 +10,7 @@ namespace Spiral\Core;
 
 use Interop\Container\ContainerInterface;
 use ReflectionFunctionAbstract as ContextFunction;
+use Spiral\Core\Container\Autowire;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
@@ -204,6 +205,11 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
             } catch (\Throwable $e) {
                 //Possibly invalid class definition or syntax error
                 throw new ContainerException($e->getMessage(), $e->getCode(), $e);
+            }
+
+            if (array_key_exists($name, $parameters) && $parameters[$name] instanceof Autowire) {
+                $arguments[] = $parameters[$name]->resolve($this);
+                continue;
             }
 
             //No declared type or scalar type or array

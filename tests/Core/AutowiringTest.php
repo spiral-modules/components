@@ -303,4 +303,18 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
+
+    public function testAutowireDelegate()
+    {
+        $container = new Container();
+
+        $container->bind('sample-binding', $s = new SampleClass());
+
+        $object = $container->make(SoftDependedClass::class, [
+            'name'   => 'some-name',
+            'sample' => new Container\Autowire('sample-binding')
+        ]);
+
+        $this->assertSame($s, $object->getSample());
+    }
 }

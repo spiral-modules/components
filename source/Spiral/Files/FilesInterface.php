@@ -19,12 +19,12 @@ interface FilesInterface
     /**
      * Permission mode: fully writable and readable files.
      */
-    const RUNTIME = 0777;
+    const RUNTIME = 0775;
 
     /**
      * Permission mode: only locked to parent (one environment).
      */
-    const READONLY = 0666;
+    const READONLY = 0664;
 
     /**
      * Few size constants for better size manipulations.

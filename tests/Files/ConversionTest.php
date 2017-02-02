@@ -26,19 +26,4 @@ class ConversionTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('/abc/dir/', $files->normalizePath('\\abc/dir', true));
         $this->assertSame('/abc/dir/', $files->normalizePath('\\abc//dir', true));
     }
-
-    public function testRelativePath()
-    {
-        $files = new FileManager();
-
-        $this->assertSame(
-            'some-filename.txt',
-            $files->relativePath('/abc/some-filename.txt', '/abc')
-        );
-
-        $this->assertSame(
-            '../some-filename.txt',
-            $files->relativePath('/abc/../some-filename.txt', '/abc')
-        );
-    }
 }

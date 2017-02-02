@@ -262,27 +262,13 @@ interface FilesInterface
      */
     public function tempFilename(string $extension = '', string $location = null): string;
 
-    /*
-     * Move outside in a future versions.
-     */
-
     /**
      * Create the most normalized version for path to file or location.
      *
-     * @param string $path      File or location path.
-     * @param bool   $directory Path points to directory.
+     * @param string $path        File or location path.
+     * @param bool   $asDirectory Path points to directory.
      *
      * @return string
      */
-    public function normalizePath(string $path, bool $directory = false): string;
-
-    /**
-     * Get relative location based on absolute path.
-     *
-     * @param string $path Original file or directory location (to).
-     * @param string $from Path will be converted to be relative to this directory (from).
-     *
-     * @return string
-     */
-    public function relativePath(string $path, string $from): string;
+    public function normalizePath(string $path, bool $asDirectory = false): string;
 }

@@ -74,7 +74,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         }
 
         foreach (array_reverse($directoryChain) as $directory) {
-            if (!mkdir($baseDirectory = $baseDirectory . '/' . $directory)) {
+            if (!mkdir($baseDirectory = "{$baseDirectory}/{$directory}")) {
                 return false;
             }
 
@@ -246,7 +246,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
             return false;
         }
 
-        return $this->setPermissions($filename, !empty($mode) ? $mode : self::DEFAULT_FILE_MODE);
+        return $this->setPermissions($filename, $mode ?? self::DEFAULT_FILE_MODE);
     }
 
     /**
@@ -345,7 +345,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      *
-     * @param Finder $finder Optional initial finder.
+     * @param Finder $finder Pre-configured Finder.
      */
     public function getFiles(string $location, string $pattern = null, Finder $finder = null): array
     {
@@ -377,7 +377,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
 
         if (!empty($extension)) {
             //I should find more original way of doing that
-            rename($filename, $filename = $filename . '.' . $extension);
+            rename($filename, $filename = "{$filename}.{$extension}");
             $this->destructFiles[] = $filename;
         }
 
@@ -387,50 +387,12 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
     /**
      * {@inheritdoc}
      */
-    public function normalizePath(string $path, bool $directory = false): string
+    public function normalizePath(string $path, bool $asDirectory = false): string
     {
-        $path = str_replace('\\', '/', $path);
+        $path = str_replace(['//', '\\'], '/', $path);
 
         //Potentially open links and ../ type directories?
-        return rtrim(preg_replace('/\/+/', '/', $path), '/') . ($directory ? '/' : '');
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @link http://stackoverflow.com/questions/2637945/getting-relative-path-from-absolute-path-in-php
-     *
-     * @todo http://stackoverflow.com/questions/4049856/replace-phps-realpath/4050444#4050444
-     */
-    public function relativePath(string $path, string $from): string
-    {
-        $path = $this->normalizePath($path);
-        $from = $this->normalizePath($from);
-
-        $from = explode('/', $from);
-        $path = explode('/', $path);
-        $relative = $path;
-
-        foreach ($from as $depth => $dir) {
-            //Find first non-matching dir
-            if ($dir === $path[$depth]) {
-                //Ignore this directory
-                array_shift($relative);
-            } else {
-                //Get number of remaining dirs to $from
-                $remaining = count($from) - $depth;
-                if ($remaining > 1) {
-                    //Add traversals up to first matching directory
-                    $padLength = (count($relative) + $remaining - 1) * -1;
-                    $relative = array_pad($relative, $padLength, '..');
-                    break;
-                } else {
-                    $relative[0] = './' . $relative[0];
-                }
-            }
-        }
-
-        return implode('/', $relative);
+        return rtrim($path, '/') . ($asDirectory ? '/' : '');
     }
 
     /**

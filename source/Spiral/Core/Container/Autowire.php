@@ -7,7 +7,7 @@
 
 namespace Spiral\Core\Container;
 
-use Interop\Container\ContainerInterface;
+use Spiral\Core\Container;
 
 /**
  * Provides ability to delegate option to container.
@@ -22,27 +22,34 @@ final class Autowire
     private $alias;
 
     /**
+     * @var array
+     */
+    private $parameters = [];
+
+    /**
      * Autowire constructor.
      *
      * @param string $alias
+     * @param array  $parameters
      */
-    public function __construct(string $alias)
+    public function __construct(string $alias, array $parameters = [])
     {
         $this->alias = $alias;
+        $this->parameters = $parameters;
     }
 
     /**
-     * @param \Interop\Container\ContainerInterface $container
+     * @param Container $container
      *
      * @return mixed
      *
-     * @throws \Interop\Container\Exception\NotFoundException  No entry was found for this
+     * @throws \Spiral\Core\Exceptions\Container\AutowireException  No entry was found for this
      *                                                         identifier.
      * @throws \Interop\Container\Exception\ContainerException Error while retrieving the entry.
      */
-    public function resolve(ContainerInterface $container)
+    public function resolve(Container $container)
     {
-        return $container->get($this->alias);
+        return $container->make($this->alias, $this->parameters);
     }
 
     /**
@@ -52,6 +59,6 @@ final class Autowire
      */
     public static function __set_state($an_array)
     {
-        return new static($an_array['alias']);
+        return new static($an_array['alias'], $an_array['parameters']);
     }
 }

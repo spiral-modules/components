@@ -16,14 +16,7 @@ use Spiral\Files\Exceptions\WriteErrorException;
  */
 interface FilesInterface
 {
-    /**
-     * Permission mode: fully writable and readable files.
-     */
     const RUNTIME = 0774;
-
-    /**
-     * Permission mode: only locked to parent (one environment).
-     */
     const READONLY = 0664;
 
     /**

@@ -52,7 +52,8 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
     ];
 
     /**
-     * Registered injectors.
+     * List of classes responsible for handling specific instance or interface. Provides ability to
+     * delegate container functionality.
      *
      * @what-if private
      * @invisible

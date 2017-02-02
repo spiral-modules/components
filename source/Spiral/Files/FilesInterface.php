@@ -17,7 +17,7 @@ use Spiral\Files\Exceptions\WriteErrorException;
 interface FilesInterface
 {
     //Owner and group can write
-    const RUNTIME  = 0665;
+    const RUNTIME = 0665;
 
     //Only owner can write
     const READONLY = 0655;
@@ -38,11 +38,11 @@ interface FilesInterface
      * Ensure location (directory) existence with specified mode.
      *
      * @param string $directory
-     * @param int    $mode
+     * @param int    $mode When NULL class can pick default mode.
      *
      * @return bool
      */
-    public function ensureDirectory(string $directory, int $mode = self::RUNTIME): bool;
+    public function ensureDirectory(string $directory, int $mode = null): bool;
 
     /**
      * Read file content into string.
@@ -61,7 +61,7 @@ interface FilesInterface
      *
      * @param string $filename
      * @param string $data
-     * @param int    $mode            One of mode constants.
+     * @param int    $mode            When NULL class can pick default mode.
      * @param bool   $ensureDirectory Ensure final destination!
      *
      * @return bool
@@ -82,7 +82,7 @@ interface FilesInterface
      *
      * @param string $filename
      * @param string $data
-     * @param int    $mode
+     * @param int    $mode When NULL class can pick default mode.
      * @param bool   $ensureDirectory
      *
      * @return bool
@@ -149,7 +149,7 @@ interface FilesInterface
      * Touch file to update it's timeUpdated value or create new file. Location must exist.
      *
      * @param string $filename
-     * @param int    $mode
+     * @param int    $mode When NULL class can pick default mode.
      */
     public function touch(string $filename, int $mode = null);
 
@@ -261,6 +261,10 @@ interface FilesInterface
      * @return string
      */
     public function tempFilename(string $extension = '', string $location = null): string;
+
+    /*
+     * Move outside in a future versions.
+     */
 
     /**
      * Create the most normalized version for path to file or location.

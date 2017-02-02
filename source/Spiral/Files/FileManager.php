@@ -21,6 +21,9 @@ use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
  */
 class FileManager extends Component implements SingletonInterface, FilesInterface
 {
+    /**
+     * Default file mode for this manager.
+     */
     const DEFAULT_FILE_MODE = self::READONLY;
 
     /**
@@ -52,6 +55,7 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
             $mode = self::DEFAULT_FILE_MODE;
         }
 
+        //Directories always executable
         $mode = $mode | 0111;
         if (is_dir($directory)) {
             //Exists :(

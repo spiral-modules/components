@@ -26,7 +26,7 @@ class LoggerTraitTest extends \PHPUnit_Framework_TestCase
     public function testNoContainer()
     {
         $class = new LoggedClass();
-        $this->assertInstanceOf(NullLogger::class, $class->getLogger());
+        $this->assertInstanceOf(NullLogger::class, $class->publicLogger());
     }
 
     public function testPsrLogger()
@@ -36,7 +36,7 @@ class LoggerTraitTest extends \PHPUnit_Framework_TestCase
         $class = new LoggedClass();
         $class->setLogger($logger);
 
-        $this->assertSame($logger, $class->getLogger());
+        $this->assertSame($logger, $class->publicLogger());
     }
 
     public function testLoggerThoughtContainer()
@@ -56,7 +56,7 @@ class LoggerTraitTest extends \PHPUnit_Framework_TestCase
         $class = new LoggedClass();
 
         $this->assertSame($container, $class->getContainer());
-        $this->assertSame($logger, $class->getLogger());
+        $this->assertSame($logger, $class->publicLogger());
     }
 }
 
@@ -64,7 +64,7 @@ class LoggedClass extends Component
 {
     use LoggerTrait;
 
-    public function getLogger()
+    public function publicLogger()
     {
         return $this->logger();
     }

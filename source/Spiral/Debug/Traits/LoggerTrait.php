@@ -39,21 +39,11 @@ trait LoggerTrait
     }
 
     /**
-     * Alias for "logger" function.
-     *
-     * @return LoggerInterface
-     */
-    protected function getLogger(): LoggerInterface
-    {
-        return $this->logger();
-    }
-
-    /**
      * Get associated or create new instance of LoggerInterface.
      *
      * @return LoggerInterface
      */
-    protected function logger(): LoggerInterface
+    protected function getLogger(): LoggerInterface
     {
         if (!empty($this->logger)) {
             return $this->logger;
@@ -61,6 +51,16 @@ trait LoggerTrait
 
         //We are using class name as log channel (name) by default
         return $this->logger = $this->createLogger();
+    }
+
+    /**
+     * Alias for "getLogger" function.
+     *
+     * @return LoggerInterface
+     */
+    protected function logger(): LoggerInterface
+    {
+        return $this->getLogger();
     }
 
     /**

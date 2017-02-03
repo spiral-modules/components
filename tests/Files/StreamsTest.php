@@ -8,6 +8,7 @@
 
 namespace Spiral\Tests\Files;
 
+use GuzzleHttp\Psr7\Stream;
 use Spiral\Files\FileManager;
 use Spiral\Files\FilesInterface;
 use Spiral\Files\Streams\StreamWrapper;
@@ -65,5 +66,17 @@ class StreamsTest extends \PHPUnit_Framework_TestCase
         fseek($resource, 7);
         $this->assertSame('text', stream_get_contents($resource, -1));
         $this->assertSame('sample', stream_get_contents($resource, 6, 0));
+    }
+
+    public function testWriteIntoStream()
+    {
+        $stream = new Stream(fopen('php://temp', 'wr+'), 'wr+');
+        $file = StreamWrapper::localFilename($stream);
+
+        file_put_contents($file, 'test');
+
+        $this->assertSame('test', file_get_contents($file));
+
+        StreamWrapper::releaseUri($file);
     }
 }

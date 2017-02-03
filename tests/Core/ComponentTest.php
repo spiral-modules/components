@@ -69,6 +69,7 @@ class ComponentTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($containerA, SharedComponent::shareContainer($containerB));
         $this->assertSame($containerB, $component->getContainer());
+        $this->assertSame($containerB, SharedComponent::getShared());
 
         $this->assertSame($containerB, SharedComponent::shareContainer($containerA));
         $this->assertSame($containerA, $component->getContainer());

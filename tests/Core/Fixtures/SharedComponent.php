@@ -27,4 +27,9 @@ class SharedComponent extends Component
     {
         return self::staticContainer($container);
     }
+
+    public static function getShared()
+    {
+        return self::staticContainer();
+    }
 }

@@ -5,12 +5,13 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 namespace Spiral\Tests\Models;
 
 use Mockery as m;
 use Spiral\Models\DataEntity;
+use Spiral\Models\Events\EntityEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\GenericEvent;
 
 class EventsTest extends \PHPUnit_Framework_TestCase
 {
@@ -42,21 +43,9 @@ class EventsTest extends \PHPUnit_Framework_TestCase
 
     public function testFireEvent()
     {
-        $events = m::mock(EventDispatcherInterface::class);
-        EventsTestEntity::setEvents($events);
-
-        $events->shouldReceive('dispatch')->with(
-            'test',
-            m::on(function (GenericEvent $event) {
-                return $event->getSubject() == 'subject';
-            })
-        )->andReturn(
-            new GenericEvent('out subject')
-        );
-
         $class = new EventsTestEntity();
-        $this->assertInstanceOf(GenericEvent::class, $class->doSomething());
-        $this->assertSame('out subject', $class->doSomething()->getSubject());
+        $this->assertInstanceOf(EntityEvent::class, $class->doSomething());
+        $this->assertSame($class, $class->doSomething()->getEntity());
     }
 }
 
@@ -64,8 +53,8 @@ class EventsTestEntity extends DataEntity
 {
     public function doSomething()
     {
-        return self::events()->dispatch('test', new GenericEvent(
-            'subject'
+        return self::events()->dispatch('test', new EntityEvent(
+            $this
         ));
     }
 }

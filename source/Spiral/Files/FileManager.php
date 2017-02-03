@@ -108,25 +108,25 @@ class FileManager extends Component implements SingletonInterface, FilesInterfac
         bool $ensureDirectory = false,
         bool $append = false
     ): bool {
-        if (empty($mode)) {
-            $mode = self::DEFAULT_FILE_MODE;
-        }
+        $mode = $mode ?? self::DEFAULT_FILE_MODE;
 
         try {
             if ($ensureDirectory) {
                 $this->ensureDirectory(dirname($filename), $mode);
             }
 
-            if (!empty($mode) && $this->exists($filename)) {
+            if ($this->exists($filename)) {
                 //Forcing mode for existed file
                 $this->setPermissions($filename, $mode);
             }
 
-            $result = (file_put_contents(
-                    $filename, $data, $append ? FILE_APPEND | LOCK_EX : LOCK_EX
-                ) !== false);
+            $result = file_put_contents(
+                $filename,
+                $data,
+                $append ? FILE_APPEND | LOCK_EX : LOCK_EX
+            );
 
-            if ($result && !empty($mode)) {
+            if ($result !== false) {
                 //Forcing mode after file creation
                 $this->setPermissions($filename, $mode);
             }

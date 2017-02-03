@@ -7,7 +7,6 @@
 
 namespace Spiral\Core\Container;
 
-use Spiral\Core\Container;
 use Spiral\Core\FactoryInterface;
 
 /**

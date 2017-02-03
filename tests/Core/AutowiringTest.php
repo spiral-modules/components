@@ -317,4 +317,13 @@ class AutowiringTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($s, $object->getSample());
     }
+
+    public function testSerializeAutowire()
+    {
+        $wire = new Container\Autowire('sample-binding', ['a' => new Container\Autowire('b')]);
+
+        $wireb = unserialize(serialize($wire));
+
+        $this->assertEquals($wire, $wireb);
+    }
 }

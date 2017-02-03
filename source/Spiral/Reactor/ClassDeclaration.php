@@ -338,21 +338,7 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
         $result .= $this->addIndent("{", $indentLevel) . "\n";
 
         //Rendering content
-        if (!empty($this->traits)) {
-            $result .= $this->renderTraits($indentLevel + 1) . "\n\n";
-        }
-
-        if (!$this->constants->isEmpty()) {
-            $result .= $this->constants->render($indentLevel + 1) . "\n\n";
-        }
-
-        if (!$this->properties->isEmpty()) {
-            $result .= $this->properties->render($indentLevel + 1) . "\n\n";
-        }
-
-        if (!$this->methods->isEmpty()) {
-            $result .= $this->methods->render($indentLevel + 1) . "\n\n";
-        }
+        $result = $this->renderBody($indentLevel, $result);
 
         $result = rtrim($result, "\n") . "\n";
         $result .= $this->addIndent("}", $indentLevel);
@@ -373,5 +359,32 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
         }
 
         return join("\n", $lines);
+    }
+
+    /**
+     * @param int    $indentLevel
+     * @param string $result
+     *
+     * @return string
+     */
+    protected function renderBody(int $indentLevel, string $result): string
+    {
+        if (!empty($this->traits)) {
+            $result .= $this->renderTraits($indentLevel + 1) . "\n\n";
+        }
+
+        if (!$this->constants->isEmpty()) {
+            $result .= $this->constants->render($indentLevel + 1) . "\n\n";
+        }
+
+        if (!$this->properties->isEmpty()) {
+            $result .= $this->properties->render($indentLevel + 1) . "\n\n";
+        }
+
+        if (!$this->methods->isEmpty()) {
+            $result .= $this->methods->render($indentLevel + 1) . "\n\n";
+        }
+
+        return $result;
     }
 }

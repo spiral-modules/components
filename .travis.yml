@@ -7,8 +7,6 @@ php:
 
 before_install:
   - composer self-update
-  - mysql -e 'CREATE DATABASE spiral;'
-  - psql -c 'create database spiral;' -U postgres
 
 install:
   - composer install --no-interaction --prefer-source

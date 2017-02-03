@@ -1,6 +1,11 @@
 CHANGELOG for 0.9.0 RC
 ======================
 
+0.9.6 (03.02.2017)
+-----
+**General**
+  * Lazy wire declaration for FactoryInterface
+
 0.9.5 (01.02.2017)
 -----
 **DBAL**

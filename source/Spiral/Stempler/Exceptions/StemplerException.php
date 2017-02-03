@@ -8,13 +8,11 @@
 
 namespace Spiral\Stempler\Exceptions;
 
-use Spiral\Core\Exceptions\RuntimeException;
-
 /**
  * StemplerException has ability to specify context token which will can used to define location
  * of html code caused error.
  */
-class StemplerException extends RuntimeException
+class StemplerException extends \RuntimeException
 {
     /**
      * @var array

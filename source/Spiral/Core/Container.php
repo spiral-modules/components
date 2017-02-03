@@ -210,8 +210,14 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                 throw new ContainerException($e->getMessage(), $e->getCode(), $e);
             }
 
-            if (array_key_exists($name, $parameters) && $parameters[$name] instanceof Autowire) {
-                $arguments[] = $parameters[$name]->resolve($this);
+            if (isset($parameters[$name]) && is_object($parameters[$name])) {
+                if ($parameters[$name] instanceof Autowire) {
+                    //Supplied by user as late dependency
+                    $arguments[] = $parameters[$name]->resolve($this);
+                } else {
+                    //Supplied by user as object
+                    $arguments[] = $parameters[$name];
+                }
                 continue;
             }
 
@@ -222,7 +228,6 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
                     //Make sure it's properly typed
                     $this->assertType($parameter, $reflection, $parameters[$name]);
                     $arguments[] = $parameters[$name];
-
                     continue;
                 }
 
@@ -234,12 +239,6 @@ class Container extends Component implements ContainerInterface, FactoryInterfac
 
                 //Unable to resolve scalar argument value
                 throw new ArgumentException($parameter, $reflection);
-            }
-
-            if (isset($parameters[$name]) && is_object($parameters[$name])) {
-                //Supplied by user but only as object!
-                $arguments[] = $parameters[$name];
-                continue;
             }
 
             try {

@@ -12,7 +12,6 @@
   "require": {
     "php": "^7.0",
     "ext-mbstring": "*",
-    "ext-openssl": "*",
     "psr/log": "*",
     "psr/http-message": "^1.0",
     "container-interop/container-interop": "^1.1",

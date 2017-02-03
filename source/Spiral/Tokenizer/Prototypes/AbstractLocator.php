@@ -100,7 +100,7 @@ class AbstractLocator extends Component implements InjectableInterface, LoggerAw
             //we are going to handle such exception and convert it soft exception
             return new \ReflectionClass($class);
         } catch (\Throwable $e) {
-            $this->logger()->error(
+            $this->getLogger()->error(
                 "Unable to resolve class '{class}', error '{message}'",
                 ['class' => $class, 'message' => $e->getMessage()]
             );

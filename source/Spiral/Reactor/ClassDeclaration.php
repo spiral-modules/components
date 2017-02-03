@@ -337,8 +337,8 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
         $result .= $this->addIndent($header, $indentLevel) . "\n";
         $result .= $this->addIndent("{", $indentLevel) . "\n";
 
-        //Rendering content
-        $result = $this->renderBody($indentLevel, $result);
+        //Rendering class body
+        $result .= $this->renderBody($indentLevel);
 
         $result = rtrim($result, "\n") . "\n";
         $result .= $this->addIndent("}", $indentLevel);
@@ -362,13 +362,13 @@ class ClassDeclaration extends NamedDeclaration implements ReplaceableInterface
     }
 
     /**
-     * @param int    $indentLevel
-     * @param string $result
+     * @param int $indentLevel
      *
      * @return string
      */
-    protected function renderBody(int $indentLevel, string $result): string
+    protected function renderBody(int $indentLevel): string
     {
+        $result = '';
         if (!empty($this->traits)) {
             $result .= $this->renderTraits($indentLevel + 1) . "\n\n";
         }

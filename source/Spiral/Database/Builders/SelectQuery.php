@@ -149,6 +149,13 @@ class SelectQuery extends AbstractSelect implements \JsonSerializable, \Countabl
         $parameters = parent::getParameters();
 
         //Unions always located at the end of query.
+        foreach ($this->joinTokens as $join) {
+            if ($join['outer'] instanceof QueryBuilder) {
+                $parameters = array_merge($parameters, $join['outer']->getParameters());
+            }
+        }
+
+        //Unions always located at the end of query.
         foreach ($this->unionTokens as $union) {
             if ($union[1] instanceof QueryBuilder) {
                 $parameters = array_merge($parameters, $union[1]->getParameters());

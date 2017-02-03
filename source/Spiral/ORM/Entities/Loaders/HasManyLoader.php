@@ -44,12 +44,19 @@ class HasManyLoader extends RelationLoader
      */
     protected function configureQuery(SelectQuery $query, array $outerKeys = []): SelectQuery
     {
+        if (!empty($this->options['using'])) {
+            //Use pre-defined query
+            return parent::configureQuery($query, $outerKeys);
+        }
+        
         if ($this->isJoined()) {
             $query->join(
                 $this->getMethod() == self::JOIN ? 'INNER' : 'LEFT',
-                "{$this->getTable()} AS {$this->getAlias()}",
-                [$this->localKey(Record::OUTER_KEY) => $this->parentKey(Record::INNER_KEY)]
-            );
+                "{$this->getTable()} AS {$this->getAlias()}")
+                ->on(
+                    $this->localKey(Record::OUTER_KEY),
+                    $this->parentKey(Record::INNER_KEY)
+                );
         } else {
             //This relation is loaded using external query
             $query->where(

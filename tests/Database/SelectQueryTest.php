@@ -4,6 +4,7 @@
  *
  * @author Wolfy-J
  */
+
 namespace Spiral\Tests\Database;
 
 use Spiral\Database\Builders\SelectQuery;
@@ -1659,7 +1660,7 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()
             ->from(['users'])
-            ->join('LEFT', 'photos', ['photos.user_id' => 'users.id']);
+            ->join('LEFT', 'photos')->on(['photos.user_id' => 'users.id']);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
@@ -1695,7 +1696,7 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()
             ->from(['users'])
-            ->leftJoin('photos', ['photos.user_id' => 'users.id']);
+            ->leftJoin('photos')->on(['photos.user_id' => 'users.id']);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} LEFT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
@@ -1707,7 +1708,7 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()
             ->from(['users'])
-            ->join('RIGHT', 'photos', ['photos.user_id' => 'users.id']);
+            ->join('RIGHT', 'photos')->on(['photos.user_id' => 'users.id']);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} RIGHT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
@@ -1743,7 +1744,7 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()
             ->from(['users'])
-            ->rightJoin('photos', ['photos.user_id' => 'users.id']);
+            ->rightJoin('photos')->on(['photos.user_id' => 'users.id']);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} RIGHT JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
@@ -1755,7 +1756,7 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()
             ->from(['users'])
-            ->join('INNER', 'photos', ['photos.user_id' => 'users.id']);
+            ->join('INNER', 'photos')->on(['photos.user_id' => 'users.id']);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} INNER JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
@@ -1791,7 +1792,7 @@ abstract class SelectQueryTest extends BaseQueryTest
     {
         $select = $this->database->select()
             ->from(['users'])
-            ->innerJoin('photos', ['photos.user_id' => 'users.id']);
+            ->innerJoin('photos')->on(['photos.user_id' => 'users.id']);
 
         $this->assertSameQuery(
             "SELECT * FROM {users} INNER JOIN {photos} ON {photos}.{user_id} = {users}.{id}",
@@ -1939,6 +1940,23 @@ abstract class SelectQueryTest extends BaseQueryTest
         );
     }
 
+    public function testJoinAliasesWithPrefixesAlternative()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()
+            ->from(['users'])
+            ->leftJoin('photos', 'p')
+            ->on([
+                'p.user_id' => 'users.id',
+                'p.public'  => new Parameter(true)
+            ]);
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} LEFT JOIN {prefix_photos} AS {p} "
+            . "ON ({p}.{user_id} = {prefix_users}.{id} AND {p}.{public} = ?)",
+            $select
+        );
+    }
+
     public function testJoinAliasesWithPrefixesAndAliases()
     {
         $select = $this->database('prefixed', 'prefix_')->select()
@@ -1979,6 +1997,26 @@ abstract class SelectQueryTest extends BaseQueryTest
             . "WHERE {u}.{status} IN (?,?)"
             . "GROUP BY {u}.{id}"
             . "ORDER BY {u}.{name} DESC",
+            $select
+        );
+    }
+
+    public function testJoinQuery()
+    {
+        $select = $this->database('prefixed', 'prefix_')->select()
+            ->from(['users as u'])
+            ->leftJoin(
+                $this->database('prefixed', 'prefix_')
+                    ->select()->from('posts AS p')
+                    ->where('p.user_id', new Expression('u.id')),
+                'sub_posts'
+            );
+
+        $this->assertSameQuery(
+            "SELECT * FROM {prefix_users} AS {u} LEFT JOIN (
+                    SELECT * FROM {prefix_posts} AS {p}
+                    WHERE {p}.{user_id} = {u}.{id}
+                  ) AS {sub_posts} ",
             $select
         );
     }

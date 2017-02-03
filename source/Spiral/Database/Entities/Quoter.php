@@ -61,6 +61,17 @@ class Quoter
     }
 
     /**
+     * Register new quotation alias.
+     *
+     * @param string $alias
+     * @param string $identifier
+     */
+    public function registerAlias(string $alias, string $identifier)
+    {
+        $this->aliases[$alias] = $identifier;
+    }
+
+    /**
      * Query query identifier, if identified stated as table - table prefix must be added.
      *
      * @param string $identifier Identifier can include simple column operations and functions,
@@ -130,7 +141,7 @@ class Quoter
         if ($isTable && strpos($identifier, '.') === false) {
             //We have to apply operation post factum to prevent self aliasing (name AS name)
             //when db has prefix, expected: prefix_name as name)
-            $this->aliases[$alias] = $identifier;
+            $this->registerAlias($alias, $identifier);
         }
 
         return $quoted;
@@ -164,7 +175,7 @@ class Quoter
         if ($isTable && !isset($this->aliases[$identifier])) {
             if (!isset($this->aliases[$this->prefix . $identifier])) {
                 //Generating our alias
-                $this->aliases[$this->prefix . $identifier] = $identifier;
+                $this->registerAlias($this->prefix . $identifier, $identifier);
             }
 
             $identifier = $this->prefix . $identifier;

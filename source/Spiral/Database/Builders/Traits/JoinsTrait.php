@@ -81,18 +81,24 @@ trait JoinsTrait
      * Register new JOIN with specified type with set of on conditions (linking one table to
      * another, no parametric on conditions allowed here).
      *
-     * @param string $type  Join type. Allowed values, LEFT, RIGHT, INNER and etc.
-     * @param string $table Joined table name (without prefix), may include AS statement.
-     * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
-     *                      closure.
+     * @param string|QueryBuilder $type  Join type. Allowed values, LEFT, RIGHT, INNER and etc.
+     * @param string              $outer Joined table name (without prefix), may include AS
+     *                                   statement.
+     * @param string              $alias Joined table or query alias.
+     * @param mixed               $on    Simplified on definition linking table names (no
+     *                                   parameters allowed) or closure.
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function join($type, $table, $on = null)
+    public function join($type, $outer, string $alias = null, $on = null)
     {
-        $this->joinTokens[$this->activeJoin = $table] = ['type' => strtoupper($type), 'on' => []];
+        $this->joinTokens[++$this->activeJoin] = [
+            'outer' => $outer,
+            'type'  => strtoupper($type),
+            'on'    => []
+        ];
 
         return call_user_func_array([$this, 'on'], array_slice(func_get_args(), 2));
     }
@@ -104,19 +110,24 @@ trait JoinsTrait
      * @link http://www.w3schools.com/sql/sql_join_inner.asp
      * @see  join()
      *
-     * @param string $table Joined table name (without prefix), may include AS statement.
-     * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
-     *                      closure.
+     * @param string|QueryBuilder $outer Joined table name (without prefix), may include AS
+     *                                   statement.
+     * @param string              $alias Joined table or query alias.
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function innerJoin($table, $on = null)
+    public function innerJoin($outer, string $alias = null)
     {
-        $this->joinTokens[$this->activeJoin = $table] = ['type' => 'INNER', 'on' => []];
+        $this->joinTokens[++$this->activeJoin] = [
+            'outer' => $outer,
+            'alias' => $alias,
+            'type'  => 'INNER',
+            'on'    => []
+        ];
 
-        return call_user_func_array([$this, 'on'], array_slice(func_get_args(), 1));
+        return $this;
     }
 
     /**
@@ -126,63 +137,82 @@ trait JoinsTrait
      * @link http://www.w3schools.com/sql/sql_join_right.asp
      * @see  join()
      *
-     * @param string $table Joined table name (without prefix), may include AS statement.
-     * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
-     *                      closure.
+     * @param string|QueryBuilder $outer Joined table name (without prefix), may include AS
+     *                                   statement.
+     * @param string              $alias Joined table or query alias.
+     * @param mixed               $on    Simplified on definition linking table names (no
+     *                                   parameters allowed) or closure.
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function rightJoin($table, $on = null)
+    public function rightJoin($outer, string $alias = null, $on = null)
     {
-        $this->joinTokens[$this->activeJoin = $table] = ['type' => 'RIGHT', 'on' => []];
+        $this->joinTokens[++$this->activeJoin] = [
+            'outer' => $outer,
+            'alias' => $alias,
+            'type'  => 'RIGHT',
+            'on'    => []
+        ];
 
-        return call_user_func_array([$this, 'on'], array_slice(func_get_args(), 1));
+        return $this;
     }
 
     /**
-     * Register new LEFT JOIN with set of on conditions (linking one table to another, no parametric
+     * Register new LEFT JOIN with set of on conditions (linking one table to another, no
+     * parametric
      * on conditions allowed here).
      *
      * @link http://www.w3schools.com/sql/sql_join_left.asp
      * @see  join()
      *
-     * @param string $table Joined table name (without prefix), may include AS statement.
-     * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
-     *                      closure.
+     * @param string|QueryBuilder $outer Joined table name (without prefix), may include AS
+     *                                   statement.
+     * @param string              $alias Joined table or query alias.
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function leftJoin($table, $on = null)
+    public function leftJoin($outer, string $alias = null)
     {
-        $this->joinTokens[$this->activeJoin = $table] = ['type' => 'LEFT', 'on' => []];
+        $this->joinTokens[++$this->activeJoin] = [
+            'outer' => $outer,
+            'alias' => $alias,
+            'type'  => 'LEFT',
+            'on'    => []
+        ];
 
-        return call_user_func_array([$this, 'on'], array_slice(func_get_args(), 1));
+        return $this;
     }
 
     /**
-     * Register new FULL JOIN with set of on conditions (linking one table to another, no parametric
+     * Register new FULL JOIN with set of on conditions (linking one table to another, no
+     * parametric
      * on conditions allowed here).
      *
      * @link http://www.w3schools.com/sql/sql_join_full.asp
      * @see  join()
      *
-     * @param string $table Joined table name (without prefix), may include AS statement.
-     * @param mixed  $on    Simplified on definition linking table names (no parameters allowed) or
-     *                      closure.
+     * @param string|QueryBuilder $outer Joined table name (without prefix), may include AS
+     *                                   statement.
+     * @param string              $alias Joined table or query alias.
      *
      * @return $this
      *
      * @throws BuilderException
      */
-    public function fullJoin($table, $on = null)
+    public function fullJoin($outer, string $alias = null)
     {
-        $this->joinTokens[$this->activeJoin = $table] = ['type' => 'FULL', 'on' => []];
+        $this->joinTokens[++$this->activeJoin] = [
+            'outer' => $outer,
+            'alias' => $alias,
+            'type'  => 'FULL',
+            'on'    => []
+        ];
 
-        return call_user_func_array([$this, 'on'], array_slice(func_get_args(), 1));
+        return $this;
     }
 
     /**

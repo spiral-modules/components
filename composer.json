@@ -1,7 +1,7 @@
 {
   "name": "spiral/components",
   "type": "framework",
-  "description": "Spiral, Core Components",
+  "description": "Spiral, Core Components, meta package",
   "license": "MIT",
   "authors": [
     {
@@ -10,31 +10,12 @@
     }
   ],
   "require": {
-    "php": "^7.0",
-    "ext-mbstring": "*",
-    "psr/log": "*",
-    "psr/http-message": "^1.0",
-    "container-interop/container-interop": "^1.1",
-    "symfony/finder": "^3.0",
-    "symfony/event-dispatcher": "^3.0",
-    "doctrine/inflector": "^v1.1"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "~5.0",
-    "mockery/mockery": "^0.9.4",
-    "guzzlehttp/guzzle": "~6.0"
-  },
-  "autoload": {
-    "files": [
-      "source/functions.php"
-    ],
-    "psr-4": {
-      "Spiral\\": "source/Spiral/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Spiral\\Tests\\": "tests/"
-    }
+    "spiral/common": "^0.9",
+    "spiral/security": "^1.0.0",
+    "spiral/database": "^0.9",
+    "spiral/orm": "^0.9",
+    "spiral/odm": "^0.9",
+    "spiral/storage": "^0.9",
+    "spiral/stempler": "^0.9"
   }
 }

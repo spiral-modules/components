@@ -13,7 +13,7 @@
     "spiral/common": "^0.9",
     "spiral/security": "^1.0.0",
     "spiral/database": "^0.9",
-    "spiral/migrations: "^0.9",
+    "spiral/migrations": "^0.9",
     "spiral/orm": "^0.9",
     "spiral/odm": "^0.9",
     "spiral/storage": "^0.9",
